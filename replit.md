@@ -2,7 +2,7 @@
 
 ## Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+Aperti Attendance System — a web app for tracking student attendance across sessions.
 
 ## Stack
 
@@ -10,11 +10,27 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Node.js version**: 24
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
-- **API framework**: Express 5
+- **Frontend**: React + Vite + Tailwind CSS (artifacts/aperti)
+- **API framework**: Express 5 (artifacts/api-server)
 - **Database**: PostgreSQL + Drizzle ORM
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
+
+## Features
+
+- Student database (add/bulk import/delete, unique student codes)
+- Session setup (lesson 1/2/3, date, time slot)
+- Attendance marking (big input, one-click)
+- Auto-absence marking (end of week)
+- CSV export of attendance records
+- Dashboard with stats (total students, attendance rate, absent count)
+
+## Database Schema
+
+- `students` — id, student_code (unique), student_name, time_slot, created_at
+- `sessions` — id, lesson_number, date, time_slot, created_at
+- `attendance` — id, student_id (FK), session_id (FK), status, marked_at
 
 ## Key Commands
 

@@ -3,20 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Aperti Attendance System API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: students
+    description: Student management
+  - name: sessions
+    description: Session management
+  - name: attendance
+    description: Attendance tracking
+  - name: dashboard
+    description: Dashboard analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +32,279 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List all students
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+    post:
+      operationId: createStudent
+      tags: [students]
+      summary: Add a new student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStudentBody"
+      responses:
+        "201":
+          description: Student created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "409":
+          description: Duplicate student code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /students/{id}:
+    delete:
+      operationId: deleteStudent
+      tags: [students]
+      summary: Delete a student
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /students/bulk:
+    post:
+      operationId: bulkCreateStudents
+      tags: [students]
+      summary: Bulk add students (ignores duplicates and empty values)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkCreateStudentsBody"
+      responses:
+        "200":
+          description: Bulk import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkImportResult"
+
+  /sessions:
+    get:
+      operationId: listSessions
+      tags: [sessions]
+      summary: List all sessions
+      responses:
+        "200":
+          description: List of sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+    post:
+      operationId: createSession
+      tags: [sessions]
+      summary: Create a new session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSessionBody"
+      responses:
+        "201":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Session"
+
+  /sessions/{id}:
+    delete:
+      operationId: deleteSession
+      tags: [sessions]
+      summary: Delete a session
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Session deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /attendance/mark:
+    post:
+      operationId: markAttendance
+      tags: [attendance]
+      summary: Mark a student as present
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MarkAttendanceBody"
+      responses:
+        "200":
+          description: Attendance marked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttendanceRecord"
+        "404":
+          description: Student or session not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /attendance:
+    get:
+      operationId: listAttendance
+      tags: [attendance]
+      summary: List attendance records with filters
+      parameters:
+        - name: sessionId
+          in: query
+          schema:
+            type: integer
+        - name: studentCode
+          in: query
+          schema:
+            type: string
+        - name: weekStart
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Attendance records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttendanceRecord"
+
+  /attendance/auto-absence:
+    post:
+      operationId: autoMarkAbsence
+      tags: [attendance]
+      summary: Auto-mark absent students for a given week
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutoAbsenceBody"
+      responses:
+        "200":
+          description: Absence records created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoAbsenceResult"
+
+  /attendance/export:
+    get:
+      operationId: exportAttendance
+      tags: [attendance]
+      summary: Export attendance as CSV
+      parameters:
+        - name: weekStart
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: CSV data
+          content:
+            text/csv:
+              schema:
+                type: string
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent attendance activity
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/weekly-stats:
+    get:
+      operationId: getWeeklyStats
+      tags: [dashboard]
+      summary: Get weekly attendance breakdown
+      parameters:
+        - name: weekStart
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        "200":
+          description: Weekly stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +315,254 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentCode:
+          type: string
+        studentName:
+          type: string
+        timeSlot:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - studentCode
+        - studentName
+        - timeSlot
+        - createdAt
+
+    CreateStudentBody:
+      type: object
+      properties:
+        studentCode:
+          type: string
+        studentName:
+          type: string
+        timeSlot:
+          type: string
+      required:
+        - studentCode
+        - studentName
+        - timeSlot
+
+    BulkCreateStudentsBody:
+      type: object
+      properties:
+        students:
+          type: array
+          items:
+            $ref: "#/components/schemas/CreateStudentBody"
+      required:
+        - students
+
+    BulkImportResult:
+      type: object
+      properties:
+        added:
+          type: integer
+        skipped:
+          type: integer
+        total:
+          type: integer
+      required:
+        - added
+        - skipped
+        - total
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: integer
+        lessonNumber:
+          type: integer
+          enum: [1, 2, 3]
+        date:
+          type: string
+          format: date
+        timeSlot:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - lessonNumber
+        - date
+        - timeSlot
+        - createdAt
+
+    CreateSessionBody:
+      type: object
+      properties:
+        lessonNumber:
+          type: integer
+          enum: [1, 2, 3]
+        date:
+          type: string
+          format: date
+        timeSlot:
+          type: string
+      required:
+        - lessonNumber
+        - date
+        - timeSlot
+
+    AttendanceRecord:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentId:
+          type: integer
+        sessionId:
+          type: integer
+        studentCode:
+          type: string
+        studentName:
+          type: string
+        lessonNumber:
+          type: integer
+        date:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [Present, Absent]
+        markedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - studentId
+        - sessionId
+        - studentCode
+        - studentName
+        - lessonNumber
+        - date
+        - status
+        - markedAt
+
+    MarkAttendanceBody:
+      type: object
+      properties:
+        studentCode:
+          type: string
+        sessionId:
+          type: integer
+      required:
+        - studentCode
+        - sessionId
+
+    AutoAbsenceBody:
+      type: object
+      properties:
+        weekStart:
+          type: string
+          format: date
+      required:
+        - weekStart
+
+    AutoAbsenceResult:
+      type: object
+      properties:
+        marked:
+          type: integer
+        message:
+          type: string
+      required:
+        - marked
+        - message
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalStudents:
+          type: integer
+        totalSessions:
+          type: integer
+        attendanceRate:
+          type: number
+          format: float
+        absentStudents:
+          type: integer
+        presentToday:
+          type: integer
+      required:
+        - totalStudents
+        - totalSessions
+        - attendanceRate
+        - absentStudents
+        - presentToday
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        studentCode:
+          type: string
+        studentName:
+          type: string
+        lessonNumber:
+          type: integer
+        status:
+          type: string
+        markedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - studentCode
+        - studentName
+        - lessonNumber
+        - status
+        - markedAt
+
+    WeeklyStats:
+      type: object
+      properties:
+        totalPresent:
+          type: integer
+        totalAbsent:
+          type: integer
+        byLesson:
+          type: array
+          items:
+            type: object
+            properties:
+              lessonNumber:
+                type: integer
+              present:
+                type: integer
+              absent:
+                type: integer
+            required:
+              - lessonNumber
+              - present
+              - absent
+      required:
+        - totalPresent
+        - totalAbsent
+        - byLesson
