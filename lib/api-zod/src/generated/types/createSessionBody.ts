@@ -5,10 +5,12 @@
  * Aperti Attendance System API
  * OpenAPI spec version: 0.1.0
  */
+import type { CreateSessionBodyDayOfWeek } from "./createSessionBodyDayOfWeek";
 import type { CreateSessionBodyLessonNumber } from "./createSessionBodyLessonNumber";
 
 export interface CreateSessionBody {
   lessonNumber: CreateSessionBodyLessonNumber;
-  date: Date;
-  timeSlot: string;
+  dayOfWeek: CreateSessionBodyDayOfWeek;
+  /** Start time in HH:MM format (24-hour) */
+  startTime: string;
 }

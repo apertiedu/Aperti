@@ -1,12 +1,12 @@
-import { pgTable, text, serial, integer, timestamp, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const sessionsTable = pgTable("sessions", {
   id: serial("id").primaryKey(),
   lessonNumber: integer("lesson_number").notNull(),
-  date: date("date").notNull(),
-  timeSlot: text("time_slot").notNull(),
+  dayOfWeek: text("day_of_week").notNull(),
+  startTime: text("start_time").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

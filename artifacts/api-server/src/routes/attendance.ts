@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, gte, lte, sql } from "drizzle-orm";
+import { eq, and, gte, lte } from "drizzle-orm";
 import { db, studentsTable, sessionsTable, attendanceTable } from "@workspace/db";
 import {
   MarkAttendanceBody,
@@ -7,6 +7,28 @@ import {
   AutoMarkAbsenceBody,
   ExportAttendanceQueryParams,
 } from "@workspace/api-zod";
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+function getDateForDayInWeek(weekStart: string, dayOfWeek: string): string {
+  const start = new Date(weekStart);
+  const targetIdx = DAY_NAMES.indexOf(dayOfWeek);
+  // weekStart is Monday (idx=1), so offset from Monday
+  const mondayIdx = 1;
+  const diff = targetIdx - mondayIdx;
+  const d = new Date(start);
+  d.setDate(start.getDate() + diff);
+  return d.toISOString().split("T")[0];
+}
+
+function getCurrentWeekMonday(): string {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const diff = day === 0 ? -6 : 1 - day; // adjust to Monday
+  const monday = new Date(now);
+  monday.setDate(now.getDate() + diff);
+  return monday.toISOString().split("T")[0];
+}
 
 const router: IRouter = Router();
 
@@ -21,7 +43,7 @@ router.post("/attendance/mark", async (req, res): Promise<void> => {
 
   const [student] = await db.select().from(studentsTable).where(eq(studentsTable.studentCode, studentCode));
   if (!student) {
-    res.status(404).json({ message: "Student not found" });
+    res.status(404).json({ message: `Student code "${studentCode}" not found` });
     return;
   }
 
@@ -31,10 +53,13 @@ router.post("/attendance/mark", async (req, res): Promise<void> => {
     return;
   }
 
+  const today = new Date().toISOString().split("T")[0];
+
   const existing = await db.select().from(attendanceTable)
     .where(and(
       eq(attendanceTable.studentId, student.id),
-      eq(attendanceTable.sessionId, sessionId)
+      eq(attendanceTable.sessionId, sessionId),
+      eq(attendanceTable.date, today)
     ));
 
   if (existing.length > 0) {
@@ -51,7 +76,9 @@ router.post("/attendance/mark", async (req, res): Promise<void> => {
         studentCode: student.studentCode,
         studentName: student.studentName,
         lessonNumber: session.lessonNumber,
-        date: session.date,
+        dayOfWeek: session.dayOfWeek,
+        startTime: session.startTime,
+        date: updated.date,
         status: updated.status,
         markedAt: updated.markedAt,
       });
@@ -65,7 +92,9 @@ router.post("/attendance/mark", async (req, res): Promise<void> => {
       studentCode: student.studentCode,
       studentName: student.studentName,
       lessonNumber: session.lessonNumber,
-      date: session.date,
+      dayOfWeek: session.dayOfWeek,
+      startTime: session.startTime,
+      date: existing[0].date,
       status: existing[0].status,
       markedAt: existing[0].markedAt,
     });
@@ -75,6 +104,7 @@ router.post("/attendance/mark", async (req, res): Promise<void> => {
   const [record] = await db.insert(attendanceTable).values({
     studentId: student.id,
     sessionId,
+    date: today,
     status: "Present",
   }).returning();
 
@@ -85,7 +115,9 @@ router.post("/attendance/mark", async (req, res): Promise<void> => {
     studentCode: student.studentCode,
     studentName: student.studentName,
     lessonNumber: session.lessonNumber,
-    date: session.date,
+    dayOfWeek: session.dayOfWeek,
+    startTime: session.startTime,
+    date: record.date,
     status: record.status,
     markedAt: record.markedAt,
   });
@@ -101,7 +133,9 @@ router.get("/attendance", async (req, res): Promise<void> => {
     studentCode: studentsTable.studentCode,
     studentName: studentsTable.studentName,
     lessonNumber: sessionsTable.lessonNumber,
-    date: sessionsTable.date,
+    dayOfWeek: sessionsTable.dayOfWeek,
+    startTime: sessionsTable.startTime,
+    date: attendanceTable.date,
     status: attendanceTable.status,
     markedAt: attendanceTable.markedAt,
   })
@@ -117,11 +151,14 @@ router.get("/attendance", async (req, res): Promise<void> => {
   if (params.success && params.data.studentCode) {
     conditions.push(eq(studentsTable.studentCode, params.data.studentCode));
   }
+  if (params.success && params.data.date) {
+    conditions.push(eq(attendanceTable.date, params.data.date));
+  }
   if (params.success && params.data.weekStart) {
     const weekEnd = new Date(params.data.weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
-    conditions.push(gte(sessionsTable.date, params.data.weekStart));
-    conditions.push(lte(sessionsTable.date, weekEnd.toISOString().split("T")[0]));
+    conditions.push(gte(attendanceTable.date, params.data.weekStart));
+    conditions.push(lte(attendanceTable.date, weekEnd.toISOString().split("T")[0]));
   }
 
   if (conditions.length > 0) {
@@ -140,32 +177,27 @@ router.post("/attendance/auto-absence", async (req, res): Promise<void> => {
   }
 
   const weekStart = parsed.data.weekStart;
-  const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 6);
-  const weekEndStr = weekEnd.toISOString().split("T")[0];
-
-  const weekSessions = await db.select().from(sessionsTable)
-    .where(and(
-      gte(sessionsTable.date, weekStart),
-      lte(sessionsTable.date, weekEndStr)
-    ));
-
+  const allSessions = await db.select().from(sessionsTable);
   const students = await db.select().from(studentsTable);
 
   let marked = 0;
 
-  for (const student of students) {
-    for (const session of weekSessions) {
+  for (const session of allSessions) {
+    const sessionDate = getDateForDayInWeek(weekStart, session.dayOfWeek);
+
+    for (const student of students) {
       const existing = await db.select().from(attendanceTable)
         .where(and(
           eq(attendanceTable.studentId, student.id),
-          eq(attendanceTable.sessionId, session.id)
+          eq(attendanceTable.sessionId, session.id),
+          eq(attendanceTable.date, sessionDate)
         ));
 
       if (existing.length === 0) {
         await db.insert(attendanceTable).values({
           studentId: student.id,
           sessionId: session.id,
+          date: sessionDate,
           status: "Absent",
         });
         marked++;
@@ -173,7 +205,7 @@ router.post("/attendance/auto-absence", async (req, res): Promise<void> => {
     }
   }
 
-  res.json({ marked, message: `Marked ${marked} absence records for the week` });
+  res.json({ marked, message: `Marked ${marked} absence records for the week of ${weekStart}` });
 });
 
 router.get("/attendance/export", async (req, res): Promise<void> => {
@@ -182,8 +214,10 @@ router.get("/attendance/export", async (req, res): Promise<void> => {
   let query = db.select({
     studentCode: studentsTable.studentCode,
     studentName: studentsTable.studentName,
-    date: sessionsTable.date,
+    date: attendanceTable.date,
     lessonNumber: sessionsTable.lessonNumber,
+    dayOfWeek: sessionsTable.dayOfWeek,
+    startTime: sessionsTable.startTime,
     status: attendanceTable.status,
   })
   .from(attendanceTable)
@@ -195,16 +229,16 @@ router.get("/attendance/export", async (req, res): Promise<void> => {
     const weekEnd = new Date(params.data.weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
     query = query.where(and(
-      gte(sessionsTable.date, params.data.weekStart),
-      lte(sessionsTable.date, weekEnd.toISOString().split("T")[0])
+      gte(attendanceTable.date, params.data.weekStart),
+      lte(attendanceTable.date, weekEnd.toISOString().split("T")[0])
     ));
   }
 
   const records = await query;
 
-  let csv = "Student Code,Student Name,Date,Lesson Number,Status\n";
+  let csv = "Student Code,Student Name,Date,Lesson Number,Day,Start Time,Status\n";
   for (const r of records) {
-    csv += `${r.studentCode},${r.studentName},${r.date},${r.lessonNumber},${r.status}\n`;
+    csv += `${r.studentCode},"${r.studentName}",${r.date},${r.lessonNumber},${r.dayOfWeek},${r.startTime},${r.status}\n`;
   }
 
   res.setHeader("Content-Type", "text/csv");

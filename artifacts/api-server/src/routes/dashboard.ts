@@ -1,11 +1,10 @@
 import { Router, type IRouter } from "express";
-import { eq, sql, desc } from "drizzle-orm";
+import { eq, sql, desc, and, gte, lte } from "drizzle-orm";
 import { db, studentsTable, sessionsTable, attendanceTable } from "@workspace/db";
 import {
   GetRecentActivityQueryParams,
   GetWeeklyStatsQueryParams,
 } from "@workspace/api-zod";
-import { and, gte, lte } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -18,8 +17,7 @@ router.get("/dashboard/summary", async (_req, res): Promise<void> => {
   const today = new Date().toISOString().split("T")[0];
   const [presentToday] = await db.select({ count: sql<number>`count(*)::int` })
     .from(attendanceTable)
-    .innerJoin(sessionsTable, eq(attendanceTable.sessionId, sessionsTable.id))
-    .where(and(eq(sessionsTable.date, today), eq(attendanceTable.status, "Present")));
+    .where(and(eq(attendanceTable.date, today), eq(attendanceTable.status, "Present")));
 
   const [absentStudentsResult] = await db.select({ count: sql<number>`count(distinct ${attendanceTable.studentId})::int` })
     .from(attendanceTable)
@@ -68,8 +66,9 @@ router.get("/dashboard/weekly-stats", async (req, res): Promise<void> => {
   } else {
     const now = new Date();
     const day = now.getDay();
-    const diff = now.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(now.setDate(diff));
+    const diff = day === 0 ? -6 : 1 - day;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() + diff);
     weekStart = monday.toISOString().split("T")[0];
   }
 
@@ -85,13 +84,12 @@ router.get("/dashboard/weekly-stats", async (req, res): Promise<void> => {
   .from(attendanceTable)
   .innerJoin(sessionsTable, eq(attendanceTable.sessionId, sessionsTable.id))
   .where(and(
-    gte(sessionsTable.date, weekStart),
-    lte(sessionsTable.date, weekEndStr)
+    gte(attendanceTable.date, weekStart),
+    lte(attendanceTable.date, weekEndStr)
   ))
   .groupBy(sessionsTable.lessonNumber, attendanceTable.status);
 
   const byLessonMap: Record<number, { present: number; absent: number }> = {};
-
   let totalPresent = 0;
   let totalAbsent = 0;
 

@@ -5,12 +5,14 @@
  * Aperti Attendance System API
  * OpenAPI spec version: 0.1.0
  */
+import type { SessionDayOfWeek } from "./sessionDayOfWeek";
 import type { SessionLessonNumber } from "./sessionLessonNumber";
 
 export interface Session {
   id: number;
   lessonNumber: SessionLessonNumber;
-  date: Date;
-  timeSlot: string;
+  dayOfWeek: SessionDayOfWeek;
+  /** Start time in HH:MM format (24-hour) */
+  startTime: string;
   createdAt: Date;
 }

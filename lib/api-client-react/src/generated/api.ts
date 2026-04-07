@@ -455,7 +455,7 @@ export const useBulkCreateStudents = <
 };
 
 /**
- * @summary List all sessions
+ * @summary List all session templates (recurring weekly)
  */
 export const getListSessionsUrl = () => {
   return `/api/sessions`;
@@ -506,7 +506,7 @@ export type ListSessionsQueryResult = NonNullable<
 export type ListSessionsQueryError = ErrorType<unknown>;
 
 /**
- * @summary List all sessions
+ * @summary List all session templates (recurring weekly)
  */
 
 export function useListSessions<
@@ -530,7 +530,7 @@ export function useListSessions<
 }
 
 /**
- * @summary Create a new session
+ * @summary Create a recurring weekly session template
  */
 export const getCreateSessionUrl = () => {
   return `/api/sessions`;
@@ -593,7 +593,7 @@ export type CreateSessionMutationBody = BodyType<CreateSessionBody>;
 export type CreateSessionMutationError = ErrorType<unknown>;
 
 /**
- * @summary Create a new session
+ * @summary Create a recurring weekly session template
  */
 export const useCreateSession = <
   TError = ErrorType<unknown>,
@@ -616,7 +616,7 @@ export const useCreateSession = <
 };
 
 /**
- * @summary Delete a session
+ * @summary Delete a session template
  */
 export const getDeleteSessionUrl = (id: number) => {
   return `/api/sessions/${id}`;
@@ -677,7 +677,7 @@ export type DeleteSessionMutationResult = NonNullable<
 export type DeleteSessionMutationError = ErrorType<unknown>;
 
 /**
- * @summary Delete a session
+ * @summary Delete a session template
  */
 export const useDeleteSession = <
   TError = ErrorType<unknown>,
@@ -700,7 +700,7 @@ export const useDeleteSession = <
 };
 
 /**
- * @summary Mark a student as present
+ * @summary Mark a student as present for a session (uses today's date)
  */
 export const getMarkAttendanceUrl = () => {
   return `/api/attendance/mark`;
@@ -763,7 +763,7 @@ export type MarkAttendanceMutationBody = BodyType<MarkAttendanceBody>;
 export type MarkAttendanceMutationError = ErrorType<ErrorResponse>;
 
 /**
- * @summary Mark a student as present
+ * @summary Mark a student as present for a session (uses today's date)
  */
 export const useMarkAttendance = <
   TError = ErrorType<ErrorResponse>,

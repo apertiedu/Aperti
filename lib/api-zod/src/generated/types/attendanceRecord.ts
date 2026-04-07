@@ -14,6 +14,8 @@ export interface AttendanceRecord {
   studentCode: string;
   studentName: string;
   lessonNumber: number;
+  dayOfWeek: string;
+  startTime: string;
   date: Date;
   status: AttendanceRecordStatus;
   markedAt: Date;

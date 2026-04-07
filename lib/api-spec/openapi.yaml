@@ -113,7 +113,7 @@ paths:
     get:
       operationId: listSessions
       tags: [sessions]
-      summary: List all sessions
+      summary: List all session templates (recurring weekly)
       responses:
         "200":
           description: List of sessions
@@ -126,7 +126,7 @@ paths:
     post:
       operationId: createSession
       tags: [sessions]
-      summary: Create a new session
+      summary: Create a recurring weekly session template
       requestBody:
         required: true
         content:
@@ -145,7 +145,7 @@ paths:
     delete:
       operationId: deleteSession
       tags: [sessions]
-      summary: Delete a session
+      summary: Delete a session template
       parameters:
         - name: id
           in: path
@@ -164,7 +164,7 @@ paths:
     post:
       operationId: markAttendance
       tags: [attendance]
-      summary: Mark a student as present
+      summary: Mark a student as present for a session (uses today's date)
       requestBody:
         required: true
         content:
@@ -200,6 +200,11 @@ paths:
           schema:
             type: string
         - name: weekStart
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: date
           in: query
           schema:
             type: string
@@ -398,19 +403,20 @@ components:
         lessonNumber:
           type: integer
           enum: [1, 2, 3]
-        date:
+        dayOfWeek:
           type: string
-          format: date
-        timeSlot:
+          enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+        startTime:
           type: string
+          description: "Start time in HH:MM format (24-hour)"
         createdAt:
           type: string
           format: date-time
       required:
         - id
         - lessonNumber
-        - date
-        - timeSlot
+        - dayOfWeek
+        - startTime
         - createdAt
 
     CreateSessionBody:
@@ -419,15 +425,16 @@ components:
         lessonNumber:
           type: integer
           enum: [1, 2, 3]
-        date:
+        dayOfWeek:
           type: string
-          format: date
-        timeSlot:
+          enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
+        startTime:
           type: string
+          description: "Start time in HH:MM format (24-hour)"
       required:
         - lessonNumber
-        - date
-        - timeSlot
+        - dayOfWeek
+        - startTime
 
     AttendanceRecord:
       type: object
@@ -444,6 +451,10 @@ components:
           type: string
         lessonNumber:
           type: integer
+        dayOfWeek:
+          type: string
+        startTime:
+          type: string
         date:
           type: string
           format: date
@@ -460,6 +471,8 @@ components:
         - studentCode
         - studentName
         - lessonNumber
+        - dayOfWeek
+        - startTime
         - date
         - status
         - markedAt

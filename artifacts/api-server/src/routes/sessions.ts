@@ -9,7 +9,7 @@ import {
 const router: IRouter = Router();
 
 router.get("/sessions", async (_req, res): Promise<void> => {
-  const sessions = await db.select().from(sessionsTable).orderBy(sessionsTable.date);
+  const sessions = await db.select().from(sessionsTable).orderBy(sessionsTable.lessonNumber);
   res.json(sessions);
 });
 

@@ -50,11 +50,25 @@ export const SessionLessonNumber = {
   NUMBER_3: 3,
 } as const;
 
+export type SessionDayOfWeek =
+  (typeof SessionDayOfWeek)[keyof typeof SessionDayOfWeek];
+
+export const SessionDayOfWeek = {
+  Monday: "Monday",
+  Tuesday: "Tuesday",
+  Wednesday: "Wednesday",
+  Thursday: "Thursday",
+  Friday: "Friday",
+  Saturday: "Saturday",
+  Sunday: "Sunday",
+} as const;
+
 export interface Session {
   id: number;
   lessonNumber: SessionLessonNumber;
-  date: string;
-  timeSlot: string;
+  dayOfWeek: SessionDayOfWeek;
+  /** Start time in HH:MM format (24-hour) */
+  startTime: string;
   createdAt: string;
 }
 
@@ -67,10 +81,24 @@ export const CreateSessionBodyLessonNumber = {
   NUMBER_3: 3,
 } as const;
 
+export type CreateSessionBodyDayOfWeek =
+  (typeof CreateSessionBodyDayOfWeek)[keyof typeof CreateSessionBodyDayOfWeek];
+
+export const CreateSessionBodyDayOfWeek = {
+  Monday: "Monday",
+  Tuesday: "Tuesday",
+  Wednesday: "Wednesday",
+  Thursday: "Thursday",
+  Friday: "Friday",
+  Saturday: "Saturday",
+  Sunday: "Sunday",
+} as const;
+
 export interface CreateSessionBody {
   lessonNumber: CreateSessionBodyLessonNumber;
-  date: string;
-  timeSlot: string;
+  dayOfWeek: CreateSessionBodyDayOfWeek;
+  /** Start time in HH:MM format (24-hour) */
+  startTime: string;
 }
 
 export type AttendanceRecordStatus =
@@ -88,6 +116,8 @@ export interface AttendanceRecord {
   studentCode: string;
   studentName: string;
   lessonNumber: number;
+  dayOfWeek: string;
+  startTime: string;
   date: string;
   status: AttendanceRecordStatus;
   markedAt: string;
@@ -140,6 +170,7 @@ export type ListAttendanceParams = {
   sessionId?: number;
   studentCode?: string;
   weekStart?: string;
+  date?: string;
 };
 
 export type ExportAttendanceParams = {

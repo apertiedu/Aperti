@@ -10,4 +10,5 @@ export type ListAttendanceParams = {
   sessionId?: number;
   studentCode?: string;
   weekStart?: Date;
+  date?: Date;
 };

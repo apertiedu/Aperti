@@ -66,28 +66,44 @@ export const BulkCreateStudentsResponse = zod.object({
 });
 
 /**
- * @summary List all sessions
+ * @summary List all session templates (recurring weekly)
  */
 export const ListSessionsResponseItem = zod.object({
   id: zod.number(),
   lessonNumber: zod.union([zod.literal(1), zod.literal(2), zod.literal(3)]),
-  date: zod.coerce.date(),
-  timeSlot: zod.string(),
+  dayOfWeek: zod.enum([
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ]),
+  startTime: zod.string().describe("Start time in HH:MM format (24-hour)"),
   createdAt: zod.coerce.date(),
 });
 export const ListSessionsResponse = zod.array(ListSessionsResponseItem);
 
 /**
- * @summary Create a new session
+ * @summary Create a recurring weekly session template
  */
 export const CreateSessionBody = zod.object({
   lessonNumber: zod.union([zod.literal(1), zod.literal(2), zod.literal(3)]),
-  date: zod.coerce.date(),
-  timeSlot: zod.string(),
+  dayOfWeek: zod.enum([
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ]),
+  startTime: zod.string().describe("Start time in HH:MM format (24-hour)"),
 });
 
 /**
- * @summary Delete a session
+ * @summary Delete a session template
  */
 export const DeleteSessionParams = zod.object({
   id: zod.coerce.number(),
@@ -98,7 +114,7 @@ export const DeleteSessionResponse = zod.object({
 });
 
 /**
- * @summary Mark a student as present
+ * @summary Mark a student as present for a session (uses today's date)
  */
 export const MarkAttendanceBody = zod.object({
   studentCode: zod.string(),
@@ -112,6 +128,8 @@ export const MarkAttendanceResponse = zod.object({
   studentCode: zod.string(),
   studentName: zod.string(),
   lessonNumber: zod.number(),
+  dayOfWeek: zod.string(),
+  startTime: zod.string(),
   date: zod.coerce.date(),
   status: zod.enum(["Present", "Absent"]),
   markedAt: zod.coerce.date(),
@@ -124,6 +142,7 @@ export const ListAttendanceQueryParams = zod.object({
   sessionId: zod.coerce.number().optional(),
   studentCode: zod.coerce.string().optional(),
   weekStart: zod.date().optional(),
+  date: zod.date().optional(),
 });
 
 export const ListAttendanceResponseItem = zod.object({
@@ -133,6 +152,8 @@ export const ListAttendanceResponseItem = zod.object({
   studentCode: zod.string(),
   studentName: zod.string(),
   lessonNumber: zod.number(),
+  dayOfWeek: zod.string(),
+  startTime: zod.string(),
   date: zod.coerce.date(),
   status: zod.enum(["Present", "Absent"]),
   markedAt: zod.coerce.date(),
