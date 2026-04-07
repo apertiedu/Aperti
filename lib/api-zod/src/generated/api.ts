@@ -21,7 +21,33 @@ export const ListStudentsResponseItem = zod.object({
   id: zod.number(),
   studentCode: zod.string(),
   studentName: zod.string(),
-  timeSlot: zod.string(),
+  lesson1SessionId: zod.number().nullish(),
+  lesson2SessionId: zod.number().nullish(),
+  lesson3SessionId: zod.number().nullish(),
+  lesson1Session: zod
+    .object({
+      id: zod.number(),
+      lessonNumber: zod.number(),
+      dayOfWeek: zod.string(),
+      startTime: zod.string(),
+    })
+    .nullish(),
+  lesson2Session: zod
+    .object({
+      id: zod.number(),
+      lessonNumber: zod.number(),
+      dayOfWeek: zod.string(),
+      startTime: zod.string(),
+    })
+    .nullish(),
+  lesson3Session: zod
+    .object({
+      id: zod.number(),
+      lessonNumber: zod.number(),
+      dayOfWeek: zod.string(),
+      startTime: zod.string(),
+    })
+    .nullish(),
   createdAt: zod.coerce.date(),
 });
 export const ListStudentsResponse = zod.array(ListStudentsResponseItem);
@@ -32,7 +58,9 @@ export const ListStudentsResponse = zod.array(ListStudentsResponseItem);
 export const CreateStudentBody = zod.object({
   studentCode: zod.string(),
   studentName: zod.string(),
-  timeSlot: zod.string(),
+  lesson1SessionId: zod.number().nullish(),
+  lesson2SessionId: zod.number().nullish(),
+  lesson3SessionId: zod.number().nullish(),
 });
 
 /**
@@ -47,14 +75,16 @@ export const DeleteStudentResponse = zod.object({
 });
 
 /**
- * @summary Bulk add students (ignores duplicates and empty values)
+ * @summary Bulk add students
  */
 export const BulkCreateStudentsBody = zod.object({
   students: zod.array(
     zod.object({
       studentCode: zod.string(),
       studentName: zod.string(),
-      timeSlot: zod.string(),
+      lesson1SessionId: zod.number().nullish(),
+      lesson2SessionId: zod.number().nullish(),
+      lesson3SessionId: zod.number().nullish(),
     }),
   ),
 });
@@ -66,7 +96,7 @@ export const BulkCreateStudentsResponse = zod.object({
 });
 
 /**
- * @summary List all session templates (recurring weekly)
+ * @summary List all session templates
  */
 export const ListSessionsResponseItem = zod.object({
   id: zod.number(),
@@ -80,7 +110,7 @@ export const ListSessionsResponseItem = zod.object({
     "Saturday",
     "Sunday",
   ]),
-  startTime: zod.string().describe("Start time in HH:MM format (24-hour)"),
+  startTime: zod.string(),
   createdAt: zod.coerce.date(),
 });
 export const ListSessionsResponse = zod.array(ListSessionsResponseItem);
@@ -99,7 +129,7 @@ export const CreateSessionBody = zod.object({
     "Saturday",
     "Sunday",
   ]),
-  startTime: zod.string().describe("Start time in HH:MM format (24-hour)"),
+  startTime: zod.string(),
 });
 
 /**
@@ -114,7 +144,7 @@ export const DeleteSessionResponse = zod.object({
 });
 
 /**
- * @summary Mark a student as present for a session (uses today's date)
+ * @summary Mark a student as present
  */
 export const MarkAttendanceBody = zod.object({
   studentCode: zod.string(),
@@ -136,7 +166,7 @@ export const MarkAttendanceResponse = zod.object({
 });
 
 /**
- * @summary List attendance records with filters
+ * @summary List attendance records
  */
 export const ListAttendanceQueryParams = zod.object({
   sessionId: zod.coerce.number().optional(),
@@ -161,7 +191,7 @@ export const ListAttendanceResponseItem = zod.object({
 export const ListAttendanceResponse = zod.array(ListAttendanceResponseItem);
 
 /**
- * @summary Auto-mark absent students for a given week
+ * @summary Auto-mark absent students for a week
  */
 export const AutoMarkAbsenceBody = zod.object({
   weekStart: zod.coerce.date(),
@@ -180,7 +210,7 @@ export const ExportAttendanceQueryParams = zod.object({
 });
 
 /**
- * @summary Get dashboard summary stats
+ * @summary Dashboard summary stats
  */
 export const GetDashboardSummaryResponse = zod.object({
   totalStudents: zod.number(),
@@ -191,7 +221,7 @@ export const GetDashboardSummaryResponse = zod.object({
 });
 
 /**
- * @summary Get recent attendance activity
+ * @summary Recent attendance activity
  */
 export const getRecentActivityQueryLimitDefault = 10;
 
@@ -212,7 +242,7 @@ export const GetRecentActivityResponse = zod.array(
 );
 
 /**
- * @summary Get weekly attendance breakdown
+ * @summary Weekly attendance breakdown
  */
 export const GetWeeklyStatsQueryParams = zod.object({
   weekStart: zod.date().optional(),

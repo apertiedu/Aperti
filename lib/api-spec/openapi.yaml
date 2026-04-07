@@ -9,15 +9,10 @@ servers:
     description: Base API path
 tags:
   - name: health
-    description: Health operations
   - name: students
-    description: Student management
   - name: sessions
-    description: Session management
   - name: attendance
-    description: Attendance tracking
   - name: dashboard
-    description: Dashboard analytics
 
 paths:
   /healthz:
@@ -94,7 +89,7 @@ paths:
     post:
       operationId: bulkCreateStudents
       tags: [students]
-      summary: Bulk add students (ignores duplicates and empty values)
+      summary: Bulk add students
       requestBody:
         required: true
         content:
@@ -113,7 +108,7 @@ paths:
     get:
       operationId: listSessions
       tags: [sessions]
-      summary: List all session templates (recurring weekly)
+      summary: List all session templates
       responses:
         "200":
           description: List of sessions
@@ -164,7 +159,7 @@ paths:
     post:
       operationId: markAttendance
       tags: [attendance]
-      summary: Mark a student as present for a session (uses today's date)
+      summary: Mark a student as present
       requestBody:
         required: true
         content:
@@ -179,7 +174,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/AttendanceRecord"
         "404":
-          description: Student or session not found
+          description: Not found
           content:
             application/json:
               schema:
@@ -189,7 +184,7 @@ paths:
     get:
       operationId: listAttendance
       tags: [attendance]
-      summary: List attendance records with filters
+      summary: List attendance records
       parameters:
         - name: sessionId
           in: query
@@ -223,7 +218,7 @@ paths:
     post:
       operationId: autoMarkAbsence
       tags: [attendance]
-      summary: Auto-mark absent students for a given week
+      summary: Auto-mark absent students for a week
       requestBody:
         required: true
         content:
@@ -232,7 +227,7 @@ paths:
               $ref: "#/components/schemas/AutoAbsenceBody"
       responses:
         "200":
-          description: Absence records created
+          description: Absences marked
           content:
             application/json:
               schema:
@@ -251,7 +246,7 @@ paths:
             format: date
       responses:
         "200":
-          description: CSV data
+          description: CSV file
           content:
             text/csv:
               schema:
@@ -261,7 +256,7 @@ paths:
     get:
       operationId: getDashboardSummary
       tags: [dashboard]
-      summary: Get dashboard summary stats
+      summary: Dashboard summary stats
       responses:
         "200":
           description: Dashboard summary
@@ -274,7 +269,7 @@ paths:
     get:
       operationId: getRecentActivity
       tags: [dashboard]
-      summary: Get recent attendance activity
+      summary: Recent attendance activity
       parameters:
         - name: limit
           in: query
@@ -295,7 +290,7 @@ paths:
     get:
       operationId: getWeeklyStats
       tags: [dashboard]
-      summary: Get weekly attendance breakdown
+      summary: Weekly attendance breakdown
       parameters:
         - name: weekStart
           in: query
@@ -317,24 +312,34 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
     ErrorResponse:
       type: object
       properties:
         message:
           type: string
-      required:
-        - message
+      required: [message]
 
     SuccessResponse:
       type: object
       properties:
         message:
           type: string
-      required:
-        - message
+      required: [message]
+
+    SessionInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        lessonNumber:
+          type: integer
+        dayOfWeek:
+          type: string
+        startTime:
+          type: string
+      required: [id, lessonNumber, dayOfWeek, startTime]
 
     Student:
       type: object
@@ -345,8 +350,24 @@ components:
           type: string
         studentName:
           type: string
-        timeSlot:
-          type: string
+        lesson1SessionId:
+          type: integer
+          nullable: true
+        lesson2SessionId:
+          type: integer
+          nullable: true
+        lesson3SessionId:
+          type: integer
+          nullable: true
+        lesson1Session:
+          $ref: "#/components/schemas/SessionInfo"
+          nullable: true
+        lesson2Session:
+          $ref: "#/components/schemas/SessionInfo"
+          nullable: true
+        lesson3Session:
+          $ref: "#/components/schemas/SessionInfo"
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -354,7 +375,6 @@ components:
         - id
         - studentCode
         - studentName
-        - timeSlot
         - createdAt
 
     CreateStudentBody:
@@ -364,12 +384,18 @@ components:
           type: string
         studentName:
           type: string
-        timeSlot:
-          type: string
+        lesson1SessionId:
+          type: integer
+          nullable: true
+        lesson2SessionId:
+          type: integer
+          nullable: true
+        lesson3SessionId:
+          type: integer
+          nullable: true
       required:
         - studentCode
         - studentName
-        - timeSlot
 
     BulkCreateStudentsBody:
       type: object
@@ -378,8 +404,7 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/CreateStudentBody"
-      required:
-        - students
+      required: [students]
 
     BulkImportResult:
       type: object
@@ -390,10 +415,7 @@ components:
           type: integer
         total:
           type: integer
-      required:
-        - added
-        - skipped
-        - total
+      required: [added, skipped, total]
 
     Session:
       type: object
@@ -408,16 +430,10 @@ components:
           enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
         startTime:
           type: string
-          description: "Start time in HH:MM format (24-hour)"
         createdAt:
           type: string
           format: date-time
-      required:
-        - id
-        - lessonNumber
-        - dayOfWeek
-        - startTime
-        - createdAt
+      required: [id, lessonNumber, dayOfWeek, startTime, createdAt]
 
     CreateSessionBody:
       type: object
@@ -430,11 +446,7 @@ components:
           enum: [Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday]
         startTime:
           type: string
-          description: "Start time in HH:MM format (24-hour)"
-      required:
-        - lessonNumber
-        - dayOfWeek
-        - startTime
+      required: [lessonNumber, dayOfWeek, startTime]
 
     AttendanceRecord:
       type: object
@@ -464,18 +476,7 @@ components:
         markedAt:
           type: string
           format: date-time
-      required:
-        - id
-        - studentId
-        - sessionId
-        - studentCode
-        - studentName
-        - lessonNumber
-        - dayOfWeek
-        - startTime
-        - date
-        - status
-        - markedAt
+      required: [id, studentId, sessionId, studentCode, studentName, lessonNumber, dayOfWeek, startTime, date, status, markedAt]
 
     MarkAttendanceBody:
       type: object
@@ -484,9 +485,7 @@ components:
           type: string
         sessionId:
           type: integer
-      required:
-        - studentCode
-        - sessionId
+      required: [studentCode, sessionId]
 
     AutoAbsenceBody:
       type: object
@@ -494,8 +493,7 @@ components:
         weekStart:
           type: string
           format: date
-      required:
-        - weekStart
+      required: [weekStart]
 
     AutoAbsenceResult:
       type: object
@@ -504,9 +502,7 @@ components:
           type: integer
         message:
           type: string
-      required:
-        - marked
-        - message
+      required: [marked, message]
 
     DashboardSummary:
       type: object
@@ -522,12 +518,7 @@ components:
           type: integer
         presentToday:
           type: integer
-      required:
-        - totalStudents
-        - totalSessions
-        - attendanceRate
-        - absentStudents
-        - presentToday
+      required: [totalStudents, totalSessions, attendanceRate, absentStudents, presentToday]
 
     ActivityItem:
       type: object
@@ -545,13 +536,7 @@ components:
         markedAt:
           type: string
           format: date-time
-      required:
-        - id
-        - studentCode
-        - studentName
-        - lessonNumber
-        - status
-        - markedAt
+      required: [id, studentCode, studentName, lessonNumber, status, markedAt]
 
     WeeklyStats:
       type: object
@@ -571,11 +556,5 @@ components:
                 type: integer
               absent:
                 type: integer
-            required:
-              - lessonNumber
-              - present
-              - absent
-      required:
-        - totalPresent
-        - totalAbsent
-        - byLesson
+            required: [lessonNumber, present, absent]
+      required: [totalPresent, totalAbsent, byLesson]

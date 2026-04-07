@@ -12,7 +12,6 @@ export interface Session {
   id: number;
   lessonNumber: SessionLessonNumber;
   dayOfWeek: SessionDayOfWeek;
-  /** Start time in HH:MM format (24-hour) */
   startTime: string;
   createdAt: Date;
 }

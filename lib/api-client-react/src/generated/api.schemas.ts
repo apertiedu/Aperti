@@ -17,18 +17,32 @@ export interface SuccessResponse {
   message: string;
 }
 
+export interface SessionInfo {
+  id: number;
+  lessonNumber: number;
+  dayOfWeek: string;
+  startTime: string;
+}
+
 export interface Student {
   id: number;
   studentCode: string;
   studentName: string;
-  timeSlot: string;
+  lesson1SessionId?: number | null;
+  lesson2SessionId?: number | null;
+  lesson3SessionId?: number | null;
+  lesson1Session?: SessionInfo | null;
+  lesson2Session?: SessionInfo | null;
+  lesson3Session?: SessionInfo | null;
   createdAt: string;
 }
 
 export interface CreateStudentBody {
   studentCode: string;
   studentName: string;
-  timeSlot: string;
+  lesson1SessionId?: number | null;
+  lesson2SessionId?: number | null;
+  lesson3SessionId?: number | null;
 }
 
 export interface BulkCreateStudentsBody {
@@ -67,7 +81,6 @@ export interface Session {
   id: number;
   lessonNumber: SessionLessonNumber;
   dayOfWeek: SessionDayOfWeek;
-  /** Start time in HH:MM format (24-hour) */
   startTime: string;
   createdAt: string;
 }
@@ -97,7 +110,6 @@ export const CreateSessionBodyDayOfWeek = {
 export interface CreateSessionBody {
   lessonNumber: CreateSessionBodyLessonNumber;
   dayOfWeek: CreateSessionBodyDayOfWeek;
-  /** Start time in HH:MM format (24-hour) */
   startTime: string;
 }
 

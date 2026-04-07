@@ -369,7 +369,7 @@ export const useDeleteStudent = <
 };
 
 /**
- * @summary Bulk add students (ignores duplicates and empty values)
+ * @summary Bulk add students
  */
 export const getBulkCreateStudentsUrl = () => {
   return `/api/students/bulk`;
@@ -432,7 +432,7 @@ export type BulkCreateStudentsMutationBody = BodyType<BulkCreateStudentsBody>;
 export type BulkCreateStudentsMutationError = ErrorType<unknown>;
 
 /**
- * @summary Bulk add students (ignores duplicates and empty values)
+ * @summary Bulk add students
  */
 export const useBulkCreateStudents = <
   TError = ErrorType<unknown>,
@@ -455,7 +455,7 @@ export const useBulkCreateStudents = <
 };
 
 /**
- * @summary List all session templates (recurring weekly)
+ * @summary List all session templates
  */
 export const getListSessionsUrl = () => {
   return `/api/sessions`;
@@ -506,7 +506,7 @@ export type ListSessionsQueryResult = NonNullable<
 export type ListSessionsQueryError = ErrorType<unknown>;
 
 /**
- * @summary List all session templates (recurring weekly)
+ * @summary List all session templates
  */
 
 export function useListSessions<
@@ -700,7 +700,7 @@ export const useDeleteSession = <
 };
 
 /**
- * @summary Mark a student as present for a session (uses today's date)
+ * @summary Mark a student as present
  */
 export const getMarkAttendanceUrl = () => {
   return `/api/attendance/mark`;
@@ -763,7 +763,7 @@ export type MarkAttendanceMutationBody = BodyType<MarkAttendanceBody>;
 export type MarkAttendanceMutationError = ErrorType<ErrorResponse>;
 
 /**
- * @summary Mark a student as present for a session (uses today's date)
+ * @summary Mark a student as present
  */
 export const useMarkAttendance = <
   TError = ErrorType<ErrorResponse>,
@@ -786,7 +786,7 @@ export const useMarkAttendance = <
 };
 
 /**
- * @summary List attendance records with filters
+ * @summary List attendance records
  */
 export const getListAttendanceUrl = (params?: ListAttendanceParams) => {
   const normalizedParams = new URLSearchParams();
@@ -853,7 +853,7 @@ export type ListAttendanceQueryResult = NonNullable<
 export type ListAttendanceQueryError = ErrorType<unknown>;
 
 /**
- * @summary List attendance records with filters
+ * @summary List attendance records
  */
 
 export function useListAttendance<
@@ -880,7 +880,7 @@ export function useListAttendance<
 }
 
 /**
- * @summary Auto-mark absent students for a given week
+ * @summary Auto-mark absent students for a week
  */
 export const getAutoMarkAbsenceUrl = () => {
   return `/api/attendance/auto-absence`;
@@ -943,7 +943,7 @@ export type AutoMarkAbsenceMutationBody = BodyType<AutoAbsenceBody>;
 export type AutoMarkAbsenceMutationError = ErrorType<unknown>;
 
 /**
- * @summary Auto-mark absent students for a given week
+ * @summary Auto-mark absent students for a week
  */
 export const useAutoMarkAbsence = <
   TError = ErrorType<unknown>,
@@ -1063,7 +1063,7 @@ export function useExportAttendance<
 }
 
 /**
- * @summary Get dashboard summary stats
+ * @summary Dashboard summary stats
  */
 export const getGetDashboardSummaryUrl = () => {
   return `/api/dashboard/summary`;
@@ -1114,7 +1114,7 @@ export type GetDashboardSummaryQueryResult = NonNullable<
 export type GetDashboardSummaryQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get dashboard summary stats
+ * @summary Dashboard summary stats
  */
 
 export function useGetDashboardSummary<
@@ -1138,7 +1138,7 @@ export function useGetDashboardSummary<
 }
 
 /**
- * @summary Get recent attendance activity
+ * @summary Recent attendance activity
  */
 export const getGetRecentActivityUrl = (params?: GetRecentActivityParams) => {
   const normalizedParams = new URLSearchParams();
@@ -1211,7 +1211,7 @@ export type GetRecentActivityQueryResult = NonNullable<
 export type GetRecentActivityQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get recent attendance activity
+ * @summary Recent attendance activity
  */
 
 export function useGetRecentActivity<
@@ -1238,7 +1238,7 @@ export function useGetRecentActivity<
 }
 
 /**
- * @summary Get weekly attendance breakdown
+ * @summary Weekly attendance breakdown
  */
 export const getGetWeeklyStatsUrl = (params?: GetWeeklyStatsParams) => {
   const normalizedParams = new URLSearchParams();
@@ -1305,7 +1305,7 @@ export type GetWeeklyStatsQueryResult = NonNullable<
 export type GetWeeklyStatsQueryError = ErrorType<unknown>;
 
 /**
- * @summary Get weekly attendance breakdown
+ * @summary Weekly attendance breakdown
  */
 
 export function useGetWeeklyStats<

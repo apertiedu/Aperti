@@ -27,6 +27,7 @@ export * from "./listAttendanceParams";
 export * from "./markAttendanceBody";
 export * from "./session";
 export * from "./sessionDayOfWeek";
+export * from "./sessionInfo";
 export * from "./sessionLessonNumber";
 export * from "./student";
 export * from "./successResponse";

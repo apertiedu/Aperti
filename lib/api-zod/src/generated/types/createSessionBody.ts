@@ -11,6 +11,5 @@ import type { CreateSessionBodyLessonNumber } from "./createSessionBodyLessonNum
 export interface CreateSessionBody {
   lessonNumber: CreateSessionBodyLessonNumber;
   dayOfWeek: CreateSessionBodyDayOfWeek;
-  /** Start time in HH:MM format (24-hour) */
   startTime: string;
 }

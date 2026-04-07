@@ -5,11 +5,17 @@
  * Aperti Attendance System API
  * OpenAPI spec version: 0.1.0
  */
+import type { SessionInfo } from "./sessionInfo";
 
 export interface Student {
   id: number;
   studentCode: string;
   studentName: string;
-  timeSlot: string;
+  lesson1SessionId?: number | null;
+  lesson2SessionId?: number | null;
+  lesson3SessionId?: number | null;
+  lesson1Session?: SessionInfo | null;
+  lesson2Session?: SessionInfo | null;
+  lesson3Session?: SessionInfo | null;
   createdAt: Date;
 }

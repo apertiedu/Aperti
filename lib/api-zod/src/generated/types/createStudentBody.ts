@@ -9,5 +9,7 @@
 export interface CreateStudentBody {
   studentCode: string;
   studentName: string;
-  timeSlot: string;
+  lesson1SessionId?: number | null;
+  lesson2SessionId?: number | null;
+  lesson3SessionId?: number | null;
 }

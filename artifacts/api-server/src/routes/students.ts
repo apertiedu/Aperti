@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, studentsTable } from "@workspace/db";
+import { db, studentsTable, sessionsTable } from "@workspace/db";
 import {
   CreateStudentBody,
   DeleteStudentParams,
@@ -9,9 +9,34 @@ import {
 
 const router: IRouter = Router();
 
+async function studentWithSessions(studentId: number) {
+  const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, studentId));
+  if (!student) return null;
+
+  const sessions = await db.select().from(sessionsTable);
+  const sessionMap = Object.fromEntries(sessions.map((s) => [s.id, s]));
+
+  return {
+    ...student,
+    lesson1Session: student.lesson1SessionId ? sessionMap[student.lesson1SessionId] ?? null : null,
+    lesson2Session: student.lesson2SessionId ? sessionMap[student.lesson2SessionId] ?? null : null,
+    lesson3Session: student.lesson3SessionId ? sessionMap[student.lesson3SessionId] ?? null : null,
+  };
+}
+
 router.get("/students", async (_req, res): Promise<void> => {
   const students = await db.select().from(studentsTable).orderBy(studentsTable.createdAt);
-  res.json(students);
+  const sessions = await db.select().from(sessionsTable);
+  const sessionMap = Object.fromEntries(sessions.map((s) => [s.id, s]));
+
+  const result = students.map((s) => ({
+    ...s,
+    lesson1Session: s.lesson1SessionId ? sessionMap[s.lesson1SessionId] ?? null : null,
+    lesson2Session: s.lesson2SessionId ? sessionMap[s.lesson2SessionId] ?? null : null,
+    lesson3Session: s.lesson3SessionId ? sessionMap[s.lesson3SessionId] ?? null : null,
+  }));
+
+  res.json(result);
 });
 
 router.post("/students", async (req, res): Promise<void> => {
@@ -21,26 +46,29 @@ router.post("/students", async (req, res): Promise<void> => {
     return;
   }
 
-  const { studentCode, studentName, timeSlot } = parsed.data;
+  const { studentCode, studentName, lesson1SessionId, lesson2SessionId, lesson3SessionId } = parsed.data;
 
-  if (!studentCode.trim() || !studentName.trim() || !timeSlot.trim()) {
-    res.status(400).json({ message: "All fields are required and cannot be empty" });
+  if (!studentCode.trim() || !studentName.trim()) {
+    res.status(400).json({ message: "Student code and name are required" });
     return;
   }
 
-  const existing = await db.select().from(studentsTable).where(eq(studentsTable.studentCode, studentCode));
+  const existing = await db.select().from(studentsTable).where(eq(studentsTable.studentCode, studentCode.trim()));
   if (existing.length > 0) {
-    res.status(409).json({ message: "Student code already exists" });
+    res.status(409).json({ message: `Student code "${studentCode}" already exists` });
     return;
   }
 
-  const [student] = await db.insert(studentsTable).values({
+  const [created] = await db.insert(studentsTable).values({
     studentCode: studentCode.trim(),
     studentName: studentName.trim(),
-    timeSlot: timeSlot.trim(),
+    lesson1SessionId: lesson1SessionId ?? null,
+    lesson2SessionId: lesson2SessionId ?? null,
+    lesson3SessionId: lesson3SessionId ?? null,
   }).returning();
 
-  res.status(201).json(student);
+  const full = await studentWithSessions(created.id);
+  res.status(201).json(full);
 });
 
 router.delete("/students/:id", async (req, res): Promise<void> => {
@@ -70,7 +98,7 @@ router.post("/students/bulk", async (req, res): Promise<void> => {
   let skipped = 0;
 
   for (const s of parsed.data.students) {
-    if (!s.studentCode?.trim() || !s.studentName?.trim() || !s.timeSlot?.trim()) {
+    if (!s.studentCode?.trim() || !s.studentName?.trim()) {
       skipped++;
       continue;
     }
@@ -84,7 +112,9 @@ router.post("/students/bulk", async (req, res): Promise<void> => {
     await db.insert(studentsTable).values({
       studentCode: s.studentCode.trim(),
       studentName: s.studentName.trim(),
-      timeSlot: s.timeSlot.trim(),
+      lesson1SessionId: s.lesson1SessionId ?? null,
+      lesson2SessionId: s.lesson2SessionId ?? null,
+      lesson3SessionId: s.lesson3SessionId ?? null,
     });
     added++;
   }
