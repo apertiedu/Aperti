@@ -9,13 +9,8 @@ import {
 
 const router: IRouter = Router();
 
-async function studentWithSessions(studentId: number) {
-  const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, studentId));
-  if (!student) return null;
-
-  const sessions = await db.select().from(sessionsTable);
+async function buildStudentResponse(student: typeof studentsTable.$inferSelect, sessions: (typeof sessionsTable.$inferSelect)[]) {
   const sessionMap = Object.fromEntries(sessions.map((s) => [s.id, s]));
-
   return {
     ...student,
     lesson1Session: student.lesson1SessionId ? sessionMap[student.lesson1SessionId] ?? null : null,
@@ -27,15 +22,8 @@ async function studentWithSessions(studentId: number) {
 router.get("/students", async (_req, res): Promise<void> => {
   const students = await db.select().from(studentsTable).orderBy(studentsTable.createdAt);
   const sessions = await db.select().from(sessionsTable);
-  const sessionMap = Object.fromEntries(sessions.map((s) => [s.id, s]));
 
-  const result = students.map((s) => ({
-    ...s,
-    lesson1Session: s.lesson1SessionId ? sessionMap[s.lesson1SessionId] ?? null : null,
-    lesson2Session: s.lesson2SessionId ? sessionMap[s.lesson2SessionId] ?? null : null,
-    lesson3Session: s.lesson3SessionId ? sessionMap[s.lesson3SessionId] ?? null : null,
-  }));
-
+  const result = await Promise.all(students.map((s) => buildStudentResponse(s, sessions)));
   res.json(result);
 });
 
@@ -59,16 +47,56 @@ router.post("/students", async (req, res): Promise<void> => {
     return;
   }
 
-  const [created] = await db.insert(studentsTable).values({
-    studentCode: studentCode.trim(),
-    studentName: studentName.trim(),
-    lesson1SessionId: lesson1SessionId ?? null,
-    lesson2SessionId: lesson2SessionId ?? null,
-    lesson3SessionId: lesson3SessionId ?? null,
-  }).returning();
+  const [created] = await db
+    .insert(studentsTable)
+    .values({
+      studentCode: studentCode.trim(),
+      studentName: studentName.trim(),
+      lesson1SessionId: lesson1SessionId ?? null,
+      lesson2SessionId: lesson2SessionId ?? null,
+      lesson3SessionId: lesson3SessionId ?? null,
+    })
+    .returning();
 
-  const full = await studentWithSessions(created.id);
-  res.status(201).json(full);
+  const sessions = await db.select().from(sessionsTable);
+  res.status(201).json(await buildStudentResponse(created, sessions));
+});
+
+router.patch("/students/:id", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) {
+    res.status(400).json({ message: "Invalid student ID" });
+    return;
+  }
+
+  const { studentName, studentCode, lesson1SessionId, lesson2SessionId, lesson3SessionId } = req.body;
+
+  const [existing] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
+  if (!existing) {
+    res.status(404).json({ message: "Student not found" });
+    return;
+  }
+
+  const updates: Record<string, unknown> = {};
+  if (studentName !== undefined) updates.studentName = String(studentName).trim();
+  if (studentCode !== undefined) updates.studentCode = String(studentCode).trim();
+  if ("lesson1SessionId" in req.body) updates.lesson1SessionId = lesson1SessionId ?? null;
+  if ("lesson2SessionId" in req.body) updates.lesson2SessionId = lesson2SessionId ?? null;
+  if ("lesson3SessionId" in req.body) updates.lesson3SessionId = lesson3SessionId ?? null;
+
+  if (Object.keys(updates).length === 0) {
+    res.status(400).json({ message: "No fields to update" });
+    return;
+  }
+
+  const [updated] = await db
+    .update(studentsTable)
+    .set(updates)
+    .where(eq(studentsTable.id, id))
+    .returning();
+
+  const sessions = await db.select().from(sessionsTable);
+  res.json(await buildStudentResponse(updated, sessions));
 });
 
 router.delete("/students/:id", async (req, res): Promise<void> => {
@@ -98,16 +126,10 @@ router.post("/students/bulk", async (req, res): Promise<void> => {
   let skipped = 0;
 
   for (const s of parsed.data.students) {
-    if (!s.studentCode?.trim() || !s.studentName?.trim()) {
-      skipped++;
-      continue;
-    }
+    if (!s.studentCode?.trim() || !s.studentName?.trim()) { skipped++; continue; }
 
     const existing = await db.select().from(studentsTable).where(eq(studentsTable.studentCode, s.studentCode.trim()));
-    if (existing.length > 0) {
-      skipped++;
-      continue;
-    }
+    if (existing.length > 0) { skipped++; continue; }
 
     await db.insert(studentsTable).values({
       studentCode: s.studentCode.trim(),
