@@ -38,7 +38,7 @@ app.use(
 
 // Auth guard
 app.use("/api", (req: Request, res: Response, next: NextFunction): void => {
-  if (req.path.startsWith("/auth/")) { next(); return; }
+  if (req.path.startsWith("/auth/") || req.path.startsWith("/public/")) { next(); return; }
   if (!(req.session as any).accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
   // Check account is not suspended (session-level check; full check is at login)
   next();

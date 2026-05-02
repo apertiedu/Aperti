@@ -8,6 +8,7 @@ import Layout from "@/components/layout";
 import StudentLayout from "@/components/student-layout";
 import Login from "@/pages/login";
 
+import Landing from "@/pages/landing";
 import Dashboard from "@/pages/dashboard";
 import Attendance from "@/pages/attendance";
 import Students from "@/pages/students";
@@ -86,6 +87,15 @@ function TeacherRouter() {
   );
 }
 
+function PublicRouter() {
+  return (
+    <Switch>
+      <Route path="/login" component={Login} />
+      <Route component={Landing} />
+    </Switch>
+  );
+}
+
 function AppContent() {
   const { user, loading } = useAuth();
 
@@ -100,7 +110,13 @@ function AppContent() {
     );
   }
 
-  if (!user) return <Login />;
+  if (!user) {
+    return (
+      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <PublicRouter />
+      </WouterRouter>
+    );
+  }
 
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>

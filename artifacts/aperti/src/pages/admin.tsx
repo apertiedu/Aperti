@@ -13,8 +13,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, UserPlus, Pencil, Trash2, Power, PowerOff, Users, BarChart3,
   Activity, Database, BookOpen, Clock, CheckCircle2, AlertTriangle,
-  GraduationCap, School, Search, ChevronRight, Eye
+  GraduationCap, School, Search, ChevronRight, Eye, Layers, Wifi, WifiOff
 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 
 type AccountRow = {
   id: number;
@@ -23,6 +24,16 @@ type AccountRow = {
   role: string;
   status: string;
   teacherAccountId: number | null;
+  createdAt: string;
+};
+
+type WorkspaceRow = {
+  id: number;
+  username: string;
+  displayName: string;
+  status: string;
+  systemMode: string;
+  studentCount: number;
   createdAt: string;
 };
 
@@ -151,13 +162,15 @@ function AccountFormDialog({ mode, initial, accounts, onSave, trigger }: {
 export default function Admin() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [tab, setTab] = useState<"overview" | "accounts" | "audit">("overview");
+  const [tab, setTab] = useState<"overview" | "accounts" | "workspaces" | "audit">("overview");
   const [accounts, setAccounts] = useState<AccountRow[]>([]);
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(true);
   const [auditSearch, setAuditSearch] = useState("");
   const [accountSearch, setAccountSearch] = useState("");
+  const [workspaces, setWorkspaces] = useState<WorkspaceRow[]>([]);
+  const [workspacesLoading, setWorkspacesLoading] = useState(true);
 
   if (user?.role !== "admin") {
     return (
@@ -184,7 +197,27 @@ export default function Admin() {
     } finally { setStatsLoading(false); }
   };
 
-  useEffect(() => { loadAccounts(); loadStats(); }, []);
+  const loadWorkspaces = async () => {
+    setWorkspacesLoading(true);
+    try {
+      const res = await fetch("/api/admin/workspaces", { credentials: "include" });
+      if (res.ok) setWorkspaces(await res.json());
+    } finally { setWorkspacesLoading(false); }
+  };
+
+  const handleToggleMode = async (workspace: WorkspaceRow) => {
+    const newMode = workspace.systemMode === "full" ? "whatsapp" : "full";
+    const res = await fetch(`/api/admin/workspaces/${workspace.id}/mode`, {
+      method: "PATCH", credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mode: newMode }),
+    });
+    if (!res.ok) { toast({ title: "Failed to update mode", variant: "destructive" }); return; }
+    setWorkspaces(ws => ws.map(w => w.id === workspace.id ? { ...w, systemMode: newMode } : w));
+    toast({ title: `${workspace.displayName} → ${newMode === "full" ? "Full System" : "WhatsApp Mode"}` });
+  };
+
+  useEffect(() => { loadAccounts(); loadStats(); loadWorkspaces(); }, []);
 
   const handleCreate = async (data: any) => {
     const res = await fetch("/api/accounts", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
@@ -257,6 +290,7 @@ export default function Admin() {
         {[
           { key: "overview", label: "System Overview", icon: BarChart3 },
           { key: "accounts", label: "Accounts", icon: Users },
+          { key: "workspaces", label: "Workspaces", icon: Layers },
           { key: "audit", label: "Activity Log", icon: Activity },
         ].map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setTab(key as any)}
@@ -459,6 +493,98 @@ export default function Admin() {
                           </TableRow>
                         );
                       })}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {tab === "workspaces" && (
+          <motion.div key="workspaces" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {[
+                { label: "Total Teachers", value: workspaces.length, color: "text-blue-600", bg: "bg-blue-50" },
+                { label: "Full System Mode", value: workspaces.filter(w => w.systemMode === "full").length, color: "text-emerald-600", bg: "bg-emerald-50" },
+                { label: "WhatsApp Mode", value: workspaces.filter(w => w.systemMode === "whatsapp").length, color: "text-amber-600", bg: "bg-amber-50" },
+              ].map(s => (
+                <Card key={s.label} className="border-border/50">
+                  <CardContent className="pt-4 pb-3">
+                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                    <p className={`text-2xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+            <Card className="border-border/50 shadow-sm">
+              <CardHeader className="pb-3 border-b border-border/50">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />Teacher Workspace Modes
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  <strong>Full System</strong> — students and parents have active login portals, full dashboards, and AI reports.<br />
+                  <strong>WhatsApp Mode</strong> — teacher/assistant-only workflow. No student or parent login required. Reports exported for WhatsApp distribution.
+                </p>
+              </CardHeader>
+              <CardContent className="p-0">
+                {workspacesLoading ? (
+                  <div className="p-8 text-center text-muted-foreground">Loading workspaces...</div>
+                ) : workspaces.length === 0 ? (
+                  <div className="p-12 text-center">
+                    <Layers className="h-10 w-10 text-muted-foreground opacity-20 mx-auto mb-3" />
+                    <p className="text-muted-foreground text-sm">No teacher workspaces yet.</p>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="hover:bg-transparent">
+                        <TableHead>Teacher</TableHead>
+                        <TableHead>Students</TableHead>
+                        <TableHead>Account Status</TableHead>
+                        <TableHead>System Mode</TableHead>
+                        <TableHead className="text-right">Toggle</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {workspaces.map(ws => (
+                        <TableRow key={ws.id}>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium text-sm">{ws.displayName}</p>
+                              <p className="text-xs font-mono text-muted-foreground">@{ws.username}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <span className="font-semibold text-primary">{ws.studentCount}</span>
+                            <span className="text-xs text-muted-foreground ml-1">enrolled</span>
+                          </TableCell>
+                          <TableCell>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${ws.status === "active" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                              {ws.status}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {ws.systemMode === "full" ? (
+                                <><Wifi className="h-3.5 w-3.5 text-emerald-500" /><span className="text-sm font-medium text-emerald-700">Full System</span></>
+                              ) : (
+                                <><WifiOff className="h-3.5 w-3.5 text-amber-500" /><span className="text-sm font-medium text-amber-700">WhatsApp Mode</span></>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <span className="text-xs text-muted-foreground">{ws.systemMode === "full" ? "Full" : "WA"}</span>
+                              <Switch
+                                checked={ws.systemMode === "full"}
+                                onCheckedChange={() => handleToggleMode(ws)}
+                                className="data-[state=checked]:bg-emerald-500"
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 )}

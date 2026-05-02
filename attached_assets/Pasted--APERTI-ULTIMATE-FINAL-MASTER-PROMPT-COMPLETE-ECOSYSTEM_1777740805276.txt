@@ -1,0 +1,520 @@
+🚀 APERTI ULTIMATE — FINAL MASTER PROMPT (COMPLETE ECOSYSTEM VERSION)
+
+Build a FULL-SCALE AI EDUCATION ECOSYSTEM PLATFORM called Aperti Ultimate.
+
+This is NOT a website.
+It is a multi-tenant SaaS + AI academy operating system + public marketplace + admin control network.
+
+It must be:
+
+- production-ready
+- scalable
+- secure (strict isolation)
+- AI-powered
+- fully automated
+- visually premium
+- hybrid (FULL SYSTEM + WHATSAPP MODE + PUBLIC MODE)
+
+---
+
+🧠 SYSTEM ARCHITECTURE (CORE RULE)
+
+Everything is organized into Teacher Workspaces:
+
+Teacher Workspace
+ ├── Students
+ ├── Parents
+ ├── Assistants
+ ├── Sessions (Online / Center)
+ ├── Attendance System
+ ├── Homework System
+ ├── Exams & Quizzes
+ ├── Question Bank
+ ├── AI Knowledge Base (RAG)
+ ├── Resources (PDFs / Videos / Notes)
+ ├── Analytics Engine
+ ├── Reports Engine
+ ├── Payments System
+ ├── Recordings System
+ ├── Notifications
+ ├── Audit Logs
+
+❗ STRICT RULE: No teacher can access another teacher’s data.
+
+---
+
+🌐 PUBLIC LANDING SYSTEM (NO LOGIN MODE)
+
+Create a public-facing page accessible without authentication.
+
+PUBLIC FEATURES:
+
+👨‍🏫 Teacher Directory
+
+- list of teachers
+- subjects taught
+- courses offered
+- center availability
+- online availability
+
+📚 COURSE CATALOG
+
+Each course includes:
+
+- teacher name
+- subject
+- description
+- difficulty level
+- schedule preview
+- pricing
+- online / center / hybrid mode
+
+🏫 CENTERS SYSTEM
+
+Support multiple learning centers:
+
+- center name
+- location
+- capacity
+- assigned teachers
+- available courses
+
+🎯 TRIAL SYSTEM
+
+Users can:
+
+- book trial sessions
+- choose online or center
+- select time slots
+- reserve limited seats
+
+System must prevent:
+
+- overbooking
+- duplicate reservations
+
+💳 PRICING SYSTEM
+
+Each course has:
+
+- monthly pricing
+- per session pricing (optional)
+- trial pricing (optional)
+- center vs online pricing
+
+---
+
+🔐 ADMIN CONTROL SYSTEM (FULL POWER)
+
+Admin can:
+
+- delete ANY entity (exam, quiz, student, etc.)
+- restore deleted data
+- permanently delete data
+- impersonate users (audit logged)
+- manage teachers, assistants, students, parents
+
+---
+
+🚨 ADMIN EXAM DELETION (CRITICAL FEATURE)
+
+Admin can delete exams completely with:
+
+- soft delete (default)
+- permanent delete (override)
+- full cascade cleanup:
+  - exam results
+  - question links
+  - analytics cache
+- full audit log tracking:
+  - who deleted
+  - when
+  - reason
+
+---
+
+👤 STUDENT ONBOARDING SYSTEM
+
+First login requires:
+
+- Student Code (validated)
+- Student Name (FORCED UPPERCASE)
+- Password (user-defined)
+- Confirm password
+
+Rules:
+
+- student must already exist in teacher database
+- first login activates account
+- password securely hashed
+
+---
+
+📊 ACCOUNT TRACKING SYSTEM
+
+System must track:
+
+Students:
+
+- total students per teacher
+- active accounts
+- inactive accounts
+- never logged in students
+
+Parents:
+
+- active parents
+- inactive parents
+- engagement percentage
+
+---
+
+🔁 SYSTEM MODES
+
+MODE 1 — FULL SYSTEM
+
+- student accounts active
+- parent accounts active
+- full dashboards
+- AI analytics enabled
+
+MODE 2 — WHATSAPP MODE
+
+- no student login required
+- no parent login required
+- teacher + assistant workflow only
+- AI still active
+- exports used for communication
+
+Admin can switch mode per teacher.
+
+---
+
+👨‍👩‍👧 PARENT PORTAL (WHATSAPP REPLACEMENT)
+
+Parents can view:
+
+- attendance
+- grades
+- homework
+- exams
+- weekly AI reports
+
+AI converts data into:
+
+- simple explanations
+- improvement advice
+- risk warnings
+
+---
+
+🏠 HOMEWORK SYSTEM
+
+Teachers:
+
+- assign homework
+- attach model answers
+- attach marking schemes (MS)
+- set deadlines
+
+Students:
+
+- submit homework (text, file, image, PDF)
+
+Assistants:
+
+- assist grading
+
+---
+
+🤖 AI HOMEWORK CORRECTION ENGINE
+
+Pipeline:
+
+1. Load marking scheme
+2. Process student submission (OCR if needed)
+3. Compare answers vs MS
+4. Assign marks per step
+5. Detect mistakes
+6. Generate feedback
+
+Output:
+
+- score breakdown
+- weak topics
+- detailed corrections
+- improvement plan
+
+Teacher approval required before final grading.
+
+---
+
+📚 AI CONTENT DESIGN ENGINE
+
+Generate:
+
+- notes
+- revision sheets
+- flashcards
+- worksheets
+- exam papers
+- infographics
+
+Must:
+
+- auto-format professionally
+- be printable
+- look like premium educational publishing
+
+---
+
+🧪 QUESTION BANK SYSTEM
+
+Each question includes:
+
+- topic
+- subtopic
+- difficulty
+- marks
+- model answer
+- mark scheme
+- tags
+- syllabus reference
+
+AI:
+
+- extracts questions from PDFs
+- classifies past papers
+- auto-tags content
+
+---
+
+🧠 AI EXAM & QUIZ GENERATOR
+
+Teachers can:
+
+- manually build exams
+- or AI generate full exams
+
+AI uses:
+
+- syllabus
+- weak topics
+- difficulty level
+- exam patterns
+
+Outputs:
+
+- quizzes
+- tests
+- mock exams
+
+---
+
+📈 AI ANALYTICS ENGINE
+
+Generate:
+
+- performance trends
+- weak/strong topics
+- engagement score
+- risk score
+- predicted grades
+
+Visuals:
+
+- charts
+- heatmaps
+- radar charts
+- rankings
+
+---
+
+🧠 AI TUTOR (RAG SYSTEM)
+
+Students can ask questions:
+
+- uses ONLY teacher-uploaded resources
+- gives explanations
+- provides examples
+- generates quizzes
+- cites sources
+
+---
+
+🎥 RECORDINGS SYSTEM
+
+Teachers:
+
+- upload Zoom/Meet links
+- set passwords
+- control access:
+  - free
+  - paid
+  - time-limited
+
+Students:
+
+- request access
+- unlock sessions
+
+---
+
+💳 PAYMENT SYSTEM
+
+Teachers:
+
+- create invoices
+- set pricing
+- track payments
+
+Students:
+
+- view invoices
+- upload proof
+- request access
+
+---
+
+📊 WEEKLY REPORT SYSTEM (CSV SINGLE CELL ONLY)
+
+Export format:
+
+report
+FULL AI GENERATED REPORT TEXT
+
+Must include:
+
+- attendance
+- homework
+- exams
+- archetype
+- weak/strong topics
+- AI insights
+- action plan
+- motivation
+
+Must be:
+
+- dynamic
+- non-repetitive
+- premium quality
+- emotionally intelligent
+
+---
+
+🔔 NOTIFICATION SYSTEM
+
+- attendance alerts
+- homework alerts
+- exam alerts
+- performance drop alerts
+- AI insights
+
+---
+
+❤️ EMOTIONAL SYSTEM
+
+Add:
+
+- streaks
+- achievements
+- motivational feedback
+- progress animations
+- engagement rewards
+
+---
+
+🎨 UI/UX SYSTEM
+
+Must feel like:
+
+- Stripe
+- Notion
+- Linear
+
+Include:
+
+- Framer Motion animations
+- glassmorphism
+- smooth transitions
+- command palette
+- modern dashboards
+- loading skeletons
+
+---
+
+⚡ PERFORMANCE SYSTEM
+
+Must support:
+
+- thousands of students
+- large PDFs
+- AI processing
+- bulk operations
+
+Use:
+
+- caching
+- queues
+- optimized DB queries
+- lazy loading
+
+---
+
+🔐 SECURITY SYSTEM
+
+Must include:
+
+- strict multi-tenant isolation
+- role-based access control
+- audit logs
+- safe delete system
+- session security
+- admin override logging
+
+---
+
+🧠 AI CLASSIFICATION SYSTEM
+
+Auto-classify students:
+
+- High Achiever
+- Consistent Worker
+- At Risk
+- Improving Fast
+- Exam Struggler
+- Attendance Risk
+
+---
+
+📂 BULK PDF SYSTEM
+
+AI must:
+
+- detect student names
+- extract metadata
+- classify content
+- auto-organize files
+- link to exams/students
+
+---
+
+🚀 FINAL SYSTEM GOAL
+
+Aperti Ultimate must become:
+
+- AI education operating system
+- SaaS academy platform
+- public education marketplace
+- hybrid WhatsApp replacement system
+- fully automated academic intelligence engine
+
+It should feel:
+
+- futuristic
+- premium
+- intelligent
+- effortless
+- addictive to use
+- enterprise-grade stable

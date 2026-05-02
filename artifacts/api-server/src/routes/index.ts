@@ -19,6 +19,8 @@ import studentPortalRouter from "./student-portal";
 import reportsRouter from "./reports";
 import paymentsRouter from "./payments";
 import recordingsRoutesRouter from "./recordings-routes";
+import publicRouter from "./public";
+import adminSettingsRouter from "./admin-settings";
 
 const router: IRouter = Router();
 
@@ -42,5 +44,7 @@ router.use(studentPortalRouter);
 router.use(reportsRouter);
 router.use(paymentsRouter);
 router.use(recordingsRoutesRouter);
+router.use(publicRouter);
+router.use(adminSettingsRouter);
 
 export default router;

@@ -8,6 +8,7 @@ export const accountsTable = pgTable("accounts", {
   role: text("role").notNull().default("admin"),
   status: text("status").notNull().default("active"),
   teacherAccountId: integer("teacher_account_id"),
+  systemMode: text("system_mode").notNull().default("full"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
