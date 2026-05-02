@@ -10,3 +10,5 @@ export * from "./question-bank";
 export * from "./audit-logs";
 export * from "./homework";
 export * from "./resources";
+export * from "./invoices";
+export * from "./recordings";

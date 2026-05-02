@@ -3,7 +3,8 @@ import { eq, and, gte, desc, sql } from "drizzle-orm";
 import {
   db, studentsTable, attendanceTable, sessionsTable,
   studentMarksTable, examQuestionsTable, examsTable,
-  homeworkTable, homeworkSubmissionsTable, resourcesTable, subjectsTable
+  homeworkTable, homeworkSubmissionsTable, resourcesTable, subjectsTable,
+  invoicesTable, recordingsTable
 } from "@workspace/db";
 import type { Request, Response, NextFunction } from "express";
 
@@ -209,6 +210,66 @@ router.get("/portal/resources", requireStudentAccess, async (req, res): Promise<
     .leftJoin(subjectsTable, eq(resourcesTable.subjectId, subjectsTable.id))
     .where(and(eq(resourcesTable.teacherAccountId, teacherId), eq(resourcesTable.isStudentVisible, true)))
     .orderBy(desc(resourcesTable.createdAt));
+
+  res.json(rows);
+});
+
+// Student invoices
+router.get("/portal/invoices", requireStudentAccess, async (req, res): Promise<void> => {
+  const session = req.session as any;
+  const studentId: number = session.studentId;
+  const teacherId: number = session.teacherAccountId;
+
+  const rows = await db.select({
+    id: invoicesTable.id,
+    title: invoicesTable.title,
+    description: invoicesTable.description,
+    amount: invoicesTable.amount,
+    currency: invoicesTable.currency,
+    status: invoicesTable.status,
+    dueDate: invoicesTable.dueDate,
+    paidAt: invoicesTable.paidAt,
+    notes: invoicesTable.notes,
+    createdAt: invoicesTable.createdAt,
+  }).from(invoicesTable)
+    .where(
+      and(
+        eq(invoicesTable.teacherAccountId, teacherId),
+        eq(invoicesTable.studentId, studentId)
+      )
+    )
+    .orderBy(desc(invoicesTable.createdAt));
+
+  res.json(rows);
+});
+
+// Student recordings
+router.get("/portal/recordings", requireStudentAccess, async (req, res): Promise<void> => {
+  const session = req.session as any;
+  const teacherId: number = session.teacherAccountId;
+
+  const rows = await db.select({
+    id: recordingsTable.id,
+    title: recordingsTable.title,
+    description: recordingsTable.description,
+    url: recordingsTable.url,
+    passcode: recordingsTable.passcode,
+    platform: recordingsTable.platform,
+    accessType: recordingsTable.accessType,
+    duration: recordingsTable.duration,
+    recordedAt: recordingsTable.recordedAt,
+    createdAt: recordingsTable.createdAt,
+    viewCount: recordingsTable.viewCount,
+    subjectName: subjectsTable.name,
+  }).from(recordingsTable)
+    .leftJoin(subjectsTable, eq(recordingsTable.subjectId, subjectsTable.id))
+    .where(
+      and(
+        eq(recordingsTable.teacherAccountId, teacherId),
+        eq(recordingsTable.isPublished, true)
+      )
+    )
+    .orderBy(desc(recordingsTable.createdAt));
 
   res.json(rows);
 });
