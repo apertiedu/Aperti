@@ -12,25 +12,34 @@ import Attendance from "@/pages/attendance";
 import Students from "@/pages/students";
 import Sessions from "@/pages/sessions";
 import Reports from "@/pages/reports";
+import Admin from "@/pages/admin";
+import Subjects from "@/pages/subjects";
+import Exams from "@/pages/exams";
+import Analytics from "@/pages/analytics";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: {
-      retry: false,
-      refetchOnWindowFocus: false,
-    },
+    queries: { retry: false, refetchOnWindowFocus: false },
   },
 });
 
 function Router() {
+  const { user } = useAuth();
+  const isAssistant = user?.role === "assistant";
+  const isAdmin = user?.role === "admin";
+
   return (
     <Layout>
       <Switch>
         <Route path="/" component={Dashboard} />
         <Route path="/attendance" component={Attendance} />
         <Route path="/students" component={Students} />
-        <Route path="/sessions" component={Sessions} />
-        <Route path="/reports" component={Reports} />
+        <Route path="/exams" component={Exams} />
+        {!isAssistant && <Route path="/sessions" component={Sessions} />}
+        {!isAssistant && <Route path="/subjects" component={Subjects} />}
+        {!isAssistant && <Route path="/analytics" component={Analytics} />}
+        {!isAssistant && <Route path="/reports" component={Reports} />}
+        {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -43,14 +52,15 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground text-sm">Loading...</div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-sm">Loading...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user) {
-    return <Login />;
-  }
+  if (!user) return <Login />;
 
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>

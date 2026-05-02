@@ -1,12 +1,19 @@
 import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+import { accountsTable } from "./accounts";
+import { subjectsTable } from "./subjects";
 
 export const sessionsTable = pgTable("sessions", {
   id: serial("id").primaryKey(),
   lessonNumber: integer("lesson_number").notNull(),
   dayOfWeek: text("day_of_week").notNull(),
   startTime: text("start_time").notNull(),
+  type: text("type").notNull().default("centre"),
+  capacity: integer("capacity"),
+  subjectId: integer("subject_id").references(() => subjectsTable.id, { onDelete: "set null" }),
+  teacherAccountId: integer("teacher_account_id").references(() => accountsTable.id, { onDelete: "cascade" }),
+  onlineLink: text("online_link"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

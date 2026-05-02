@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-interface AuthUser {
+export interface AuthUser {
   username: string;
   displayName: string;
+  role: "admin" | "teacher" | "assistant";
+  teacherAccountId: number | null;
 }
 
 interface AuthContextType {
@@ -28,8 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (username: string, password: string) => {
     const res = await fetch("/api/auth/login", {
-      method: "POST",
-      credentials: "include",
+      method: "POST", credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
     });
