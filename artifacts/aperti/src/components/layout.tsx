@@ -1,21 +1,23 @@
 import { useLocation, Link } from "wouter";
 import {
   LayoutDashboard, CheckSquare, Users, CalendarClock, FileBarChart,
-  School, LogOut, Shield, BookOpen, ClipboardList, BarChart3, Settings,
-  ChevronLeft, ChevronRight
+  School, LogOut, Shield, BookOpen, ClipboardList, BarChart3,
+  ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import CommandPalette, { useCommandPalette } from "@/components/command-palette";
+import NotificationBell from "@/components/notification-bell";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
   const [collapsed, setCollapsed] = useState(false);
+  const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
 
-  const isAdmin = user?.role === "admin";
   const isAssistant = user?.role === "assistant";
 
   const navigation = [
@@ -26,6 +28,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { name: "Subjects", href: "/subjects", icon: BookOpen, roles: ["admin", "teacher"] },
     { name: "Exams & Marks", href: "/exams", icon: ClipboardList, roles: ["admin", "teacher", "assistant"] },
     { name: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "teacher"] },
+    { name: "Question Bank", href: "/question-bank", icon: BookMarked, roles: ["admin", "teacher"] },
+    { name: "Parent Comms", href: "/parent-comms", icon: MessageSquare, roles: ["admin", "teacher"] },
     { name: "Reports", href: "/reports", icon: FileBarChart, roles: ["admin", "teacher"] },
     { name: "Admin Panel", href: "/admin", icon: Shield, roles: ["admin"] },
   ].filter(item => !user || (item.roles as string[]).includes(user.role));
@@ -43,6 +47,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex w-full bg-background font-sans">
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+
       <div className={`${collapsed ? "w-16" : "w-64"} bg-card border-r border-border flex flex-col h-screen sticky top-0 transition-all duration-200`}>
         {/* Logo */}
         <div className={`p-4 border-b border-border flex items-center ${collapsed ? "justify-center" : "justify-between"} gap-3`}>
@@ -67,8 +73,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
+        {/* Search trigger */}
+        {!collapsed && (
+          <div className="px-3 pt-3">
+            <button
+              onClick={() => setPaletteOpen(true)}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg border border-border/70 bg-muted/30 text-xs text-muted-foreground hover:border-primary/40 hover:bg-muted/60 transition-all"
+            >
+              <Search className="h-3 w-3" />
+              <span className="flex-1 text-left">Search...</span>
+              <kbd className="bg-muted px-1 py-0.5 rounded text-[9px] font-mono">⌘K</kbd>
+            </button>
+          </div>
+        )}
+
         {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto mt-2">
           {navigation.map((item) => {
             const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
             return (
@@ -88,7 +108,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* Bottom user section */}
-        {!collapsed && (
+        {!collapsed ? (
           <div className="p-3 border-t border-border space-y-2">
             <div className="px-3 py-2 rounded-lg bg-muted/50">
               <p className="text-xs font-medium text-foreground truncate">{user?.displayName || user?.username}</p>
@@ -100,17 +120,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="ghost" size="sm"
               className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs h-8"
               onClick={handleLogout}
             >
-              <LogOut className="w-3.5 h-3.5" />
-              Sign out
+              <LogOut className="w-3.5 h-3.5" />Sign out
             </Button>
           </div>
-        )}
-        {collapsed && (
+        ) : (
           <div className="p-3 border-t border-border">
             <button onClick={handleLogout} className="w-full flex justify-center text-muted-foreground hover:text-destructive transition-colors p-2" title="Sign out">
               <LogOut className="w-4 h-4" />
@@ -120,6 +137,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </div>
 
       <main className="flex-1 flex flex-col min-h-screen overflow-auto">
+        {/* Top bar */}
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b border-border/50 px-6 py-2.5 flex items-center justify-end gap-2">
+          <button
+            onClick={() => setPaletteOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors border border-border/50"
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Quick search</span>
+            <kbd className="hidden sm:inline bg-muted px-1 py-0.5 rounded font-mono text-[9px]">⌘K</kbd>
+          </button>
+          <NotificationBell />
+        </div>
+
         <div className="flex-1 p-6 lg:p-8 max-w-[1400px] mx-auto w-full">
           {children}
         </div>

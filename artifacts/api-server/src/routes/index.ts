@@ -9,6 +9,9 @@ import attendanceRouter from "./attendance";
 import dashboardRouter from "./dashboard";
 import examsRouter from "./exams";
 import analyticsRouter from "./analytics";
+import notificationsRouter from "./notifications";
+import questionBankRouter from "./question-bank";
+import studentProfileRouter from "./student-profile";
 
 const router: IRouter = Router();
 
@@ -22,5 +25,8 @@ router.use(attendanceRouter);
 router.use(dashboardRouter);
 router.use(examsRouter);
 router.use(analyticsRouter);
+router.use(notificationsRouter);
+router.use(questionBankRouter);
+router.use(studentProfileRouter);
 
 export default router;

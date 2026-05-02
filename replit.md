@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Aperti** — a full-stack educational SaaS platform for managing student attendance, exams/marks, analytics, and multi-role access for tutoring centres.
+**Aperti** — a full multi-tenant educational SaaS platform for managing student attendance, exams/marks, analytics, and multi-role access for tutoring centres and academies.
 
 ## Stack
 
@@ -18,90 +18,140 @@
 - **Charts**: Recharts
 - **Build**: esbuild (CJS bundle)
 
-## Roles
+## Roles & Access
 
-- **Admin** — full access, account management, all data
-- **Teacher** — own data only (students, sessions, subjects, exams, analytics)
-- **Assistant** — limited access (attendance, students, exams mark entry only)
+- **Admin** — full access, account management, all teacher data
+- **Teacher** — STRICTLY isolated workspace (own students/sessions/exams/analytics only)
+- **Assistant** — limited access, scoped to assigned teacher's data
 
-Default admin credentials: `admin` / `aperti2024`
+Default admin: `admin` / `aperti2024`
+
+## CRITICAL SECURITY: Multi-Tenant Architecture
+
+Every backend route is protected by `requireTenantAccess` middleware (`artifacts/api-server/src/middleware/tenant.ts`):
+- Derives teacher identity ONLY from `req.session` — NEVER from request body/params
+- Injects `req.tenant` context: `{ accountId, teacherId, isAdmin, role }`
+- Admin: `teacherId = null` (access all), Teacher: `teacherId = accountId`, Assistant: `teacherId = teacherAccountId`
+- All DB queries filter by `teacherAccountId` using tenant context
+- Cross-tenant access returns 403
 
 ## Features
 
-### Core
+### Core Platform
 - Multi-role authentication (admin/teacher/assistant) with role-based sidebar nav
-- Session-based auth with PostgreSQL session store
 - Collapsible sidebar with role badge
+- Command palette (⌘K) — keyboard navigation across all pages
+- Notification bell — 30s polling, unread badge, mark read/delete
+- Organizations table — future multi-org scalability (default org seeded)
+- Audit logs — tracks all significant actions with account, IP, resource
 
 ### Students
 - Add, edit, delete, bulk-import students
 - Fields: code, name, phone, parent phone, notes, status (active/suspended)
 - Assign up to 3 lesson sessions per student
-- Teacher isolation (each teacher sees only their students)
+- Full academic profile page per student (click chart icon in students table)
+- Teacher isolation: each teacher's students are invisible to others
+
+### Student Academic Profile (`/students/:id`)
+- KPI cards: attendance rate, exam average, predicted IGCSE grade, risk level
+- AI-style insight engine — generates contextual text summaries (rule-based):
+  - Attendance drop/improvement alerts
+  - Topic weakness/strength callouts
+  - Exam trend analysis
+- GitHub-style attendance heatmap (26 weeks, color-coded)
+- Recent vs. prior 4-week attendance comparison
+- Exam performance line chart (trend over time)
+- Topic mastery horizontal bar chart
+- Full exam results table with IGCSE letter grades
+- Risk score (0-100) based on attendance + exam performance
 
 ### Sessions
 - Weekly recurring sessions (lesson 1/2/3, day, time)
-- Session type: **centre** (with optional seat capacity) or **online** (with meeting link)
+- Session type: **centre** (optional capacity) or **online** (meeting link)
 - Subject assignment per session
-- Capacity tracking (present vs capacity)
 
 ### Subjects
-- Create/edit/delete subjects per teacher
-- Linked to sessions and exams
+- Per-teacher subject library
 
 ### Attendance
-- Mark attendance by student code (manual or QR scan)
+- Mark by student code (manual or QR scan)
 - Auto-absence marking for the week
 - Capacity enforcement for centre sessions
 - CSV export per week
 
 ### Exams & Marks
-- Create exams with optional subject/date/total marks
-- Question builder (topic, max marks, ordering)
-- Mark entry grid (per student × per question, with mistake notes)
-- Results view with auto-calculated percentages and IGCSE letter grades
-- Drill-down UX (exam list → detail → mark grid → results)
+- Exam lifecycle: create → question builder (topic/marks) → mark grid → results
+- Results with auto-calculated percentages and IGCSE grades
+- Question import from Question Bank
 
-### Analytics
-- KPI cards: total students, attendance rate, present/absent counts
+### Question Bank (`/question-bank`)
+- Per-teacher reusable question library
+- Fields: question text, topic, subtopic, difficulty, max marks, model answer, common mistakes, tags
+- Filter by subject, difficulty, search
+- Import questions directly into exams
+- Usage counter per question
+- Stats: total, easy/medium/hard counts
+
+### Analytics (`/analytics`)
+- KPI cards: total students, attendance rate, present/absent
 - Per-session attendance bar chart
-- Predicted IGCSE grade distribution chart
+- Predicted grade distribution (70% exam + 30% attendance)
 - Top performers and at-risk student panels
-- Most absent students list
-- Full student performance table with predicted grades (70% exam + 30% attendance weighting)
-- Session type breakdown (online vs centre)
+- Full student performance table with IGCSE predictions and risk scores
+- Teacher intelligence metrics
+
+### Parent Communication (`/parent-comms`)
+- Student selector with search
+- Message types: Today's Absence, Low Attendance Alert, Exam Reminder, Low Performance Alert, Weekly Summary, Custom
+- Auto-generates WhatsApp-formatted messages for parent phones
+- One-click copy to clipboard
+- Direct WhatsApp links (`wa.me/...`) for student and parent phones
+- Bulk absence message generation for all students
+
+### Notifications
+- In-app real-time notification bell (30s polling)
+- Unread count badge
+- Types: info, warning, success, error with distinct icons/colors
+- Mark individual or all as read
+- Delete individual notifications
 
 ### Admin Panel (admin only)
 - Create/edit/delete all accounts
-- Set role (admin/teacher/assistant) and status (active/suspended)
+- Set role (admin/teacher/assistant) and status
 - Assign assistants to teachers
-- Stats summary (admins, teachers, assistants, suspended)
+- Stats summary
 
 ## Database Schema
 
-- `accounts` — id, username, password_hash, display_name, role, status, teacher_account_id, created_at
-- `subjects` — id, name, teacher_account_id, created_at
-- `sessions` — id, lesson_number, day_of_week, start_time, type, capacity, subject_id, teacher_account_id, online_link, created_at
-- `students` — id, student_code, student_name, phone, parent_phone, notes, status, teacher_account_id, lesson1/2/3_session_id, created_at
+- `organizations` — id, name, slug, status, plan (future multi-org)
+- `accounts` — id, username, password_hash, display_name, role, status, teacher_account_id, organization_id
+- `subjects` — id, name, teacher_account_id
+- `sessions` — id, lesson_number, day_of_week, start_time, type, capacity, subject_id, teacher_account_id, online_link
+- `students` — id, student_code, student_name, phone, parent_phone, notes, status, teacher_account_id, lesson1/2/3_session_id
 - `attendance` — id, student_id, session_id, date, status, marked_at
-- `exams` — id, name, subject_id, teacher_account_id, exam_date, total_marks, created_at
+- `exams` — id, name, subject_id, teacher_account_id, exam_date, total_marks
 - `exam_questions` — id, exam_id, parent_id, question_text, topic, max_marks, question_order
 - `student_marks` — id, student_id, exam_id, question_id, marks_scored, mistakes, marked_at
+- `notifications` — id, account_id, title, message, type, is_read, link
+- `question_bank` — id, teacher_account_id, subject_id, question_text, topic, subtopic, difficulty, max_marks, model_answer, common_mistakes, tags, times_used
+- `audit_logs` — id, account_id, teacher_id, action, resource, resource_id, details, ip_address
+
+### Performance Indexes
+All tenant-filtered columns are indexed: students/sessions/exams/subjects by teacher_account_id, attendance by student_id+date and session_id+date, student_marks by student_id+exam_id, notifications by account_id+is_read
 
 ## Key Commands
 
-- `pnpm run typecheck` — full typecheck across all packages
+- `pnpm run typecheck` — full typecheck
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks from OpenAPI spec
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
+- `pnpm --filter @workspace/api-server run build` — build API server
 
 ## Important Notes
 
 - Do NOT use `console.log` in server code — use `req.log` or `logger`
-- Do NOT import `zod` directly in `api-server` routes — use `@workspace/api-zod` exports or manual validation
+- Do NOT import `zod` directly in `api-server` routes — use manual validation or `@workspace/api-zod`
 - Sessions are weekly recurring templates (not date-specific)
-- Teacher isolation: admin sees all, teacher sees own data, assistant sees teacher's data
-- Auto-absence marks one absence per lesson per student per week based on assigned sessions
+- NEVER derive teacherId from request body — always from `req.session` via tenant middleware
+- Auto-absence marks one absence per lesson per student per week
 - QR codes encode the `studentCode` string
-- Analytics predicted grade: 70% exam score + 30% attendance rate → A*–U scale
-
-See the `pnpm-workspace` skill for workspace structure and TypeScript setup.
+- Predicted IGCSE grade: 70% exam × 0.7 + attendanceRate × 0.3 → A*–U scale
+- Risk score: `min(100, max(0, 80-attendanceRate)*1.2 + max(0, 60-examPct)*0.8)`

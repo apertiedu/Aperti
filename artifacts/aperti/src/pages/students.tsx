@@ -18,7 +18,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Package } from "lucide-react";
+import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Package, BarChart2 } from "lucide-react";
+import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 
@@ -169,6 +170,7 @@ function StudentForm({
 export default function Students() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
   const [search, setSearch] = useState("");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isBulkOpen, setIsBulkOpen] = useState(false);
@@ -338,6 +340,7 @@ export default function Students() {
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
                           <QRModal student={student as StudentRecord} />
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="View Profile" onClick={() => navigate(`/students/${student.id}`)}><BarChart2 className="h-3.5 w-3.5" /></Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setEditingStudent(student as StudentRecord)}><Pencil className="h-3.5 w-3.5" /></Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => { if (confirm("Delete this student?")) deleteStudentMutation.mutate({ id: student.id }); }}><Trash2 className="h-3.5 w-3.5" /></Button>
                         </div>

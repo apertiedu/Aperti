@@ -1,19 +1,15 @@
 import { Router, type IRouter } from "express";
 import { eq, and, sql, desc } from "drizzle-orm";
 import { db, studentsTable, sessionsTable, attendanceTable, studentMarksTable, examQuestionsTable, examsTable } from "@workspace/db";
+import { requireTenantAccess } from "../middleware/tenant";
 
 const router: IRouter = Router();
 
-function getTeacherId(req: any): number | null {
-  if (req.session.role === "admin") return null;
-  if (req.session.role === "teacher") return req.session.accountId;
-  return req.session.teacherAccountId || req.session.accountId;
-}
+router.get("/analytics/attendance-summary", requireTenantAccess, async (req, res): Promise<void> => {
+  const { teacherId, isAdmin } = req.tenant;
+  const teacherFilter = !isAdmin && teacherId ? eq(sessionsTable.teacherAccountId, teacherId) : sql`1=1`;
+  const studentFilter = !isAdmin && teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`;
 
-router.get("/analytics/attendance-summary", async (req, res): Promise<void> => {
-  const teacherId = getTeacherId(req);
-
-  // Per session attendance counts
   const sessionSummary = await db.select({
     sessionId: attendanceTable.sessionId,
     lessonNumber: sessionsTable.lessonNumber,
@@ -26,7 +22,7 @@ router.get("/analytics/attendance-summary", async (req, res): Promise<void> => {
   }).from(attendanceTable)
     .innerJoin(sessionsTable, eq(attendanceTable.sessionId, sessionsTable.id))
     .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
-    .where(teacherId ? eq(sessionsTable.teacherAccountId, teacherId) : sql`1=1`)
+    .where(and(teacherFilter, studentFilter))
     .groupBy(attendanceTable.sessionId, sessionsTable.lessonNumber, sessionsTable.dayOfWeek, sessionsTable.startTime, sessionsTable.type, sessionsTable.capacity, attendanceTable.status);
 
   const bySession: Record<number, any> = {};
@@ -38,33 +34,25 @@ router.get("/analytics/attendance-summary", async (req, res): Promise<void> => {
     else bySession[row.sessionId].absent += row.count;
   }
 
-  // Most absent students
-  const absentQuery = db.select({
+  const mostAbsent = await db.select({
     studentId: attendanceTable.studentId,
     studentName: studentsTable.studentName,
     studentCode: studentsTable.studentCode,
     absentCount: sql<number>`count(*)::int`,
   }).from(attendanceTable)
     .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
-    .where(and(
-      eq(attendanceTable.status, "Absent"),
-      teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`
-    ))
+    .where(and(eq(attendanceTable.status, "Absent"), studentFilter))
     .groupBy(attendanceTable.studentId, studentsTable.studentName, studentsTable.studentCode)
     .orderBy(desc(sql`count(*)`))
     .limit(10);
 
-  const mostAbsent = await absentQuery;
-
-  // Overall stats
-  const totalStudentsQ = await db.select({ count: sql<number>`count(*)::int` }).from(studentsTable)
-    .where(teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`);
+  const totalStudentsQ = await db.select({ count: sql<number>`count(*)::int` }).from(studentsTable).where(studentFilter);
   const presentQ = await db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable)
     .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
-    .where(and(eq(attendanceTable.status, "Present"), teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`));
+    .where(and(eq(attendanceTable.status, "Present"), studentFilter));
   const absentQ = await db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable)
     .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
-    .where(and(eq(attendanceTable.status, "Absent"), teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`));
+    .where(and(eq(attendanceTable.status, "Absent"), studentFilter));
 
   const totalPresent = presentQ[0]?.count || 0;
   const totalAbsent = absentQ[0]?.count || 0;
@@ -82,35 +70,31 @@ router.get("/analytics/attendance-summary", async (req, res): Promise<void> => {
   });
 });
 
-router.get("/analytics/performance", async (req, res): Promise<void> => {
-  const teacherId = getTeacherId(req);
+router.get("/analytics/performance", requireTenantAccess, async (req, res): Promise<void> => {
+  const { teacherId, isAdmin } = req.tenant;
+  const studentFilter = !isAdmin && teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`;
 
-  const students = teacherId
-    ? await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId))
-    : await db.select().from(studentsTable);
-
+  const students = await db.select().from(studentsTable).where(studentFilter);
   if (students.length === 0) { res.json({ topStudents: [], atRisk: [], averagePercentage: 0, studentStats: [] }); return; }
 
   const studentIds = students.map(s => s.id);
+  if (studentIds.length === 0) { res.json({ topStudents: [], atRisk: [], averagePercentage: 0, studentStats: [] }); return; }
 
-  // Get all marks with question max marks
   const marksData = await db.select({
     studentId: studentMarksTable.studentId,
     marksScored: studentMarksTable.marksScored,
     maxMarks: examQuestionsTable.maxMarks,
     topic: examQuestionsTable.topic,
-    mistakes: studentMarksTable.mistakes,
   }).from(studentMarksTable)
     .innerJoin(examQuestionsTable, eq(studentMarksTable.questionId, examQuestionsTable.id))
-    .where(teacherId ? and(sql`${studentMarksTable.studentId} = ANY(${sql.raw(`ARRAY[${studentIds.join(',')}]`)})`) : sql`1=1`);
+    .where(sql`${studentMarksTable.studentId} = ANY(ARRAY[${sql.raw(studentIds.join(","))}]::int[])`);
 
-  // Get attendance per student
   const attendanceData = await db.select({
     studentId: attendanceTable.studentId,
     status: attendanceTable.status,
     count: sql<number>`count(*)::int`,
   }).from(attendanceTable)
-    .where(teacherId ? and(eq(attendanceTable.status, attendanceTable.status), sql`${attendanceTable.studentId} = ANY(${sql.raw(`ARRAY[${studentIds.join(',')}]`)})`) : sql`1=1`)
+    .where(sql`${attendanceTable.studentId} = ANY(ARRAY[${sql.raw(studentIds.join(","))}]::int[])`)
     .groupBy(attendanceTable.studentId, attendanceTable.status);
 
   const attendanceMap: Record<number, { present: number; absent: number }> = {};
@@ -141,7 +125,6 @@ router.get("/analytics/performance", async (req, res): Promise<void> => {
     const marks = marksMap[s.id];
     const examPercentage = marks && marks.totalMax > 0 ? Math.round((marks.totalScored / marks.totalMax) * 100 * 10) / 10 : null;
 
-    // Predicted IGCSE grade based on exam performance + attendance
     let predictedGrade = "N/A";
     if (examPercentage !== null) {
       const adjusted = examPercentage * 0.7 + attendanceRate * 0.3;
@@ -154,39 +137,33 @@ router.get("/analytics/performance", async (req, res): Promise<void> => {
       else predictedGrade = "U";
     }
 
-    // Weak/strong topics
     const topicStats = marks ? Object.entries(marks.topics).map(([topic, data]) => ({
-      topic,
-      percentage: data.max > 0 ? Math.round((data.scored / data.max) * 100) : 0,
+      topic, percentage: data.max > 0 ? Math.round((data.scored / data.max) * 100) : 0,
     })).sort((a, b) => a.percentage - b.percentage) : [];
 
-    const weakTopics = topicStats.filter(t => t.percentage < 60).map(t => t.topic);
-    const strongTopics = topicStats.filter(t => t.percentage >= 80).map(t => t.topic);
+    const riskScore = Math.min(100, Math.round(Math.max(0, 80 - attendanceRate) * 1.2 + (examPercentage !== null ? Math.max(0, 60 - examPercentage) * 0.8 : 20)));
 
     return {
-      id: s.id,
-      studentCode: s.studentCode,
-      studentName: s.studentName,
-      attendanceRate,
-      presentCount: att.present,
-      absentCount: att.absent,
-      examPercentage,
-      predictedGrade,
-      weakTopics,
-      strongTopics,
+      id: s.id, studentCode: s.studentCode, studentName: s.studentName,
+      attendanceRate, presentCount: att.present, absentCount: att.absent,
+      examPercentage, predictedGrade,
+      weakTopics: topicStats.filter(t => t.percentage < 60).map(t => t.topic),
+      strongTopics: topicStats.filter(t => t.percentage >= 80).map(t => t.topic),
       isAtRisk: attendanceRate < 70 || (examPercentage !== null && examPercentage < 50),
+      riskScore,
     };
   });
 
   const withExams = studentStats.filter(s => s.examPercentage !== null);
   const avgPercentage = withExams.length > 0
-    ? Math.round(withExams.reduce((sum, s) => sum + (s.examPercentage ?? 0), 0) / withExams.length * 10) / 10
-    : 0;
+    ? Math.round(withExams.reduce((sum, s) => sum + (s.examPercentage ?? 0), 0) / withExams.length * 10) / 10 : 0;
 
-  const topStudents = [...studentStats].sort((a, b) => (b.examPercentage ?? 0) - (a.examPercentage ?? 0)).slice(0, 5);
-  const atRisk = studentStats.filter(s => s.isAtRisk).sort((a, b) => a.attendanceRate - b.attendanceRate).slice(0, 10);
-
-  res.json({ topStudents, atRisk, averagePercentage: avgPercentage, studentStats });
+  res.json({
+    topStudents: [...studentStats].sort((a, b) => (b.examPercentage ?? 0) - (a.examPercentage ?? 0)).slice(0, 5),
+    atRisk: studentStats.filter(s => s.isAtRisk).sort((a, b) => b.riskScore - a.riskScore).slice(0, 10),
+    averagePercentage: avgPercentage,
+    studentStats,
+  });
 });
 
 export default router;

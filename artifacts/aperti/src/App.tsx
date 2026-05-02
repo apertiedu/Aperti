@@ -16,6 +16,9 @@ import Admin from "@/pages/admin";
 import Subjects from "@/pages/subjects";
 import Exams from "@/pages/exams";
 import Analytics from "@/pages/analytics";
+import StudentProfile from "@/pages/student-profile";
+import QuestionBank from "@/pages/question-bank";
+import ParentComms from "@/pages/parent-comms";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,11 +37,14 @@ function Router() {
         <Route path="/" component={Dashboard} />
         <Route path="/attendance" component={Attendance} />
         <Route path="/students" component={Students} />
+        <Route path="/students/:id" component={StudentProfile} />
         <Route path="/exams" component={Exams} />
         {!isAssistant && <Route path="/sessions" component={Sessions} />}
         {!isAssistant && <Route path="/subjects" component={Subjects} />}
         {!isAssistant && <Route path="/analytics" component={Analytics} />}
         {!isAssistant && <Route path="/reports" component={Reports} />}
+        {!isAssistant && <Route path="/question-bank" component={QuestionBank} />}
+        {!isAssistant && <Route path="/parent-comms" component={ParentComms} />}
         {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />
       </Switch>
