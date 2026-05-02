@@ -191,12 +191,46 @@ router.get("/students/:id/profile", requireTenantAccess, async (req, res): Promi
 
   const insights = generateInsights(student.studentName, recentRate, olderRate, overallRate, avgExamPercent, weakTopics, strongTopics, examTrend, totalAbsent);
 
+  // Compute archetype
+  function computeArchetype(attRate: number, examAvg: number | null, trend: number | null, recent: number, older: number) {
+    const drop = older - recent;
+    if (drop >= 20) return { name: "Burnout Risk", description: "Showing signs of withdrawal with significantly declining attendance.", color: "red", emoji: "🔴", priority: "critical" };
+    if (attRate >= 90 && examAvg !== null && examAvg >= 80) return { name: "Consistent Achiever", description: "Outstanding attendance combined with top academic performance.", color: "emerald", emoji: "⭐", priority: "excellent" };
+    if (examAvg !== null && examAvg >= 70 && attRate < 75) return { name: "High Potential / Low Discipline", description: "Strong academic ability hampered by irregular attendance.", color: "amber", emoji: "💡", priority: "watch" };
+    if (attRate < 60 || (examAvg !== null && examAvg < 40)) return { name: "At-Risk Student", description: "Requires immediate intervention and dedicated support.", color: "red", emoji: "⚠️", priority: "critical" };
+    if (trend !== null && trend >= 15) return { name: "Fast Improver", description: "Remarkable upward trajectory in academic performance.", color: "blue", emoji: "🚀", priority: "excellent" };
+    if (attRate >= 90 && examAvg !== null && examAvg < 60) return { name: "Attendance-Dependent Learner", description: "Great attendance but needs stronger academic reinforcement.", color: "orange", emoji: "📚", priority: "watch" };
+    if (examAvg !== null && examAvg >= 75 && attRate < 80) return { name: "Exam Specialist", description: "Achieves strong exam results despite irregular attendance.", color: "purple", emoji: "🎯", priority: "monitor" };
+    if (attRate >= 85 && examAvg !== null && examAvg >= 60) return { name: "Quiet Analytical Learner", description: "Consistent and methodical with steady, reliable progress.", color: "teal", emoji: "🧠", priority: "good" };
+    if (attRate < 80 && examAvg !== null && examAvg >= 60) return { name: "Last-Minute Performer", description: "Capable of good results but needs more consistent effort.", color: "amber", emoji: "⏰", priority: "watch" };
+    return { name: "Standard Learner", description: "Making steady progress — building foundations for success.", color: "slate", emoji: "📈", priority: "good" };
+  }
+
+  // Generate action plan
+  function generateActionPlan(weak: string[], strong: string[], attRate: number, examAvg: number | null, trend: number | null) {
+    const items: { category: string; priority: "high" | "medium" | "low"; action: string; icon: string }[] = [];
+    if (attRate < 70) items.push({ category: "Attendance", priority: "high", action: `Attendance at ${attRate}% needs urgent improvement. Target 85%+. Every missed session creates knowledge gaps that compound.`, icon: "📅" });
+    else if (attRate < 85) items.push({ category: "Attendance", priority: "medium", action: `Improve attendance from ${attRate}% to 90%+. Consistent presence is the single biggest predictor of academic success.`, icon: "📅" });
+    if (weak.length > 0) items.push({ category: "Priority Revision", priority: "high", action: `Focus revision on: ${weak.slice(0, 3).join(", ")}. Solve 5 targeted questions per topic. Study marking schemes carefully.`, icon: "📖" });
+    if (examAvg !== null && examAvg < 50) items.push({ category: "Exam Technique", priority: "high", action: "Practice past paper questions daily under timed conditions. Understand what examiners reward.", icon: "✏️" });
+    else if (examAvg !== null && examAvg < 70) items.push({ category: "Exam Skills", priority: "medium", action: "Review returned papers for patterns. Maximize performance on familiar topics before tackling harder ones.", icon: "✏️" });
+    if (trend !== null && trend <= -10) items.push({ category: "Performance Recovery", priority: "high", action: "Exam scores are declining. Schedule a one-to-one session to identify root causes.", icon: "🔍" });
+    if (strong.length > 0) items.push({ category: "Leverage Strengths", priority: "low", action: `Excellent in ${strong.slice(0, 2).join(" and ")}. Apply this same strategy to weaker areas.`, icon: "💪" });
+    items.push({ category: "Study Habit", priority: "low", action: "Review session notes within 24 hours using active recall — closes notes, tests memory. Doubles long-term retention.", icon: "🧠" });
+    return items;
+  }
+
+  const archetype = computeArchetype(overallRate, avgExamPercent, examTrend, recentRate, olderRate);
+  const actionPlan = generateActionPlan(weakTopics, strongTopics, overallRate, avgExamPercent, examTrend);
+
   res.json({
     student,
     attendance: { total, totalPresent, totalAbsent, overallRate, recentRate, olderRate, heatmap },
     exams: { results: examResults, topicStats, avgExamPercent, examTrend, weakTopics, strongTopics },
     prediction: { predictedGrade, riskScore, riskLevel, rankingPercentile },
     insights,
+    archetype,
+    actionPlan,
   });
 });
 

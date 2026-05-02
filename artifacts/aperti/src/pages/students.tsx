@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Package, BarChart2 } from "lucide-react";
+import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Package, BarChart2, KeyRound, UserCheck } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -178,6 +178,24 @@ export default function Students() {
   const [editSaving, setEditSaving] = useState(false);
   const [bulkData, setBulkData] = useState("");
   const [bulkExporting, setBulkExporting] = useState(false);
+  const [createAccountStudent, setCreateAccountStudent] = useState<StudentRecord | null>(null);
+  const [createAccountPassword, setCreateAccountPassword] = useState("");
+  const [createAccountSaving, setCreateAccountSaving] = useState(false);
+
+  const handleCreateAccount = async () => {
+    if (!createAccountStudent || !createAccountPassword) return;
+    setCreateAccountSaving(true);
+    try {
+      const res = await fetch(`/api/students/${createAccountStudent.id}/create-account`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: createAccountPassword }) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { toast({ title: "Error", description: data.message || "Failed", variant: "destructive" }); return; }
+      toast({ title: "Login created!", description: `Username: ${data.username}` });
+      queryClient.invalidateQueries({ queryKey: getListStudentsQueryKey() });
+      setCreateAccountStudent(null);
+      setCreateAccountPassword("");
+    } catch { toast({ title: "Error", variant: "destructive" }); }
+    finally { setCreateAccountSaving(false); }
+  };
 
   const blankStudent = { studentCode: "", studentName: "", lesson1SessionId: null as number | null, lesson2SessionId: null as number | null, lesson3SessionId: null as number | null };
 
@@ -304,6 +322,30 @@ export default function Students() {
         </DialogContent>
       </Dialog>
 
+      {/* Create Login Account Dialog */}
+      <Dialog open={!!createAccountStudent} onOpenChange={(v) => { if (!v) { setCreateAccountStudent(null); setCreateAccountPassword(""); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><KeyRound className="h-4 w-4" />Create Login Account</DialogTitle>
+          </DialogHeader>
+          {createAccountStudent && (
+            <div className="space-y-4 pt-2">
+              <div className="bg-muted/40 rounded-lg p-3 text-sm">
+                <p className="font-semibold">{createAccountStudent.studentName}</p>
+                <p className="text-muted-foreground text-xs mt-0.5">Username will be: <span className="font-mono font-semibold">{createAccountStudent.studentCode.toLowerCase()}</span></p>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Initial Password</Label>
+                <Input type="password" placeholder="Min 6 characters" value={createAccountPassword} onChange={e => setCreateAccountPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleCreateAccount()} />
+              </div>
+              <Button className="w-full gap-2" disabled={createAccountSaving || createAccountPassword.length < 6} onClick={handleCreateAccount}>
+                <UserCheck className="h-4 w-4" />{createAccountSaving ? "Creating..." : "Create Account"}
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Card className="border-border/50 shadow-sm">
         <CardHeader className="pb-4 border-b border-border/50">
           <div className="relative w-full md:max-w-sm">
@@ -341,6 +383,9 @@ export default function Students() {
                         <div className="flex items-center justify-end gap-1">
                           <QRModal student={student as StudentRecord} />
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="View Profile" onClick={() => navigate(`/students/${student.id}`)}><BarChart2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title={(student as any).accountId ? "Has login account" : "Create login account"} onClick={() => { if (!(student as any).accountId) setCreateAccountStudent(student as StudentRecord); }}>
+                            {(student as any).accountId ? <UserCheck className="h-3.5 w-3.5 text-emerald-500" /> : <KeyRound className="h-3.5 w-3.5" />}
+                          </Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setEditingStudent(student as StudentRecord)}><Pencil className="h-3.5 w-3.5" /></Button>
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" onClick={() => { if (confirm("Delete this student?")) deleteStudentMutation.mutate({ id: student.id }); }}><Trash2 className="h-3.5 w-3.5" /></Button>
                         </div>

@@ -8,3 +8,5 @@ export * from "./exams";
 export * from "./notifications";
 export * from "./question-bank";
 export * from "./audit-logs";
+export * from "./homework";
+export * from "./resources";

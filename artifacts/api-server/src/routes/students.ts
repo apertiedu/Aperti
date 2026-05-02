@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, and, sql } from "drizzle-orm";
-import { db, studentsTable, sessionsTable } from "@workspace/db";
+import bcrypt from "bcryptjs";
+import { db, studentsTable, sessionsTable, accountsTable } from "@workspace/db";
 import { CreateStudentBody, DeleteStudentParams, BulkCreateStudentsBody } from "@workspace/api-zod";
 
 const router: IRouter = Router();
@@ -102,6 +103,44 @@ router.post("/students/bulk", async (req, res): Promise<void> => {
   }
 
   res.json({ added, skipped });
+});
+
+// Create a student login account
+router.post("/students/:id/create-account", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  const { password } = req.body;
+  if (!password || password.length < 6) { res.status(400).json({ message: "Password must be at least 6 characters" }); return; }
+
+  const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
+  if (!student) { res.status(404).json({ message: "Student not found" }); return; }
+  if (student.accountId) { res.status(400).json({ message: "Student already has a login account" }); return; }
+
+  const username = student.studentCode.toLowerCase();
+  const existing = await db.select({ id: accountsTable.id }).from(accountsTable).where(eq(accountsTable.username, username));
+  if (existing.length > 0) { res.status(400).json({ message: `Username '${username}' is already taken` }); return; }
+
+  const hash = await bcrypt.hash(password, 10);
+  const [account] = await db.insert(accountsTable).values({
+    username,
+    passwordHash: hash,
+    displayName: student.studentName,
+    role: "student",
+    status: "active",
+    teacherAccountId: student.teacherAccountId,
+  }).returning();
+
+  await db.update(studentsTable).set({ accountId: account.id }).where(eq(studentsTable.id, id));
+  res.status(201).json({ message: "Student account created", username, accountId: account.id });
+});
+
+// Delete student account
+router.delete("/students/:id/account", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id, 10);
+  const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
+  if (!student?.accountId) { res.status(404).json({ message: "No account linked" }); return; }
+  await db.update(studentsTable).set({ accountId: null }).where(eq(studentsTable.id, id));
+  await db.delete(accountsTable).where(eq(accountsTable.id, student.accountId));
+  res.json({ message: "Student account removed" });
 });
 
 export default router;

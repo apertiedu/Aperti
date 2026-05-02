@@ -1,0 +1,522 @@
+🚀 APERTI ULTIMATE — FULL MASTER BUILD PROMPT (FINAL VERSION)
+
+Build a COMPLETE, PRODUCTION-READY, AI-POWERED EDUCATION OPERATING SYSTEM called Aperti Ultimate.
+
+This is a full SaaS platform for schools, academies, teachers, students, assistants, parents, and admin.
+
+It must be:
+
+- highly scalable
+- multi-tenant (strict isolation per teacher)
+- AI-driven
+- fully automated
+- visually premium
+- emotionally engaging
+- enterprise-grade
+- production stable (NO crashes)
+
+---
+
+🧠 CORE SYSTEM STRUCTURE (MANDATORY)
+
+The system is built around Teacher Workspaces (multi-tenant isolation):
+
+Teacher Workspace
+ ├── Students
+ ├── Parents
+ ├── Assistants
+ ├── Sessions
+ ├── Attendance
+ ├── Homework
+ ├── Exams & Quizzes
+ ├── Question Bank
+ ├── Resources (PDFs, videos, notes)
+ ├── AI Knowledge Base (RAG)
+ ├── Analytics
+ ├── Reports
+ ├── Payments
+ ├── Recordings
+ ├── Notifications
+ ├── Audit Logs
+
+NO CROSS-TEACHER DATA ACCESS EVER.
+
+---
+
+👑 SUPER ADMIN SYSTEM (ABSOLUTE CONTROL)
+
+Admin can:
+
+- delete ANY entity (soft + permanent)
+- restore ANY deleted data
+- impersonate users (safe audit mode)
+- override permissions
+- access ALL workspaces
+- view full system analytics
+
+Admin can manage:
+
+- teachers
+- assistants
+- students
+- parents
+- exams
+- quizzes
+- attendance
+- homework
+- AI outputs
+- reports
+- payments
+- resources
+- recordings
+
+---
+
+🛡 SAFE DELETE + RECYCLE BIN
+
+All deletions must:
+
+- be soft delete first
+- move to recycle bin
+- store deletedBy, deletedAt, reason
+- support restore
+- support permanent delete (admin only)
+- be fully audited
+
+---
+
+🔐 AUTH SYSTEM
+
+Implement:
+
+- role-based authentication (admin/teacher/assistant/student/parent)
+- bcrypt password hashing
+- session-based auth
+- secure cookies
+- password reset
+- change password system
+- login activity tracking
+
+---
+
+👨‍👩‍👧 PARENT PORTAL (NO WHATSAPP REPLACEMENT)
+
+Each student can have parent accounts.
+
+Parents can ONLY access:
+
+- their child’s data
+
+Parent Dashboard:
+
+- attendance
+- grades
+- homework
+- exams
+- weekly AI reports
+- progress trends
+
+AI Parent Translator:
+
+Convert teacher data into simple language:
+
+- “weak in electromagnetism” → “needs more practice in electricity concepts”
+
+Alerts:
+
+- absence alerts
+- low performance alerts
+- homework missing alerts
+- exam reminders
+
+Parent AI Chat:
+
+Ask questions about child performance using only their data.
+
+---
+
+👨‍🎓 STUDENT SYSTEM
+
+Students:
+
+- optional login accounts
+- QR code identity
+- attendance history
+- exam history
+- homework history
+- weak topics
+- archetype
+- risk score
+
+Students can:
+
+- submit homework
+- view reports
+- access resources
+- ask AI tutor
+
+---
+
+👨‍🏫 TEACHER SYSTEM
+
+Teachers can:
+
+- manage students
+- create sessions
+- create exams/quizzes
+- assign homework
+- upload resources
+- view analytics
+- manage assistants
+- communicate with parents
+- generate AI reports
+
+---
+
+👨‍💼 ASSISTANT SYSTEM
+
+Assistants can:
+
+- mark attendance
+- enter grades
+- assist homework correction
+- view limited analytics
+- cannot modify exams or system structure
+
+---
+
+🧠 ATTENDANCE SYSTEM (FIXED + INTELLIGENT)
+
+Auto-absence engine:
+
+- weekly cron job
+- detect missing attendance per lesson
+- mark absent ONCE only
+- prevent duplicates
+- respect cancellations/exams/holidays
+
+Features:
+
+- attendance streaks
+- attendance heatmaps
+- attendance risk score
+- attendance vs performance correlation
+
+---
+
+🏠 HOMEWORK SYSTEM
+
+Teachers:
+
+- assign homework
+- attach files
+- set deadlines
+- add model answers
+
+Students:
+
+- submit homework
+- upload files
+- edit before deadline
+
+Assistants:
+
+- assist grading
+
+---
+
+🤖 AI CORRECTION ENGINE
+
+AI can:
+
+- compare answers with model answers (PDF)
+- detect mistakes
+- estimate marks
+- generate feedback
+- highlight weak concepts
+
+Must:
+
+- require teacher approval
+- support bulk correction
+- support OCR inputs
+
+---
+
+📚 AI CONTENT DESIGN ENGINE (GRAPHIC AI)
+
+AI generates:
+
+- beautifully designed notes
+- worksheets
+- revision booklets
+- flashcards
+- exam papers
+- infographics
+
+Must:
+
+- auto-format professionally
+- generate clean layouts
+- look like premium educational publishing
+
+---
+
+🧪 QUESTION BANK SYSTEM
+
+Each question includes:
+
+- topic
+- subtopic
+- difficulty
+- marks
+- model answer
+- mark scheme
+- tags
+- syllabus reference
+
+AI:
+
+- classifies past papers
+- extracts questions from PDFs
+- organizes automatically
+
+---
+
+🧠 AI EXAM & QUIZ GENERATOR
+
+Teachers can:
+
+- manually select questions
+- or AI generate full exams
+
+AI uses:
+
+- syllabus
+- weak topics
+- difficulty
+- exam style
+
+Outputs:
+
+- quizzes
+- tests
+- mock exams
+- revision packs
+
+---
+
+📈 AI ANALYTICS ENGINE
+
+Generate:
+
+- performance trends
+- weak topics
+- strong topics
+- risk scoring
+- predicted grades
+- engagement score
+
+Visuals:
+
+- charts
+- heatmaps
+- ranking systems
+- radar charts
+
+---
+
+🧠 AI TUTOR (RAG SYSTEM)
+
+Students can ask questions:
+
+- uses ONLY teacher-uploaded resources
+- gives explanations
+- generates examples
+- creates quizzes
+- cites sources
+
+---
+
+🎥 RECORDINGS SYSTEM
+
+Teachers:
+
+- upload Zoom/Meet links
+- set passcodes
+- define access rules:
+  - free
+  - paid
+  - time-limited
+
+Students:
+
+- request access
+- unlock content
+
+---
+
+💳 PAYMENT SYSTEM
+
+Teachers:
+
+- create invoices
+- set prices
+- track payments
+
+Students:
+
+- view invoices
+- upload proof
+- request access
+
+---
+
+📊 WEEKLY REPORT GENERATOR (CSV SINGLE CELL)
+
+Export format:
+
+report
+FULL FORMATTED AI REPORT TEXT
+
+Reports include:
+
+- performance summary
+- attendance
+- homework
+- exams
+- archetype
+- weak/strong topics
+- AI insights
+- action plan
+- motivation
+
+Must be:
+
+- dynamic
+- non-repetitive
+- premium
+- emotionally intelligent
+
+---
+
+👨‍👩‍👧 PARENT SYSTEM REPLACES WHATSAPP
+
+Parents receive:
+
+- dashboards
+- alerts
+- reports
+- AI explanations
+- teacher messages
+
+NO external WhatsApp needed.
+
+---
+
+🎨 UI/UX SYSTEM
+
+Must feel like:
+
+- Stripe
+- Notion
+- Linear
+
+Include:
+
+- Framer Motion animations
+- glassmorphism
+- smooth transitions
+- command palette
+- loading skeletons
+- modern dashboards
+- responsive design
+
+---
+
+❤️ EMOTIONAL SYSTEM
+
+Add:
+
+- streaks
+- achievements
+- motivational feedback
+- progress animations
+- engagement rewards
+
+---
+
+⚡ PERFORMANCE SYSTEM
+
+Must support:
+
+- thousands of students
+- large PDFs
+- AI processing
+- bulk operations
+
+Use:
+
+- caching
+- queues
+- lazy loading
+- optimized DB queries
+
+---
+
+🔐 SECURITY SYSTEM
+
+Must include:
+
+- strict multi-tenant isolation
+- role-based access control
+- audit logs
+- safe delete system
+- session security
+- admin override logging
+
+---
+
+🧠 AI CLASSIFICATION SYSTEM
+
+Auto-classify students into:
+
+- High Achiever
+- Consistent Worker
+- At Risk
+- Improving Fast
+- Exam Struggler
+- Attendance Risk
+
+---
+
+📂 BULK PDF SYSTEM
+
+AI can:
+
+- detect student names
+- extract metadata
+- classify content
+- link to students/exams
+- auto-organize files
+
+---
+
+🚀 FINAL GOAL
+
+Aperti Ultimate must become:
+
+- a full AI education operating system
+- SaaS-grade platform
+- emotionally intelligent system
+- deeply analytical engine
+- fully automated academy platform
+- visually premium product
+
+It should feel like:
+
+- a billion-dollar SaaS system
+- futuristic
+- intelligent
+- effortless
+- addictive to use

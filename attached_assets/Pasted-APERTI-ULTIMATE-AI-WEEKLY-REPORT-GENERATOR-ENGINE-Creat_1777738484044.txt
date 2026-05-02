@@ -1,0 +1,421 @@
+APERTI ULTIMATE — AI WEEKLY REPORT GENERATOR ENGINE 🚀📊
+
+Create the MOST PROFESSIONAL, AI-GENERATED weekly report system possible.
+
+The current reports are too basic and feel like plain text.
+
+The new system should generate:
+
+- premium
+- intelligent
+- emotionally engaging
+- highly analytical
+- beautifully structured
+- teacher-friendly
+- WhatsApp-friendly
+- export-ready
+- parent-friendly
+
+The reports should feel like they were written by a REAL academic analyst + AI performance coach.
+
+---
+
+🚨 VERY IMPORTANT EXPORT REQUIREMENT
+
+The assistant MUST be able to:
+
+✅ Export ALL reports as CSV
+BUT:
+
+⚠️ EACH REPORT MUST EXIST INSIDE A SINGLE CELL/TEXT COLUMN ONLY.
+
+Example:
+
+report
+full formatted report text here
+
+NO multiple CSV columns.
+
+This allows:
+
+- WhatsApp bulk sending
+- easy copying
+- CRM usage
+- bulk messaging tools
+
+---
+
+🧠 AI REPORT GENERATION ENGINE
+
+The system should dynamically generate reports based on:
+
+- attendance
+- exams
+- quizzes
+- homework
+- consistency
+- submission timing
+- improvement trends
+- weak topics
+- strong topics
+- streaks
+- engagement
+- risk level
+- archetype
+- momentum
+
+The reports should NEVER feel repetitive.
+
+The AI should vary:
+
+- wording
+- tone
+- insights
+- recommendations
+- motivation
+
+---
+
+📊 REPORT STRUCTURE (PREMIUM VERSION)
+
+The report should feel:
+
+- elegant
+- compact
+- insightful
+- professional
+- motivational
+
+Use:
+
+- smart spacing
+- visual separators
+- emojis strategically
+- progress bars
+- AI-generated insights
+
+---
+
+🎨 REQUIRED REPORT SECTIONS
+
+HEADER
+
+Generate a premium header:
+
+Example:
+
+⭐ APERTI WEEKLY PERFORMANCE REPORT
+👨‍🎓 Student: Ahmed Ali
+🆔 Code: PHY-021
+📅 Week: 21/02/2026 → 27/02/2026
+🏫 Teacher: Mr. Ahmed Physics
+📈 Academic Status: Rising Performer 🚀
+
+---
+
+🧠 AI PERFORMANCE CLASSIFICATION
+
+The system should intelligently classify students.
+
+Examples:
+
+- Elite Performer 🌟
+- Rising Achiever 🚀
+- Consistent Worker ⚡
+- Discipline-Dependent Learner 📘
+- High Potential / Low Focus ⚠️
+- Recovery Phase Student 🔄
+- Exam-Struggling Hard Worker 💪
+- Attendance-Risk Student 🚨
+- Momentum Builder 📈
+
+The classification should be dynamically generated.
+
+---
+
+📊 PERFORMANCE SNAPSHOT
+
+Example:
+
+━━━━━━━━━━━━━━━━━━
+📊 PERFORMANCE SNAPSHOT
+━━━━━━━━━━━━━━━━━━
+
+🎯 Overall Performance: 78%
+📈 Weekly Trend: +6% Improvement 🚀
+🏅 Class Ranking: #4 / 32
+🔥 Consistency Score: 82%
+⚡ Engagement Level: High
+
+---
+
+📚 ACADEMIC ANALYSIS
+
+Generate deep AI insights.
+
+Example:
+
+━━━━━━━━━━━━━━━━━━
+🧠 ACADEMIC ANALYSIS
+━━━━━━━━━━━━━━━━━━
+
+✅ Strongest Area:
+• Circular Motion & Dynamics 💪
+
+⚠️ Needs Improvement:
+• Density & Measurements
+
+📌 AI Insight:
+Ahmed demonstrates strong conceptual understanding in mechanics-based topics, but accuracy drops in calculation-heavy questions requiring unit conversion and precision.
+
+---
+
+📊 SMART METRICS SECTION
+
+Example:
+
+━━━━━━━━━━━━━━━━━━
+📈 SMART METRICS
+━━━━━━━━━━━━━━━━━━
+
+📍 Attendance: 83%
+🟩🟩🟩🟩⬜
+
+📍 Homework Completion: 100%
+🟩🟩🟩🟩🟩
+
+📍 Homework Average: 88%
+
+📍 Exams & Quizzes Average: 72%
+
+📍 Submission Discipline:
+⚡ Excellent — All homework submitted on time
+
+📍 Attendance Discipline:
+⚠ Slight inconsistency detected this week
+
+---
+
+🧠 AI BEHAVIORAL ANALYSIS
+
+Generate intelligent learning behavior insights.
+
+Example:
+
+━━━━━━━━━━━━━━━━━━
+🧠 LEARNING PROFILE
+━━━━━━━━━━━━━━━━━━
+
+💡 Archetype:
+“The Persistent Improver”
+
+📌 Characteristics:
+• Strong homework commitment
+• Positive improvement trajectory
+• Needs more timed exam practice
+• Performs better after revision sessions
+
+---
+
+🚨 RISK DETECTION ENGINE
+
+Detect:
+
+- burnout
+- attendance decline
+- performance drops
+- inconsistency
+- disengagement
+
+Example:
+
+🚨 Attention Needed:
+Recent attendance fluctuations may begin affecting exam performance if consistency does not improve.
+
+---
+
+🎯 ACTION PLAN ENGINE
+
+Generate SMART action plans.
+
+Example:
+
+━━━━━━━━━━━━━━━━━━
+🚀 ACTION PLAN
+━━━━━━━━━━━━━━━━━━
+
+✅ Maintain strong homework consistency
+📚 Focus revision on Density & Measurements
+🧠 Increase timed solving practice
+⚡ Attend all upcoming revision sessions
+📈 Aim for +5% exam improvement next week
+
+---
+
+❤️ AI MOTIVATION ENGINE
+
+Generate emotionally intelligent motivational endings.
+
+Examples:
+
+💪 Consistency creates excellence — keep building momentum.
+
+🌟 Excellent progress this week. Your discipline is clearly paying off.
+
+🚀 Small improvements every week lead to massive long-term success.
+
+The motivation should adapt to:
+
+- struggling students
+- improving students
+- elite students
+
+---
+
+🎨 VISUAL DESIGN REQUIREMENTS
+
+The reports should:
+
+- look premium
+- use clean separators
+- feel modern
+- avoid clutter
+- remain WhatsApp-friendly
+
+Use:
+
+- unicode separators
+- elegant spacing
+- intelligent emoji usage
+- aligned formatting
+
+---
+
+📈 ADVANCED ANALYTICS TO INCLUDE
+
+Add:
+
+- ranking percentile
+- improvement momentum
+- attendance streaks
+- submission consistency
+- engagement score
+- confidence score
+- exam readiness level
+- predicted grade trend
+
+---
+
+🧠 PREDICTIVE AI INSIGHTS
+
+Generate predictions like:
+
+📈 Predicted Trend:
+If attendance consistency remains above 85%, projected exam improvement next month is likely.
+
+⚡ AI Forecast:
+Student is approaching “High Achiever” category if current momentum continues.
+
+---
+
+📊 CLASS COMPARISON INSIGHTS
+
+Optional section:
+
+📍 Above Class Average in Homework Discipline
+📍 Top 15% in Consistency
+📍 Needs improvement in timed assessments
+
+---
+
+🔥 REPORT QUALITY RULES
+
+The reports must NEVER:
+
+- feel robotic
+- repeat identical wording
+- feel generic
+- look messy
+- feel overcrowded
+
+The reports MUST:
+
+- feel personalized
+- sound intelligent
+- remain concise
+- provide actionable insights
+- motivate students
+
+---
+
+📂 EXPORT SYSTEM
+
+Allow:
+
+- CSV export
+- bulk export
+- WhatsApp-ready export
+- copy-to-clipboard
+- PDF export
+- printable versions
+
+CSV format MUST remain:
+
+report
+full report text
+
+ONLY ONE COLUMN.
+
+---
+
+🤖 AI LANGUAGE ENGINE
+
+The system should intelligently vary:
+
+- sentence structures
+- motivational phrases
+- recommendations
+- archetypes
+- insight wording
+
+Prevent repetitive reports.
+
+---
+
+⚡ PERFORMANCE REQUIREMENTS
+
+Generate reports instantly even for:
+
+- thousands of students
+- bulk exports
+- multiple weeks
+
+Optimize:
+
+- caching
+- batch generation
+- report templates
+- async processing
+
+---
+
+🚀 FINAL EXPECTATION
+
+The Aperti Weekly Report Generator should become:
+
+- the BEST academic reporting engine
+- AI-powered
+- emotionally intelligent
+- highly analytical
+- visually premium
+- WhatsApp optimized
+- scalable for academies
+
+The reports should feel:
+
+- professional
+- modern
+- motivating
+- intelligent
+- personalized
+- premium SaaS quality

@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/auth";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/layout";
+import StudentLayout from "@/components/student-layout";
 import Login from "@/pages/login";
 
 import Dashboard from "@/pages/dashboard";
@@ -19,6 +20,13 @@ import Analytics from "@/pages/analytics";
 import StudentProfile from "@/pages/student-profile";
 import QuestionBank from "@/pages/question-bank";
 import ParentComms from "@/pages/parent-comms";
+import HomeworkPage from "@/pages/homework";
+import ResourcesPage from "@/pages/resources";
+
+import StudentDashboard from "@/pages/student-portal/dashboard";
+import MyAttendance from "@/pages/student-portal/my-attendance";
+import MyHomework from "@/pages/student-portal/my-homework";
+import MyResources from "@/pages/student-portal/my-resources";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,7 +34,21 @@ const queryClient = new QueryClient({
   },
 });
 
-function Router() {
+function StudentRouter() {
+  return (
+    <StudentLayout>
+      <Switch>
+        <Route path="/" component={StudentDashboard} />
+        <Route path="/attendance" component={MyAttendance} />
+        <Route path="/homework" component={MyHomework} />
+        <Route path="/resources" component={MyResources} />
+        <Route component={NotFound} />
+      </Switch>
+    </StudentLayout>
+  );
+}
+
+function TeacherRouter() {
   const { user } = useAuth();
   const isAssistant = user?.role === "assistant";
   const isAdmin = user?.role === "admin";
@@ -45,6 +67,8 @@ function Router() {
         {!isAssistant && <Route path="/reports" component={Reports} />}
         {!isAssistant && <Route path="/question-bank" component={QuestionBank} />}
         {!isAssistant && <Route path="/parent-comms" component={ParentComms} />}
+        {!isAssistant && <Route path="/homework" component={HomeworkPage} />}
+        {!isAssistant && <Route path="/resources" component={ResourcesPage} />}
         {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />
       </Switch>
@@ -70,7 +94,7 @@ function AppContent() {
 
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      <Router />
+      {user.role === "student" ? <StudentRouter /> : <TeacherRouter />}
     </WouterRouter>
   );
 }

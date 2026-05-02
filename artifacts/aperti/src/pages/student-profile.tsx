@@ -3,9 +3,11 @@ import { useParams, useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import AttendanceHeatmap from "@/components/heatmap";
+import { motion } from "framer-motion";
 import {
   ChevronLeft, AlertTriangle, CheckCircle2, Info, TrendingUp, TrendingDown,
-  Users, Target, BookOpen, Award, Activity, Phone, MessageSquare, Star
+  Users, Target, BookOpen, Award, Activity, Phone, MessageSquare, Star,
+  Zap, ClipboardList
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
 import { useAuth } from "@/context/auth";
@@ -70,7 +72,7 @@ export default function StudentProfile() {
     );
   }
 
-  const { student, attendance, exams, prediction, insights } = data;
+  const { student, attendance, exams, prediction, insights, archetype, actionPlan } = data;
   const trendDir = exams.examTrend !== null ? (exams.examTrend > 0 ? "up" : exams.examTrend < 0 ? "down" : "flat") : "flat";
 
   const kpiCards = [
@@ -123,6 +125,31 @@ export default function StudentProfile() {
           </Card>
         ))}
       </div>
+
+      {/* Archetype Banner */}
+      {archetype && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className={`rounded-2xl p-5 flex items-center gap-4 border ${
+            archetype.priority === "critical" ? "bg-red-50 border-red-200" :
+            archetype.priority === "excellent" ? "bg-emerald-50 border-emerald-200" :
+            archetype.priority === "watch" ? "bg-amber-50 border-amber-200" :
+            "bg-blue-50 border-blue-200"
+          }`}>
+          <div className="text-3xl">{archetype.emoji}</div>
+          <div className="flex-1">
+            <p className="font-bold text-base text-gray-900">{archetype.name}</p>
+            <p className="text-sm text-gray-600 mt-0.5">{archetype.description}</p>
+          </div>
+          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide flex-shrink-0 ${
+            archetype.priority === "critical" ? "bg-red-100 text-red-700" :
+            archetype.priority === "excellent" ? "bg-emerald-100 text-emerald-700" :
+            archetype.priority === "watch" ? "bg-amber-100 text-amber-700" :
+            "bg-blue-100 text-blue-700"
+          }`}>
+            {archetype.priority}
+          </span>
+        </motion.div>
+      )}
 
       {/* AI Insights */}
       {insights.length > 0 && (
@@ -229,6 +256,41 @@ export default function StudentProfile() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Action Plan */}
+      {actionPlan && actionPlan.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader className="pb-3 border-b border-border/50">
+              <CardTitle className="text-base flex items-center gap-2">
+                <ClipboardList className="h-4 w-4 text-primary" />Personalised Action Plan
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-2.5">
+              {actionPlan.map((item: { category: string; priority: "high" | "medium" | "low"; action: string; icon: string }, i: number) => (
+                <div key={i} className={`flex items-start gap-3 p-3 rounded-xl border ${
+                  item.priority === "high" ? "bg-red-50 border-red-100" :
+                  item.priority === "medium" ? "bg-amber-50 border-amber-100" :
+                  "bg-gray-50 border-gray-100"
+                }`}>
+                  <div className="text-xl flex-shrink-0 mt-0.5">{item.icon}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-xs font-bold text-gray-700">{item.category}</span>
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase tracking-wide ${
+                        item.priority === "high" ? "bg-red-100 text-red-600" :
+                        item.priority === "medium" ? "bg-amber-100 text-amber-600" :
+                        "bg-gray-200 text-gray-500"
+                      }`}>{item.priority}</span>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">{item.action}</p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Exam results table */}
       {exams.results.length > 0 && (

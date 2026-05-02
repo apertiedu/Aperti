@@ -2,7 +2,8 @@ import { useLocation, Link } from "wouter";
 import {
   LayoutDashboard, CheckSquare, Users, CalendarClock, FileBarChart,
   School, LogOut, Shield, BookOpen, ClipboardList, BarChart3,
-  ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search
+  ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search,
+  KeyRound, BookText, FolderOpen
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import CommandPalette, { useCommandPalette } from "@/components/command-palette";
 import NotificationBell from "@/components/notification-bell";
+import ChangePasswordModal from "@/components/change-password-modal";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -27,6 +29,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { name: "Sessions", href: "/sessions", icon: CalendarClock, roles: ["admin", "teacher"] },
     { name: "Subjects", href: "/subjects", icon: BookOpen, roles: ["admin", "teacher"] },
     { name: "Exams & Marks", href: "/exams", icon: ClipboardList, roles: ["admin", "teacher", "assistant"] },
+    { name: "Homework", href: "/homework", icon: BookText, roles: ["admin", "teacher"] },
+    { name: "Resources", href: "/resources", icon: FolderOpen, roles: ["admin", "teacher"] },
     { name: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "teacher"] },
     { name: "Question Bank", href: "/question-bank", icon: BookMarked, roles: ["admin", "teacher"] },
     { name: "Parent Comms", href: "/parent-comms", icon: MessageSquare, roles: ["admin", "teacher"] },
@@ -119,6 +123,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <span className="text-[10px] text-muted-foreground truncate">@{user?.username}</span>
               </div>
             </div>
+            <ChangePasswordModal
+              trigger={
+                <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground text-xs h-8">
+                  <KeyRound className="w-3.5 h-3.5" />Change Password
+                </Button>
+              }
+            />
             <Button
               variant="ghost" size="sm"
               className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs h-8"

@@ -16,6 +16,7 @@ export const studentsTable = pgTable("students", {
   lesson1SessionId: integer("lesson1_session_id").references(() => sessionsTable.id, { onDelete: "set null" }),
   lesson2SessionId: integer("lesson2_session_id").references(() => sessionsTable.id, { onDelete: "set null" }),
   lesson3SessionId: integer("lesson3_session_id").references(() => sessionsTable.id, { onDelete: "set null" }),
+  accountId: integer("account_id").references(() => accountsTable.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

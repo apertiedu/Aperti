@@ -1,0 +1,603 @@
+APERTI ULTIMATE — AI EDUCATION ECOSYSTEM EXPANSION 🚀🧠
+
+Refactor and massively expand Aperti into a COMPLETE AI-POWERED EDUCATION ECOSYSTEM.
+
+This is NO LONGER just an attendance system.
+
+It should become:
+
+- an AI teaching platform
+- AI academic operations system
+- AI correction engine
+- AI content generation platform
+- AI analytics engine
+- AI-powered academy management system
+
+The system should feel:
+
+- futuristic
+- premium
+- deeply intelligent
+- visually stunning
+- emotionally engaging
+- extremely automated
+- enterprise-grade
+
+---
+
+🚨 CRITICAL SYSTEM REFACTOR
+
+REMOVE SUBJECT-BASED ORGANIZATION
+
+The platform should NOT organize around subjects globally.
+
+The platform should organize around:
+
+Teacher Workspace
+   └── Students
+   └── Sessions
+   └── Exams
+   └── Homework
+   └── Resources
+   └── AI Knowledge Base
+   └── Analytics
+   └── Reports
+
+Each teacher should have a COMPLETELY isolated ecosystem.
+
+Teachers should NEVER interact through “subjects”.
+
+Instead:
+
+- every teacher owns their own sessions
+- their own students
+- their own resources
+- their own exams
+- their own AI knowledge base
+- their own analytics
+
+Subjects are only metadata INSIDE a teacher workspace.
+
+---
+
+🚨 FIX AUTO-ABSENCE ENGINE (VERY IMPORTANT)
+
+Current auto absence system is unreliable.
+
+Completely redesign it.
+
+---
+
+✅ REQUIRED AUTO-ABSENCE LOGIC
+
+At the end of each week:
+
+For every ACTIVE student:
+
+- check each assigned lesson slot
+- detect if attendance exists for that lesson during the week
+- if no attendance exists:
+  - create ONE absence record only
+  - prevent duplicates
+  - respect exam overrides
+  - respect cancelled sessions
+  - respect holidays
+
+---
+
+🧠 REQUIRED AUTO-ABSENCE FEATURES
+
+Add:
+
+- cron-based automation
+- manual trigger
+- weekly logs
+- absence audit trail
+- duplicate prevention
+- late attendance reconciliation
+- attendance repair tools
+- dry-run preview before execution
+
+---
+
+📊 ATTENDANCE INTELLIGENCE
+
+Generate:
+
+- attendance streaks
+- attendance consistency score
+- attendance risk score
+- absentee prediction
+- attendance heatmaps
+- attendance-performance correlations
+
+---
+
+🤖 AI GRAPHIC DESIGN ENGINE (MAJOR FEATURE)
+
+Create a COMPLETE AI educational content design system.
+
+This is one of the MOST IMPORTANT differentiating features.
+
+The AI should generate:
+
+- beautifully designed notes
+- revision booklets
+- worksheets
+- quizzes
+- flashcards
+- exam papers
+- topic summaries
+- visual explanations
+- infographics
+- cheat sheets
+
+The generated output should feel:
+
+- professionally designed
+- modern
+- printable
+- visually engaging
+
+---
+
+🎨 AI EDUCATIONAL DESIGN SYSTEM
+
+The AI should automatically:
+
+- choose typography
+- generate layouts
+- organize sections
+- create color hierarchy
+- highlight important concepts
+- add diagrams
+- create modern page structures
+- generate clean educational visuals
+
+The output should resemble:
+
+- premium tutoring center notes
+- modern educational publishers
+- high-end revision guides
+
+---
+
+📚 AI PAST PAPER RECONSTRUCTION ENGINE
+
+Allow teachers to upload:
+
+- old past papers
+- syllabus PDFs
+- notes
+- marking schemes
+
+The AI should:
+
+- classify questions
+- detect topics
+- detect difficulty
+- detect paper structure
+- rebuild questions into NEW paper formats
+- modernize layouts
+- reorganize by topic
+- generate classified worksheets
+
+---
+
+🧠 AI QUESTION CLASSIFICATION ENGINE
+
+Upload:
+
+- PDF past papers
+- syllabus
+- notes
+
+The AI should classify each question by:
+
+- topic
+- subtopic
+- difficulty
+- style
+- marks
+- exam objective
+- skill type
+
+Store results in a centralized intelligent question bank.
+
+---
+
+🧩 ADVANCED QUESTION BANK
+
+Each question should support:
+
+Question
+ ├── topic
+ ├── subtopic
+ ├── syllabus reference
+ ├── difficulty
+ ├── marks
+ ├── examiner style
+ ├── common mistakes
+ ├── model answer
+ ├── mark scheme
+ ├── tags
+ ├── diagrams
+ ├── source paper
+ ├── explanation
+ ├── AI-generated hints
+
+---
+
+🤖 AI QUIZ & EXAM GENERATOR
+
+Teachers should be able to:
+
+OPTION 1
+
+Select questions manually from the question bank.
+
+OPTION 2
+
+Use AI generation.
+
+The AI should generate:
+
+- quizzes
+- topic tests
+- mock exams
+- revision sheets
+- homework
+
+Based on:
+
+- topic
+- difficulty
+- syllabus coverage
+- student weaknesses
+- exam style
+
+---
+
+🎨 PROFESSIONAL EXAM DESIGNER
+
+Generated exams should look:
+
+- professionally typeset
+- clean
+- printable
+- modern
+
+Add:
+
+- automatic spacing
+- section styling
+- marks formatting
+- diagrams
+- answer lines
+- headers/footers
+- branding
+- QR metadata
+- student information boxes
+
+Generate:
+
+- PDF export
+- editable versions
+
+---
+
+🤖 AI EXPLANATION ENGINE
+
+Students can ask:
+
+- “Explain this question”
+- “Why is my answer wrong?”
+- “Explain the mark scheme”
+- “Teach me this topic”
+
+The AI should:
+
+- explain step-by-step
+- simplify concepts
+- adapt explanations
+- use teacher resources only
+- generate diagrams/examples
+
+---
+
+🤖 AI AUTO-CORRECTION ENGINE
+
+Teachers upload:
+
+- marking schemes PDFs
+- model answers PDFs
+
+Students upload:
+
+- homework PDFs
+- scanned papers
+- typed answers
+
+The AI should:
+
+- OCR the paper
+- detect student answers
+- compare against MS
+- estimate marks
+- annotate mistakes
+- highlight missing points
+- generate feedback
+- detect weak topics
+
+---
+
+📝 AI ANNOTATION SYSTEM
+
+The AI should visually annotate PDFs:
+
+- highlight errors
+- underline weak answers
+- add comments
+- add score bubbles
+- generate correction overlays
+
+Export:
+
+- corrected PDF
+- analytics report
+- teacher review version
+
+---
+
+📂 BULK PAPER IMPORT ENGINE
+
+Teachers upload MANY PDFs.
+
+The system should:
+
+- automatically detect:
+  - student name
+  - student code
+  - paper type
+  - exam session
+  - pages
+- organize files automatically
+- link papers to students
+- create correction queues
+
+---
+
+🧠 OCR + HANDWRITING PREPARATION
+
+Prepare architecture for:
+
+- OCR
+- handwriting recognition
+- image segmentation
+- answer extraction
+
+Even if external AI APIs are added later.
+
+---
+
+🧠 AI REVISION GENERATOR
+
+Generate:
+
+- revision plans
+- flashcards
+- summaries
+- formula sheets
+- weak-topic drills
+- exam predictions
+- study schedules
+
+Based on:
+
+- analytics
+- weak topics
+- attendance
+- previous exams
+
+---
+
+📈 LEARNING INTELLIGENCE ENGINE
+
+Track:
+
+- learning velocity
+- retention
+- consistency
+- concept mastery
+- burnout risk
+- engagement
+- confidence level
+
+Generate:
+
+- archetypes
+- action plans
+- intervention suggestions
+
+---
+
+🧠 AI ACADEMIC ASSISTANT
+
+Create an in-platform AI tutor.
+
+Capabilities:
+
+- answer questions
+- explain notes
+- summarize PDFs
+- generate quizzes
+- explain MS
+- suggest revision
+- generate examples
+
+Teacher-controlled knowledge base only.
+
+---
+
+🎥 RECORDINGS & RESOURCE ACCESS SYSTEM
+
+Teachers upload:
+
+- Zoom recordings
+- Meet links
+- PDFs
+- notes
+- worksheets
+
+Students can:
+
+- request access
+- pay if required
+- unlock temporarily/permanently
+
+Teachers can configure:
+
+- expiry dates
+- access levels
+- payment requirements
+- permissions
+
+---
+
+💳 ADVANCED PAYMENT SYSTEM
+
+Add:
+
+- invoices
+- payment instructions
+- proof upload
+- approval workflows
+- paid content access
+- subscription preparation
+
+---
+
+❤️ EMOTIONAL UX SYSTEM
+
+The platform should feel ALIVE.
+
+Add:
+
+- smooth transitions
+- achievement animations
+- streak celebrations
+- motivational feedback
+- progress emotions
+- dynamic dashboards
+
+Examples:
+
+- “Excellent consistency this month 🔥”
+- “You improved 12% 🚀”
+- “Attendance streak: 8 sessions”
+
+---
+
+🎨 PREMIUM UI SYSTEM
+
+Use:
+
+- Framer Motion
+- glassmorphism
+- animated gradients
+- floating cards
+- premium shadows
+- smooth modals
+- elegant typography
+
+The platform should resemble:
+
+- Linear
+- Notion
+- Stripe Dashboard
+- modern SaaS products
+
+---
+
+📱 MOBILE-FIRST EXPERIENCE
+
+Optimize:
+
+- attendance marking
+- QR scanning
+- homework uploads
+- analytics viewing
+- notifications
+
+The mobile app experience should feel native.
+
+---
+
+⚡ PERFORMANCE REQUIREMENTS
+
+Even with:
+
+- thousands of students
+- huge PDFs
+- AI processing
+- analytics
+- OCR
+
+The system must remain:
+
+- fast
+- smooth
+- responsive
+
+Implement:
+
+- queues
+- caching
+- workers
+- lazy loading
+- optimized DB queries
+
+---
+
+☁️ FUTURE AI ARCHITECTURE
+
+Prepare modular architecture for:
+
+- OpenAI APIs
+- OCR APIs
+- vector databases
+- embeddings
+- semantic search
+- AI agents
+
+---
+
+🚀 FINAL EXPECTATION
+
+Aperti Ultimate should become:
+
+- the ultimate AI education operating system
+- deeply analytical
+- highly automated
+- visually beautiful
+- emotionally intelligent
+- scalable to academies and schools
+- powered by advanced educational AI
+
+The platform should feel:
+
+- premium
+- futuristic
+- intelligent
+- elegant
+- addictive
+- enterprise-grade
+
+MOST IMPORTANT:
+
+- teacher workspace isolation
+- reliability
+- automation
+- educational intelligence
+- beautiful UI/UX
+- advanced AI-powered learning systems
