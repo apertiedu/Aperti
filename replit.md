@@ -92,6 +92,23 @@ Every backend route is protected by `requireTenantAccess` middleware (`artifacts
 - Usage counter per question
 - Stats: total, easy/medium/hard counts
 
+### AI Exam Generator (`/exam-generator`)
+- Rule-based exam auto-generation from question bank
+- Modes: Easy, Medium, Hard, Mixed, Predicted (most-used Qs), Topic Drill
+- Topic multi-select chips (loads live from question bank)
+- Question count slider (1–50)
+- Creates real exam + exam_questions in DB with `times_used` tracking
+- Result screen: difficulty breakdown bar chart, topics used, total marks
+- Route: `POST /api/exams/generate`, `GET /api/exams/generate/topics`
+
+### Past Paper Library (`/past-papers` for admin/teacher, `/portal/papers` for students)
+- `past_papers` DB table: title, subject, year, session, variant, paper_number, file_url, mark_scheme_url, examiner_report_url
+- Admin: upload/edit/delete papers with full metadata; only admin can write
+- All roles: browse with filters (subject, year, session, search), subject chips
+- Download links: Question Paper, Mark Scheme, Examiner Report
+- Student view: grouped by subject with color-coded session badges
+- Routes: `GET/POST/PATCH/DELETE /api/past-papers`, `GET /api/past-papers/subjects`
+
 ### Analytics (`/analytics`)
 - KPI cards: total students, attendance rate, present/absent
 - Per-session attendance bar chart
@@ -139,6 +156,8 @@ Three tabs:
 - `student_marks` — id, student_id, exam_id, question_id, marks_scored, mistakes, marked_at
 - `notifications` — id, account_id, title, message, type, is_read, link
 - `question_bank` — id, teacher_account_id, subject_id, question_text, topic, subtopic, difficulty, max_marks, model_answer, common_mistakes, tags, times_used
+- `past_papers` — id, title, subject, year, session, variant, paper_number, file_url, mark_scheme_url, examiner_report_url, uploaded_by, is_public, created_at
+- `practice_sessions` — id, student_id, questions JSONB, answers JSONB, score, total, time_taken_seconds, completed_at, created_at
 - `audit_logs` — id, account_id, teacher_id, action, resource, resource_id, details, ip_address
 
 ### Performance Indexes
@@ -173,3 +192,6 @@ All tenant-filtered columns are indexed: students/sessions/exams/subjects by tea
 - Risk score: `min(100, max(0, 80-attendanceRate)*1.2 + max(0, 60-examPct)*0.8)`
 - Attendance frontend calls `POST /api/attendance/mark` (not `/api/attendance`)
 - Student portal flashcard spaced repetition uses `flashcard_progress` table (exists in DB)
+- Flashcard student UI: 3D animated flip cards (AnimatePresence rotateY), Hard/OK/Easy rating buttons, mastery progress bar, deck grid with per-deck color gradients
+- Past Paper Library auth: `requireAuth` middleware (any logged-in role can read; admin-only write)
+- Exam Generator: `POST /api/exams/generate` inserts into `exams` + `exam_questions` tables, increments `times_used` on source questions

@@ -25,6 +25,8 @@ import flashcardsRouter from "./flashcards";
 import coursesRouter from "./courses";
 import centersRouter from "./centers";
 import trialsRouter from "./trials";
+import pastPapersRouter from "./past-papers";
+import examGeneratorRouter from "./exam-generator";
 
 const router: IRouter = Router();
 
@@ -54,5 +56,7 @@ router.use(flashcardsRouter);
 router.use(coursesRouter);
 router.use(centersRouter);
 router.use(trialsRouter);
+router.use(pastPapersRouter);
+router.use(examGeneratorRouter);
 
 export default router;

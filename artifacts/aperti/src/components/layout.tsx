@@ -4,7 +4,7 @@ import {
   School, LogOut, Shield, BookOpen, ClipboardList, BarChart3,
   ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search,
   KeyRound, BookText, FolderOpen, Video, CreditCard, GraduationCap,
-  Building2, Layers, Sun, Moon
+  Building2, Layers, Sun, Moon, Library, Wand2
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       label: "Tools",
       items: [
         { name: "Question Bank", href: "/question-bank", icon: BookMarked, roles: ["admin", "teacher"] },
+        { name: "Exam Generator", href: "/exam-generator", icon: Wand2, roles: ["admin", "teacher"] },
+        { name: "Past Papers", href: "/past-papers", icon: Library, roles: ["admin", "teacher"] },
         { name: "Flashcards", href: "/flashcards", icon: Layers, roles: ["admin", "teacher"] },
         { name: "Parent Comms", href: "/parent-comms", icon: MessageSquare, roles: ["admin", "teacher"] },
       ]

@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target, Menu, X } from "lucide-react";
+import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target, Menu, X, Library } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { name: "Exams", href: "/exams", icon: Award },
   { name: "Practice", href: "/practice", icon: Target },
   { name: "Flashcards", href: "/flashcards", icon: Layers },
+  { name: "Past Papers", href: "/papers", icon: Library },
   { name: "Recordings", href: "/recordings", icon: Video },
   { name: "Resources", href: "/resources", icon: FolderOpen },
   { name: "Invoices", href: "/invoices", icon: CreditCard },
