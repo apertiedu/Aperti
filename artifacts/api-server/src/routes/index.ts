@@ -30,6 +30,8 @@ import examGeneratorRouter from "./exam-generator";
 import goalsRouter from "./goals";
 import achievementsRouter from "./achievements";
 import riskEngineRouter from "./risk-engine";
+import onlineExamsRouter from "./online-exams";
+import inventoryRouter from "./inventory";
 
 const router: IRouter = Router();
 
@@ -64,5 +66,7 @@ router.use(examGeneratorRouter);
 router.use(goalsRouter);
 router.use(achievementsRouter);
 router.use(riskEngineRouter);
+router.use(onlineExamsRouter);
+router.use(inventoryRouter);
 
 export default router;

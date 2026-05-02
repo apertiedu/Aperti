@@ -45,6 +45,9 @@ import PastPaperLibrary from "@/pages/student-portal/past-paper-library";
 import MyGoals from "@/pages/student-portal/my-goals";
 import AchievementsPage from "@/pages/student-portal/achievements";
 import RiskReportPage from "@/pages/risk-report";
+import TakeExam from "@/pages/student-portal/take-exam";
+import ExamMonitor from "@/pages/exam-monitor";
+import InventoryPage from "@/pages/inventory";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -68,6 +71,7 @@ function StudentRouter() {
         <Route path="/papers" component={PastPaperLibrary} />
         <Route path="/goals" component={MyGoals} />
         <Route path="/achievements" component={AchievementsPage} />
+        <Route path="/exams/:examId/take" component={TakeExam} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -103,6 +107,8 @@ function TeacherRouter() {
         {!isAssistant && <Route path="/past-papers" component={PastPapersPage} />}
         {!isAssistant && <Route path="/exam-generator" component={ExamGeneratorPage} />}
         {!isAssistant && <Route path="/risk-report" component={RiskReportPage} />}
+        {!isAssistant && <Route path="/inventory" component={InventoryPage} />}
+        <Route path="/exams/:examId/monitor" component={ExamMonitor} />
         {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />
       </Switch>
