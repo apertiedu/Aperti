@@ -1,25 +1,30 @@
 import { useLocation, Link } from "wouter";
-import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target } from "lucide-react";
+import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target, Menu, X } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 const NAV_ITEMS = [
   { name: "Home", href: "/", icon: LayoutDashboard },
-  { name: "My Attendance", href: "/attendance", icon: CheckSquare },
+  { name: "Attendance", href: "/attendance", icon: CheckSquare },
   { name: "Homework", href: "/homework", icon: BookOpen },
-  { name: "Exam Results", href: "/exams", icon: Award },
-  { name: "Practice Exams", href: "/practice", icon: Target },
+  { name: "Exams", href: "/exams", icon: Award },
+  { name: "Practice", href: "/practice", icon: Target },
   { name: "Flashcards", href: "/flashcards", icon: Layers },
   { name: "Recordings", href: "/recordings", icon: Video },
   { name: "Resources", href: "/resources", icon: FolderOpen },
   { name: "Invoices", href: "/invoices", icon: CreditCard },
 ];
 
+// Top 5 for mobile bottom nav
+const MOBILE_NAV_ITEMS = NAV_ITEMS.slice(0, 5);
+
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -30,80 +35,156 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     .split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
 
   return (
-    <div className="min-h-screen flex w-full bg-gradient-to-br from-slate-50 to-indigo-50/30 font-sans">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-indigo-100 flex flex-col h-screen sticky top-0 shadow-sm">
-        {/* Logo */}
-        <div className="p-5 border-b border-indigo-50">
+    <div className="min-h-[100dvh] flex w-full bg-muted/20 font-sans pb-16 md:pb-0">
+      {/* Desktop Sidebar */}
+      <div className="hidden md:flex w-64 bg-card border-r border-border flex-col h-screen sticky top-0 shadow-sm z-20">
+        <div className="p-5 border-b border-border/50">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-white flex-shrink-0 shadow-md shadow-indigo-200">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground flex-shrink-0 shadow-sm">
               <School className="w-4.5 h-4.5" style={{width:18,height:18}} />
             </div>
             <div>
-              <h1 className="font-bold text-sm tracking-tight text-gray-900 leading-none">Aperti</h1>
-              <p className="text-[10px] text-indigo-400 mt-0.5 font-medium">Student Portal</p>
+              <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">Aperti</h1>
+              <p className="text-[10px] text-primary mt-0.5 font-medium">Student Portal</p>
             </div>
           </div>
         </div>
 
-        {/* Student avatar */}
-        <div className="px-4 py-4 border-b border-indigo-50">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-violet-50">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 flex items-center justify-center text-white text-sm font-bold shadow-sm flex-shrink-0">
+        <div className="px-4 py-4 border-b border-border/50">
+          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border/50">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center text-primary-foreground text-sm font-bold shadow-sm flex-shrink-0">
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-900 truncate">{user?.displayName || user?.username}</p>
-              <p className="text-[10px] text-indigo-500 font-medium">Student</p>
+              <p className="text-xs font-semibold text-foreground truncate">{user?.displayName || user?.username}</p>
+              <p className="text-[10px] text-primary font-medium">Student</p>
             </div>
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 p-3 space-y-0.5">
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto custom-scrollbar">
           {NAV_ITEMS.map((item) => {
-            const isActive = location === item.href;
+            const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
             return (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 card-hover ${
                   isActive
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-200"
-                    : "text-gray-500 hover:bg-indigo-50 hover:text-indigo-700"
+                    ? "bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                 }`}
               >
-                <item.icon className="w-4 h-4 flex-shrink-0" />
+                <item.icon className={`w-4 h-4 flex-shrink-0 transition-transform ${!isActive && "group-hover:scale-110"}`} />
                 <span>{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        {/* Bottom */}
-        <div className="p-3 border-t border-indigo-50">
+        <div className="p-3 border-t border-border/50">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
           >
             <LogOut className="w-4 h-4 flex-shrink-0" />Sign out
           </button>
         </div>
       </div>
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col min-h-screen overflow-auto">
-        <div className="flex-1 p-6 lg:p-8 max-w-5xl mx-auto w-full">
-          <motion.div
-            key={location}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+      {/* Mobile Top Bar */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-14 bg-card border-b border-border flex items-center justify-between px-4 z-30 shadow-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-primary-foreground">
+            <School className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-foreground tracking-tight">Aperti Portal</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xs font-bold">
+            {initials}
+          </div>
+          <button onClick={() => setMobileMenuOpen(v => !v)} className="p-2 -mr-2 text-foreground">
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Full Menu Overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -10 }}
+            className="md:hidden fixed inset-0 top-14 bg-background z-20 overflow-y-auto pb-20"
           >
-            {children}
+            <div className="p-4 space-y-1">
+              {NAV_ITEMS.map((item) => {
+                const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                      isActive ? "bg-primary/10 text-primary font-semibold" : "text-foreground hover:bg-muted"
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    <span>{item.name}</span>
+                  </Link>
+                );
+              })}
+              <div className="h-px bg-border my-4" />
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/10 transition-all"
+              >
+                <LogOut className="w-5 h-5 flex-shrink-0" />Sign out
+              </button>
+            </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main content */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-auto pt-14 md:pt-0">
+        <div className="flex-1 p-4 md:p-6 lg:p-8 max-w-5xl mx-auto w-full relative">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </main>
+
+      {/* Mobile Bottom Nav */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t border-border flex items-center justify-around px-2 z-30 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.04)] dark:shadow-[0_-4px_24px_rgba(0,0,0,0.2)]">
+        {MOBILE_NAV_ITEMS.map((item) => {
+          const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex flex-col items-center justify-center w-14 h-12 rounded-xl transition-all ${
+                isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <div className={`p-1 rounded-full ${isActive ? 'bg-primary/10' : ''}`}>
+                <item.icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+              </div>
+              <span className={`text-[9px] mt-0.5 ${isActive ? 'font-bold' : 'font-medium'}`}>{item.name}</span>
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

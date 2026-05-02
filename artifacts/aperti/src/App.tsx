@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/auth";
+import { ThemeProvider } from "@/context/theme";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/layout";
 import StudentLayout from "@/components/student-layout";
@@ -138,12 +139,14 @@ function AppContent() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-        <Toaster />
-      </TooltipProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+          <Toaster />
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
