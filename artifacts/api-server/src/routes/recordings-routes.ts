@@ -65,7 +65,7 @@ router.post("/recordings", requireTenantAccess, async (req, res): Promise<void> 
 // PATCH /api/recordings/:id
 router.patch("/recordings/:id", requireTenantAccess, async (req, res): Promise<void> => {
   const { teacherId, isAdmin } = req.tenant;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
 
   const [existing] = await db.select().from(recordingsTable).where(eq(recordingsTable.id, id));
   if (!existing) { res.status(404).json({ message: "Recording not found" }); return; }
@@ -92,7 +92,7 @@ router.patch("/recordings/:id", requireTenantAccess, async (req, res): Promise<v
 // DELETE /api/recordings/:id
 router.delete("/recordings/:id", requireTenantAccess, async (req, res): Promise<void> => {
   const { teacherId, isAdmin } = req.tenant;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
 
   const [existing] = await db.select().from(recordingsTable).where(eq(recordingsTable.id, id));
   if (!existing) { res.status(404).json({ message: "Recording not found" }); return; }

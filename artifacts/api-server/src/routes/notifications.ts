@@ -32,7 +32,7 @@ router.post("/notifications/read-all", requireTenantAccess, async (req, res): Pr
 });
 
 router.patch("/notifications/:id/read", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { accountId } = req.tenant;
   await db.update(notificationsTable)
     .set({ isRead: true })
@@ -41,7 +41,7 @@ router.patch("/notifications/:id/read", requireTenantAccess, async (req, res): P
 });
 
 router.delete("/notifications/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { accountId } = req.tenant;
   await db.delete(notificationsTable)
     .where(and(eq(notificationsTable.id, id), eq(notificationsTable.accountId, accountId)));

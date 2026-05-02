@@ -39,7 +39,7 @@ export default function PracticeExams() {
       const params = new URLSearchParams();
       if (selectedTopic) params.set("topic", selectedTopic);
       if (selectedDiff) params.set("difficulty", selectedDiff);
-      const r = await fetch(`/api/question-bank?${params}`, { credentials: "include" });
+      const r = await fetch(`/api/portal/practice-questions?${params}`, { credentials: "include" });
       if (r.ok) {
         const data: Question[] = await r.json();
         setQuestions(data);

@@ -27,11 +27,11 @@ export default function MyFlashcards() {
   const [sessionTotal, setSessionTotal] = useState(0);
 
   const loadStats = async () => {
-    const r = await fetch("/api/flashcards/stats", { credentials: "include" });
+    const r = await fetch("/api/portal/flashcards/stats", { credentials: "include" });
     if (r.ok) setStats(await r.json());
   };
   const loadDecks = async () => {
-    const r = await fetch("/api/flashcards/decks", { credentials: "include" });
+    const r = await fetch("/api/portal/flashcards/decks", { credentials: "include" });
     if (r.ok) setDecks(await r.json());
     setLoading(false);
   };
@@ -40,7 +40,7 @@ export default function MyFlashcards() {
   const startReview = async (deck?: string) => {
     setReviewLoading(true);
     const params = deck ? `?deck=${encodeURIComponent(deck)}` : "";
-    const r = await fetch(`/api/flashcards/review${params}`, { credentials: "include" });
+    const r = await fetch(`/api/portal/flashcards/review${params}`, { credentials: "include" });
     if (r.ok) {
       const cards = await r.json();
       if (!cards.length) { setMode("done"); setReviewLoading(false); return; }
@@ -53,7 +53,7 @@ export default function MyFlashcards() {
 
   const handleRate = async (quality: number) => {
     const card = reviewCards[currentIdx];
-    await fetch(`/api/flashcards/${card.id}/review`, {
+    await fetch(`/api/portal/flashcards/${card.id}/review`, {
       method: "POST", credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ quality }),

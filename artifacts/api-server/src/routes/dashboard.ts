@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, sql, desc, and, gte, lte } from "drizzle-orm";
 import { db, studentsTable, sessionsTable, attendanceTable } from "@workspace/db";
+import { requireTenantAccess } from "../middleware/tenant";
 import {
   GetRecentActivityQueryParams,
   GetWeeklyStatsQueryParams,
@@ -8,20 +9,35 @@ import {
 
 const router: IRouter = Router();
 
-router.get("/dashboard/summary", async (_req, res): Promise<void> => {
-  const [studentCount] = await db.select({ count: sql<number>`count(*)::int` }).from(studentsTable);
-  const [sessionCount] = await db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable);
-  const [totalRecords] = await db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable);
-  const [presentRecords] = await db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable).where(eq(attendanceTable.status, "Present"));
+router.get("/dashboard/summary", requireTenantAccess, async (req, res): Promise<void> => {
+  const { teacherId, isAdmin } = req.tenant;
+  const stuFilter = !isAdmin && teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`;
+  const sesFilter = !isAdmin && teacherId ? eq(sessionsTable.teacherAccountId, teacherId) : sql`1=1`;
+  const attStuJoin = !isAdmin && teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`;
+
+  const [studentCount] = await db.select({ count: sql<number>`count(*)::int` }).from(studentsTable).where(stuFilter);
+  const [sessionCount] = await db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable).where(sesFilter);
+
+  const [totalRecords] = await db.select({ count: sql<number>`count(*)::int` })
+    .from(attendanceTable)
+    .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+    .where(attStuJoin);
+
+  const [presentRecords] = await db.select({ count: sql<number>`count(*)::int` })
+    .from(attendanceTable)
+    .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+    .where(and(eq(attendanceTable.status, "Present"), attStuJoin));
 
   const today = new Date().toISOString().split("T")[0];
   const [presentToday] = await db.select({ count: sql<number>`count(*)::int` })
     .from(attendanceTable)
-    .where(and(eq(attendanceTable.date, today), eq(attendanceTable.status, "Present")));
+    .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+    .where(and(eq(attendanceTable.date, today), eq(attendanceTable.status, "Present"), attStuJoin));
 
   const [absentStudentsResult] = await db.select({ count: sql<number>`count(distinct ${attendanceTable.studentId})::int` })
     .from(attendanceTable)
-    .where(eq(attendanceTable.status, "Absent"));
+    .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+    .where(and(eq(attendanceTable.status, "Absent"), attStuJoin));
 
   const total = totalRecords.count || 0;
   const present = presentRecords.count || 0;
@@ -36,9 +52,11 @@ router.get("/dashboard/summary", async (_req, res): Promise<void> => {
   });
 });
 
-router.get("/dashboard/recent-activity", async (req, res): Promise<void> => {
+router.get("/dashboard/recent-activity", requireTenantAccess, async (req, res): Promise<void> => {
+  const { teacherId, isAdmin } = req.tenant;
   const params = GetRecentActivityQueryParams.safeParse(req.query);
   const limit = (params.success && params.data.limit) || 10;
+  const teacherFilter = !isAdmin && teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`;
 
   const records = await db.select({
     id: attendanceTable.id,
@@ -51,18 +69,20 @@ router.get("/dashboard/recent-activity", async (req, res): Promise<void> => {
   .from(attendanceTable)
   .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
   .innerJoin(sessionsTable, eq(attendanceTable.sessionId, sessionsTable.id))
+  .where(teacherFilter)
   .orderBy(desc(attendanceTable.markedAt))
   .limit(limit);
 
   res.json(records);
 });
 
-router.get("/dashboard/weekly-stats", async (req, res): Promise<void> => {
+router.get("/dashboard/weekly-stats", requireTenantAccess, async (req, res): Promise<void> => {
+  const { teacherId, isAdmin } = req.tenant;
   const params = GetWeeklyStatsQueryParams.safeParse(req.query);
 
   let weekStart: string;
   if (params.success && params.data.weekStart) {
-    weekStart = params.data.weekStart;
+    weekStart = (params.data.weekStart as unknown as Date).toISOString().split("T")[0];
   } else {
     const now = new Date();
     const day = now.getDay();
@@ -75,6 +95,7 @@ router.get("/dashboard/weekly-stats", async (req, res): Promise<void> => {
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
   const weekEndStr = weekEnd.toISOString().split("T")[0];
+  const sesFilter = !isAdmin && teacherId ? eq(sessionsTable.teacherAccountId, teacherId) : sql`1=1`;
 
   const records = await db.select({
     lessonNumber: sessionsTable.lessonNumber,
@@ -85,7 +106,8 @@ router.get("/dashboard/weekly-stats", async (req, res): Promise<void> => {
   .innerJoin(sessionsTable, eq(attendanceTable.sessionId, sessionsTable.id))
   .where(and(
     gte(attendanceTable.date, weekStart),
-    lte(attendanceTable.date, weekEndStr)
+    lte(attendanceTable.date, weekEndStr),
+    sesFilter,
   ))
   .groupBy(sessionsTable.lessonNumber, attendanceTable.status);
 

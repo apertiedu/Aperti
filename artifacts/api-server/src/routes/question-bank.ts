@@ -65,7 +65,7 @@ router.post("/question-bank", requireTenantAccess, async (req, res): Promise<voi
 });
 
 router.patch("/question-bank/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const { questionText, topic, subtopic, difficulty, maxMarks, modelAnswer, commonMistakes, tags, subjectId } = req.body;
 
@@ -90,7 +90,7 @@ router.patch("/question-bank/:id", requireTenantAccess, async (req, res): Promis
 });
 
 router.delete("/question-bank/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
 
   const condition = isAdmin
@@ -103,8 +103,8 @@ router.delete("/question-bank/:id", requireTenantAccess, async (req, res): Promi
 
 // Import questions from bank to an exam
 router.post("/question-bank/:id/use-in-exam/:examId", requireTenantAccess, async (req, res): Promise<void> => {
-  const qId = parseInt(req.params.id, 10);
-  const examId = parseInt(req.params.examId, 10);
+  const qId = parseInt(req.params.id as string, 10);
+  const examId = parseInt(req.params.examId as string, 10);
 
   const [q] = await db.select().from(questionBankTable).where(eq(questionBankTable.id, qId));
   if (!q) { res.status(404).json({ message: "Question not found" }); return; }

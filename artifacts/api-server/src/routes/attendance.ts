@@ -112,11 +112,13 @@ router.get("/attendance", async (req, res): Promise<void> => {
   const conditions = [];
   if (params.success && params.data.sessionId) conditions.push(eq(attendanceTable.sessionId, params.data.sessionId));
   if (params.success && params.data.studentCode) conditions.push(eq(studentsTable.studentCode, params.data.studentCode));
-  if (params.success && params.data.date) conditions.push(eq(attendanceTable.date, params.data.date));
+  if (params.success && params.data.date) conditions.push(eq(attendanceTable.date, (params.data.date as unknown as Date).toISOString().split("T")[0]));
   if (params.success && params.data.weekStart) {
-    const weekEnd = new Date(params.data.weekStart + "T00:00:00");
+    const wsDate = params.data.weekStart as unknown as Date;
+    const wsStr = wsDate.toISOString().split("T")[0];
+    const weekEnd = new Date(wsDate);
     weekEnd.setDate(weekEnd.getDate() + 6);
-    conditions.push(gte(attendanceTable.date, params.data.weekStart));
+    conditions.push(gte(attendanceTable.date, wsStr));
     conditions.push(lte(attendanceTable.date, weekEnd.toISOString().split("T")[0]));
   }
 
@@ -135,7 +137,7 @@ router.post("/attendance/auto-absence", async (req, res): Promise<void> => {
     return;
   }
 
-  const weekStart = parsed.data.weekStart;
+  const weekStart = (parsed.data.weekStart as unknown as Date).toISOString().split("T")[0];
   const allStudents = await db.select().from(studentsTable);
   const allSessions = await db.select().from(sessionsTable);
   const sessionMap = Object.fromEntries(allSessions.map((s) => [s.id, s]));
@@ -212,11 +214,13 @@ router.get("/attendance/export", async (req, res): Promise<void> => {
     .$dynamic();
 
   if (params.success && params.data.weekStart) {
-    const weekEnd = new Date(params.data.weekStart + "T00:00:00");
+    const wsDate = params.data.weekStart as unknown as Date;
+    const wsStr = wsDate.toISOString().split("T")[0];
+    const weekEnd = new Date(wsDate);
     weekEnd.setDate(weekEnd.getDate() + 6);
     query = query.where(
       and(
-        gte(attendanceTable.date, params.data.weekStart),
+        gte(attendanceTable.date, wsStr),
         lte(attendanceTable.date, weekEnd.toISOString().split("T")[0])
       )
     );

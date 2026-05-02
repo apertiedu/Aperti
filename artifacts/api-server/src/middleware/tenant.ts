@@ -25,6 +25,12 @@ export function requireTenantAccess(req: Request, res: Response, next: NextFunct
   }
 
   const role: string = session.role || "admin";
+
+  if (role === "student") {
+    res.status(403).json({ message: "Students must use the student portal" });
+    return;
+  }
+
   let teacherId: number | null = null;
 
   if (role === "teacher") {

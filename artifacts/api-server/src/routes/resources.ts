@@ -63,7 +63,7 @@ router.post("/resources", requireTenantAccess, async (req, res): Promise<void> =
 });
 
 router.patch("/resources/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const updates: Record<string, unknown> = {};
   const fields = ["title", "description", "type", "url", "content", "topic", "tags", "isStudentVisible", "subjectId"] as const;
@@ -81,7 +81,7 @@ router.patch("/resources/:id", requireTenantAccess, async (req, res): Promise<vo
 });
 
 router.delete("/resources/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const condition = isAdmin ? eq(resourcesTable.id, id) : and(eq(resourcesTable.id, id), eq(resourcesTable.teacherAccountId, teacherId!));
   await db.delete(resourcesTable).where(condition!);
@@ -90,7 +90,7 @@ router.delete("/resources/:id", requireTenantAccess, async (req, res): Promise<v
 
 // Increment view count (called when student opens resource)
 router.post("/resources/:id/view", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   await db.update(resourcesTable).set({ viewCount: sql`${resourcesTable.viewCount} + 1` }).where(eq(resourcesTable.id, id));
   res.json({ message: "View counted" });
 });

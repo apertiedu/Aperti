@@ -54,7 +54,7 @@ router.get("/trials", requireTenantAccess, async (req, res): Promise<void> => {
 });
 
 router.patch("/trials/:id/status", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const { status, notes } = req.body;
   const allowed = ["pending", "confirmed", "cancelled", "completed"];
@@ -69,7 +69,7 @@ router.patch("/trials/:id/status", requireTenantAccess, async (req, res): Promis
 });
 
 router.delete("/trials/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const tenantCond = isAdmin ? "" : ` AND teacher_account_id=${teacherId}`;
   await pool.query(`DELETE FROM trial_sessions WHERE id=$1${tenantCond}`, [id]);

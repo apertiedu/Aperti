@@ -49,7 +49,7 @@ router.post("/courses", requireTenantAccess, async (req, res): Promise<void> => 
 });
 
 router.patch("/courses/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const { title, description, subject, difficulty, priceMonthly, pricePerSession, priceTrial, mode, maxStudents, syllabus, isActive } = req.body;
   const sets: string[] = []; const params: unknown[] = []; let i = 1;
@@ -73,7 +73,7 @@ router.patch("/courses/:id", requireTenantAccess, async (req, res): Promise<void
 });
 
 router.delete("/courses/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const tenantCond = isAdmin ? "" : ` AND teacher_account_id=${teacherId}`;
   await pool.query(`DELETE FROM courses WHERE id=$1${tenantCond}`, [id]);

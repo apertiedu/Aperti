@@ -48,7 +48,7 @@ function generateInsights(
 }
 
 router.get("/students/:id/profile", requireTenantAccess, async (req, res): Promise<void> => {
-  const studentId = parseInt(req.params.id, 10);
+  const studentId = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
 
   // Verify tenant access to this student
@@ -236,7 +236,7 @@ router.get("/students/:id/profile", requireTenantAccess, async (req, res): Promi
 
 // WhatsApp message generation
 router.post("/students/:id/whatsapp-message", requireTenantAccess, async (req, res): Promise<void> => {
-  const studentId = parseInt(req.params.id, 10);
+  const studentId = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const { type = "absence", weekStart, customNote } = req.body;
 

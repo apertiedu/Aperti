@@ -55,7 +55,7 @@ router.post("/homework", requireTenantAccess, async (req, res): Promise<void> =>
 });
 
 router.patch("/homework/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const { title, description, instructions, dueDate, totalMarks, subjectId, classFilter, allowLate, isPublished } = req.body;
 
@@ -77,7 +77,7 @@ router.patch("/homework/:id", requireTenantAccess, async (req, res): Promise<voi
 });
 
 router.delete("/homework/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const condition = isAdmin ? eq(homeworkTable.id, id) : and(eq(homeworkTable.id, id), eq(homeworkTable.teacherAccountId, teacherId!));
   await db.delete(homeworkTable).where(condition!);
@@ -86,7 +86,7 @@ router.delete("/homework/:id", requireTenantAccess, async (req, res): Promise<vo
 
 // Get submissions for a homework
 router.get("/homework/:id/submissions", requireTenantAccess, async (req, res): Promise<void> => {
-  const hwId = parseInt(req.params.id, 10);
+  const hwId = parseInt(req.params.id as string, 10);
 
   const submissions = await db.select({
     id: homeworkSubmissionsTable.id,
@@ -109,7 +109,7 @@ router.get("/homework/:id/submissions", requireTenantAccess, async (req, res): P
 
 // Grade a submission
 router.patch("/homework/submissions/:id/grade", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { marksAwarded, teacherFeedback } = req.body;
 
   const [updated] = await db.update(homeworkSubmissionsTable).set({

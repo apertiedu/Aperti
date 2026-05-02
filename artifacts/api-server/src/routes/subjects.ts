@@ -27,7 +27,7 @@ router.post("/subjects", requireTenantAccess, async (req, res): Promise<void> =>
 });
 
 router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { name } = req.body;
   if (!name?.trim()) { res.status(400).json({ message: "Name required" }); return; }
   const [updated] = await db.update(subjectsTable).set({ name: name.trim() }).where(eq(subjectsTable.id, id)).returning();
@@ -36,7 +36,7 @@ router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<voi
 });
 
 router.delete("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   await db.delete(subjectsTable).where(eq(subjectsTable.id, id));
   res.json({ message: "Subject deleted" });
 });

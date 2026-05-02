@@ -34,7 +34,6 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   req.session.teacherAccountId = account.teacherAccountId ?? null;
   req.session.studentId = null;
 
-  // If student role, link to student record
   if (account.role === "student") {
     const [studentRecord] = await db.select().from(studentsTable).where(eq(studentsTable.accountId, account.id));
     if (studentRecord) {
@@ -44,6 +43,7 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   }
 
   res.json({
+    id: account.id,
     username: account.username,
     displayName: account.displayName || account.username,
     role: account.role,
@@ -52,7 +52,6 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   });
 });
 
-// Student self-activation: first login = account creation
 router.post("/auth/activate", async (req, res): Promise<void> => {
   const { studentCode, studentName, password, confirmPassword } = req.body;
   if (!studentCode?.trim() || !studentName?.trim() || !password) {
@@ -64,20 +63,16 @@ router.post("/auth/activate", async (req, res): Promise<void> => {
   if (password.length < 6) {
     res.status(400).json({ message: "Password must be at least 6 characters" }); return;
   }
-  // Find student by code
   const [student] = await db.select().from(studentsTable).where(eq(studentsTable.studentCode, studentCode.trim().toUpperCase()));
   if (!student) { res.status(404).json({ message: "Student code not found. Contact your teacher." }); return; }
-  // Name must match (uppercase)
   const inputName = studentName.trim().toUpperCase();
   const storedName = (student.studentName || "").toUpperCase();
   if (inputName !== storedName) {
     res.status(400).json({ message: "Name does not match our records. Enter your name exactly as given." }); return;
   }
-  // Check if already activated
   if (student.accountId) {
     res.status(409).json({ message: "Account already activated. Please sign in." }); return;
   }
-  // Create account
   const username = studentCode.trim().toLowerCase();
   const [existing] = await db.select().from(accountsTable).where(eq(accountsTable.username, username));
   if (existing) { res.status(409).json({ message: "An account with this code already exists. Try signing in." }); return; }
@@ -90,9 +85,7 @@ router.post("/auth/activate", async (req, res): Promise<void> => {
     status: "active",
     teacherAccountId: student.teacherAccountId ?? null,
   }).returning();
-  // Link to student record
   await db.update(studentsTable).set({ accountId: account.id }).where(eq(studentsTable.id, student.id));
-  // Auto-login
   req.session.accountId = account.id;
   req.session.username = account.username;
   req.session.displayName = account.displayName || account.username;
@@ -100,6 +93,7 @@ router.post("/auth/activate", async (req, res): Promise<void> => {
   req.session.teacherAccountId = student.teacherAccountId ?? null;
   req.session.studentId = student.id;
   res.status(201).json({
+    id: account.id,
     username: account.username,
     displayName: account.displayName,
     role: "student",
@@ -115,6 +109,7 @@ router.post("/auth/logout", (req, res): void => {
 router.get("/auth/me", (req, res): void => {
   if (!req.session.accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
   res.json({
+    id: req.session.accountId,
     username: req.session.username,
     displayName: req.session.displayName,
     role: req.session.role || "admin",

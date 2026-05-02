@@ -39,7 +39,7 @@ router.post("/centers", requireTenantAccess, async (req, res): Promise<void> => 
 });
 
 router.patch("/centers/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const { name, location, capacity, isActive } = req.body;
   const sets: string[] = []; const params: unknown[] = []; let i = 1;
@@ -56,7 +56,7 @@ router.patch("/centers/:id", requireTenantAccess, async (req, res): Promise<void
 });
 
 router.delete("/centers/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { teacherId, isAdmin } = req.tenant;
   const tenantCond = isAdmin ? "" : ` AND teacher_account_id=${teacherId}`;
   await pool.query(`DELETE FROM centers WHERE id=$1${tenantCond}`, [id]);

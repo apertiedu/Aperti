@@ -60,7 +60,7 @@ router.post("/invoices", requireTenantAccess, async (req, res): Promise<void> =>
 // PATCH /api/invoices/:id
 router.patch("/invoices/:id", requireTenantAccess, async (req, res): Promise<void> => {
   const { teacherId, isAdmin } = req.tenant;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { title, description, amount, currency, status, dueDate, notes, paymentProof } = req.body;
 
   const [existing] = await db.select().from(invoicesTable).where(eq(invoicesTable.id, id));
@@ -88,7 +88,7 @@ router.patch("/invoices/:id", requireTenantAccess, async (req, res): Promise<voi
 // DELETE /api/invoices/:id
 router.delete("/invoices/:id", requireTenantAccess, async (req, res): Promise<void> => {
   const { teacherId, isAdmin } = req.tenant;
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
 
   const [existing] = await db.select().from(invoicesTable).where(eq(invoicesTable.id, id));
   if (!existing) { res.status(404).json({ message: "Invoice not found" }); return; }

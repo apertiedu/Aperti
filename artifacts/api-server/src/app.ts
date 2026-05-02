@@ -12,6 +12,11 @@ import { db, accountsTable } from "@workspace/db";
 const app: Express = express();
 const PgSession = connectPgSimple(session);
 
+const isProduction = process.env.NODE_ENV === "production";
+if (isProduction) {
+  app.set("trust proxy", 1);
+}
+
 app.use(
   pinoHttp({
     logger,
@@ -32,15 +37,18 @@ app.use(
     secret: process.env["SESSION_SECRET"] || "aperti-fallback-secret",
     resave: false,
     saveUninitialized: false,
-    cookie: { httpOnly: true, secure: false, maxAge: 7 * 24 * 60 * 60 * 1000 },
+    cookie: {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    },
   })
 );
 
-// Auth guard
 app.use("/api", (req: Request, res: Response, next: NextFunction): void => {
   if (req.path.startsWith("/auth/") || req.path.startsWith("/public/")) { next(); return; }
   if (!(req.session as any).accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
-  // Check account is not suspended (session-level check; full check is at login)
   next();
 });
 

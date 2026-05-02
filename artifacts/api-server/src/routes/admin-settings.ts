@@ -41,7 +41,7 @@ router.get("/admin/workspaces", requireAdmin, async (req, res): Promise<void> =>
 
 // PATCH /api/admin/workspaces/:id/mode
 router.patch("/admin/workspaces/:id/mode", requireAdmin, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { mode } = req.body;
 
   if (!["full", "whatsapp"].includes(mode)) {
