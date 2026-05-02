@@ -150,13 +150,26 @@ All tenant-filtered columns are indexed: students/sessions/exams/subjects by tea
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks from OpenAPI spec
 - `pnpm --filter @workspace/api-server run build` — build API server
 
+## Route Security Patterns
+
+- `attendance.ts` — uses `requireTenantAccess` on all 4 routes (mark, list, auto-absence, export); teacher filter on sessions/students joins
+- `students.ts` — uses internal `getTeacherId()` helper; PATCH/DELETE/create-account/delete-account all verify `ownsStudent()` before mutating
+- `sessions.ts` — same pattern with `ownsSession()` ownership guard on PATCH/DELETE
+- `homework.ts`, `resources.ts`, `flashcards.ts`, `question-bank.ts`, `payments.ts`, `recordings-routes.ts` — all use `requireTenantAccess` with full tenant filtering
+- `analytics.ts`, `reports.ts`, `dashboard.ts` — use `requireTenantAccess` with `teacherFilter`/`studentFilter` on all DB queries
+- `student-portal.ts` — uses `requireStudentAccess` (blocks non-students); all queries scoped by `session.studentId`
+- `accounts.ts` — uses `requireAdmin` (admin only)
+- Attendance mark endpoint: verifies teacher owns BOTH the student AND the session before marking
+
 ## Important Notes
 
 - Do NOT use `console.log` in server code — use `req.log` or `logger`
 - Do NOT import `zod` directly in `api-server` routes — use manual validation or `@workspace/api-zod`
 - Sessions are weekly recurring templates (not date-specific)
 - NEVER derive teacherId from request body — always from `req.session` via tenant middleware
-- Auto-absence marks one absence per lesson per student per week
+- Auto-absence marks one absence per lesson per student per week (scoped to teacher's students/sessions only)
 - QR codes encode the `studentCode` string
 - Predicted IGCSE grade: 70% exam × 0.7 + attendanceRate × 0.3 → A*–U scale
 - Risk score: `min(100, max(0, 80-attendanceRate)*1.2 + max(0, 60-examPct)*0.8)`
+- Attendance frontend calls `POST /api/attendance/mark` (not `/api/attendance`)
+- Student portal flashcard spaced repetition uses `flashcard_progress` table (exists in DB)

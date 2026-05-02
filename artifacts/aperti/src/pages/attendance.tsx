@@ -60,7 +60,7 @@ export default function Attendance() {
     if (!code.trim() || !currentSessionId || marking) return;
     setMarking(true);
     try {
-      const res = await fetch("/api/attendance", {
+      const res = await fetch("/api/attendance/mark", {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ studentCode: code.trim(), sessionId: currentSessionId }),

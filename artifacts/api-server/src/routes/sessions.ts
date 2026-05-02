@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, sql } from "drizzle-orm";
-import { db, sessionsTable, attendanceTable, studentsTable } from "@workspace/db";
+import { db, sessionsTable, attendanceTable } from "@workspace/db";
 import { CreateSessionBody, DeleteSessionParams } from "@workspace/api-zod";
 
 const VALID_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -11,6 +11,11 @@ function getTeacherId(req: any): number | null {
   if (req.session.role === "admin") return null;
   if (req.session.role === "teacher") return req.session.accountId;
   return req.session.teacherAccountId || req.session.accountId;
+}
+
+function ownsSession(teacherId: number | null, session: typeof sessionsTable.$inferSelect): boolean {
+  if (teacherId === null) return true; // admin owns all
+  return session.teacherAccountId === teacherId;
 }
 
 router.get("/sessions", async (req, res): Promise<void> => {
@@ -40,8 +45,13 @@ router.post("/sessions", async (req, res): Promise<void> => {
 });
 
 router.patch("/sessions/:id", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ message: "Invalid session ID" }); return; }
+
+  const teacherId = getTeacherId(req);
+  const [existing] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, id));
+  if (!existing) { res.status(404).json({ message: "Session not found" }); return; }
+  if (!ownsSession(teacherId, existing)) { res.status(403).json({ message: "Access denied" }); return; }
 
   const { lessonNumber, dayOfWeek, startTime, type, capacity, subjectId, onlineLink } = req.body;
   const updates: Record<string, unknown> = {};
@@ -63,9 +73,6 @@ router.patch("/sessions/:id", async (req, res): Promise<void> => {
 
   if (Object.keys(updates).length === 0) { res.status(400).json({ message: "No fields to update" }); return; }
 
-  const [existing] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, id));
-  if (!existing) { res.status(404).json({ message: "Session not found" }); return; }
-
   const [updated] = await db.update(sessionsTable).set(updates).where(eq(sessionsTable.id, id)).returning();
   res.json(updated);
 });
@@ -73,13 +80,19 @@ router.patch("/sessions/:id", async (req, res): Promise<void> => {
 router.delete("/sessions/:id", async (req, res): Promise<void> => {
   const params = DeleteSessionParams.safeParse(req.params);
   if (!params.success) { res.status(400).json({ message: "Invalid session ID" }); return; }
+
+  const teacherId = getTeacherId(req);
+  const [existing] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, params.data.id));
+  if (!existing) { res.status(404).json({ message: "Session not found" }); return; }
+  if (!ownsSession(teacherId, existing)) { res.status(403).json({ message: "Access denied" }); return; }
+
   await db.delete(sessionsTable).where(eq(sessionsTable.id, params.data.id));
   res.json({ message: "Session deleted" });
 });
 
 // Capacity check for a session today
 router.get("/sessions/:id/capacity", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const [session] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, id));
   if (!session) { res.status(404).json({ message: "Session not found" }); return; }
 

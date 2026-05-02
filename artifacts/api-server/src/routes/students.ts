@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { db, studentsTable, sessionsTable, accountsTable } from "@workspace/db";
 import { CreateStudentBody, DeleteStudentParams, BulkCreateStudentsBody } from "@workspace/api-zod";
@@ -10,6 +10,11 @@ function getTeacherId(req: any): number | null {
   if (req.session.role === "admin") return null;
   if (req.session.role === "teacher") return req.session.accountId;
   return req.session.teacherAccountId || req.session.accountId;
+}
+
+function ownsStudent(teacherId: number | null, student: typeof studentsTable.$inferSelect): boolean {
+  if (teacherId === null) return true; // admin owns all
+  return student.teacherAccountId === teacherId;
 }
 
 async function buildStudentResponse(student: typeof studentsTable.$inferSelect, sessions: (typeof sessionsTable.$inferSelect)[]) {
@@ -54,13 +59,15 @@ router.post("/students", async (req, res): Promise<void> => {
 });
 
 router.patch("/students/:id", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ message: "Invalid student ID" }); return; }
 
-  const { studentName, studentCode, lesson1SessionId, lesson2SessionId, lesson3SessionId, phone, parentPhone, notes, status } = req.body;
-
+  const teacherId = getTeacherId(req);
   const [existing] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
   if (!existing) { res.status(404).json({ message: "Student not found" }); return; }
+  if (!ownsStudent(teacherId, existing)) { res.status(403).json({ message: "Access denied" }); return; }
+
+  const { studentName, studentCode, lesson1SessionId, lesson2SessionId, lesson3SessionId, phone, parentPhone, notes, status } = req.body;
 
   const updates: Record<string, unknown> = {};
   if (studentName !== undefined) updates.studentName = String(studentName).trim();
@@ -83,6 +90,12 @@ router.patch("/students/:id", async (req, res): Promise<void> => {
 router.delete("/students/:id", async (req, res): Promise<void> => {
   const params = DeleteStudentParams.safeParse(req.params);
   if (!params.success) { res.status(400).json({ message: "Invalid student ID" }); return; }
+
+  const teacherId = getTeacherId(req);
+  const [existing] = await db.select().from(studentsTable).where(eq(studentsTable.id, params.data.id));
+  if (!existing) { res.status(404).json({ message: "Student not found" }); return; }
+  if (!ownsStudent(teacherId, existing)) { res.status(403).json({ message: "Access denied" }); return; }
+
   await db.delete(studentsTable).where(eq(studentsTable.id, params.data.id));
   res.json({ message: "Student deleted" });
 });
@@ -107,12 +120,14 @@ router.post("/students/bulk", async (req, res): Promise<void> => {
 
 // Create a student login account
 router.post("/students/:id/create-account", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
   const { password } = req.body;
   if (!password || password.length < 6) { res.status(400).json({ message: "Password must be at least 6 characters" }); return; }
 
+  const teacherId = getTeacherId(req);
   const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
   if (!student) { res.status(404).json({ message: "Student not found" }); return; }
+  if (!ownsStudent(teacherId, student)) { res.status(403).json({ message: "Access denied" }); return; }
   if (student.accountId) { res.status(400).json({ message: "Student already has a login account" }); return; }
 
   const username = student.studentCode.toLowerCase();
@@ -135,9 +150,13 @@ router.post("/students/:id/create-account", async (req, res): Promise<void> => {
 
 // Delete student account
 router.delete("/students/:id/account", async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id, 10);
+  const id = parseInt(req.params.id as string, 10);
+  const teacherId = getTeacherId(req);
+
   const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, id));
   if (!student?.accountId) { res.status(404).json({ message: "No account linked" }); return; }
+  if (!ownsStudent(teacherId, student)) { res.status(403).json({ message: "Access denied" }); return; }
+
   await db.update(studentsTable).set({ accountId: null }).where(eq(studentsTable.id, id));
   await db.delete(accountsTable).where(eq(accountsTable.id, student.accountId));
   res.json({ message: "Student account removed" });
