@@ -21,6 +21,10 @@ import paymentsRouter from "./payments";
 import recordingsRoutesRouter from "./recordings-routes";
 import publicRouter from "./public";
 import adminSettingsRouter from "./admin-settings";
+import flashcardsRouter from "./flashcards";
+import coursesRouter from "./courses";
+import centersRouter from "./centers";
+import trialsRouter from "./trials";
 
 const router: IRouter = Router();
 
@@ -46,5 +50,9 @@ router.use(paymentsRouter);
 router.use(recordingsRoutesRouter);
 router.use(publicRouter);
 router.use(adminSettingsRouter);
+router.use(flashcardsRouter);
+router.use(coursesRouter);
+router.use(centersRouter);
+router.use(trialsRouter);
 
 export default router;

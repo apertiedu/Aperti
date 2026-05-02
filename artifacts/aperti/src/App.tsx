@@ -25,6 +25,9 @@ import HomeworkPage from "@/pages/homework";
 import ResourcesPage from "@/pages/resources";
 import PaymentsPage from "@/pages/payments";
 import RecordingsPage from "@/pages/recordings";
+import FlashcardsPage from "@/pages/flashcards";
+import CoursesPage from "@/pages/courses";
+import CentersPage from "@/pages/centers";
 
 import StudentDashboard from "@/pages/student-portal/dashboard";
 import MyAttendance from "@/pages/student-portal/my-attendance";
@@ -33,6 +36,8 @@ import MyResources from "@/pages/student-portal/my-resources";
 import MyExams from "@/pages/student-portal/my-exams";
 import MyInvoices from "@/pages/student-portal/my-invoices";
 import MyRecordings from "@/pages/student-portal/my-recordings";
+import MyFlashcards from "@/pages/student-portal/my-flashcards";
+import PracticeExams from "@/pages/student-portal/practice-exams";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -51,6 +56,8 @@ function StudentRouter() {
         <Route path="/exams" component={MyExams} />
         <Route path="/invoices" component={MyInvoices} />
         <Route path="/recordings" component={MyRecordings} />
+        <Route path="/flashcards" component={MyFlashcards} />
+        <Route path="/practice" component={PracticeExams} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -80,6 +87,9 @@ function TeacherRouter() {
         {!isAssistant && <Route path="/resources" component={ResourcesPage} />}
         {!isAssistant && <Route path="/recordings" component={RecordingsPage} />}
         {!isAssistant && <Route path="/payments" component={PaymentsPage} />}
+        {!isAssistant && <Route path="/flashcards" component={FlashcardsPage} />}
+        {!isAssistant && <Route path="/courses" component={CoursesPage} />}
+        {!isAssistant && <Route path="/centers" component={CentersPage} />}
         {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />
       </Switch>

@@ -3,7 +3,8 @@ import {
   LayoutDashboard, CheckSquare, Users, CalendarClock, FileBarChart,
   School, LogOut, Shield, BookOpen, ClipboardList, BarChart3,
   ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search,
-  KeyRound, BookText, FolderOpen, Video, CreditCard
+  KeyRound, BookText, FolderOpen, Video, CreditCard, GraduationCap,
+  Building2, Layers
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { name: "Question Bank", href: "/question-bank", icon: BookMarked, roles: ["admin", "teacher"] },
     { name: "Recordings", href: "/recordings", icon: Video, roles: ["admin", "teacher"] },
     { name: "Payments", href: "/payments", icon: CreditCard, roles: ["admin", "teacher"] },
+    { name: "Flashcards", href: "/flashcards", icon: Layers, roles: ["admin", "teacher"] },
+    { name: "Courses", href: "/courses", icon: GraduationCap, roles: ["admin", "teacher"] },
+    { name: "Centers", href: "/centers", icon: Building2, roles: ["admin", "teacher"] },
     { name: "Parent Comms", href: "/parent-comms", icon: MessageSquare, roles: ["admin", "teacher"] },
     { name: "Reports", href: "/reports", icon: FileBarChart, roles: ["admin", "teacher"] },
     { name: "Admin Panel", href: "/admin", icon: Shield, roles: ["admin"] },

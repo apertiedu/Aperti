@@ -52,6 +52,62 @@ router.post("/auth/login", async (req, res): Promise<void> => {
   });
 });
 
+// Student self-activation: first login = account creation
+router.post("/auth/activate", async (req, res): Promise<void> => {
+  const { studentCode, studentName, password, confirmPassword } = req.body;
+  if (!studentCode?.trim() || !studentName?.trim() || !password) {
+    res.status(400).json({ message: "Student code, name, and password are required" }); return;
+  }
+  if (password !== confirmPassword) {
+    res.status(400).json({ message: "Passwords do not match" }); return;
+  }
+  if (password.length < 6) {
+    res.status(400).json({ message: "Password must be at least 6 characters" }); return;
+  }
+  // Find student by code
+  const [student] = await db.select().from(studentsTable).where(eq(studentsTable.studentCode, studentCode.trim().toUpperCase()));
+  if (!student) { res.status(404).json({ message: "Student code not found. Contact your teacher." }); return; }
+  // Name must match (uppercase)
+  const inputName = studentName.trim().toUpperCase();
+  const storedName = (student.studentName || "").toUpperCase();
+  if (inputName !== storedName) {
+    res.status(400).json({ message: "Name does not match our records. Enter your name exactly as given." }); return;
+  }
+  // Check if already activated
+  if (student.accountId) {
+    res.status(409).json({ message: "Account already activated. Please sign in." }); return;
+  }
+  // Create account
+  const username = studentCode.trim().toLowerCase();
+  const [existing] = await db.select().from(accountsTable).where(eq(accountsTable.username, username));
+  if (existing) { res.status(409).json({ message: "An account with this code already exists. Try signing in." }); return; }
+  const passwordHash = await bcrypt.hash(password, 10);
+  const [account] = await db.insert(accountsTable).values({
+    username,
+    passwordHash,
+    displayName: student.studentName,
+    role: "student",
+    status: "active",
+    teacherAccountId: student.teacherAccountId ?? null,
+  }).returning();
+  // Link to student record
+  await db.update(studentsTable).set({ accountId: account.id }).where(eq(studentsTable.id, student.id));
+  // Auto-login
+  req.session.accountId = account.id;
+  req.session.username = account.username;
+  req.session.displayName = account.displayName || account.username;
+  req.session.role = "student";
+  req.session.teacherAccountId = student.teacherAccountId ?? null;
+  req.session.studentId = student.id;
+  res.status(201).json({
+    username: account.username,
+    displayName: account.displayName,
+    role: "student",
+    teacherAccountId: student.teacherAccountId ?? null,
+    studentId: student.id,
+  });
+});
+
 router.post("/auth/logout", (req, res): void => {
   req.session.destroy(() => res.json({ message: "Logged out" }));
 });
