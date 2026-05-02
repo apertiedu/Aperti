@@ -115,11 +115,16 @@ Every backend route is protected by `requireTenantAccess` middleware (`artifacts
 - Mark individual or all as read
 - Delete individual notifications
 
-### Admin Panel (admin only)
-- Create/edit/delete all accounts
-- Set role (admin/teacher/assistant) and status
-- Assign assistants to teachers
-- Stats summary
+### Reports (`/reports`)
+Two-tab page:
+- **AI Weekly Reports tab** — select a week, click "Generate All Reports" to produce a full formatted performance report per student using the rule-based AI engine. Each report includes: header, performance snapshot, smart metrics with emoji progress bars, academic analysis (strong/weak topics), AI insights paragraph, personalised action plan, and motivational close. Reports can be previewed in-modal, copied to clipboard individually, or exported as a single-column CSV (WhatsApp bulk-send compatible format). Status summary cards: Elite/Achievers, Good Progress, Needs Attention, At Risk.
+- **Attendance Records tab** — existing week filter, auto-mark absences, CSV export.
+
+### Admin Control Center (`/admin`, admin only)
+Three tabs:
+- **System Overview** — 8 KPI cards (total students, teachers, assistants, student accounts, sessions, exams, attendance records, overall attendance rate), teacher workspace table (student count per teacher), recent activity preview with link to audit log.
+- **Accounts** — full account CRUD: create/edit/delete, suspend/reactivate, search. Stats cards for each role.
+- **Activity Log** — searchable audit log showing all 100 most recent platform events with actor name, role badge, action color-coding, resource, and timestamp.
 
 ## Database Schema
 

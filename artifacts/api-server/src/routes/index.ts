@@ -16,6 +16,7 @@ import studentProfileRouter from "./student-profile";
 import homeworkRouter from "./homework";
 import resourcesRouter from "./resources";
 import studentPortalRouter from "./student-portal";
+import reportsRouter from "./reports";
 
 const router: IRouter = Router();
 
@@ -36,5 +37,6 @@ router.use(studentProfileRouter);
 router.use(homeworkRouter);
 router.use(resourcesRouter);
 router.use(studentPortalRouter);
+router.use(reportsRouter);
 
 export default router;
