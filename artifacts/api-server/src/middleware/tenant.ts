@@ -16,6 +16,14 @@ declare global {
   }
 }
 
+export function requireStudentAccess(req: Request, res: Response, next: NextFunction): void {
+  const session = req.session as any;
+  if (!session.accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
+  if (session.role !== "student") { res.status(403).json({ message: "Student access required" }); return; }
+  if (!session.studentId) { res.status(403).json({ message: "No student record linked" }); return; }
+  next();
+}
+
 export function requireTenantAccess(req: Request, res: Response, next: NextFunction): void {
   const session = req.session as any;
 

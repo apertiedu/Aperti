@@ -4,7 +4,7 @@ import {
   School, LogOut, Shield, BookOpen, ClipboardList, BarChart3,
   ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search,
   KeyRound, BookText, FolderOpen, Video, CreditCard, GraduationCap,
-  Building2, Layers, Sun, Moon, Library, Wand2
+  Building2, Layers, Sun, Moon, Library, Wand2, AlertTriangle
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -75,6 +75,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       items: [
         { name: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "teacher"] },
         { name: "Reports", href: "/reports", icon: FileBarChart, roles: ["admin", "teacher"] },
+        { name: "Risk Report", href: "/risk-report", icon: AlertTriangle, roles: ["admin", "teacher"] },
       ]
     },
     {

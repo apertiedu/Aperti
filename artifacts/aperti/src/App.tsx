@@ -42,6 +42,9 @@ import MyRecordings from "@/pages/student-portal/my-recordings";
 import MyFlashcards from "@/pages/student-portal/my-flashcards";
 import PracticeExams from "@/pages/student-portal/practice-exams";
 import PastPaperLibrary from "@/pages/student-portal/past-paper-library";
+import MyGoals from "@/pages/student-portal/my-goals";
+import AchievementsPage from "@/pages/student-portal/achievements";
+import RiskReportPage from "@/pages/risk-report";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +66,8 @@ function StudentRouter() {
         <Route path="/flashcards" component={MyFlashcards} />
         <Route path="/practice" component={PracticeExams} />
         <Route path="/papers" component={PastPaperLibrary} />
+        <Route path="/goals" component={MyGoals} />
+        <Route path="/achievements" component={AchievementsPage} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -97,6 +102,7 @@ function TeacherRouter() {
         {!isAssistant && <Route path="/centers" component={CentersPage} />}
         {!isAssistant && <Route path="/past-papers" component={PastPapersPage} />}
         {!isAssistant && <Route path="/exam-generator" component={ExamGeneratorPage} />}
+        {!isAssistant && <Route path="/risk-report" component={RiskReportPage} />}
         {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />
       </Switch>

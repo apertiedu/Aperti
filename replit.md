@@ -158,6 +158,9 @@ Three tabs:
 - `question_bank` — id, teacher_account_id, subject_id, question_text, topic, subtopic, difficulty, max_marks, model_answer, common_mistakes, tags, times_used
 - `past_papers` — id, title, subject, year, session, variant, paper_number, file_url, mark_scheme_url, examiner_report_url, uploaded_by, is_public, created_at
 - `practice_sessions` — id, student_id, questions JSONB, answers JSONB, score, total, time_taken_seconds, completed_at, created_at
+- `student_goals` — id, student_id, goal_type (attendance/grade/streak), target_value, subject_id, deadline, notes, is_active, created_at
+- `student_achievements` — id, student_id, achievement_key, achievement_name, description, xp_points, earned_at; UNIQUE(student_id, achievement_key)
+- `student_xp` — student_id (PK), total_xp, level, updated_at
 - `audit_logs` — id, account_id, teacher_id, action, resource, resource_id, details, ip_address
 
 ### Performance Indexes
@@ -195,3 +198,7 @@ All tenant-filtered columns are indexed: students/sessions/exams/subjects by tea
 - Flashcard student UI: 3D animated flip cards (AnimatePresence rotateY), Hard/OK/Easy rating buttons, mastery progress bar, deck grid with per-deck color gradients
 - Past Paper Library auth: `requireAuth` middleware (any logged-in role can read; admin-only write)
 - Exam Generator: `POST /api/exams/generate` inserts into `exams` + `exam_questions` tables, increments `times_used` on source questions
+- `requireStudentAccess` is now exported from `middleware/tenant.ts` (previously only defined locally in student-portal.ts)
+- Achievement check (`POST /api/portal/achievements/check`) is called automatically after practice sessions complete and after goal creation
+- Practice Exam Simulation Mode: full-screen dark UI overlay (`fixed inset-0 z-50`), separate from normal quiz mode, saves to `practice_sessions` table
+- XP levels: 1=Beginner(0-99), 2=Learner(100-299), 3=Student(300-599), 4=Scholar(600-999), 5=Academic(1000-1999), 6=Elite(2000+)

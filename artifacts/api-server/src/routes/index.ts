@@ -27,6 +27,9 @@ import centersRouter from "./centers";
 import trialsRouter from "./trials";
 import pastPapersRouter from "./past-papers";
 import examGeneratorRouter from "./exam-generator";
+import goalsRouter from "./goals";
+import achievementsRouter from "./achievements";
+import riskEngineRouter from "./risk-engine";
 
 const router: IRouter = Router();
 
@@ -58,5 +61,8 @@ router.use(centersRouter);
 router.use(trialsRouter);
 router.use(pastPapersRouter);
 router.use(examGeneratorRouter);
+router.use(goalsRouter);
+router.use(achievementsRouter);
+router.use(riskEngineRouter);
 
 export default router;
