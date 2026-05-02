@@ -1,9 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 export interface AuthUser {
+  id?: number;
   username: string;
   displayName: string;
-  role: "admin" | "teacher" | "assistant";
+  role: "admin" | "teacher" | "assistant" | "student";
   teacherAccountId: number | null;
 }
 

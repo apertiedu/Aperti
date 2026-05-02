@@ -1,11 +1,4 @@
-import {
-  useGetDashboardSummary,
-  useGetRecentActivity,
-  useGetWeeklyStats,
-  getGetDashboardSummaryQueryKey,
-  getGetRecentActivityQueryKey,
-  getGetWeeklyStatsQueryKey
-} from "@workspace/api-client-react";
+import { useState, useEffect } from "react";
 import { Users, UserCheck, UserX, Clock, TrendingUp, BarChart3, Scan } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,18 +9,32 @@ import { Link } from "wouter";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+type Summary = { totalStudents: number; attendanceRate: number; presentToday: number; absentStudents: number };
+type Activity = { id: number; studentName: string; studentCode: string; lessonNumber: number; status: string; markedAt: string };
+type WeeklyStats = { byLesson: { lessonNumber: number; present: number; absent: number }[] };
+
 export default function Dashboard() {
   const { user } = useAuth();
-  const { data: summary, isLoading: loadingSummary } = useGetDashboardSummary({ query: { queryKey: getGetDashboardSummaryQueryKey() } });
-  const { data: recentActivity, isLoading: loadingActivity } = useGetRecentActivity({ limit: 10 }, { query: { queryKey: getGetRecentActivityQueryKey({ limit: 10 }) } });
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [weeklyStats, setWeeklyStats] = useState<WeeklyStats | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(true);
+  const [loadingActivity, setLoadingActivity] = useState(true);
+  const [loadingStats, setLoadingStats] = useState(true);
 
   const weekStart = new Date();
   weekStart.setDate(weekStart.getDate() - weekStart.getDay());
   const weekStartStr = format(weekStart, "yyyy-MM-dd");
-
-  const { data: weeklyStats, isLoading: loadingStats } = useGetWeeklyStats({ weekStart: weekStartStr }, { query: { queryKey: getGetWeeklyStatsQueryKey({ weekStart: weekStartStr }) } });
-
   const today = DAY_NAMES[new Date().getDay()];
+
+  useEffect(() => {
+    fetch("/api/dashboard/summary", { credentials: "include" })
+      .then(r => r.ok ? r.json() : null).then(d => { setSummary(d); setLoadingSummary(false); });
+    fetch("/api/dashboard/recent-activity?limit=10", { credentials: "include" })
+      .then(r => r.ok ? r.json() : []).then(d => { setRecentActivity(d); setLoadingActivity(false); });
+    fetch(`/api/dashboard/weekly-stats?weekStart=${weekStartStr}`, { credentials: "include" })
+      .then(r => r.ok ? r.json() : null).then(d => { setWeeklyStats(d); setLoadingStats(false); });
+  }, []);
 
   const statsCards = [
     { title: "Total Students", value: summary?.totalStudents ?? 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
@@ -36,7 +43,7 @@ export default function Dashboard() {
     { title: "Total Absences", value: summary?.absentStudents ?? 0, icon: UserX, color: "text-red-600", bg: "bg-red-50" },
   ];
 
-  const chartData = weeklyStats?.byLesson.map((lesson) => ({
+  const chartData = weeklyStats?.byLesson.map(lesson => ({
     name: `Lesson ${lesson.lessonNumber}`,
     Present: lesson.present,
     Absent: lesson.absent,
@@ -52,10 +59,7 @@ export default function Dashboard() {
           </p>
         </div>
         <Link href="/attendance">
-          <Button className="gap-2">
-            <Scan className="h-4 w-4" />
-            Mark Attendance
-          </Button>
+          <Button className="gap-2"><Scan className="h-4 w-4" />Mark Attendance</Button>
         </Link>
       </div>
 
@@ -89,8 +93,7 @@ export default function Dashboard() {
         <Card className="lg:col-span-2 border-border/50 shadow-sm flex flex-col">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-primary" />
-              This Week's Attendance
+              <BarChart3 className="h-4 w-4 text-primary" />This Week's Attendance
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 min-h-[260px]">
@@ -120,18 +123,15 @@ export default function Dashboard() {
         <Card className="border-border/50 shadow-sm flex flex-col">
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
-              <Clock className="h-4 w-4 text-muted-foreground" />
-              Recent Activity
+              <Clock className="h-4 w-4 text-muted-foreground" />Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent className="flex-1 overflow-y-auto max-h-72">
             {loadingActivity ? (
-              <div className="space-y-3">
-                {[...Array(5)].map((_, i) => <div key={i} className="h-11 bg-muted/50 animate-pulse rounded-md" />)}
-              </div>
-            ) : recentActivity && recentActivity.length > 0 ? (
+              <div className="space-y-3">{[...Array(5)].map((_, i) => <div key={i} className="h-11 bg-muted/50 animate-pulse rounded-md" />)}</div>
+            ) : recentActivity.length > 0 ? (
               <div className="space-y-2">
-                {recentActivity.map((activity) => (
+                {recentActivity.map(activity => (
                   <div key={activity.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${activity.status === "Present" ? "bg-emerald-500" : "bg-red-500"}`} />
                     <div className="flex-1 overflow-hidden">
@@ -163,9 +163,7 @@ export default function Dashboard() {
           { href: "/reports", label: "Reports", color: "bg-amber-50 hover:bg-amber-100 text-amber-700" },
         ].map(link => (
           <Link key={link.href} href={link.href}>
-            <div className={`rounded-lg p-3 text-center text-sm font-medium cursor-pointer transition-colors ${link.color}`}>
-              {link.label}
-            </div>
+            <div className={`rounded-lg p-3 text-center text-sm font-medium cursor-pointer transition-colors ${link.color}`}>{link.label}</div>
           </Link>
         ))}
       </div>

@@ -50,7 +50,7 @@ function CircleProgress({ rate }: { rate: number }) {
 const CARD_VARIANTS = {
   hidden: { opacity: 0, y: 20 },
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.4, ease: "easeOut" } }),
-};
+} as any;
 
 export default function StudentDashboard() {
   const { user } = useAuth();

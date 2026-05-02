@@ -35,7 +35,7 @@ const SUBJECT_COLORS = [
 const CARD_VARIANTS = {
   hidden: { opacity: 0, y: 24 },
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] } }),
-};
+} as any;
 
 function Avatar({ name, size = 40 }: { name: string; size?: number }) {
   const initials = name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);

@@ -1,10 +1,4 @@
-import { useState, useCallback } from "react";
-import {
-  useListAttendance,
-  useAutoMarkAbsence,
-  getListAttendanceQueryKey,
-} from "@workspace/api-client-react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useState, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,19 +35,14 @@ function formatWeekLabel(monday: string): string {
   return `${format(start, "dd/MM/yyyy")} → ${format(end, "dd/MM/yyyy")}`;
 }
 
-type StudentReport = {
-  studentId: number;
-  studentCode: string;
-  studentName: string;
-  report: string;
-};
-
+type StudentReport = { studentId: number; studentCode: string; studentName: string; report: string };
+type AttendanceRecord = { id: number; date: string; studentCode: string; studentName: string; lessonNumber: number; dayOfWeek: string; status: string };
 type StatusLevel = "elite" | "good" | "watch" | "risk";
 
 function getStatusLevel(report: string): StatusLevel {
   if (report.includes("Elite Performer") || report.includes("Consistent Achiever")) return "elite";
   if (report.includes("Needs Urgent Support") || report.includes("Performance Declining") || report.includes("Attendance-Risk")) return "risk";
-  if (report.includes("High Potential") || report.includes("Homework") && report.includes("low")) return "watch";
+  if (report.includes("High Potential") || (report.includes("Homework") && report.includes("low"))) return "watch";
   return "good";
 }
 
@@ -72,27 +61,20 @@ function extractStatus(report: string): string {
 function ReportPreviewModal({ report, onClose }: { report: StudentReport; onClose: () => void }) {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
-
   const handleCopy = async () => {
     await navigator.clipboard.writeText(report.report);
     setCopied(true);
     toast({ title: "Copied to clipboard" });
     setTimeout(() => setCopied(false), 2000);
   };
-
   return (
     <Dialog open onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileBarChart className="h-4 w-4 text-primary" />
-            {report.studentName} — Weekly Report
-          </DialogTitle>
+          <DialogTitle className="flex items-center gap-2"><FileBarChart className="h-4 w-4 text-primary" />{report.studentName} — Weekly Report</DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-y-auto">
-          <pre className="text-xs font-mono bg-muted/30 rounded-xl p-4 whitespace-pre-wrap leading-relaxed border border-border/50">
-            {report.report}
-          </pre>
+          <pre className="text-xs font-mono bg-muted/30 rounded-xl p-4 whitespace-pre-wrap leading-relaxed border border-border/50">{report.report}</pre>
         </div>
         <div className="flex gap-2 pt-2 border-t border-border/50">
           <Button onClick={handleCopy} className="flex-1 gap-2" variant="outline">
@@ -108,7 +90,6 @@ function ReportPreviewModal({ report, onClose }: { report: StudentReport; onClos
 
 export default function Reports() {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const [tab, setTab] = useState<"ai" | "attendance">("ai");
   const [weekStart, setWeekStart] = useState(() => getMondayOfWeek(new Date()));
   const [exporting, setExporting] = useState(false);
@@ -118,20 +99,20 @@ export default function Reports() {
   const [search, setSearch] = useState("");
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [exportingCsv, setExportingCsv] = useState(false);
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [autoMarking, setAutoMarking] = useState(false);
 
-  const { data: records, isLoading: attendanceLoading } = useListAttendance(
-    { weekStart },
-    { query: { queryKey: getListAttendanceQueryKey({ weekStart }), enabled: tab === "attendance" } }
-  );
+  const loadAttendance = useCallback(async (week: string) => {
+    if (tab !== "attendance") return;
+    setAttendanceLoading(true);
+    try {
+      const r = await fetch(`/api/attendance?weekStart=${week}`, { credentials: "include" });
+      if (r.ok) setRecords(await r.json());
+    } finally { setAttendanceLoading(false); }
+  }, [tab]);
 
-  const autoMarkMutation = useAutoMarkAbsence({
-    mutation: {
-      onSuccess: (res) => {
-        queryClient.invalidateQueries({ queryKey: getListAttendanceQueryKey({ weekStart }) });
-        toast({ title: "Auto-mark complete", description: res.message });
-      },
-    },
-  });
+  useEffect(() => { loadAttendance(weekStart); }, [tab, weekStart]);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -146,11 +127,25 @@ export default function Reports() {
       const data: StudentReport[] = await res.json();
       setReports(data);
       toast({ title: `${data.length} reports generated`, description: "All reports are ready to preview and export." });
-    } catch {
-      toast({ title: "Failed to generate reports", variant: "destructive" });
-    } finally {
-      setGenerating(false);
-    }
+    } catch { toast({ title: "Failed to generate reports", variant: "destructive" }); }
+    finally { setGenerating(false); }
+  };
+
+  const handleAutoMark = async () => {
+    if (!confirm("Auto-mark all students with no record this week as Absent?")) return;
+    setAutoMarking(true);
+    try {
+      const res = await fetch("/api/attendance/auto-absence", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ weekStart }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.message || "Failed");
+      toast({ title: "Auto-mark complete", description: data.message });
+      loadAttendance(weekStart);
+    } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
+    finally { setAutoMarking(false); }
   };
 
   const handleCopyOne = async (report: StudentReport) => {
@@ -165,22 +160,15 @@ export default function Reports() {
     setExportingCsv(true);
     try {
       const rows = ["report"];
-      for (const r of reports) {
-        const escaped = `"${r.report.replace(/"/g, '""')}"`;
-        rows.push(escaped);
-      }
+      for (const r of reports) rows.push(`"${r.report.replace(/"/g, '""')}"`);
       const csv = rows.join("\n");
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `aperti-reports-${weekStart}.csv`;
-      a.click();
+      a.href = url; a.download = `aperti-reports-${weekStart}.csv`; a.click();
       URL.revokeObjectURL(url);
       toast({ title: "CSV exported", description: `${reports.length} reports in single-column format` });
-    } finally {
-      setExportingCsv(false);
-    }
+    } finally { setExportingCsv(false); }
   }, [reports, weekStart, toast]);
 
   const handleExportAttendanceCsv = async () => {
@@ -191,15 +179,11 @@ export default function Reports() {
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `attendance-${weekStart}.csv`;
+      a.href = url; a.download = `attendance-${weekStart}.csv`;
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
-    } catch {
-      toast({ title: "Export failed", variant: "destructive" });
-    } finally {
-      setExporting(false);
-    }
+    } catch { toast({ title: "Export failed", variant: "destructive" }); }
+    finally { setExporting(false); }
   };
 
   const filteredReports = reports.filter(r =>
@@ -219,26 +203,14 @@ export default function Reports() {
       {previewReport && <ReportPreviewModal report={previewReport} onClose={() => setPreviewReport(null)} />}
 
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <FileBarChart className="h-7 w-7 text-primary" />
-          Reports
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2"><FileBarChart className="h-7 w-7 text-primary" />Reports</h1>
         <p className="text-muted-foreground">Generate AI-powered weekly performance reports and view attendance records.</p>
       </div>
 
-      {/* Tab Switcher */}
       <div className="flex gap-1 p-1 bg-muted/40 rounded-xl w-fit border border-border/50">
-        {[
-          { key: "ai", label: "AI Weekly Reports", icon: Sparkles },
-          { key: "attendance", label: "Attendance Records", icon: ClipboardList },
-        ].map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            onClick={() => setTab(key as any)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              tab === key ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
+        {([["ai", "AI Weekly Reports", Sparkles], ["attendance", "Attendance Records", ClipboardList]] as const).map(([key, label, Icon]) => (
+          <button key={key} onClick={() => setTab(key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === key ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"}`}>
             <Icon className="h-4 w-4" />{label}
           </button>
         ))}
@@ -247,7 +219,6 @@ export default function Reports() {
       <AnimatePresence mode="wait">
         {tab === "ai" ? (
           <motion.div key="ai" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-5">
-            {/* Controls */}
             <Card className="border-border/50 shadow-sm">
               <CardContent className="pt-5 pb-4">
                 <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
@@ -259,8 +230,7 @@ export default function Reports() {
                   <div className="flex gap-2">
                     {reports.length > 0 && (
                       <Button variant="outline" className="gap-2" onClick={handleExportCsv} disabled={exportingCsv}>
-                        <FileDown className="h-4 w-4" />
-                        {exportingCsv ? "Exporting..." : `Export CSV (${reports.length})`}
+                        <FileDown className="h-4 w-4" />{exportingCsv ? "Exporting..." : `Export CSV (${reports.length})`}
                       </Button>
                     )}
                     <Button className="gap-2" onClick={handleGenerate} disabled={generating}>
@@ -272,7 +242,6 @@ export default function Reports() {
               </CardContent>
             </Card>
 
-            {/* Status summary cards */}
             {reports.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
@@ -281,8 +250,7 @@ export default function Reports() {
                   { label: "Needs Attention", count: countByLevel.watch, style: "text-amber-600", bg: "bg-amber-50 border-amber-100" },
                   { label: "At Risk", count: countByLevel.risk, style: "text-red-600", bg: "bg-red-50 border-red-100" },
                 ].map(s => (
-                  <motion.div key={s.label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-                    className={`rounded-xl p-4 border ${s.bg}`}>
+                  <motion.div key={s.label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={`rounded-xl p-4 border ${s.bg}`}>
                     <p className="text-xs text-muted-foreground">{s.label}</p>
                     <p className={`text-2xl font-bold mt-1 ${s.style}`}>{s.count}</p>
                   </motion.div>
@@ -290,7 +258,6 @@ export default function Reports() {
               </div>
             )}
 
-            {/* Report List */}
             {reports.length > 0 ? (
               <Card className="border-border/50 shadow-sm">
                 <CardHeader className="pb-3 border-b border-border/50">
@@ -320,15 +287,13 @@ export default function Reports() {
                             <p className="text-xs text-muted-foreground font-mono">{r.studentCode}</p>
                           </div>
                           {statusText && (
-                            <span className={`text-xs px-2.5 py-1 rounded-full font-medium border hidden sm:block max-w-[180px] truncate ${style.badge}`}>
-                              {statusText}
-                            </span>
+                            <span className={`text-xs px-2.5 py-1 rounded-full font-medium border hidden sm:block max-w-[180px] truncate ${style.badge}`}>{statusText}</span>
                           )}
                           <div className="flex gap-1.5">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setPreviewReport(r)} title="Preview Report">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => setPreviewReport(r)}>
                               <Eye className="h-3.5 w-3.5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleCopyOne(r)} title="Copy to clipboard">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => handleCopyOne(r)}>
                               {copiedId === r.studentId ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
                             </Button>
                           </div>
@@ -348,13 +313,11 @@ export default function Reports() {
                   <p className="text-sm text-muted-foreground mt-1">Select a week and click "Generate All Reports" to create AI-powered student reports.</p>
                 </div>
                 <Button className="gap-2" onClick={handleGenerate} disabled={generating}>
-                  <Sparkles className="h-4 w-4" />
-                  {generating ? "Generating..." : "Generate Now"}
+                  <Sparkles className="h-4 w-4" />{generating ? "Generating..." : "Generate Now"}
                 </Button>
               </div>
             )}
 
-            {/* CSV format note */}
             {reports.length > 0 && (
               <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-xs text-blue-700">
                 <p className="font-semibold mb-1">📋 CSV Export Format</p>
@@ -371,13 +334,11 @@ export default function Reports() {
                   <Input type="date" className="w-44" value={weekStart} onChange={e => setWeekStart(e.target.value)} />
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="gap-2" onClick={() => { if (confirm("Auto-mark all students with no record this week as Absent?")) autoMarkMutation.mutate({ data: { weekStart } }); }} disabled={autoMarkMutation.isPending}>
-                    <Wand2 className="h-4 w-4 text-primary" />
-                    {autoMarkMutation.isPending ? "Processing..." : "Auto-Mark Absences"}
+                  <Button variant="outline" className="gap-2" onClick={handleAutoMark} disabled={autoMarking}>
+                    <Wand2 className="h-4 w-4 text-primary" />{autoMarking ? "Processing..." : "Auto-Mark Absences"}
                   </Button>
                   <Button className="gap-2" onClick={handleExportAttendanceCsv} disabled={exporting}>
-                    <Download className="h-4 w-4" />
-                    {exporting ? "Downloading..." : "Export CSV"}
+                    <Download className="h-4 w-4" />{exporting ? "Downloading..." : "Export CSV"}
                   </Button>
                 </div>
               </CardHeader>
@@ -389,34 +350,28 @@ export default function Reports() {
                     <Table>
                       <TableHeader className="sticky top-0 bg-card z-10 shadow-sm">
                         <TableRow className="hover:bg-transparent">
-                          <TableHead>Date</TableHead>
-                          <TableHead>Code</TableHead>
-                          <TableHead>Name</TableHead>
-                          <TableHead>Lesson</TableHead>
-                          <TableHead>Day</TableHead>
-                          <TableHead>Status</TableHead>
+                          <TableHead>Date</TableHead><TableHead>Code</TableHead><TableHead>Name</TableHead>
+                          <TableHead>Lesson</TableHead><TableHead>Day</TableHead><TableHead>Status</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {!records || records.length === 0 ? (
+                        {records.length === 0 ? (
                           <TableRow><TableCell colSpan={6} className="h-24 text-center text-muted-foreground">No records for this week.</TableCell></TableRow>
-                        ) : (
-                          records.map(record => (
-                            <TableRow key={record.id}>
-                              <TableCell className="font-medium whitespace-nowrap">{format(new Date(record.date + "T00:00:00"), "EEE, MMM d")}</TableCell>
-                              <TableCell className="font-mono text-sm">{record.studentCode}</TableCell>
-                              <TableCell>{record.studentName}</TableCell>
-                              <TableCell>Lesson {record.lessonNumber}</TableCell>
-                              <TableCell className="text-muted-foreground">{record.dayOfWeek}</TableCell>
-                              <TableCell>
-                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${record.status === "Present" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
-                                  {record.status === "Present" ? <CheckSquare className="h-3 w-3" /> : <XSquare className="h-3 w-3" />}
-                                  {record.status}
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
+                        ) : records.map(record => (
+                          <TableRow key={record.id}>
+                            <TableCell className="font-medium whitespace-nowrap">{format(new Date(record.date + "T00:00:00"), "EEE, MMM d")}</TableCell>
+                            <TableCell className="font-mono text-sm">{record.studentCode}</TableCell>
+                            <TableCell>{record.studentName}</TableCell>
+                            <TableCell>Lesson {record.lessonNumber}</TableCell>
+                            <TableCell className="text-muted-foreground">{record.dayOfWeek}</TableCell>
+                            <TableCell>
+                              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${record.status === "Present" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+                                {record.status === "Present" ? <CheckSquare className="h-3 w-3" /> : <XSquare className="h-3 w-3" />}
+                                {record.status}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
                   </div>

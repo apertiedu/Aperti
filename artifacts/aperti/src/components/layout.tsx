@@ -53,6 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     admin: "bg-purple-100 text-purple-700",
     teacher: "bg-blue-100 text-blue-700",
     assistant: "bg-green-100 text-green-700",
+    student: "bg-teal-100 text-teal-700",
   }[user?.role ?? "assistant"] ?? "bg-muted text-muted-foreground";
 
   return (
