@@ -1,6 +1,6 @@
 import { useLocation, Link } from "wouter";
 import {
-  LayoutDashboard, CheckSquare, Users, CalendarClock, CalendarDays, FileBarChart,
+  LayoutDashboard, CheckSquare, Users, CalendarClock, CalendarDays, Calendar, FileBarChart,
   School, LogOut, Shield, BookOpen, ClipboardList, BarChart3,
   ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search,
   KeyRound, BookText, FolderOpen, Video, CreditCard, GraduationCap,
@@ -43,6 +43,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       items: [
         { name: "Sessions", href: "/sessions", icon: CalendarClock, roles: ["admin", "teacher"] },
         { name: "Timetable", href: "/timetable", icon: CalendarDays, roles: ["admin", "teacher"] },
+        { name: "Calendar", href: "/calendar", icon: Calendar, roles: ["admin", "teacher"] },
         { name: "Subjects", href: "/subjects", icon: BookOpen, roles: ["admin", "teacher"] },
         { name: "Exams & Marks", href: "/exams", icon: ClipboardList, roles: ["admin", "teacher", "assistant"] },
         { name: "Homework", href: "/homework", icon: BookText, roles: ["admin", "teacher"] },

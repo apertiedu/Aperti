@@ -86,6 +86,25 @@ Every backend route is protected by `requireTenantAccess` middleware (`artifacts
 - **MCQ Question Builder** — toggle between Written/Structured and Multiple Choice (MCQ) per question; 4 option inputs A/B/C/D with click-to-select correct answer; MCQ questions auto-scored on online exam submit; correct answer shown in teacher view with ✓ badge
 - **Online Exam Time Limit** — teachers set per-exam time limit (minutes) at creation; shown on exam card and detail view with clock icon; feeds directly into online exam session timer
 
+### Calendar (`/calendar` for teachers/admin)
+- Monthly view with prev/next navigation; click any day to open a detail panel
+- Three event types: **sessions** (blue, recurring weekly), **exams** (purple, on exam_date), **homework** (amber, on due_date)
+- KPI row: session count, exam count, homework count, total events for the month
+- Day detail panel (desktop slide-out, mobile card below grid) shows full event metadata including join links for online sessions
+- Backend: `GET /api/calendar/events?start=DATE&end=DATE` — expands recurring sessions into dates, joins exams and homework in date range
+- `artifacts/api-server/src/routes/calendar.ts`
+
+### Dashboard (`/` teacher/admin)
+- Time-of-day greeting, attendance warning badge
+- Quick action buttons (Mark Attendance, Students, Exams, Analytics)
+- KPI cards: Total Students, Attendance Rate, Present Today, Total Absences
+- **Today's Schedule** panel: sessions happening today with % attended, type badge, join link for online
+- Weekly attendance bar chart + Recent activity feed
+- **Upcoming Exams** panel: exams in next 14 days with countdown badge (Today/Tomorrow/Nd)
+- **At-Risk Students** panel: students below 75% attendance with progress bar, links to Risk Report
+- Footer quick nav: Reports, Parent Comms, Question Bank, Timetable
+- New endpoints: `GET /api/dashboard/today-sessions`, `/api/dashboard/upcoming-exams`, `/api/dashboard/at-risk`
+
 ### Timetable (`/timetable` for teachers, `/timetable` for students)
 - Teacher view: week grid (Mon–Sun columns) + list view toggle; color-coded by day; each session card shows time, lesson number, subject, type (centre/online), student count, join link for online sessions; KPI cards (total sessions, active days, online count); "Today" badge highlights current day
 - Student view: same route `/timetable`; shows only the student's own assigned sessions (lesson1/2/3); "Today" + "Next" session highlighted at top; full weekly breakdown below; online sessions show "Join" link

@@ -51,6 +51,7 @@ import ExamMonitor from "@/pages/exam-monitor";
 import InventoryPage from "@/pages/inventory";
 import TimetablePage from "@/pages/timetable";
 import MyTimetable from "@/pages/student-portal/my-timetable";
+import CalendarPage from "@/pages/calendar";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -113,6 +114,7 @@ function TeacherRouter() {
         {!isAssistant && <Route path="/risk-report" component={RiskReportPage} />}
         {!isAssistant && <Route path="/inventory" component={InventoryPage} />}
         {!isAssistant && <Route path="/timetable" component={TimetablePage} />}
+        {!isAssistant && <Route path="/calendar" component={CalendarPage} />}
         <Route path="/exams/:examId/monitor" component={ExamMonitor} />
         {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />

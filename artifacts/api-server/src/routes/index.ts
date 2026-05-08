@@ -34,6 +34,7 @@ import onlineExamsRouter from "./online-exams";
 import inventoryRouter from "./inventory";
 import tutorialRouter from "./tutorial";
 import timetableRouter from "./timetable";
+import calendarRouter from "./calendar";
 
 const router: IRouter = Router();
 
@@ -72,5 +73,6 @@ router.use(onlineExamsRouter);
 router.use(inventoryRouter);
 router.use(tutorialRouter);
 router.use(timetableRouter);
+router.use(calendarRouter);
 
 export default router;

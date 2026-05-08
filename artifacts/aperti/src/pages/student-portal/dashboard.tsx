@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles } from "lucide-react";
+import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
@@ -12,6 +12,13 @@ type PortalData = {
   latestExam: { examName: string; percentage: number } | null;
   upcomingHomework: { id: number; title: string; dueDate: string | null; subjectName: string | null; submissionStatus: string | null }[];
 };
+
+type MySession = {
+  id: number; lessonNumber: number; dayOfWeek: string; startTime: string;
+  type: string; onlineLink: string | null; subjectName: string | null;
+};
+
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -58,6 +65,9 @@ export default function StudentDashboard() {
   const [, navigate] = useLocation();
   const [data, setData] = useState<PortalData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [todaySessions, setTodaySessions] = useState<MySession[]>([]);
+
+  const todayName = DAY_NAMES[new Date().getDay()];
 
   useEffect(() => {
     fetch("/api/portal/me", { credentials: "include" })
@@ -65,7 +75,10 @@ export default function StudentDashboard() {
       .then(setData)
       .catch(() => { })
       .finally(() => setLoading(false));
-  }, []);
+    fetch("/api/portal/timetable", { credentials: "include" })
+      .then(r => r.ok ? r.json() : [])
+      .then((sessions: MySession[]) => setTodaySessions(sessions.filter(s => s.dayOfWeek === todayName)));
+  }, [todayName]);
 
   const firstName = data?.student?.studentName?.split(" ")[0] || user?.displayName?.split(" ")[0] || "there";
   const rate = data?.stats.attendanceRate ?? 0;
@@ -262,6 +275,52 @@ export default function StudentDashboard() {
             )}
           </div>
         </motion.div>
+
+        {/* Today's Sessions */}
+        {todaySessions.length > 0 && (
+          <motion.div custom={3} variants={CARD_VARIANTS} initial="hidden" animate="show"
+            className="lg:col-span-2 bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
+              <h2 className="font-bold text-foreground flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-primary" />Today's Sessions
+              </h2>
+              <button onClick={() => navigate("/timetable")} className="text-xs text-primary hover:text-primary/80 font-semibold transition-colors flex items-center">
+                Full timetable <ChevronRight className="h-3 w-3 ml-0.5" />
+              </button>
+            </div>
+            <div className="divide-y divide-border">
+              {todaySessions.map((s, i) => (
+                <motion.div key={s.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i * 0.07 }}
+                  className="flex items-center gap-4 px-5 py-3.5">
+                  <div className="bg-primary/10 p-2 rounded-xl shrink-0">
+                    <Clock className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate">{s.subjectName ?? "No Subject"}</p>
+                    <p className="text-xs text-muted-foreground">Lesson {s.lessonNumber} · {s.startTime?.slice(0, 5)}</p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {s.type === "online" ? (
+                      <span className="flex items-center gap-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium">
+                        <Wifi className="w-3 h-3" /> Online
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full font-medium">
+                        <Building2 className="w-3 h-3" /> Centre
+                      </span>
+                    )}
+                    {s.type === "online" && s.onlineLink && (
+                      <a href={s.onlineLink} target="_blank" rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-primary font-semibold hover:underline">
+                        <ExternalLink className="w-3 h-3" /> Join
+                      </a>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Quick Tools */}
         <motion.div custom={4} variants={CARD_VARIANTS} initial="hidden" animate="show" className="flex flex-col gap-3">
