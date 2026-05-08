@@ -20,7 +20,7 @@ router.get("/exams", async (req, res): Promise<void> => {
 });
 
 router.post("/exams", async (req, res): Promise<void> => {
-  const { name, subjectId, examDate, totalMarks } = req.body;
+  const { name, subjectId, examDate, totalMarks, timeLimitMinutes } = req.body;
   if (!name?.trim()) { res.status(400).json({ message: "Exam name is required" }); return; }
   const teacherId = getTeacherId(req);
   const [created] = await db.insert(examsTable).values({
@@ -29,6 +29,7 @@ router.post("/exams", async (req, res): Promise<void> => {
     teacherAccountId: teacherId,
     examDate: examDate || null,
     totalMarks: totalMarks ? String(totalMarks) : null,
+    timeLimitMinutes: timeLimitMinutes ? parseInt(timeLimitMinutes, 10) : null,
   }).returning();
   res.status(201).json(created);
 });
@@ -54,12 +55,13 @@ router.get("/exams/:id", async (req, res): Promise<void> => {
 
 router.patch("/exams/:id", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
-  const { name, subjectId, examDate, totalMarks } = req.body;
+  const { name, subjectId, examDate, totalMarks, timeLimitMinutes } = req.body;
   const updates: Record<string, unknown> = {};
   if (name) updates.name = name.trim();
   if ("subjectId" in req.body) updates.subjectId = subjectId ? parseInt(subjectId, 10) : null;
   if ("examDate" in req.body) updates.examDate = examDate || null;
   if ("totalMarks" in req.body) updates.totalMarks = totalMarks ? String(totalMarks) : null;
+  if ("timeLimitMinutes" in req.body) updates.timeLimitMinutes = timeLimitMinutes ? parseInt(timeLimitMinutes, 10) : null;
   const [updated] = await db.update(examsTable).set(updates).where(eq(examsTable.id, id)).returning();
   if (!updated) { res.status(404).json({ message: "Exam not found" }); return; }
   res.json(updated);
@@ -74,8 +76,9 @@ router.delete("/exams/:id", async (req, res): Promise<void> => {
 // Questions
 router.post("/exams/:id/questions", async (req, res): Promise<void> => {
   const examId = parseInt(req.params.id, 10);
-  const { questionText, topic, maxMarks, questionOrder, parentId } = req.body;
+  const { questionText, topic, maxMarks, questionOrder, parentId, questionType, options, correctOption } = req.body;
   if (!maxMarks && maxMarks !== 0) { res.status(400).json({ message: "maxMarks is required" }); return; }
+  const type = questionType || "written";
   const [created] = await db.insert(examQuestionsTable).values({
     examId,
     questionText: questionText || null,
@@ -83,18 +86,26 @@ router.post("/exams/:id/questions", async (req, res): Promise<void> => {
     maxMarks: String(maxMarks),
     questionOrder: questionOrder ?? 0,
     parentId: parentId ? parseInt(parentId, 10) : null,
+    questionType: type,
+    options: type === "mcq" && Array.isArray(options) ? options : null,
+    correctOption: type === "mcq" && correctOption !== undefined ? parseInt(correctOption, 10) : null,
   }).returning();
   res.status(201).json(created);
 });
 
 router.patch("/exam-questions/:id", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
-  const { questionText, topic, maxMarks, questionOrder } = req.body;
+  const { questionText, topic, maxMarks, questionOrder, questionType, options, correctOption } = req.body;
   const updates: Record<string, unknown> = {};
   if ("questionText" in req.body) updates.questionText = questionText;
   if ("topic" in req.body) updates.topic = topic;
   if ("maxMarks" in req.body) updates.maxMarks = String(maxMarks);
   if ("questionOrder" in req.body) updates.questionOrder = questionOrder;
+  if ("questionType" in req.body) {
+    updates.questionType = questionType;
+    updates.options = questionType === "mcq" && Array.isArray(options) ? options : null;
+    updates.correctOption = questionType === "mcq" && correctOption !== undefined ? parseInt(correctOption, 10) : null;
+  }
   const [updated] = await db.update(examQuestionsTable).set(updates).where(eq(examQuestionsTable.id, id)).returning();
   res.json(updated);
 });

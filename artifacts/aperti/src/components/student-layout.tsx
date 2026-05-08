@@ -1,5 +1,5 @@
 import { useLocation, Link } from "wouter";
-import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target, Menu, X, Library, Trophy, Flag, Sparkles } from "lucide-react";
+import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target, Menu, X, Library, Trophy, Flag, Sparkles, CalendarDays } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,6 +8,7 @@ import { useTour } from "@/components/onboarding-tour";
 
 const NAV_ITEMS = [
   { name: "Home", href: "/", icon: LayoutDashboard },
+  { name: "Timetable", href: "/timetable", icon: CalendarDays },
   { name: "Attendance", href: "/attendance", icon: CheckSquare },
   { name: "Homework", href: "/homework", icon: BookOpen },
   { name: "Exams", href: "/exams", icon: Award },

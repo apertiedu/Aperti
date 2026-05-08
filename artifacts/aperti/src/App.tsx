@@ -49,6 +49,8 @@ import RiskReportPage from "@/pages/risk-report";
 import TakeExam from "@/pages/student-portal/take-exam";
 import ExamMonitor from "@/pages/exam-monitor";
 import InventoryPage from "@/pages/inventory";
+import TimetablePage from "@/pages/timetable";
+import MyTimetable from "@/pages/student-portal/my-timetable";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -73,6 +75,7 @@ function StudentRouter() {
         <Route path="/goals" component={MyGoals} />
         <Route path="/achievements" component={AchievementsPage} />
         <Route path="/exams/:examId/take" component={TakeExam} />
+        <Route path="/timetable" component={MyTimetable} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -109,6 +112,7 @@ function TeacherRouter() {
         {!isAssistant && <Route path="/exam-generator" component={ExamGeneratorPage} />}
         {!isAssistant && <Route path="/risk-report" component={RiskReportPage} />}
         {!isAssistant && <Route path="/inventory" component={InventoryPage} />}
+        {!isAssistant && <Route path="/timetable" component={TimetablePage} />}
         <Route path="/exams/:examId/monitor" component={ExamMonitor} />
         {isAdmin && <Route path="/admin" component={Admin} />}
         <Route component={NotFound} />

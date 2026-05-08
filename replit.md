@@ -83,6 +83,12 @@ Every backend route is protected by `requireTenantAccess` middleware (`artifacts
 - Exam lifecycle: create → question builder (topic/marks) → mark grid → results
 - Results with auto-calculated percentages and IGCSE grades
 - Question import from Question Bank
+- **MCQ Question Builder** — toggle between Written/Structured and Multiple Choice (MCQ) per question; 4 option inputs A/B/C/D with click-to-select correct answer; MCQ questions auto-scored on online exam submit; correct answer shown in teacher view with ✓ badge
+- **Online Exam Time Limit** — teachers set per-exam time limit (minutes) at creation; shown on exam card and detail view with clock icon; feeds directly into online exam session timer
+
+### Timetable (`/timetable` for teachers, `/timetable` for students)
+- Teacher view: week grid (Mon–Sun columns) + list view toggle; color-coded by day; each session card shows time, lesson number, subject, type (centre/online), student count, join link for online sessions; KPI cards (total sessions, active days, online count); "Today" badge highlights current day
+- Student view: same route `/timetable`; shows only the student's own assigned sessions (lesson1/2/3); "Today" + "Next" session highlighted at top; full weekly breakdown below; online sessions show "Join" link
 
 ### Question Bank (`/question-bank`)
 - Per-teacher reusable question library
@@ -152,7 +158,8 @@ Three tabs:
 - `students` — id, student_code, student_name, phone, parent_phone, notes, status, teacher_account_id, lesson1/2/3_session_id
 - `attendance` — id, student_id, session_id, date, status, marked_at
 - `exams` — id, name, subject_id, teacher_account_id, exam_date, total_marks
-- `exam_questions` — id, exam_id, parent_id, question_text, topic, max_marks, question_order
+- `exam_questions` — id, exam_id, parent_id, question_text, topic, max_marks, question_order, question_type (written/mcq, default written), options (JSONB string array), correct_option (integer 0-based index)
+- `exams` — also has `time_limit_minutes` (integer, nullable) for online exam timer
 - `student_marks` — id, student_id, exam_id, question_id, marks_scored, mistakes, marked_at
 - `notifications` — id, account_id, title, message, type, is_read, link
 - `question_bank` — id, teacher_account_id, subject_id, question_text, topic, subtopic, difficulty, max_marks, model_answer, common_mistakes, tags, times_used

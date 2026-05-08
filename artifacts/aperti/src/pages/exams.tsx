@@ -9,13 +9,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { ClipboardList, Plus, Trash2, Pencil, Eye, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  ClipboardList, Plus, Trash2, Eye, ChevronRight, CheckCircle2,
+  Monitor, FileQuestion, PenLine, Clock, AlignLeft
+} from "lucide-react";
 
 type Subject = { id: number; name: string };
-type Exam = { id: number; name: string; subjectId: number | null; examDate: string | null; totalMarks: string | null; createdAt: string };
-type Question = { id: number; examId: number; questionText: string | null; topic: string | null; maxMarks: string; questionOrder: number };
+type Exam = {
+  id: number; name: string; subjectId: number | null; examDate: string | null;
+  totalMarks: string | null; timeLimitMinutes: number | null; createdAt: string
+};
+type Question = {
+  id: number; examId: number; questionText: string | null; topic: string | null;
+  maxMarks: string; questionOrder: number; questionType: string;
+  options: string[] | null; correctOption: number | null;
+};
 type Student = { id: number; studentCode: string; studentName: string };
 type Mark = { studentId: number; questionId: number; marksScored: string | null; mistakes: string | null };
+
+const OPTION_LABELS = ["A", "B", "C", "D"];
+
+const emptyQForm = {
+  questionText: "", topic: "", maxMarks: "", questionType: "written",
+  options: ["", "", "", ""], correctOption: 0,
+};
 
 export default function Exams() {
   const { toast } = useToast();
@@ -27,23 +45,19 @@ export default function Exams() {
   const [loading, setLoading] = useState(true);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [savingExam, setSavingExam] = useState(false);
-  const [examForm, setExamForm] = useState({ name: "", subjectId: "", examDate: "", totalMarks: "" });
+  const [examForm, setExamForm] = useState({ name: "", subjectId: "", examDate: "", totalMarks: "", timeLimitMinutes: "" });
 
-  // Drill-down state
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [examDetail, setExamDetail] = useState<{ exam: Exam; questions: Question[]; students: Student[]; marks: Mark[] } | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
-  // Question form
   const [isAddQOpen, setIsAddQOpen] = useState(false);
-  const [qForm, setQForm] = useState({ questionText: "", topic: "", maxMarks: "" });
+  const [qForm, setQForm] = useState(emptyQForm);
   const [savingQ, setSavingQ] = useState(false);
 
-  // Mark entry
   const [markData, setMarkData] = useState<Record<string, { marksScored: string; mistakes: string }>>({});
   const [savingMarks, setSavingMarks] = useState(false);
 
-  // Results view
   const [results, setResults] = useState<any>(null);
   const [showResults, setShowResults] = useState(false);
 
@@ -66,12 +80,10 @@ export default function Exams() {
       if (res.ok) {
         const data = await res.json();
         setExamDetail(data);
-        // Build initial mark data from existing marks
         const md: Record<string, { marksScored: string; mistakes: string }> = {};
         for (const m of data.marks) {
           md[`${m.studentId}_${m.questionId}`] = {
-            marksScored: m.marksScored ?? "",
-            mistakes: m.mistakes ?? "",
+            marksScored: m.marksScored ?? "", mistakes: m.mistakes ?? "",
           };
         }
         setMarkData(md);
@@ -89,12 +101,17 @@ export default function Exams() {
       const res = await fetch("/api/exams", {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...examForm, subjectId: examForm.subjectId || null, totalMarks: examForm.totalMarks || null }),
+        body: JSON.stringify({
+          ...examForm,
+          subjectId: examForm.subjectId || null,
+          totalMarks: examForm.totalMarks || null,
+          timeLimitMinutes: examForm.timeLimitMinutes ? parseInt(examForm.timeLimitMinutes) : null,
+        }),
       });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message); }
       toast({ title: "Exam created" });
       setIsAddOpen(false);
-      setExamForm({ name: "", subjectId: "", examDate: "", totalMarks: "" });
+      setExamForm({ name: "", subjectId: "", examDate: "", totalMarks: "", timeLimitMinutes: "" });
       load();
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
     finally { setSavingExam(false); }
@@ -103,17 +120,32 @@ export default function Exams() {
   const handleAddQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedExam) return;
+    if (qForm.questionType === "mcq") {
+      const filled = qForm.options.filter(o => o.trim());
+      if (filled.length < 2) { toast({ title: "Add at least 2 MCQ options", variant: "destructive" }); return; }
+    }
     setSavingQ(true);
     try {
+      const body: any = {
+        questionText: qForm.questionText,
+        topic: qForm.topic,
+        maxMarks: parseFloat(qForm.maxMarks),
+        questionOrder: (examDetail?.questions.length ?? 0) + 1,
+        questionType: qForm.questionType,
+      };
+      if (qForm.questionType === "mcq") {
+        body.options = qForm.options.filter(o => o.trim());
+        body.correctOption = qForm.correctOption;
+      }
       const res = await fetch(`/api/exams/${selectedExam.id}/questions`, {
         method: "POST", credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...qForm, maxMarks: parseFloat(qForm.maxMarks), questionOrder: (examDetail?.questions.length ?? 0) + 1 }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) throw new Error("Failed to add question");
       toast({ title: "Question added" });
       setIsAddQOpen(false);
-      setQForm({ questionText: "", topic: "", maxMarks: "" });
+      setQForm(emptyQForm);
       loadDetail(selectedExam.id);
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
     finally { setSavingQ(false); }
@@ -136,7 +168,11 @@ export default function Exams() {
           const key = `${student.id}_${q.id}`;
           const entry = markData[key];
           if (entry) {
-            marks.push({ studentId: student.id, questionId: q.id, marksScored: entry.marksScored !== "" ? parseFloat(entry.marksScored) : null, mistakes: entry.mistakes || null });
+            marks.push({
+              studentId: student.id, questionId: q.id,
+              marksScored: entry.marksScored !== "" ? parseFloat(entry.marksScored) : null,
+              mistakes: entry.mistakes || null,
+            });
           }
         }
       }
@@ -165,7 +201,11 @@ export default function Exams() {
     load();
   };
 
+  // ── EXAM DETAIL VIEW ────────────────────────────────────────────────────────
   if (selectedExam) {
+    const writtenQs = examDetail?.questions.filter(q => q.questionType !== "mcq") ?? [];
+    const mcqQs = examDetail?.questions.filter(q => q.questionType === "mcq") ?? [];
+
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -177,36 +217,111 @@ export default function Exams() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">{selectedExam.name}</h1>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              {selectedExam.examDate && `Date: ${selectedExam.examDate} · `}
-              {selectedExam.totalMarks && `Total: ${selectedExam.totalMarks} marks`}
-            </p>
+            <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground flex-wrap">
+              {selectedExam.examDate && <span>Date: {new Date(selectedExam.examDate + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>}
+              {selectedExam.totalMarks && <span>· {selectedExam.totalMarks} marks</span>}
+              {selectedExam.timeLimitMinutes && (
+                <span className="flex items-center gap-1 text-amber-600">
+                  <Clock className="h-3.5 w-3.5" />{selectedExam.timeLimitMinutes}min limit
+                </span>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button variant="outline" className="gap-2" onClick={handleLoadResults}><Eye className="h-4 w-4" />View Results</Button>
+            <Button variant="outline" className="gap-2" onClick={() => window.location.href = `/exams/${selectedExam.id}/monitor`}>
+              <Monitor className="h-4 w-4" />Live Monitor
+            </Button>
             {!isAssistant && (
-              <Dialog open={isAddQOpen} onOpenChange={setIsAddQOpen}>
+              <Dialog open={isAddQOpen} onOpenChange={v => { setIsAddQOpen(v); if (!v) setQForm(emptyQForm); }}>
                 <DialogTrigger asChild>
                   <Button className="gap-2"><Plus className="h-4 w-4" />Add Question</Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-w-lg">
                   <DialogHeader><DialogTitle>Add Question</DialogTitle></DialogHeader>
                   <form onSubmit={handleAddQuestion} className="space-y-4 pt-2">
+                    {/* Question Type Toggle */}
                     <div className="space-y-1.5">
-                      <Label>Question / Description</Label>
-                      <Input placeholder="e.g. Q1: Describe Newton's First Law..." value={qForm.questionText} onChange={e => setQForm({ ...qForm, questionText: e.target.value })} />
+                      <Label>Question Type</Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: "written", label: "Structured / Written", icon: AlignLeft },
+                          { id: "mcq", label: "Multiple Choice (MCQ)", icon: FileQuestion },
+                        ].map(({ id, label, icon: Icon }) => (
+                          <button key={id} type="button"
+                            onClick={() => setQForm(f => ({ ...f, questionType: id }))}
+                            className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                              qForm.questionType === id
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-primary/50"
+                            }`}>
+                            <Icon className="h-4 w-4 flex-shrink-0" />{label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
+
+                    <div className="space-y-1.5">
+                      <Label>Question Text</Label>
+                      {qForm.questionType === "mcq" ? (
+                        <Input
+                          placeholder="e.g. Which of the following is Newton's First Law?"
+                          value={qForm.questionText}
+                          onChange={e => setQForm(f => ({ ...f, questionText: e.target.value }))}
+                          required
+                        />
+                      ) : (
+                        <Textarea
+                          placeholder="e.g. Describe Newton's First Law and give an example..."
+                          value={qForm.questionText}
+                          onChange={e => setQForm(f => ({ ...f, questionText: e.target.value }))}
+                          rows={2}
+                        />
+                      )}
+                    </div>
+
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
                         <Label>Topic</Label>
-                        <Input placeholder="e.g. Mechanics, Waves..." value={qForm.topic} onChange={e => setQForm({ ...qForm, topic: e.target.value })} />
+                        <Input placeholder="e.g. Mechanics" value={qForm.topic} onChange={e => setQForm(f => ({ ...f, topic: e.target.value }))} />
                       </div>
                       <div className="space-y-1.5">
                         <Label>Max Marks</Label>
-                        <Input type="number" min="0" step="0.5" placeholder="10" value={qForm.maxMarks} onChange={e => setQForm({ ...qForm, maxMarks: e.target.value })} required />
+                        <Input type="number" min="0" step="0.5" placeholder="1" value={qForm.maxMarks}
+                          onChange={e => setQForm(f => ({ ...f, maxMarks: e.target.value }))} required />
                       </div>
                     </div>
-                    <Button type="submit" className="w-full" disabled={savingQ}>{savingQ ? "Adding..." : "Add Question"}</Button>
+
+                    {qForm.questionType === "mcq" && (
+                      <div className="space-y-2">
+                        <Label>Options <span className="text-muted-foreground font-normal text-xs">(click the letter to mark as correct)</span></Label>
+                        {qForm.options.map((opt, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <button type="button"
+                              onClick={() => setQForm(f => ({ ...f, correctOption: i }))}
+                              className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 border-2 transition-all ${
+                                qForm.correctOption === i
+                                  ? "bg-emerald-500 border-emerald-500 text-white"
+                                  : "border-border text-muted-foreground hover:border-emerald-400"
+                              }`}>{OPTION_LABELS[i]}</button>
+                            <Input
+                              placeholder={`Option ${OPTION_LABELS[i]}`}
+                              value={opt}
+                              onChange={e => setQForm(f => {
+                                const opts = [...f.options];
+                                opts[i] = e.target.value;
+                                return { ...f, options: opts };
+                              })}
+                            />
+                          </div>
+                        ))}
+                        <p className="text-xs text-muted-foreground">Green letter = correct answer</p>
+                      </div>
+                    )}
+
+                    <Button type="submit" className="w-full" disabled={savingQ}>
+                      {savingQ ? "Adding..." : `Add ${qForm.questionType === "mcq" ? "MCQ" : "Structured"} Question`}
+                    </Button>
                   </form>
                 </DialogContent>
               </Dialog>
@@ -286,13 +401,38 @@ export default function Exams() {
                   </Card>
                 ) : (
                   <div className="space-y-2">
+                    {/* MCQ badge summary */}
+                    {mcqQs.length > 0 && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+                        <FileQuestion className="h-3.5 w-3.5 text-violet-500" />
+                        <span>{mcqQs.length} MCQ · {writtenQs.length} Written</span>
+                      </div>
+                    )}
                     {examDetail?.questions.map((q, i) => (
                       <Card key={q.id} className="border-border/50">
                         <CardContent className="p-3">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium">Q{i + 1}{q.questionText ? `: ${q.questionText}` : ""}</p>
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <span className="text-xs font-mono text-muted-foreground">Q{i + 1}</span>
+                                <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${q.questionType === "mcq" ? "border-violet-300 text-violet-600 bg-violet-50" : "border-blue-300 text-blue-600 bg-blue-50"}`}>
+                                  {q.questionType === "mcq" ? "MCQ" : "Written"}
+                                </Badge>
+                              </div>
+                              {q.questionText && <p className="text-sm font-medium leading-snug line-clamp-2">{q.questionText}</p>}
                               {q.topic && <p className="text-xs text-primary mt-0.5">{q.topic}</p>}
+                              {q.questionType === "mcq" && q.options && (
+                                <div className="mt-1.5 space-y-0.5">
+                                  {q.options.map((opt, oi) => (
+                                    <p key={oi} className={`text-xs flex items-center gap-1 ${oi === q.correctOption ? "text-emerald-600 font-semibold" : "text-muted-foreground"}`}>
+                                      <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] flex-shrink-0 ${oi === q.correctOption ? "bg-emerald-100" : "bg-muted"}`}>
+                                        {OPTION_LABELS[oi]}
+                                      </span>
+                                      {opt} {oi === q.correctOption && "✓"}
+                                    </p>
+                                  ))}
+                                </div>
+                              )}
                               <p className="text-xs text-muted-foreground mt-1">{q.maxMarks} marks</p>
                             </div>
                             {!isAssistant && (
@@ -341,10 +481,12 @@ export default function Exams() {
                         <th className="text-left px-3 py-2.5 font-medium text-muted-foreground sticky left-0 bg-muted/50 min-w-[140px]">Student</th>
                         {examDetail.questions.map((q, i) => (
                           <th key={q.id} className="px-2 py-2.5 text-center font-medium text-muted-foreground min-w-[90px]">
-                            Q{i + 1}<br /><span className="text-[10px] font-normal">/{q.maxMarks}</span>
+                            Q{i + 1}
+                            {q.questionType === "mcq" && <span className="ml-1 text-[9px] text-violet-500 font-normal">MCQ</span>}
+                            <br /><span className="text-[10px] font-normal">/{q.maxMarks}</span>
                           </th>
                         ))}
-                        <th className="px-3 py-2.5 text-left font-medium text-muted-foreground min-w-[160px]">Mistakes/Notes</th>
+                        <th className="px-3 py-2.5 text-left font-medium text-muted-foreground min-w-[160px]">Notes</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -362,10 +504,7 @@ export default function Exams() {
                             return (
                               <td key={q.id} className="px-2 py-2">
                                 <Input
-                                  type="number"
-                                  min="0"
-                                  max={max}
-                                  step="0.5"
+                                  type="number" min="0" max={max} step="0.5"
                                   className={`h-8 w-20 text-center text-sm ${score !== null && score > max ? "border-red-400" : ""}`}
                                   value={val}
                                   onChange={e => setMarkData(prev => ({
@@ -401,6 +540,7 @@ export default function Exams() {
     );
   }
 
+  // ── EXAMS LIST ──────────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -409,10 +549,10 @@ export default function Exams() {
             <ClipboardList className="h-7 w-7 text-indigo-600" />
             Exams & Marks
           </h1>
-          <p className="text-muted-foreground mt-1">Create exams, add questions, and record student marks.</p>
+          <p className="text-muted-foreground mt-1">Create exams, add MCQ or written questions, and record student marks.</p>
         </div>
         {!isAssistant && (
-          <Dialog open={isAddOpen} onOpenChange={v => { setIsAddOpen(v); if (!v) setExamForm({ name: "", subjectId: "", examDate: "", totalMarks: "" }); }}>
+          <Dialog open={isAddOpen} onOpenChange={v => { setIsAddOpen(v); if (!v) setExamForm({ name: "", subjectId: "", examDate: "", totalMarks: "", timeLimitMinutes: "" }); }}>
             <DialogTrigger asChild>
               <Button className="gap-2"><Plus className="h-4 w-4" />Create Exam</Button>
             </DialogTrigger>
@@ -438,9 +578,16 @@ export default function Exams() {
                     <Input type="date" value={examForm.examDate} onChange={e => setExamForm({ ...examForm, examDate: e.target.value })} />
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label>Total Marks (optional — auto-calculated from questions)</Label>
-                  <Input type="number" placeholder="e.g. 100" value={examForm.totalMarks} onChange={e => setExamForm({ ...examForm, totalMarks: e.target.value })} />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Total Marks (optional)</Label>
+                    <Input type="number" placeholder="e.g. 100" value={examForm.totalMarks} onChange={e => setExamForm({ ...examForm, totalMarks: e.target.value })} />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" />Online Time Limit (min)</Label>
+                    <Input type="number" min="5" max="300" step="5" placeholder="e.g. 60" value={examForm.timeLimitMinutes}
+                      onChange={e => setExamForm({ ...examForm, timeLimitMinutes: e.target.value })} />
+                  </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={savingExam}>{savingExam ? "Creating..." : "Create Exam"}</Button>
               </form>
@@ -470,9 +617,14 @@ export default function Exams() {
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold truncate group-hover:text-primary transition-colors">{exam.name}</p>
                       {subject && <p className="text-xs text-primary mt-0.5">{subject.name}</p>}
-                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
                         {exam.examDate && <span>{new Date(exam.examDate + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</span>}
                         {exam.totalMarks && <span>{exam.totalMarks} marks</span>}
+                        {exam.timeLimitMinutes && (
+                          <span className="flex items-center gap-0.5 text-amber-600">
+                            <Clock className="h-3 w-3" />{exam.timeLimitMinutes}min
+                          </span>
+                        )}
                       </div>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -484,7 +636,7 @@ export default function Exams() {
                     </div>
                   </div>
                   <div className="mt-3 flex items-center gap-1 text-xs text-muted-foreground">
-                    <ChevronRight className="h-3.5 w-3.5" />
+                    <PenLine className="h-3.5 w-3.5" />
                     <span>Click to open</span>
                   </div>
                 </CardContent>

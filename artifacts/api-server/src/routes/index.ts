@@ -33,6 +33,7 @@ import riskEngineRouter from "./risk-engine";
 import onlineExamsRouter from "./online-exams";
 import inventoryRouter from "./inventory";
 import tutorialRouter from "./tutorial";
+import timetableRouter from "./timetable";
 
 const router: IRouter = Router();
 
@@ -70,5 +71,6 @@ router.use(riskEngineRouter);
 router.use(onlineExamsRouter);
 router.use(inventoryRouter);
 router.use(tutorialRouter);
+router.use(timetableRouter);
 
 export default router;
