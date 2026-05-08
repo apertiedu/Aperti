@@ -1,9 +1,10 @@
 import { useLocation, Link } from "wouter";
-import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target, Menu, X, Library, Trophy, Flag } from "lucide-react";
+import { LayoutDashboard, CheckSquare, BookOpen, FolderOpen, User, LogOut, School, Award, CreditCard, Video, Layers, Target, Menu, X, Library, Trophy, Flag, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useTour } from "@/components/onboarding-tour";
 
 const NAV_ITEMS = [
   { name: "Home", href: "/", icon: LayoutDashboard },
@@ -27,6 +28,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
+  const { startTour } = useTour();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
@@ -85,7 +87,13 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           })}
         </nav>
 
-        <div className="p-3 border-t border-border/50">
+        <div className="p-3 border-t border-border/50 space-y-1">
+          <button
+            onClick={startTour}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all duration-200"
+          >
+            <Sparkles className="w-4 h-4 flex-shrink-0" />Replay Tour
+          </button>
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200"

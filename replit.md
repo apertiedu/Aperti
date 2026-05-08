@@ -161,6 +161,7 @@ Three tabs:
 - `student_goals` — id, student_id, goal_type (attendance/grade/streak), target_value, subject_id, deadline, notes, is_active, created_at
 - `student_achievements` — id, student_id, achievement_key, achievement_name, description, xp_points, earned_at; UNIQUE(student_id, achievement_key)
 - `student_xp` — student_id (PK), total_xp, level, updated_at
+- `tutorial_progress` — id, account_id (UNIQUE), completed, last_step, completed_at, created_at, updated_at
 - `online_exam_sessions` — id, exam_id, student_id, student_account_id, started_at, submitted_at, time_limit_minutes, answers JSONB, auto_score, max_score, status (in_progress/submitted/expired); UNIQUE(exam_id, student_id)
 - `inventory_items` — id, teacher_account_id, name, item_type (book/sheet/worksheet/exam_booklet/other), description, price, stock_count, low_stock_threshold, is_active, created_at
 - `inventory_sales` — id, item_id, student_id, teacher_account_id, quantity, unit_price, total_price, payment_status (paid/unpaid), notes, sold_at

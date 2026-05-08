@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/auth";
+import { TourProvider } from "@/components/onboarding-tour";
 import { ThemeProvider } from "@/context/theme";
 import NotFound from "@/pages/not-found";
 import Layout from "@/components/layout";
@@ -160,7 +161,9 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <AuthProvider>
-            <AppContent />
+            <TourProvider>
+              <AppContent />
+            </TourProvider>
           </AuthProvider>
           <Toaster />
         </TooltipProvider>

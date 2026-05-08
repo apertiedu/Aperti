@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/context/auth";
+import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ type Tab = "signin" | "activate";
 
 export default function Login() {
   const { login } = useAuth();
+  const [, navigate] = useLocation();
   const [tab, setTab] = useState<Tab>("signin");
 
   // Sign-in state
@@ -32,7 +34,7 @@ export default function Login() {
     e.preventDefault();
     setSigninError("");
     setSigninLoading(true);
-    try { await login(username.trim(), password); }
+    try { await login(username.trim(), password); navigate("/"); }
     catch (err: any) { setSigninError(err.message || "Invalid username or password"); }
     finally { setSigninLoading(false); }
   };
@@ -51,8 +53,8 @@ export default function Login() {
       });
       const data = await res.json();
       if (!res.ok) { setActivateError(data.message || "Activation failed"); return; }
-      // Reload auth context by triggering login flow
       await login(code.trim().toLowerCase(), newPass);
+      navigate("/");
     } catch (err: any) {
       setActivateError(err.message || "Activation failed");
     } finally { setActivateLoading(false); }

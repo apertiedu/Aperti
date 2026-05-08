@@ -4,7 +4,7 @@ import {
   School, LogOut, Shield, BookOpen, ClipboardList, BarChart3,
   ChevronLeft, ChevronRight, BookMarked, MessageSquare, Search,
   KeyRound, BookText, FolderOpen, Video, CreditCard, GraduationCap,
-  Building2, Layers, Sun, Moon, Library, Wand2, AlertTriangle, Package
+  Building2, Layers, Sun, Moon, Library, Wand2, AlertTriangle, Package, Sparkles
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,7 @@ import NotificationBell from "@/components/notification-bell";
 import ChangePasswordModal from "@/components/change-password-modal";
 import { useTheme } from "@/context/theme";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTour } from "@/components/onboarding-tour";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -26,6 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const isAssistant = user?.role === "assistant";
   const isAdmin = user?.role === "admin";
+  const { startTour } = useTour();
 
   const navGroups = [
     {
@@ -221,6 +223,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   </Button>
                 }
               />
+              <Button
+                variant="ghost" size="sm"
+                className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground text-xs h-8 transition-colors"
+                onClick={startTour}
+              >
+                <Sparkles className="w-3.5 h-3.5" />Replay Tour
+              </Button>
               <Button
                 variant="ghost" size="sm"
                 className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-xs h-8 transition-colors"

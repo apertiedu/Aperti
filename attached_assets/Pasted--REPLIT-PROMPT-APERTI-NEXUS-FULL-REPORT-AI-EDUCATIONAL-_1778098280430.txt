@@ -1,0 +1,529 @@
+🚀 REPLIT PROMPT — APERTI NEXUS FULL REPORT + AI EDUCATIONAL SYSTEM
+
+Build a production-grade AI Educational Operating System called:
+
+APERTI NEXUS 🌌
+
+────────────────────────────
+
+🧠 CORE SYSTEM
+
+Aperti Nexus is:
+
+AI Academic ERP
+
+AI Learning Platform
+
+AI Exam Intelligence System
+
+AI Revision System
+
+AI Flashcards System
+
+AI Analytics Engine
+
+AI Study Coach
+
+AI Resource Intelligence System
+
+AI Question Extraction Engine
+
+AI Marking & Report Engine
+
+
+Goal: “One seamless AI-powered academic operating system.”
+
+────────────────────────────
+
+❌ CORE RULE
+
+REMOVE ALL NON-ACADEMIC FEATURES:
+
+no commerce
+
+no sales
+
+no inventory
+
+no business modules
+
+
+ONLY EDUCATION SYSTEMS.
+
+────────────────────────────
+
+🔐 ROLE SYSTEM (RBAC)
+
+Roles:
+
+👑 ADMIN (full control)
+
+👀 Admin Assistant
+
+👨‍🏫 Teacher
+
+🧑‍🏫 Teacher Assistant
+
+🎓 Student
+
+👨‍👩‍👧 Parent
+
+
+Permission system is database-driven.
+
+ADMIN ONLY ACCESS:
+
+REPORT SYSTEM
+
+CSV EXPORT SYSTEM
+
+
+if role !== ADMIN → DENY ACCESS 🚫
+
+────────────────────────────
+
+🌐 HOMEPAGE (CINEMATIC)
+
+Features:
+
+glassmorphism UI
+
+animated gradients
+
+floating particles
+
+parallax motion
+
+AI dashboards
+
+animated counters
+
+premium SaaS design
+
+
+Role selection:
+
+Student
+
+Parent
+
+Teacher
+
+
+UI changes dynamically.
+
+────────────────────────────
+
+🎓 STUDENT SYSTEM
+
+Students can:
+
+view dashboard
+
+take exams
+
+use AI tutor
+
+use flashcards
+
+view reports
+
+access revision system
+
+
+ONLY OWN DATA ACCESS.
+
+────────────────────────────
+
+👨‍🏫 TEACHER SYSTEM
+
+Teachers can:
+
+manage students
+
+create exams
+
+upload resources
+
+use AI tools
+
+generate reports
+
+manage attendance
+
+
+ONLY THEIR OWN CLASSES.
+
+────────────────────────────
+
+👨‍👩‍👧 PARENT SYSTEM
+
+Parents can:
+
+view child progress
+
+attendance
+
+AI insights
+
+
+NO OTHER STUDENTS ACCESS.
+
+────────────────────────────
+
+📄 AI RESOURCE ENGINE
+
+Supports:
+
+PDF
+
+Images
+
+Notes
+
+Scanned documents
+
+
+AI can:
+
+summarize
+
+simplify
+
+generate flashcards
+
+extract syllabus structure
+
+
+────────────────────────────
+
+🧠 QUESTION EXTRACTION ENGINE
+
+Extract from:
+
+PDFs
+
+images
+
+past papers
+
+
+Detect:
+
+question number
+
+marks
+
+topic
+
+subparts
+
+command words
+
+
+Store: Q10 0620_s25_qp_22 format
+
+────────────────────────────
+
+🧪 TEST BUILDER
+
+drag & drop questions
+
+auto difficulty balance
+
+search question bank
+
+build exams
+
+
+────────────────────────────
+
+⏱ EXAM SYSTEM
+
+timed exams
+
+fullscreen mode
+
+autosave
+
+MCQs + structured
+
+AI marking
+
+
+────────────────────────────
+
+✍️ AI MARKING ENGINE
+
+highlight mistakes
+
+examiner feedback
+
+mark breakdown
+
+annotated results
+
+
+────────────────────────────
+
+🃏 FLASHCARD SYSTEM
+
+flip animation
+
+spaced repetition
+
+mastery tracking
+
+AI-generated from notes & mistakes
+
+
+────────────────────────────
+
+🧠 AI STUDY COACH
+
+weak topic tracking
+
+revision plans
+
+performance guidance
+
+personalized learning paths
+
+
+────────────────────────────
+
+🚨 EARLY WARNING SYSTEM
+
+Detect:
+
+grade drops
+
+low engagement
+
+burnout risk
+
+
+Trigger:
+
+alerts + intervention plans
+
+
+────────────────────────────
+
+📊 ANALYTICS CENTER
+
+heatmaps
+
+trend analysis
+
+prediction models
+
+engagement scoring
+
+
+────────────────────────────
+
+🔍 GLOBAL SEARCH
+
+Search:
+
+students
+
+exams
+
+questions
+
+reports
+
+flashcards
+
+
+Fast fuzzy search enabled.
+
+────────────────────────────
+
+⚡ PERFORMANCE
+
+lazy loading
+
+async AI processing
+
+caching
+
+retry system
+
+no crashes
+
+
+────────────────────────────
+
+🔐 SECURITY
+
+bcrypt hashing
+
+RBAC middleware
+
+audit logs
+
+session security
+
+soft delete + rollback
+
+
+────────────────────────────
+
+📊 REPORT SYSTEM (ADMIN ONLY 🔥)
+
+ONLY ADMIN CAN ACCESS THIS MODULE.
+
+Teachers / Parents / Students: ❌ NO ACCESS
+
+────────────────────────────
+
+📤 CSV EXPORT SYSTEM
+
+Admin can: 1️⃣ Select:
+
+ALL TEACHERS
+
+SINGLE TEACHER (dropdown)
+
+
+2️⃣ Export:
+
+Weekly reports per student
+
+
+3️⃣ Output:
+
+CSV file
+
+bulk export supported
+
+filtered export supported
+
+
+4️⃣ CSV FORMAT:
+
+Columns:
+
+studentCode
+
+studentName
+
+teacherName
+
+weekRange
+
+reportText
+
+
+────────────────────────────
+
+❌ REMOVE COMPLETELY:
+
+parent comments section
+
+any feedback field
+
+
+────────────────────────────
+
+📄 AI REPORT FORMAT (STRICT TEMPLATE)
+
+Each reportText must follow:
+
+⭐ WEEKLY REPORT: ALI EMAD 🆔 Student Code: A01 🗓 Week: 21/02/2026 → 27/02/2026
+
+📌 STATUS: ⚡ Moderate
+
+📈 TREND: • Overall: 🆕 Not enough data
+
+────────────────────────
+
+📊 PERFORMANCE SUMMARY: • Overall Score: 73% ⚡ Moderate • Main Issue: Low Exam Performance
+
+────────────────────────
+
+📊 KEY METRICS: • Attendance: 67% 🟩🟩🟩⬜⬜ ⚡ Needs Attention • Homework Completion: 100% 🟩🟩🟩🟩🟩 ✅ Good • Homework Average: 65% • Exams & Quizzes Avg: 54% • Homework Discipline: 🏆 Elite • Homework Late: 2/2 (1 late) • Attendance Commitment: ⚠ Monitor
+
+🧠 ARCHETYPE: • Hard Worker 💡 — High effort in homework, exam results lag
+
+🎯 FOCUS: • Weak Topic: Density & Measurements 🛠️ • Strong Topic: Forces & Circular Motion 💪 • Overall Performance: 73%
+
+🚀 ACTION PLAN: ⚡ Improve attendance consistency 🌟 Maintain strong homework habits 🔴 Boost exam performance 💡 Increase revision effort 📚 Focus weak topics ⚡ Strengthen strong topics
+
+💡 MOTIVATION: 💪 Stay consistent — improvement is coming! 📈 Build consistency for better results
+
+✨ MADE WITH ❤️ BY APERTI 👻 ✨
+
+────────────────────────────
+
+🧠 AI REPORT ENGINE LOGIC
+
+AI must:
+
+compute performance score
+
+detect weak/strong topics
+
+generate archetype
+
+detect burnout risk
+
+generate action plan
+
+produce motivation text
+
+analyze trends
+
+
+────────────────────────────
+
+📦 DATABASE
+
+StudentReports:
+
+id
+
+studentId
+
+teacherId
+
+weekStart
+
+weekEnd
+
+reportText (LONG TEXT)
+
+generatedAt
+
+
+────────────────────────────
+
+⚡ PERFORMANCE REQUIREMENTS
+
+batch generate for ALL students
+
+async queue system
+
+caching enabled
+
+fast CSV export (<5s for 1000+ rows)
+
+
+────────────────────────────
+
+🚀 FINAL FLOW
+
+ADMIN ACTION:
+
+📤 Export Reports → CSV
+
+System:
+
+filters by teacher OR all teachers
+
+generates AI reports
+
+exports downloadable CSV instantly
