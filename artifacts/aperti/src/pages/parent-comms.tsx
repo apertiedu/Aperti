@@ -6,9 +6,182 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Copy, CheckCheck, Phone, Search, Filter, AlertTriangle, Send } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MessageSquare, Copy, CheckCheck, Phone, Search, AlertTriangle, Send, Bell, Users, Radio, Loader2, CheckCircle2, Info, XCircle } from "lucide-react";
 
 type Student = { id: number; studentCode: string; studentName: string; phone: string | null; parentPhone: string | null; status: string };
+type Session = { id: number; lessonNumber: number; dayOfWeek: string; startTime: string; subjectName: string };
+
+const NOTIF_TYPES = [
+  { value: "info", label: "Info", icon: Info, color: "text-blue-600 border-blue-200 bg-blue-50" },
+  { value: "warning", label: "Warning", icon: AlertTriangle, color: "text-amber-600 border-amber-200 bg-amber-50" },
+  { value: "success", label: "Success", icon: CheckCircle2, color: "text-emerald-600 border-emerald-200 bg-emerald-50" },
+  { value: "error", label: "Urgent", icon: XCircle, color: "text-red-600 border-red-200 bg-red-50" },
+];
+
+function BroadcastPanel({ students }: { students: Student[] }) {
+  const { toast } = useToast();
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [target, setTarget] = useState<"all" | "session" | "specific">("all");
+  const [sessionId, setSessionId] = useState("all");
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [title, setTitle] = useState("");
+  const [message, setMessage] = useState("");
+  const [notifType, setNotifType] = useState("info");
+  const [link, setLink] = useState("");
+  const [sending, setSending] = useState(false);
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    fetch("/api/sessions", { credentials: "include" })
+      .then(r => r.ok ? r.json() : [])
+      .then((rows: any[]) => setSessions(rows.map(s => ({
+        id: s.id, lessonNumber: s.lessonNumber, dayOfWeek: s.dayOfWeek,
+        startTime: s.startTime, subjectName: s.subjectName ?? "No Subject",
+      }))));
+  }, []);
+
+  const toggleStudent = (id: number) =>
+    setSelectedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+
+  const filteredStudents = students.filter(s =>
+    s.studentName.toLowerCase().includes(search.toLowerCase()) || s.studentCode.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const handleSend = async () => {
+    if (!title.trim() || !message.trim()) {
+      toast({ title: "Title and message are required", variant: "destructive" }); return;
+    }
+    if (target === "specific" && selectedIds.size === 0) {
+      toast({ title: "Select at least one student", variant: "destructive" }); return;
+    }
+    setSending(true);
+    try {
+      const body: any = { title: title.trim(), message: message.trim(), type: notifType, link: link || undefined, target };
+      if (target === "session" && sessionId !== "all") body.sessionId = sessionId;
+      if (target === "specific") body.studentIds = Array.from(selectedIds);
+      const res = await fetch("/api/notifications/broadcast", {
+        method: "POST", credentials: "include",
+        headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      const { sent } = await res.json();
+      toast({ title: `Notification sent to ${sent} student${sent !== 1 ? "s" : ""}` });
+      setTitle(""); setMessage(""); setLink(""); setSelectedIds(new Set());
+    } catch {
+      toast({ title: "Failed to send notification", variant: "destructive" });
+    } finally { setSending(false); }
+  };
+
+  const currentType = NOTIF_TYPES.find(t => t.value === notifType)!;
+
+  return (
+    <Card className="border-border/50 shadow-sm">
+      <CardHeader className="pb-3 border-b border-border/50">
+        <CardTitle className="text-base flex items-center gap-2">
+          <Bell className="h-4 w-4 text-primary" /> Push Notification Broadcast
+        </CardTitle>
+        <p className="text-xs text-muted-foreground mt-0.5">Send in-app notifications directly to students' notification bell</p>
+      </CardHeader>
+      <CardContent className="pt-5 space-y-4">
+        {/* Target */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Recipients</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {([["all", "All Students", Users], ["session", "By Session", Radio], ["specific", "Select Students", Users]] as const).map(([val, lbl, Icon]) => (
+              <button key={val} onClick={() => setTarget(val as any)}
+                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold border transition-all ${target === val ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/40 hover:bg-muted/50 text-muted-foreground"}`}>
+                <Icon className="w-3.5 h-3.5" /> {lbl}
+              </button>
+            ))}
+          </div>
+          {target === "session" && (
+            <Select value={sessionId} onValueChange={setSessionId}>
+              <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select session…" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All sessions</SelectItem>
+                {sessions.map(s => <SelectItem key={s.id} value={String(s.id)}>L{s.lessonNumber} · {s.dayOfWeek} {s.startTime?.slice(0, 5)} · {s.subjectName}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          )}
+          {target === "specific" && (
+            <div className="border border-border rounded-xl overflow-hidden">
+              <div className="p-2 border-b border-border bg-muted/30">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input className="pl-8 h-8 text-xs" placeholder="Search students…" value={search} onChange={e => setSearch(e.target.value)} />
+                </div>
+              </div>
+              <div className="max-h-44 overflow-y-auto divide-y divide-border/60">
+                {filteredStudents.map(s => (
+                  <button key={s.id} onClick={() => toggleStudent(s.id)}
+                    className={`w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-muted/40 transition-colors ${selectedIds.has(s.id) ? "bg-primary/5" : ""}`}>
+                    <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${selectedIds.has(s.id) ? "border-primary bg-primary" : "border-border"}`}>
+                      {selectedIds.has(s.id) && <CheckCircle2 className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-sm font-medium truncate">{s.studentName}</span>
+                    <span className="text-xs text-muted-foreground font-mono ml-auto shrink-0">{s.studentCode}</span>
+                  </button>
+                ))}
+              </div>
+              {selectedIds.size > 0 && (
+                <div className="p-2 bg-primary/5 border-t border-border text-xs text-primary font-semibold">
+                  {selectedIds.size} student{selectedIds.size !== 1 ? "s" : ""} selected
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Type */}
+        <div className="space-y-2">
+          <Label className="text-sm font-semibold">Notification Type</Label>
+          <div className="grid grid-cols-4 gap-2">
+            {NOTIF_TYPES.map(t => (
+              <button key={t.value} onClick={() => setNotifType(t.value)}
+                className={`flex flex-col items-center gap-1 p-2 rounded-xl text-xs font-bold border-2 transition-all ${notifType === t.value ? t.color + " border-current" : "border-border hover:bg-muted/50 text-muted-foreground"}`}>
+                <t.icon className="w-4 h-4" /> {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label className="text-sm">Title <span className="text-red-500">*</span></Label>
+            <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Exam Tomorrow at 10am" className="h-9 text-sm" maxLength={100} />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-sm">Link (optional)</Label>
+            <Input value={link} onChange={e => setLink(e.target.value)} placeholder="/exams or /timetable" className="h-9 text-sm" />
+          </div>
+        </div>
+        <div className="space-y-1.5">
+          <Label className="text-sm">Message <span className="text-red-500">*</span></Label>
+          <Textarea value={message} onChange={e => setMessage(e.target.value)} rows={3} placeholder="Write your notification message here…" className="text-sm resize-none" maxLength={500} />
+          <p className="text-xs text-muted-foreground text-right">{message.length}/500</p>
+        </div>
+
+        {/* Preview */}
+        {(title || message) && (
+          <div className={`rounded-xl border-2 p-3 flex items-start gap-3 ${currentType.color}`}>
+            <currentType.icon className="w-4 h-4 mt-0.5 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold">{title || "Notification title"}</p>
+              <p className="text-xs mt-0.5 opacity-80">{message || "Notification message…"}</p>
+            </div>
+            <Badge variant="secondary" className="text-[10px] shrink-0">{currentType.label}</Badge>
+          </div>
+        )}
+
+        <Button className="w-full gap-2 h-10" onClick={handleSend} disabled={sending}>
+          {sending ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</> : <><Send className="w-4 h-4" /> Send Notification</>}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
 
 const MESSAGE_TYPES = [
   { value: "absence", label: "Today's Absence", icon: "📅" },
@@ -271,6 +444,9 @@ export default function ParentComms() {
           </CardContent>
         )}
       </Card>
+
+      {/* Push Notification Broadcast */}
+      <BroadcastPanel students={students} />
     </div>
   );
 }

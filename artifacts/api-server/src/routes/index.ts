@@ -35,6 +35,8 @@ import inventoryRouter from "./inventory";
 import tutorialRouter from "./tutorial";
 import timetableRouter from "./timetable";
 import calendarRouter from "./calendar";
+import gradebookRouter from "./gradebook";
+import notifyBroadcastRouter from "./notify-broadcast";
 
 const router: IRouter = Router();
 
@@ -74,5 +76,7 @@ router.use(inventoryRouter);
 router.use(tutorialRouter);
 router.use(timetableRouter);
 router.use(calendarRouter);
+router.use(gradebookRouter);
+router.use(notifyBroadcastRouter);
 
 export default router;

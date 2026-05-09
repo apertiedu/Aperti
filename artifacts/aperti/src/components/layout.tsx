@@ -78,6 +78,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Insights",
       items: [
+        { name: "Grade Book", href: "/gradebook", icon: BookMarked, roles: ["admin", "teacher"] },
         { name: "Analytics", href: "/analytics", icon: BarChart3, roles: ["admin", "teacher"] },
         { name: "Reports", href: "/reports", icon: FileBarChart, roles: ["admin", "teacher"] },
         { name: "Risk Report", href: "/risk-report", icon: AlertTriangle, roles: ["admin", "teacher"] },
