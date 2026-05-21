@@ -1,122 +1,62 @@
-import { Router, type IRouter } from "express";
-import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
-import { db, accountsTable, studentsTable } from "@workspace/db";
+import { Router, Request, Response } from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { db } from "../lib/db";          // your drizzle client
+import { accountsTable, deviceSessionsTable } from "@lib/db/schema";
 
-declare module "express-session" {
-  interface SessionData {
-    accountId: number;
-    username: string;
-    displayName: string;
-    role: string;
-    teacherAccountId: number | null;
-    studentId: number | null;
-  }
-}
+const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret";
+const TOKEN_EXPIRY = "7d";
 
-const router: IRouter = Router();
+export const authRouter = Router();
 
-router.post("/auth/login", async (req, res): Promise<void> => {
-  const { username, password } = req.body;
-  if (!username || !password) { res.status(400).json({ message: "Username and password are required" }); return; }
-
-  const [account] = await db.select().from(accountsTable).where(eq(accountsTable.username, username.trim().toLowerCase()));
-  if (!account) { res.status(401).json({ message: "Invalid username or password" }); return; }
-  if (account.status === "suspended") { res.status(403).json({ message: "Account suspended. Contact your administrator." }); return; }
+// POST /auth/login
+authRouter.post("/login", async (req: Request, res: Response) => {
+  const { username, password, deviceId, ip, userAgent } = req.body;
+  const account = await db.query.accounts.findFirst({ where: (a, { eq }) => eq(a.username, username) });
+  if (!account || account.status !== "active") return res.status(401).json({ error: "Invalid credentials" });
 
   const valid = await bcrypt.compare(password, account.passwordHash);
-  if (!valid) { res.status(401).json({ message: "Invalid username or password" }); return; }
+  if (!valid) return res.status(401).json({ error: "Invalid credentials" });
 
-  req.session.accountId = account.id;
-  req.session.username = account.username;
-  req.session.displayName = account.displayName || account.username;
-  req.session.role = account.role;
-  req.session.teacherAccountId = account.teacherAccountId ?? null;
-  req.session.studentId = null;
+  const token = jwt.sign({ id: account.id, role: account.role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
 
-  if (account.role === "student") {
-    const [studentRecord] = await db.select().from(studentsTable).where(eq(studentsTable.accountId, account.id));
-    if (studentRecord) {
-      req.session.studentId = studentRecord.id;
-      req.session.teacherAccountId = studentRecord.teacherAccountId;
-    }
+  if (deviceId) {
+    await db.insert(deviceSessionsTable).values({
+      accountId: account.id, deviceId, ip, userAgent,
+      lastActiveAt: new Date(),
+    });
   }
 
-  res.json({
-    id: account.id,
-    username: account.username,
-    displayName: account.displayName || account.username,
-    role: account.role,
-    teacherAccountId: account.teacherAccountId ?? null,
-    studentId: req.session.studentId ?? null,
-  });
+  res.json({ token, user: { id: account.id, username: account.username, displayName: account.displayName, role: account.role } });
 });
 
-router.post("/auth/activate", async (req, res): Promise<void> => {
-  const { studentCode, studentName, password, confirmPassword } = req.body;
-  if (!studentCode?.trim() || !studentName?.trim() || !password) {
-    res.status(400).json({ message: "Student code, name, and password are required" }); return;
-  }
-  if (password !== confirmPassword) {
-    res.status(400).json({ message: "Passwords do not match" }); return;
-  }
-  if (password.length < 6) {
-    res.status(400).json({ message: "Password must be at least 6 characters" }); return;
-  }
-  const [student] = await db.select().from(studentsTable).where(eq(studentsTable.studentCode, studentCode.trim().toUpperCase()));
-  if (!student) { res.status(404).json({ message: "Student code not found. Contact your teacher." }); return; }
-  const inputName = studentName.trim().toUpperCase();
-  const storedName = (student.studentName || "").toUpperCase();
-  if (inputName !== storedName) {
-    res.status(400).json({ message: "Name does not match our records. Enter your name exactly as given." }); return;
-  }
-  if (student.accountId) {
-    res.status(409).json({ message: "Account already activated. Please sign in." }); return;
-  }
-  const username = studentCode.trim().toLowerCase();
-  const [existing] = await db.select().from(accountsTable).where(eq(accountsTable.username, username));
-  if (existing) { res.status(409).json({ message: "An account with this code already exists. Try signing in." }); return; }
-  const passwordHash = await bcrypt.hash(password, 10);
-  const [account] = await db.insert(accountsTable).values({
-    username,
-    passwordHash,
-    displayName: student.studentName,
-    role: "student",
-    status: "active",
-    teacherAccountId: student.teacherAccountId ?? null,
-  }).returning();
-  await db.update(studentsTable).set({ accountId: account.id }).where(eq(studentsTable.id, student.id));
-  req.session.accountId = account.id;
-  req.session.username = account.username;
-  req.session.displayName = account.displayName || account.username;
-  req.session.role = "student";
-  req.session.teacherAccountId = student.teacherAccountId ?? null;
-  req.session.studentId = student.id;
-  res.status(201).json({
-    id: account.id,
-    username: account.username,
-    displayName: account.displayName,
-    role: "student",
-    teacherAccountId: student.teacherAccountId ?? null,
-    studentId: student.id,
-  });
+// POST /auth/signup (admin only for now, or allow teacher signup)
+authRouter.post("/signup", async (req: Request, res: Response) => {
+  const { username, password, displayName, role } = req.body;
+  const hash = await bcrypt.hash(password, 12);
+  const [newUser] = await db.insert(accountsTable).values({ username, passwordHash: hash, displayName, role }).returning();
+  res.status(201).json({ user: { id: newUser.id, username: newUser.username, role: newUser.role } });
 });
 
-router.post("/auth/logout", (req, res): void => {
-  req.session.destroy(() => res.json({ message: "Logged out" }));
+// GET /auth/me – validate token
+authRouter.get("/me", async (req: Request, res: Response) => {
+  const header = req.headers.authorization;
+  if (!header?.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
+  try {
+    const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
+    const account = await db.query.accounts.findFirst({ where: (a, { eq }) => eq(a.id, payload.id) });
+    if (!account) return res.status(401).json({ error: "User not found" });
+    res.json({ user: { id: account.id, username: account.username, displayName: account.displayName, role: account.role } });
+  } catch {
+    res.status(401).json({ error: "Invalid token" });
+  }
 });
 
-router.get("/auth/me", (req, res): void => {
-  if (!req.session.accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
-  res.json({
-    id: req.session.accountId,
-    username: req.session.username,
-    displayName: req.session.displayName,
-    role: req.session.role || "admin",
-    teacherAccountId: req.session.teacherAccountId ?? null,
-    studentId: req.session.studentId ?? null,
-  });
+// POST /auth/logout – delete device session
+authRouter.post("/logout", async (req: Request, res: Response) => {
+  const { deviceId } = req.body;
+  if (deviceId) {
+    await db.delete(deviceSessionsTable).where(eq(deviceSessionsTable.deviceId, deviceId));
+  }
+  res.json({ success: true });
 });
-
-export default router;
-export { };
