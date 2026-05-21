@@ -12,3 +12,20 @@ export * from "./homework";
 export * from "./resources";
 export * from "./invoices";
 export * from "./recordings";
+
+// ––– Aperti V6 new modules –––
+export * from "./echo-memory";
+export * from "./knowledge-graph";
+export * from "./subscriptions";
+export * from "./flex-seats";
+export * from "./kudos-engine";
+export * from "./simulations";
+export * from "./live-class";
+export * from "./twin-control";
+export * from "./marker-mind";
+export * from "./insight-stream";
+export * from "./guardian";
+export * from "./ascend";
+export * from "./paper-vault";
+export * from "./aperti-courses";
+export * from "./helpdesk";
