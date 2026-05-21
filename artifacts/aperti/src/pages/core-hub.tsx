@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import {
   BookOpen,
@@ -26,10 +25,20 @@ import {
   ChevronRight,
   Zap,
   Sparkles,
+  Edit3,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@/context/auth";
 
-// ---------- Mock data (replace with API calls later) ----------
+// ---------- Exact pricing plan (as agreed) ----------
+const PLAN_DETAILS = {
+  name: "Master",
+  priceEgp: 200,
+  studentLimit: 300,
+  currentStudents: 287,
+  flexSeatPrice: 3,
+};
+
 const todayStats = {
   lessons: 4,
   studentsPresent: 89,
@@ -44,41 +53,54 @@ const upcomingLessons = [
 ];
 
 const quickActions = [
-  { label: "Start Live Class", icon: CalendarCheck, color: "text-teal-600", href: "/live-class" },
-  { label: "Take Attendance", icon: CheckCheckIcon, color: "text-teal-600", href: "/checkin" },
-  { label: "Create Homework", icon: BookOpen, color: "text-teal-600", href: "/submit-flow" },
-  { label: "View Reports", icon: TrendingUp, color: "text-teal-600", href: "/pulse" },
+  { label: "Start Live Class", icon: CalendarCheck, href: "/live-class" },
+  { label: "Take Attendance", icon: CheckCheckIcon, href: "/checkin" },
+  { label: "Create Homework", icon: BookOpen, href: "/submit-flow" },
+  { label: "View Reports", icon: TrendingUp, href: "/pulse" },
 ];
 
-// Custom CheckCheck icon (inline)
 function CheckCheckIcon(props: any) {
   return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M18 6 7 17l-5-5" />
       <path d="m22 10-7.5 7.5L13 16" />
     </svg>
   );
 }
 
-// Animation variants
 const container = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.08 },
-  },
+  show: { opacity: 1, transition: { staggerChildren: 0.08 } },
 };
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 200, damping: 20 } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 200, damping: 20 },
+  },
 };
 
-// ---------- Main Component ----------
 export default function CoreHub() {
+  const { user } = useAuth(); // will be real after we build Auth, now mock
+  const displayName = user?.displayName || "Youssef Tarek";
+  const isAdmin = user?.role === "admin";
+
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
-      {/* Header */}
+      {/* Header – personalised */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -87,9 +109,12 @@ export default function CoreHub() {
       >
         <div>
           <h1 className="text-3xl font-bold text-foreground">
-            Welcome back, <span className="text-primary">Teacher</span>
+            Welcome back,{" "}
+            <span className="text-primary">{displayName}</span>
           </h1>
-          <p className="text-muted-foreground">Here’s your classroom at a glance.</p>
+          <p className="text-muted-foreground">
+            Your classroom at a glance — every mind finds its rhythm.
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" size="icon" className="relative">
@@ -98,9 +123,13 @@ export default function CoreHub() {
               3
             </span>
           </Button>
-          <Button variant="outline" size="icon">
-            <Settings className="h-5 w-5" />
-          </Button>
+          {isAdmin && (
+            <Link href="/admin/subpilot-settings">
+              <Button variant="outline" size="icon" title="Manage subscription plans">
+                <Settings className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
           <Link href="/helpdesk">
             <Button variant="outline" size="icon">
               <HelpCircle className="h-5 w-5" />
@@ -109,7 +138,7 @@ export default function CoreHub() {
         </div>
       </motion.div>
 
-      {/* Stats Row */}
+      {/* Stats row */}
       <motion.div
         variants={container}
         initial="hidden"
@@ -140,7 +169,7 @@ export default function CoreHub() {
 
       {/* Two‑column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left column (upcoming + quick actions) */}
+        {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Upcoming Lessons */}
           <motion.div variants={item} initial="hidden" animate="show">
@@ -156,12 +185,20 @@ export default function CoreHub() {
                 <ScrollArea className="h-[200px]">
                   <div className="space-y-3">
                     {upcomingLessons.map((lesson, i) => (
-                      <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                      <div
+                        key={i}
+                        className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
+                      >
                         <div>
                           <p className="font-medium">{lesson.subject}</p>
-                          <p className="text-sm text-muted-foreground">{lesson.time} • {lesson.students} students</p>
+                          <p className="text-sm text-muted-foreground">
+                            {lesson.time} • {lesson.students} students
+                          </p>
                         </div>
-                        <Badge variant="outline" className="border-primary text-primary">
+                        <Badge
+                          variant="outline"
+                          className="border-primary text-primary"
+                        >
                           <Link href="/plan-grid">View</Link>
                         </Badge>
                       </div>
@@ -185,7 +222,10 @@ export default function CoreHub() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {quickActions.map((action, idx) => (
                     <Link key={idx} href={action.href}>
-                      <Button variant="outline" className="w-full h-auto py-3 flex flex-col items-center gap-1 group">
+                      <Button
+                        variant="outline"
+                        className="w-full h-auto py-3 flex flex-col items-center gap-1 group"
+                      >
                         <action.icon className="h-5 w-5 text-primary group-hover:scale-110 transition-transform" />
                         <span className="text-xs">{action.label}</span>
                       </Button>
@@ -197,29 +237,53 @@ export default function CoreHub() {
           </motion.div>
         </div>
 
-        {/* Right column (subscription + kudos) */}
+        {/* Right column */}
         <div className="space-y-6">
-          {/* Subscription Health */}
+          {/* Subscription health – exact plan */}
           <motion.div variants={item} initial="hidden" animate="show">
             <Card className="card-hover">
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  SubPilot™
-                </CardTitle>
-                <CardDescription>Your current plan</CardDescription>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    SubPilot™
+                  </CardTitle>
+                  {isAdmin && (
+                    <Link href="/admin/subpilot-settings">
+                      <Button variant="ghost" size="icon" title="Edit plans">
+                        <Edit3 className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+                <CardDescription>
+                  {PLAN_DETAILS.name} plan — {PLAN_DETAILS.priceEgp} EGP / student / month
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-sm text-muted-foreground">Plan</span>
-                  <Badge className="bg-primary text-primary-foreground">Master</Badge>
-                </div>
-                <div className="flex justify-between">
                   <span className="text-sm text-muted-foreground">Students</span>
-                  <span className="font-medium">287 / 300</span>
+                  <span className="font-medium">
+                    {PLAN_DETAILS.currentStudents} / {PLAN_DETAILS.studentLimit}
+                  </span>
                 </div>
-                <Progress value={95} className="h-2" />
-                <p className="text-xs text-muted-foreground">FlexSeats™ available • <Link href="/subpilot" className="underline underline-offset-2">Manage</Link></p>
+                <Progress
+                  value={
+                    (PLAN_DETAILS.currentStudents / PLAN_DETAILS.studentLimit) * 100
+                  }
+                  className="h-2"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>
+                    FlexSeats™ available at{" "}
+                    <strong>{PLAN_DETAILS.flexSeatPrice} EGP</strong> each
+                  </span>
+                </div>
+                <Link href="/subpilot">
+                  <Button variant="outline" size="sm" className="w-full mt-1">
+                    Manage subscription
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </motion.div>
@@ -257,7 +321,11 @@ export default function CoreHub() {
                     <Badge variant="secondary">2nd</Badge>
                   </div>
                   <Link href="/kudos-engine">
-                    <Button variant="ghost" size="sm" className="w-full justify-between">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-between"
+                    >
                       View leaderboard <ChevronRight className="h-4 w-4" />
                     </Button>
                   </Link>
@@ -271,7 +339,6 @@ export default function CoreHub() {
   );
 }
 
-// Reusable stats card
 function StatsCard({
   label,
   value,
