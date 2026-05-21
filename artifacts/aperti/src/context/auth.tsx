@@ -1,62 +1,55 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-export interface AuthUser {
-  id?: number;
+interface User {
+  id: number;
   username: string;
   displayName: string;
-  role: "admin" | "teacher" | "assistant" | "student";
-  teacherAccountId: number | null;
+  role: "admin" | "teacher" | "assistant" | "student" | "parent";
 }
 
 interface AuthContextType {
-  user: AuthUser | null;
+  user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
+  logout: () => void;
+  token: string | null;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType>(null!);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem("aperti_token"));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/auth/me", { credentials: "include" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => setUser(data ?? null))
-      .catch(() => setUser(null))
+    if (!token) { setLoading(false); return; }
+    fetch(`${import.meta.env.VITE_API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(res => res.json())
+      .then(data => { if (data.user) setUser(data.user); else localStorage.removeItem("aperti_token"); })
       .finally(() => setLoading(false));
-  }, []);
+  }, [token]);
 
   const login = async (username: string, password: string) => {
-    const res = await fetch("/api/auth/login", {
-      method: "POST", credentials: "include",
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, deviceId: "web" }), // real device ID later
     });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || "Login failed");
-    }
     const data = await res.json();
-    setUser(data);
+    if (!res.ok) throw new Error(data.error);
+    localStorage.setItem("aperti_token", data.token);
+    setToken(data.token);
+    setUser(data.user);
   };
 
-  const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  const logout = () => {
+    localStorage.removeItem("aperti_token");
+    setToken(null);
     setUser(null);
   };
 
-  return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, loading, login, logout, token }}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
-  return ctx;
-}
+export const useAuth = () => useContext(AuthContext);
