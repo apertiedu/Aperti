@@ -70,3 +70,15 @@ async function seedDefaultAdmin() {
 seedDefaultAdmin();
 
 export default app;
+
+import { authRouter } from "./routes/auth";
+import { dashboardRouter } from "./routes/dashboard";
+import { attendanceRouter } from "./routes/attendance";
+import { lessonsRouter } from "./routes/lessons";
+import { subscriptionsRouter } from "./routes/subscriptions";
+
+app.use("/auth", authRouter);
+app.use("/dashboard", dashboardRouter);
+app.use("/attendance", attendanceRouter);
+app.use("/lessons", lessonsRouter);
+app.use("/subscriptions", subscriptionsRouter);
