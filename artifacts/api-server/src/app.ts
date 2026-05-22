@@ -82,3 +82,6 @@ app.use("/dashboard", dashboardRouter);
 app.use("/attendance", attendanceRouter);
 app.use("/lessons", lessonsRouter);
 app.use("/subscriptions", subscriptionsRouter);
+
+import { studentsRouter } from "./routes/students";
+app.use("/students", studentsRouter);
