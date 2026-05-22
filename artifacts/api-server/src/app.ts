@@ -85,3 +85,7 @@ app.use("/subscriptions", subscriptionsRouter);
 
 import { studentsRouter } from "./routes/students";
 app.use("/students", studentsRouter);
+
+
+import { liveClassRouter } from "./routes/live-class";
+app.use("/live-class", liveClassRouter);
