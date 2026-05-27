@@ -134,3 +134,7 @@ export default function LiveClass() {
     </div>
   );
 }
+
+// After setHostToken...
+// Show pairing dialog with QR code
+setPairDialogOpen(true);
