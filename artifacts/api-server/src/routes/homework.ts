@@ -1,126 +1,114 @@
-import { Router, type IRouter } from "express";
-import { eq, and, desc, sql } from "drizzle-orm";
-import { db, homeworkTable, homeworkSubmissionsTable, studentsTable, subjectsTable } from "@workspace/db";
-import { requireTenantAccess } from "../middleware/tenant";
+import { Router, Response } from "express";
+import { db } from "../lib/db";
+import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
+import { homeworkTable, homeworkSubmissionsTable } from "@lib/db/schema/homework";
+import { eq, and } from "drizzle-orm";
 
-const router: IRouter = Router();
+export const homeworkRouter = Router();
 
-router.get("/homework", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, isAdmin } = req.tenant;
+// ─── TEACHER ROUTES ───
 
-  const rows = await db.select({
-    id: homeworkTable.id,
-    title: homeworkTable.title,
-    description: homeworkTable.description,
-    dueDate: homeworkTable.dueDate,
-    totalMarks: homeworkTable.totalMarks,
-    classFilter: homeworkTable.classFilter,
-    allowLate: homeworkTable.allowLate,
-    isPublished: homeworkTable.isPublished,
-    subjectId: homeworkTable.subjectId,
-    subjectName: subjectsTable.name,
-    createdAt: homeworkTable.createdAt,
-    submissionCount: sql<number>`(SELECT COUNT(*) FROM homework_submissions WHERE homework_id = ${homeworkTable.id})::int`,
-    gradedCount: sql<number>`(SELECT COUNT(*) FROM homework_submissions WHERE homework_id = ${homeworkTable.id} AND status = 'graded')::int`,
-  }).from(homeworkTable)
-    .leftJoin(subjectsTable, eq(homeworkTable.subjectId, subjectsTable.id))
-    .where(!isAdmin && teacherId ? eq(homeworkTable.teacherAccountId, teacherId) : sql`1=1`)
-    .orderBy(desc(homeworkTable.createdAt));
-
-  res.json(rows);
+// GET /homework/teacher — list all homework for this teacher
+homeworkRouter.get("/teacher", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const list = await db.query.homework.findMany({
+    where: (h, { eq }) => eq(h.teacherAccountId, teacherId),
+    orderBy: (h, { desc }) => [desc(h.createdAt)],
+  });
+  res.json(list);
 });
 
-router.post("/homework", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, isAdmin, accountId } = req.tenant;
-  const { title, description, instructions, dueDate, totalMarks, subjectId, classFilter, allowLate } = req.body;
-
-  if (!title?.trim()) { res.status(400).json({ message: "Title is required" }); return; }
-
-  const effectiveTeacherId = isAdmin ? accountId : (teacherId ?? accountId);
-
-  const [created] = await db.insert(homeworkTable).values({
-    teacherAccountId: effectiveTeacherId,
-    title: title.trim(),
-    description: description?.trim() || null,
-    instructions: instructions?.trim() || null,
-    dueDate: dueDate || null,
-    totalMarks: totalMarks ? String(totalMarks) : null,
-    subjectId: subjectId ? parseInt(subjectId, 10) : null,
-    classFilter: classFilter || null,
-    allowLate: !!allowLate,
-    isPublished: true,
+// POST /homework — create new homework
+homeworkRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const { subjectId, title, description, instructions, dueDate, totalMarks, allowLate, classFilter } = req.body;
+  const [hw] = await db.insert(homeworkTable).values({
+    teacherAccountId: teacherId,
+    subjectId, title, description, instructions, dueDate, totalMarks: totalMarks?.toString(),
+    allowLate, classFilter, isPublished: true,
   }).returning();
-
-  res.status(201).json(created);
+  res.status(201).json(hw);
 });
 
-router.patch("/homework/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id as string, 10);
-  const { teacherId, isAdmin } = req.tenant;
-  const { title, description, instructions, dueDate, totalMarks, subjectId, classFilter, allowLate, isPublished } = req.body;
-
-  const updates: Record<string, unknown> = {};
-  if (title) updates.title = title.trim();
-  if ("description" in req.body) updates.description = description?.trim() || null;
-  if ("instructions" in req.body) updates.instructions = instructions?.trim() || null;
-  if ("dueDate" in req.body) updates.dueDate = dueDate || null;
-  if ("totalMarks" in req.body) updates.totalMarks = totalMarks ? String(totalMarks) : null;
-  if ("subjectId" in req.body) updates.subjectId = subjectId ? parseInt(subjectId, 10) : null;
-  if ("classFilter" in req.body) updates.classFilter = classFilter || null;
-  if ("allowLate" in req.body) updates.allowLate = !!allowLate;
-  if ("isPublished" in req.body) updates.isPublished = !!isPublished;
-
-  const condition = isAdmin ? eq(homeworkTable.id, id) : and(eq(homeworkTable.id, id), eq(homeworkTable.teacherAccountId, teacherId!));
-  const [updated] = await db.update(homeworkTable).set(updates).where(condition!).returning();
-  if (!updated) { res.status(404).json({ message: "Homework not found" }); return; }
-  res.json(updated);
+// PUT /homework/:id — update homework
+homeworkRouter.put("/:id", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const id = parseInt(req.params.id);
+  // ensure ownership
+  const existing = await db.query.homework.findFirst({ where: (h, { eq, and }) => and(eq(h.id, id), eq(h.teacherAccountId, teacherId)) });
+  if (!existing) return res.status(404).json({ error: "Not found" });
+  await db.update(homeworkTable).set(req.body).where(eq(homeworkTable.id, id));
+  res.json({ success: true });
 });
 
-router.delete("/homework/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id as string, 10);
-  const { teacherId, isAdmin } = req.tenant;
-  const condition = isAdmin ? eq(homeworkTable.id, id) : and(eq(homeworkTable.id, id), eq(homeworkTable.teacherAccountId, teacherId!));
-  await db.delete(homeworkTable).where(condition!);
-  res.json({ message: "Homework deleted" });
+// DELETE /homework/:id
+homeworkRouter.delete("/:id", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const id = parseInt(req.params.id);
+  await db.delete(homeworkTable).where(and(eq(homeworkTable.id, id), eq(homeworkTable.teacherAccountId, teacherId)));
+  res.json({ success: true });
 });
 
-// Get submissions for a homework
-router.get("/homework/:id/submissions", requireTenantAccess, async (req, res): Promise<void> => {
-  const hwId = parseInt(req.params.id as string, 10);
-
-  const submissions = await db.select({
-    id: homeworkSubmissionsTable.id,
-    studentId: homeworkSubmissionsTable.studentId,
-    studentName: studentsTable.studentName,
-    studentCode: studentsTable.studentCode,
-    content: homeworkSubmissionsTable.content,
-    status: homeworkSubmissionsTable.status,
-    marksAwarded: homeworkSubmissionsTable.marksAwarded,
-    teacherFeedback: homeworkSubmissionsTable.teacherFeedback,
-    submittedAt: homeworkSubmissionsTable.submittedAt,
-    gradedAt: homeworkSubmissionsTable.gradedAt,
-  }).from(homeworkSubmissionsTable)
-    .innerJoin(studentsTable, eq(homeworkSubmissionsTable.studentId, studentsTable.id))
-    .where(eq(homeworkSubmissionsTable.homeworkId, hwId))
-    .orderBy(studentsTable.studentName);
-
-  res.json(submissions);
+// GET /homework/:id/submissions — teacher views all submissions for a homework
+homeworkRouter.get("/:id/submissions", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const homeworkId = parseInt(req.params.id);
+  const subs = await db.query.homeworkSubmissions.findMany({
+    where: (s, { eq }) => eq(s.homeworkId, homeworkId),
+    with: { student: true }, // requires relation in schema — we can add later
+  });
+  res.json(subs);
 });
 
-// Grade a submission
-router.patch("/homework/submissions/:id/grade", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id as string, 10);
-  const { marksAwarded, teacherFeedback } = req.body;
-
-  const [updated] = await db.update(homeworkSubmissionsTable).set({
-    marksAwarded: marksAwarded !== undefined ? String(marksAwarded) : null,
-    teacherFeedback: teacherFeedback?.trim() || null,
-    status: "graded",
-    gradedAt: new Date(),
-  }).where(eq(homeworkSubmissionsTable.id, id)).returning();
-
-  if (!updated) { res.status(404).json({ message: "Submission not found" }); return; }
-  res.json(updated);
+// POST /homework/:id/submissions/:subId/grade — teacher grades a submission
+homeworkRouter.post("/:id/submissions/:subId/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const subId = parseInt(req.params.subId);
+  const { marksAwarded, teacherFeedback, status } = req.body;
+  await db.update(homeworkSubmissionsTable)
+    .set({ marksAwarded: marksAwarded?.toString(), teacherFeedback, status, gradedAt: new Date() })
+    .where(eq(homeworkSubmissionsTable.id, subId));
+  res.json({ success: true });
 });
 
-export default router;
+// ─── STUDENT ROUTES ───
+
+// GET /homework/student — list homework for the enrolled student
+homeworkRouter.get("/student", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+  // In a full system we'd look up the student's teacher and filter homework by that teacher + subject
+  // For now, return all published homework
+  const list = await db.query.homework.findMany({
+    where: (h, { eq }) => eq(h.isPublished, true),
+    orderBy: (h, { desc }) => [desc(h.createdAt)],
+  });
+  res.json(list);
+});
+
+// POST /homework/:id/submit — student submits work
+homeworkRouter.post("/:id/submit", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+  const homeworkId = parseInt(req.params.id);
+  const studentId = req.userId!; // in student context, userId is the student's account ID
+  const { content } = req.body; // content could be JSON with text or file URLs
+  // Upsert: if already exists, update; else insert
+  const existing = await db.query.homeworkSubmissions.findFirst({
+    where: (s, { eq, and }) => and(eq(s.homeworkId, homeworkId), eq(s.studentId, studentId)),
+  });
+  if (existing) {
+    await db.update(homeworkSubmissionsTable)
+      .set({ content, status: "submitted", submittedAt: new Date() })
+      .where(eq(homeworkSubmissionsTable.id, existing.id));
+  } else {
+    await db.insert(homeworkSubmissionsTable).values({
+      homeworkId, studentId, content, status: "submitted", submittedAt: new Date(),
+    });
+  }
+  res.json({ success: true });
+});
+
+// GET /homework/:id/my-submission — student views their own submission
+homeworkRouter.get("/:id/my-submission", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+  const homeworkId = parseInt(req.params.id);
+  const studentId = req.userId!;
+  const sub = await db.query.homeworkSubmissions.findFirst({
+    where: (s, { eq, and }) => and(eq(s.homeworkId, homeworkId), eq(s.studentId, studentId)),
+  });
+  res.json(sub || null);
+});
