@@ -138,3 +138,13 @@ export default function LiveClass() {
 // After setHostToken...
 // Show pairing dialog with QR code
 setPairDialogOpen(true);
+
+room.on(RoomEvent.DataReceived, (payload, participant) => {
+  try {
+    const msg = JSON.parse(new TextDecoder().decode(payload));
+    if (msg.action === "mute_all") {
+      participants.forEach(p => p.setMicrophoneEnabled(false));
+    }
+    // ... handle other actions
+  } catch {}
+});
