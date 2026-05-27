@@ -89,3 +89,6 @@ app.use("/students", studentsRouter);
 
 import { liveClassRouter } from "./routes/live-class";
 app.use("/live-class", liveClassRouter);
+
+import { homeworkRouter } from "./routes/homework";
+app.use("/homework", homeworkRouter);
