@@ -92,3 +92,6 @@ app.use("/live-class", liveClassRouter);
 
 import { homeworkRouter } from "./routes/homework";
 app.use("/homework", homeworkRouter);
+
+import { questionBankRouter } from "./routes/question-bank";
+app.use("/question-bank", questionBankRouter);
