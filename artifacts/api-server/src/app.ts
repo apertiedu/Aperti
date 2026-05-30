@@ -95,3 +95,6 @@ app.use("/homework", homeworkRouter);
 
 import { questionBankRouter } from "./routes/question-bank";
 app.use("/question-bank", questionBankRouter);
+
+import { flashcardsRouter } from "./routes/flashcards";
+app.use("/flashcards", flashcardsRouter);
