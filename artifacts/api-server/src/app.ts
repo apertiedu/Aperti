@@ -98,3 +98,6 @@ app.use("/question-bank", questionBankRouter);
 
 import { flashcardsRouter } from "./routes/flashcards";
 app.use("/flashcards", flashcardsRouter);
+
+import { mentorRouter } from "./routes/mentor";
+app.use("/mentor", mentorRouter);
