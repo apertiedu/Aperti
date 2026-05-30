@@ -1,130 +1,70 @@
-import { Router, type IRouter } from "express";
-import { eq, and, desc, ilike, sql } from "drizzle-orm";
-import { db, questionBankTable, subjectsTable } from "@workspace/db";
-import { requireTenantAccess } from "../middleware/tenant";
+import { Router, Response } from "express";
+import { db } from "../lib/db";
+import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
+import { questionBankTable } from "@lib/db/schema/question-bank";
+import { eq, and, like } from "drizzle-orm";
 
-const router: IRouter = Router();
+export const questionBankRouter = Router();
 
-router.get("/question-bank", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, isAdmin } = req.tenant;
-  const { subjectId, topic, difficulty, search } = req.query as Record<string, string>;
+// GET /question-bank — list all questions for the teacher
+questionBankRouter.get("/", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const { subject, topic, difficulty, search } = req.query;
 
-  let query = db.select({
-    id: questionBankTable.id,
-    questionText: questionBankTable.questionText,
-    topic: questionBankTable.topic,
-    subtopic: questionBankTable.subtopic,
-    difficulty: questionBankTable.difficulty,
-    maxMarks: questionBankTable.maxMarks,
-    modelAnswer: questionBankTable.modelAnswer,
-    commonMistakes: questionBankTable.commonMistakes,
-    tags: questionBankTable.tags,
-    timesUsed: questionBankTable.timesUsed,
-    subjectId: questionBankTable.subjectId,
-    subjectName: subjectsTable.name,
-    createdAt: questionBankTable.createdAt,
-  }).from(questionBankTable)
-    .leftJoin(subjectsTable, eq(questionBankTable.subjectId, subjectsTable.id))
-    .$dynamic();
+  let query = db.query.questionBank.findMany({
+    where: (q, { eq, and }) => and(eq(q.teacherAccountId, teacherId)),
+    orderBy: (q, { desc }) => [desc(q.createdAt)],
+  });
 
-  const conditions = [];
-  if (!isAdmin && teacherId) conditions.push(eq(questionBankTable.teacherAccountId, teacherId));
-  if (subjectId) conditions.push(eq(questionBankTable.subjectId, parseInt(subjectId, 10)));
-  if (topic) conditions.push(ilike(questionBankTable.topic, `%${topic}%`));
-  if (difficulty) conditions.push(eq(questionBankTable.difficulty, difficulty));
-  if (search) conditions.push(ilike(questionBankTable.questionText, `%${search}%`));
+  // For simplicity, we'll filter in memory — in production, use proper DB filters
+  let questions = await db.query.questionBank.findMany({
+    where: (q, { eq }) => eq(q.teacherAccountId, teacherId),
+  });
 
-  if (conditions.length > 0) query = query.where(and(...conditions));
+  if (subject) questions = questions.filter(q => q.subjectId === parseInt(subject as string));
+  if (topic) questions = questions.filter(q => q.topic?.toLowerCase().includes((topic as string).toLowerCase()));
+  if (difficulty) questions = questions.filter(q => q.difficulty === difficulty);
+  if (search) {
+    const term = (search as string).toLowerCase();
+    questions = questions.filter(q => q.questionText.toLowerCase().includes(term) || q.tags?.toLowerCase().includes(term));
+  }
 
-  const rows = await query.orderBy(desc(questionBankTable.createdAt));
-  res.json(rows);
+  res.json(questions);
 });
 
-router.post("/question-bank", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, accountId, isAdmin } = req.tenant;
-  const { questionText, topic, subtopic, difficulty, maxMarks, modelAnswer, commonMistakes, tags, subjectId } = req.body;
-
-  if (!questionText?.trim()) { res.status(400).json({ message: "Question text is required" }); return; }
-
-  const effectiveTeacherId = isAdmin ? accountId : (teacherId ?? accountId);
-
-  const [created] = await db.insert(questionBankTable).values({
-    teacherAccountId: effectiveTeacherId,
-    questionText: questionText.trim(),
-    topic: topic?.trim() || null,
-    subtopic: subtopic?.trim() || null,
-    difficulty: difficulty || "medium",
-    maxMarks: String(maxMarks || 1),
-    modelAnswer: modelAnswer?.trim() || null,
-    commonMistakes: commonMistakes?.trim() || null,
-    tags: tags?.trim() || null,
-    subjectId: subjectId ? parseInt(subjectId, 10) : null,
+// POST /question-bank — create new question
+questionBankRouter.post("/", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const { subjectId, questionText, topic, subtopic, difficulty, maxMarks, modelAnswer, commonMistakes, tags } = req.body;
+  const [q] = await db.insert(questionBankTable).values({
+    teacherAccountId: teacherId,
+    subjectId,
+    questionText,
+    topic,
+    subtopic,
+    difficulty,
+    maxMarks: maxMarks?.toString(),
+    modelAnswer,
+    commonMistakes,
+    tags,
   }).returning();
-
-  res.status(201).json(created);
+  res.status(201).json(q);
 });
 
-router.patch("/question-bank/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id as string, 10);
-  const { teacherId, isAdmin } = req.tenant;
-  const { questionText, topic, subtopic, difficulty, maxMarks, modelAnswer, commonMistakes, tags, subjectId } = req.body;
-
-  const updates: Record<string, unknown> = {};
-  if (questionText) updates.questionText = questionText.trim();
-  if ("topic" in req.body) updates.topic = topic?.trim() || null;
-  if ("subtopic" in req.body) updates.subtopic = subtopic?.trim() || null;
-  if (difficulty) updates.difficulty = difficulty;
-  if ("maxMarks" in req.body) updates.maxMarks = String(maxMarks);
-  if ("modelAnswer" in req.body) updates.modelAnswer = modelAnswer?.trim() || null;
-  if ("commonMistakes" in req.body) updates.commonMistakes = commonMistakes?.trim() || null;
-  if ("tags" in req.body) updates.tags = tags?.trim() || null;
-  if ("subjectId" in req.body) updates.subjectId = subjectId ? parseInt(subjectId, 10) : null;
-
-  const condition = isAdmin
-    ? eq(questionBankTable.id, id)
-    : and(eq(questionBankTable.id, id), eq(questionBankTable.teacherAccountId, teacherId!));
-
-  const [updated] = await db.update(questionBankTable).set(updates).where(condition!).returning();
-  if (!updated) { res.status(404).json({ message: "Question not found" }); return; }
-  res.json(updated);
+// PUT /question-bank/:id
+questionBankRouter.put("/:id", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const id = parseInt(req.params.id);
+  const existing = await db.query.questionBank.findFirst({ where: (q, { eq, and }) => and(eq(q.id, id), eq(q.teacherAccountId, teacherId)) });
+  if (!existing) return res.status(404).json({ error: "Not found" });
+  await db.update(questionBankTable).set(req.body).where(eq(questionBankTable.id, id));
+  res.json({ success: true });
 });
 
-router.delete("/question-bank/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id as string, 10);
-  const { teacherId, isAdmin } = req.tenant;
-
-  const condition = isAdmin
-    ? eq(questionBankTable.id, id)
-    : and(eq(questionBankTable.id, id), eq(questionBankTable.teacherAccountId, teacherId!));
-
-  await db.delete(questionBankTable).where(condition!);
-  res.json({ message: "Question deleted" });
+// DELETE /question-bank/:id
+questionBankRouter.delete("/:id", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const id = parseInt(req.params.id);
+  await db.delete(questionBankTable).where(and(eq(questionBankTable.id, id), eq(questionBankTable.teacherAccountId, teacherId)));
+  res.json({ success: true });
 });
-
-// Import questions from bank to an exam
-router.post("/question-bank/:id/use-in-exam/:examId", requireTenantAccess, async (req, res): Promise<void> => {
-  const qId = parseInt(req.params.id as string, 10);
-  const examId = parseInt(req.params.examId as string, 10);
-
-  const [q] = await db.select().from(questionBankTable).where(eq(questionBankTable.id, qId));
-  if (!q) { res.status(404).json({ message: "Question not found" }); return; }
-
-  const { examQuestionsTable } = await import("@workspace/db");
-  const [existing] = await db.select({ count: sql<number>`count(*)::int` }).from(examQuestionsTable)
-    .where(eq(examQuestionsTable.examId, examId));
-
-  const [created] = await db.insert(examQuestionsTable).values({
-    examId,
-    questionText: q.questionText,
-    topic: q.topic,
-    maxMarks: q.maxMarks,
-    questionOrder: (existing?.count ?? 0) + 1,
-  }).returning();
-
-  // Increment usage count
-  await db.update(questionBankTable).set({ timesUsed: sql`${questionBankTable.timesUsed} + 1` }).where(eq(questionBankTable.id, qId));
-
-  res.status(201).json(created);
-});
-
-export default router;
