@@ -101,3 +101,7 @@ app.use("/flashcards", flashcardsRouter);
 
 import { mentorRouter } from "./routes/mentor";
 app.use("/mentor", mentorRouter);
+
+
+import { revisitRouter } from "./routes/revisit";
+app.use("/revisit", revisitRouter);
