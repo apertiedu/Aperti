@@ -1,107 +1,109 @@
-import { Router, type IRouter } from "express";
-import { eq, and, desc, lte, sql } from "drizzle-orm";
-import { db } from "@workspace/db";
-import { requireTenantAccess } from "../middleware/tenant";
-import { pool } from "@workspace/db";
+import { Router, Response } from "express";
+import { db } from "../lib/db";
+import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
+import { flashcardDecksTable, flashcardItemsTable, flashcardProgressTable } from "@lib/db/schema/flashcards";
+import { eq, and } from "drizzle-orm";
 
-const router: IRouter = Router();
+export const flashcardsRouter = Router();
 
-function tenantWhere(teacherId: number | null, isAdmin: boolean) {
-  return isAdmin ? sql`1=1` : sql`teacher_account_id = ${teacherId}`;
-}
+// ─── TEACHER ROUTES ───
 
-// ── DECKS (grouped view) ──────────────────────────────────────────────────────
-
-router.get("/flashcards/decks", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, isAdmin } = req.tenant;
-  const clause = isAdmin ? "" : `WHERE teacher_account_id = ${teacherId}`;
-  const { rows } = await pool.query(`
-    SELECT deck_name, COUNT(*)::int AS card_count,
-      MIN(created_at) AS created_at
-    FROM flashcards ${clause}
-    GROUP BY deck_name ORDER BY deck_name
-  `);
-  res.json(rows);
+// GET /flashcards/decks — teacher's decks
+flashcardsRouter.get("/decks", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const decks = await db.query.flashcardDecks.findMany({
+    where: (d, { eq }) => eq(d.teacherAccountId, teacherId),
+    orderBy: (d, { desc }) => [desc(d.createdAt)],
+  });
+  res.json(decks);
 });
 
-// ── CARDS ─────────────────────────────────────────────────────────────────────
-
-router.get("/flashcards", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, isAdmin } = req.tenant;
-  const { deck, topic, difficulty, search } = req.query as Record<string, string>;
-  const conditions: string[] = [];
-  const params: unknown[] = [];
-  let i = 1;
-  if (!isAdmin && teacherId) { conditions.push(`teacher_account_id = $${i++}`); params.push(teacherId); }
-  if (deck) { conditions.push(`deck_name = $${i++}`); params.push(deck); }
-  if (topic) { conditions.push(`topic ILIKE $${i++}`); params.push(`%${topic}%`); }
-  if (difficulty) { conditions.push(`difficulty = $${i++}`); params.push(difficulty); }
-  if (search) { conditions.push(`(front ILIKE $${i} OR back ILIKE $${i++})`); params.push(`%${search}%`); }
-  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
-  const { rows } = await pool.query(`SELECT * FROM flashcards ${where} ORDER BY created_at DESC`, params);
-  res.json(rows);
+// POST /flashcards/decks — create new deck
+flashcardsRouter.post("/decks", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const teacherId = req.userId!;
+  const { title, description, subjectId } = req.body;
+  const [deck] = await db.insert(flashcardDecksTable).values({ teacherAccountId: teacherId, title, description, subjectId }).returning();
+  res.status(201).json(deck);
 });
 
-router.post("/flashcards", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, accountId, isAdmin } = req.tenant;
-  const { front, back, deckName, topic, difficulty, tags, subjectId, aiGenerated } = req.body;
-  if (!front?.trim() || !back?.trim()) { res.status(400).json({ message: "Front and back are required" }); return; }
-  const effectiveTeacherId = isAdmin ? accountId : (teacherId ?? accountId);
-  const { rows } = await pool.query(
-    `INSERT INTO flashcards (teacher_account_id, subject_id, deck_name, front, back, difficulty, tags, topic, ai_generated)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
-    [effectiveTeacherId, subjectId || null, deckName?.trim() || "General", front.trim(), back.trim(),
-     difficulty || "medium", tags?.trim() || null, topic?.trim() || null, aiGenerated || false]
-  );
-  res.status(201).json(rows[0]);
+// DELETE /flashcards/decks/:id
+flashcardsRouter.delete("/decks/:id", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id);
+  await db.delete(flashcardDecksTable).where(eq(flashcardDecksTable.id, id));
+  res.json({ success: true });
 });
 
-router.patch("/flashcards/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id as string, 10);
-  const { teacherId, isAdmin } = req.tenant;
-  const { front, back, deckName, topic, difficulty, tags } = req.body;
-  const sets: string[] = []; const params: unknown[] = []; let i = 1;
-  if (front) { sets.push(`front = $${i++}`); params.push(front.trim()); }
-  if (back) { sets.push(`back = $${i++}`); params.push(back.trim()); }
-  if ("deckName" in req.body) { sets.push(`deck_name = $${i++}`); params.push(deckName?.trim() || "General"); }
-  if ("topic" in req.body) { sets.push(`topic = $${i++}`); params.push(topic?.trim() || null); }
-  if (difficulty) { sets.push(`difficulty = $${i++}`); params.push(difficulty); }
-  if ("tags" in req.body) { sets.push(`tags = $${i++}`); params.push(tags?.trim() || null); }
-  if (!sets.length) { res.status(400).json({ message: "Nothing to update" }); return; }
-  const tenantCond = isAdmin ? "" : ` AND teacher_account_id = ${teacherId}`;
-  params.push(id);
-  const { rows } = await pool.query(`UPDATE flashcards SET ${sets.join(",")} WHERE id = $${i}${tenantCond} RETURNING *`, params);
-  if (!rows[0]) { res.status(404).json({ message: "Card not found" }); return; }
-  res.json(rows[0]);
+// GET /flashcards/decks/:id/cards — cards in a deck
+flashcardsRouter.get("/decks/:id/cards", authenticate, async (req: AuthRequest, res: Response) => {
+  const deckId = parseInt(req.params.id);
+  const cards = await db.query.flashcardItems.findMany({
+    where: (c, { eq }) => eq(c.deckId, deckId),
+  });
+  res.json(cards);
 });
 
-router.delete("/flashcards/:id", requireTenantAccess, async (req, res): Promise<void> => {
-  const id = parseInt(req.params.id as string, 10);
-  const { teacherId, isAdmin } = req.tenant;
-  const tenantCond = isAdmin ? "" : ` AND teacher_account_id = ${teacherId}`;
-  await pool.query(`DELETE FROM flashcards WHERE id = $1${tenantCond}`, [id]);
-  res.json({ message: "Deleted" });
+// POST /flashcards/decks/:id/cards — add card
+flashcardsRouter.post("/decks/:id/cards", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const deckId = parseInt(req.params.id);
+  const { front, back, imageUrl, latexContent, difficulty } = req.body;
+  const [card] = await db.insert(flashcardItemsTable).values({ deckId, front, back, imageUrl, latexContent, difficulty }).returning();
+  res.status(201).json(card);
 });
 
-// ── BULK CREATE (AI-generated set) ────────────────────────────────────────────
+// DELETE /flashcards/cards/:id
+flashcardsRouter.delete("/cards/:id", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id);
+  await db.delete(flashcardItemsTable).where(eq(flashcardItemsTable.id, id));
+  res.json({ success: true });
+});
 
-router.post("/flashcards/bulk", requireTenantAccess, async (req, res): Promise<void> => {
-  const { teacherId, accountId, isAdmin } = req.tenant;
-  const { cards, deckName } = req.body as { cards: { front: string; back: string; topic?: string }[]; deckName: string };
-  if (!Array.isArray(cards) || cards.length === 0) { res.status(400).json({ message: "cards array required" }); return; }
-  const effectiveTeacherId = isAdmin ? accountId : (teacherId ?? accountId);
-  const deck = deckName?.trim() || "AI Generated";
-  const inserted = [];
-  for (const c of cards) {
-    if (!c.front?.trim() || !c.back?.trim()) continue;
-    const { rows } = await pool.query(
-      `INSERT INTO flashcards (teacher_account_id, deck_name, front, back, topic, ai_generated) VALUES ($1,$2,$3,$4,$5,TRUE) RETURNING *`,
-      [effectiveTeacherId, deck, c.front.trim(), c.back.trim(), c.topic?.trim() || null]
-    );
-    inserted.push(rows[0]);
+// ─── STUDENT ROUTES ───
+
+// GET /flashcards/student/decks — decks available to student
+flashcardsRouter.get("/student/decks", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+  // In a full system, we'd find the student's teacher and return their decks + public decks
+  const decks = await db.query.flashcardDecks.findMany();
+  res.json(decks);
+});
+
+// POST /flashcards/review — log review (SM-2 algorithm)
+flashcardsRouter.post("/review", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+  const studentId = req.userId!;
+  const { cardId, quality } = req.body; // quality: 0-5 rating
+
+  // Fetch existing progress or create new
+  let progress = await db.query.flashcardProgress.findFirst({
+    where: (p, { eq, and }) => and(eq(p.studentId, studentId), eq(p.cardId, cardId)),
+  });
+
+  let { repetitions = 0, easeFactor = 250, interval = 0 } = progress || {};
+
+  // SM-2 algorithm
+  if (quality >= 3) {
+    if (repetitions === 0) interval = 1;
+    else if (repetitions === 1) interval = 6;
+    else interval = Math.round(interval * (easeFactor / 100));
+    repetitions++;
+  } else {
+    repetitions = 0;
+    interval = 1;
   }
-  res.status(201).json(inserted);
+  easeFactor = Math.max(130, easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02)) * 100);
+  const nextReview = new Date(Date.now() + interval * 86400000);
+
+  if (progress) {
+    await db.update(flashcardProgressTable).set({
+      repetitions, easeFactor: Math.round(easeFactor), interval,
+      nextReview, lastReview: new Date(),
+      masteryLevel: quality >= 4 ? "mastered" : quality >= 3 ? "learning" : "struggling",
+    }).where(eq(flashcardProgressTable.id, progress.id));
+  } else {
+    await db.insert(flashcardProgressTable).values({
+      studentId, cardId, repetitions, easeFactor: Math.round(easeFactor),
+      interval, nextReview, lastReview: new Date(),
+      masteryLevel: "new",
+    });
+  }
+
+  res.json({ nextReview, interval, repetitions });
 });
-
-
-export default router;
