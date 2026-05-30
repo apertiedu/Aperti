@@ -105,3 +105,6 @@ app.use("/mentor", mentorRouter);
 
 import { revisitRouter } from "./routes/revisit";
 app.use("/revisit", revisitRouter);
+
+import { examsRouter } from "./routes/exams";
+app.use("/exams", examsRouter);
