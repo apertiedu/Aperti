@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, BookOpen, CalendarCheck, Brain, Layers, Flame, FlaskConical,
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
-  Sun, Moon, LogOut, Users, Shield, Repeat2, Video, Library,
+  Sun, Moon, LogOut, Users, Shield, Repeat2, Video, Library, Link2,
 } from "lucide-react";
 
 const primaryNav = [
@@ -42,6 +42,7 @@ const allNav = [
   { href: "/team-forge", label: "TeamForge", icon: Users, desc: "Class competitions" },
   { href: "/live-class", label: "LiveClass", icon: Video, desc: "Join live session" },
   { href: "/privacy-vault", label: "PrivacyVault", icon: Shield, desc: "My data" },
+  { href: "/link-parent", label: "Link Parent", icon: Link2, desc: "Connect to parent" },
 ];
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {

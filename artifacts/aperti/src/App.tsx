@@ -99,6 +99,7 @@ import StudentRegister from "@/pages/student-register";
 import MyCourses from "@/pages/teacher/my-courses";
 import StudentMyCourses from "@/pages/student/my-courses";
 import StudentApprovals from "@/pages/student-approvals";
+import LinkParent from "@/pages/student/link-parent";
 
 // Parent
 import GuardianHub from "@/pages/parent/guardian-hub";
@@ -202,6 +203,7 @@ function StudentRouter() {
         <Route path="/papers" component={PastPaperLibrary} />
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
+        <Route path="/link-parent" component={LinkParent} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>

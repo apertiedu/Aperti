@@ -69,7 +69,63 @@ parentRouter.put("/approve-link/:id", authenticate, requireRole("parent"), async
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
-// ── STUDENT ENDPOINT ─────────────────────────────────────────────────────────
+// GET /parent/child-stats/:linkId — parent gets child's attendance & homework summary
+parentRouter.get("/child-stats/:linkId", authenticate, requireRole("parent"), async (req: AuthRequest, res: Response) => {
+  try {
+    const linkId = parseInt(req.params.linkId);
+    const { rows: linkRows } = await pool.query(
+      "SELECT student_id FROM guardian_links WHERE id=$1 AND parent_account_id=$2 AND status='active'",
+      [linkId, req.userId]
+    );
+    if (!linkRows.length) return res.status(404).json({ error: "Link not found or not active" });
+    const studentId = linkRows[0].student_id;
+
+    const { rows: attRows } = await pool.query(
+      `SELECT COUNT(*) AS total,
+              SUM(CASE WHEN status='present' THEN 1 ELSE 0 END) AS present
+       FROM attendance WHERE student_id=$1`, [studentId]
+    );
+    const total = parseInt(attRows[0]?.total || "0");
+    const present = parseInt(attRows[0]?.present || "0");
+    const attendanceRate = total > 0 ? Math.round((present / total) * 100) : 0;
+
+    const { rows: hwRows } = await pool.query(
+      `SELECT
+         COUNT(CASE WHEN submission_status IN ('submitted','graded') THEN 1 END) AS submitted,
+         COUNT(CASE WHEN submission_status='pending' THEN 1 END) AS pending
+       FROM homework_submissions WHERE student_id=$1`, [studentId]
+    );
+
+    res.json({
+      attendanceRate,
+      totalSessions: total,
+      presentCount: present,
+      homeworkSubmitted: parseInt(hwRows[0]?.submitted || "0"),
+      homeworkPending: parseInt(hwRows[0]?.pending || "0"),
+    });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// ── STUDENT ENDPOINTS ────────────────────────────────────────────────────────
+
+// GET /parent/my-links — student sees their own guardian link requests
+parentRouter.get("/my-links", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+  try {
+    const { rows: studentRows } = await pool.query(
+      "SELECT id FROM students WHERE account_id=$1", [req.userId]
+    );
+    if (!studentRows.length) return res.json([]);
+    const studentId = studentRows[0].id;
+    const { rows } = await pool.query(
+      `SELECT gl.id, gl.status, gl.pairing_code, gl.requested_at
+       FROM guardian_links gl
+       WHERE gl.student_id=$1
+       ORDER BY gl.requested_at DESC`,
+      [studentId]
+    );
+    res.json(rows);
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
 
 // POST /parent/link-student — student enters parent's pairing code
 parentRouter.post("/link-student", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
