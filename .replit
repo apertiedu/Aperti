@@ -13,6 +13,7 @@ channel = "stable-25_05"
 PORT = "5000"
 BASE_PATH = "/"
 API_PORT = "3001"
+VITE_API_URL = "/api"
 
 [workflows]
 runButton = "Project"
@@ -63,6 +64,13 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
+<<<<<<< HEAD
+=======
+localPort = 5001
+externalPort = 3003
+
+[[ports]]
+>>>>>>> ccc01d3d2b42dc6b4fb6f7ca8a1589cc7b618877
 localPort = 8080
 externalPort = 8080
 
@@ -72,7 +80,11 @@ externalPort = 8081
 
 [[ports]]
 localPort = 21664
+<<<<<<< HEAD
 externalPort = 3000
+=======
+externalPort = 4200
+>>>>>>> ccc01d3d2b42dc6b4fb6f7ca8a1589cc7b618877
 
 [deployment]
 deploymentTarget = "autoscale"

@@ -26,6 +26,8 @@ if (!basePath) {
   );
 }
 
+const apiPort = process.env.API_PORT || "3001";
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -62,6 +64,17 @@ export default defineConfig({
     port,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy: {
+      "/socket.io": {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+        ws: true,
+      },
+      "/api": {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+      },
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],

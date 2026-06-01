@@ -23,7 +23,8 @@
     "jsonwebtoken": "^9.0.3",
     "livekit-server-sdk": "^2.15.4",
     "pino": "^9",
-    "pino-http": "^10"
+    "pino-http": "^10",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",

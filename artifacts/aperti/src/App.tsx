@@ -42,6 +42,10 @@ import TwinControl from "@/pages/twin-control";
 import SubPilot from "@/pages/subpilot";
 import HelpDesk from "@/pages/helpdesk";
 import InsightExams from "@/pages/insight-exams";
+import ScanScribe from "@/pages/scan-scribe";
+import ErrorTrace from "@/pages/error-trace";
+
+// Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
 import SubPilotAdmin from "@/pages/admin/subpilot-settings";
 import HelpDeskAdmin from "@/pages/admin/helpdesk-admin";
@@ -51,6 +55,8 @@ import BudgetSense from "@/pages/admin/budget-sense";
 import AutoScale from "@/pages/admin/auto-scale";
 import SpendWise from "@/pages/admin/spend-wise";
 import AdminCommand from "@/pages/admin/admin-command";
+import WorldPilot from "@/pages/admin/world-pilot";
+import GuardianPulseAdmin from "@/pages/admin/guardian-pulse-admin";
 
 // Student
 import StudyStream from "@/pages/student/study-stream";
@@ -65,12 +71,26 @@ import TakeExam from "@/pages/student/take-exam";
 import SkillBadge from "@/pages/student/skill-badge";
 import LearnPath from "@/pages/student/learn-path";
 import DiscoverFeed from "@/pages/student/discover-feed";
+import Revisit from "@/pages/student/revisit";
+import FocusCoach from "@/pages/student/focus-coach";
+import FocusZone from "@/pages/student/focus-zone";
+import TrialVault from "@/pages/student/trial-vault";
+import PeakRankings from "@/pages/student/peak-rankings";
+import PeerReview from "@/pages/student/peer-review";
+import SnapGrade from "@/pages/student/snap-grade";
+import LiveClassSession from "@/pages/student/live-class-session";
+import ForgeFieldLab from "@/pages/student/labs/forge-field";
+import ReactSphereLab from "@/pages/student/labs/react-sphere";
+import GeometrixLab from "@/pages/student/labs/geometrix";
+import BioSphereLab from "@/pages/student/labs/biosphere";
+
+// Shared pages
 import TeamForge from "@/pages/team-forge";
 import PrivacyVault from "@/pages/privacy-vault";
-import ErrorTrace from "@/pages/error-trace";
 
 // Parent
 import GuardianHub from "@/pages/parent/guardian-hub";
+import GuardianLink from "@/pages/parent/guardian-link";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,6 +114,18 @@ function StudentRouter() {
         <Route path="/skill-badge" component={SkillBadge} />
         <Route path="/learn-path" component={LearnPath} />
         <Route path="/discover" component={DiscoverFeed} />
+        <Route path="/revisit" component={Revisit} />
+        <Route path="/focus-coach" component={FocusCoach} />
+        <Route path="/focus-zone" component={FocusZone} />
+        <Route path="/trial-vault" component={TrialVault} />
+        <Route path="/peak-rankings" component={PeakRankings} />
+        <Route path="/peer-review" component={PeerReview} />
+        <Route path="/snap-grade" component={SnapGrade} />
+        <Route path="/live-class" component={LiveClassSession} />
+        <Route path="/labs/forge-field" component={ForgeFieldLab} />
+        <Route path="/labs/react-sphere" component={ReactSphereLab} />
+        <Route path="/labs/geometrix" component={GeometrixLab} />
+        <Route path="/labs/biosphere" component={BioSphereLab} />
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
         <Route component={NotFound} />
@@ -104,7 +136,6 @@ function StudentRouter() {
 
 function TeacherRouter() {
   const { user } = useAuth();
-  const isAssistant = user?.role === "assistant";
   const isAdmin = user?.role === "admin";
 
   return (
@@ -132,9 +163,12 @@ function TeacherRouter() {
         <Route path="/subpilot" component={SubPilot} />
         <Route path="/helpdesk" component={HelpDesk} />
         <Route path="/insight-exams" component={InsightExams} />
+        <Route path="/scan-scribe" component={ScanScribe} />
+        <Route path="/error-trace" component={ErrorTrace} />
         {isAdmin && (
           <>
             <Route path="/admin/command" component={AdminCommand} />
+            <Route path="/admin/world-pilot" component={WorldPilot} />
             <Route path="/admin/paper-vault" component={PaperVaultAdmin} />
             <Route path="/admin/subpilot-settings" component={SubPilotAdmin} />
             <Route path="/admin/helpdesk" component={HelpDeskAdmin} />
@@ -143,8 +177,22 @@ function TeacherRouter() {
             <Route path="/admin/budget-sense" component={BudgetSense} />
             <Route path="/admin/auto-scale" component={AutoScale} />
             <Route path="/admin/spend-wise" component={SpendWise} />
+            <Route path="/admin/guardian-pulse" component={GuardianPulseAdmin} />
           </>
         )}
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
+  );
+}
+
+function ParentRouter() {
+  return (
+    <Layout>
+      <Switch>
+        <Route path="/parent/guardian-hub" component={GuardianHub} />
+        <Route path="/parent/guardian-link" component={GuardianLink} />
+        <Route path="/" component={GuardianHub} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -172,8 +220,8 @@ function AppContent() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-sm">Loading...</p>
+          <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground text-xs">Loading Aperti…</p>
         </div>
       </div>
     );
@@ -189,7 +237,13 @@ function AppContent() {
 
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      {user.role === "student" ? <StudentRouter /> : <TeacherRouter />}
+      {user.role === "student" ? (
+        <StudentRouter />
+      ) : user.role === "parent" ? (
+        <ParentRouter />
+      ) : (
+        <TeacherRouter />
+      )}
     </WouterRouter>
   );
 }
