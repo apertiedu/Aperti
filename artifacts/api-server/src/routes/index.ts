@@ -73,7 +73,7 @@ router.use(adminSettingsRouter);
 router.use(flashcardsRouter);
 router.use(centersRouter);
 router.use(trialsRouter);
-router.use(pastPapersRouter);
+router.use("/past-papers", pastPapersRouter);
 router.use(examGeneratorRouter);
 router.use(goalsRouter);
 router.use(achievementsRouter);

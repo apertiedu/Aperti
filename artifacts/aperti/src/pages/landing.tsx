@@ -228,12 +228,160 @@ const features = [
   { icon: Zap, title: "Auto-Grading Engine", desc: "Submit homework, mark schemes auto-applied. Instant feedback. Teachers review only edge cases.", color: "#F57C00" },
 ];
 
-/* ── Featured courses mock ── */
-const MOCK_COURSES = [
-  { id: 0, title: "IGCSE Physics Intensive", subject: "Physics", teacher: "Mr. Ahmed Hassan", price: "299 EGP / mo", weeks: 12, students: 48, color: "#1976D2" },
-  { id: 0, title: "A-Level Math Mastery", subject: "Math", teacher: "Dr. Fatima El-Said", price: "249 EGP / mo", weeks: 16, students: 63, color: "#388E3C" },
-  { id: 0, title: "IGCSE Chemistry Excellence", subject: "Chemistry", teacher: "Ms. Sara Karim", price: "279 EGP / mo", weeks: 10, students: 35, color: "#7B1FA2" },
-];
+/* ── Subject colour palette ── */
+const SUBJECT_PALETTE: Record<string, string> = {
+  Physics: "#1565C0", Math: "#2E7D32", Mathematics: "#2E7D32",
+  Chemistry: "#6A1B9A", Biology: "#00838F", English: "#C62828",
+  History: "#4E342E", Geography: "#006064", Economics: "#E65100",
+  "Computer Science": "#4527A0", CS: "#4527A0", Arabic: "#AD1457",
+  Science: "#00796B",
+};
+const subjectColor = (s?: string | null) => SUBJECT_PALETTE[s ?? ""] ?? TEAL;
+
+interface PublicCourse {
+  id: number; title: string; description: string | null; subject: string | null;
+  price_egp: number | null; thumbnail_url: string | null; duration_weeks: number | null;
+  enrolled_count: number | null; teacher_name: string | null;
+}
+
+function FeaturedCourseSkeleton() {
+  return (
+    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 animate-pulse">
+      <div className="h-36 bg-gradient-to-br from-gray-100 to-gray-50" />
+      <div className="p-5 space-y-3">
+        <div className="h-4 bg-gray-100 rounded-lg w-3/4" />
+        <div className="h-3 bg-gray-100 rounded-lg w-1/2" />
+        <div className="h-3 bg-gray-100 rounded-lg w-1/3" />
+      </div>
+    </div>
+  );
+}
+
+function FeaturedCoursesSection() {
+  const { data: courses = [], isLoading } = useQuery<PublicCourse[]>({
+    queryKey: ["public-courses-featured"],
+    queryFn: async () => {
+      const res = await fetch("/courses");
+      if (!res.ok) return [];
+      const data: PublicCourse[] = await res.json();
+      return data
+        .sort((a, b) => (b.enrolled_count ?? 0) - (a.enrolled_count ?? 0))
+        .slice(0, 3);
+    },
+    staleTime: 10 * 60 * 1000,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {[0, 1, 2].map(i => <FeaturedCourseSkeleton key={i} />)}
+      </div>
+    );
+  }
+
+  if (courses.length === 0) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm"
+      >
+        <motion.div
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-lg"
+          style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}
+        >
+          <BookOpen className="h-8 w-8 text-white" />
+        </motion.div>
+        <p className="font-extrabold text-gray-900 text-lg mb-2">Courses launching soon</p>
+        <p className="text-sm text-gray-400 max-w-xs mx-auto">Our educators are preparing exclusive course content. Be the first to enroll.</p>
+        <Link href="/courses">
+          <button className="mt-6 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-shadow"
+            style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}>
+            Visit Marketplace
+          </button>
+        </Link>
+      </motion.div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      {courses.map((c, i) => {
+        const color = subjectColor(c.subject);
+        return (
+          <Reveal key={c.id} delay={i * 0.1}>
+            <Link href={`/courses/${c.id}`}>
+              <motion.div
+                whileHover={{ y: -8, boxShadow: "0 24px 48px rgba(0,0,0,0.12)", transition: { duration: 0.25, ease: [0.22,1,0.36,1] } }}
+                className="bg-white rounded-2xl overflow-hidden border border-gray-100 cursor-pointer h-full flex flex-col"
+              >
+                {/* Thumbnail / subject banner */}
+                <div className="h-38 relative flex items-end p-4"
+                  style={{ background: `linear-gradient(145deg, ${color}18 0%, ${color}30 100%)`, minHeight: 144 }}>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <motion.div
+                      animate={{ rotate: [0, 3, -3, 0] }}
+                      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md"
+                      style={{ background: `linear-gradient(135deg, ${color}CC, ${color})` }}
+                    >
+                      <BookOpen className="h-7 w-7 text-white" />
+                    </motion.div>
+                  </div>
+                  {/* Subject pill */}
+                  {c.subject && (
+                    <span className="relative z-10 text-[10px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm"
+                      style={{ background: `${color}22`, color, border: `1px solid ${color}30` }}>
+                      {c.subject}
+                    </span>
+                  )}
+                  {/* Enrolled badge */}
+                  {(c.enrolled_count ?? 0) > 0 && (
+                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 shadow-sm">
+                      <Users className="h-3 w-3" style={{ color }} />
+                      <span className="text-[10px] font-bold" style={{ color }}>{c.enrolled_count} enrolled</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Body */}
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex items-start justify-between gap-2 mb-1.5">
+                    <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 flex-1">{c.title}</h3>
+                    {c.price_egp != null && (
+                      <span className="text-xs font-black whitespace-nowrap ml-1" style={{ color: TEAL }}>
+                        {c.price_egp} EGP
+                      </span>
+                    )}
+                  </div>
+                  {c.teacher_name && (
+                    <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                      <GraduationCap className="h-3 w-3" />{c.teacher_name}
+                    </p>
+                  )}
+                  {c.description && (
+                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3 flex-1">{c.description}</p>
+                  )}
+                  <div className="flex items-center gap-3 text-xs text-gray-400 mt-auto pt-2 border-t border-gray-50">
+                    {c.duration_weeks && (
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{c.duration_weeks}w</span>
+                    )}
+                    <span className="flex items-center gap-1 ml-auto" style={{ color }}>
+                      View Course <ChevronRight className="h-3 w-3" />
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+          </Reveal>
+        );
+      })}
+    </div>
+  );
+}
 
 /* ── Count-up hook (native IntersectionObserver) ── */
 function useCountUp(target: number, duration = 1600) {
@@ -486,34 +634,7 @@ export default function Landing() {
             </div>
           </Reveal>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {MOCK_COURSES.map((c, i) => (
-              <Reveal key={i} delay={i * 0.1}>
-                <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-lg transition-shadow">
-                  <div className="h-36 flex items-center justify-center relative" style={{ background: `linear-gradient(135deg, ${c.color}12, ${c.color}25)` }}>
-                    <div className="text-center">
-                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ background: `${c.color}20` }}>
-                        <BookOpen className="h-6 w-6" style={{ color: c.color }} />
-                      </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: `${c.color}18`, color: c.color }}>{c.subject}</span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <h3 className="font-bold text-gray-900 text-sm leading-snug">{c.title}</h3>
-                      <span className="text-xs font-bold whitespace-nowrap" style={{ color: TEAL }}>{c.price}</span>
-                    </div>
-                    <p className="text-xs text-gray-400 mb-4">{c.teacher}</p>
-                    <div className="flex items-center gap-3 text-xs text-gray-400">
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{c.weeks}w</span>
-                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{c.students} enrolled</span>
-                    </div>
-                  </div>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
+          <FeaturedCoursesSection />
 
           <Reveal delay={0.3}>
             <div className="text-center mt-8">

@@ -59,6 +59,9 @@ import AdminCommand from "@/pages/admin/admin-command";
 import WorldPilot from "@/pages/admin/world-pilot";
 import GuardianPulseAdmin from "@/pages/admin/guardian-pulse-admin";
 
+// Student Portal
+import PastPaperLibrary from "@/pages/student-portal/past-paper-library";
+
 // Student
 import StudyStream from "@/pages/student/study-stream";
 import MyHomework from "@/pages/student/my-homework";
@@ -196,6 +199,7 @@ function StudentRouter() {
         <Route path="/labs/react-sphere" component={ReactSphereLab} />
         <Route path="/labs/geometrix" component={GeometrixLab} />
         <Route path="/labs/biosphere" component={BioSphereLab} />
+        <Route path="/papers" component={PastPaperLibrary} />
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
         <Route component={NotFound} />
@@ -233,6 +237,7 @@ const TEACHER_ROUTES = (
     <Route path="/insight-exams" component={InsightExams} />
     <Route path="/scan-scribe" component={ScanScribe} />
     <Route path="/error-trace" component={ErrorTrace} />
+    <Route path="/papers" component={PastPaperLibrary} />
   </>
 );
 

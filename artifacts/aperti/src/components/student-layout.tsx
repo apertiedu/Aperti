@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, BookOpen, CalendarCheck, Brain, Layers, Flame, FlaskConical,
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
-  Sun, Moon, LogOut, Users, Shield, Repeat2, Video,
+  Sun, Moon, LogOut, Users, Shield, Repeat2, Video, Library,
 } from "lucide-react";
 
 const primaryNav = [
@@ -31,6 +31,7 @@ const allNav = [
   { href: "/revisit", label: "Revisit", icon: Repeat2, desc: "Revision planner" },
   { href: "/focus-coach", label: "FocusCoach", icon: Target, desc: "Weak topic tracker" },
   { href: "/focus-zone", label: "FocusZone", icon: Clock, desc: "Distraction-free study" },
+  { href: "/papers", label: "Past Papers", icon: Library, desc: "Past paper library" },
   { href: "/trial-vault", label: "TrialVault", icon: FileText, desc: "Mock exams" },
   { href: "/peak-rankings", label: "PeakRankings", icon: Trophy, desc: "Leaderboards" },
   { href: "/peer-review", label: "PeerReview", icon: Users, desc: "Peer assessment" },
