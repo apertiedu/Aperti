@@ -2,7 +2,6 @@ modules = ["nodejs-20", "web", "bash"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
-integrations = ["javascript_openai_ai_integrations:2.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -13,7 +12,6 @@ channel = "stable-25_05"
 PORT = "5000"
 BASE_PATH = "/"
 API_PORT = "3001"
-VITE_API_URL = "/api"
 
 [workflows]
 runButton = "Project"
@@ -62,29 +60,6 @@ externalPort = 3001
 [[ports]]
 localPort = 5000
 externalPort = 80
-
-[[ports]]
-<<<<<<< HEAD
-=======
-localPort = 5001
-externalPort = 3003
-
-[[ports]]
->>>>>>> ccc01d3d2b42dc6b4fb6f7ca8a1589cc7b618877
-localPort = 8080
-externalPort = 8080
-
-[[ports]]
-localPort = 8081
-externalPort = 8081
-
-[[ports]]
-localPort = 21664
-<<<<<<< HEAD
-externalPort = 3000
-=======
-externalPort = 4200
->>>>>>> ccc01d3d2b42dc6b4fb6f7ca8a1589cc7b618877
 
 [deployment]
 deploymentTarget = "autoscale"
