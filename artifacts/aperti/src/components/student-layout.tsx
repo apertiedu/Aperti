@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, BookOpen, CalendarCheck, Brain, Layers, Flame, FlaskConical,
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
-  Sun, Moon, LogOut, Users, Shield, Repeat2,
+  Sun, Moon, LogOut, Users, Shield, Repeat2, Video,
 } from "lucide-react";
 
 const primaryNav = [
@@ -39,6 +39,7 @@ const allNav = [
   { href: "/learn-path", label: "LearnPath™", icon: Target, desc: "Learning journey" },
   { href: "/discover", label: "DiscoverFeed™", icon: Star, desc: "Curated content" },
   { href: "/team-forge", label: "TeamForge™", icon: Users, desc: "Class competitions" },
+  { href: "/live-class", label: "LiveClass™", icon: Video, desc: "Join live session" },
   { href: "/privacy-vault", label: "PrivacyVault™", icon: Shield, desc: "My data" },
 ];
 

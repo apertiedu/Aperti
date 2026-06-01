@@ -65,6 +65,11 @@ export default defineConfig({
     host: "0.0.0.0",
     allowedHosts: true,
     proxy: {
+      "/socket.io": {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+        ws: true,
+      },
       "/api": {
         target: `http://localhost:${apiPort}`,
         changeOrigin: true,

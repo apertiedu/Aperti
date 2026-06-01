@@ -78,6 +78,7 @@ import TrialVault from "@/pages/student/trial-vault";
 import PeakRankings from "@/pages/student/peak-rankings";
 import PeerReview from "@/pages/student/peer-review";
 import SnapGrade from "@/pages/student/snap-grade";
+import LiveClassSession from "@/pages/student/live-class-session";
 import ForgeFieldLab from "@/pages/student/labs/forge-field";
 import ReactSphereLab from "@/pages/student/labs/react-sphere";
 import GeometrixLab from "@/pages/student/labs/geometrix";
@@ -120,6 +121,7 @@ function StudentRouter() {
         <Route path="/peak-rankings" component={PeakRankings} />
         <Route path="/peer-review" component={PeerReview} />
         <Route path="/snap-grade" component={SnapGrade} />
+        <Route path="/live-class" component={LiveClassSession} />
         <Route path="/labs/forge-field" component={ForgeFieldLab} />
         <Route path="/labs/react-sphere" component={ReactSphereLab} />
         <Route path="/labs/geometrix" component={GeometrixLab} />

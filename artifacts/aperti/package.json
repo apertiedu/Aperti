@@ -83,6 +83,7 @@
     "livekit-client": "^2.19.1",
     "qrcode": "^1.5.4",
     "react-canvas-draw": "^1.2.1",
+    "socket.io-client": "^4.8.3",
     "three": "^0.184.0"
   }
 }
