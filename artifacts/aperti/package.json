@@ -78,6 +78,7 @@
   },
   "dependencies": {
     "@types/three": "^0.184.1",
+    "html5-qrcode": "^2.3.8",
     "jsqr": "^1.4.0",
     "jszip": "^3.10.1",
     "livekit-client": "^2.19.1",
