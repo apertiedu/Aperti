@@ -191,13 +191,42 @@ function LessonEditor({ lesson, onClose, onRefresh }: { lesson: Lesson | null; o
                   <Input placeholder="YouTube or video URL" value={section.content || ""} onChange={e => updateSection(idx, "content", e.target.value)} />
                 )}
                 {section.type === "quiz" && (
-                  <p className="text-sm text-muted-foreground">Select questions from QueryVault (feature coming soon)</p>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Question IDs (comma-separated)</Label>
+                    <Input
+                      placeholder="e.g. 12, 34, 56"
+                      value={(section.quizQuestionIds || []).join(", ")}
+                      onChange={e => {
+                        const ids = e.target.value.split(",").map(s => Number(s.trim())).filter(n => !isNaN(n) && n > 0);
+                        updateSection(idx, "quizQuestionIds", ids);
+                      }}
+                    />
+                    <p className="text-xs text-muted-foreground">Enter question IDs from QueryVault.</p>
+                  </div>
                 )}
                 {section.type === "simulation" && (
-                  <p className="text-sm text-muted-foreground">Link to SimVerse simulation (feature coming soon)</p>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">SimVerse Simulation ID</Label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 7"
+                      value={section.simulationId ?? ""}
+                      onChange={e => updateSection(idx, "simulationId", e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                    <p className="text-xs text-muted-foreground">Enter the SimVerse simulation ID to embed.</p>
+                  </div>
                 )}
                 {section.type === "flashcards" && (
-                  <p className="text-sm text-muted-foreground">Select a flashcard deck (feature coming soon)</p>
+                  <div className="space-y-1">
+                    <Label className="text-xs text-muted-foreground">Flashcard Deck ID</Label>
+                    <Input
+                      type="number"
+                      placeholder="e.g. 3"
+                      value={section.flashcardDeckId ?? ""}
+                      onChange={e => updateSection(idx, "flashcardDeckId", e.target.value ? Number(e.target.value) : undefined)}
+                    />
+                    <p className="text-xs text-muted-foreground">Enter the CardStack deck ID to attach.</p>
+                  </div>
                 )}
               </div>
             </div>

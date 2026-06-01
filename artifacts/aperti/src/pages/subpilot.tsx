@@ -170,9 +170,9 @@ export default function SubPilot() {
                   {flexMutation.isPending ? "Adding…" : `Add (${flexQty} × ${activePlan?.flexSeatPriceEgp || '?'} EGP)`}
                 </Button>
               </div>
-              {mySub?.flexSeats?.length > 0 && (
+              {(mySub?.flexSeats?.length ?? 0) > 0 && (
                 <div className="text-sm text-muted-foreground">
-                  Active FlexSeats: {mySub.flexSeats.map((fs: any) => `${fs.quantity} seat(s)`).join(", ")}
+                  Active FlexSeats: {(mySub!.flexSeats ?? []).map((fs: any) => `${fs.quantity} seat(s)`).join(", ")}
                 </div>
               )}
             </CardContent>

@@ -14,7 +14,8 @@ import { CheckCircle, Sparkles, Eye } from "lucide-react";
 const API = import.meta.env.VITE_API_URL || "";
 const token = () => localStorage.getItem("aperti_token");
 
-export default function GradeFlow({ examId }: { examId: number }) {
+export default function GradeFlow() {
+  const examId = 0;
   const queryClient = useQueryClient();
   const [selectedSubmission, setSelectedSubmission] = useState<any>(null);
 

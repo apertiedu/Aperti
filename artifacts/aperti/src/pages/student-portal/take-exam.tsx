@@ -32,8 +32,13 @@ export default function TakeExam() {
       });
       return res.json();
     },
-    onSuccess: (data) => setTimeLeft((data.exam?.timeLimitMinutes || 60) * 60),
   });
+
+  useEffect(() => {
+    if (data?.exam?.timeLimitMinutes) {
+      setTimeLeft(data.exam.timeLimitMinutes * 60);
+    }
+  }, [data?.exam?.timeLimitMinutes]);
 
   const submitMutation = useMutation({
     mutationFn: (answersArray: any[]) =>

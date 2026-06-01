@@ -17,7 +17,8 @@ async function fetchJSON(url: string) {
   return res.json();
 }
 
-export default function ClassForge({ liveClassId = 1 }: { liveClassId?: number }) {
+export default function ClassForge() {
+  const liveClassId = 1;
   const { data, isLoading } = useQuery({
     queryKey: ["class-forge", "heatmap", liveClassId],
     queryFn: () => fetchJSON(`/class-forge/heatmap/${liveClassId}`),

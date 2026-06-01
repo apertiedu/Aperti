@@ -27,7 +27,7 @@ export default function QuickSwitch() {
       <Card className="card-hover max-w-md">
         <CardHeader><CardTitle>Switch Role</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          <Select value={selectedRole} onValueChange={setSelectedRole}>
+          <Select value={selectedRole} onValueChange={(v) => setSelectedRole(v as typeof selectedRole)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="admin">Admin</SelectItem>

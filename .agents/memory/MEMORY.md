@@ -1,2 +1,4 @@
-- [Aperti stack & API wiring](aperti-stack.md) — monorepo setup, proxy config, JWT auth, how API calls reach Express from Vite dev server
-- [Aperti route map](aperti-routes.md) — all teacher/student/parent/admin routes and which component each maps to
+- [Framer Motion spring type](framer-spring.md) — `type: "spring"` in variant transitions needs `as const` to satisfy TypeScript
+- [Wouter Route component props](wouter-route-props.md) — components passed as `component={}` to wouter Route must take no custom props; use internal defaults or URL params
+- [Three.js OrbitControls types](three-orbitcontrols.md) — `three/examples/jsm/controls/OrbitControls` not resolved by @types/three; suppress with `// @ts-ignore`
+- [Redis stub pattern](redis-stub.md) — api-server has in-memory Redis stub at `artifacts/api-server/src/lib/redis.ts` for Replit compatibility

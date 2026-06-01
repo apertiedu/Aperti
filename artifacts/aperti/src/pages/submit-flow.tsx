@@ -46,6 +46,8 @@ interface Homework {
   isPublished: boolean;
   allowLate: boolean;
   createdAt: string;
+  description?: string;
+  instructions?: string;
 }
 
 export default function SubmitFlow() {

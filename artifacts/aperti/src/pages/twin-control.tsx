@@ -38,12 +38,12 @@ export default function TwinControl() {
     roomRef.current = room;
     room.connect(LIVEKIT_URL, controlToken).then(() => {
       // Listen for participants
-      setParticipants([...room.remoteParticipant.values()]);
-      room.on(RoomEvent.ParticipantConnected, () => setParticipants([...room.remoteParticipant.values()]));
-      room.on(RoomEvent.ParticipantDisconnected, () => setParticipants([...room.remoteParticipant.values()]));
+      setParticipants([...room.remoteParticipants.values()]);
+      room.on(RoomEvent.ParticipantConnected, () => setParticipants([...room.remoteParticipants.values()]));
+      room.on(RoomEvent.ParticipantDisconnected, () => setParticipants([...room.remoteParticipants.values()]));
       // Listen for hand raise data (we'll use data messages)
       room.on(RoomEvent.DataReceived, (payload, participant) => {
-        if (payload.toString() === "hand_raise") setHandRaised((prev) => [...prev, participant.identity]);
+        if (payload.toString() === "hand_raise" && participant) setHandRaised((prev) => [...prev, participant.identity]);
       });
     });
     return () => { room.disconnect(); };

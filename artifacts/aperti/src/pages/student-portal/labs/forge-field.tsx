@@ -29,7 +29,7 @@ export default function ForgeField() {
   const [switchClosed, setSwitchClosed] = useState(false);
   const [batteryOn, setBatteryOn] = useState(true);
   const [bulbGlows, setBulbGlows] = useState(false);
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number | null>(null);
 
   // Simulate circuit logic
   useEffect(() => {

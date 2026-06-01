@@ -52,14 +52,37 @@ export default function CoreHub() {
     queryFn: () => fetchJSON("/dashboard/summary"),
   });
 
-  const { data: subData, isLoading: subLoading } = useQuery({
+  const { data: subData } = useQuery({
     queryKey: ["subscription", "mine"],
     queryFn: () => fetchJSON("/subscriptions/mine"),
   });
 
+  const { data: timetable, isLoading: timetableLoading } = useQuery({
+    queryKey: ["timetable"],
+    queryFn: () => fetchJSON("/timetable"),
+  });
+
+  const { data: kudosData, isLoading: kudosLoading } = useQuery({
+    queryKey: ["leaderboard"],
+    queryFn: () => fetchJSON("/portal/leaderboard"),
+  });
+
   const plan = subData?.subscription?.plan;
-  const flexSeats = subData?.flexSeats || [];
-  const currentStudents = 287; // Replace later with actual count from API
+  const currentStudents = summary?.totalStudents ?? subData?.studentCount ?? 0;
+
+  // Build today's upcoming lessons from the timetable
+  const todayName = new Date().toLocaleDateString("en-US", { weekday: "long" });
+  const nowHHMM = new Date().toTimeString().slice(0, 5);
+  const upcomingLessons: any[] = (Array.isArray(timetable) ? timetable : [])
+    .filter((s: any) => {
+      const dow = typeof s.dayOfWeek === "string" ? s.dayOfWeek : "";
+      return dow.toLowerCase() === todayName.toLowerCase() && (s.startTime ?? "") >= nowHHMM;
+    })
+    .sort((a: any, b: any) => (a.startTime ?? "").localeCompare(b.startTime ?? ""))
+    .slice(0, 4);
+
+  // Top kudos earners
+  const topKudos: any[] = (Array.isArray(kudosData?.leaderboard) ? kudosData.leaderboard : []).slice(0, 3);
 
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
@@ -131,7 +154,7 @@ export default function CoreHub() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left column */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Upcoming Lessons – placeholder, real API next */}
+          {/* Upcoming Lessons – live timetable data */}
           <motion.div variants={item} initial="hidden" animate="show">
             <Card className="card-hover">
               <CardHeader className="pb-2">
@@ -139,15 +162,34 @@ export default function CoreHub() {
                   <CalendarCheck className="h-5 w-5 text-primary" />
                   Upcoming Lessons
                 </CardTitle>
-                <CardDescription>Your next sessions (coming soon)</CardDescription>
+                <CardDescription>Today's remaining sessions — {todayName}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ScrollArea className="h-[200px]">
-                  <div className="space-y-3 text-muted-foreground text-sm">
-                    {["09:00 AM — Physics 0625", "11:00 AM — Math 0580", "02:00 PM — Chemistry"].map((l, i) => (
-                      <div key={i} className="p-3 rounded-lg bg-muted/50">{l}</div>
-                    ))}
-                  </div>
+                  {timetableLoading ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map(i => <Skeleton key={i} className="h-12 rounded-lg" />)}
+                    </div>
+                  ) : upcomingLessons.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-muted-foreground text-sm gap-1 py-8">
+                      <CalendarCheck className="h-8 w-8 opacity-30" />
+                      <p>No more lessons today.</p>
+                      <Link href="/plan-grid"><Button variant="link" size="sm" className="text-primary p-0">View full timetable →</Button></Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {upcomingLessons.map((s: any, i: number) => (
+                        <div key={i} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                          <span className="text-xs font-mono text-primary font-semibold w-16 shrink-0">{s.startTime}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{s.subjectName || s.courseName || "Lesson"}</p>
+                            <p className="text-xs text-muted-foreground truncate">{s.className || s.groupName || s.type || ""}</p>
+                          </div>
+                          <Badge variant="outline" className="text-xs shrink-0">{s.lessonNumber ? `L${s.lessonNumber}` : ""}</Badge>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </ScrollArea>
               </CardContent>
             </Card>
@@ -232,7 +274,7 @@ export default function CoreHub() {
             </Card>
           </motion.div>
 
-          {/* Kudos Engine – placeholder real later */}
+          {/* Kudos Engine – live leaderboard */}
           <motion.div variants={item} initial="hidden" animate="show">
             <Card className="card-hover">
               <CardHeader className="pb-2">
@@ -240,23 +282,38 @@ export default function CoreHub() {
                   <Award className="h-5 w-5 text-primary" />
                   Kudos Engine™
                 </CardTitle>
-                <CardDescription>Top assistants this week</CardDescription>
+                <CardDescription>Top performers this week</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 bg-primary/20 text-primary"><AvatarFallback>AS</AvatarFallback></Avatar>
-                    <div className="flex-1"><p className="text-sm font-medium">Ahmed S.</p><p className="text-xs text-muted-foreground">+320 pts</p></div>
-                    <Badge variant="secondary">1st</Badge>
+                {kudosLoading ? (
+                  <div className="space-y-2">
+                    {[1, 2, 3].map(i => <Skeleton key={i} className="h-10 rounded-lg" />)}
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8 bg-primary/20 text-primary"><AvatarFallback>MK</AvatarFallback></Avatar>
-                    <div className="flex-1"><p className="text-sm font-medium">Mona K.</p><p className="text-xs text-muted-foreground">+275 pts</p></div>
-                    <Badge variant="secondary">2nd</Badge>
+                ) : topKudos.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">No rankings yet this week.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {topKudos.map((k: any, i: number) => {
+                      const ordinals = ["1st", "2nd", "3rd"];
+                      const initials = ((k.displayName || k.name || "?") as string)
+                        .split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase();
+                      return (
+                        <div key={i} className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8 bg-primary/20 text-primary">
+                            <AvatarFallback>{initials}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{k.displayName || k.name}</p>
+                            <p className="text-xs text-muted-foreground">+{k.points ?? k.totalPoints ?? 0} pts</p>
+                          </div>
+                          <Badge variant="secondary">{ordinals[i] ?? `${i + 1}th`}</Badge>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
+                )}
                 <Link href="/kudos-engine">
-                  <Button variant="ghost" size="sm" className="w-full justify-between">
+                  <Button variant="ghost" size="sm" className="w-full justify-between mt-3">
                     View leaderboard <ChevronRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -286,7 +343,7 @@ const container = {
 
 const item = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 200, damping: 20 } },
+  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 200, damping: 20 } },
 };
 
 function StatsCard({ label, value, icon }: { label: string; value: number | string; icon: React.ReactNode }) {

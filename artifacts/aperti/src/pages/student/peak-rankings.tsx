@@ -38,7 +38,7 @@ const trendIcon = (trend: string) => {
 };
 
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
-const item = { hidden: { opacity: 0, x: -12 }, show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 280, damping: 24 } } };
+const item = { hidden: { opacity: 0, x: -12 }, show: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 280, damping: 24 } } };
 
 export default function PeakRankings() {
   const [subject, setSubject] = useState("All Subjects");

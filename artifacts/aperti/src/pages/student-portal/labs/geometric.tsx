@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from "react";
 import * as THREE from "three";
+// @ts-ignore
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
