@@ -1,127 +1,80 @@
-import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { QrCode, MicOff, Hand, Users, Play, Pause, Monitor, MessageCircle, BarChart3 } from "lucide-react";
-import { Room, RoomEvent, RemoteParticipant } from "livekit-client";
+import { Clock, Smartphone, QrCode, MicOff, Hand, BarChart3, Monitor } from "lucide-react";
 
-const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL || "ws://localhost:7880";
-const API = "/api";
+const TEAL = "#00796B";
+const TEAL_LIGHT = "#E6F4F1";
 
 export default function TwinControl() {
-  const [pairCode, setPairCode] = useState("");
-  const [controlToken, setControlToken] = useState<string | null>(null);
-  const [roomName, setRoomName] = useState<string | null>(null);
-  const [participants, setParticipants] = useState<RemoteParticipant[]>([]);
-  const [handRaised, setHandRaised] = useState<string[]>([]);
-  const [recording, setRecording] = useState(false);
-  const roomRef = useRef<Room | null>(null);
-
-  // Pair via scanning (simulate with input for now)
-  const pairDevice = async () => {
-    const res = await fetch(`${API}/live-class/control-token?pairCode=${pairCode}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` },
-    });
-    const data = await res.json();
-    if (data.controlToken) {
-      setControlToken(data.controlToken);
-      setRoomName(data.roomName);
-    }
-  };
-
-  // Connect with control token
-  useEffect(() => {
-    if (!controlToken || !roomName) return;
-    const room = new Room({ adaptiveStream: true });
-    roomRef.current = room;
-    room.connect(LIVEKIT_URL, controlToken).then(() => {
-      // Listen for participants
-      setParticipants([...room.remoteParticipants.values()]);
-      room.on(RoomEvent.ParticipantConnected, () => setParticipants([...room.remoteParticipants.values()]));
-      room.on(RoomEvent.ParticipantDisconnected, () => setParticipants([...room.remoteParticipants.values()]));
-      // Listen for hand raise data (we'll use data messages)
-      room.on(RoomEvent.DataReceived, (payload, participant) => {
-        if (payload.toString() === "hand_raise" && participant) setHandRaised((prev) => [...prev, participant.identity]);
-      });
-    });
-    return () => { room.disconnect(); };
-  }, [controlToken, roomName]);
-
-  const sendControl = (action: string) => {
-    // Send data message to room (presenter device will listen)
-    const str = JSON.stringify({ action, timestamp: Date.now() });
-    roomRef.current?.localParticipant.publishData(new TextEncoder().encode(str), { reliable: true });
-  };
+  const features = [
+    { icon: QrCode, label: "QR Pairing", desc: "Pair any mobile device as a clicker in seconds" },
+    { icon: MicOff, label: "Mute Controls", desc: "Mute or spotlight participants from your phone" },
+    { icon: Hand, label: "Hand-Raise Queue", desc: "Manage raised hands and grant speaking turns" },
+    { icon: BarChart3, label: "Live Polls", desc: "Launch and tally polls without leaving the slide" },
+    { icon: Monitor, label: "Whiteboard Remote", desc: "Draw annotations wirelessly from across the room" },
+  ];
 
   return (
-    <div className="min-h-screen bg-background p-4 page-transition">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold mb-2">TwinControl<span className="text-primary"></span></h1>
-        <p className="text-muted-foreground mb-4">Your pocket command center.</p>
+    <div className="min-h-screen bg-[#F5F5F5] p-6 flex flex-col items-center justify-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="text-center max-w-lg w-full"
+      >
+        {/* Icon */}
+        <div
+          className="h-16 w-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
+          style={{ background: TEAL_LIGHT }}
+        >
+          <Smartphone className="h-8 w-8" style={{ color: TEAL }} />
+        </div>
 
-        {!controlToken ? (
-          <Card className="card-hover">
-            <CardHeader><CardTitle>Pair with LiveClass</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-2">
-                <Input placeholder="Enter pair code" value={pairCode} onChange={(e) => setPairCode(e.target.value)} />
-                <Button onClick={pairDevice}>Connect</Button>
-              </div>
-              <Button variant="outline" className="w-full" onClick={() => alert("Scan QR would open camera")}>
-                <QrCode className="h-4 w-4 mr-2" /> Scan QR Code
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {/* Status */}
-            <Card className="card-hover">
-              <CardContent className="p-4 flex items-center justify-between">
-                <span className="text-sm">Connected to {roomName}</span>
-                <Badge className="bg-primary text-primary-foreground">Live</Badge>
-              </CardContent>
-            </Card>
+        <Badge
+          className="mb-5 rounded-full px-4 py-1.5 text-xs font-semibold border-0 gap-1.5"
+          style={{ background: TEAL_LIGHT, color: TEAL }}
+        >
+          <Clock className="h-3 w-3" /> Coming Soon
+        </Badge>
 
-            {/* Quick Controls Grid */}
-            <div className="grid grid-cols-3 gap-3">
-              <Button variant="outline" className="h-20 flex flex-col gap-1" onClick={() => sendControl("mute_all")}>
-                <MicOff className="h-5 w-5" /> <span className="text-xs">Mute All</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex flex-col gap-1" onClick={() => sendControl("hand_queue")}>
-                <Hand className="h-5 w-5" /> <span className="text-xs">Hands ({handRaised.length})</span>
-              </Button>
-              <Button variant="outline" className="h-20 flex flex-col gap-1" onClick={() => { setRecording(!recording); sendControl(recording ? "pause_rec" : "resume_rec"); }}>
-                {recording ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />} <span className="text-xs">Rec</span>
-              </Button>
-            </div>
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-3 tracking-tight">TwinControl</h1>
+        <p className="text-gray-500 text-base leading-relaxed mb-10">
+          Turn any smartphone into a wireless classroom remote. Pair via QR code and control your live session, polls, and whiteboard from anywhere in the room.
+        </p>
 
-            {/* Participant list */}
-            <Card className="card-hover">
-              <CardHeader className="pb-2"><CardTitle className="text-lg">Participants ({participants.length})</CardTitle></CardHeader>
-              <CardContent>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {participants.map((p) => (
-                    <div key={p.sid} className="flex items-center justify-between">
-                      <span className="text-sm">{p.name || p.identity}</span>
-                      <div className="flex gap-2">
-                        {handRaised.includes(p.sid) && <Badge variant="secondary">✋</Badge>}
-                        <Button variant="ghost" size="sm" onClick={() => sendControl(`mute_single:${p.sid}`)}><MicOff className="h-3 w-3" /></Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+        {/* Feature preview grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left mb-10">
+          {features.map((f, i) => (
+            <motion.div
+              key={f.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 + i * 0.07 }}
+            >
+              <Card className="border-0 shadow-sm bg-white">
+                <CardContent className="p-4 flex items-start gap-3">
+                  <div
+                    className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ background: TEAL_LIGHT }}
+                  >
+                    <f.icon className="h-4 w-4" style={{ color: TEAL }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{f.label}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{f.desc}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+          {/* Filler for odd grid */}
+          <div />
+        </div>
 
-            {/* Extra Controls */}
-            <div className="grid grid-cols-2 gap-3">
-              <Button variant="outline" onClick={() => sendControl("share_screen")}><Monitor className="h-4 w-4 mr-2" />Share Screen</Button>
-              <Button variant="outline" onClick={() => sendControl("poll")}><BarChart3 className="h-4 w-4 mr-2" />Quick Poll</Button>
-            </div>
-          </div>
-        )}
+        <p className="text-xs text-gray-400">
+          TwinControl pairs seamlessly with LiveClass sessions. You'll be notified when it's available for your institution.
+        </p>
       </motion.div>
     </div>
   );

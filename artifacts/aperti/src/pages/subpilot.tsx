@@ -263,9 +263,10 @@ export default function SubPilot() {
                             <RadioGroupItem value="instapay" id="instapay" />
                             <Label htmlFor="instapay">InstaPay</Label>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <RadioGroupItem value="stripe" id="stripe" />
-                            <Label htmlFor="stripe">Card (Stripe)</Label>
+                          <div className="flex items-center gap-2 text-sm opacity-50 cursor-not-allowed">
+                            <RadioGroupItem value="stripe" id="stripe" disabled />
+                            <Label htmlFor="stripe" className="cursor-not-allowed">Card (Stripe)</Label>
+                            <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-[#E6F4F1] text-[#00796B] font-semibold">Coming Soon</span>
                           </div>
                         </RadioGroup>
                         {paymentMethod === "instapay" && (

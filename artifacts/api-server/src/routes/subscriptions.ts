@@ -91,6 +91,15 @@ subscriptionsRouter.put("/admin/:id/approve", authenticate, requireRole("admin")
   res.json({ success: true });
 });
 
+// PUT /subscriptions/admin/:id/reject — reject InstaPay
+subscriptionsRouter.put("/admin/:id/reject", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id);
+  await db.update(subscriptionsTable)
+    .set({ status: "cancelled", paymentStatus: "failed" })
+    .where(eq(subscriptionsTable.id, id));
+  res.json({ success: true });
+});
+
 // PUT /subscriptions/admin/plans/:id — update plan (price, features, etc.)
 subscriptionsRouter.put("/admin/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);

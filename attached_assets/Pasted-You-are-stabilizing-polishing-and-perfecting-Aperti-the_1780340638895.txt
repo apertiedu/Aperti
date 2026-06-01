@@ -1,0 +1,95 @@
+You are stabilizing, polishing, and perfecting **Aperti**, the educational operating system. The codebase is a full‑stack app (Vite frontend + Express backend + Drizzle ORM) with many modules already functional, but several critical issues remain and the overall platform needs a final professional pass before launch.
+
+**Your mission:**
+1. Fix **all known critical bugs** listed below.
+2. For any feature that cannot be made fully functional **right now**, replace it with a **non‑interactive "Coming Soon" badge** and disable its interactions. Nothing broken or half‑working should remain.
+3. Enforce the **Liquid Flow 2.0** design system everywhere, remove all remaining unprofessional elements, and ensure the platform feels like a premium, cohesive product.
+
+---
+
+## 🔥 CRITICAL BUGS TO FIX IMMEDIATELY
+
+### 1. Role‑Based Routing
+- **Admin must see the Admin Command Centre** by default (route `/`), **not** the teacher CoreHub.
+- **Teacher** must see CoreHub as default.
+- **QuickSwitch (role switcher)** must work: admin can temporarily preview as teacher/student/parent with a clear banner, and exit back to admin view.
+
+### 2. InstaPay Manual Approval Flow
+- Teacher selects InstaPay, enters transaction code, sees "Pending Review".
+- Admin approves/rejects in SubPilot admin panel → subscription activates.
+- Ensure the entire flow works end‑to‑end.
+
+### 3. SimVerse™ Labs
+- **ForgeField** (circuit builder), **ReactSphere** (chemistry), **Geometrix** (3D shapes), **BioSphere** (cell explorer) must be interactive and work correctly.
+- If any lab is still unstable, replace it with a professional "Coming Soon" preview card that shows a high‑quality static image/description but **disables all interactions**.
+
+### 4. InkSpace™ Full‑Screen Canvas
+- Must open in full‑screen mode by default, with tools: pen, highlighter, eraser, shapes, text, undo/redo, save/load to backend.
+- If save/load API is missing, implement it. If the canvas still has glitches, mark it as "Coming Soon" and show a locked preview.
+
+### 5. PaperVault™ Admin Upload
+- Drag‑and‑drop zone, PDF‑only validation, progress bar, upload to backend, store on disk, return public URL.
+- If the upload fails, replace it with a "Coming Soon" placeholder.
+
+### 6. QR Attendance Scanner (CheckIn™)
+- Scanner must open camera, scan student QR code, call `/api/attendance/mark-by-code`, and update UI in real time.
+- If the scanner is unreliable, replace it with a manual attendance entry form and mark the scanner as "Coming Soon".
+
+### 7. LiveClass™ & TwinControl™
+- WebRTC mesh must reliably connect peers; whiteboard sync, hand‑raise, mute work.
+- TwinControl pairing via QR must work seamlessly.
+- If connectivity is still unstable, keep the room creation UI but show a "Coming Soon" banner on the video area and disable the room until fixed.
+
+### 8. The Mentor™ Streaming Chat
+- Must work with OpenAI streaming (SSE). If API key is missing, show a message "AI tutoring is coming soon" and disable chat input.
+
+### 9. Stripe Integration
+- If real Stripe checkout is not fully implemented, replace the Stripe option with a "Coming Soon" badge and keep only InstaPay active.
+
+---
+
+## 🎨 DESIGN & PROFESSIONALISM ENFORCEMENT
+
+- **Remove all ™ symbols** from every file, title, and navigation.
+- **No user‑customizable accent colors** – only black, white, grey, and teal (#00796B).
+- **No fake reviews, competitor names, "free during beta", or "5‑minute setup" messages** anywhere.
+- **All pages must use Liquid Flow 2.0:** Inter font, teal accents, `rounded-xl` cards with `shadow-sm`, spring animations, responsive.
+- **Any "Coming Soon" badge** must be styled elegantly (e.g., a teal badge with a clock icon) and the underlying feature must be completely non‑interactive (buttons disabled, forms hidden).
+
+---
+
+## 📋 COMPLETE MODULE AUDIT
+
+Systematically go through **every** module listed below and apply the above rules: fix if possible, otherwise lock behind "Coming Soon".
+
+### Teacher Pages
+CoreHub, PlanGrid, CheckIn, SubmitFlow, GradeFlow, SchemeCraft, QueryVault, CardStack, Syllabuilder, KudosEngine, Pulse, LiveClass, TwinControl, ClassForge, ContentCraft, LabBuilder, MarkerMind, InsightStream, InkSpace, HelpDesk
+
+### Student Pages
+StudyStream, The Mentor, Revisit, FocusCoach, Echo, Ascend, PeakRankings, SimVerse (ForgeField, ReactSphere, Geometrix, BioSphere), SnapGrade, ExamVault, FocusZone, TrialVault, PaperVault, LearnPath, DiscoverFeed, SkillBadge, TeamForge, PeerReview
+
+### Parent Pages
+GuardianHub, GuardianLink, GuardianPulse
+
+### Admin Pages
+AdminCommand, SubPilot, FlexSeats, BudgetSense, AutoScale, SpendWise, ShieldCore, QuickSwitch, HelpDesk, PrivacyVault
+
+### Public Pages
+Landing, Terms, Privacy, Contact, Sitemap, PaperVault Public
+
+---
+
+## ⚙️ BACKEND REQUIREMENTS
+
+- Ensure all API routes are wired, authenticated, and scoped to the correct roles.
+- Provide a seed script (admin / admin123) and verify it runs on first boot.
+- GuardianPulse email trigger must work (manual trigger from admin panel is acceptable).
+- Database schema must be complete; run migrations if needed.
+
+---
+
+## 🚀 FINAL OUTPUT
+
+After all fixes, output a concise summary listing which modules are fully functional and which are locked behind "Coming Soon". Confirm the admin login credentials. The platform must feel stable, professional, and ready for a closed demo.
+
+**Start now – fix the critical bugs first, then lock unstable features, and finally polish the design.**

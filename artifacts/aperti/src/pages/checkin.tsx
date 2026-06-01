@@ -96,6 +96,7 @@ export default function CheckIn() {
   const [recent, setRecent] = useState<ScannedEntry[]>([]);
   const [notified, setNotified] = useState<Set<number>>(new Set());
   const [notifying, setNotifying] = useState<Set<number>>(new Set());
+  const [notifyingAll, setNotifyingAll] = useState(false);
 
   const { data: lessons = [] } = useQuery<Lesson[]>({
     queryKey: ["lessons"],
@@ -540,14 +541,36 @@ export default function CheckIn() {
               {absentRecords.length > 0 && (
                 <Card className="border-0 shadow-sm border-l-4 border-l-red-400">
                   <CardHeader className="pb-3 border-b">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4 text-red-500" />
+                    <div className="flex items-center gap-2 flex-wrap gap-y-2">
+                      <Bell className="h-4 w-4 text-red-500 shrink-0" />
                       <CardTitle className="text-sm font-semibold text-red-600">
                         Notify Absent Parents — WhatsApp
                       </CardTitle>
-                      <Badge className="ml-auto bg-red-50 text-red-600 border-0 text-xs">
+                      <Badge className="bg-red-50 text-red-600 border-0 text-xs">
                         {absentRecords.length} absent
                       </Badge>
+                      <Button
+                        size="sm"
+                        onClick={async () => {
+                          setNotifyingAll(true);
+                          const unnotified = absentRecords.filter(r => !notified.has(r.studentId));
+                          for (const r of unnotified) {
+                            await sendWhatsApp(r);
+                            // Small delay so browser doesn't block multiple window.open calls
+                            await new Promise(res => setTimeout(res, 600));
+                          }
+                          setNotifyingAll(false);
+                        }}
+                        disabled={notifyingAll || absentRecords.every(r => notified.has(r.studentId))}
+                        className="ml-auto h-7 text-xs bg-[#25D366] hover:bg-[#1EBE5A] text-white gap-1.5"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        {notifyingAll
+                          ? "Opening…"
+                          : absentRecords.every(r => notified.has(r.studentId))
+                            ? "All Notified"
+                            : `Notify All (${absentRecords.filter(r => !notified.has(r.studentId)).length})`}
+                      </Button>
                     </div>
                   </CardHeader>
                   <CardContent className="p-0 divide-y">
