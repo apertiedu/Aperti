@@ -89,9 +89,18 @@ import BioSphereLab from "@/pages/student/labs/biosphere";
 import TeamForge from "@/pages/team-forge";
 import PrivacyVault from "@/pages/privacy-vault";
 
+// Marketplace & registration
+import Courses from "@/pages/courses";
+import CourseDetail from "@/pages/course-detail";
+import StudentRegister from "@/pages/student-register";
+import MyCourses from "@/pages/teacher/my-courses";
+import StudentMyCourses from "@/pages/student/my-courses";
+import StudentApprovals from "@/pages/student-approvals";
+
 // Parent
 import GuardianHub from "@/pages/parent/guardian-hub";
 import GuardianLink from "@/pages/parent/guardian-link";
+import LinkStudent from "@/pages/parent/link-student";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -160,6 +169,9 @@ function StudentRouter() {
   return (
     <StudentLayout>
       <Switch>
+        <Route path="/courses" component={Courses} />
+        <Route path="/courses/:id" component={CourseDetail} />
+        <Route path="/my-courses" component={StudentMyCourses} />
         <Route path="/" component={StudyStream} />
         <Route path="/my-homework" component={MyHomework} />
         <Route path="/my-timetable" component={MyTimetable} />
@@ -194,6 +206,10 @@ function StudentRouter() {
 
 const TEACHER_ROUTES = (
   <>
+    <Route path="/courses" component={Courses} />
+    <Route path="/courses/:id" component={CourseDetail} />
+    <Route path="/my-courses" component={MyCourses} />
+    <Route path="/student-approvals" component={StudentApprovals} />
     <Route path="/plan-grid" component={PlanGrid} />
     <Route path="/checkin" component={CheckIn} />
     <Route path="/submit-flow" component={SubmitFlow} />
@@ -266,8 +282,11 @@ function ParentRouter() {
   return (
     <Layout>
       <Switch>
+        <Route path="/courses" component={Courses} />
+        <Route path="/courses/:id" component={CourseDetail} />
         <Route path="/parent/guardian-hub" component={GuardianHub} />
         <Route path="/parent/guardian-link" component={GuardianLink} />
+        <Route path="/parent/link-student" component={LinkStudent} />
         <Route path="/" component={GuardianHub} />
         <Route component={NotFound} />
       </Switch>
@@ -279,6 +298,9 @@ function PublicRouter() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/student-register" component={StudentRegister} />
+      <Route path="/courses" component={Courses} />
+      <Route path="/courses/:id" component={CourseDetail} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/contact" component={Contact} />

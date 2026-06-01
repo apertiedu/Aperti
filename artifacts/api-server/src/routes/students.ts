@@ -60,6 +60,69 @@ studentsRouter.post("/", authenticate, async (req: AuthRequest, res: Response) =
   }
 });
 
+// GET /students/pending — teacher sees pending student account registrations
+studentsRouter.get("/pending", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const teacherId = req.userId!;
+    const role = req.role!;
+    const { pool } = await import("@workspace/db");
+    let query = `SELECT id, username, display_name, email, status, created_at, role
+                 FROM accounts WHERE role='student' AND status='pending'`;
+    const params: any[] = [];
+    if (role !== "admin") {
+      params.push(teacherId);
+      query += ` AND teacher_account_id=$${params.length}`;
+    }
+    query += " ORDER BY created_at DESC";
+    const { rows } = await pool.query(query, params);
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /students/:id/approve — approve a pending student
+studentsRouter.put("/:id/approve", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { pool } = await import("@workspace/db");
+    const id = parseInt(req.params.id);
+    const teacherId = req.userId!;
+    const role = req.role!;
+    let query = `UPDATE accounts SET status='active' WHERE id=$1 AND role='student' AND status='pending'`;
+    const params: any[] = [id];
+    if (role !== "admin") {
+      params.push(teacherId);
+      query += ` AND teacher_account_id=$${params.length}`;
+    }
+    const { rowCount } = await pool.query(query, params);
+    if (!rowCount) return res.status(404).json({ error: "Student not found or not authorized" });
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /students/:id/reject — reject a pending student
+studentsRouter.put("/:id/reject", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { pool } = await import("@workspace/db");
+    const id = parseInt(req.params.id);
+    const teacherId = req.userId!;
+    const role = req.role!;
+    let query = `UPDATE accounts SET status='rejected' WHERE id=$1 AND role='student' AND status='pending'`;
+    const params: any[] = [id];
+    if (role !== "admin") {
+      params.push(teacherId);
+      query += ` AND teacher_account_id=$${params.length}`;
+    }
+    const { rowCount } = await pool.query(query, params);
+    if (!rowCount) return res.status(404).json({ error: "Student not found or not authorized" });
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 studentsRouter.patch("/:id", authenticate, async (req: AuthRequest, res: Response) => {
   const id = Number(req.params.id);
   const { studentName, studentCode, lesson1SessionId, lesson2SessionId, lesson3SessionId } = req.body;

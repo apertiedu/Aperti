@@ -23,6 +23,8 @@ import { mentorRouter } from "./routes/mentor";
 import { revisitRouter } from "./routes/revisit";
 import examsRouter from "./routes/exams";
 import { uploadRouter } from "./routes/upload";
+import { coursesRouter } from "./routes/courses";
+import { parentRouter } from "./routes/parent";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -82,6 +84,8 @@ app.use("/mentor", mentorRouter);
 app.use("/revisit", revisitRouter);
 app.use("/exams", examsRouter);
 app.use("/upload", uploadRouter);
+app.use("/courses", coursesRouter);
+app.use("/parent", parentRouter);
 
 async function seedDefaultAdmin() {
   try {

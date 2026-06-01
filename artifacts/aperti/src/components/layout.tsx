@@ -8,7 +8,7 @@ import {
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart,
   RefreshCw, Settings, MessageSquare,
   LogOut, School, ChevronLeft, ChevronRight, Search, KeyRound,
-  Sun, Moon, Sparkles,
+  Sun, Moon, Sparkles, ShoppingBag, UserCheck, Link2,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -87,6 +87,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Pulse", href: "/pulse", icon: BarChart3, roles: ["admin","teacher"] },
         { name: "InsightStream", href: "/insight-stream", icon: TrendingUp, roles: ["admin","teacher"] },
         { name: "InsightExams", href: "/insight-exams", icon: ClipboardCheck, roles: ["admin","teacher","assistant"] },
+      ],
+    },
+    {
+      label: "Marketplace",
+      items: [
+        { name: "Course Marketplace", href: "/courses", icon: ShoppingBag, roles: ["admin","teacher","assistant","parent"] },
+        { name: "My Courses", href: "/my-courses", icon: BookMarked, roles: ["admin","teacher"] },
+        { name: "Student Approvals", href: "/student-approvals", icon: UserCheck, roles: ["admin","teacher"] },
+        { name: "Link Child Account", href: "/parent/link-student", icon: Link2, roles: ["parent"] },
       ],
     },
     {

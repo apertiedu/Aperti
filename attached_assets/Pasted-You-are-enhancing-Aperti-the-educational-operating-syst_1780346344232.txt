@@ -1,0 +1,163 @@
+You are enhancing **Aperti**, the educational operating system, into a premium, beautifully animated, and fully functional platform.  
+The codebase is a full‑stack app (Vite + Express + Drizzle) with JWT auth and many modules.  
+Your mission:  
+1. **Massively improve the guest landing page** – make it stunning, unique, and premium.  
+2. **Build a Teacher Course Marketplace** – teachers create courses with prices, students browse and enroll, teacher/assistant approval required.  
+3. **Upgrade the UI/UX** – professional sidebar, global search bar, amazing header, beautiful animations (Framer Motion) that make using the website joyful and satisfying.  
+4. **Student Registration with Teacher Approval** – students register and must be approved by teacher/assistant.  
+5. **Parent‑Student Linking** – parents use a unique pairing code, student links parent profile, parent approves.  
+6. **Enforce Liquid Flow 2.0 design** – strict palette, no ™, no fake reviews, no broken features (lock behind “Coming Soon” if needed).
+
+---
+
+## 🔥 PRIORITY 1 – REDESIGN THE GUEST LANDING PAGE (ULTRA‑PREMIUM)
+
+The landing page must become the most beautiful, creative, and professional educational website possible.  
+Remove any old content. Build from scratch with these requirements:
+
+### Visual Design
+- **Palette:** `#F5F5F5` background, `#FFFFFF` cards, `#121212` text, teal `#00796B` accent.  
+- **Typography:** Inter (sans), JetBrains Mono (mono for code).  
+- **Animation:** Framer Motion springs – hero elements fade/slide up, feature cards stagger in, smooth scroll reveals.  
+- **Imagery:** Use a large, elegant SVG illustration of a connected classroom/neural network with teal‑accented nodes. No childish graphics.  
+- **No fake reviews, no competitor names, no “free” or “5‑minute setup” messaging.**
+
+### Structure
+1. **Navigation:** Sticky, transparent with backdrop‑blur on scroll. Logo (Aperti.) on left, links (Features, Courses, Pricing, Apply) + “Sign In” button on right.  
+2. **Hero Section:**  
+   - Headline: “Where every mind finds its rhythm.”  
+   - Subheadline: “The intelligent operating system that unifies teaching, learning, and assessment in one breathtakingly simple platform.”  
+   - CTA: “Explore Courses” (scrolls to marketplace preview) and “Request Early Access” (scrolls to form).  
+   - Visual: Animated SVG network with floating, glowing teal particles.  
+3. **Marketplace Preview:**  
+   - Show 2‑3 featured teacher courses (mock data for now – e.g., “IGCSE Physics Intensive”, “A‑Level Math Mastery”) with price, teacher name, and a “View Courses” button linking to the full marketplace page (which we will build).  
+4. **Features Section:**  
+   - 3‑4 premium cards (Live Teaching, Smart Attendance, AI‑Powered Tutoring, Auto‑Grading) with lucide‑react icons, teal accents, and subtle hover lift.  
+5. **Pricing Section (Teacher Plans):**  
+   - Starter (50 EGP), Professional (100), Enterprise (150), Master (200) – clean cards, teal outlines.  
+   - Note about FlexSeats and volume discounts.  
+   - CTA: “Get Started” → scrolls to early‑access form.  
+6. **Early‑Access Form:**  
+   - Title: “Join Aperti Early Access”  
+   - Fields: Full Name, Email, Estimated Students, Subjects, Message.  
+   - On submit, show success message.  
+7. **Footer:**  
+   - Links to Terms, Privacy, Contact, Sitemap, Past Papers (public), and Course Marketplace.  
+
+**The entire page must be fully responsive, load with smooth animations, and feel like a premium product.**
+
+---
+
+## 🔥 PRIORITY 2 – TEACHER COURSE MARKETPLACE
+
+Teachers must be able to create courses, set prices, and have students browse and enroll.
+
+### Backend
+- **New table: `courses`** – id, teacher_id, title, description, subject, price_egp, thumbnail_url, created_at, is_published.  
+- **New table: `enrollments`** – id, course_id, student_id, status (pending/approved/rejected), requested_at, approved_by (assistant_id nullable).  
+- **API endpoints:**  
+  - `POST /api/courses` – teacher creates course.  
+  - `GET /api/courses` – list published courses (public).  
+  - `GET /api/courses/:id` – course detail.  
+  - `POST /api/courses/:id/enroll` – student requests enrollment.  
+  - `GET /api/teacher/enrollments` – teacher/assistant sees pending requests.  
+  - `PUT /api/enrollments/:id` – approve/reject (teacher/assistant).  
+- **Permissions:** Only teacher owns their courses. Enrollment requests scoped to teacher’s students.
+
+### Frontend
+- **Marketplace Page (`/courses`):** Public list of all published courses with search/filter by subject. Each card shows title, teacher name, price, short description. Click leads to detail page.  
+- **Course Detail Page (`/courses/:id`):** Full description, teacher info, price, “Enroll” button. If logged in, student can request enrollment. If not logged in, prompt to login.  
+- **Teacher Dashboard – Courses Tab:** Manage own courses (create, edit, delete), see enrollment requests, approve/reject.  
+- **Student Dashboard – My Courses:** See enrolled courses and statuses.  
+- **Design:** Follow Liquid Flow – cards, teal accents, spring animations on hover.
+
+---
+
+## 🔥 PRIORITY 3 – PROFESSIONAL UI/UX UPGRADE
+
+Make the entire platform feel like a premium, cohesive product.
+
+### Global Sidebar (Teacher/Admin)
+- Collapsible sidebar with groups: **Core** (CoreHub, PlanGrid, CheckIn), **Teaching** (LiveClass, SubmitFlow, InsightExams, GradeFlow), **Content** (QueryVault, CardStack, Syllabuilder, ContentCraft), **Insights** (Pulse, MarkerMind, InsightStream), **Manage** (SubPilot, HelpDesk, Admin Command).  
+- Active state: teal background, white text.  
+- Smooth open/close animation.  
+- Mobile: slide‑over drawer.
+
+### Global Header
+- Sticky top bar with:  
+  - Logo (Aperti.)  
+  - **Global Search Bar** (⌘K style) – searches across courses, lessons, students, questions. Use a command palette (cmdk or custom).  
+  - Notification bell (with dropdown).  
+  - User avatar with dropdown (Profile, Settings, Logout).  
+- Beautiful teal accent on active elements, subtle shadows.
+
+### Animations
+- All page transitions: fade + slide up (Framer Motion `AnimatePresence`).  
+- Card hover: lift and shadow increase.  
+- Button clicks: scale down slightly then spring back.  
+- List items: stagger on enter.  
+- Use `motion.div` consistently. No jarring movements.
+
+### Student Mobile Experience
+- Bottom tab bar with: StudyStream, Homework, Mentor, CardStack, Ascend (or More).  
+- More opens a grid of all student modules.  
+- Smooth transitions between tabs.
+
+---
+
+## 🔥 PRIORITY 4 – STUDENT REGISTRATION & TEACHER APPROVAL
+
+- **Student Registration Flow:**  
+  1. Student creates account with email, password, name, and selects a teacher from a list of public teachers.  
+  2. After registration, status is “pending”.  
+  3. Teacher/assistant sees pending students in **Students** page, can approve/reject.  
+  4. Once approved, student can access full features.  
+- **Existing student accounts should still work; add a migration to set existing ones as “approved”.**
+
+### API
+- `POST /api/auth/student‑register` – creates student account with pending status.  
+- `GET /api/students/pending` – teacher sees pending list.  
+- `PUT /api/students/:id/approve` – approve student.
+
+---
+
+## 🔥 PRIORITY 5 – PARENT‑STUDENT LINKING WITH PAIRING CODE
+
+- **Parent Profile:** Parent creates account (role: parent), gets a **unique pairing code** displayed on their dashboard.  
+- **Student Side:** In student settings, they can enter the parent’s pairing code. This sends a request to the parent.  
+- **Parent Side:** Parent sees pending link requests, can approve/reject. After approval, parent can view that student’s progress in GuardianHub.  
+- **Support multiple children:** One parent can link multiple students.
+
+### Backend
+- `parent_links` table: id, parent_id, student_id, status, pairing_code, created_at.  
+- Generate unique pairing code per parent (e.g., 8‑char alphanumeric).  
+- API:  
+  - `POST /api/parent/generate‑code` – generate/regenerate code.  
+  - `POST /api/student/link‑parent` – student enters code, creates pending link.  
+  - `GET /api/parent/pending‑links` – parent sees requests.  
+  - `PUT /api/parent/approve‑link/:id` – approve/reject.
+
+---
+
+## 🔒 RULES FOR STABILITY
+
+- **Do not break existing working features.**  
+- **If any feature cannot be made fully functional right now, lock it behind a polished “Coming Soon” badge** (teal badge with clock icon, non‑interactive).  
+- **Remove all ™ symbols** – already done, verify.  
+- **No fake reviews, no competitor names, no “free during beta” language.**  
+- **Ensure role isolation:** admin routes are admin‑only (else 404), teacher routes scoped, student routes scoped.  
+- **Fix any import errors, broken APIs, or TypeScript issues.**
+
+---
+
+## ✅ FINAL CHECKLIST
+
+1. Landing page redesigned and stunning.  
+2. Course marketplace fully functional.  
+3. Sidebar, header, global search, and animations upgraded.  
+4. Student registration with teacher approval working.  
+5. Parent‑student linking via pairing code working.  
+6. All existing features either working or “Coming Soon”.  
+7. Platform feels premium, responsive, and joyful to use.
+
+**Start now – create the landing page and marketplace, then upgrade the UI, then implement the new registration and parent flows. Ensure perfection.**

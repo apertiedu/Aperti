@@ -74,6 +74,22 @@ export default defineConfig({
         target: `http://localhost:${apiPort}`,
         changeOrigin: true,
       },
+      "/auth": {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+      },
+      "/courses": {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+      },
+      "/parent": {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+      },
+      "/uploads": {
+        target: `http://localhost:${apiPort}`,
+        changeOrigin: true,
+      },
     },
     fs: {
       strict: true,

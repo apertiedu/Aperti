@@ -33,13 +33,13 @@ args = "Backend API"
 name = "Start application"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=5000 BASE_PATH=/ pnpm --filter @workspace/aperti run dev"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=5000 BASE_PATH=/ API_PORT=8080 pnpm --filter @workspace/aperti run dev"
+waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Backend API"
@@ -62,10 +62,6 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 5001
-externalPort = 3000
-
-[[ports]]
 localPort = 8080
 externalPort = 8080
 
@@ -76,6 +72,10 @@ externalPort = 8081
 [[ports]]
 localPort = 21664
 externalPort = 3002
+
+[[ports]]
+localPort = 21665
+externalPort = 4200
 
 [deployment]
 deploymentTarget = "autoscale"

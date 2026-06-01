@@ -1,671 +1,599 @@
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, FormEvent, useEffect } from "react";
 import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import {
-  ArrowRight, Shield, BookOpen, Brain, BarChart3, Video,
-  ClipboardCheck, GraduationCap, CheckCircle2, Sparkles,
-  Menu, X, Users, FileText, Zap, ChevronRight,
-} from "lucide-react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import {
+  ArrowRight, BookOpen, Brain, BarChart3, Video, CheckCircle2,
+  Menu, X, GraduationCap, Clock, Users, ChevronRight, Sparkles,
+  Shield, Zap, Target, Star, Globe
+} from "lucide-react";
 
 const TEAL = "#00796B";
 const TEAL_LIGHT = "#E6F4F1";
+const TEAL_MED = "#00897B";
 
 /* ── Scroll reveal ── */
-function Reveal({ children, delay = 0, y = 24 }: { children: React.ReactNode; delay?: number; y?: number }) {
+function Reveal({ children, delay = 0, y = 28 }: { children: React.ReactNode; delay?: number; y?: number }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
+  const inView = useInView(ref, { once: true, margin: "-80px" });
   return (
-    <motion.div
-      ref={ref}
+    <motion.div ref={ref}
       initial={{ opacity: 0, y }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}>
       {children}
     </motion.div>
   );
 }
 
-/* ── Hero SVG illustration – neural / learning network ── */
-function HeroIllustration() {
+/* ── Neural Network SVG ── */
+function NeuralNetwork() {
   const nodes = [
-    { cx: 200, cy: 160, r: 28, label: "Teacher" },
-    { cx: 420, cy: 80, r: 20, label: "LiveClass" },
-    { cx: 560, cy: 200, r: 22, label: "Analytics" },
-    { cx: 440, cy: 300, r: 20, label: "Student" },
-    { cx: 280, cy: 320, r: 18, label: "Mentor" },
-    { cx: 100, cy: 280, r: 18, label: "Parent" },
-    { cx: 350, cy: 180, r: 14, label: "" },
-    { cx: 480, cy: 150, r: 10, label: "" },
+    { cx: 180, cy: 140, r: 30, label: "Teacher", primary: true },
+    { cx: 400, cy: 70, r: 22, label: "LiveClass" },
+    { cx: 540, cy: 200, r: 24, label: "Analytics" },
+    { cx: 420, cy: 310, r: 20, label: "Student" },
+    { cx: 260, cy: 320, r: 20, label: "Mentor" },
+    { cx: 90, cy: 270, r: 20, label: "Parent" },
+    { cx: 320, cy: 185, r: 14, label: "" },
+    { cx: 470, cy: 140, r: 11, label: "" },
+    { cx: 150, cy: 350, r: 10, label: "" },
   ];
   const edges = [
-    [0, 1], [0, 4], [0, 5], [0, 6], [1, 2], [1, 7],
-    [2, 3], [3, 4], [4, 5], [6, 3], [6, 1], [7, 2],
+    [0,1],[0,4],[0,5],[0,6],[1,2],[1,7],[2,3],[3,4],[4,5],[6,3],[6,1],[7,2],[5,8]
   ];
 
   return (
-    <svg
-      viewBox="0 0 660 400"
-      className="w-full max-w-2xl mx-auto"
-      style={{ height: 340 }}
-      aria-hidden
-    >
-      {/* Glow filter */}
+    <svg viewBox="0 0 640 420" className="w-full max-w-2xl" style={{ height: 360 }} aria-hidden>
       <defs>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
-          <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        <filter id="glow2">
+          <feGaussianBlur stdDeviation="4" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
-        <radialGradient id="nodeGrad" cx="30%" cy="30%" r="70%">
+        <radialGradient id="nodeG" cx="35%" cy="25%" r="65%">
           <stop offset="0%" stopColor="#4DB6AC" />
           <stop offset="100%" stopColor={TEAL} />
         </radialGradient>
+        <radialGradient id="nodeGbig" cx="35%" cy="25%" r="65%">
+          <stop offset="0%" stopColor="#80CBC4" />
+          <stop offset="100%" stopColor={TEAL_MED} />
+        </radialGradient>
       </defs>
 
-      {/* Edges */}
       {edges.map(([a, b], i) => (
-        <motion.line
-          key={i}
-          x1={nodes[a].cx} y1={nodes[a].cy}
-          x2={nodes[b].cx} y2={nodes[b].cy}
-          stroke={TEAL} strokeWidth="1.5" strokeOpacity="0.22"
+        <motion.line key={i}
+          x1={nodes[a].cx} y1={nodes[a].cy} x2={nodes[b].cx} y2={nodes[b].cy}
+          stroke={TEAL} strokeWidth="1.5" strokeOpacity="0.18"
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 1.2, delay: 0.3 + i * 0.06, ease: "easeInOut" }}
-        />
+          transition={{ duration: 1.4, delay: 0.3 + i * 0.07, ease: "easeInOut" }} />
       ))}
 
-      {/* Pulse rings */}
-      {[0, 2, 3].map((ni, i) => (
-        <motion.circle
-          key={`pulse-${ni}`}
-          cx={nodes[ni].cx} cy={nodes[ni].cy}
-          r={nodes[ni].r + 8}
-          fill="none"
-          stroke={TEAL}
-          strokeWidth="1"
-          strokeOpacity="0.18"
-          initial={{ scale: 1, opacity: 0.18 }}
-          animate={{ scale: [1, 1.6, 1], opacity: [0.18, 0, 0.18] }}
-          transition={{ duration: 3, delay: i * 1.1, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: `${nodes[ni].cx}px ${nodes[ni].cy}px` }}
-        />
-      ))}
-
-      {/* Nodes */}
       {nodes.map((n, i) => (
-        <motion.g
-          key={i}
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring" as const, stiffness: 220, damping: 18, delay: 0.1 + i * 0.08 }}
-          style={{ transformOrigin: `${n.cx}px ${n.cy}px` }}
-        >
-          <circle cx={n.cx} cy={n.cy} r={n.r + 3} fill="white" opacity="0.6" />
-          <circle cx={n.cx} cy={n.cy} r={n.r} fill="url(#nodeGrad)" filter="url(#glow)" />
+        <g key={i} filter="url(#glow2)">
+          <motion.circle cx={n.cx} cy={n.cy} r={n.r}
+            fill={n.primary ? "url(#nodeGbig)" : "url(#nodeG)"}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.5 + i * 0.1, type: "spring", bounce: 0.4 }}
+            style={{ originX: `${n.cx}px`, originY: `${n.cy}px` }} />
           {n.label && (
-            <text
-              x={n.cx} y={n.cy + n.r + 14}
-              textAnchor="middle"
-              fontSize="10"
-              fill="#475569"
-              fontFamily="Inter, sans-serif"
-              fontWeight="500"
-            >
+            <motion.text x={n.cx} y={n.cy + n.r + 14} textAnchor="middle"
+              fontSize={10} fill="#374151" fontWeight="600" fontFamily="Inter, sans-serif"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.8 + i * 0.1 }}>
               {n.label}
-            </text>
+            </motion.text>
           )}
-        </motion.g>
+        </g>
       ))}
 
-      {/* Floating data packets */}
-      {[0, 1].map((i) => (
-        <motion.circle
-          key={`pkt-${i}`}
-          r="4" fill={TEAL} opacity="0.7"
-          initial={{ cx: nodes[0].cx, cy: nodes[0].cy }}
-          animate={{
-            cx: [nodes[0].cx, nodes[i === 0 ? 1 : 4].cx],
-            cy: [nodes[0].cy, nodes[i === 0 ? 1 : 4].cy],
-          }}
-          transition={{ duration: 2.5, delay: i * 1.2, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
-        />
+      {/* Floating particles */}
+      {[
+        { x: 500, y: 60, delay: 0 }, { x: 60, y: 150, delay: 0.5 },
+        { x: 590, y: 350, delay: 1 }, { x: 30, y: 380, delay: 1.5 },
+      ].map((p, i) => (
+        <motion.circle key={`p${i}`} cx={p.x} cy={p.y} r={3}
+          fill={TEAL} opacity={0.35}
+          animate={{ y: [-6, 6, -6], opacity: [0.35, 0.6, 0.35] }}
+          transition={{ duration: 3 + i * 0.8, delay: p.delay, repeat: Infinity, ease: "easeInOut" }} />
       ))}
     </svg>
   );
 }
 
-/* ── Feature card ── */
-function FeatureCard({ icon, title, desc, delay = 0 }: { icon: React.ReactNode; title: string; desc: string; delay?: number }) {
+/* ── Nav ── */
+function Nav() {
+  const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const fn = () => setScrolled(window.scrollY > 30);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
+  }, []);
+
   return (
-    <Reveal delay={delay}>
-      <motion.div
-        whileHover={{ y: -6, boxShadow: "0 20px 48px rgba(0,121,107,0.12)" }}
-        transition={{ type: "spring" as const, stiffness: 340, damping: 24 }}
-        className="rounded-2xl border border-slate-100 bg-white p-6 h-full flex flex-col gap-4"
-      >
-        <div
-          className="h-11 w-11 rounded-xl flex items-center justify-center shrink-0"
-          style={{ background: TEAL_LIGHT }}
-        >
-          {icon}
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
+      <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+        <Link href="/">
+          <span className="text-xl font-extrabold tracking-tight cursor-pointer" style={{ color: "#121212" }}>
+            Aperti<span style={{ color: TEAL }}>.</span>
+          </span>
+        </Link>
+
+        {/* Desktop nav */}
+        <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-500">
+          <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
+          <Link href="/courses" className="hover:text-gray-900 transition-colors">Courses</Link>
+          <a href="#pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
+          <a href="#apply" className="hover:text-gray-900 transition-colors">Apply</a>
         </div>
-        <div>
-          <h3 className="text-base font-semibold text-slate-900 mb-1.5">{title}</h3>
-          <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+
+        <div className="hidden md:flex items-center gap-3">
+          <Link href="/courses">
+            <button className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all">
+              Explore Courses
+            </button>
+          </Link>
+          <Link href="/login">
+            <button className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all hover:opacity-90" style={{ background: TEAL }}>
+              Sign In
+            </button>
+          </Link>
         </div>
-      </motion.div>
-    </Reveal>
+
+        {/* Mobile menu button */}
+        <button className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100" onClick={() => setOpen(!open)}>
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }} className="md:hidden bg-white border-t border-gray-100 overflow-hidden">
+            <div className="px-5 py-4 space-y-3">
+              {[["#features","Features"],["#pricing","Pricing"],["#apply","Apply"]].map(([href,label]) => (
+                <a key={href} href={href} onClick={() => setOpen(false)}
+                  className="block text-sm font-medium text-gray-600 hover:text-gray-900 py-1">{label}</a>
+              ))}
+              <Link href="/courses"><span className="block text-sm font-medium text-gray-600 hover:text-gray-900 py-1" onClick={() => setOpen(false)}>Courses</span></Link>
+              <div className="pt-2 flex gap-2">
+                <Link href="/student-register" className="flex-1">
+                  <button className="w-full text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700">Register</button>
+                </Link>
+                <Link href="/login" className="flex-1">
+                  <button className="w-full text-sm font-semibold px-4 py-2 rounded-xl text-white" style={{ background: TEAL }}>Sign In</button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </nav>
   );
 }
 
 /* ── Pricing card ── */
-function PricingCard({ name, price, features, popular }: { name: string; price: string; features: string[]; popular?: boolean }) {
+const plans = [
+  { name: "Starter", price: 50, seats: "Up to 30", color: "#757575", features: ["30 students", "CheckIn & Attendance", "Homework submissions", "Basic analytics"] },
+  { name: "Professional", price: 100, seats: "Up to 80", color: TEAL, highlight: true, features: ["80 students", "All Starter features", "LiveClass streaming", "QueryVault & CardStack", "Parent Guardian Hub"] },
+  { name: "Enterprise", price: 150, seats: "Up to 200", color: "#1976D2", features: ["200 students", "All Professional features", "InsightStream analytics", "Priority support", "API access"] },
+  { name: "Master", price: 200, seats: "Unlimited", color: "#7B1FA2", features: ["Unlimited students", "All features", "Custom integrations", "Dedicated support", "SLA guaranteed"] },
+];
+
+function PricingCard({ plan }: { plan: typeof plans[0] }) {
   return (
-    <Reveal>
-      <motion.div
-        whileHover={{ y: -6, boxShadow: popular ? "0 24px 60px rgba(0,121,107,0.20)" : "0 16px 40px rgba(0,0,0,0.08)" }}
-        transition={{ type: "spring" as const, stiffness: 340, damping: 24 }}
-        className={`relative rounded-2xl border bg-white p-7 h-full flex flex-col ${
-          popular ? "border-[#00796B] ring-2 ring-[#00796B]/15" : "border-slate-100"
-        }`}
-      >
-        {popular && (
-          <span
-            className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white text-[11px] font-bold px-4 py-1 rounded-full tracking-wide"
-            style={{ background: TEAL }}
-          >
-            MOST POPULAR
-          </span>
-        )}
-        <div className="mb-6">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">{name}</p>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-4xl font-extrabold text-slate-900">{price}</span>
-            <span className="text-sm text-slate-400 leading-tight">EGP<br />/ student / mo</span>
-          </div>
+    <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      className={`bg-white rounded-2xl p-6 shadow-sm border-2 relative overflow-hidden ${plan.highlight ? "" : "border-gray-100"}`}
+      style={{ borderColor: plan.highlight ? plan.color : undefined }}>
+      {plan.highlight && (
+        <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: plan.color }}>
+          POPULAR
         </div>
-        <ul className="space-y-3 mb-8 flex-1">
-          {features.map((f, i) => (
-            <li key={i} className="flex items-start gap-2.5 text-sm text-slate-600">
-              <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0" style={{ color: TEAL }} />
-              {f}
-            </li>
-          ))}
-        </ul>
-        <a href="#apply">
-          <Button
-            className="w-full rounded-xl font-semibold h-10"
-            style={popular ? { background: TEAL, color: "white" } : { background: "#F1F5F9", color: "#334155" }}
-          >
-            Request Access
-          </Button>
-        </a>
-      </motion.div>
+      )}
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${plan.color}15` }}>
+        <Star className="h-5 w-5" style={{ color: plan.color }} />
+      </div>
+      <h3 className="font-extrabold text-gray-900 text-lg mb-1">{plan.name}</h3>
+      <div className="mb-1">
+        <span className="text-3xl font-black" style={{ color: plan.color }}>{plan.price}</span>
+        <span className="text-gray-400 text-sm ml-1">EGP / mo</span>
+      </div>
+      <p className="text-xs text-gray-400 mb-5">{plan.seats}</p>
+      <div className="space-y-2 mb-6">
+        {plan.features.map(f => (
+          <div key={f} className="flex items-center gap-2 text-sm text-gray-600">
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: plan.color }} />
+            {f}
+          </div>
+        ))}
+      </div>
+      <a href="#apply">
+        <button className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+          style={{ background: plan.highlight ? plan.color : `${plan.color}12`, color: plan.highlight ? "white" : plan.color }}>
+          Get Started
+        </button>
+      </a>
+    </motion.div>
+  );
+}
+
+/* ── Feature card ── */
+const features = [
+  { icon: Video, title: "Live Interactive Classes", desc: "Host real-time video sessions with whiteboard collaboration, screen sharing, and live chat. Students join from anywhere.", color: "#1976D2" },
+  { icon: Brain, title: "AI-Powered Mentor", desc: "Students get 24/7 tutoring from an intelligent AI mentor trained on your course material and exam syllabi.", color: TEAL },
+  { icon: BarChart3, title: "Smart Attendance", desc: "QR-code check-in, GPS validation, and live attendance dashboards. Never chase a register again.", color: "#388E3C" },
+  { icon: Zap, title: "Auto-Grading Engine", desc: "Submit homework, mark schemes auto-applied. Instant feedback. Teachers review only edge cases.", color: "#F57C00" },
+];
+
+/* ── Featured courses mock ── */
+const MOCK_COURSES = [
+  { id: 0, title: "IGCSE Physics Intensive", subject: "Physics", teacher: "Mr. Ahmed Hassan", price: "299 EGP / mo", weeks: 12, students: 48, color: "#1976D2" },
+  { id: 0, title: "A-Level Math Mastery", subject: "Math", teacher: "Dr. Fatima El-Said", price: "249 EGP / mo", weeks: 16, students: 63, color: "#388E3C" },
+  { id: 0, title: "IGCSE Chemistry Excellence", subject: "Chemistry", teacher: "Ms. Sara Karim", price: "279 EGP / mo", weeks: 10, students: 35, color: "#7B1FA2" },
+];
+
+/* ── Count-up hook (native IntersectionObserver) ── */
+function useCountUp(target: number, duration = 1600) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const hasRun = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !hasRun.current) {
+          hasRun.current = true;
+          observer.disconnect();
+          if (target === 0) return;
+          const startTime = performance.now();
+          const tick = (now: number) => {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.round(eased * target));
+            if (progress < 1) requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [target, duration]);
+
+  return { count, ref };
+}
+
+interface PlatformStats {
+  activeStudents: number;
+  activeTeachers: number;
+  publishedCourses: number;
+  attendanceRecords: number;
+}
+
+function StatItem({ value, suffix = "", label, delay }: { value: number; suffix?: string; label: string; delay: number }) {
+  const { count, ref } = useCountUp(value);
+  return (
+    <Reveal delay={delay}>
+      <div ref={ref} className="text-center">
+        <p className="text-3xl font-black mb-1" style={{ color: TEAL }}>
+          {count.toLocaleString()}{suffix}
+        </p>
+        <p className="text-xs text-gray-400 font-medium">{label}</p>
+      </div>
     </Reveal>
+  );
+}
+
+function StatsStrip() {
+  const { data: stats } = useQuery<PlatformStats>({
+    queryKey: ["platform-stats"],
+    queryFn: async () => {
+      const res = await fetch("/auth/stats");
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const items = [
+    { value: stats?.activeStudents ?? 0, suffix: stats && stats.activeStudents > 0 ? "+" : "", label: "Active students" },
+    { value: stats?.activeTeachers ?? 0, suffix: "", label: "Educators on the platform" },
+    { value: stats?.publishedCourses ?? 0, suffix: "", label: "Published courses" },
+    { value: stats?.attendanceRecords ?? 0, suffix: stats && stats.attendanceRecords > 0 ? "+" : "", label: "Attendance records logged" },
+  ];
+
+  return (
+    <div className="py-16 px-5 border-y border-gray-100" style={{ background: "#F9FAFB" }}>
+      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+        {items.map((s, i) => (
+          <StatItem key={i} value={s.value} suffix={s.suffix} label={s.label} delay={i * 0.08} />
+        ))}
+      </div>
+    </div>
   );
 }
 
 /* ── Early access form ── */
 function EarlyAccessForm() {
+  const [form, setForm] = useState({ name: "", email: "", students: "", subjects: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 900);
+    await new Promise(r => setTimeout(r, 900));
+    setLoading(false);
+    setSubmitted(true);
   };
 
   if (submitted) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.93 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring" as const, stiffness: 280, damping: 22 }}
-        className="text-center p-12 bg-white border border-slate-100 rounded-2xl shadow-sm max-w-xl mx-auto"
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring" as const, stiffness: 380, damping: 20, delay: 0.1 }}
-          className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-          style={{ background: TEAL_LIGHT }}
-        >
-          <Sparkles className="h-7 w-7" style={{ color: TEAL }} />
-        </motion.div>
-        <h3 className="text-xl font-bold text-slate-900 mb-2">Application received.</h3>
-        <p className="text-slate-500 text-sm leading-relaxed">
-          Our team will review your application and reach out within 48 hours to set up your personalised Aperti workspace.
-        </p>
+      <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+        className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100 max-w-lg mx-auto">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: TEAL_LIGHT }}>
+          <CheckCircle2 className="h-7 w-7" style={{ color: TEAL }} />
+        </div>
+        <h3 className="text-xl font-extrabold text-gray-900 mb-2">Application received!</h3>
+        <p className="text-gray-500 text-sm">We will personally reach out within 48 hours to set up your workspace.</p>
       </motion.div>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-xl mx-auto bg-white border border-slate-100 rounded-2xl p-8 shadow-sm space-y-5"
-    >
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Full Name *</Label>
-          <Input required placeholder="e.g. Alexandra Chen" className="h-10 rounded-xl border-slate-200" />
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-lg mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Full Name *</label>
+          <input required value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50"
+            placeholder="Dr. Ahmed Hassan" />
         </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Email *</Label>
-          <Input required type="email" placeholder="you@school.com" className="h-10 rounded-xl border-slate-200" />
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email Address *</label>
+          <input required type="email" value={form.email} onChange={e => setForm(f => ({...f, email: e.target.value}))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50"
+            placeholder="you@school.com" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Estimated Students</label>
+          <input value={form.students} onChange={e => setForm(f => ({...f, students: e.target.value}))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50"
+            placeholder="e.g. 60" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-gray-600 mb-1.5">Subjects Taught</label>
+          <input value={form.subjects} onChange={e => setForm(f => ({...f, subjects: e.target.value}))}
+            className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50"
+            placeholder="Physics, Math…" />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Estimated Students *</Label>
-          <Input required type="number" min={1} placeholder="e.g. 120" className="h-10 rounded-xl border-slate-200" />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-sm font-medium text-slate-700">Subjects & Exam Boards</Label>
-          <Input placeholder="e.g. Physics CAIE, Maths Edexcel" className="h-10 rounded-xl border-slate-200" />
-        </div>
+      <div className="mb-5">
+        <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tell us about your school</label>
+        <textarea value={form.message} onChange={e => setForm(f => ({...f, message: e.target.value}))} rows={3}
+          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50 resize-none"
+          placeholder="Tell us about your teaching setup, current challenges, and what you hope Aperti can do for your students…" />
       </div>
-      <div className="space-y-1.5">
-        <Label className="text-sm font-medium text-slate-700">What would you like Aperti to solve?</Label>
-        <Textarea
-          rows={3}
-          placeholder="Tell us your biggest teaching challenge…"
-          className="rounded-xl border-slate-200 resize-none"
-        />
-      </div>
-      <Button
-        type="submit"
-        disabled={loading}
-        className="w-full h-11 rounded-xl font-semibold text-white"
-        style={{ background: loading ? "#4DB6AC" : TEAL }}
-      >
-        {loading ? (
-          <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 0.9, repeat: Infinity }}>
-            Submitting…
-          </motion.span>
-        ) : (
-          <span className="flex items-center justify-center gap-2">
-            Submit Application <ArrowRight className="h-4 w-4" />
-          </span>
-        )}
-      </Button>
-      <p className="text-center text-xs text-slate-400">
-        No commitment required. We'll personally reach out within 48 hours.
-      </p>
+      <button type="submit" disabled={loading}
+        className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
+        style={{ background: TEAL }}>
+        {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Submitting…</> : <>Request Early Access <ArrowRight className="h-4 w-4" /></>}
+      </button>
     </form>
   );
 }
 
-/* ── Main landing page ── */
+/* ── MAIN ── */
 export default function Landing() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const { scrollY } = useScroll();
-  const navBg = useTransform(scrollY, [0, 80], ["rgba(245,245,245,0)", "rgba(255,255,255,0.96)"]);
-  const navBorder = useTransform(scrollY, [0, 80], ["rgba(0,0,0,0)", "rgba(226,232,240,1)"]);
-
-  const features = [
-    {
-      icon: <Video className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "Live Teaching",
-      desc: "High-fidelity virtual classrooms with WebRTC, host controls, hand-raise, whiteboard sync, and session recording — built for professional educators.",
-    },
-    {
-      icon: <ClipboardCheck className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "Smart Attendance",
-      desc: "QR-based check-in with anti-fraud scanning, automatic parent notifications for absences, and detailed attendance analytics in real time.",
-    },
-    {
-      icon: <Brain className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "AI-Powered Tutoring",
-      desc: "The Mentor adapts to each student's learning gaps, preferred style, and exam board — delivering personalised guidance at every step.",
-    },
-    {
-      icon: <BarChart3 className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "Deep Insight Analytics",
-      desc: "InsightStream surfaces attendance trends, grade trajectories, engagement scores, and at-risk flags before they become problems.",
-    },
-    {
-      icon: <GraduationCap className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "Auto-Grading",
-      desc: "SubmitFlow accepts handwritten or typed work, applies your mark scheme via AI, and returns annotated feedback instantly.",
-    },
-    {
-      icon: <Shield className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "Exam Integrity",
-      desc: "ShieldCore provides behavioural proctoring, browser-lock mode, and AI-generated unique question sets — all built in.",
-    },
-  ];
-
-  const plans = [
-    {
-      name: "Starter",
-      price: "50",
-      features: ["QR Attendance & Reporting", "PlanGrid Timetable", "SubmitFlow Homework", "Student & Parent Portals", "10 GB Secure Storage"],
-    },
-    {
-      name: "Professional",
-      price: "100",
-      popular: true,
-      features: [
-        "Everything in Starter",
-        "LiveClass (up to 50 peers)",
-        "The Mentor AI Tutor",
-        "InkSpace Digital Whiteboard",
-        "InsightStream Analytics",
-        "50 GB Storage",
-      ],
-    },
-    {
-      name: "Enterprise",
-      price: "150",
-      features: [
-        "Everything in Professional",
-        "LiveClass (up to 200 peers)",
-        "ShieldCore Proctoring",
-        "TeamForge Collaboration",
-        "Priority Support",
-        "100 GB Storage",
-      ],
-    },
-    {
-      name: "Master",
-      price: "200",
-      features: [
-        "Unlimited Seats & Storage",
-        "White-Label Branding",
-        "Dedicated Account Manager",
-        "Custom Integrations & API",
-        "SLA Guarantee",
-        "Custom Pricing for Centres",
-      ],
-    },
-  ];
-
-  const navLinks = [
-    { label: "Features", href: "#features" },
-    { label: "Pricing", href: "#pricing" },
-    { label: "Apply", href: "#apply" },
-  ];
+  const { scrollYProgress } = useScroll();
+  const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -40]);
 
   return (
-    <div className="min-h-screen text-slate-900" style={{ background: "#F5F5F5", fontFamily: "Inter, sans-serif" }}>
-
-      {/* ── NAV ── */}
-      <motion.nav
-        className="fixed top-0 w-full z-50 backdrop-blur-sm border-b"
-        style={{ backgroundColor: navBg, borderColor: navBorder }}
-      >
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
-          <a href="/" className="text-xl font-extrabold tracking-tight text-slate-900">
-            Aperti<span style={{ color: TEAL }}>.</span>
-          </a>
-
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500">
-            {navLinks.map(l => (
-              <a key={l.label} href={l.href} className="hover:text-slate-900 transition-colors">{l.label}</a>
-            ))}
-          </div>
-
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="text-slate-500 hover:text-slate-900 text-sm">Sign in</Button>
-            </Link>
-            <a href="#apply">
-              <Button size="sm" className="rounded-xl text-white px-5 text-sm font-semibold" style={{ background: TEAL }}>
-                Request Access
-              </Button>
-            </a>
-          </div>
-
-          <button className="md:hidden p-1" onClick={() => setMobileOpen(v => !v)}>
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-white border-t border-slate-100 px-5 py-5 flex flex-col gap-4 text-sm font-medium"
-            >
-              {navLinks.map(l => (
-                <a key={l.label} href={l.href} onClick={() => setMobileOpen(false)} className="text-slate-600">{l.label}</a>
-              ))}
-              <Link href="/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" size="sm" className="w-full rounded-xl">Sign in</Button>
-              </Link>
-              <a href="#apply" onClick={() => setMobileOpen(false)}>
-                <Button size="sm" className="w-full rounded-xl text-white font-semibold" style={{ background: TEAL }}>
-                  Request Access
-                </Button>
-              </a>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.nav>
+    <div className="min-h-screen font-sans" style={{ background: "#F5F5F5", color: "#121212" }}>
+      <Nav />
 
       {/* ── HERO ── */}
-      <section className="pt-36 pb-24 md:pt-52 md:pb-32 px-5 max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left — copy */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.05 }}
-            >
-              <Badge
-                className="mb-7 rounded-full px-4 py-1.5 text-xs font-semibold border-0 tracking-wide"
-                style={{ background: TEAL_LIGHT, color: TEAL }}
-              >
+      <section className="min-h-screen flex items-center pt-24 pb-16 px-5 relative overflow-hidden" style={{ background: "white" }}>
+        {/* Background decoration */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: TEAL }} />
+          <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: TEAL }} />
+        </div>
+
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            {/* Left: copy */}
+            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, ease: [0.22,1,0.36,1] }}>
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+                className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold mb-7 border"
+                style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+                <Sparkles className="h-3 w-3" />
                 Educational Operating System
-              </Badge>
+              </motion.div>
+
+              <h1 className="text-5xl md:text-6xl lg:text-[64px] font-black leading-[1.06] tracking-tight mb-6" style={{ color: "#121212" }}>
+                Where every mind<br />
+                <span style={{ color: TEAL }}>finds its rhythm.</span>
+              </h1>
+
+              <p className="text-lg text-gray-500 leading-relaxed mb-9 max-w-xl">
+                The intelligent operating system that unifies teaching, learning, and assessment in one breathtakingly simple platform.
+              </p>
+
+              <div className="flex flex-wrap gap-3 mb-10">
+                <a href="#courses-preview">
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white shadow-lg"
+                    style={{ background: TEAL, boxShadow: `0 8px 24px ${TEAL}30` }}>
+                    Explore Courses <ArrowRight className="h-4 w-4" />
+                  </motion.button>
+                </a>
+                <a href="#apply">
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-gray-700 border border-gray-200 bg-white hover:border-gray-300 transition-colors">
+                    Request Early Access
+                  </motion.button>
+                </a>
+              </div>
+
+              <div className="flex flex-wrap gap-5 text-xs text-gray-400">
+                {["Trusted by educators across 3 countries", "GDPR-compliant data ownership", "Dedicated onboarding support"].map((t, i) => (
+                  <motion.div key={t} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 + i * 0.1 }}
+                    className="flex items-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" style={{ color: TEAL }} />
+                    {t}
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
 
-            <motion.h1
-              className="text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] mb-6"
-              initial={{ opacity: 0, y: 28 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.65, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              Where every mind{" "}
-              <span style={{ color: TEAL }}>finds its rhythm.</span>
-            </motion.h1>
-
-            <motion.p
-              className="text-lg text-slate-500 leading-relaxed mb-10 max-w-lg"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, delay: 0.18 }}
-            >
-              The intelligent operating system that replaces fragmented tools with one unified, beautifully designed platform — built for educators who refuse to compromise.
-            </motion.p>
-
-            <motion.div
-              className="flex flex-col sm:flex-row gap-3"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.28 }}
-            >
-              <a href="#apply">
-                <Button
-                  size="lg"
-                  className="rounded-xl h-12 px-8 text-white font-semibold shadow-md"
-                  style={{ background: TEAL }}
-                >
-                  Request Early Access <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </a>
-              <a href="#features">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="rounded-xl h-12 px-6 border-slate-200 bg-white text-slate-700 font-medium hover:bg-slate-50"
-                >
-                  Explore Features <ChevronRight className="ml-1 h-4 w-4" />
-                </Button>
-              </a>
-            </motion.div>
-
-            <motion.div
-              className="mt-10 flex flex-wrap gap-6 text-xs text-slate-400"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-            >
-              {["Trusted by educators across 3 countries", "GDPR-compliant data ownership", "Dedicated onboarding support"].map(t => (
-                <span key={t} className="flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color: TEAL }} />
-                  {t}
-                </span>
-              ))}
+            {/* Right: SVG */}
+            <motion.div style={{ y: heroY }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.9, delay: 0.2, ease: [0.22,1,0.36,1] }}
+              className="relative hidden lg:block">
+              <NeuralNetwork />
             </motion.div>
           </div>
-
-          {/* Right — illustration */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="hidden lg:block"
-          >
-            <HeroIllustration />
-          </motion.div>
         </div>
       </section>
 
-      {/* ── TRUST BAR ── */}
-      <section className="py-10 px-5" style={{ background: "white" }}>
-        <div className="max-w-5xl mx-auto">
+      {/* ── COURSE PREVIEW ── */}
+      <section id="courses-preview" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+        <div className="max-w-7xl mx-auto">
           <Reveal>
-            <div className="flex flex-wrap items-center justify-center gap-10 text-sm text-slate-400 font-medium">
-              {[
-                { icon: <Shield className="h-4 w-4" />, text: "Enterprise-grade security" },
-                { icon: <Zap className="h-4 w-4" />, text: "Real-time synchronisation" },
-                { icon: <Users className="h-4 w-4" />, text: "Multi-role portals" },
-                { icon: <BookOpen className="h-4 w-4" />, text: "All major exam boards" },
-                { icon: <CheckCircle2 className="h-4 w-4" />, text: "White-label available" },
-              ].map((item, i) => (
-                <span key={i} className="flex items-center gap-2" style={{ color: "#94A3B8" }}>
-                  <span style={{ color: TEAL }}>{item.icon}</span>
-                  {item.text}
+            <div className="flex items-end justify-between mb-12">
+              <div>
+                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-4"
+                  style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+                  <BookOpen className="h-3 w-3" />Course Marketplace
                 </span>
-              ))}
+                <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">Featured Courses</h2>
+                <p className="text-gray-500 mt-2">Expert-led courses with live sessions, AI mentoring, and structured assessments.</p>
+              </div>
+              <Link href="/courses">
+                <button className="hidden sm:flex items-center gap-1.5 text-sm font-semibold hover:opacity-80 transition-opacity" style={{ color: TEAL }}>
+                  View All <ChevronRight className="h-4 w-4" />
+                </button>
+              </Link>
+            </div>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {MOCK_COURSES.map((c, i) => (
+              <Reveal key={i} delay={i * 0.1}>
+                <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-lg transition-shadow">
+                  <div className="h-36 flex items-center justify-center relative" style={{ background: `linear-gradient(135deg, ${c.color}12, ${c.color}25)` }}>
+                    <div className="text-center">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-2" style={{ background: `${c.color}20` }}>
+                        <BookOpen className="h-6 w-6" style={{ color: c.color }} />
+                      </div>
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ background: `${c.color}18`, color: c.color }}>{c.subject}</span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-bold text-gray-900 text-sm leading-snug">{c.title}</h3>
+                      <span className="text-xs font-bold whitespace-nowrap" style={{ color: TEAL }}>{c.price}</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mb-4">{c.teacher}</p>
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{c.weeks}w</span>
+                      <span className="flex items-center gap-1"><Users className="h-3 w-3" />{c.students} enrolled</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal delay={0.3}>
+            <div className="text-center mt-8">
+              <Link href="/courses">
+                <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border-2 transition-all hover:bg-gray-50"
+                  style={{ borderColor: TEAL, color: TEAL }}>
+                  Browse All Courses <ArrowRight className="h-4 w-4" />
+                </button>
+              </Link>
             </div>
           </Reveal>
         </div>
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+      <section id="features" className="py-24 px-5 bg-white">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
-              <Badge className="mb-5 rounded-full px-4 py-1.5 text-xs font-semibold border-0" style={{ background: TEAL_LIGHT, color: TEAL }}>
-                Core Capabilities
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
-                One platform. Every tool you need.
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+                style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+                <Target className="h-3 w-3" />Platform Features
+              </span>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+                Everything you need to<br />teach brilliantly.
               </h2>
-              <p className="text-slate-500 max-w-xl mx-auto text-lg leading-relaxed">
-                Stop juggling fragmented apps. Aperti brings your entire teaching workflow into one coherent, beautifully crafted system.
-              </p>
+              <p className="text-gray-500 max-w-lg mx-auto">Built for modern educators who demand the best from every tool they use.</p>
             </div>
           </Reveal>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {features.map((f, i) => (
-              <FeatureCard key={f.title} {...f} delay={i * 0.07} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ── */}
-      <section className="py-24 px-5" style={{ background: "white" }}>
-        <div className="max-w-5xl mx-auto">
-          <Reveal>
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">
-                From chaos to clarity.
-              </h2>
-              <p className="text-slate-500 max-w-lg mx-auto">
-                Aperti is thoughtfully structured around the way great educators already think.
-              </p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                step: "01",
-                title: "Configure your workspace",
-                desc: "Add your subjects, student roster, and timetable. Our onboarding team will guide you through every detail.",
-              },
-              {
-                step: "02",
-                title: "Run your first session",
-                desc: "Take attendance with a QR scan, launch a live class, assign homework — everything flows from one dashboard.",
-              },
-              {
-                step: "03",
-                title: "Act on real-time insight",
-                desc: "Aperti surfaces who is falling behind, which topics need attention, and which students are thriving.",
-              },
-            ].map((item, i) => (
-              <Reveal key={item.step} delay={i * 0.1}>
-                <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm">
-                  <div
-                    className="text-5xl font-extrabold mb-5 leading-none"
-                    style={{ color: TEAL_LIGHT, WebkitTextStroke: `2px ${TEAL}` }}
-                  >
-                    {item.step}
+              <Reveal key={f.title} delay={i * 0.1}>
+                <motion.div whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(0,0,0,0.08)", transition: { duration: 0.2 } }}
+                  className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ background: `${f.color}12` }}>
+                    <f.icon className="h-5 w-5" style={{ color: f.color }} />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{item.desc}</p>
-                </div>
+                  <h3 className="font-bold text-gray-900 mb-2 text-sm">{f.title}</h3>
+                  <p className="text-xs text-gray-500 leading-relaxed">{f.desc}</p>
+                </motion.div>
               </Reveal>
             ))}
           </div>
         </div>
       </section>
 
+      {/* ── STATS STRIP ── */}
+      <StatsStrip />
+
       {/* ── PRICING ── */}
-      <section id="pricing" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+      <section id="pricing" className="py-24 px-5 bg-white">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
-              <Badge className="mb-5 rounded-full px-4 py-1.5 text-xs font-semibold border-0" style={{ background: TEAL_LIGHT, color: TEAL }}>
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+                style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
                 Transparent Pricing
-              </Badge>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
+              </span>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
                 Plans that scale with you.
               </h2>
-              <p className="text-slate-500 max-w-lg mx-auto">
+              <p className="text-gray-500 max-w-lg mx-auto">
                 Pay per student, per month. Adjust seats at any time with FlexSeats — no lock-in, no surprise invoices.
               </p>
             </div>
           </Reveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {plans.map(p => (
-              <PricingCard key={p.name} {...p} />
+            {plans.map((p, i) => (
+              <Reveal key={p.name} delay={i * 0.1}>
+                <PricingCard plan={p} />
+              </Reveal>
             ))}
           </div>
 
-          <Reveal>
-            <p className="text-center text-sm text-slate-400 mt-8">
+          <Reveal delay={0.4}>
+            <p className="text-center text-sm text-gray-400 mt-8">
               Volume discounts available for large centres. InstaPay accepted.{" "}
-              <a href="#apply" className="underline underline-offset-2" style={{ color: TEAL }}>
+              <a href="#apply" className="underline underline-offset-2 font-medium" style={{ color: TEAL }}>
                 Talk to us for custom pricing.
               </a>
             </p>
@@ -674,18 +602,21 @@ export default function Landing() {
       </section>
 
       {/* ── EARLY ACCESS FORM ── */}
-      <section id="apply" className="py-24 px-5" style={{ background: "white" }}>
-        <div className="max-w-7xl mx-auto text-center">
+      <section id="apply" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+        <div className="max-w-7xl mx-auto">
           <Reveal>
-            <Badge className="mb-5 rounded-full px-4 py-1.5 text-xs font-semibold border-0" style={{ background: TEAL_LIGHT, color: TEAL }}>
-              Exclusive Community
-            </Badge>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-slate-900 mb-4 tracking-tight">
-              Join Aperti Early Access.
-            </h2>
-            <p className="text-slate-500 mb-12 max-w-lg mx-auto text-lg leading-relaxed">
-              We are onboarding a select community of pioneering educators. Tell us about your school — we will personally build your workspace together.
-            </p>
+            <div className="text-center mb-12">
+              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+                style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+                <Globe className="h-3 w-3" />Exclusive Community
+              </span>
+              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+                Join Aperti Early Access.
+              </h2>
+              <p className="text-gray-500 max-w-lg mx-auto text-lg leading-relaxed">
+                We are onboarding a select community of pioneering educators. Tell us about your school — we will personally build your workspace together.
+              </p>
+            </div>
           </Reveal>
           <Reveal delay={0.1}>
             <EarlyAccessForm />
@@ -694,27 +625,37 @@ export default function Landing() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-slate-100 py-12 px-5" style={{ background: "#F5F5F5" }}>
+      <footer className="border-t border-gray-100 py-12 px-5 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div>
-              <p className="text-base font-extrabold text-slate-900">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-10">
+            <div className="max-w-xs">
+              <p className="text-lg font-extrabold text-gray-900 mb-1">
                 Aperti<span style={{ color: TEAL }}>.</span>
               </p>
-              <p className="text-xs text-slate-400 mt-1">Where every mind finds its rhythm.</p>
+              <p className="text-xs text-gray-400 leading-relaxed">Where every mind finds its rhythm. The educational operating system for modern educators.</p>
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
-              <a href="/paper-vault" className="hover:text-slate-700 transition-colors">Past Papers</a>
-              <a href="/terms" className="hover:text-slate-700 transition-colors">Terms</a>
-              <a href="/privacy" className="hover:text-slate-700 transition-colors">Privacy</a>
-              <a href="/contact" className="hover:text-slate-700 transition-colors">Contact</a>
-              <a href="/sitemap" className="hover:text-slate-700 transition-colors">Sitemap</a>
-              <a href="mailto:info@aperti.ai" style={{ color: TEAL }} className="hover:opacity-80 transition-opacity">
+            <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm text-gray-400">
+              <Link href="/courses"><span className="hover:text-gray-700 transition-colors cursor-pointer">Course Marketplace</span></Link>
+              <a href="/paper-vault" className="hover:text-gray-700 transition-colors">Past Papers</a>
+              <a href="/terms" className="hover:text-gray-700 transition-colors">Terms</a>
+              <a href="/privacy" className="hover:text-gray-700 transition-colors">Privacy</a>
+              <a href="/contact" className="hover:text-gray-700 transition-colors">Contact</a>
+              <a href="/sitemap" className="hover:text-gray-700 transition-colors">Sitemap</a>
+            </div>
+            <div>
+              <a href="mailto:info@aperti.ai" className="text-sm font-semibold hover:opacity-80 transition-opacity" style={{ color: TEAL }}>
                 info@aperti.ai
               </a>
+              <div className="mt-4">
+                <Link href="/student-register">
+                  <button className="text-sm font-semibold px-5 py-2.5 rounded-xl text-white" style={{ background: TEAL }}>
+                    Student Sign Up
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-400">
+          <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-400">
             <span>© 2026 Aperti. All rights reserved.</span>
             <span>Built for educators who refuse to compromise.</span>
           </div>
