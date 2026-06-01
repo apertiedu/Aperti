@@ -722,10 +722,10 @@ export default function Landing() {
               Try it now
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-3">
-              Physics in the browser.
+              SimVerse — labs in your browser.
             </h2>
             <p className="text-slate-500 mb-8">
-              One of many interactive labs built into Aperti. Tap the battery, flip the switch.
+              One of many interactive simulations built into Aperti. Toggle the battery, flip the switch, watch physics happen live.
             </p>
           </Reveal>
           <Reveal delay={0.1}>

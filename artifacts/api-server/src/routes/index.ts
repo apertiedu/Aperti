@@ -44,6 +44,7 @@ import { mentorRouter } from "./mentor";
 import { revisitRouter } from "./revisit";
 import { ascendRouter } from "./ascend";
 import { echoEvolveRouter } from "./echo-evolve";
+import inkspaceRouter from "./inkspace";
 
 const router: IRouter = Router();
 
@@ -92,5 +93,6 @@ router.use("/mentor", mentorRouter);
 router.use("/revisit", revisitRouter);
 router.use("/ascend", ascendRouter);
 router.use("/echo-evolve", echoEvolveRouter);
+router.use("/inkspace", inkspaceRouter);
 
 export default router;

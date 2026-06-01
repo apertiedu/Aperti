@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 import Layout from "@/components/layout";
 import StudentLayout from "@/components/student-layout";
 import Login from "@/pages/login";
+import { useEffect } from "react";
 
 // Public & Legal
 import Landing from "@/pages/landing";
@@ -98,6 +99,63 @@ const queryClient = new QueryClient({
   },
 });
 
+const ROLE_OVERRIDE_KEY = "aperti_role_override";
+
+export function getRoleOverride(): string | null {
+  return localStorage.getItem(ROLE_OVERRIDE_KEY);
+}
+export function setRoleOverride(role: string | null) {
+  if (role) localStorage.setItem(ROLE_OVERRIDE_KEY, role);
+  else localStorage.removeItem(ROLE_OVERRIDE_KEY);
+}
+
+function RoleOverrideBanner({ originalRole }: { originalRole: string }) {
+  const override = getRoleOverride();
+  if (!override) return null;
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        background: "#00796B",
+        color: "white",
+        textAlign: "center",
+        padding: "6px 12px",
+        fontSize: 13,
+        fontWeight: 600,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 12,
+      }}
+    >
+      <span>
+        Previewing as <strong>{override}</strong> — you are actually <strong>{originalRole}</strong>
+      </span>
+      <button
+        onClick={() => {
+          setRoleOverride(null);
+          window.location.reload();
+        }}
+        style={{
+          background: "rgba(255,255,255,0.2)",
+          border: "1px solid rgba(255,255,255,0.4)",
+          color: "white",
+          padding: "2px 10px",
+          borderRadius: 4,
+          cursor: "pointer",
+          fontSize: 12,
+        }}
+      >
+        Exit Preview
+      </button>
+    </div>
+  );
+}
+
 function StudentRouter() {
   return (
     <StudentLayout>
@@ -134,52 +192,70 @@ function StudentRouter() {
   );
 }
 
-function TeacherRouter() {
-  const { user } = useAuth();
-  const isAdmin = user?.role === "admin";
+const TEACHER_ROUTES = (
+  <>
+    <Route path="/plan-grid" component={PlanGrid} />
+    <Route path="/checkin" component={CheckIn} />
+    <Route path="/submit-flow" component={SubmitFlow} />
+    <Route path="/grade-flow" component={GradeFlow} />
+    <Route path="/scheme-craft" component={SchemeCraft} />
+    <Route path="/query-vault" component={QueryVault} />
+    <Route path="/cardstack" component={CardStack} />
+    <Route path="/syllabuilder" component={Syllabuilder} />
+    <Route path="/kudos-engine" component={KudosEngine} />
+    <Route path="/pulse" component={Pulse} />
+    <Route path="/live-class" component={LiveClass} />
+    <Route path="/class-forge" component={ClassForge} />
+    <Route path="/content-craft" component={ContentCraft} />
+    <Route path="/lab-builder" component={LabBuilder} />
+    <Route path="/marker-mind" component={MarkerMind} />
+    <Route path="/insight-stream" component={InsightStream} />
+    <Route path="/inkspace" component={InkSpace} />
+    <Route path="/twin-control" component={TwinControl} />
+    <Route path="/subpilot" component={SubPilot} />
+    <Route path="/helpdesk" component={HelpDesk} />
+    <Route path="/insight-exams" component={InsightExams} />
+    <Route path="/scan-scribe" component={ScanScribe} />
+    <Route path="/error-trace" component={ErrorTrace} />
+  </>
+);
 
+const ADMIN_ROUTES = (
+  <>
+    <Route path="/admin/command" component={AdminCommand} />
+    <Route path="/admin/world-pilot" component={WorldPilot} />
+    <Route path="/admin/paper-vault" component={PaperVaultAdmin} />
+    <Route path="/admin/subpilot-settings" component={SubPilotAdmin} />
+    <Route path="/admin/helpdesk" component={HelpDeskAdmin} />
+    <Route path="/admin/shield-core" component={ShieldCore} />
+    <Route path="/admin/quick-switch" component={QuickSwitch} />
+    <Route path="/admin/budget-sense" component={BudgetSense} />
+    <Route path="/admin/auto-scale" component={AutoScale} />
+    <Route path="/admin/spend-wise" component={SpendWise} />
+    <Route path="/admin/guardian-pulse" component={GuardianPulseAdmin} />
+  </>
+);
+
+function AdminRouter() {
+  return (
+    <Layout>
+      <Switch>
+        <Route path="/" component={AdminCommand} />
+        <Route path="/corehub" component={CoreHub} />
+        {TEACHER_ROUTES}
+        {ADMIN_ROUTES}
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
+  );
+}
+
+function TeacherRouter() {
   return (
     <Layout>
       <Switch>
         <Route path="/" component={CoreHub} />
-        <Route path="/plan-grid" component={PlanGrid} />
-        <Route path="/checkin" component={CheckIn} />
-        <Route path="/submit-flow" component={SubmitFlow} />
-        <Route path="/grade-flow" component={GradeFlow} />
-        <Route path="/scheme-craft" component={SchemeCraft} />
-        <Route path="/query-vault" component={QueryVault} />
-        <Route path="/cardstack" component={CardStack} />
-        <Route path="/syllabuilder" component={Syllabuilder} />
-        <Route path="/kudos-engine" component={KudosEngine} />
-        <Route path="/pulse" component={Pulse} />
-        <Route path="/live-class" component={LiveClass} />
-        <Route path="/class-forge" component={ClassForge} />
-        <Route path="/content-craft" component={ContentCraft} />
-        <Route path="/lab-builder" component={LabBuilder} />
-        <Route path="/marker-mind" component={MarkerMind} />
-        <Route path="/insight-stream" component={InsightStream} />
-        <Route path="/inkspace" component={InkSpace} />
-        <Route path="/twin-control" component={TwinControl} />
-        <Route path="/subpilot" component={SubPilot} />
-        <Route path="/helpdesk" component={HelpDesk} />
-        <Route path="/insight-exams" component={InsightExams} />
-        <Route path="/scan-scribe" component={ScanScribe} />
-        <Route path="/error-trace" component={ErrorTrace} />
-        {isAdmin && (
-          <>
-            <Route path="/admin/command" component={AdminCommand} />
-            <Route path="/admin/world-pilot" component={WorldPilot} />
-            <Route path="/admin/paper-vault" component={PaperVaultAdmin} />
-            <Route path="/admin/subpilot-settings" component={SubPilotAdmin} />
-            <Route path="/admin/helpdesk" component={HelpDeskAdmin} />
-            <Route path="/admin/shield-core" component={ShieldCore} />
-            <Route path="/admin/quick-switch" component={QuickSwitch} />
-            <Route path="/admin/budget-sense" component={BudgetSense} />
-            <Route path="/admin/auto-scale" component={AutoScale} />
-            <Route path="/admin/spend-wise" component={SpendWise} />
-            <Route path="/admin/guardian-pulse" component={GuardianPulseAdmin} />
-          </>
-        )}
+        {TEACHER_ROUTES}
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -235,15 +311,28 @@ function AppContent() {
     );
   }
 
+  const roleOverride = getRoleOverride();
+  const effectiveRole = roleOverride || user.role;
+
+  let router: React.ReactNode;
+  if (effectiveRole === "student") {
+    router = <StudentRouter />;
+  } else if (effectiveRole === "parent") {
+    router = <ParentRouter />;
+  } else if (effectiveRole === "admin") {
+    router = <AdminRouter />;
+  } else {
+    router = <TeacherRouter />;
+  }
+
   return (
     <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-      {user.role === "student" ? (
-        <StudentRouter />
-      ) : user.role === "parent" ? (
-        <ParentRouter />
-      ) : (
-        <TeacherRouter />
+      {roleOverride && user.role === "admin" && (
+        <RoleOverrideBanner originalRole={user.role} />
       )}
+      <div style={roleOverride ? { paddingTop: 36 } : undefined}>
+        {router}
+      </div>
     </WouterRouter>
   );
 }

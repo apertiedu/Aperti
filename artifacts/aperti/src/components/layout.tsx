@@ -8,7 +8,7 @@ import {
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart,
   RefreshCw, Settings, MessageSquare,
   LogOut, School, ChevronLeft, ChevronRight, Search, KeyRound,
-  Sun, Moon, Sparkles, Zap,
+  Sun, Moon, Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { toast } = useToast();
   const [collapsed, setCollapsed] = useState(false);
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
-  const { accent, setAccent, dark, toggleDark, THEMES } = useTheme();
+  const { dark, toggleDark } = useTheme();
   const { startTour } = useTour();
 
   const isAdmin = user?.role === "admin";
@@ -49,7 +49,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Core",
       items: [
-        { name: "CoreHub", href: "/", icon: LayoutDashboard, roles: ["admin","teacher","assistant"] },
+        ...(isAdmin
+          ? [{ name: "Command Center", href: "/", icon: Terminal, roles: ["admin"] as string[] }]
+          : [{ name: "CoreHub", href: "/", icon: LayoutDashboard, roles: ["teacher","assistant"] as string[] }]
+        ),
         { name: "CheckIn", href: "/checkin", icon: QrCode, roles: ["admin","teacher","assistant"] },
         { name: "PlanGrid", href: "/plan-grid", icon: CalendarDays, roles: ["admin","teacher"] },
       ],
@@ -97,7 +100,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Admin",
       items: [
-        { name: "Command Center", href: "/admin/command", icon: Terminal, roles: ["admin"] },
+        { name: "Admin Overview", href: "/admin/command", icon: Terminal, roles: ["admin"] },
         { name: "WorldPilot", href: "/admin/world-pilot", icon: Globe, roles: ["admin"] },
         { name: "PaperVault Admin", href: "/admin/paper-vault", icon: Library, roles: ["admin"] },
         { name: "ShieldCore", href: "/admin/shield-core", icon: Shield, roles: ["admin"] },
@@ -124,11 +127,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   const roleBadgeColor = {
-    admin: "text-purple-600 dark:text-purple-400",
+    admin: "text-primary",
     teacher: "text-primary",
-    assistant: "text-emerald-600 dark:text-emerald-400",
+    assistant: "text-primary",
     student: "text-primary",
-    parent: "text-amber-600 dark:text-amber-400",
+    parent: "text-primary",
   }[user?.role ?? "teacher"] ?? "text-muted-foreground";
 
   const initials = (user?.displayName || user?.username || "U")
@@ -144,7 +147,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       (item) =>
         location === item.href ||
         (item.href !== "/" && location.startsWith(item.href)),
-    )?.name || "CoreHub";
+    )?.name || (isAdmin ? "Command Center" : "CoreHub");
 
   return (
     <div className="min-h-screen flex w-full bg-background font-sans">
@@ -236,18 +239,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Footer */}
         <div className="border-t border-sidebar-border shrink-0">
           {!collapsed && (
-            <div className="px-3 py-2 flex items-center justify-between border-b border-border/30">
-              <div className="flex items-center gap-1">
-                {THEMES.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setAccent(t.id)}
-                    className={`w-3 h-3 rounded-full transition-transform ${accent === t.id ? "ring-2 ring-offset-1 ring-primary scale-110 dark:ring-offset-background" : "hover:scale-125"}`}
-                    style={{ backgroundColor: `hsl(${t.primary})` }}
-                    title={t.label}
-                  />
-                ))}
-              </div>
+            <div className="px-3 py-2 flex items-center justify-end border-b border-border/30">
               <button
                 onClick={toggleDark}
                 className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-muted"
