@@ -9,8 +9,16 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Sparkles, Plus, History, CreditCard } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Sparkles, Plus, CreditCard, MessageSquare, Phone, Save,
+  CheckCircle2, Clock, ExternalLink,
+} from "lucide-react";
 import { useAuth } from "@/context/auth";
 
 const API = "/api";
@@ -18,7 +26,11 @@ const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(options?.headers || {}) },
+    headers: {
+      Authorization: `Bearer ${token()}`,
+      "Content-Type": "application/json",
+      ...(options?.headers as object | undefined),
+    },
     ...options,
   });
   if (!res.ok) throw new Error("Failed");
@@ -34,7 +46,6 @@ interface Plan {
   studentLimit: number | null;
   flexSeatPriceEgp: string | null;
 }
-
 interface Subscription {
   id: number;
   planId: number;
@@ -43,10 +54,47 @@ interface Subscription {
   plan?: Plan;
 }
 
+interface NotifySettings {
+  senderName: string;
+  messageTemplate: string;
+  whatsappEnabled: boolean;
+}
+
+interface StudentPhone {
+  id: number;
+  student_name: string;
+  student_code: string;
+  parent_phone: string | null;
+}
+
+interface NotifyLog {
+  id: number;
+  student_name: string;
+  parent_phone: string;
+  status: string;
+  lesson_name: string;
+  date: string;
+  message: string;
+  sent_at: string;
+}
+
 export default function SubPilot() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [flexQty, setFlexQty] = useState(1);
+  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"instapay" | "stripe">("instapay");
+  const [instapayCode, setInstapayCode] = useState("");
+
+  // Notification settings state
+  const [notifySettings, setNotifySettings] = useState<NotifySettings>({
+    senderName: "Your Teacher",
+    messageTemplate: "Dear parent, {studentName} was marked {status} from {lessonName} on {date}. Please contact us for more details.",
+    whatsappEnabled: true,
+  });
+  const [editingPhoneId, setEditingPhoneId] = useState<number | null>(null);
+  const [phoneInput, setPhoneInput] = useState("");
 
   const { data: plans, isLoading: plansLoading } = useQuery<Plan[]>({
     queryKey: ["plans"],
@@ -58,90 +106,181 @@ export default function SubPilot() {
     queryFn: () => fetchJSON("/subscriptions/mine"),
   });
 
-  const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<"instapay" | "stripe">("instapay");
-  const [instapayCode, setInstapayCode] = useState("");
+  const { data: fetchedSettings } = useQuery<NotifySettings>({
+    queryKey: ["notify-settings"],
+    queryFn: () => fetchJSON("/absence-notify/settings"),
+    onSuccess: (d) => setNotifySettings(d),
+  } as any);
 
-  const checkoutMutation = useMutation({
-    mutationFn: (data: any) => fetchJSON("/subscriptions/checkout", { method: "POST", body: JSON.stringify(data) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mySub"] }),
+  const { data: studentsPhones = [], isLoading: studentsLoading } = useQuery<StudentPhone[]>({
+    queryKey: ["students-phones"],
+    queryFn: () => fetchJSON("/absence-notify/students-phones"),
   });
 
-  const flexMutation = useMutation({
-    mutationFn: (qty: number) => fetchJSON("/subscriptions/flex-seats", { method: "POST", body: JSON.stringify({ quantity: qty }) }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["mySub"] }),
+  const { data: notifyLog = [] } = useQuery<NotifyLog[]>({
+    queryKey: ["notify-log"],
+    queryFn: () => fetchJSON("/absence-notify/log"),
   });
 
   const activeSub = mySub?.subscription;
   const activePlan = plans?.find(p => p.id === activeSub?.planId);
 
+  const checkoutMutation = useMutation({
+    mutationFn: (data: any) => fetchJSON("/subscriptions/checkout", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mySub"] });
+      toast({ title: "Subscription updated" });
+    },
+  });
+
+  const flexMutation = useMutation({
+    mutationFn: (qty: number) => fetchJSON("/subscriptions/flex-seats", { method: "POST", body: JSON.stringify({ quantity: qty }) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["mySub"] });
+      toast({ title: "FlexSeats added" });
+    },
+  });
+
+  const saveSettingsMutation = useMutation({
+    mutationFn: (settings: NotifySettings) =>
+      fetchJSON("/absence-notify/settings", { method: "PUT", body: JSON.stringify(settings) }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notify-settings"] });
+      toast({ title: "Notification settings saved" });
+    },
+  });
+
+  const updatePhoneMutation = useMutation({
+    mutationFn: ({ studentId, parentPhone }: { studentId: number; parentPhone: string }) =>
+      fetchJSON("/absence-notify/update-phone", {
+        method: "POST",
+        body: JSON.stringify({ studentId, parentPhone }),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["students-phones"] });
+      setEditingPhoneId(null);
+      toast({ title: "Parent phone updated" });
+    },
+  });
+
   return (
-    <div className="min-h-screen bg-background p-6 page-transition">
+    <div className="min-h-screen bg-[#F5F5F5] p-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold">SubPilot<span className="text-primary"></span></h1>
-        <p className="text-muted-foreground">Your subscription & billing command center.</p>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <CreditCard className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">SubPilot</h1>
+            <p className="text-sm text-muted-foreground">Subscription, billing & parent notifications</p>
+          </div>
+        </div>
       </motion.div>
 
       <Tabs defaultValue="current" className="space-y-6">
-        <TabsList>
+        <TabsList className="bg-white border">
           <TabsTrigger value="current">Current Plan</TabsTrigger>
-          <TabsTrigger value="plans">Upgrade / New Plan</TabsTrigger>
+          <TabsTrigger value="plans">Upgrade</TabsTrigger>
           <TabsTrigger value="flex">FlexSeats</TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-1.5">
+            <MessageSquare className="h-3.5 w-3.5" /> Notifications
+          </TabsTrigger>
         </TabsList>
 
-        {/* Current Plan */}
+        {/* ── Current Plan ── */}
         <TabsContent value="current">
           {subLoading ? (
             <Skeleton className="h-48 w-full rounded-xl" />
           ) : activeSub ? (
-            <Card className="card-hover">
+            <Card className="shadow-sm border-0 max-w-lg">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Sparkles className="h-5 w-5 text-primary" /> {activePlan?.name} Plan</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" /> {activePlan?.name} Plan
+                </CardTitle>
                 <CardDescription>Active since {new Date(activeSub.startDate).toLocaleDateString()}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-2">
-                <div className="flex justify-between"><span>Price</span><span className="font-medium">{activePlan?.priceEgp} EGP / student / month</span></div>
-                <div className="flex justify-between"><span>Status</span><Badge>{activeSub.status}</Badge></div>
-                <div className="flex justify-between"><span>FlexSeats used</span><span>{mySub?.flexSeats?.length || 0}</span></div>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Price</span>
+                  <span className="font-medium">{activePlan?.priceEgp} EGP / student / month</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge className="bg-primary/10 text-primary border-0">{activeSub.status}</Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">FlexSeats</span>
+                  <span>{mySub?.flexSeats?.length || 0} active</span>
+                </div>
               </CardContent>
             </Card>
           ) : (
-            <Card className="card-hover">
-              <CardContent className="p-8 text-center text-muted-foreground">
-                No active subscription. Choose a plan to start.
+            <Card className="shadow-sm border-0 max-w-lg">
+              <CardContent className="p-10 text-center text-muted-foreground">
+                No active subscription. Choose a plan to get started.
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        {/* Plans */}
+        {/* ── Upgrade ── */}
         <TabsContent value="plans">
           {plansLoading ? (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {[1,2,3,4].map(i => <Skeleton key={i} className="h-64 rounded-xl" />)}
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64 rounded-xl" />)}
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
               {plans?.map(plan => (
-                <Card key={plan.id} className={`card-hover cursor-pointer ${selectedPlan === plan.id ? "border-primary shadow-md shadow-primary/10" : ""}`} onClick={() => setSelectedPlan(plan.id)}>
-                  <CardHeader>
-                    <CardTitle>{plan.name}</CardTitle>
-                    <div className="text-2xl font-bold">{plan.priceEgp} EGP<span className="text-sm font-normal text-muted-foreground">/student/mo</span></div>
+                <Card
+                  key={plan.id}
+                  className={`shadow-sm cursor-pointer transition-all border-2 ${
+                    selectedPlan === plan.id
+                      ? "border-primary shadow-md shadow-primary/10"
+                      : "border-transparent hover:border-primary/20"
+                  }`}
+                  onClick={() => setSelectedPlan(plan.id)}
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base">{plan.name}</CardTitle>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {plan.priceEgp}
+                      <span className="text-sm font-normal text-muted-foreground"> EGP/student/mo</span>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <ul className="space-y-1 text-sm">
-                      {plan.features?.slice(0,4).map((f,i) => <li key={i} className="flex items-center gap-2"><Sparkles className="h-3 w-3 text-primary" />{f}</li>)}
+                    <ul className="space-y-1.5 text-sm mb-4">
+                      {plan.features?.slice(0, 4).map((f, i) => (
+                        <li key={i} className="flex items-center gap-2 text-muted-foreground">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-primary shrink-0" />{f}
+                        </li>
+                      ))}
                     </ul>
                     {selectedPlan === plan.id && (
-                      <div className="mt-4 space-y-3">
+                      <div className="mt-4 space-y-3 border-t pt-3">
                         <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as any)}>
-                          <div className="flex items-center space-x-2"><RadioGroupItem value="instapay" id="instapay" /><Label htmlFor="instapay">InstaPay</Label></div>
-                          <div className="flex items-center space-x-2"><RadioGroupItem value="stripe" id="stripe" /><Label htmlFor="stripe">Card (Stripe)</Label></div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <RadioGroupItem value="instapay" id="instapay" />
+                            <Label htmlFor="instapay">InstaPay</Label>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm">
+                            <RadioGroupItem value="stripe" id="stripe" />
+                            <Label htmlFor="stripe">Card (Stripe)</Label>
+                          </div>
                         </RadioGroup>
                         {paymentMethod === "instapay" && (
-                          <Input placeholder="InstaPay transaction code" value={instapayCode} onChange={e => setInstapayCode(e.target.value)} />
+                          <Input
+                            placeholder="InstaPay transaction code"
+                            value={instapayCode}
+                            onChange={e => setInstapayCode(e.target.value)}
+                            className="h-9"
+                          />
                         )}
-                        <Button className="w-full" onClick={() => checkoutMutation.mutate({ planId: plan.id, paymentMethod, instapayCode })} disabled={checkoutMutation.isPending}>
+                        <Button
+                          className="w-full h-9 bg-primary hover:bg-primary/90 text-white"
+                          onClick={e => { e.stopPropagation(); checkoutMutation.mutate({ planId: plan.id, paymentMethod, instapayCode }); }}
+                          disabled={checkoutMutation.isPending}
+                        >
                           {checkoutMutation.isPending ? "Processing…" : "Subscribe"}
                         </Button>
                       </div>
@@ -153,27 +292,223 @@ export default function SubPilot() {
           )}
         </TabsContent>
 
-        {/* FlexSeats */}
+        {/* ── FlexSeats ── */}
         <TabsContent value="flex">
-          <Card className="card-hover max-w-md">
+          <Card className="shadow-sm border-0 max-w-md">
             <CardHeader>
-              <CardTitle>FlexSeats</CardTitle>
-              <CardDescription>Add extra students without upgrading your plan. {activePlan?.flexSeatPriceEgp} EGP each.</CardDescription>
+              <CardTitle className="text-base">FlexSeats</CardTitle>
+              <CardDescription>
+                Add extra students without upgrading.{" "}
+                {activePlan?.flexSeatPriceEgp ? `${activePlan.flexSeatPriceEgp} EGP each.` : ""}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex gap-3 items-end">
-                <div className="space-y-2 flex-1">
-                  <Label>Number of students</Label>
-                  <Input type="number" min={1} value={flexQty} onChange={e => setFlexQty(Number(e.target.value))} />
+                <div className="space-y-1.5 flex-1">
+                  <Label className="text-xs font-medium">Number of students</Label>
+                  <Input type="number" min={1} value={flexQty} onChange={e => setFlexQty(Number(e.target.value))} className="h-9" />
                 </div>
-                <Button onClick={() => flexMutation.mutate(flexQty)} disabled={flexMutation.isPending}>
-                  {flexMutation.isPending ? "Adding…" : `Add (${flexQty} × ${activePlan?.flexSeatPriceEgp || '?'} EGP)`}
+                <Button
+                  onClick={() => flexMutation.mutate(flexQty)}
+                  disabled={flexMutation.isPending}
+                  className="h-9 bg-primary text-white hover:bg-primary/90"
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1" />
+                  {flexMutation.isPending ? "Adding…" : `Add ${flexQty} seat${flexQty !== 1 ? "s" : ""}`}
                 </Button>
               </div>
               {(mySub?.flexSeats?.length ?? 0) > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  Active FlexSeats: {(mySub!.flexSeats ?? []).map((fs: any) => `${fs.quantity} seat(s)`).join(", ")}
+                <p className="text-sm text-muted-foreground">
+                  Active: {mySub!.flexSeats.map((fs: any) => `${fs.quantity} seat(s)`).join(", ")}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ── Notifications ── */}
+        <TabsContent value="notifications" className="space-y-6">
+          {/* Settings */}
+          <Card className="shadow-sm border-0 max-w-2xl">
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="text-base flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 text-primary" /> WhatsApp Absence Notifications
+              </CardTitle>
+              <CardDescription>
+                Configure automatic parent notifications when students are marked absent.
+                Messages are sent via WhatsApp — no extra fees, no API key required.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-5 space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Enable WhatsApp notifications</p>
+                  <p className="text-xs text-muted-foreground">Opens WhatsApp with a pre-filled message for each absent student's parent</p>
                 </div>
+                <Switch
+                  checked={notifySettings.whatsappEnabled}
+                  onCheckedChange={v => setNotifySettings(s => ({ ...s, whatsappEnabled: v }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-gray-600">Sender Name</Label>
+                <Input
+                  value={notifySettings.senderName}
+                  onChange={e => setNotifySettings(s => ({ ...s, senderName: e.target.value }))}
+                  placeholder="e.g. Mr. Ahmed — Physics"
+                  className="h-9"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-gray-600">Message Template</Label>
+                <Textarea
+                  value={notifySettings.messageTemplate}
+                  onChange={e => setNotifySettings(s => ({ ...s, messageTemplate: e.target.value }))}
+                  rows={4}
+                  className="resize-none text-sm font-mono"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use: <code className="bg-muted px-1 rounded">{"{studentName}"}</code>,{" "}
+                  <code className="bg-muted px-1 rounded">{"{status}"}</code>,{" "}
+                  <code className="bg-muted px-1 rounded">{"{lessonName}"}</code>,{" "}
+                  <code className="bg-muted px-1 rounded">{"{date}"}</code>
+                </p>
+              </div>
+              <Button
+                onClick={() => saveSettingsMutation.mutate(notifySettings)}
+                disabled={saveSettingsMutation.isPending}
+                className="bg-primary text-white hover:bg-primary/90 h-9"
+              >
+                <Save className="h-3.5 w-3.5 mr-2" />
+                {saveSettingsMutation.isPending ? "Saving…" : "Save Settings"}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Parent phone numbers */}
+          <Card className="shadow-sm border-0 max-w-2xl">
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Phone className="h-4 w-4 text-primary" /> Parent Phone Numbers
+              </CardTitle>
+              <CardDescription>Set the WhatsApp number for each student's parent. Include country code (e.g. +201012345678).</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {studentsLoading ? (
+                <div className="p-6 space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}</div>
+              ) : studentsPhones.length === 0 ? (
+                <div className="p-10 text-center text-muted-foreground text-sm">
+                  No students found. Add students first via ClassForge.
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Parent WhatsApp</TableHead>
+                      <TableHead className="w-24" />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {studentsPhones.map(s => (
+                      <TableRow key={s.id}>
+                        <TableCell className="font-medium text-sm">{s.student_name}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground font-mono">{s.student_code}</TableCell>
+                        <TableCell>
+                          {editingPhoneId === s.id ? (
+                            <Input
+                              value={phoneInput}
+                              onChange={e => setPhoneInput(e.target.value)}
+                              placeholder="+201012345678"
+                              className="h-7 text-xs w-40"
+                              autoFocus
+                            />
+                          ) : (
+                            <span className={`text-sm ${s.parent_phone ? "text-gray-700 font-mono" : "text-muted-foreground"}`}>
+                              {s.parent_phone || "—"}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingPhoneId === s.id ? (
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                className="h-7 text-xs bg-primary text-white"
+                                onClick={() => updatePhoneMutation.mutate({ studentId: s.id, parentPhone: phoneInput })}
+                                disabled={updatePhoneMutation.isPending}
+                              >
+                                Save
+                              </Button>
+                              <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditingPhoneId(null)}>
+                                Cancel
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-7 text-xs"
+                              onClick={() => { setEditingPhoneId(s.id); setPhoneInput(s.parent_phone || ""); }}
+                            >
+                              Edit
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Notification log */}
+          <Card className="shadow-sm border-0 max-w-2xl">
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="text-base flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" /> Notification History
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {notifyLog.length === 0 ? (
+                <div className="p-10 text-center text-muted-foreground text-sm">
+                  No notifications sent yet. Use the CheckIn page to send absence alerts.
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Lesson</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Sent</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {notifyLog.map(log => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-medium text-sm">{log.student_name}</TableCell>
+                        <TableCell>
+                          <Badge
+                            className={`text-[10px] border-0 ${
+                              log.status === "Absent" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {log.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{log.lesson_name}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">{log.date}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground">
+                          {new Date(log.sent_at).toLocaleTimeString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               )}
             </CardContent>
           </Card>

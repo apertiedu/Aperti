@@ -1,0 +1,105 @@
+You are enhancing **Aperti**, the educational operating system. The codebase is a working full‑stack app with JWT auth, WebRTC LiveClass, and many modules already functional. However, the guest landing page must become premium, all ™ symbols must be removed, and every feature must work flawlessly with a professional, polished UI.
+
+**Your mission:**
+1. **Remove ALL ™ symbols** from the entire codebase – in page titles, navigation, cards, descriptions, and module names. The creative module names (CoreHub, PlanGrid, CheckIn, etc.) stay, but without the ™ suffix.
+2. **Redesign the public landing page** to be the most exclusive, premium educational website in the world.
+3. **Fix every remaining bug** and ensure every module works perfectly with the Liquid Flow 2.0 design system.
+
+---
+
+## 🔥 MANDATORY – NO ™ SYMBOLS ANYWHERE
+
+Search every file (components, pages, API routes, database seeds, etc.) for the string `™` and delete it. The brand names must appear exactly like: **CoreHub**, **PlanGrid**, **CheckIn**, **LiveClass**, etc. – never with a trademark symbol.
+
+---
+
+## 🔥 PRIORITY 1 – LANDING PAGE REDESIGN (EXTREME PREMIUM)
+
+The current landing page (`pages/landing.tsx`) must be rebuilt into a stunning, high‑end marketing page that communicates sophistication, exclusivity, and trust – **never** "free", "easy", or "quick setup".
+
+### Design & Messaging Rules
+- **Remove the "Watch Demo" button entirely.** There is no working demo video, so do not show a broken button.
+- **Remove any text that says "free during beta" or "less than 5 minutes setup".** Aperti is a professional enterprise‑grade platform, not a casual tool.
+- **Tone:** Premium, calm, forward‑looking. Use phrases like:
+  - "The intelligent operating system for modern education."
+  - "Trusted by leading educators worldwide."
+  - "Request early access to join our exclusive community of pioneering teachers."
+- **No fake reviews, no competitor names, no ™ symbols.**
+
+### Visual Design (Liquid Flow 2.0)
+- Strict palette: `#F5F5F5` background, `#FFFFFF` cards, `#121212` text, `#00796B` teal accent.
+- Typography: **Inter** (sans) for all text; `JetBrains Mono` for any code snippets.
+- Components: `shadcn/ui` cards with `rounded-xl`, `shadow-sm`, hover‑lift effect.
+- Animations: Framer Motion spring animations on scroll‑reveal sections, subtle fade‑ins, and elegant transitions.
+- Layout: Airy, generous spacing, high‑quality abstract illustration (SVG) of a connected classroom or neural network – nothing childish.
+
+### Sections to implement (in order)
+1. **Navigation bar:** Minimal – logo (Aperti.) on left, "Features", "Pricing", "Apply" links on right, plus a "Sign In" button. Fixed, subtle background blur on scroll.
+2. **Hero:**
+   - Headline: "Where every mind finds its rhythm."
+   - Subheadline: "The intelligent operating system that replaces fragmented tools with one unified, beautifully designed platform."
+   - CTA button: "Request Early Access" (scrolls to the form at the bottom).
+   - Visual: A large, elegant SVG illustration of interconnected nodes, glowing teal accents, representing a learning network.
+3. **Features section:**
+   - 3‑4 cards highlighting top capabilities (e.g., "Live Teaching", "Smart Attendance", "AI‑Powered Tutoring", "Auto‑Grading"). Each card: icon, title, short description.
+   - Icons must use `lucide-react` with teal color.
+4. **Pricing section:**
+   - Teacher plans only: Starter (50 EGP/student/mo), Professional (100), Enterprise (150), Master (200).
+   - Include a small note about FlexSeats and volume discounts.
+   - Buttons: "Get Started" – all scroll to the early‑access form.
+5. **Early‑access form:**
+   - Title: "Join Aperti Early Access"
+   - Fields: Full Name, Email, Estimated Students, Subjects, Message.
+   - On submit, show a success message: "Thank you. Our team will contact you soon." (No backend needed, just state toggle.)
+   - Design: clean white card, teal submit button, subtle border.
+6. **Footer:**
+   - Links: Terms, Privacy, Contact, Sitemap, info@aperti.ai.
+   - Copyright: © 2026 Aperti.
+
+**The entire page must be fully responsive and load with smooth animations.**
+
+---
+
+## 🔥 PRIORITY 2 – FULL MODULE FUNCTIONALITY & POLISH
+
+After the landing page is perfect, go through **every single module** and ensure it is:
+- Fully functional (no broken APIs, no placeholders except explicitly marked as future).
+- Styled with Liquid Flow 2.0 – correct colors, typography, animations.
+- Responsive and accessible.
+
+### Specific Fixes Needed
+- **QuickSwitch (Role Switcher):** Must work. Admin can switch to teacher/student/parent view, with a banner showing "You are previewing as [role]" and a button to exit.
+- **InstaPay:** Teacher can enter transaction code; admin can approve in SubPilot admin.
+- **Labs (SimVerse):** ForgeField, ReactSphere, Geometrix, BioSphere must all load and be interactive. If any lab is broken, replace it with a working minimal implementation.
+- **InkSpace:** Full‑screen canvas, tools (pen, highlighter, eraser, shapes, text), undo/redo, save/load via API. Already partially done – ensure it works smoothly.
+- **PaperVault:** Admin upload with drag‑and‑drop, progress bar, PDF only. Already improved – ensure it's flawless.
+- **QR Attendance:** Scanner must work, mark attendance, and send absence notifications. Already built – verify end‑to‑end.
+- **LiveClass:** WebRTC mesh must reliably connect peers; whiteboard syncs in real‑time; hand‑raise and mute controls work.
+- **TwinControl:** Pairing via QR should work seamlessly with the LiveClass room.
+- **The Mentor:** Streaming chat with OpenAI must work (use the provided API key or a placeholder with clear instructions).
+- **Check all teacher pages:** CoreHub stats come from real API data, PlanGrid saves lessons, CheckIn marks attendance, SubmitFlow submits and grades, Pulse shows charts, etc.
+- **Check all student pages:** StudyStream shows real homework and lessons, CardStack uses SM‑2, Ascend tracks XP, etc.
+- **Admin pages:** AdminCommand lists all admin modules; each admin sub‑page is functional.
+
+### Design Consistency
+- No page should look unstyled. Every page must use the same card components, teal accents, and Inter font.
+- Remove any remaining "™" symbols from titles and navigation.
+- Delete any leftover "Coming soon" stubs – replace with at least a basic page that fits the design.
+
+---
+
+## 🔥 PRIORITY 3 – BACKEND & INFRASTRUCTURE
+
+- **Seed script:** Already created (admin / admin123). Ensure it works on first run.
+- **API endpoints:** All needed routes are wired and protected by JWT.
+- **Stripe:** If not already fully integrated, add a test mode checkout session creation endpoint.
+- **Email:** GuardianPulse can be triggered manually from admin panel; optionally add a cron job.
+- **Deployment:** Provide a `deploy.sh` script and PM2 ecosystem file for Spaceship VPS.
+
+---
+
+## 🚀 FINAL STEP
+
+After all changes, output a concise summary of what was improved and confirm the admin login credentials. Ensure the platform feels like a polished, premium product ready for launch.
+
+**Start now – redesign the landing page first, then perfect every module.**

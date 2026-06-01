@@ -45,6 +45,7 @@ import { revisitRouter } from "./revisit";
 import { ascendRouter } from "./ascend";
 import { echoEvolveRouter } from "./echo-evolve";
 import inkspaceRouter from "./inkspace";
+import absenceNotifyRouter from "./absence-notify";
 
 const router: IRouter = Router();
 
@@ -94,5 +95,6 @@ router.use("/revisit", revisitRouter);
 router.use("/ascend", ascendRouter);
 router.use("/echo-evolve", echoEvolveRouter);
 router.use("/inkspace", inkspaceRouter);
+router.use("/absence-notify", absenceNotifyRouter);
 
 export default router;

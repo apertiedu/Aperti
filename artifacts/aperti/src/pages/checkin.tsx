@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   QrCode, Camera, CameraOff, CheckCircle2, XCircle, Clock,
   Users, UserCheck, UserX, RotateCcw, KeyboardIcon,
+  MessageCircle, Phone, ExternalLink, Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -93,6 +94,8 @@ export default function CheckIn() {
   const [manualCode, setManualCode] = useState("");
   const [markStatus, setMarkStatus] = useState<MarkStatus>("Present");
   const [recent, setRecent] = useState<ScannedEntry[]>([]);
+  const [notified, setNotified] = useState<Set<number>>(new Set());
+  const [notifying, setNotifying] = useState<Set<number>>(new Set());
 
   const { data: lessons = [] } = useQuery<Lesson[]>({
     queryKey: ["lessons"],
@@ -187,6 +190,41 @@ export default function CheckIn() {
   const unMarked = lessonStudents.filter(s => !markedIds.has(s.id));
   const presentCount = records.filter(r => r.status === "Present" || r.status === "Late").length;
   const rate = lessonStudents.length ? Math.round((presentCount / lessonStudents.length) * 100) : 0;
+  const absentRecords = records.filter(r => r.status === "Absent");
+
+  const sendWhatsApp = async (record: AttendanceRecord) => {
+    const lessonObj = lessons.find(l => l.id === record.sessionId);
+    const lessonLabel = lessonObj ? `Lesson #${lessonObj.lessonNumber} (${lessonObj.dayOfWeek})` : "Today's Lesson";
+    setNotifying(prev => new Set(prev).add(record.studentId));
+    try {
+      const res = await apiFetch("/absence-notify/send", {
+        method: "POST",
+        body: JSON.stringify({
+          studentId: record.studentId,
+          studentName: record.studentName,
+          status: record.status,
+          lessonName: lessonLabel,
+          date,
+        }),
+      });
+      if (res.ok && res.waUrl) {
+        window.open(res.waUrl, "_blank");
+        setNotified(prev => new Set(prev).add(record.studentId));
+        toast({ title: `WhatsApp opened for ${record.studentName}`, duration: 2500 });
+      } else {
+        toast({
+          title: "No parent phone on record",
+          description: `Add ${record.studentName}'s parent number in SubPilot → Notifications.`,
+          variant: "destructive",
+          duration: 5000,
+        });
+      }
+    } catch {
+      toast({ title: "Failed to send notification", variant: "destructive", duration: 2000 });
+    } finally {
+      setNotifying(prev => { const s = new Set(prev); s.delete(record.studentId); return s; });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] p-4 md:p-6">
@@ -494,6 +532,62 @@ export default function CheckIn() {
                         </div>
                       </div>
                     ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Absent — notify parents via WhatsApp */}
+              {absentRecords.length > 0 && (
+                <Card className="border-0 shadow-sm border-l-4 border-l-red-400">
+                  <CardHeader className="pb-3 border-b">
+                    <div className="flex items-center gap-2">
+                      <Bell className="h-4 w-4 text-red-500" />
+                      <CardTitle className="text-sm font-semibold text-red-600">
+                        Notify Absent Parents — WhatsApp
+                      </CardTitle>
+                      <Badge className="ml-auto bg-red-50 text-red-600 border-0 text-xs">
+                        {absentRecords.length} absent
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0 divide-y">
+                    {absentRecords.map(r => {
+                      const done = notified.has(r.studentId);
+                      const busy = notifying.has(r.studentId);
+                      return (
+                        <div key={r.id} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50/60">
+                          <div className="h-7 w-7 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+                            <XCircle className="h-4 w-4 text-red-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">{r.studentName}</p>
+                            <p className="text-xs text-gray-400 font-mono">{r.studentCode}</p>
+                          </div>
+                          {done ? (
+                            <Badge className="bg-[#00796B]/10 text-[#00796B] border-0 text-xs gap-1">
+                              <CheckCircle2 className="h-3 w-3" /> Sent
+                            </Badge>
+                          ) : (
+                            <Button
+                              size="sm"
+                              onClick={() => sendWhatsApp(r)}
+                              disabled={busy}
+                              className="h-7 text-xs bg-[#25D366] hover:bg-[#1EBE5A] text-white gap-1.5"
+                            >
+                              <MessageCircle className="h-3.5 w-3.5" />
+                              {busy ? "Opening…" : "WhatsApp"}
+                              <ExternalLink className="h-3 w-3 opacity-60" />
+                            </Button>
+                          )}
+                        </div>
+                      );
+                    })}
+                    <div className="px-4 py-2.5 bg-amber-50/60">
+                      <p className="text-xs text-amber-700 flex items-center gap-1.5">
+                        <Phone className="h-3 w-3 shrink-0" />
+                        Set parent phone numbers in <strong>SubPilot → Notifications</strong> for instant message generation.
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               )}
