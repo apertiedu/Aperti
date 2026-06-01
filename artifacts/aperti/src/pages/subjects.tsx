@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,7 @@ export default function Subjects() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/subjects", { credentials: "include" });
+      const res = await apiFetch("/api/subjects", { credentials: "include" });
       if (res.ok) setSubjects(await res.json());
     } finally { setLoading(false); }
   };
@@ -35,8 +36,8 @@ export default function Subjects() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await fetch("/api/subjects", {
-        method: "POST", credentials: "include",
+      const res = await apiFetch("/api/subjects", {
+        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
       });
@@ -54,8 +55,8 @@ export default function Subjects() {
     if (!editSubject) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/subjects/${editSubject.id}`, {
-        method: "PATCH", credentials: "include",
+      const res = await apiFetch(`/api/subjects/${editSubject.id}`, {
+        method: "PATCH", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name }),
       });
@@ -70,7 +71,7 @@ export default function Subjects() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this subject? This may affect exams linked to it.")) return;
-    await fetch(`/api/subjects/${id}`, { method: "DELETE", credentials: "include" });
+    await apiFetch(`/api/subjects/${id}`, { method: "DELETE" });
     toast({ title: "Subject deleted" });
     load();
   };

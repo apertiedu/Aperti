@@ -15,10 +15,10 @@ import {
 import { Plus, FlaskConical, ExternalLink, Atom, Globe, Triangle } from "lucide-react";
 
 const LAB_TYPES = [
-  { value: "forge-field", label: "ForgeField™", desc: "Physics circuit & force builder", icon: <Atom className="h-5 w-5" /> },
-  { value: "react-sphere", label: "ReactSphere™", desc: "Chemistry reaction simulator", icon: <FlaskConical className="h-5 w-5" /> },
-  { value: "geometrix", label: "Geometrix™", desc: "Interactive geometry workspace", icon: <Triangle className="h-5 w-5" /> },
-  { value: "biosphere", label: "Biosphere™", desc: "Biology ecosystem simulation", icon: <Globe className="h-5 w-5" /> },
+  { value: "forge-field", label: "ForgeField", desc: "Physics circuit & force builder", icon: <Atom className="h-5 w-5" /> },
+  { value: "react-sphere", label: "ReactSphere", desc: "Chemistry reaction simulator", icon: <FlaskConical className="h-5 w-5" /> },
+  { value: "geometrix", label: "Geometrix", desc: "Interactive geometry workspace", icon: <Triangle className="h-5 w-5" /> },
+  { value: "biosphere", label: "Biosphere", desc: "Biology ecosystem simulation", icon: <Globe className="h-5 w-5" /> },
 ];
 
 interface Lab {
@@ -55,7 +55,7 @@ export default function LabBuilder() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Lab Builder<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">Lab Builder<span className="text-primary"></span></h1>
           <p className="text-muted-foreground">Configure and assign interactive SimVerse labs to your students.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

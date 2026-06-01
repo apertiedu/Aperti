@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CheckCircle, Sparkles, Eye } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 export default function GradeFlow() {

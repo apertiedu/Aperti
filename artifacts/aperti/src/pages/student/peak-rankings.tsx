@@ -58,7 +58,7 @@ export default function PeakRankings() {
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Trophy className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">PeakRankings<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">PeakRankings<span className="text-primary"></span></h1>
         </div>
         <p className="text-muted-foreground">Class leaderboards — compete, improve, and celebrate wins.</p>
       </motion.div>

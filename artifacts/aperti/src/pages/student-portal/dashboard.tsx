@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
@@ -70,12 +71,12 @@ export default function StudentDashboard() {
   const todayName = DAY_NAMES[new Date().getDay()];
 
   useEffect(() => {
-    fetch("/api/portal/me", { credentials: "include" })
+    apiFetch("/api/portal/me", { credentials: "include" })
       .then(r => r.ok ? r.json() : null)
       .then(setData)
       .catch(() => { })
       .finally(() => setLoading(false));
-    fetch("/api/portal/timetable", { credentials: "include" })
+    apiFetch("/api/portal/timetable", { credentials: "include" })
       .then(r => r.ok ? r.json() : [])
       .then((sessions: MySession[]) => setTodaySessions(sessions.filter(s => s.dayOfWeek === todayName)));
   }, [todayName]);

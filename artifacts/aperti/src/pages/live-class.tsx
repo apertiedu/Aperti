@@ -68,7 +68,7 @@ function LobbyView({ onStart }: { onStart: (name: string, title: string) => void
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-xl"
       >
-        <h1 className="text-3xl font-bold mb-1">LiveClass<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold mb-1">LiveClass<span className="text-primary"></span></h1>
         <p className="text-muted-foreground mb-6">Start a live session for your students.</p>
 
         <div className="rounded-2xl overflow-hidden bg-[#0f172a] aspect-video mb-6 flex items-center justify-center">
@@ -154,7 +154,7 @@ export default function LiveClass() {
             <PhoneOff className="h-7 w-7 text-primary" />
           </div>
           <h2 className="text-xl font-semibold">Session ended</h2>
-          <p className="text-muted-foreground text-sm">The LiveClass™ session has ended.</p>
+          <p className="text-muted-foreground text-sm">The LiveClass session has ended.</p>
           <Button onClick={() => window.location.reload()}>New session</Button>
         </div>
       </div>
@@ -169,7 +169,7 @@ export default function LiveClass() {
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-card border-b shrink-0">
         <div className="flex items-center gap-3">
-          <span className="font-bold text-primary">LiveClass™</span>
+          <span className="font-bold text-primary">LiveClass</span>
           {lc.lessonTitle && <span className="text-sm text-muted-foreground">{lc.lessonTitle}</span>}
           <Badge variant="secondary" className="text-xs">LIVE</Badge>
         </div>

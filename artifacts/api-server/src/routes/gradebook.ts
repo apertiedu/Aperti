@@ -127,7 +127,7 @@ router.get("/gradebook/filters", requireTenantAccess, async (req, res): Promise<
   const { rows: sessions } = await pool.query(`
     SELECT s.id, s.lesson_number AS "lessonNumber", s.day_of_week AS "dayOfWeek", s.start_time AS "startTime",
            COALESCE(sub.name,'No Subject') AS "subjectName"
-    FROM sessions s LEFT JOIN subjects sub ON sub.id=s.subject_id
+    FROM lessons s LEFT JOIN subjects sub ON sub.id=s.subject_id
     WHERE 1=1 ${teacherCond.replace('teacher_account_id', 's.teacher_account_id')}
     ORDER BY s.lesson_number, s.day_of_week
   `);

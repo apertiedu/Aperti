@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
+const API = "/api/auth";
+
 interface User {
   id: number;
   username: string;
@@ -24,26 +26,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!token) { setLoading(false); return; }
-    fetch(`${import.meta.env.VITE_API_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+    fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
-      .then(data => { if (data.user) setUser(data.user); else localStorage.removeItem("aperti_token"); })
+      .then(data => {
+        if (data.user) setUser(data.user);
+        else { localStorage.removeItem("aperti_token"); setToken(null); }
+      })
+      .catch(() => { localStorage.removeItem("aperti_token"); setToken(null); })
       .finally(() => setLoading(false));
   }, [token]);
 
   const login = async (username: string, password: string) => {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
+    const res = await fetch(`${API}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, deviceId: "web" }), // real device ID later
+      body: JSON.stringify({ username, password, deviceId: `web-${Date.now()}` }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    if (!res.ok) throw new Error(data.error || "Login failed");
     localStorage.setItem("aperti_token", data.token);
     setToken(data.token);
     setUser(data.user);
   };
 
   const logout = () => {
+    const t = localStorage.getItem("aperti_token");
+    if (t) {
+      fetch(`${API}/logout`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+        body: JSON.stringify({ deviceId: "web" }),
+      }).catch(() => {});
+    }
     localStorage.removeItem("aperti_token");
     setToken(null);
     setUser(null);

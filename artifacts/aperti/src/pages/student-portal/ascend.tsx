@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Flame, Star, Trophy, Target, ArrowUp, Zap } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
@@ -46,7 +46,7 @@ export default function Ascend() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold">Ascend<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">Ascend<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Your journey to mastery.</p>
       </motion.div>
 

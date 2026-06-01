@@ -1,29 +1,18 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
-
-function requireAuth(req: any, res: any, next: any) {
-  if (!(req.session as any)?.accountId) { res.status(401).json({ message: "Unauthorized" }); return; }
-  next();
-}
+import { authenticate, AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-router.get("/tutorial/progress", requireAuth, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const accountId: number = session.accountId;
-  const { rows } = await pool.query(
-    `SELECT * FROM tutorial_progress WHERE account_id=$1`, [accountId]
-  );
-  if (!rows[0]) {
-    res.json({ completed: false, lastStep: 0, exists: false });
-    return;
-  }
+router.get("/tutorial/progress", authenticate, async (req: AuthRequest, res): Promise<void> => {
+  const accountId = req.userId!;
+  const { rows } = await pool.query(`SELECT * FROM tutorial_progress WHERE account_id=$1`, [accountId]);
+  if (!rows[0]) { res.json({ completed: false, lastStep: 0, exists: false }); return; }
   res.json({ completed: rows[0].completed, lastStep: rows[0].last_step, exists: true });
 });
 
-router.post("/tutorial/progress", requireAuth, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const accountId: number = session.accountId;
+router.post("/tutorial/progress", authenticate, async (req: AuthRequest, res): Promise<void> => {
+  const accountId = req.userId!;
   const { completed, lastStep } = req.body;
   await pool.query(`
     INSERT INTO tutorial_progress (account_id, completed, last_step, completed_at, updated_at)
@@ -34,9 +23,8 @@ router.post("/tutorial/progress", requireAuth, async (req, res): Promise<void> =
   res.json({ saved: true });
 });
 
-router.delete("/tutorial/progress", requireAuth, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const accountId: number = session.accountId;
+router.delete("/tutorial/progress", authenticate, async (req: AuthRequest, res): Promise<void> => {
+  const accountId = req.userId!;
   await pool.query(`DELETE FROM tutorial_progress WHERE account_id=$1`, [accountId]);
   res.json({ reset: true });
 });

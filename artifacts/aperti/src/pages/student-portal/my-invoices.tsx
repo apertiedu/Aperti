@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CreditCard, CheckCircle2, Clock, AlertCircle, XCircle } from "lucide-react";
@@ -28,7 +29,7 @@ export default function MyInvoices() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/portal/invoices", { credentials: "include" })
+    apiFetch("/api/portal/invoices", { credentials: "include" })
       .then(r => r.ok ? r.json() : [])
       .then(setInvoices)
       .catch(() => setInvoices([]))

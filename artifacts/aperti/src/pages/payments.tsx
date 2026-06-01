@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -165,9 +166,9 @@ export default function Payments() {
     setLoading(true);
     try {
       const [invRes, stuRes, statRes] = await Promise.all([
-        fetch("/api/invoices", { credentials: "include" }),
-        fetch("/api/students", { credentials: "include" }),
-        fetch("/api/invoices/stats", { credentials: "include" }),
+        apiFetch("/api/invoices", { credentials: "include" }),
+        apiFetch("/api/students", { credentials: "include" }),
+        apiFetch("/api/invoices/stats", { credentials: "include" }),
       ]);
       if (invRes.ok) setInvoices(await invRes.json());
       if (stuRes.ok) setStudents(await stuRes.json());
@@ -178,14 +179,14 @@ export default function Payments() {
   useEffect(() => { load(); }, [load]);
 
   const handleCreate = async (data: any) => {
-    const res = await fetch("/api/invoices", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const res = await apiFetch("/api/invoices", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Failed"); }
     toast({ title: "Invoice created" });
     load();
   };
 
   const handleEdit = async (id: number, data: any) => {
-    const res = await fetch(`/api/invoices/${id}`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const res = await apiFetch(`/api/invoices/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Failed"); }
     toast({ title: "Invoice updated" });
     load();
@@ -197,7 +198,7 @@ export default function Payments() {
 
   const handleDelete = async (id: number) => {
     if (!confirm("Delete this invoice?")) return;
-    const res = await fetch(`/api/invoices/${id}`, { method: "DELETE", credentials: "include" });
+    const res = await apiFetch(`/api/invoices/${id}`, { method: "DELETE" });
     if (!res.ok) { toast({ title: "Error", variant: "destructive" }); return; }
     toast({ title: "Invoice deleted" });
     load();

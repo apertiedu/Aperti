@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Award, Plus, Medal } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, opts?: RequestInit) {
@@ -60,7 +60,7 @@ export default function KudosEngine() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Kudos Engine<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">Kudos Engine<span className="text-primary"></span></h1>
           <p className="text-muted-foreground">Recognise and reward student excellence.</p>
         </div>
         <Button onClick={() => setAwardOpen(v => !v)}>

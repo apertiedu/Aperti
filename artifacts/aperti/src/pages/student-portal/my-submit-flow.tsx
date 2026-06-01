@@ -17,7 +17,7 @@ import {
   Upload, CheckCircle, Clock, AlertCircle,
 } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {

@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Users, MousePointerClick, MessageCircle, Activity, Flame } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
@@ -27,7 +27,7 @@ export default function ClassForge() {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold">ClassForge<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">ClassForge<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Post‑session engagement intelligence.</p>
       </motion.div>
 

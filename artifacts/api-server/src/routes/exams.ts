@@ -1,25 +1,24 @@
 import { Router, type IRouter } from "express";
 import { eq, and, sql } from "drizzle-orm";
-import { db, examsTable, examQuestionsTable, studentMarksTable, studentsTable, subjectsTable } from "@workspace/db";
+import { db, examsTable, examQuestionsTable, studentMarksTable, studentsTable } from "@workspace/db";
+import { authenticate, AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-function getTeacherId(req: any): number {
-  if (req.session.role === "teacher") return req.session.accountId;
-  if (req.session.role === "assistant") return req.session.teacherAccountId || req.session.accountId;
-  return req.session.accountId;
+function getTeacherId(req: AuthRequest): number {
+  return req.userId!;
 }
 
-router.get("/exams", async (req, res): Promise<void> => {
+router.get("/exams", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const teacherId = getTeacherId(req);
-  const filter = req.session.role === "admin" ? undefined : eq(examsTable.teacherAccountId, teacherId);
+  const filter = req.role === "admin" ? undefined : eq(examsTable.teacherAccountId, teacherId);
   const rows = filter
     ? await db.select().from(examsTable).where(filter).orderBy(examsTable.createdAt)
     : await db.select().from(examsTable).orderBy(examsTable.createdAt);
   res.json(rows);
 });
 
-router.post("/exams", async (req, res): Promise<void> => {
+router.post("/exams", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const { name, subjectId, examDate, totalMarks, timeLimitMinutes } = req.body;
   if (!name?.trim()) { res.status(400).json({ message: "Exam name is required" }); return; }
   const teacherId = getTeacherId(req);
@@ -34,7 +33,7 @@ router.post("/exams", async (req, res): Promise<void> => {
   res.status(201).json(created);
 });
 
-router.get("/exams/:id", async (req, res): Promise<void> => {
+router.get("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   const [exam] = await db.select().from(examsTable).where(eq(examsTable.id, id));
   if (!exam) { res.status(404).json({ message: "Exam not found" }); return; }
@@ -44,16 +43,15 @@ router.get("/exams/:id", async (req, res): Promise<void> => {
     .orderBy(examQuestionsTable.questionOrder);
 
   const teacherId = getTeacherId(req);
-  const students = req.session.role === "admin"
+  const students = req.role === "admin"
     ? await db.select().from(studentsTable)
     : await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId));
 
   const marks = await db.select().from(studentMarksTable).where(eq(studentMarksTable.examId, id));
-
   res.json({ exam, questions, students, marks });
 });
 
-router.patch("/exams/:id", async (req, res): Promise<void> => {
+router.patch("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   const { name, subjectId, examDate, totalMarks, timeLimitMinutes } = req.body;
   const updates: Record<string, unknown> = {};
@@ -67,14 +65,13 @@ router.patch("/exams/:id", async (req, res): Promise<void> => {
   res.json(updated);
 });
 
-router.delete("/exams/:id", async (req, res): Promise<void> => {
+router.delete("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   await db.delete(examsTable).where(eq(examsTable.id, id));
   res.json({ message: "Exam deleted" });
 });
 
-// Questions
-router.post("/exams/:id/questions", async (req, res): Promise<void> => {
+router.post("/exams/:id/questions", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const examId = parseInt(req.params.id, 10);
   const { questionText, topic, maxMarks, questionOrder, parentId, questionType, options, correctOption } = req.body;
   if (!maxMarks && maxMarks !== 0) { res.status(400).json({ message: "maxMarks is required" }); return; }
@@ -93,7 +90,7 @@ router.post("/exams/:id/questions", async (req, res): Promise<void> => {
   res.status(201).json(created);
 });
 
-router.patch("/exam-questions/:id", async (req, res): Promise<void> => {
+router.patch("/exam-questions/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   const { questionText, topic, maxMarks, questionOrder, questionType, options, correctOption } = req.body;
   const updates: Record<string, unknown> = {};
@@ -110,14 +107,13 @@ router.patch("/exam-questions/:id", async (req, res): Promise<void> => {
   res.json(updated);
 });
 
-router.delete("/exam-questions/:id", async (req, res): Promise<void> => {
+router.delete("/exam-questions/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   await db.delete(examQuestionsTable).where(eq(examQuestionsTable.id, id));
   res.json({ message: "Question deleted" });
 });
 
-// Marks
-router.post("/exams/:id/marks", async (req, res): Promise<void> => {
+router.post("/exams/:id/marks", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const examId = parseInt(req.params.id, 10);
   const { marks } = req.body;
   if (!Array.isArray(marks)) { res.status(400).json({ message: "marks array required" }); return; }
@@ -139,11 +135,10 @@ router.post("/exams/:id/marks", async (req, res): Promise<void> => {
       },
     });
   }
-
   res.json({ message: `Saved ${marks.length} mark entries` });
 });
 
-router.get("/exams/:id/results", async (req, res): Promise<void> => {
+router.get("/exams/:id/results", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const examId = parseInt(req.params.id, 10);
   const [exam] = await db.select().from(examsTable).where(eq(examsTable.id, examId));
   if (!exam) { res.status(404).json({ message: "Exam not found" }); return; }
@@ -160,8 +155,7 @@ router.get("/exams/:id/results", async (req, res): Promise<void> => {
     .innerJoin(studentsTable, eq(studentMarksTable.studentId, studentsTable.id))
     .where(eq(studentMarksTable.examId, examId));
 
-  const studentMap: Record<number, { studentId: number; studentName: string; studentCode: string; totalScored: number; questionMarks: Record<number, { marksScored: number | null; mistakes: string | null }> }> = {};
-
+  const studentMap: Record<number, any> = {};
   for (const mark of marks) {
     if (!studentMap[mark.studentId]) {
       studentMap[mark.studentId] = { studentId: mark.studentId, studentName: mark.studentName, studentCode: mark.studentCode, totalScored: 0, questionMarks: {} };
@@ -173,10 +167,9 @@ router.get("/exams/:id/results", async (req, res): Promise<void> => {
 
   const totalMax = questions.reduce((sum, q) => sum + parseFloat(String(q.maxMarks)), 0);
   const results = Object.values(studentMap).map(s => ({
-    ...s,
-    totalMax,
+    ...s, totalMax,
     percentage: totalMax > 0 ? Math.round((s.totalScored / totalMax) * 100 * 10) / 10 : 0,
-  })).sort((a, b) => b.totalScored - a.totalScored);
+  })).sort((a: any, b: any) => b.totalScored - a.totalScored);
 
   res.json({ exam, questions, results, totalMax });
 });

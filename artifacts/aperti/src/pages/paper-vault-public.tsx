@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Download, FileText, BookOpen } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 async function fetchJSON(url: string) {
   const res = await fetch(`${API}${url}`);
@@ -37,7 +37,7 @@ export default function PaperVault() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center">
-        <h1 className="text-3xl font-bold">PaperVault<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">PaperVault<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Free past papers, open to everyone.</p>
       </motion.div>
 

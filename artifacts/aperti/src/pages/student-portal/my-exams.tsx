@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
@@ -50,8 +51,8 @@ export default function MyExams() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/portal/exams", { credentials: "include" }).then(r => r.ok ? r.json() : []).catch(() => []),
-      fetch("/api/portal/online-exams", { credentials: "include" }).then(r => r.ok ? r.json() : []).catch(() => []),
+      apiFetch("/api/portal/exams", { credentials: "include" }).then(r => r.ok ? r.json() : []).catch(() => []),
+      apiFetch("/api/portal/online-exams", { credentials: "include" }).then(r => r.ok ? r.json() : []).catch(() => []),
     ]).then(([res, online]) => {
       setResults(res);
       setOnlineExams(online);

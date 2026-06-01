@@ -85,7 +85,7 @@ export default function FocusZone() {
     <div className={`min-h-screen transition-colors duration-500 ${phaseBg} p-6 page-transition flex flex-col`}>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 text-center">
         <h1 className="text-3xl font-bold">
-          FocusZone<span className="text-primary">™</span>
+          FocusZone<span className="text-primary"></span>
         </h1>
         <p className="text-muted-foreground text-sm mt-1">Distraction-free deep work sessions.</p>
       </motion.div>

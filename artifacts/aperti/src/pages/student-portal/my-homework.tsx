@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, Clock, CheckCircle2, AlertTriangle, ChevronDown, ChevronUp, Send, Edit3, Award } from "lucide-react";
@@ -29,7 +30,7 @@ export default function MyHomework() {
   const [activeTab, setActiveTab] = useState<"pending" | "submitted" | "graded">("pending");
 
   const load = () => {
-    fetch("/api/portal/homework", { credentials: "include" })
+    apiFetch("/api/portal/homework", { credentials: "include" })
       .then(r => r.ok ? r.json() : [])
       .then((rows: HW[]) => {
         setHomework(rows);
@@ -45,8 +46,8 @@ export default function MyHomework() {
   const handleSubmit = async (hwId: number, isDraft: boolean) => {
     setSubmitting(hwId);
     try {
-      const res = await fetch(`/api/portal/homework/${hwId}/submit`, {
-        method: "POST", credentials: "include",
+      const res = await apiFetch(`/api/portal/homework/${hwId}/submit`, {
+        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: drafts[hwId] || "", isDraft }),
       });

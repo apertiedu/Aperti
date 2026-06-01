@@ -11,7 +11,7 @@ import { FileText, Zap, Clock, Target, ChevronRight, Sparkles, BarChart3 } from 
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 const MOCK_TRIALS = [
@@ -53,7 +53,7 @@ export default function TrialVault() {
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <FileText className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">TrialVault<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">TrialVault<span className="text-primary"></span></h1>
         </div>
         <p className="text-muted-foreground">Intelligently generated mock exams with predicted difficulty curves.</p>
       </motion.div>
@@ -67,7 +67,7 @@ export default function TrialVault() {
                 <Sparkles className="h-4 w-4 text-primary" />
                 Generate New Trial
               </CardTitle>
-              <CardDescription>Calibrated to your Echo™ memory profile</CardDescription>
+              <CardDescription>Calibrated to your Echo memory profile</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">

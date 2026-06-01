@@ -49,62 +49,62 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Core",
       items: [
-        { name: "CoreHub™", href: "/", icon: LayoutDashboard, roles: ["admin","teacher","assistant"] },
-        { name: "CheckIn™", href: "/checkin", icon: QrCode, roles: ["admin","teacher","assistant"] },
-        { name: "PlanGrid™", href: "/plan-grid", icon: CalendarDays, roles: ["admin","teacher"] },
+        { name: "CoreHub", href: "/", icon: LayoutDashboard, roles: ["admin","teacher","assistant"] },
+        { name: "CheckIn", href: "/checkin", icon: QrCode, roles: ["admin","teacher","assistant"] },
+        { name: "PlanGrid", href: "/plan-grid", icon: CalendarDays, roles: ["admin","teacher"] },
       ],
     },
     {
       label: "Teaching",
       items: [
-        { name: "SubmitFlow™", href: "/submit-flow", icon: ClipboardList, roles: ["admin","teacher"] },
-        { name: "GradeFlow™", href: "/grade-flow", icon: CheckSquare2, roles: ["admin","teacher","assistant"] },
-        { name: "SchemeCraft™", href: "/scheme-craft", icon: FileText, roles: ["admin","teacher"] },
-        { name: "LiveClass™", href: "/live-class", icon: Video, roles: ["admin","teacher"] },
-        { name: "TwinControl™", href: "/twin-control", icon: Smartphone, roles: ["admin","teacher"] },
-        { name: "ClassForge™", href: "/class-forge", icon: Users2, roles: ["admin","teacher"] },
-        { name: "InkSpace™", href: "/inkspace", icon: PenLine, roles: ["admin","teacher","assistant"] },
+        { name: "SubmitFlow", href: "/submit-flow", icon: ClipboardList, roles: ["admin","teacher"] },
+        { name: "GradeFlow", href: "/grade-flow", icon: CheckSquare2, roles: ["admin","teacher","assistant"] },
+        { name: "SchemeCraft", href: "/scheme-craft", icon: FileText, roles: ["admin","teacher"] },
+        { name: "LiveClass", href: "/live-class", icon: Video, roles: ["admin","teacher"] },
+        { name: "TwinControl", href: "/twin-control", icon: Smartphone, roles: ["admin","teacher"] },
+        { name: "ClassForge", href: "/class-forge", icon: Users2, roles: ["admin","teacher"] },
+        { name: "InkSpace", href: "/inkspace", icon: PenLine, roles: ["admin","teacher","assistant"] },
       ],
     },
     {
       label: "Content",
       items: [
-        { name: "QueryVault™", href: "/query-vault", icon: BookMarked, roles: ["admin","teacher"] },
-        { name: "CardStack™", href: "/cardstack", icon: Layers, roles: ["admin","teacher"] },
-        { name: "Syllabuilder™", href: "/syllabuilder", icon: Wand2, roles: ["admin","teacher"] },
-        { name: "ContentCraft™", href: "/content-craft", icon: Palette, roles: ["admin","teacher"] },
-        { name: "LabBuilder™", href: "/lab-builder", icon: FlaskConical, roles: ["admin","teacher"] },
-        { name: "MarkerMind™", href: "/marker-mind", icon: Brain, roles: ["admin","teacher","assistant"] },
-        { name: "ScanScribe™", href: "/scan-scribe", icon: ScanLine, roles: ["admin","teacher","assistant"] },
+        { name: "QueryVault", href: "/query-vault", icon: BookMarked, roles: ["admin","teacher"] },
+        { name: "CardStack", href: "/cardstack", icon: Layers, roles: ["admin","teacher"] },
+        { name: "Syllabuilder", href: "/syllabuilder", icon: Wand2, roles: ["admin","teacher"] },
+        { name: "ContentCraft", href: "/content-craft", icon: Palette, roles: ["admin","teacher"] },
+        { name: "LabBuilder", href: "/lab-builder", icon: FlaskConical, roles: ["admin","teacher"] },
+        { name: "MarkerMind", href: "/marker-mind", icon: Brain, roles: ["admin","teacher","assistant"] },
+        { name: "ScanScribe", href: "/scan-scribe", icon: ScanLine, roles: ["admin","teacher","assistant"] },
       ],
     },
     {
       label: "Insights",
       items: [
-        { name: "Pulse™", href: "/pulse", icon: BarChart3, roles: ["admin","teacher"] },
-        { name: "InsightStream™", href: "/insight-stream", icon: TrendingUp, roles: ["admin","teacher"] },
-        { name: "InsightExams™", href: "/insight-exams", icon: ClipboardCheck, roles: ["admin","teacher","assistant"] },
+        { name: "Pulse", href: "/pulse", icon: BarChart3, roles: ["admin","teacher"] },
+        { name: "InsightStream", href: "/insight-stream", icon: TrendingUp, roles: ["admin","teacher"] },
+        { name: "InsightExams", href: "/insight-exams", icon: ClipboardCheck, roles: ["admin","teacher","assistant"] },
       ],
     },
     {
       label: "Manage",
       items: [
-        { name: "KudosEngine™", href: "/kudos-engine", icon: Award, roles: ["admin","teacher"] },
-        { name: "SubPilot™", href: "/subpilot", icon: CreditCard, roles: ["admin","teacher"] },
-        { name: "HelpDesk™", href: "/helpdesk", icon: HelpCircle, roles: ["admin","teacher","assistant"] },
+        { name: "KudosEngine", href: "/kudos-engine", icon: Award, roles: ["admin","teacher"] },
+        { name: "SubPilot", href: "/subpilot", icon: CreditCard, roles: ["admin","teacher"] },
+        { name: "HelpDesk", href: "/helpdesk", icon: HelpCircle, roles: ["admin","teacher","assistant"] },
       ],
     },
     {
       label: "Admin",
       items: [
         { name: "Command Center", href: "/admin/command", icon: Terminal, roles: ["admin"] },
-        { name: "WorldPilot™", href: "/admin/world-pilot", icon: Globe, roles: ["admin"] },
+        { name: "WorldPilot", href: "/admin/world-pilot", icon: Globe, roles: ["admin"] },
         { name: "PaperVault Admin", href: "/admin/paper-vault", icon: Library, roles: ["admin"] },
-        { name: "ShieldCore™", href: "/admin/shield-core", icon: Shield, roles: ["admin"] },
-        { name: "BudgetSense™", href: "/admin/budget-sense", icon: DollarSign, roles: ["admin"] },
-        { name: "AutoScale™", href: "/admin/auto-scale", icon: Cpu, roles: ["admin"] },
-        { name: "SpendWise™", href: "/admin/spend-wise", icon: PieChart, roles: ["admin"] },
-        { name: "QuickSwitch™", href: "/admin/quick-switch", icon: RefreshCw, roles: ["admin"] },
+        { name: "ShieldCore", href: "/admin/shield-core", icon: Shield, roles: ["admin"] },
+        { name: "BudgetSense", href: "/admin/budget-sense", icon: DollarSign, roles: ["admin"] },
+        { name: "AutoScale", href: "/admin/auto-scale", icon: Cpu, roles: ["admin"] },
+        { name: "SpendWise", href: "/admin/spend-wise", icon: PieChart, roles: ["admin"] },
+        { name: "QuickSwitch", href: "/admin/quick-switch", icon: RefreshCw, roles: ["admin"] },
         { name: "SubPilot Settings", href: "/admin/subpilot-settings", icon: Settings, roles: ["admin"] },
         { name: "HelpDesk Admin", href: "/admin/helpdesk", icon: MessageSquare, roles: ["admin"] },
       ],
@@ -144,7 +144,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       (item) =>
         location === item.href ||
         (item.href !== "/" && location.startsWith(item.href)),
-    )?.name || "CoreHub™";
+    )?.name || "CoreHub";
 
   return (
     <div className="min-h-screen flex w-full bg-background font-sans">

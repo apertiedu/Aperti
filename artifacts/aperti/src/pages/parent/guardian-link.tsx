@@ -20,7 +20,7 @@ const MOCK_MESSAGES: Record<string, Array<{ id: string; from: "teacher" | "paren
   t1: [
     { id: "m1", from: "teacher", content: "Good morning! I wanted to let you know that Nour did exceptionally well on last week's wave optics test — scored 88%. Keep up the encouragement at home!", time: "09:15", read: true },
     { id: "m2", from: "parent", content: "That's wonderful news! We're very proud of her. Is there anything specific we should focus on for the upcoming paper?", time: "10:30", read: true },
-    { id: "m3", from: "teacher", content: "I'd recommend focusing on electromagnetic induction — it tends to be tricky. I've uploaded some extra resources to ContentCraft™. Also, her mock exam is on June 12th.", time: "11:00", read: false },
+    { id: "m3", from: "teacher", content: "I'd recommend focusing on electromagnetic induction — it tends to be tricky. I've uploaded some extra resources to ContentCraft. Also, her mock exam is on June 12th.", time: "11:00", read: false },
     { id: "m4", from: "teacher", content: "Don't hesitate to reach out if you have any concerns about exam prep 📚", time: "11:01", read: false },
   ],
   t2: [],
@@ -58,7 +58,7 @@ export default function GuardianLink() {
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <MessageSquare className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">GuardianLink<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">GuardianLink<span className="text-primary"></span></h1>
         </div>
         <p className="text-muted-foreground">Direct messaging with your child's teachers.</p>
       </motion.div>

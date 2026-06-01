@@ -59,7 +59,7 @@ export default function BioSphere() {
 
   return (
     <Card className="card-hover">
-      <CardHeader><CardTitle>BioSphere™ – Cell Explorer</CardTitle></CardHeader>
+      <CardHeader><CardTitle>BioSphere – Cell Explorer</CardTitle></CardHeader>
       <CardContent><div ref={mountRef} className="w-full h-96 border rounded-lg" /></CardContent>
     </Card>
   );

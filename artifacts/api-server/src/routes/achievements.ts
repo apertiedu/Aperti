@@ -64,8 +64,8 @@ async function awardAchievement(studentId: number, key: string): Promise<boolean
 }
 
 router.get("/portal/achievements", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+  
+  const studentId: number = (req as any).studentId;
 
   const [{ rows: earned }, { rows: xpRows }] = await Promise.all([
     pool.query(`SELECT * FROM student_achievements WHERE student_id=$1 ORDER BY earned_at DESC`, [studentId]),
@@ -90,9 +90,9 @@ router.get("/portal/achievements", requireStudentAccess, async (req, res): Promi
 });
 
 router.post("/portal/achievements/check", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
-  const teacherId: number = session.teacherAccountId;
+  
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
   const newlyEarned: string[] = [];
 
   await awardAchievement(studentId, "first_login");
@@ -181,9 +181,9 @@ router.post("/portal/achievements/check", requireStudentAccess, async (req, res)
 });
 
 router.get("/portal/leaderboard", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
-  const teacherId: number = session.teacherAccountId;
+  
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
 
   const { rows } = await pool.query(`
     SELECT 

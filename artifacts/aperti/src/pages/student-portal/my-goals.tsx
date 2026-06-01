@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -105,7 +106,7 @@ export default function MyGoals() {
 
   const load = async () => {
     setLoading(true);
-    const r = await fetch("/api/portal/goals", { credentials: "include" });
+    const r = await apiFetch("/api/portal/goals", { credentials: "include" });
     if (r.ok) setGoals(await r.json());
     setLoading(false);
   };
@@ -116,8 +117,8 @@ export default function MyGoals() {
     e.preventDefault();
     if (!form.targetValue) return;
     setSaving(true);
-    const res = await fetch("/api/portal/goals", {
-      method: "POST", credentials: "include",
+    const res = await apiFetch("/api/portal/goals", {
+      method: "POST", 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ goalType: form.goalType, targetValue: parseFloat(form.targetValue), deadline: form.deadline || null, notes: form.notes || null }),
     });
@@ -127,11 +128,11 @@ export default function MyGoals() {
     setAddOpen(false);
     setForm({ goalType: "attendance", targetValue: "", deadline: "", notes: "" });
     load();
-    fetch("/api/portal/achievements/check", { method: "POST", credentials: "include" });
+    apiFetch("/api/portal/achievements/check", { method: "POST" });
   };
 
   const handleDelete = async (id: number) => {
-    await fetch(`/api/portal/goals/${id}`, { method: "DELETE", credentials: "include" });
+    await apiFetch(`/api/portal/goals/${id}`, { method: "DELETE" });
     load();
   };
 

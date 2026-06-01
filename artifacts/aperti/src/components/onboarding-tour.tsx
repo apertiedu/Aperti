@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect, useCallback, createContext, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
@@ -108,8 +109,8 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
 
   const saveProgress = useCallback(async (done: boolean, s: number) => {
     try {
-      await fetch("/api/tutorial/progress", {
-        method: "POST", credentials: "include",
+      await apiFetch("/api/tutorial/progress", {
+        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed: done, lastStep: s }),
       });
@@ -122,7 +123,7 @@ export function TourProvider({ children }: { children: React.ReactNode }) {
     const lsDone = !!localStorage.getItem(LS_KEY(user.role));
     if (lsDone) { setIsTourDone(true); return; }
     // Check server
-    fetch("/api/tutorial/progress", { credentials: "include" })
+    apiFetch("/api/tutorial/progress", { credentials: "include" })
       .then(r => r.ok ? r.json() : null)
       .then(d => {
         if (!d || !d.exists || !d.completed) {

@@ -1,20 +1,15 @@
 import { Router, type IRouter } from "express";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { sql as sqlTag } from "drizzle-orm";
 import { db, accountsTable, studentsTable } from "@workspace/db";
-import type { Request, Response, NextFunction } from "express";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-function requireAdmin(req: Request, res: Response, next: NextFunction): void {
-  const session = req.session as any;
-  if (!session.accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
-  if (session.role !== "admin") { res.status(403).json({ message: "Admin access required" }); return; }
-  next();
-}
+const adminOnly = [authenticate, requireRole("admin")];
 
 // GET /api/admin/workspaces
-router.get("/admin/workspaces", requireAdmin, async (req, res): Promise<void> => {
+router.get("/admin/workspaces", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
   const rows = await db.select({
     id: accountsTable.id,
     username: accountsTable.username,
@@ -26,7 +21,6 @@ router.get("/admin/workspaces", requireAdmin, async (req, res): Promise<void> =>
     .where(eq(accountsTable.role, "teacher"))
     .orderBy(accountsTable.displayName);
 
-  // Add student counts
   const counts = await db.select({
     teacherAccountId: studentsTable.teacherAccountId,
     count: sqlTag<number>`count(*)::int`,
@@ -40,7 +34,7 @@ router.get("/admin/workspaces", requireAdmin, async (req, res): Promise<void> =>
 });
 
 // PATCH /api/admin/workspaces/:id/mode
-router.patch("/admin/workspaces/:id/mode", requireAdmin, async (req, res): Promise<void> => {
+router.patch("/admin/workspaces/:id/mode", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
   const { mode } = req.body;
 

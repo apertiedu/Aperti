@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar, Clock, BookOpen, Zap, Target, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 async function fetchJSON(url: string) {
   const token = localStorage.getItem("aperti_token");
@@ -39,7 +39,7 @@ export default function Revisit() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold">Revisit<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">Revisit<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Your daily revision path, crafted for you.</p>
       </motion.div>
 

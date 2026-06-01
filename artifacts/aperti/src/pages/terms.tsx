@@ -65,7 +65,7 @@ export default function Terms() {
           <h2 className="text-xl font-semibold mb-3">6. Subscription and Billing</h2>
           <p className="text-muted-foreground leading-relaxed">
             Access to premium features requires an active subscription. Fees are billed per student
-            per month as shown on the pricing page. FlexSeats™ are charged at the rate specified in
+            per month as shown on the pricing page. FlexSeats are charged at the rate specified in
             your active plan. We reserve the right to modify pricing with 30 days' prior notice. No
             refunds are issued for partial months unless required by applicable law.
           </p>

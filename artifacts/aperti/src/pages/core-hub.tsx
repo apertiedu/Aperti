@@ -31,7 +31,7 @@ import { useAuth } from "@/context/auth";
 import { useQuery } from "@tanstack/react-query";
 
 // ---------- API helpers ----------
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 async function fetchJSON(url: string) {
   const token = localStorage.getItem("aperti_token");
@@ -234,7 +234,7 @@ export default function CoreHub() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Sparkles className="h-5 w-5 text-primary" />
-                    SubPilot™
+                    SubPilot
                   </CardTitle>
                   {isAdmin && (
                     <Link href="/admin/subpilot-settings">
@@ -258,7 +258,7 @@ export default function CoreHub() {
                     <Progress value={(currentStudents / plan.studentLimit) * 100} className="h-2" />
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>
-                        FlexSeats™ available at <strong>{plan.flexSeatPriceEgp} EGP</strong> each
+                        FlexSeats available at <strong>{plan.flexSeatPriceEgp} EGP</strong> each
                       </span>
                     </div>
                   </>
@@ -280,7 +280,7 @@ export default function CoreHub() {
               <CardHeader className="pb-2">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Award className="h-5 w-5 text-primary" />
-                  Kudos Engine™
+                  Kudos Engine
                 </CardTitle>
                 <CardDescription>Top performers this week</CardDescription>
               </CardHeader>

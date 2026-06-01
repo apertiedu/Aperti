@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { LifeBuoy, Plus, Clock, CheckCircle } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
@@ -48,7 +48,7 @@ export default function HelpDesk() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <LifeBuoy className="h-7 w-7 text-primary" /> HelpDesk<span className="text-primary">™</span>
+            <LifeBuoy className="h-7 w-7 text-primary" /> HelpDesk<span className="text-primary"></span>
           </h1>
           <p className="text-muted-foreground">Get help directly from the admin team.</p>
         </div>

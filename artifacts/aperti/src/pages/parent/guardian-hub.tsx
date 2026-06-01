@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users, CheckCircle, BookOpen, TrendingUp } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 export default function GuardianHub() {
   // For demo: hardcoded children; in production, fetch from guardian_links table
@@ -18,7 +18,7 @@ export default function GuardianHub() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold">GuardianHub<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">GuardianHub<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Your children's learning, at a glance.</p>
       </motion.div>
 

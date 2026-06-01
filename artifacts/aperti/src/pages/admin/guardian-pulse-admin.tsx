@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useMutation } from "@tanstack/react-query";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 export default function GuardianPulseAdmin() {
   const [result, setResult] = useState("");

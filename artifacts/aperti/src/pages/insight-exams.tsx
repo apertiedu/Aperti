@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Clock, Eye, Trash2, FileText } from "lucide-react";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
@@ -58,7 +58,7 @@ export default function InsightExams() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Insight Exams<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">Insight Exams<span className="text-primary"></span></h1>
           <p className="text-muted-foreground">Create assessments. Track performance.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

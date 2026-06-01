@@ -1,12 +1,12 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
 import { requireStudentAccess } from "../middleware/tenant";
+import { AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-router.get("/portal/goals", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+router.get("/portal/goals", requireStudentAccess as any, async (req: AuthRequest, res): Promise<void> => {
+  const studentId: number = (req as any).studentId;
 
   const { rows: goals } = await pool.query(`
     SELECT g.*, s.name AS subject_name FROM student_goals g
@@ -49,9 +49,8 @@ router.get("/portal/goals", requireStudentAccess, async (req, res): Promise<void
   res.json(enriched);
 });
 
-router.post("/portal/goals", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+router.post("/portal/goals", requireStudentAccess as any, async (req: AuthRequest, res): Promise<void> => {
+  const studentId: number = (req as any).studentId;
   const { goalType, targetValue, subjectId, deadline, notes } = req.body;
   if (!goalType || targetValue === undefined) { res.status(400).json({ message: "goalType and targetValue required" }); return; }
   const { rows } = await pool.query(
@@ -62,10 +61,9 @@ router.post("/portal/goals", requireStudentAccess, async (req, res): Promise<voi
   res.status(201).json(rows[0]);
 });
 
-router.patch("/portal/goals/:id", requireStudentAccess, async (req, res): Promise<void> => {
+router.patch("/portal/goals/:id", requireStudentAccess as any, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+  const studentId: number = (req as any).studentId;
   const { targetValue, deadline, notes, isActive } = req.body;
   const sets: string[] = []; const params: unknown[] = []; let i = 1;
   if (targetValue !== undefined) { sets.push(`target_value=$${i++}`); params.push(targetValue); }
@@ -81,10 +79,9 @@ router.patch("/portal/goals/:id", requireStudentAccess, async (req, res): Promis
   res.json(rows[0]);
 });
 
-router.delete("/portal/goals/:id", requireStudentAccess, async (req, res): Promise<void> => {
+router.delete("/portal/goals/:id", requireStudentAccess as any, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+  const studentId: number = (req as any).studentId;
   await pool.query(`DELETE FROM student_goals WHERE id=$1 AND student_id=$2`, [id, studentId]);
   res.json({ message: "Goal deleted" });
 });

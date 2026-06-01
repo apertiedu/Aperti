@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Send, Sparkles, BookOpen, Lightbulb, RefreshCw } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 interface Message {
   id: string;
@@ -89,7 +89,7 @@ export default function TheMentor() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition flex flex-col">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
-        <h1 className="text-3xl font-bold">The Mentor<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">The Mentor<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Your personal, adaptive tutor.</p>
       </motion.div>
 

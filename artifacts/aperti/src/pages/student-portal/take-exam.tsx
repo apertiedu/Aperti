@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Timer, AlertTriangle, Flag, ArrowLeft, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 export default function TakeExam() {

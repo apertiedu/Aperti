@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useCallback, useEffect } from "react";
 import QRCode from "qrcode";
 import JSZip from "jszip";
@@ -165,19 +166,19 @@ export default function Students() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { const r = await fetch("/api/students", { credentials: "include" }); if (r.ok) setStudents(await r.json()); }
+    try { const r = await apiFetch("/api/students", { credentials: "include" }); if (r.ok) setStudents(await r.json()); }
     finally { setLoading(false); }
   }, []);
 
   useEffect(() => {
     load();
-    fetch("/api/sessions", { credentials: "include" }).then(r => r.ok ? r.json() : []).then(setSessions);
+    apiFetch("/api/sessions", { credentials: "include" }).then(r => r.ok ? r.json() : []).then(setSessions);
   }, []);
 
   const handleAdd = async (data: typeof blankStudent) => {
     setAddSaving(true);
     try {
-      const res = await fetch("/api/students", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      const res = await apiFetch("/api/students", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.message || "Failed");
       await load(); setIsAddOpen(false); toast({ title: "Student added" });
@@ -189,7 +190,7 @@ export default function Students() {
     if (!editingStudent) return;
     setEditSaving(true);
     try {
-      const res = await fetch(`/api/students/${editingStudent.id}`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      const res = await apiFetch(`/api/students/${editingStudent.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Update failed"); }
       await load(); toast({ title: "Student updated" }); setEditingStudent(null);
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
@@ -200,7 +201,7 @@ export default function Students() {
     if (!confirm("Delete this student?")) return;
     setDeletingId(id);
     try {
-      await fetch(`/api/students/${id}`, { method: "DELETE", credentials: "include" });
+      await apiFetch(`/api/students/${id}`, { method: "DELETE" });
       await load(); toast({ title: "Student removed" });
     } catch { toast({ title: "Error deleting student", variant: "destructive" }); }
     finally { setDeletingId(null); }
@@ -212,7 +213,7 @@ export default function Students() {
     if (parsed.length === 0) { toast({ title: "No valid rows", variant: "destructive" }); return; }
     setBulkSaving(true);
     try {
-      const res = await fetch("/api/students/bulk", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ students: parsed }) });
+      const res = await apiFetch("/api/students/bulk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ students: parsed }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.message || "Failed");
       await load(); setIsBulkOpen(false); setBulkData("");
@@ -225,7 +226,7 @@ export default function Students() {
     if (!createAccountStudent || !createAccountPassword) return;
     setCreateAccountSaving(true);
     try {
-      const res = await fetch(`/api/students/${createAccountStudent.id}/create-account`, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: createAccountPassword }) });
+      const res = await apiFetch(`/api/students/${createAccountStudent.id}/create-account`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: createAccountPassword }) });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { toast({ title: "Error", description: data.message || "Failed", variant: "destructive" }); return; }
       toast({ title: "Login created!", description: `Username: ${data.username}` });

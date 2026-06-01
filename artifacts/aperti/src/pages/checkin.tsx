@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { QrCode, Users, CheckCircle, XCircle, Clock } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
@@ -66,7 +66,7 @@ export default function CheckIn() {
         className="mb-8"
       >
         <h1 className="text-3xl font-bold">
-          CheckIn<span className="text-primary">™</span>
+          CheckIn<span className="text-primary"></span>
         </h1>
         <p className="text-muted-foreground">
           Take attendance in seconds. No paper, no roll call.

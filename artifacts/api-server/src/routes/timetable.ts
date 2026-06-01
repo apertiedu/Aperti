@@ -1,11 +1,11 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
 import { requireTenantAccess, requireStudentAccess } from "../middleware/tenant";
+import { AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-// Teacher / admin — get all sessions with student counts
-router.get("/timetable", requireTenantAccess, async (req, res): Promise<void> => {
+router.get("/timetable", requireTenantAccess as any, async (req: AuthRequest, res): Promise<void> => {
   const { teacherId, isAdmin } = req.tenant;
   const teacherCond = isAdmin ? "" : `WHERE s.teacher_account_id = ${teacherId}`;
   const { rows } = await pool.query(`
@@ -14,7 +14,7 @@ router.get("/timetable", requireTenantAccess, async (req, res): Promise<void> =>
       s.start_time AS "startTime", s.type, s.capacity, s.online_link AS "onlineLink",
       sub.name AS "subjectName",
       COUNT(DISTINCT st.id)::int AS "studentCount"
-    FROM sessions s
+    FROM lessons s
     LEFT JOIN subjects sub ON sub.id = s.subject_id
     LEFT JOIN students st ON (
       st.lesson1_session_id = s.id OR
@@ -34,10 +34,8 @@ router.get("/timetable", requireTenantAccess, async (req, res): Promise<void> =>
   res.json(rows);
 });
 
-// Student portal — their own assigned sessions
-router.get("/portal/timetable", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+router.get("/portal/timetable", requireStudentAccess as any, async (req: AuthRequest, res): Promise<void> => {
+  const studentId: number = (req as any).studentId;
 
   const { rows } = await pool.query(`
     SELECT
@@ -45,7 +43,7 @@ router.get("/portal/timetable", requireStudentAccess, async (req, res): Promise<
       s.start_time AS "startTime", s.type, s.capacity, s.online_link AS "onlineLink",
       sub.name AS "subjectName"
     FROM students st
-    JOIN sessions s ON (
+    JOIN lessons s ON (
       s.id = st.lesson1_session_id OR
       s.id = st.lesson2_session_id OR
       s.id = st.lesson3_session_id

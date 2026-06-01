@@ -7,23 +7,28 @@ import {
   invoicesTable, recordingsTable, questionBankTable,
   pool,
 } from "@workspace/db";
-import type { Request, Response, NextFunction } from "express";
+import type { Response, NextFunction } from "express";
+import { authenticate, AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-function requireStudentAccess(req: Request, res: Response, next: NextFunction): void {
-  const session = req.session as any;
-  if (!session.accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
-  if (session.role !== "student") { res.status(403).json({ message: "Student access required" }); return; }
-  if (!session.studentId) { res.status(403).json({ message: "No student record linked" }); return; }
-  next();
+async function requireStudentAccess(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  authenticate(req, res, async () => {
+    const accountId = req.userId;
+    if (!accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
+    const [student] = await db.select().from(studentsTable).where(eq(studentsTable.accountId, accountId));
+    if (!student) { res.status(403).json({ message: "No student record linked to this account" }); return; }
+    (req as any).studentId = student.id;
+    (req as any).teacherAccountId = student.teacherAccountId;
+    next();
+  });
 }
 
 // Get student profile + stats
 router.get("/portal/me", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
-  const teacherId: number = session.teacherAccountId;
+  
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
 
   const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, studentId));
   if (!student) { res.status(404).json({ message: "Student record not found" }); return; }
@@ -99,8 +104,8 @@ router.get("/portal/me", requireStudentAccess, async (req, res): Promise<void> =
 
 // Student's own attendance history
 router.get("/portal/attendance", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+  
+  const studentId: number = (req as any).studentId;
 
   const since = new Date(); since.setDate(since.getDate() - 365);
   const sinceStr = since.toISOString().split("T")[0];
@@ -132,9 +137,9 @@ router.get("/portal/attendance", requireStudentAccess, async (req, res): Promise
 
 // Homework list for student
 router.get("/portal/homework", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
-  const teacherId: number = session.teacherAccountId;
+  
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
 
   const rows = await db.select({
     id: homeworkTable.id,
@@ -164,8 +169,8 @@ router.get("/portal/homework", requireStudentAccess, async (req, res): Promise<v
 
 // Submit homework
 router.post("/portal/homework/:id/submit", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+  
+  const studentId: number = (req as any).studentId;
   const hwId = parseInt(req.params.id as string, 10);
   const { content, isDraft } = req.body;
 
@@ -192,8 +197,8 @@ router.post("/portal/homework/:id/submit", requireStudentAccess, async (req, res
 
 // Student resources
 router.get("/portal/resources", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const teacherId: number = session.teacherAccountId;
+  
+  const teacherId: number = (req as any).teacherAccountId;
 
   const rows = await db.select({
     id: resourcesTable.id,
@@ -217,9 +222,9 @@ router.get("/portal/resources", requireStudentAccess, async (req, res): Promise<
 
 // Student invoices
 router.get("/portal/invoices", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
-  const teacherId: number = session.teacherAccountId;
+  
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
 
   const rows = await db.select({
     id: invoicesTable.id,
@@ -246,8 +251,8 @@ router.get("/portal/invoices", requireStudentAccess, async (req, res): Promise<v
 
 // Student recordings
 router.get("/portal/recordings", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const teacherId: number = session.teacherAccountId;
+  
+  const teacherId: number = (req as any).teacherAccountId;
 
   const rows = await db.select({
     id: recordingsTable.id,
@@ -277,8 +282,8 @@ router.get("/portal/recordings", requireStudentAccess, async (req, res): Promise
 
 // Student exam results
 router.get("/portal/exams", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+  
+  const studentId: number = (req as any).studentId;
 
   const marks = await db.select({
     examId: studentMarksTable.examId,
@@ -310,9 +315,9 @@ router.get("/portal/exams", requireStudentAccess, async (req, res): Promise<void
 // ── PORTAL: FLASHCARDS (student spaced repetition) ───────────────────────────
 
 router.get("/portal/flashcards/stats", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
-  const teacherId: number = session.teacherAccountId;
+  
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
   try {
     const { rows } = await pool.query(`
       SELECT
@@ -332,8 +337,8 @@ router.get("/portal/flashcards/stats", requireStudentAccess, async (req, res): P
 });
 
 router.get("/portal/flashcards/decks", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const teacherId: number = session.teacherAccountId;
+  
+  const teacherId: number = (req as any).teacherAccountId;
   try {
     const { rows } = await pool.query(`
       SELECT deck_name, COUNT(*)::int AS card_count
@@ -347,9 +352,9 @@ router.get("/portal/flashcards/decks", requireStudentAccess, async (req, res): P
 });
 
 router.get("/portal/flashcards/review", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
-  const teacherId: number = session.teacherAccountId;
+  
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
   const { deck } = req.query as Record<string, string>;
   const deckCond = deck ? `AND f.deck_name = $3` : "";
   const params: unknown[] = [studentId, teacherId];
@@ -373,8 +378,8 @@ router.get("/portal/flashcards/review", requireStudentAccess, async (req, res): 
 });
 
 router.post("/portal/flashcards/:id/review", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const studentId: number = session.studentId;
+  
+  const studentId: number = (req as any).studentId;
   const flashcardId = parseInt(req.params.id as string, 10);
   const { quality } = req.body as { quality: number };
   if (quality === undefined || quality < 0 || quality > 5) { res.status(400).json({ message: "quality 0-5 required" }); return; }
@@ -406,8 +411,8 @@ router.post("/portal/flashcards/:id/review", requireStudentAccess, async (req, r
 // ── PORTAL: PRACTICE QUESTIONS (question bank filtered by teacher) ────────────
 
 router.get("/portal/practice-questions", requireStudentAccess, async (req, res): Promise<void> => {
-  const session = req.session as any;
-  const teacherId: number = session.teacherAccountId;
+  
+  const teacherId: number = (req as any).teacherAccountId;
   const { topic, difficulty } = req.query as Record<string, string>;
 
   const conditions: ReturnType<typeof eq>[] = [eq(questionBankTable.teacherAccountId, teacherId)];

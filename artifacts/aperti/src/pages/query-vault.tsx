@@ -19,7 +19,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, Pencil, Trash2, Filter } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
@@ -63,7 +63,7 @@ export default function QueryVault() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">QueryVault<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">QueryVault<span className="text-primary"></span></h1>
           <p className="text-muted-foreground">Your private question bank.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

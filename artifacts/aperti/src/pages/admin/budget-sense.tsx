@@ -31,7 +31,7 @@ export default function BudgetSense() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Calculator className="h-7 w-7 text-primary" /> BudgetSense<span className="text-primary">™</span>
+          <Calculator className="h-7 w-7 text-primary" /> BudgetSense<span className="text-primary"></span>
         </h1>
         <p className="text-muted-foreground">Understand exactly where your money can go.</p>
       </motion.div>

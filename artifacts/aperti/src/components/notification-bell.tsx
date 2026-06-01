@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect, useRef } from "react";
 import { Bell, Check, CheckCheck, Trash2, AlertTriangle, Info, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -35,8 +36,8 @@ export default function NotificationBell() {
   const fetchNotifications = async () => {
     try {
       const [notifRes, countRes] = await Promise.all([
-        fetch("/api/notifications", { credentials: "include" }),
-        fetch("/api/notifications/unread-count", { credentials: "include" }),
+        apiFetch("/api/notifications", { credentials: "include" }),
+        apiFetch("/api/notifications/unread-count", { credentials: "include" }),
       ]);
       if (notifRes.ok) setNotifications(await notifRes.json());
       if (countRes.ok) { const d = await countRes.json(); setUnreadCount(d.count); }
@@ -58,19 +59,19 @@ export default function NotificationBell() {
   }, []);
 
   const markAllRead = async () => {
-    await fetch("/api/notifications/read-all", { method: "POST", credentials: "include" });
+    await apiFetch("/api/notifications/read-all", { method: "POST" });
     setUnreadCount(0);
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   };
 
   const markRead = async (id: number) => {
-    await fetch(`/api/notifications/${id}/read`, { method: "PATCH", credentials: "include" });
+    await apiFetch(`/api/notifications/${id}/read`, { method: "PATCH" });
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
     setUnreadCount(prev => Math.max(0, prev - 1));
   };
 
   const deleteNotif = async (id: number) => {
-    await fetch(`/api/notifications/${id}`, { method: "DELETE", credentials: "include" });
+    await apiFetch(`/api/notifications/${id}`, { method: "DELETE" });
     const notif = notifications.find(n => n.id === id);
     if (notif && !notif.isRead) setUnreadCount(prev => Math.max(0, prev - 1));
     setNotifications(prev => prev.filter(n => n.id !== id));

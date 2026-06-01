@@ -2,3 +2,4 @@
 - [Wouter Route component props](wouter-route-props.md) — components passed as `component={}` to wouter Route must take no custom props; use internal defaults or URL params
 - [Three.js OrbitControls types](three-orbitcontrols.md) — `three/examples/jsm/controls/OrbitControls` not resolved by @types/three; suppress with `// @ts-ignore`
 - [Redis stub pattern](redis-stub.md) — api-server has in-memory Redis stub at `artifacts/api-server/src/lib/redis.ts` for Replit compatibility
+- [Aperti JWT auth system](aperti-jwt-auth.md) — JWT_SECRET must match across auth.ts and middleware/auth.ts; db.query needs schema aliases; sessionsTable=lessonsTable (raw SQL must use "lessons"); apiFetch at @/lib/api adds Bearer token for all frontend pages

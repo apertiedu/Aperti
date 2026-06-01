@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Sparkles, Plus, History, CreditCard } from "lucide-react";
 import { useAuth } from "@/context/auth";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
@@ -78,7 +78,7 @@ export default function SubPilot() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold">SubPilot<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">SubPilot<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Your subscription & billing command center.</p>
       </motion.div>
 
@@ -86,7 +86,7 @@ export default function SubPilot() {
         <TabsList>
           <TabsTrigger value="current">Current Plan</TabsTrigger>
           <TabsTrigger value="plans">Upgrade / New Plan</TabsTrigger>
-          <TabsTrigger value="flex">FlexSeats™</TabsTrigger>
+          <TabsTrigger value="flex">FlexSeats</TabsTrigger>
         </TabsList>
 
         {/* Current Plan */}
@@ -102,7 +102,7 @@ export default function SubPilot() {
               <CardContent className="space-y-2">
                 <div className="flex justify-between"><span>Price</span><span className="font-medium">{activePlan?.priceEgp} EGP / student / month</span></div>
                 <div className="flex justify-between"><span>Status</span><Badge>{activeSub.status}</Badge></div>
-                <div className="flex justify-between"><span>FlexSeats™ used</span><span>{mySub?.flexSeats?.length || 0}</span></div>
+                <div className="flex justify-between"><span>FlexSeats used</span><span>{mySub?.flexSeats?.length || 0}</span></div>
               </CardContent>
             </Card>
           ) : (
@@ -157,7 +157,7 @@ export default function SubPilot() {
         <TabsContent value="flex">
           <Card className="card-hover max-w-md">
             <CardHeader>
-              <CardTitle>FlexSeats™</CardTitle>
+              <CardTitle>FlexSeats</CardTitle>
               <CardDescription>Add extra students without upgrading your plan. {activePlan?.flexSeatPriceEgp} EGP each.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
@@ -66,13 +67,13 @@ export default function ResourcesPage() {
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState("");
 
-  const load = async () => { setLoading(true); const [r, s] = await Promise.all([fetch(`/api/resources${filterType ? `?type=${filterType}` : ""}`, { credentials: "include" }), fetch("/api/subjects", { credentials: "include" })]); if (r.ok) setResources(await r.json()); if (s.ok) setSubjects(await s.json()); setLoading(false); };
+  const load = async () => { setLoading(true); const [r, s] = await Promise.all([apiFetch(`/api/resources${filterType ? `?type=${filterType}` : ""}`, { credentials: "include" }), apiFetch("/api/subjects", { credentials: "include" })]); if (r.ok) setResources(await r.json()); if (s.ok) setSubjects(await s.json()); setLoading(false); };
   useEffect(() => { load(); }, [filterType]);
 
-  const handleCreate = async (d: any) => { const r = await fetch("/api/resources", { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) }); if (!r.ok) throw new Error("Failed"); toast({ title: "Resource added" }); load(); };
-  const handleEdit = async (id: number, d: any) => { await fetch(`/api/resources/${id}`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) }); toast({ title: "Updated" }); load(); };
-  const handleDelete = async (id: number) => { if (!confirm("Delete?")) return; await fetch(`/api/resources/${id}`, { method: "DELETE", credentials: "include" }); toast({ title: "Deleted" }); load(); };
-  const toggleVisibility = async (r: Resource) => { await fetch(`/api/resources/${r.id}`, { method: "PATCH", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isStudentVisible: !r.isStudentVisible }) }); load(); };
+  const handleCreate = async (d: any) => { const r = await apiFetch("/api/resources", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) }); if (!r.ok) throw new Error("Failed"); toast({ title: "Resource added" }); load(); };
+  const handleEdit = async (id: number, d: any) => { await apiFetch(`/api/resources/${id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d) }); toast({ title: "Updated" }); load(); };
+  const handleDelete = async (id: number) => { if (!confirm("Delete?")) return; await apiFetch(`/api/resources/${id}`, { method: "DELETE" }); toast({ title: "Deleted" }); load(); };
+  const toggleVisibility = async (r: Resource) => { await apiFetch(`/api/resources/${r.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ isStudentVisible: !r.isStudentVisible }) }); load(); };
 
   const stats = { total: resources.length, visible: resources.filter(r => r.isStudentVisible).length, views: resources.reduce((s, r) => s + r.viewCount, 0) };
 

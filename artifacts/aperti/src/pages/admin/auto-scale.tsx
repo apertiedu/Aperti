@@ -36,7 +36,7 @@ export default function AutoScale() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold flex items-center gap-2"><Activity className="h-7 w-7 text-primary" /> AutoScale<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold flex items-center gap-2"><Activity className="h-7 w-7 text-primary" /> AutoScale<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Monitor and scale your infrastructure intelligently.</p>
       </motion.div>
 

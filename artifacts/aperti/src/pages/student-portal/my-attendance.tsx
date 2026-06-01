@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CheckSquare, TrendingDown, TrendingUp, Minus } from "lucide-react";
@@ -11,7 +12,7 @@ export default function MyAttendance() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/portal/attendance", { credentials: "include" })
+    apiFetch("/api/portal/attendance", { credentials: "include" })
       .then(r => r.ok ? r.json() : null)
       .then(setData)
       .finally(() => setLoading(false));

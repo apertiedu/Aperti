@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth";
@@ -65,8 +66,8 @@ export default function Exams() {
     setLoading(true);
     try {
       const [examsRes, subjectsRes] = await Promise.all([
-        fetch("/api/exams", { credentials: "include" }),
-        fetch("/api/subjects", { credentials: "include" }),
+        apiFetch("/api/exams", { credentials: "include" }),
+        apiFetch("/api/subjects", { credentials: "include" }),
       ]);
       if (examsRes.ok) setExams(await examsRes.json());
       if (subjectsRes.ok) setSubjects(await subjectsRes.json());
@@ -76,7 +77,7 @@ export default function Exams() {
   const loadDetail = async (examId: number) => {
     setDetailLoading(true);
     try {
-      const res = await fetch(`/api/exams/${examId}`, { credentials: "include" });
+      const res = await apiFetch(`/api/exams/${examId}`, { credentials: "include" });
       if (res.ok) {
         const data = await res.json();
         setExamDetail(data);
@@ -98,8 +99,8 @@ export default function Exams() {
     e.preventDefault();
     setSavingExam(true);
     try {
-      const res = await fetch("/api/exams", {
-        method: "POST", credentials: "include",
+      const res = await apiFetch("/api/exams", {
+        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...examForm,
@@ -137,8 +138,8 @@ export default function Exams() {
         body.options = qForm.options.filter(o => o.trim());
         body.correctOption = qForm.correctOption;
       }
-      const res = await fetch(`/api/exams/${selectedExam.id}/questions`, {
-        method: "POST", credentials: "include",
+      const res = await apiFetch(`/api/exams/${selectedExam.id}/questions`, {
+        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
@@ -153,7 +154,7 @@ export default function Exams() {
 
   const handleDeleteQuestion = async (qId: number) => {
     if (!confirm("Delete this question? All marks for it will be lost.")) return;
-    await fetch(`/api/exam-questions/${qId}`, { method: "DELETE", credentials: "include" });
+    await apiFetch(`/api/exam-questions/${qId}`, { method: "DELETE" });
     toast({ title: "Question deleted" });
     if (selectedExam) loadDetail(selectedExam.id);
   };
@@ -176,8 +177,8 @@ export default function Exams() {
           }
         }
       }
-      const res = await fetch(`/api/exams/${selectedExam.id}/marks`, {
-        method: "POST", credentials: "include",
+      const res = await apiFetch(`/api/exams/${selectedExam.id}/marks`, {
+        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ marks }),
       });
@@ -189,13 +190,13 @@ export default function Exams() {
 
   const handleLoadResults = async () => {
     if (!selectedExam) return;
-    const res = await fetch(`/api/exams/${selectedExam.id}/results`, { credentials: "include" });
+    const res = await apiFetch(`/api/exams/${selectedExam.id}/results`, { credentials: "include" });
     if (res.ok) { setResults(await res.json()); setShowResults(true); }
   };
 
   const handleDeleteExam = async (id: number) => {
     if (!confirm("Delete this exam and all its data?")) return;
-    await fetch(`/api/exams/${id}`, { method: "DELETE", credentials: "include" });
+    await apiFetch(`/api/exams/${id}`, { method: "DELETE" });
     toast({ title: "Exam deleted" });
     if (selectedExam?.id === id) setSelectedExam(null);
     load();

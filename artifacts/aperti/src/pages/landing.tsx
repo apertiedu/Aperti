@@ -5,11 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  ArrowRight, Zap, Shield, BookOpen, Users, CheckCircle2, Sparkles,
+  ArrowRight, Shield, BookOpen, Users, CheckCircle2, Sparkles,
   Menu, X, Brain, BarChart3, Video, ClipboardCheck, GraduationCap,
-  FileText, Star, ChevronRight,
+  FileText,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -284,16 +283,18 @@ function PricingCard({
             </li>
           ))}
         </ul>
-        <Button
-          className="w-full rounded-xl font-medium"
-          style={
-            popular
-              ? { background: TEAL, color: "white" }
-              : { background: "#F1F5F9", color: "#334155" }
-          }
-        >
-          Get started
-        </Button>
+        <a href="#early-access" className="block">
+          <Button
+            className="w-full rounded-xl font-medium"
+            style={
+              popular
+                ? { background: TEAL, color: "white" }
+                : { background: "#F1F5F9", color: "#334155" }
+            }
+          >
+            Get started
+          </Button>
+        </a>
       </motion.div>
     </Reveal>
   );
@@ -450,47 +451,47 @@ export default function Landing() {
   const features = [
     {
       icon: <ClipboardCheck className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "CheckIn™",
+      title: "CheckIn",
       desc: "QR-based attendance with anti-fraud scanning, auto-generated logs, and instant reports.",
     },
     {
       icon: <BookOpen className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "PlanGrid™",
+      title: "PlanGrid",
       desc: "Smart scheduling for online, in-person, and hybrid classes — all in one timetable.",
     },
     {
       icon: <Video className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "LiveClass™",
+      title: "LiveClass",
       desc: "High-quality virtual classrooms with host controls, recording, and TwinControl pairing.",
     },
     {
       icon: <Shield className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "ShieldCore™",
+      title: "ShieldCore",
       desc: "Behavioural proctoring and anti-cheat built directly into your exam flow.",
     },
     {
       icon: <Brain className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "The Mentor™",
+      title: "The Mentor",
       desc: "An AI tutor that adapts to each student's weak areas, preferred style, and pace.",
     },
     {
       icon: <BarChart3 className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "InsightStream™",
+      title: "InsightStream",
       desc: "Real-time analytics on attendance, grades, engagement, and student risk levels.",
     },
     {
       icon: <Users className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "SubmitFlow™",
+      title: "SubmitFlow",
       desc: "Homework submission with auto-grading, handwriting OCR, and instant feedback.",
     },
     {
       icon: <FileText className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "PaperVault™",
+      title: "PaperVault",
       desc: "A free public library of past papers, mark schemes, and revision resources.",
     },
     {
       icon: <GraduationCap className="h-5 w-5" style={{ color: TEAL }} />,
-      title: "Ascend™",
+      title: "Ascend",
       desc: "XP, levels, quests, and leaderboards that make learning feel like an adventure.",
     },
   ];
@@ -500,9 +501,9 @@ export default function Landing() {
       name: "Starter",
       price: "50",
       features: [
-        "CheckIn™ attendance",
-        "PlanGrid™ timetable",
-        "SubmitFlow™ homework",
+        "CheckIn attendance",
+        "PlanGrid timetable",
+        "SubmitFlow homework",
         "10 GB secure storage",
         "Up to 50 students",
       ],
@@ -513,10 +514,10 @@ export default function Landing() {
       popular: true,
       features: [
         "Everything in Starter",
-        "GradeFlow™ + SchemeCraft™",
-        "LiveClass™ (up to 50 participants)",
-        "InkSpace™ digital whiteboard",
-        "The Mentor™ AI tutor",
+        "GradeFlow + SchemeCraft",
+        "LiveClass (up to 50 participants)",
+        "InkSpace digital whiteboard",
+        "The Mentor AI tutor",
         "50 GB storage",
       ],
     },
@@ -525,9 +526,9 @@ export default function Landing() {
       price: "150",
       features: [
         "Everything in Professional",
-        "LiveClass™ (up to 200 participants)",
-        "TeamForge™ group projects",
-        "ShieldCore™ proctoring",
+        "LiveClass (up to 200 participants)",
+        "TeamForge group projects",
+        "ShieldCore proctoring",
         "Priority support",
         "100 GB storage",
       ],
@@ -546,23 +547,6 @@ export default function Landing() {
     },
   ];
 
-  const testimonials = [
-    {
-      name: "Ms. Johnson",
-      role: "A-Level Mathematics, 127 students",
-      text: "I used to juggle three different apps just to run a single lesson. Aperti replaced all of them — and my students actually enjoy logging in.",
-    },
-    {
-      name: "Mr. Williams",
-      role: "IGCSE Physics & Chemistry, 84 students",
-      text: "The AI mentor caught students who were struggling before I even noticed. The risk engine is genuinely impressive.",
-    },
-    {
-      name: "Alex Rivera",
-      role: "Centre Director, 340 students",
-      text: "FlexSeats™ let us scale from 80 to 340 students mid-year without a single admin headache. The billing just worked.",
-    },
-  ];
 
   return (
     <div className="min-h-screen text-slate-900" style={{ background: "#F5F5F5", fontFamily: "Inter, sans-serif" }}>
@@ -577,7 +561,7 @@ export default function Landing() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <a href="/" className="flex items-center gap-1 text-xl font-extrabold tracking-tight text-slate-900">
-            Aperti<span style={{ color: TEAL }}>™</span>
+            Aperti<span style={{ color: TEAL }}></span>
           </a>
 
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600">
@@ -826,48 +810,6 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-20 px-4" style={{ background: "white" }}>
-        <div className="max-w-6xl mx-auto">
-          <Reveal>
-            <div className="text-center mb-14">
-              <Badge
-                className="mb-4 rounded-full px-3 py-1 text-xs font-semibold border-0"
-                style={{ background: "#E6F4F1", color: TEAL }}
-              >
-                Early Feedback
-              </Badge>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900">
-                Teachers love the difference.
-              </h2>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <Reveal key={t.name} delay={i * 0.1}>
-                <motion.div
-                  whileHover={{ y: -4 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  className="rounded-2xl border border-slate-200 bg-white p-7"
-                >
-                  <div className="flex mb-3">
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <Star key={j} className="h-4 w-4 fill-current" style={{ color: TEAL }} />
-                    ))}
-                  </div>
-                  <p className="text-slate-700 text-sm leading-relaxed mb-5">"{t.text}"</p>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{t.name}</p>
-                    <p className="text-xs text-slate-400">{t.role}</p>
-                  </div>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── PRICING ── */}
       <section id="pricing" className="py-20 px-4" style={{ background: "#F5F5F5" }}>
         <div className="max-w-7xl mx-auto">
@@ -883,7 +825,7 @@ export default function Landing() {
                 Teacher plans that scale with you.
               </h2>
               <p className="text-slate-500 max-w-lg mx-auto">
-                Pay per student, per month. Scale up or down with FlexSeats™ at any time.
+                Pay per student, per month. Scale up or down with FlexSeats at any time.
                 Volume discounts available for large centres.
               </p>
             </div>
@@ -897,7 +839,7 @@ export default function Landing() {
 
           <Reveal>
             <p className="text-center text-sm text-slate-400 mt-8">
-              Student independent plans available separately. InstaPay accepted. FlexSeats™ lets you
+              Student independent plans available separately. InstaPay accepted. FlexSeats lets you
               add or remove seats mid-cycle with pro-rated billing.{" "}
               <a href="#early-access" className="underline underline-offset-2" style={{ color: TEAL }}>
                 Talk to us for custom pricing.
@@ -937,7 +879,7 @@ export default function Landing() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
             <div>
               <p className="text-base font-extrabold text-slate-900">
-                Aperti<span style={{ color: TEAL }}>™</span>
+                Aperti<span style={{ color: TEAL }}></span>
               </p>
               <p className="text-xs text-slate-400 mt-0.5">Where every mind finds its rhythm.</p>
             </div>
@@ -954,7 +896,7 @@ export default function Landing() {
           </div>
 
           <div className="mt-8 pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-400">
-            <span>© {new Date().getFullYear()} Aperti™. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} Aperti. All rights reserved.</span>
             <span>Built for teachers who refuse to compromise.</span>
           </div>
         </div>

@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, TrendingUp } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 export default function ErrorTrace() {
@@ -27,7 +27,7 @@ export default function ErrorTrace() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <TrendingUp className="h-7 w-7 text-primary" /> ErrorTrace<span className="text-primary">™</span>
+          <TrendingUp className="h-7 w-7 text-primary" /> ErrorTrace<span className="text-primary"></span>
         </h1>
         <p className="text-muted-foreground">Your mistake personality decoded.</p>
       </motion.div>

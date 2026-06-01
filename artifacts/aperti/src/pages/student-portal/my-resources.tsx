@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { FolderOpen, Link2, FileText, Video, Mic, BookOpen, ExternalLink, Tag, Search } from "lucide-react";
@@ -25,14 +26,14 @@ export default function MyResources() {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/api/portal/resources", { credentials: "include" })
+    apiFetch("/api/portal/resources", { credentials: "include" })
       .then(r => r.ok ? r.json() : [])
       .then(setResources)
       .finally(() => setLoading(false));
   }, []);
 
   const handleOpen = async (resource: Resource) => {
-    await fetch(`/api/resources/${resource.id}/view`, { method: "POST", credentials: "include" });
+    await apiFetch(`/api/resources/${resource.id}/view`, { method: "POST" });
     if (resource.url) window.open(resource.url, "_blank");
     else setExpandedId(expandedId === resource.id ? null : resource.id);
   };

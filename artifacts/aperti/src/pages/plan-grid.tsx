@@ -23,7 +23,7 @@ import {
   Plus, Pencil, Trash2, Calendar as CalendarIcon, Clock, MapPin, Monitor, Users,
 } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
@@ -78,7 +78,7 @@ export default function PlanGrid() {
       >
         <div>
           <h1 className="text-3xl font-bold">
-            PlanGrid<span className="text-primary">™</span>
+            PlanGrid<span className="text-primary"></span>
           </h1>
           <p className="text-muted-foreground">Your intelligent timetable.</p>
         </div>

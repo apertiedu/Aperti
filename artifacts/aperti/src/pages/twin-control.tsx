@@ -8,7 +8,7 @@ import { QrCode, MicOff, Hand, Users, Play, Pause, Monitor, MessageCircle, BarCh
 import { Room, RoomEvent, RemoteParticipant } from "livekit-client";
 
 const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL || "ws://localhost:7880";
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 export default function TwinControl() {
   const [pairCode, setPairCode] = useState("");
@@ -58,7 +58,7 @@ export default function TwinControl() {
   return (
     <div className="min-h-screen bg-background p-4 page-transition">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-md mx-auto">
-        <h1 className="text-2xl font-bold mb-2">TwinControl<span className="text-primary">™</span></h1>
+        <h1 className="text-2xl font-bold mb-2">TwinControl<span className="text-primary"></span></h1>
         <p className="text-muted-foreground mb-4">Your pocket command center.</p>
 
         {!controlToken ? (

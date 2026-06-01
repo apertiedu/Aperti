@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,8 +45,8 @@ export default function AchievementsPage() {
   const load = async () => {
     setLoading(true);
     const [achRes, lbRes] = await Promise.all([
-      fetch("/api/portal/achievements", { credentials: "include" }),
-      fetch("/api/portal/leaderboard", { credentials: "include" }),
+      apiFetch("/api/portal/achievements", { credentials: "include" }),
+      apiFetch("/api/portal/leaderboard", { credentials: "include" }),
     ]);
     if (achRes.ok) setData(await achRes.json());
     if (lbRes.ok) {
@@ -60,7 +61,7 @@ export default function AchievementsPage() {
 
   const checkAchievements = async () => {
     setChecking(true);
-    const res = await fetch("/api/portal/achievements/check", { method: "POST", credentials: "include" });
+    const res = await apiFetch("/api/portal/achievements/check", { method: "POST" });
     if (res.ok) {
       const { newlyEarned } = await res.json();
       if (newlyEarned.length > 0) {

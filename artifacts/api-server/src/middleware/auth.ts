@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret";
+const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret-change-in-prod";
 
 export interface AuthRequest extends Request {
   userId?: number;

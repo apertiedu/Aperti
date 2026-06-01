@@ -14,7 +14,7 @@ export default function SkillBadge() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold">SkillBadge<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">SkillBadge<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Your earned credentials.</p>
       </motion.div>
 

@@ -59,11 +59,7 @@ app.use(
   })
 );
 
-app.use("/api", (req: Request, res: Response, next: NextFunction): void => {
-  if (req.path.startsWith("/auth/") || req.path.startsWith("/public/")) { next(); return; }
-  if (!(req.session as any).accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
-  next();
-});
+// Auth is enforced per-route via JWT middleware (authenticate) — no global session guard needed.
 
 app.use("/api", router);
 

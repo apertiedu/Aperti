@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Lightbulb, AlertTriangle } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 export default function MarkerMind() {
@@ -23,7 +23,7 @@ export default function MarkerMind() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <h1 className="text-3xl font-bold flex items-center gap-2">
-          <Lightbulb className="h-7 w-7 text-primary" /> MarkerMind<span className="text-primary">™</span>
+          <Lightbulb className="h-7 w-7 text-primary" /> MarkerMind<span className="text-primary"></span>
         </h1>
         <p className="text-muted-foreground">Examiner tips from past reports.</p>
       </motion.div>

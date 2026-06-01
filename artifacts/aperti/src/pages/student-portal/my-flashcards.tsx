@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -48,12 +49,12 @@ export default function MyFlashcards() {
   const [rating, setRating] = useState(false);
 
   const loadStats = useCallback(async () => {
-    const r = await fetch("/api/portal/flashcards/stats", { credentials: "include" });
+    const r = await apiFetch("/api/portal/flashcards/stats", { credentials: "include" });
     if (r.ok) setStats(await r.json());
   }, []);
 
   const loadDecks = useCallback(async () => {
-    const r = await fetch("/api/portal/flashcards/decks", { credentials: "include" });
+    const r = await apiFetch("/api/portal/flashcards/decks", { credentials: "include" });
     if (r.ok) setDecks(await r.json());
     setLoading(false);
   }, []);
@@ -64,7 +65,7 @@ export default function MyFlashcards() {
     setReviewLoading(true);
     setSelectedDeck(deck ?? null);
     const params = deck ? `?deck=${encodeURIComponent(deck)}` : "";
-    const r = await fetch(`/api/portal/flashcards/review${params}`, { credentials: "include" });
+    const r = await apiFetch(`/api/portal/flashcards/review${params}`, { credentials: "include" });
     if (r.ok) {
       const cards = await r.json();
       if (!cards.length) { setMode("done"); setReviewLoading(false); return; }
@@ -80,8 +81,8 @@ export default function MyFlashcards() {
     if (rating) return;
     setRating(true);
     const card = reviewCards[currentIdx];
-    await fetch(`/api/portal/flashcards/${card.id}/review`, {
-      method: "POST", credentials: "include",
+    await apiFetch(`/api/portal/flashcards/${card.id}/review`, {
+      method: "POST", 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ quality }),
     });

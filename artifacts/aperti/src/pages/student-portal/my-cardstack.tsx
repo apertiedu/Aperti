@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, ArrowRight, Check, X, RefreshCw } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
@@ -66,7 +66,7 @@ export default function MyCardStack() {
   if (!selectedDeckId) {
     return (
       <div className="min-h-screen bg-background p-6 page-transition">
-        <h1 className="text-3xl font-bold mb-8">CardStack<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold mb-8">CardStack<span className="text-primary"></span></h1>
         {decksLoading ? (
           <div className="grid grid-cols-2 gap-4">{[1,2].map(i=><Skeleton key={i} className="h-24 rounded-xl"/>)}</div>
         ) : (

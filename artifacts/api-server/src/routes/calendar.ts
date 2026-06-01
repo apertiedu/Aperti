@@ -44,7 +44,7 @@ router.get("/calendar/events", requireTenantAccess, async (req, res): Promise<vo
            s.start_time AS "startTime", s.type, s.online_link AS "onlineLink",
            COALESCE(sub.name, 'No Subject') AS "subjectName",
            COUNT(DISTINCT st.id)::int AS "studentCount"
-    FROM sessions s
+    FROM lessons s
     LEFT JOIN subjects sub ON sub.id = s.subject_id
     LEFT JOIN students st ON (st.lesson1_session_id=s.id OR st.lesson2_session_id=s.id OR st.lesson3_session_id=s.id)
     WHERE 1=1 ${teacherCond}

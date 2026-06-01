@@ -1,5 +1,7 @@
-import type { Request, Response, NextFunction } from "express";
-import { db, auditLogsTable } from "@workspace/db";
+import type { Response, NextFunction } from "express";
+import { db, auditLogsTable, studentsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { authenticate, AuthRequest } from "./auth";
 
 export interface TenantContext {
   accountId: number;
@@ -16,63 +18,51 @@ declare global {
   }
 }
 
-export function requireStudentAccess(req: Request, res: Response, next: NextFunction): void {
-  const session = req.session as any;
-  if (!session.accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
-  if (session.role !== "student") { res.status(403).json({ message: "Student access required" }); return; }
-  if (!session.studentId) { res.status(403).json({ message: "No student record linked" }); return; }
-  next();
+export async function requireStudentAccess(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  authenticate(req, res, async () => {
+    const accountId = req.userId;
+    if (!accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
+    if (req.role !== "student") { res.status(403).json({ message: "Student access required" }); return; }
+    const [student] = await db.select().from(studentsTable).where(eq(studentsTable.accountId, accountId));
+    if (!student) { res.status(403).json({ message: "No student record linked to this account" }); return; }
+    (req as any).studentId = student.id;
+    (req as any).teacherAccountId = student.teacherAccountId;
+    next();
+  });
 }
 
-export function requireTenantAccess(req: Request, res: Response, next: NextFunction): void {
-  const session = req.session as any;
+export function requireTenantAccess(req: AuthRequest, res: Response, next: NextFunction): void {
+  authenticate(req, res, () => {
+    const accountId = req.userId;
+    const role = req.role || "admin";
 
-  if (!session.accountId) {
-    res.status(401).json({ message: "Not authenticated" });
-    return;
-  }
+    if (!accountId) { res.status(401).json({ message: "Not authenticated" }); return; }
+    if (role === "student") { res.status(403).json({ message: "Students must use the student portal" }); return; }
 
-  const role: string = session.role || "admin";
-
-  if (role === "student") {
-    res.status(403).json({ message: "Students must use the student portal" });
-    return;
-  }
-
-  let teacherId: number | null = null;
-
-  if (role === "teacher") {
-    teacherId = session.accountId;
-  } else if (role === "assistant") {
-    teacherId = session.teacherAccountId ?? null;
-    if (!teacherId) {
-      res.status(403).json({ message: "Assistant is not assigned to a teacher" });
-      return;
+    let teacherId: number | null = null;
+    if (role === "teacher") {
+      teacherId = accountId;
+    } else if (role === "assistant") {
+      const account = (req as any)._account;
+      teacherId = account?.teacherAccountId ?? null;
+      if (!teacherId) { res.status(403).json({ message: "Assistant is not assigned to a teacher" }); return; }
     }
-  }
-  // admin: teacherId stays null — can access all data
 
-  req.tenant = {
-    accountId: session.accountId,
-    teacherId,
-    isAdmin: role === "admin",
-    role,
-  };
-
-  next();
+    req.tenant = { accountId, teacherId, isAdmin: role === "admin", role };
+    next();
+  });
 }
 
 export async function logAudit(
-  req: Request,
+  req: AuthRequest,
   action: string,
   resource: string,
   resourceId?: number,
   details?: Record<string, unknown>
 ): Promise<void> {
   try {
-    const session = req.session as any;
     await db.insert(auditLogsTable).values({
-      accountId: session.accountId ?? null,
+      accountId: req.userId ?? null,
       teacherId: req.tenant?.teacherId ?? null,
       action,
       resource,

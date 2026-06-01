@@ -68,7 +68,7 @@ export default function Geometrix() {
   return (
     <Card className="card-hover">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Geometrix™ – 3D Lab</CardTitle>
+        <CardTitle>Geometrix – 3D Lab</CardTitle>
         <div className="flex gap-2">
           {Object.keys(shapes).map((s) => (
             <Button

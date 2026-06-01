@@ -9,7 +9,7 @@ import {
   TrendingUp, Users, BookOpen, AlertTriangle, CheckCircle, Clock,
 } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 async function fetchJSON(url: string) {
   const res = await fetch(`${API}${url}`, { headers: { Authorization: `Bearer ${token()}` } });
@@ -49,7 +49,7 @@ export default function InsightStream() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold">Insight Stream<span className="text-primary">™</span></h1>
+        <h1 className="text-3xl font-bold">Insight Stream<span className="text-primary"></span></h1>
         <p className="text-muted-foreground">Live analytics for your classes — attendance, performance, and risk.</p>
       </motion.div>
 

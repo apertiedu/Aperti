@@ -178,7 +178,7 @@ export default function ForgeField() {
       <Card className="card-hover">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            ForgeField™ — Circuit Lab
+            ForgeField — Circuit Lab
           </CardTitle>
           <div className="flex flex-wrap gap-2 mt-2">
             <Button size="sm" onClick={() => setRunning(r => !r)}>

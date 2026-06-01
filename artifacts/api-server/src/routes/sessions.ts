@@ -2,23 +2,23 @@ import { Router, type IRouter } from "express";
 import { eq, and, sql } from "drizzle-orm";
 import { db, sessionsTable, attendanceTable } from "@workspace/db";
 import { CreateSessionBody, DeleteSessionParams } from "@workspace/api-zod";
+import { authenticate, AuthRequest } from "../middleware/auth";
 
 const VALID_DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
 const router: IRouter = Router();
 
-function getTeacherId(req: any): number | null {
-  if (req.session.role === "admin") return null;
-  if (req.session.role === "teacher") return req.session.accountId;
-  return req.session.teacherAccountId || req.session.accountId;
+function getTeacherId(req: AuthRequest): number | null {
+  if (req.role === "admin") return null;
+  return req.userId ?? null;
 }
 
 function ownsSession(teacherId: number | null, session: typeof sessionsTable.$inferSelect): boolean {
-  if (teacherId === null) return true; // admin owns all
+  if (teacherId === null) return true;
   return session.teacherAccountId === teacherId;
 }
 
-router.get("/sessions", async (req, res): Promise<void> => {
+router.get("/sessions", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const teacherId = getTeacherId(req);
   const rows = teacherId
     ? await db.select().from(sessionsTable).where(eq(sessionsTable.teacherAccountId, teacherId))
@@ -26,12 +26,12 @@ router.get("/sessions", async (req, res): Promise<void> => {
   res.json(rows);
 });
 
-router.post("/sessions", async (req, res): Promise<void> => {
+router.post("/sessions", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const parsed = CreateSessionBody.safeParse(req.body);
   if (!parsed.success) { res.status(400).json({ message: parsed.error.message }); return; }
 
   const { type, capacity, subjectId, onlineLink } = req.body;
-  const teacherId = getTeacherId(req) ?? req.session.accountId;
+  const teacherId = getTeacherId(req) ?? req.userId!;
 
   const [session] = await db.insert(sessionsTable).values({
     ...parsed.data,
@@ -44,7 +44,7 @@ router.post("/sessions", async (req, res): Promise<void> => {
   res.status(201).json(session);
 });
 
-router.patch("/sessions/:id", async (req, res): Promise<void> => {
+router.patch("/sessions/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
   if (isNaN(id)) { res.status(400).json({ message: "Invalid session ID" }); return; }
 
@@ -77,7 +77,7 @@ router.patch("/sessions/:id", async (req, res): Promise<void> => {
   res.json(updated);
 });
 
-router.delete("/sessions/:id", async (req, res): Promise<void> => {
+router.delete("/sessions/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   const params = DeleteSessionParams.safeParse(req.params);
   if (!params.success) { res.status(400).json({ message: "Invalid session ID" }); return; }
 
@@ -90,7 +90,6 @@ router.delete("/sessions/:id", async (req, res): Promise<void> => {
   res.json({ message: "Session deleted" });
 });
 
-// Capacity check for a session today
 router.get("/sessions/:id/capacity", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
   const [session] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, id));

@@ -51,7 +51,7 @@ function JoinView({ onJoin, initialCode }: { onJoin: (code: string, name: string
         className="w-full max-w-sm"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold">LiveClass<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">LiveClass<span className="text-primary"></span></h1>
           <p className="text-muted-foreground mt-2">Enter the room code your teacher shared.</p>
         </div>
 
@@ -151,7 +151,7 @@ export default function LiveClassSession() {
       {/* Top */}
       <div className="flex items-center justify-between px-4 py-2 bg-card border-b shrink-0">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-primary text-sm">LiveClass™</span>
+          <span className="font-bold text-primary text-sm">LiveClass</span>
           {lc.lessonTitle && <span className="text-xs text-muted-foreground">{lc.lessonTitle}</span>}
         </div>
         <span className="text-xs text-muted-foreground">{allParticipants.length + 1} participants</span>

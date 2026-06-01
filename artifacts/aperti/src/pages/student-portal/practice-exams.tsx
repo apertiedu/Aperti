@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,7 @@ export default function PracticeExams() {
       const params = new URLSearchParams();
       if (selectedTopic) params.set("topic", selectedTopic);
       if (selectedDiff) params.set("difficulty", selectedDiff);
-      const r = await fetch(`/api/portal/practice-questions?${params}`, { credentials: "include" });
+      const r = await apiFetch(`/api/portal/practice-questions?${params}`, { credentials: "include" });
       if (r.ok) {
         const data: Question[] = await r.json();
         setQuestions(data);
@@ -95,12 +96,12 @@ export default function PracticeExams() {
     const total = scores.length;
     if (total > 0) {
       try {
-        await fetch("/api/portal/practice-sessions", {
-          method: "POST", credentials: "include",
+        await apiFetch("/api/portal/practice-sessions", {
+          method: "POST", 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ questions: quizCards.map(q => q.id), score: correct, total, timeTakenSeconds: timeTaken }),
         });
-        await fetch("/api/portal/achievements/check", { method: "POST", credentials: "include" });
+        await apiFetch("/api/portal/achievements/check", { method: "POST" });
       } catch { /* non-critical */ }
     }
     setMode("results");
@@ -116,12 +117,12 @@ export default function PracticeExams() {
       const sc = newScores.filter(Boolean).length;
       const tot = newScores.length;
       if (tot > 0) {
-        fetch("/api/portal/practice-sessions", {
-          method: "POST", credentials: "include",
+        apiFetch("/api/portal/practice-sessions", {
+          method: "POST", 
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ questions: quizCards.map(q => q.id), score: sc, total: tot, timeTakenSeconds: timeTaken }),
         }).catch(() => {});
-        fetch("/api/portal/achievements/check", { method: "POST", credentials: "include" }).catch(() => {});
+        apiFetch("/api/portal/achievements/check", { method: "POST" }).catch(() => {});
       }
       setMode("results");
     } else { setCurrentIdx(next); setShowAnswer(false); }

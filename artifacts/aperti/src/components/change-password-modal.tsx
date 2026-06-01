@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -57,8 +58,8 @@ export default function ChangePasswordModal({ trigger }: { trigger: React.ReactN
     if (form.next.length < 6) { setError("New password must be at least 6 characters"); return; }
     setSaving(true);
     try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST", credentials: "include",
+      const res = await apiFetch("/api/auth/change-password", {
+        method: "POST", 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword: form.current, newPassword: form.next }),
       });

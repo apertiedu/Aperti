@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { CalendarDays, Clock, Wifi, Building2, BookOpen } from "lucide-react";
@@ -37,7 +38,7 @@ export default function MyTimetable() {
   const today = getTodayName();
 
   useEffect(() => {
-    fetch("/api/portal/timetable", { credentials: "include" })
+    apiFetch("/api/portal/timetable", { credentials: "include" })
       .then(r => r.ok ? r.json() : [])
       .then(setSessions)
       .catch(() => setSessions([]))

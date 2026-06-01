@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import {
   Users, UserCheck, UserX, TrendingUp, BarChart3, Scan, Calendar,
@@ -79,17 +80,17 @@ export default function Dashboard() {
   const dateStr = format(new Date(), "EEEE, dd MMMM yyyy");
 
   useEffect(() => {
-    fetch("/api/dashboard/summary", { credentials: "include" })
+    apiFetch("/api/dashboard/summary", { credentials: "include" })
       .then(r => r.ok ? r.json() : null).then(d => { setSummary(d); setDone("summary"); });
-    fetch("/api/dashboard/recent-activity?limit=8", { credentials: "include" })
+    apiFetch("/api/dashboard/recent-activity?limit=8", { credentials: "include" })
       .then(r => r.ok ? r.json() : []).then(d => { setRecentActivity(d); setDone("activity"); });
-    fetch(`/api/dashboard/weekly-stats?weekStart=${weekStartStr}`, { credentials: "include" })
+    apiFetch(`/api/dashboard/weekly-stats?weekStart=${weekStartStr}`, { credentials: "include" })
       .then(r => r.ok ? r.json() : null).then(d => { setWeeklyStats(d); setDone("stats"); });
-    fetch("/api/dashboard/today-sessions", { credentials: "include" })
+    apiFetch("/api/dashboard/today-sessions", { credentials: "include" })
       .then(r => r.ok ? r.json() : []).then(d => { setTodaySessions(d); setDone("today"); });
-    fetch("/api/dashboard/upcoming-exams", { credentials: "include" })
+    apiFetch("/api/dashboard/upcoming-exams", { credentials: "include" })
       .then(r => r.ok ? r.json() : []).then(d => { setUpcomingExams(d); setDone("exams"); });
-    fetch("/api/dashboard/at-risk", { credentials: "include" })
+    apiFetch("/api/dashboard/at-risk", { credentials: "include" })
       .then(r => r.ok ? r.json() : []).then(d => { setAtRisk(d); setDone("risk"); });
   }, [weekStartStr]);
 

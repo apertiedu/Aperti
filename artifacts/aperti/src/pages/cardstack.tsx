@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Trash2, ChevronLeft, ChevronRight, Layers } from "lucide-react";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
@@ -71,7 +71,7 @@ export default function Cardstack() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">CardStack<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">CardStack<span className="text-primary"></span></h1>
           <p className="text-muted-foreground">Create and manage flashcard decks for your students.</p>
         </div>
         <Dialog open={deckDialogOpen} onOpenChange={setDeckDialogOpen}>

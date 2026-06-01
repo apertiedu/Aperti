@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Target, Zap, Brain, ArrowRight, BookOpen, CheckCircle2, AlertCircle } from "lucide-react";
 import { Link } from "wouter";
 
-const API = import.meta.env.VITE_API_URL || "";
+const API = "/api";
 
 async function fetchJSON(url: string) {
   const token = localStorage.getItem("aperti_token");
@@ -30,7 +30,7 @@ const MOCK_WEAK_TOPICS = [
 const DAILY_GOALS = [
   { id: "g1", label: "Complete 20 flashcards", points: 50 },
   { id: "g2", label: "Practice 3 past paper questions", points: 80 },
-  { id: "g3", label: "Review 1 weak topic with The Mentor™", points: 100 },
+  { id: "g3", label: "Review 1 weak topic with The Mentor", points: 100 },
   { id: "g4", label: "Score ≥ 70% on a mini quiz", points: 120 },
 ];
 
@@ -65,7 +65,7 @@ export default function FocusCoach() {
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Target className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">FocusCoach<span className="text-primary">™</span></h1>
+          <h1 className="text-3xl font-bold">FocusCoach<span className="text-primary"></span></h1>
         </div>
         <p className="text-muted-foreground">Your personalised weak-topic tracker and daily goal setter.</p>
       </motion.div>
@@ -76,7 +76,7 @@ export default function FocusCoach() {
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <AlertCircle className="h-5 w-5 text-destructive" />
             Weak Topics
-            <Badge variant="secondary" className="ml-auto text-xs">from Echo™ memory</Badge>
+            <Badge variant="secondary" className="ml-auto text-xs">from Echo memory</Badge>
           </h2>
           {MOCK_WEAK_TOPICS.map((topic) => (
             <motion.div key={topic.id} variants={item}>

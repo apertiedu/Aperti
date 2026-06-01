@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Video, ExternalLink, Lock, Users, Unlock, Copy, Check, Search } from "lucide-react";
@@ -36,7 +37,7 @@ export default function MyRecordings() {
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   useEffect(() => {
-    fetch("/api/portal/recordings", { credentials: "include" })
+    apiFetch("/api/portal/recordings", { credentials: "include" })
       .then(r => r.ok ? r.json() : [])
       .then(setRecordings)
       .catch(() => setRecordings([]))

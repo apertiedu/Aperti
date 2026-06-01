@@ -2,18 +2,13 @@ import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, accountsTable } from "@workspace/db";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
-function requireAdmin(req: any, res: any, next: any) {
-  if (req.session.role !== "admin") {
-    res.status(403).json({ message: "Admin access required" });
-    return;
-  }
-  next();
-}
+const adminOnly = [authenticate, requireRole("admin")];
 
-router.get("/accounts", requireAdmin, async (req, res): Promise<void> => {
+router.get("/accounts", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
   const accounts = await db.select({
     id: accountsTable.id,
     username: accountsTable.username,
@@ -26,7 +21,7 @@ router.get("/accounts", requireAdmin, async (req, res): Promise<void> => {
   res.json(accounts);
 });
 
-router.post("/accounts", requireAdmin, async (req, res): Promise<void> => {
+router.post("/accounts", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
   const { username, password, displayName, role, teacherAccountId } = req.body;
   if (!username || !password) { res.status(400).json({ message: "Username and password are required" }); return; }
   if (!["admin", "teacher", "assistant"].includes(role || "assistant")) { res.status(400).json({ message: "Invalid role" }); return; }
@@ -48,7 +43,7 @@ router.post("/accounts", requireAdmin, async (req, res): Promise<void> => {
   }
 });
 
-router.patch("/accounts/:id", requireAdmin, async (req, res): Promise<void> => {
+router.patch("/accounts/:id", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ message: "Invalid ID" }); return; }
 
@@ -62,7 +57,7 @@ router.patch("/accounts/:id", requireAdmin, async (req, res): Promise<void> => {
   }
   if (status !== undefined) {
     if (!["active", "suspended"].includes(status)) { res.status(400).json({ message: "Invalid status" }); return; }
-    if (id === req.session.accountId && status === "suspended") { res.status(400).json({ message: "Cannot suspend your own account" }); return; }
+    if (id === req.userId && status === "suspended") { res.status(400).json({ message: "Cannot suspend your own account" }); return; }
     updates.status = status;
   }
   if (password) {
@@ -82,9 +77,9 @@ router.patch("/accounts/:id", requireAdmin, async (req, res): Promise<void> => {
   res.json(updated);
 });
 
-router.delete("/accounts/:id", requireAdmin, async (req, res): Promise<void> => {
+router.delete("/accounts/:id", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
-  if (id === req.session.accountId) { res.status(400).json({ message: "Cannot delete your own account" }); return; }
+  if (id === req.userId) { res.status(400).json({ message: "Cannot delete your own account" }); return; }
   await db.delete(accountsTable).where(eq(accountsTable.id, id));
   res.json({ message: "Account deleted" });
 });

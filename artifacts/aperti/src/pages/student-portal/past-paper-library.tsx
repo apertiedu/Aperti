@@ -1,3 +1,4 @@
+import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,8 +42,8 @@ export default function PastPaperLibrary() {
     if (filterSession) params.set("session", filterSession);
     if (search) params.set("search", search);
     const [papersRes, subjectsRes] = await Promise.all([
-      fetch(`/api/past-papers?${params}`, { credentials: "include" }),
-      fetch("/api/past-papers/subjects", { credentials: "include" }),
+      apiFetch(`/api/past-papers?${params}`, { credentials: "include" }),
+      apiFetch("/api/past-papers/subjects", { credentials: "include" }),
     ]);
     if (papersRes.ok) setPapers(await papersRes.json());
     if (subjectsRes.ok) setSubjects(await subjectsRes.json());
