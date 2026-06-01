@@ -16,7 +16,7 @@ type Paper = {
 };
 
 /* ── Subject colour + icon system ── */
-interface SubjectMeta { primary: string; light: string; icon: React.ComponentType<{ className?: string }> }
+interface SubjectMeta { primary: string; light: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }
 const SUBJECT_META: Record<string, SubjectMeta> = {
   Physics:            { primary: "#1565C0", light: "#EBF3FF", icon: Atom },
   Mathematics:        { primary: "#2E7D32", light: "#EBF5EC", icon: Calculator },
@@ -54,7 +54,7 @@ const containerVariants = {
 };
 const itemVariants = {
   hidden: { opacity: 0, y: 18, scale: 0.97 },
-  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+  show:   { opacity: 1, y: 0,  scale: 1, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
 };
 
 /* ── Download button ── */
@@ -472,7 +472,7 @@ export default function PastPaperLibrary() {
                   key={subject}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: gi * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.5, delay: gi * 0.08, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] }}
                 >
                   {/* Subject header */}
                   <div className="flex items-center gap-3 mb-4">

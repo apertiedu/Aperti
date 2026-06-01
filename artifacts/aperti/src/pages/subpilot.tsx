@@ -109,7 +109,7 @@ export default function SubPilot() {
   const { data: fetchedSettings } = useQuery<NotifySettings>({
     queryKey: ["notify-settings"],
     queryFn: () => fetchJSON("/absence-notify/settings"),
-    onSuccess: (d) => setNotifySettings(d),
+    onSuccess: (d: NotifySettings) => setNotifySettings(d),
   } as any);
 
   const { data: studentsPhones = [], isLoading: studentsLoading } = useQuery<StudentPhone[]>({
