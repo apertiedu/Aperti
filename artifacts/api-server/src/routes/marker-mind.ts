@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { examinerReportsTable } from "@lib/db/schema/marker-mind";
+import { examinerReportsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 export const markerMindRouter = Router();

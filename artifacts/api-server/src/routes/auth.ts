@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { db } from "../lib/db";          // your drizzle client
-import { accountsTable, deviceSessionsTable } from "@lib/db/schema";
+import { db } from "@workspace/db";          // your drizzle client
+import { accountsTable, deviceSessionsTable } from "@workspace/db";
 
 const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret";
 const TOKEN_EXPIRY = "7d";

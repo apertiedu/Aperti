@@ -8,6 +8,19 @@ import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
 import bcrypt from "bcryptjs";
 import { db, accountsTable } from "@workspace/db";
+import { authRouter } from "./routes/auth";
+import { dashboardRouter } from "./routes/dashboard";
+import { attendanceRouter } from "./routes/attendance";
+import { lessonsRouter } from "./routes/lessons";
+import { subscriptionsRouter } from "./routes/subscriptions";
+import { studentsRouter } from "./routes/students";
+import { liveClassRouter } from "./routes/live-class";
+import { homeworkRouter } from "./routes/homework";
+import { questionBankRouter } from "./routes/question-bank";
+import { flashcardsRouter } from "./routes/flashcards";
+import { mentorRouter } from "./routes/mentor";
+import { revisitRouter } from "./routes/revisit";
+import examsRouter from "./routes/exams";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -54,6 +67,20 @@ app.use("/api", (req: Request, res: Response, next: NextFunction): void => {
 
 app.use("/api", router);
 
+app.use("/auth", authRouter);
+app.use("/dashboard", dashboardRouter);
+app.use("/attendance", attendanceRouter);
+app.use("/lessons", lessonsRouter);
+app.use("/subscriptions", subscriptionsRouter);
+app.use("/students", studentsRouter);
+app.use("/live-class", liveClassRouter);
+app.use("/homework", homeworkRouter);
+app.use("/question-bank", questionBankRouter);
+app.use("/flashcards", flashcardsRouter);
+app.use("/mentor", mentorRouter);
+app.use("/revisit", revisitRouter);
+app.use("/exams", examsRouter);
+
 async function seedDefaultAdmin() {
   try {
     const existing = await db.select().from(accountsTable);
@@ -70,41 +97,3 @@ async function seedDefaultAdmin() {
 seedDefaultAdmin();
 
 export default app;
-
-import { authRouter } from "./routes/auth";
-import { dashboardRouter } from "./routes/dashboard";
-import { attendanceRouter } from "./routes/attendance";
-import { lessonsRouter } from "./routes/lessons";
-import { subscriptionsRouter } from "./routes/subscriptions";
-
-app.use("/auth", authRouter);
-app.use("/dashboard", dashboardRouter);
-app.use("/attendance", attendanceRouter);
-app.use("/lessons", lessonsRouter);
-app.use("/subscriptions", subscriptionsRouter);
-
-import { studentsRouter } from "./routes/students";
-app.use("/students", studentsRouter);
-
-
-import { liveClassRouter } from "./routes/live-class";
-app.use("/live-class", liveClassRouter);
-
-import { homeworkRouter } from "./routes/homework";
-app.use("/homework", homeworkRouter);
-
-import { questionBankRouter } from "./routes/question-bank";
-app.use("/question-bank", questionBankRouter);
-
-import { flashcardsRouter } from "./routes/flashcards";
-app.use("/flashcards", flashcardsRouter);
-
-import { mentorRouter } from "./routes/mentor";
-app.use("/mentor", mentorRouter);
-
-
-import { revisitRouter } from "./routes/revisit";
-app.use("/revisit", revisitRouter);
-
-import { examsRouter } from "./routes/exams";
-app.use("/exams", examsRouter);

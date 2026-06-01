@@ -1,9 +1,9 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { engagementRecordsTable } from "@lib/db/schema/engagement";
-import { liveClassRoomsTable } from "@lib/db/schema/live-class";
-import { echoMemoryTable } from "@lib/db/schema/echo-memory";
+import { engagementRecordsTable } from "@workspace/db";
+import { liveClassRoomsTable } from "@workspace/db";
+import { echoMemoryTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 
 export const classForgeRouter = Router();

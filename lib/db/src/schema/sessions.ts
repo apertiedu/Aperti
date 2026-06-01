@@ -21,6 +21,8 @@ export const lessonsTable = pgTable("lessons", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const sessionsTable = lessonsTable;
+
 export const insertLessonSchema = createInsertSchema(lessonsTable).omit({ id: true, createdAt: true });
 export type InsertLesson = z.infer<typeof insertLessonSchema>;
 export type Lesson = typeof lessonsTable.$inferSelect;

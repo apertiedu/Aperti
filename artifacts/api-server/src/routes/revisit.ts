@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 
 export const revisitRouter = Router();
 

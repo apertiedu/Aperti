@@ -1,5 +1,5 @@
 import { pgTable, serial, integer, text, timestamp, jsonb } from "drizzle-orm/pg-core";
-import { liveClassRoomsTable } from "./live-class";
+import { liveClassRoomsTable } from "./Live-class";
 import { studentsTable } from "./students";
 
 export const engagementRecordsTable = pgTable("engagement_records", {

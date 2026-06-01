@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
-import { homeworkTable, homeworkSubmissionsTable } from "@lib/db/schema/homework";
+import { homeworkTable, homeworkSubmissionsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 
 export const homeworkRouter = Router();

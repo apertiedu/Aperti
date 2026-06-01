@@ -10,7 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  ArrowRight, Zap, Shield, BookOpen, Users, Star, Sparkles, Menu, X, CircuitBoard, Globe, Palette,
+  ArrowRight, Zap, Shield, BookOpen, Users, Star, Sparkles, Menu, X, CircuitBoard, Globe, Palette, CalendarCheck,
 } from "lucide-react";
 import { Link } from "wouter";
 

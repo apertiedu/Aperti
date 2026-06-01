@@ -1,9 +1,9 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { lessonsTable } from "@lib/db/schema/sessions";
-import { attendanceTable } from "@lib/db/schema/attendance";
-import { homeworkSubmissionsTable } from "@lib/db/schema/homework";
+import { lessonsTable } from "@workspace/db";
+import { attendanceTable } from "@workspace/db";
+import { homeworkSubmissionsTable } from "@workspace/db";
 
 export const dashboardRouter = Router();
 

@@ -2,7 +2,7 @@
 // For now, we create the route that generates the email content
 
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
 export const guardianPulseRouter = Router();

@@ -18,7 +18,7 @@ import { Room, VideoPresets, RoomEvent, RemoteParticipant } from "livekit-client
 
 const API = import.meta.env.VITE_API_URL || "";
 const token = () => localStorage.getItem("aperti_token");
-const LIVEKIT_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
+const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL || "ws://localhost:7880";
 
 async function fetchJSON(url: string) {
   const res = await fetch(`${API}${url}`, { headers: { Authorization: `Bearer ${token()}` } });
@@ -134,17 +134,3 @@ export default function LiveClass() {
     </div>
   );
 }
-
-// After setHostToken...
-// Show pairing dialog with QR code
-setPairDialogOpen(true);
-
-room.on(RoomEvent.DataReceived, (payload, participant) => {
-  try {
-    const msg = JSON.parse(new TextDecoder().decode(payload));
-    if (msg.action === "mute_all") {
-      participants.forEach(p => p.setMicrophoneEnabled(false));
-    }
-    // ... handle other actions
-  } catch {}
-});

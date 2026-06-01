@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { helpdeskTicketsTable } from "@lib/db/schema/helpdesk";
+import { helpdeskTicketsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 export const helpdeskRouter = Router();

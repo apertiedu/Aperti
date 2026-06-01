@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { QrCode, MicOff, Hand, Users, Play, Pause, Monitor, MessageCircle, BarChart3 } from "lucide-react";
 import { Room, RoomEvent, RemoteParticipant } from "livekit-client";
 
-const LIVEKIT_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
+const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL || "ws://localhost:7880";
 const API = import.meta.env.VITE_API_URL || "";
 
 export default function TwinControl() {

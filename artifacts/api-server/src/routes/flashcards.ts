@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
-import { flashcardDecksTable, flashcardItemsTable, flashcardProgressTable } from "@lib/db/schema/flashcards";
+import { flashcardDecksTable, flashcardItemsTable, flashcardProgressTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 
 export const flashcardsRouter = Router();

@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 
 export const mentorRouter = Router();
 
@@ -40,55 +40,72 @@ Your task:
 - Be encouraging, never condescending.
 - Keep responses concise but thorough (max 300 words per message).`;
 
-  // 4. Call the internal intelligence engine (OpenAI compatible)
-  const { Configuration, OpenAIApi } = require("openai");
-  const openai = new OpenAIApi(new Configuration({ apiKey: process.env.OPENAI_API_KEY }));
+  if (!process.env.OPENAI_API_KEY) {
+    res.status(503).json({ error: "AI mentor not configured" });
+    return;
+  }
 
   // Set up SSE streaming
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
-  const stream = await openai.createChatCompletion({
-    model: "gpt-4o-mini",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: message },
-    ],
-    stream: true,
-    temperature: 0.7,
-    max_tokens: 500,
-  }, { responseType: "stream" });
+  try {
+    const fetch = (await import("node:http")).request;
+    const body = JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message },
+      ],
+      stream: true,
+      temperature: 0.7,
+      max_tokens: 500,
+    });
 
-  // Pipe the OpenAI stream to our SSE response
-  stream.data.on("data", (chunk: Buffer) => {
-    const lines = chunk.toString().split("\n").filter((line: string) => line.trim() !== "");
-    for (const line of lines) {
-      const message = line.replace(/^data: /, "");
-      if (message === "[DONE]") {
-        res.write("data: [DONE]\n\n");
-        break;
-      }
-      try {
-        const parsed = JSON.parse(message);
-        const content = parsed.choices[0]?.delta?.content;
-        if (content) {
-          res.write(`data: ${JSON.stringify({ content })}\n\n`);
+    const https = await import("node:https");
+    const reqOptions = {
+      hostname: "api.openai.com",
+      path: "/v1/chat/completions",
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Length": Buffer.byteLength(body),
+      },
+    };
+
+    const apiReq = https.request(reqOptions, (apiRes) => {
+      apiRes.on("data", (chunk: Buffer) => {
+        const lines = chunk.toString().split("\n").filter((line: string) => line.trim() !== "");
+        for (const line of lines) {
+          const msg = line.replace(/^data: /, "");
+          if (msg === "[DONE]") {
+            res.write("data: [DONE]\n\n");
+            break;
+          }
+          try {
+            const parsed = JSON.parse(msg);
+            const content = parsed.choices[0]?.delta?.content;
+            if (content) {
+              res.write(`data: ${JSON.stringify({ content })}\n\n`);
+            }
+          } catch {
+            // skip non-JSON
+          }
         }
-      } catch {
-        // skip non-JSON
-      }
-    }
-  });
+      });
+      apiRes.on("end", () => res.end());
+      apiRes.on("error", (err: Error) => { console.error("Mentor stream error:", err); res.end(); });
+    });
 
-  stream.data.on("end", () => {
+    apiReq.on("error", (err: Error) => { console.error("Mentor request error:", err); res.end(); });
+    apiReq.write(body);
+    apiReq.end();
+  } catch (err) {
+    console.error("Mentor error:", err);
     res.end();
-  });
-
-  stream.data.on("error", (err: Error) => {
-    console.error("Mentor stream error:", err);
-    res.end();
-  });
+  }
 });
 
 // GET /mentor/sessions — list past sessions (for history)

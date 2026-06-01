@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp, jsonb, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, jsonb, numeric, boolean } from "drizzle-orm/pg-core";
 import { studentsTable } from "./students";
 
 export const echoMemoryTable = pgTable("echo_memory", {

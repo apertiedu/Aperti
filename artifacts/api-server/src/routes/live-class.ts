@@ -1,9 +1,9 @@
 import { Router, Response } from "express";
 import { AccessToken } from "livekit-server-sdk";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { liveClassRoomsTable } from "@lib/db/schema/live-class";
-import { lessonsTable } from "@lib/db/schema/sessions";
+import { liveClassRoomsTable } from "@workspace/db";
+import { lessonsTable } from "@workspace/db";
 
 const LIVEKIT_API_KEY = process.env.LIVEKIT_API_KEY || "devkey";
 const LIVEKIT_SECRET = process.env.LIVEKIT_SECRET || "devsecret";

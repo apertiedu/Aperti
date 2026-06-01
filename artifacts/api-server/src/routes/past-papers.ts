@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { pastPapersTable } from "@lib/db/schema/paper-vault";
+import { pastPapersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 export const pastPapersRouter = Router();

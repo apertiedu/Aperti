@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
-import { questionBankTable } from "@lib/db/schema/question-bank";
+import { questionBankTable } from "@workspace/db";
 import { eq, and, like } from "drizzle-orm";
 
 export const questionBankRouter = Router();

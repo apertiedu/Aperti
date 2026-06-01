@@ -1,5 +1,5 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { eq, and, sql } from "drizzle-orm";
 

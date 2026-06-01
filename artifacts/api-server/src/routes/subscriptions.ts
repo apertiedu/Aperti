@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { subscriptionsTable, subscriptionPlansTable, flexSeatsTable } from "@lib/db/schema/subscriptions";
+import { subscriptionsTable, subscriptionPlansTable, flexSeatsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 
 export const subscriptionsRouter = Router();

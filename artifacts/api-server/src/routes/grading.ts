@@ -1,9 +1,9 @@
 import { Router, Response } from "express";
-import { db } from "../lib/db";
+import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { markSchemesTable } from "@lib/db/schema/mark-schemes";
-import { examQuestionsTable } from "@lib/db/schema/exams";
-import { studentMarksTable } from "@lib/db/schema/exams";
+import { markSchemesTable } from "@workspace/db";
+import { examQuestionsTable } from "@workspace/db";
+import { studentMarksTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 
 export const gradingRouter = Router();
