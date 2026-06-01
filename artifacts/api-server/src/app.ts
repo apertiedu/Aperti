@@ -3,6 +3,7 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import path from "path";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
@@ -21,6 +22,7 @@ import { flashcardsRouter } from "./routes/flashcards";
 import { mentorRouter } from "./routes/mentor";
 import { revisitRouter } from "./routes/revisit";
 import examsRouter from "./routes/exams";
+import { uploadRouter } from "./routes/upload";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -61,6 +63,9 @@ app.use(
 
 // Auth is enforced per-route via JWT middleware (authenticate) — no global session guard needed.
 
+// Serve uploaded homework files
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 app.use("/api", router);
 
 app.use("/auth", authRouter);
@@ -76,6 +81,7 @@ app.use("/flashcards", flashcardsRouter);
 app.use("/mentor", mentorRouter);
 app.use("/revisit", revisitRouter);
 app.use("/exams", examsRouter);
+app.use("/upload", uploadRouter);
 
 async function seedDefaultAdmin() {
   try {

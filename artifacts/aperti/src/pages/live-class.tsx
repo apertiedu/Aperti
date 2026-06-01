@@ -262,12 +262,17 @@ export default function LiveClass() {
               label={lc.cameraOn ? "Stop video" : "Start video"}
               danger={!lc.cameraOn}
             />
-            <ControlBtn
-              active={lc.isScreenSharing}
-              onClick={lc.toggleScreenShare}
-              icon={lc.isScreenSharing ? <MonitorOff className="h-5 w-5" /> : <Monitor className="h-5 w-5" />}
-              label="Screen"
-            />
+            <div className="relative group">
+              <ControlBtn
+                active={false}
+                onClick={() => {}}
+                icon={<Monitor className="h-5 w-5 opacity-40" />}
+                label="Screen"
+              />
+              <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                Coming Soon
+              </span>
+            </div>
             <ControlBtn
               active={lc.whiteboardVisible}
               onClick={() => lc.toggleWhiteboard(!lc.whiteboardVisible)}

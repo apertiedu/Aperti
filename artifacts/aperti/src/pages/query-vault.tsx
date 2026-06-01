@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle,
+  Card, CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,8 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Pencil, Trash2, Filter } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ImageIcon, X, Upload } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
@@ -40,6 +40,7 @@ interface Question {
   maxMarks: string;
   tags: string | null;
   timesUsed: number;
+  imageUrl?: string | null;
 }
 
 export default function QueryVault() {
@@ -63,14 +64,14 @@ export default function QueryVault() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">QueryVault<span className="text-primary"></span></h1>
+          <h1 className="text-3xl font-bold">QueryVault</h1>
           <p className="text-muted-foreground">Your private question bank.</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button onClick={() => setEditingQuestion(null)}><Plus className="h-4 w-4 mr-2" />Add Question</Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editingQuestion ? "Edit Question" : "New Question"}</DialogTitle></DialogHeader>
             <QuestionForm
               question={editingQuestion}
@@ -102,24 +103,30 @@ export default function QueryVault() {
       {isLoading ? (
         <div className="space-y-3">{Array.from({length:5}).map((_,i)=><Skeleton key={i} className="h-20 w-full rounded-xl"/>)}</div>
       ) : questions?.length === 0 ? (
-        <Card className="card-hover"><CardContent className="p-8 text-center text-muted-foreground">No questions yet.</CardContent></Card>
+        <Card className="card-hover"><CardContent className="p-8 text-center text-muted-foreground">No questions yet. Click "Add Question" to create your first one.</CardContent></Card>
       ) : (
         <div className="space-y-3">
           {questions?.map((q) => (
             <motion.div key={q.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="card-hover">
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="flex-1">
                       <p className="font-medium line-clamp-2">{q.questionText}</p>
-                      <div className="flex gap-2 mt-2">
+                      {q.imageUrl && (
+                        <div className="mt-2">
+                          <img src={q.imageUrl} alt="Question diagram" className="max-h-32 rounded-lg border object-contain" />
+                        </div>
+                      )}
+                      <div className="flex gap-2 mt-2 flex-wrap">
                         {q.topic && <Badge variant="secondary">{q.topic}</Badge>}
                         <Badge variant="outline">{q.difficulty}</Badge>
                         <Badge variant="outline">{q.maxMarks} marks</Badge>
                         <span className="text-xs text-muted-foreground">Used {q.timesUsed}x</span>
+                        {q.imageUrl && <Badge variant="outline" className="gap-1"><ImageIcon className="h-3 w-3" />Diagram</Badge>}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 shrink-0">
                       <Button variant="ghost" size="icon" onClick={() => { setEditingQuestion(q); setDialogOpen(true); }}>
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -139,6 +146,8 @@ export default function QueryVault() {
 }
 
 function QuestionForm({ question, onClose, onRefresh }: { question: Question | null; onClose: () => void; onRefresh: () => void }) {
+  const { toast } = useToast();
+  const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     questionText: question?.questionText ?? "",
     topic: question?.topic ?? "",
@@ -147,7 +156,9 @@ function QuestionForm({ question, onClose, onRefresh }: { question: Question | n
     maxMarks: question?.maxMarks ?? "1",
     modelAnswer: "",
     tags: question?.tags ?? "",
+    imageUrl: question?.imageUrl ?? "",
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
@@ -160,12 +171,89 @@ function QuestionForm({ question, onClose, onRefresh }: { question: Question | n
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["question-bank"] }); onClose(); onRefresh(); },
   });
 
+  const handleImageUpload = async (file: File) => {
+    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
+      toast({ title: "Only PNG or JPG images are allowed for diagrams", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image must be under 5 MB", variant: "destructive" });
+      return;
+    }
+    setUploadingImage(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const fileData = e.target?.result as string;
+      try {
+        const res = await fetch("/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token()}`,
+          },
+          body: JSON.stringify({ fileName: file.name, fileType: file.type, fileData }),
+        });
+        if (!res.ok) throw new Error("Upload failed");
+        const { url } = await res.json();
+        setForm(f => ({ ...f, imageUrl: url }));
+        toast({ title: "Diagram uploaded" });
+      } catch {
+        toast({ title: "Upload failed", variant: "destructive" });
+      } finally {
+        setUploadingImage(false);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <form onSubmit={(e) => { e.preventDefault(); mutation.mutate(form); }} className="space-y-4 mt-4">
       <div className="space-y-2">
         <Label>Question Text *</Label>
         <Textarea rows={4} required value={form.questionText} onChange={e => setForm({...form, questionText: e.target.value})} />
       </div>
+
+      {/* Diagram upload */}
+      <div className="space-y-2">
+        <Label>Diagram / Image (optional)</Label>
+        {form.imageUrl ? (
+          <div className="relative w-fit">
+            <img src={form.imageUrl} alt="Diagram preview" className="max-h-36 rounded-lg border object-contain" />
+            <button
+              type="button"
+              onClick={() => setForm(f => ({ ...f, imageUrl: "" }))}
+              className="absolute -top-2 -right-2 bg-white border border-gray-200 rounded-full p-0.5 shadow text-gray-500 hover:text-red-500"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".png,.jpg,.jpeg"
+              className="hidden"
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); e.target.value = ""; }}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-2 border-dashed"
+              disabled={uploadingImage}
+              onClick={() => fileRef.current?.click()}
+            >
+              {uploadingImage ? (
+                <><div className="h-3 w-3 border border-gray-400 border-t-transparent rounded-full animate-spin" />Uploading…</>
+              ) : (
+                <><Upload className="h-3.5 w-3.5" />Upload diagram (PNG, JPG)</>
+              )}
+            </Button>
+          </div>
+        )}
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2"><Label>Topic</Label><Input value={form.topic} onChange={e => setForm({...form, topic: e.target.value})} /></div>
         <div className="space-y-2"><Label>Subtopic</Label><Input value={form.subtopic} onChange={e => setForm({...form, subtopic: e.target.value})} /></div>

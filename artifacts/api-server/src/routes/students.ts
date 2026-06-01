@@ -24,26 +24,40 @@ studentsRouter.post("/bulk", authenticate, async (req: AuthRequest, res: Respons
   }
   const rows = students.map(s => ({
     studentName: s.studentName,
-    studentCode: s.studentCode,
+    studentCode: s.studentCode.trim().toUpperCase(),
     teacherAccountId: teacherId,
   }));
-  const inserted = await db.insert(studentsTable).values(rows).returning();
-  res.json(inserted);
+  try {
+    const inserted = await db.insert(studentsTable).values(rows).returning();
+    res.json(inserted);
+  } catch (err: any) {
+    if (err.code === "23505" || err.message?.includes("unique")) {
+      return res.status(409).json({ error: "One or more student codes already exist. Student codes must be unique across the entire platform." });
+    }
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 studentsRouter.post("/", authenticate, async (req: AuthRequest, res: Response) => {
   const teacherId = req.userId!;
   const { studentName, studentCode, lesson1SessionId, lesson2SessionId, lesson3SessionId } = req.body;
   if (!studentName || !studentCode) return res.status(400).json({ error: "studentName and studentCode required" });
-  const [student] = await db.insert(studentsTable).values({
-    studentName,
-    studentCode,
-    teacherAccountId: teacherId,
-    lesson1SessionId: lesson1SessionId || null,
-    lesson2SessionId: lesson2SessionId || null,
-    lesson3SessionId: lesson3SessionId || null,
-  }).returning();
-  res.status(201).json(student);
+  try {
+    const [student] = await db.insert(studentsTable).values({
+      studentName,
+      studentCode: studentCode.trim().toUpperCase(),
+      teacherAccountId: teacherId,
+      lesson1SessionId: lesson1SessionId || null,
+      lesson2SessionId: lesson2SessionId || null,
+      lesson3SessionId: lesson3SessionId || null,
+    }).returning();
+    res.status(201).json(student);
+  } catch (err: any) {
+    if (err.code === "23505" || err.message?.includes("unique")) {
+      return res.status(409).json({ error: `Student code "${studentCode}" is already taken. Student codes must be unique across the entire platform.` });
+    }
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 studentsRouter.patch("/:id", authenticate, async (req: AuthRequest, res: Response) => {

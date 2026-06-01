@@ -14,6 +14,7 @@ export const questionBankTable = pgTable("question_bank", {
   modelAnswer: text("model_answer"),
   commonMistakes: text("common_mistakes"),
   tags: text("tags"),
+  imageUrl: text("image_url"),
   timesUsed: integer("times_used").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

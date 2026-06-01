@@ -35,7 +35,7 @@ questionBankRouter.get("/", authenticate, requireRole("teacher", "admin", "assis
 // POST /question-bank — create new question
 questionBankRouter.post("/", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
   const teacherId = req.userId!;
-  const { subjectId, questionText, topic, subtopic, difficulty, maxMarks, modelAnswer, commonMistakes, tags } = req.body;
+  const { subjectId, questionText, topic, subtopic, difficulty, maxMarks, modelAnswer, commonMistakes, tags, imageUrl } = req.body;
   const [q] = await db.insert(questionBankTable).values({
     teacherAccountId: teacherId,
     subjectId,
@@ -47,6 +47,7 @@ questionBankRouter.post("/", authenticate, requireRole("teacher", "admin", "assi
     modelAnswer,
     commonMistakes,
     tags,
+    imageUrl: imageUrl || null,
   }).returning();
   res.status(201).json(q);
 });

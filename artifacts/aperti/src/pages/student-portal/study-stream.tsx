@@ -23,6 +23,7 @@ import {
   TrendingUp,
   Flame,
   ArrowRight,
+  HelpCircle,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/auth";
@@ -63,6 +64,11 @@ export default function StudyStream() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Link href="/helpdesk">
+            <Button variant="outline" size="sm" className="gap-2 border-primary/30 text-primary hover:bg-primary/5">
+              <HelpCircle className="h-4 w-4" /> Ask for Help
+            </Button>
+          </Link>
           <Link href="/ascend">
             <Button variant="outline" size="sm" className="gap-2">
               <Flame className="h-4 w-4 text-orange-500" /> {MOCK_ASCEND.streak} day streak

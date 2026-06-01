@@ -704,6 +704,7 @@ export default function Landing() {
               <p className="text-xs text-slate-400 mt-1">Where every mind finds its rhythm.</p>
             </div>
             <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-400">
+              <a href="/paper-vault" className="hover:text-slate-700 transition-colors">Past Papers</a>
               <a href="/terms" className="hover:text-slate-700 transition-colors">Terms</a>
               <a href="/privacy" className="hover:text-slate-700 transition-colors">Privacy</a>
               <a href="/contact" className="hover:text-slate-700 transition-colors">Contact</a>
