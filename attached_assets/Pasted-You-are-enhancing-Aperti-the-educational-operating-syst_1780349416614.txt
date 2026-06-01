@@ -1,0 +1,80 @@
+You are enhancing **Aperti**, the educational operating system, into a premium platform.  
+Existing features are mostly functional, but two critical modules need a major upgrade: **InkSpace** (digital notebook) and **Geometrix** (3D geometry lab). You will also maintain and improve all previously built modules, ensuring a consistent Liquid Flow 2.0 design and a stable, professional experience.
+
+**Your mission:**  
+1. **Massively upgrade InkSpace** with file import, PDF annotation, handwriting recognition, and an extensive shape library.  
+2. **Build a professional Geometrix 3D lab** with a huge library of 3D shapes, interactive nets, unfolding/folding, measurements, and full customization.  
+3. **Preserve and polish all existing features** (landing page, marketplace, UI/UX, registration, parent linking, etc.), fix any bugs, and lock incomplete features behind "Coming Soon" badges.
+
+---
+
+## 🔥 PRIORITY 1 – INKSPACE ULTIMATE UPGRADE
+
+### New Capabilities
+- **Import Files:** Students/teachers can import **JPG, PNG, and PDF** files into a notebook page.  
+- **PDF Annotation:** Imported PDFs open as a multi‑page document; users can draw, highlight, and add text on top.  
+- **Handwriting Recognition:** Use Tesseract.js or a similar library to convert handwritten ink to digital text in real‑time or on demand.  
+- **Extensive Shape Library:** Add a sidebar panel with a huge collection of pre‑built shapes (lines, arrows, rectangles, circles, polygons, stars, flowchart symbols, mathematical symbols, etc.). Drag‑and‑drop onto the canvas.  
+- **Full‑Screen Mode:** Default full‑screen with a toggle to exit.  
+- **Persistence:** Save/Load notebooks to/from the backend (POST /api/inkspace/save, GET /api/inkspace/load).  
+- **Tools:** Pen, highlighter, eraser, text, shapes, lasso select, undo/redo, zoom, pan.  
+- **Export:** Export as PNG or PDF.
+
+### Implementation Guidelines
+- Use the existing HTML5 Canvas (or upgrade to a more robust library if necessary, but keep performance smooth).  
+- The UI must follow Liquid Flow 2.0: Inter font, teal accents, clean cards.  
+- If the handwriting recognition or PDF import cannot be made fully reliable, mark those specific sub‑features as "Coming Soon" but still allow basic drawing and shape insertion.
+
+---
+
+## 🔥 PRIORITY 2 – GEOMETRIX 3D LAB (PROFESSIONAL GRADE)
+
+### Core Features
+- **Huge 3D Shape Library:** Include all standard solids (cube, cuboid, prism, pyramid, cylinder, cone, sphere, hemisphere, tetrahedron, octahedron, dodecahedron, icosahedron, etc.) and allow users to select any shape.  
+- **Interactive 3D View:** Rotate, zoom, pan using OrbitControls. Smooth real‑time rendering with Three.js.  
+- **Nets Visualization:** Show the net of the selected shape. Animate unfolding and folding. Allow users to switch between 3D and net view.  
+- **Color Customization:** Color each face independently (or group faces). Provide a color picker with a palette of teal‑compliant colors.  
+- **Measurements & Properties:** Display vertices count, edges, faces, side lengths, surface area, volume (with dynamic formulas based on shape dimensions).  
+- **Interactive Labels:** Click on a vertex or edge to see its coordinate/length.  
+- **Slicing Tool:** (Optional, mark "Coming Soon" if too complex) Allow slicing the solid with a plane to see cross‑sections.
+
+### Technical Requirements
+- Use Three.js (already installed) and build a reusable component.  
+- Ensure the lab runs smoothly on low‑end devices – optimize geometry and shadows.  
+- UI controls: sidebar with shape selector, net toggle, color palette, measurement panel.  
+- Follow Liquid Flow 2.0 design – no neon, clean teal accents.
+
+### Fallback
+If any advanced feature (like slicing) cannot be completed, keep the core 3D viewer, net folding, and measurements, and mark the missing parts as "Coming Soon".
+
+---
+
+## 🔥 PRIORITY 3 – PRESERVE AND POLISH EXISTING FEATURES
+
+- **Landing Page:** Already premium – ensure no regressions.  
+- **Marketplace:** Teacher courses, enrollment, approval – must work.  
+- **UI/UX:** Sidebar, global search bar, header, animations – must be smooth.  
+- **Student Registration & Teacher Approval:** Fully functional.  
+- **Parent Linking:** Pairing code system works.  
+- **Role Isolation:** Admin routes give 404 for non‑admins; teacher routes scoped.  
+- **All other modules:** Fix any broken API or import errors. Lock incomplete features behind "Coming Soon" with a polished badge.
+
+---
+
+## 🔒 GENERAL RULES
+
+- **Design:** Strict Liquid Flow 2.0 – Inter font, teal #00796B, black/grey/white. No custom accent colors, no neon, no ™.  
+- **Stability:** No half‑working features – either fully functional or locked behind a non‑interactive "Coming Soon" badge.  
+- **No fake reviews, competitor names, or unprofessional language.**  
+- **Responsive:** All pages must work on mobile, tablet, and desktop.
+
+---
+
+## 🚀 FINAL OUTPUT
+
+After completion, provide a brief summary:
+- Which parts of InkSpace and Geometrix are fully functional.
+- Which parts are "Coming Soon".
+- Confirm admin login (admin / admin123) and that the platform is stable.
+
+**Start now – upgrade InkSpace and Geometrix first, then ensure everything else is perfect.**

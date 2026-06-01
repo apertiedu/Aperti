@@ -2,6 +2,7 @@ modules = ["nodejs-20", "web", "bash", "postgresql-16"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
+integrations = ["javascript_openai_ai_integrations:2.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -38,28 +39,24 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=5000 BASE_PATH=/ API_PORT=8080 pnpm --filter @workspace/aperti run dev"
+args = "PORT=5000 BASE_PATH=/ API_PORT=3001 pnpm --filter @workspace/aperti run dev"
 waitForPort = 5000
 
 [[workflows.workflow]]
 name = "Backend API"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "PORT=3001 pnpm --filter @workspace/api-server run dev"
 waitForPort = 3001
 
-[workflows.workflow.metadata]
-outputType = "console"
-
 [[ports]]
 localPort = 3001
 externalPort = 3001
-
-[[ports]]
-localPort = 5000
-externalPort = 80
 
 [[ports]]
 localPort = 8080
@@ -76,6 +73,10 @@ externalPort = 3002
 [[ports]]
 localPort = 21665
 externalPort = 4200
+
+[[ports]]
+localPort = 5000
+externalPort = 80
 
 [deployment]
 deploymentTarget = "autoscale"
