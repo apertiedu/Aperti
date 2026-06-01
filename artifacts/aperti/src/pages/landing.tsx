@@ -26,77 +26,99 @@ function Reveal({ children, delay = 0, y = 28 }: { children: React.ReactNode; de
   );
 }
 
-/* ── Neural Network SVG ── */
-function NeuralNetwork() {
-  const nodes = [
-    { cx: 180, cy: 140, r: 30, label: "Teacher", primary: true },
-    { cx: 400, cy: 70, r: 22, label: "LiveClass" },
-    { cx: 540, cy: 200, r: 24, label: "Analytics" },
-    { cx: 420, cy: 310, r: 20, label: "Student" },
-    { cx: 260, cy: 320, r: 20, label: "Mentor" },
-    { cx: 90, cy: 270, r: 20, label: "Parent" },
-    { cx: 320, cy: 185, r: 14, label: "" },
-    { cx: 470, cy: 140, r: 11, label: "" },
-    { cx: 150, cy: 350, r: 10, label: "" },
+/* ── Abstract Geometry Hero Visual ── */
+function AbstractGeometry() {
+  // Isometric cube wireframe key points (cx=270, cy=190, s=72)
+  const T  = [270, 118], TR = [332, 154], TL = [208, 154];
+  const M  = [270, 190], BR = [332, 226], BL = [208, 226], B = [270, 262];
+
+  const edges: [number[], number[]][] = [
+    [T, TR], [T, TL], [TR, M], [TL, M],
+    [TR, BR], [M, B], [TL, BL],
+    [BR, B], [BL, B],
   ];
-  const edges = [
-    [0,1],[0,4],[0,5],[0,6],[1,2],[1,7],[2,3],[3,4],[4,5],[6,3],[6,1],[7,2],[5,8]
+
+  const topFace  = `${T[0]},${T[1]} ${TR[0]},${TR[1]} ${M[0]},${M[1]} ${TL[0]},${TL[1]}`;
+  const rightFace = `${TR[0]},${TR[1]} ${BR[0]},${BR[1]} ${B[0]},${B[1]} ${M[0]},${M[1]}`;
+  const leftFace  = `${TL[0]},${TL[1]} ${M[0]},${M[1]} ${B[0]},${B[1]} ${BL[0]},${BL[1]}`;
+
+  const particles = [
+    { cx: 490, cy: 80, r: 3, delay: 0 }, { cx: 80, cy: 160, r: 2.5, delay: 0.6 },
+    { cx: 560, cy: 330, r: 3.5, delay: 1.1 }, { cx: 40, cy: 350, r: 2, delay: 1.7 },
+    { cx: 520, cy: 200, r: 2, delay: 0.3 }, { cx: 140, cy: 310, r: 2, delay: 0.9 },
   ];
 
   return (
-    <svg viewBox="0 0 640 420" className="w-full max-w-2xl" style={{ height: 360 }} aria-hidden>
+    <svg viewBox="0 0 600 400" className="w-full max-w-2xl" style={{ height: 360 }} aria-hidden>
       <defs>
-        <filter id="glow2">
-          <feGaussianBlur stdDeviation="4" result="blur" />
+        <radialGradient id="geoGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor={TEAL} stopOpacity="0.15" />
+          <stop offset="100%" stopColor={TEAL} stopOpacity="0" />
+        </radialGradient>
+        <filter id="softGlow">
+          <feGaussianBlur stdDeviation="3" result="blur" />
           <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
-        <radialGradient id="nodeG" cx="35%" cy="25%" r="65%">
-          <stop offset="0%" stopColor="#4DB6AC" />
-          <stop offset="100%" stopColor={TEAL} />
-        </radialGradient>
-        <radialGradient id="nodeGbig" cx="35%" cy="25%" r="65%">
-          <stop offset="0%" stopColor="#80CBC4" />
-          <stop offset="100%" stopColor={TEAL_MED} />
-        </radialGradient>
       </defs>
 
+      {/* Background glow */}
+      <circle cx={270} cy={190} r={180} fill="url(#geoGlow)" />
+
+      {/* Dot grid */}
+      {Array.from({ length: 8 }, (_, row) =>
+        Array.from({ length: 10 }, (_, col) => (
+          <circle key={`${row}-${col}`}
+            cx={50 + col * 56} cy={30 + row * 50} r={1.2}
+            fill={TEAL} opacity={0.08} />
+        ))
+      )}
+
+      {/* Cube face fills */}
+      <polygon points={topFace}  fill={TEAL} opacity={0.13} />
+      <polygon points={rightFace} fill={TEAL} opacity={0.08} />
+      <polygon points={leftFace}  fill={TEAL} opacity={0.05} />
+
+      {/* Cube wireframe edges */}
       {edges.map(([a, b], i) => (
         <motion.line key={i}
-          x1={nodes[a].cx} y1={nodes[a].cy} x2={nodes[b].cx} y2={nodes[b].cy}
-          stroke={TEAL} strokeWidth="1.5" strokeOpacity="0.18"
+          x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
+          stroke={TEAL} strokeWidth={1.6} strokeOpacity={0.55}
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: 1, opacity: 1 }}
-          transition={{ duration: 1.4, delay: 0.3 + i * 0.07, ease: "easeInOut" }} />
+          transition={{ duration: 1.2, delay: 0.2 + i * 0.08, ease: "easeOut" }}
+        />
       ))}
 
-      {nodes.map((n, i) => (
-        <g key={i} filter="url(#glow2)">
-          <motion.circle cx={n.cx} cy={n.cy} r={n.r}
-            fill={n.primary ? "url(#nodeGbig)" : "url(#nodeG)"}
-            initial={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.5 + i * 0.1, type: "spring", bounce: 0.4 }}
-            style={{ originX: `${n.cx}px`, originY: `${n.cy}px` }} />
-          {n.label && (
-            <motion.text x={n.cx} y={n.cy + n.r + 14} textAnchor="middle"
-              fontSize={10} fill="#374151" fontWeight="600" fontFamily="Inter, sans-serif"
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.8 + i * 0.1 }}>
-              {n.label}
-            </motion.text>
-          )}
-        </g>
-      ))}
+      {/* Small pyramid (top-right) */}
+      <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
+        <line x1={490} y1={90} x2={450} y2={195} stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.38} />
+        <line x1={490} y1={90} x2={530} y2={195} stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.38} />
+        <line x1={450} y1={195} x2={530} y2={195} stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.38} />
+        <line x1={490} y1={90} x2={490} y2={195} stroke={TEAL} strokeWidth={1} strokeOpacity={0.2} strokeDasharray="4 3" />
+      </motion.g>
+
+      {/* Sphere outline (lower-left) */}
+      <motion.g filter="url(#softGlow)"
+        initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.9, type: "spring", bounce: 0.3 }}
+        style={{ originX: "100px", originY: "310px" }}>
+        <circle cx={100} cy={310} r={52} fill="none" stroke={TEAL} strokeWidth={1.4} strokeOpacity={0.35} />
+        <ellipse cx={100} cy={310} rx={52} ry={14} fill="none" stroke={TEAL} strokeWidth={1} strokeOpacity={0.22} strokeDasharray="5 3" />
+        <line x1={100} y1={258} x2={100} y2={362} stroke={TEAL} strokeWidth={0.8} strokeOpacity={0.18} strokeDasharray="4 3" />
+      </motion.g>
+
+      {/* Torus hint (bottom-right) */}
+      <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}>
+        <ellipse cx={510} cy={320} rx={45} ry={18} fill="none" stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.3} />
+        <ellipse cx={510} cy={320} rx={22} ry={9} fill="none" stroke={TEAL} strokeWidth={1} strokeOpacity={0.2} />
+      </motion.g>
 
       {/* Floating particles */}
-      {[
-        { x: 500, y: 60, delay: 0 }, { x: 60, y: 150, delay: 0.5 },
-        { x: 590, y: 350, delay: 1 }, { x: 30, y: 380, delay: 1.5 },
-      ].map((p, i) => (
-        <motion.circle key={`p${i}`} cx={p.x} cy={p.y} r={3}
-          fill={TEAL} opacity={0.35}
-          animate={{ y: [-6, 6, -6], opacity: [0.35, 0.6, 0.35] }}
-          transition={{ duration: 3 + i * 0.8, delay: p.delay, repeat: Infinity, ease: "easeInOut" }} />
+      {particles.map((p, i) => (
+        <motion.circle key={i} cx={p.cx} cy={p.cy} r={p.r}
+          fill={TEAL} opacity={0.4}
+          animate={{ y: [-5, 5, -5], opacity: [0.4, 0.65, 0.4] }}
+          transition={{ duration: 3 + i * 0.7, delay: p.delay, repeat: Infinity, ease: "easeInOut" }} />
       ))}
     </svg>
   );
@@ -593,7 +615,7 @@ export default function Landing() {
               </div>
 
               <div className="flex flex-wrap gap-5 text-xs text-gray-400">
-                {["Trusted by educators across 3 countries", "GDPR-compliant data ownership", "Dedicated onboarding support"].map((t, i) => (
+                {["GDPR-compliant data ownership", "Dedicated onboarding support", "No lock-in contracts"].map((t, i) => (
                   <motion.div key={t} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 + i * 0.1 }}
                     className="flex items-center gap-1.5">
                     <CheckCircle2 className="h-3.5 w-3.5" style={{ color: TEAL }} />
@@ -607,7 +629,7 @@ export default function Landing() {
             <motion.div style={{ y: heroY }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.22,1,0.36,1] }}
               className="relative hidden lg:block">
-              <NeuralNetwork />
+              <AbstractGeometry />
             </motion.div>
           </div>
         </div>
