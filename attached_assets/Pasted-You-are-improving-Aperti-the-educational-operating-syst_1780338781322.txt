@@ -1,0 +1,100 @@
+You are improving **Aperti**, the educational operating system. The codebase is a full‑stack app (Vite + Express + Drizzle) with many modules partially built but many bugs and design issues.  
+Your task: **fix every critical problem, enforce the strict Liquid Flow design, and make the entire platform professional, functional, and ready for launch.**
+
+---
+
+## 🔥 PRIORITY 1 – IMMEDIATE CRITICAL FIXES
+
+1. **Remove the guest landing page circuit demo**  
+   - If the interactive circuit demo cannot be made to look extremely professional and bug‑free, delete it entirely.  
+   - Replace it with a clean static illustration of the platform’s capabilities (e.g., a simple SVG of a connected classroom or a clean feature highlight image).  
+   - The rest of the landing page must remain: hero, features, pricing, early‑access form, footer.
+
+2. **Remove all user‑customizable secondary color options**  
+   - Aperti uses **only** black, white, grey, and teal (`#00796B`). Delete any UI that lets users change accent colors.  
+   - Enforce the palette rigidly across every page, component, and admin setting.
+
+3. **Fix the role‑based routing – Admin must not be treated as a teacher**  
+   - Ensure that `/admin/*` routes are only accessible to `role: admin`.  
+   - Admin should see the Admin Command Centre, not the teacher CoreHub by default.  
+   - Check `App.tsx` and middleware – fix any logic that incorrectly assigns admin to teacher views.
+
+4. **Fix the QR scanner for CheckIn™**  
+   - The scanner must work: open camera, scan a student QR code, call `POST /api/attendance/mark-by-code` successfully.  
+   - If the current `html5‑qrcode` implementation fails, rebuild it with a simpler, working approach.  
+   - Ensure deduplication and real‑time UI updates.
+
+5. **Fix the Role Switcher (QuickSwitch™)**  
+   - Admin must be able to switch to any role (teacher, student, parent) and see the corresponding dashboard.  
+   - The switch must be temporary, not persistent, and clearly indicated with a banner.
+
+6. **Fix InstaPay integration**  
+   - Ensure the teacher can select InstaPay, enter a transaction code, and see status "Pending Review".  
+   - Admin must be able to approve the code in SubPilot admin, activating the subscription.
+
+7. **Fix all labs (SimVerse™)**  
+   - ForgeField (circuit builder), ReactSphere (chemistry), Geometrix (3D shapes), BioSphere (cell explorer) must all render and be interactive.  
+   - Use Three.js and Canvas as needed. If any lab fails, replace it with a working minimal implementation.
+
+8. **Fix InkSpace™ and the whiteboard**  
+   - Both must be full‑screen by default, with a toggle to exit full‑screen.  
+   - Add tools: pen, highlighter, eraser, text, shapes (rectangle, circle), color picker (from Aperti palette), undo/redo, clear, export to PNG.  
+   - InkSpace must persist notes to the backend (save/load) – add `POST /api/inkspace/save` and `GET /api/inkspace/load`.
+
+9. **Fix Past Papers uploader (PaperVault admin)**  
+   - Improve UI: drag‑and‑drop zone, progress bar, file type validation (PDF only).  
+   - Upload to backend, store on disk, return public URL.
+
+10. **Remove old tutorial / onboarding**  
+    - Delete any reference to a tutorial designed for a previous version.  
+    - Build a **new, context‑sensitive onboarding wizard** that triggers only on first login and guides the user through the current features.
+
+---
+
+## 🎨 PRIORITY 2 – DESIGN & UX OVERHAUL
+
+- **Enforce Liquid Flow everywhere:**  
+  - Typography: Inter (sans), JetBrains Mono (mono).  
+  - Colors: #F5F5F5 bg, #FFFFFF cards, #121212 text, #00796B teal accent.  
+  - Cards: rounded‑xl, shadow‑sm, hover‑lift effect.  
+  - Animations: Framer Motion spring transitions on every page and modal.  
+  - No other colors, no purple/blue neons, no glassmorphism.  
+- **Remove all ™ symbols** from the codebase (keep names like CoreHub, PlanGrid).  
+- **Remove all fake reviews/testimonials** and competitor names (Google Classroom, etc.).  
+- **Ensure all buttons and links work:** internal anchors smooth‑scroll, external links open correctly, navigation never 404s.  
+- **Responsiveness:** Mobile‑first for student views, adaptive for teacher/admin.
+
+---
+
+## 🔧 PRIORITY 3 – MODULE‑BY‑MODULE PERFECTION
+
+After the critical fixes and design overhaul, systematically enhance **every** existing module:
+
+- **Teacher:** CoreHub (real stats, no mock), PlanGrid (working recurrence), CheckIn (QR functional), SubmitFlow (upload + grading flow), GradeFlow+SchemeCraft (keyword auto‑grade), QueryVault (full CRUD), CardStack (SM‑2), Syllabuilder, KudosEngine, Pulse (charts), LiveClass (already WebRTC), TwinControl, ClassForge, ContentCraft, LabBuilder, MarkerMind, InsightStream, InkSpace, HelpDesk.
+- **Student:** StudyStream (real data), The Mentor (streaming AI chat), Revisit, FocusCoach, Echo, Ascend (XP/quests), PeakRankings, SimVerse (all labs working), SnapGrade (OCR), ExamVault, FocusZone, TrialVault, PaperVault, LearnPath, DiscoverFeed, SkillBadge, TeamForge, PeerReview.
+- **Parent:** GuardianHub, GuardianLink, GuardianPulse.
+- **Admin:** AdminCommand, SubPilot (Stripe+InstaPay), FlexSeats, BudgetSense, AutoScale, SpendWise, ShieldCore, QuickSwitch, HelpDesk, PrivacyVault.
+- **Public:** Landing (perfect, no demo if not excellent), Terms, Privacy, Contact, Sitemap.
+
+---
+
+## ⚙️ BACKEND ESSENTIALS
+
+- **Provide admin credentials:**  
+  - Create a seed script (`scripts/seed.ts`) that generates an admin account:  
+    `username: admin`, `password: admin123` (bcrypt hashed), `role: admin`.  
+  - Run the seed automatically on first startup, or document a command to run.
+- **All API routes must be wired** and protected by JWT auth (`authenticate`, `requireRole`).
+- **Stripe:** Real checkout session creation and webhook handling for subscriptions.
+- **InstaPay:** Manual approval workflow functional.
+- **OCR:** `POST /api/ocr/scan` works with multer + Tesseract.
+- **Email:** GuardianPulse cron (every Friday) or manual trigger sends emails via Nodemailer.
+- **LiveClass:** Keep WebRTC mesh + Socket.IO signaling; ensure it works reliably.
+
+---
+
+## 🚀 FINAL STEP
+
+After all fixes and enhancements, output a summary of what was changed and provide the admin login credentials so Youssef can start using Aperti immediately.
+
+**Start now – fix the critical issues first, then beautify and perfect.**
