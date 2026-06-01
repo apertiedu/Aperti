@@ -1,0 +1,2 @@
+- [Aperti stack & API wiring](aperti-stack.md) — monorepo setup, proxy config, JWT auth, how API calls reach Express from Vite dev server
+- [Aperti route map](aperti-routes.md) — all teacher/student/parent/admin routes and which component each maps to
