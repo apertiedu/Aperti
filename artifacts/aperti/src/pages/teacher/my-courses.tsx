@@ -1,34 +1,76 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, BookOpen, Users, CheckCircle2, XCircle, Edit3, Trash2, Eye, EyeOff, Clock } from "lucide-react";
+import {
+  Plus, BookOpen, Users, CheckCircle2, XCircle, Edit3, Trash2,
+  Eye, EyeOff, Clock, Search, GraduationCap, TrendingUp, Globe,
+  ImageIcon, ChevronRight, AlertTriangle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Sheet, SheetContent, SheetHeader, SheetTitle,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#00796B";
+const TEAL_LIGHT = "#E0F2F1";
 const tok = () => localStorage.getItem("aperti_token") || "";
 const authFetch = (url: string, opts?: RequestInit) =>
-  fetch(url, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });
+  fetch(url, {
+    ...opts,
+    headers: {
+      Authorization: `Bearer ${tok()}`,
+      "Content-Type": "application/json",
+      ...(opts?.headers || {}),
+    },
+  });
 
 interface Course {
-  id: number; title: string; description: string | null; subject: string | null;
-  price_egp: string | null; is_published: boolean; duration_weeks: number;
-  pending_count: string; approved_count: string; created_at: string;
-}
-interface Enrollment {
-  id: number; course_title: string; student_name: string; student_username: string;
-  student_email: string | null; status: string; requested_at: string;
+  id: number;
+  title: string;
+  description: string | null;
+  subject: string | null;
+  price_egp: string | null;
+  thumbnail_url: string | null;
+  is_published: boolean;
+  duration_weeks: number;
+  enrolled_count: number;
+  pending_count: string;
+  approved_count: string;
+  created_at: string;
 }
 
+interface Enrollment {
+  id: number;
+  course_id: number;
+  course_title: string;
+  student_name: string;
+  student_username: string;
+  student_email: string | null;
+  status: string;
+  requested_at: string;
+}
+
+const SUBJECTS = [
+  "Physics", "Mathematics", "Chemistry", "Biology", "English",
+  "History", "Geography", "Economics", "Computer Science", "Arabic", "Science", "Other",
+];
+
+/* ── Course form ─────────────────────────────────────────────────────────── */
 function CourseForm({ course, onClose }: { course?: Course | null; onClose: () => void }) {
   const { toast } = useToast();
   const qc = useQueryClient();
@@ -37,232 +79,653 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
     description: course?.description ?? "",
     subject: course?.subject ?? "",
     priceEgp: course?.price_egp ?? "",
+    thumbnailUrl: course?.thumbnail_url ?? "",
     durationWeeks: course?.duration_weeks?.toString() ?? "8",
     isPublished: course?.is_published ?? false,
   });
 
+  const f = (k: keyof typeof form, v: string | boolean) =>
+    setForm(prev => ({ ...prev, [k]: v }));
+
   const mutation = useMutation({
     mutationFn: async () => {
+      const body = {
+        title: form.title,
+        description: form.description || null,
+        subject: form.subject || null,
+        priceEgp: form.priceEgp ? parseFloat(form.priceEgp) : null,
+        thumbnailUrl: form.thumbnailUrl || null,
+        durationWeeks: parseInt(form.durationWeeks) || 8,
+        isPublished: form.isPublished,
+      };
       const res = await authFetch(course ? `/courses/${course.id}` : "/courses", {
         method: course ? "PUT" : "POST",
-        body: JSON.stringify({ ...form, priceEgp: form.priceEgp || null, durationWeeks: parseInt(form.durationWeeks) }),
+        body: JSON.stringify(body),
       });
-      if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error || "Failed"); }
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.error || "Failed to save");
+      }
       return res.json();
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["teacher-courses"] });
-      toast({ title: course ? "Course updated" : "Course created ✅" });
+      toast({ title: course ? "Course updated" : "Course created" });
       onClose();
     },
-    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+    onError: (err: Error) =>
+      toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
   return (
-    <form onSubmit={e => { e.preventDefault(); mutation.mutate(); }} className="space-y-4 mt-4">
+    <form onSubmit={e => { e.preventDefault(); mutation.mutate(); }} className="space-y-4 mt-2">
       <div className="space-y-1.5">
-        <Label className="text-xs font-semibold">Course Title *</Label>
-        <Input required value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} placeholder="e.g. IGCSE Physics Intensive" className="h-10 rounded-xl" />
+        <Label className="text-xs font-semibold text-gray-700">Course Title *</Label>
+        <Input
+          required
+          value={form.title}
+          onChange={e => f("title", e.target.value)}
+          placeholder="e.g. IGCSE Physics Intensive"
+          className="h-10 rounded-xl"
+        />
       </div>
+
       <div className="space-y-1.5">
-        <Label className="text-xs font-semibold">Description</Label>
-        <Textarea rows={3} value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} placeholder="What will students learn?" className="rounded-xl resize-none" />
+        <Label className="text-xs font-semibold text-gray-700">Description</Label>
+        <Textarea
+          rows={3}
+          value={form.description}
+          onChange={e => f("description", e.target.value)}
+          placeholder="What will students learn in this course?"
+          className="rounded-xl resize-none text-sm"
+        />
       </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold">Subject</Label>
-          <Input value={form.subject} onChange={e => setForm(f => ({...f, subject: e.target.value}))} placeholder="Physics, Math…" className="h-10 rounded-xl" />
+          <Label className="text-xs font-semibold text-gray-700">Subject</Label>
+          <select
+            value={form.subject}
+            onChange={e => f("subject", e.target.value)}
+            className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">Select subject…</option>
+            {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold">Price (EGP / mo)</Label>
-          <Input type="number" value={form.priceEgp} onChange={e => setForm(f => ({...f, priceEgp: e.target.value}))} placeholder="299" className="h-10 rounded-xl" />
+          <Label className="text-xs font-semibold text-gray-700">Price (EGP / mo)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={form.priceEgp}
+            onChange={e => f("priceEgp", e.target.value)}
+            placeholder="e.g. 299"
+            className="h-10 rounded-xl"
+          />
         </div>
       </div>
+
       <div className="space-y-1.5">
-        <Label className="text-xs font-semibold">Duration (weeks)</Label>
-        <Input type="number" value={form.durationWeeks} onChange={e => setForm(f => ({...f, durationWeeks: e.target.value}))} className="h-10 rounded-xl" />
+        <Label className="text-xs font-semibold text-gray-700">Thumbnail URL</Label>
+        <div className="flex gap-2 items-start">
+          <Input
+            value={form.thumbnailUrl}
+            onChange={e => f("thumbnailUrl", e.target.value)}
+            placeholder="https://… (optional)"
+            className="h-10 rounded-xl flex-1"
+          />
+          {form.thumbnailUrl && (
+            <div className="h-10 w-14 rounded-xl overflow-hidden border border-gray-200 shrink-0">
+              <img
+                src={form.thumbnailUrl}
+                alt=""
+                className="h-full w-full object-cover"
+                onError={e => (e.currentTarget.style.display = "none")}
+              />
+            </div>
+          )}
+        </div>
       </div>
-      <label className="flex items-center gap-2.5 cursor-pointer">
-        <input type="checkbox" checked={form.isPublished} onChange={e => setForm(f => ({...f, isPublished: e.target.checked}))} className="rounded" />
-        <span className="text-sm text-gray-700">Publish immediately (visible in marketplace)</span>
+
+      <div className="space-y-1.5">
+        <Label className="text-xs font-semibold text-gray-700">Duration (weeks)</Label>
+        <Input
+          type="number"
+          min={1}
+          max={104}
+          value={form.durationWeeks}
+          onChange={e => f("durationWeeks", e.target.value)}
+          className="h-10 rounded-xl"
+        />
+      </div>
+
+      <label className="flex items-center gap-2.5 cursor-pointer py-1">
+        <div
+          onClick={() => f("isPublished", !form.isPublished)}
+          className={`w-10 h-5.5 rounded-full transition-colors relative cursor-pointer ${form.isPublished ? "bg-[#00796B]" : "bg-gray-200"}`}
+          style={{ minWidth: 40, height: 22 }}
+        >
+          <div
+            className={`absolute top-0.5 w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform`}
+            style={{
+              width: 18, height: 18,
+              transform: form.isPublished ? "translateX(20px)" : "translateX(2px)",
+            }}
+          />
+        </div>
+        <span className="text-sm text-gray-700 select-none">
+          {form.isPublished ? "Published — visible in marketplace" : "Draft — hidden from students"}
+        </span>
       </label>
-      <Button type="submit" className="w-full h-10 rounded-xl font-semibold" style={{ background: TEAL }} disabled={mutation.isPending}>
+
+      <Button
+        type="submit"
+        className="w-full h-10 rounded-xl font-semibold text-white"
+        style={{ background: TEAL }}
+        disabled={mutation.isPending}
+      >
         {mutation.isPending ? "Saving…" : course ? "Save Changes" : "Create Course"}
       </Button>
     </form>
   );
 }
 
+/* ── Enrollment request row ──────────────────────────────────────────────── */
+function EnrollmentRow({ e, onAction }: {
+  e: Enrollment;
+  onAction: (id: number, status: string) => void;
+}) {
+  const initials = (e.student_name || e.student_username).slice(0, 2).toUpperCase();
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+      <Card className="border border-gray-100 shadow-sm">
+        <CardContent className="p-4 flex items-center gap-4">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold"
+            style={{ background: TEAL }}
+          >
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-gray-900">
+              {e.student_name || e.student_username}
+            </p>
+            <p className="text-xs text-gray-400 truncate">→ {e.course_title}</p>
+            {e.student_email && (
+              <p className="text-xs text-gray-300 truncate">{e.student_email}</p>
+            )}
+            <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+              <Clock className="h-3 w-3" />
+              {new Date(e.requested_at).toLocaleDateString("en-GB", {
+                day: "numeric", month: "short", year: "numeric",
+              })}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            {e.status === "pending" ? (
+              <>
+                <Button
+                  size="sm"
+                  className="h-7 px-3 rounded-lg gap-1 text-xs text-white"
+                  style={{ background: TEAL }}
+                  onClick={() => onAction(e.id, "approved")}
+                >
+                  <CheckCircle2 className="h-3 w-3" /> Approve
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="h-7 px-3 rounded-lg gap-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                  onClick={() => onAction(e.id, "rejected")}
+                >
+                  <XCircle className="h-3 w-3" /> Reject
+                </Button>
+              </>
+            ) : (
+              <Badge
+                className={`text-[10px] rounded-full px-2 ${
+                  e.status === "approved"
+                    ? "bg-[#E0F2F1] text-[#00796B]"
+                    : "bg-red-50 text-red-600"
+                }`}
+                variant="outline"
+              >
+                {e.status}
+              </Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+/* ── Main page ───────────────────────────────────────────────────────────── */
 export default function MyCourses() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
+  const [studentsFor, setStudentsFor] = useState<Course | null>(null);
+  const [search, setSearch] = useState("");
+  const [tab, setTab] = useState("courses");
 
+  /* ── queries ── */
   const { data: courses = [], isLoading: coursesLoading } = useQuery<Course[]>({
     queryKey: ["teacher-courses"],
     queryFn: () => authFetch("/courses/teacher/my").then(r => r.json()),
+    refetchInterval: 30_000,
   });
 
-  const { data: enrollments = [] } = useQuery<Enrollment[]>({
+  const { data: enrollments = [], isLoading: enrollmentsLoading } = useQuery<Enrollment[]>({
     queryKey: ["teacher-enrollments"],
     queryFn: () => authFetch("/courses/teacher/enrollments").then(r => r.json()),
+    refetchInterval: 20_000,
   });
 
+  /* ── mutations ── */
   const deleteMutation = useMutation({
     mutationFn: (id: number) => authFetch(`/courses/${id}`, { method: "DELETE" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["teacher-courses"] }); toast({ title: "Course deleted" }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teacher-courses"] });
+      toast({ title: "Course deleted" });
+      setDeleteTarget(null);
+    },
   });
 
-  const publishMutation = useMutation({
-    mutationFn: ({ id, isPublished }: { id: number; isPublished: boolean }) =>
-      authFetch(`/courses/${id}`, { method: "PUT", body: JSON.stringify({ isPublished }) }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["teacher-courses"] }),
+  const togglePublish = useMutation({
+    mutationFn: (c: Course) =>
+      authFetch(`/courses/${c.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          title: c.title,
+          description: c.description,
+          subject: c.subject,
+          priceEgp: c.price_egp ? parseFloat(c.price_egp) : null,
+          thumbnailUrl: c.thumbnail_url,
+          durationWeeks: c.duration_weeks,
+          isPublished: !c.is_published,
+        }),
+      }),
+    onSuccess: (_, c) => {
+      qc.invalidateQueries({ queryKey: ["teacher-courses"] });
+      toast({ title: c.is_published ? "Course unpublished" : "Course published" });
+    },
   });
 
   const enrollMutation = useMutation({
     mutationFn: ({ id, status }: { id: number; status: string }) =>
       authFetch(`/courses/enrollments/${id}`, { method: "PUT", body: JSON.stringify({ status }) }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["teacher-enrollments"] }); toast({ title: "Enrollment updated" }); },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["teacher-enrollments"] });
+      qc.invalidateQueries({ queryKey: ["teacher-courses"] });
+      toast({ title: "Enrollment updated" });
+    },
   });
 
-  const pending = enrollments.filter(e => e.status === "pending");
+  /* ── derived data ── */
+  const pending = useMemo(() => enrollments.filter(e => e.status === "pending"), [enrollments]);
+  const filteredCourses = useMemo(() => {
+    const q = search.toLowerCase();
+    return q
+      ? courses.filter(c =>
+          c.title.toLowerCase().includes(q) ||
+          (c.subject?.toLowerCase().includes(q) ?? false)
+        )
+      : courses;
+  }, [courses, search]);
+
+  const totalEnrolled = courses.reduce((s, c) => s + (parseInt(c.approved_count) || 0), 0);
+  const published = courses.filter(c => c.is_published).length;
+
+  /* ── course students sheet ── */
+  const courseStudents = useMemo(
+    () => studentsFor
+      ? enrollments.filter(e => e.course_id === studentsFor.id && e.status === "approved")
+      : [],
+    [enrollments, studentsFor]
+  );
+
+  const openEdit = (c: Course) => { setEditing(c); setDialogOpen(true); };
+  const closeDialog = () => { setDialogOpen(false); setEditing(null); };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-primary" /> My Courses
+            <BookOpen className="h-6 w-6" style={{ color: TEAL }} /> My Courses
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Create and manage your published courses.</p>
+          <p className="text-gray-500 text-sm mt-1">
+            Create, manage and publish your courses to the student marketplace.
+          </p>
         </div>
-        <Dialog open={dialogOpen} onOpenChange={v => { setDialogOpen(v); if (!v) setEditing(null); }}>
+        <Dialog open={dialogOpen} onOpenChange={v => { if (!v) closeDialog(); else setDialogOpen(true); }}>
           <DialogTrigger asChild>
-            <Button className="gap-2 rounded-xl" style={{ background: TEAL }} onClick={() => setEditing(null)}>
+            <Button
+              className="gap-2 rounded-xl text-white shrink-0"
+              style={{ background: TEAL }}
+              onClick={() => { setEditing(null); setDialogOpen(true); }}
+            >
               <Plus className="h-4 w-4" /> New Course
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader><DialogTitle>{editing ? "Edit Course" : "Create Course"}</DialogTitle></DialogHeader>
-            <CourseForm course={editing} onClose={() => { setDialogOpen(false); setEditing(null); }} />
+          <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editing ? "Edit Course" : "Create New Course"}</DialogTitle>
+            </DialogHeader>
+            <CourseForm course={editing} onClose={closeDialog} />
           </DialogContent>
         </Dialog>
       </div>
 
-      <Tabs defaultValue="courses">
-        <TabsList className="bg-gray-100 rounded-xl p-1">
-          <TabsTrigger value="courses" className="rounded-lg text-xs">My Courses ({courses.length})</TabsTrigger>
-          <TabsTrigger value="enrollments" className="rounded-lg text-xs">
-            Enrollment Requests {pending.length > 0 && <Badge className="ml-1 bg-primary text-white text-[10px] px-1.5">{pending.length}</Badge>}
-          </TabsTrigger>
-        </TabsList>
+      {/* ── Stats strip ── */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: "Total Courses", value: courses.length, icon: BookOpen },
+          { label: "Published", value: published, icon: Globe },
+          { label: "Students Enrolled", value: totalEnrolled, icon: GraduationCap },
+        ].map(({ label, value, icon: Icon }) => (
+          <Card key={label} className="border border-gray-100 shadow-sm">
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: TEAL_LIGHT }}>
+                <Icon className="h-4.5 w-4.5" style={{ color: TEAL }} />
+              </div>
+              <div>
+                <p className="text-xl font-black text-gray-900">{value}</p>
+                <p className="text-xs text-gray-400">{label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
+      {/* ── Tabs ── */}
+      <Tabs value={tab} onValueChange={setTab}>
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <TabsList className="bg-gray-100 rounded-xl p-1">
+            <TabsTrigger value="courses" className="rounded-lg text-xs">
+              Courses ({courses.length})
+            </TabsTrigger>
+            <TabsTrigger value="enrollments" className="rounded-lg text-xs relative">
+              Requests
+              {pending.length > 0 && (
+                <Badge
+                  className="ml-1.5 text-white text-[10px] px-1.5 py-0 rounded-full h-4 min-w-4"
+                  style={{ background: TEAL }}
+                >
+                  {pending.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          {tab === "courses" && (
+            <div className="relative w-56">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+              <Input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search courses…"
+                className="h-8 pl-8 rounded-xl text-xs"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* ── COURSES TAB ── */}
         <TabsContent value="courses" className="mt-4">
           {coursesLoading ? (
-            <div className="space-y-3">{[...Array(3)].map((_,i) => <div key={i} className="h-20 bg-white animate-pulse rounded-2xl" />)}</div>
-          ) : courses.length === 0 ? (
-            <Card className="border-dashed border-2 border-gray-200"><CardContent className="p-10 text-center text-gray-400">
-              <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-20" />
-              <p className="font-medium">No courses yet</p>
-              <p className="text-sm mt-1">Create your first course to start enrolling students.</p>
-            </CardContent></Card>
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <Skeleton key={i} className="h-20 w-full rounded-2xl" />
+              ))}
+            </div>
+          ) : filteredCourses.length === 0 ? (
+            <Card className="border-dashed border-2 border-gray-200">
+              <CardContent className="p-12 text-center text-gray-400">
+                <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                <p className="font-semibold">
+                  {search ? "No courses match your search" : "No courses yet"}
+                </p>
+                {!search && (
+                  <p className="text-sm mt-1">
+                    Create your first course and publish it to start enrolling students.
+                  </p>
+                )}
+              </CardContent>
+            </Card>
           ) : (
             <div className="space-y-3">
-              {courses.map((c, i) => (
-                <motion.div key={c.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <Card className="border border-gray-100 shadow-sm">
-                    <CardContent className="p-4 flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${TEAL}12` }}>
-                        <BookOpen className="h-5 w-5" style={{ color: TEAL }} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-bold text-sm text-gray-900 truncate">{c.title}</p>
-                          <Badge variant={c.is_published ? "default" : "secondary"} className={`text-[10px] px-2 rounded-full ${c.is_published ? "bg-emerald-100 text-emerald-700" : ""}`}>
-                            {c.is_published ? "Published" : "Draft"}
-                          </Badge>
+              <AnimatePresence>
+                {filteredCourses.map((c, i) => (
+                  <motion.div
+                    key={c.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.97 }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                      <CardContent className="p-0 flex overflow-hidden rounded-2xl">
+                        {/* Thumbnail */}
+                        <div
+                          className="w-28 h-24 shrink-0 flex items-center justify-center"
+                          style={{
+                            background: c.thumbnail_url ? undefined : TEAL_LIGHT,
+                          }}
+                        >
+                          {c.thumbnail_url ? (
+                            <img
+                              src={c.thumbnail_url}
+                              alt={c.title}
+                              className="w-full h-full object-cover"
+                              onError={e => {
+                                e.currentTarget.style.display = "none";
+                                e.currentTarget.parentElement!.style.background = TEAL_LIGHT;
+                              }}
+                            />
+                          ) : (
+                            <ImageIcon className="h-6 w-6" style={{ color: TEAL, opacity: 0.4 }} />
+                          )}
                         </div>
-                        <div className="flex items-center gap-3 mt-0.5 text-xs text-gray-400">
-                          {c.subject && <span>{c.subject}</span>}
-                          {c.price_egp && <span>{parseFloat(c.price_egp).toLocaleString()} EGP/mo</span>}
-                          <span className="flex items-center gap-1"><Users className="h-3 w-3" />{c.approved_count} enrolled</span>
-                          {parseInt(c.pending_count) > 0 && <span className="text-amber-600 font-medium">{c.pending_count} pending</span>}
+
+                        {/* Info */}
+                        <div className="flex-1 p-4 min-w-0 flex items-center gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-0.5">
+                              <p className="font-bold text-sm text-gray-900 truncate">{c.title}</p>
+                              <Badge
+                                className={`text-[10px] px-2 rounded-full shrink-0 ${
+                                  c.is_published
+                                    ? "bg-[#E0F2F1] text-[#00796B]"
+                                    : "bg-gray-100 text-gray-500"
+                                }`}
+                                variant="outline"
+                              >
+                                {c.is_published ? "Published" : "Draft"}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-400">
+                              {c.subject && <span className="font-medium text-gray-600">{c.subject}</span>}
+                              {c.price_egp && <span>{parseFloat(c.price_egp).toLocaleString()} EGP/mo</span>}
+                              <span>{c.duration_weeks}w</span>
+                            </div>
+                            <div className="flex items-center gap-3 mt-1.5 text-xs">
+                              <button
+                                onClick={() => setStudentsFor(c)}
+                                className="flex items-center gap-1 text-gray-500 hover:text-[#00796B] transition-colors"
+                              >
+                                <Users className="h-3 w-3" />
+                                <span className="font-semibold">{c.approved_count}</span> enrolled
+                                <ChevronRight className="h-2.5 w-2.5" />
+                              </button>
+                              {parseInt(c.pending_count) > 0 && (
+                                <button
+                                  onClick={() => setTab("enrollments")}
+                                  className="flex items-center gap-1 font-semibold text-amber-600 hover:text-amber-700 transition-colors"
+                                >
+                                  <AlertTriangle className="h-3 w-3" />
+                                  {c.pending_count} pending
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-gray-400 hover:text-gray-700 rounded-lg"
+                              title={c.is_published ? "Unpublish" : "Publish"}
+                              onClick={() => togglePublish.mutate(c)}
+                              disabled={togglePublish.isPending}
+                            >
+                              {c.is_published
+                                ? <EyeOff className="h-3.5 w-3.5" />
+                                : <Eye className="h-3.5 w-3.5" />}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-gray-400 hover:text-gray-700 rounded-lg"
+                              onClick={() => openEdit(c)}
+                            >
+                              <Edit3 className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-gray-400 hover:text-red-500 rounded-lg"
+                              onClick={() => setDeleteTarget(c)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-gray-700"
-                          onClick={() => publishMutation.mutate({ id: c.id, isPublished: !c.is_published })}
-                          title={c.is_published ? "Unpublish" : "Publish"}>
-                          {c.is_published ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-gray-700"
-                          onClick={() => { setEditing(c); setDialogOpen(true); }}>
-                          <Edit3 className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-red-500"
-                          onClick={() => deleteMutation.mutate(c.id)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
           )}
         </TabsContent>
 
+        {/* ── ENROLLMENTS TAB ── */}
         <TabsContent value="enrollments" className="mt-4">
-          {enrollments.length === 0 ? (
-            <Card className="border-dashed border-2 border-gray-200"><CardContent className="p-10 text-center text-gray-400">
-              <Users className="h-10 w-10 mx-auto mb-3 opacity-20" />
-              <p className="font-medium">No enrollment requests</p>
-            </CardContent></Card>
+          {enrollmentsLoading ? (
+            <div className="space-y-3">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
+            </div>
+          ) : enrollments.length === 0 ? (
+            <Card className="border-dashed border-2 border-gray-200">
+              <CardContent className="p-12 text-center text-gray-400">
+                <Users className="h-10 w-10 mx-auto mb-3 opacity-20" />
+                <p className="font-semibold">No enrollment requests yet</p>
+                <p className="text-sm mt-1">When students request to join your courses, they'll appear here.</p>
+              </CardContent>
+            </Card>
           ) : (
             <div className="space-y-2">
-              {enrollments.map((e, i) => (
-                <motion.div key={e.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
-                  <Card className="border border-gray-100 shadow-sm">
-                    <CardContent className="p-4 flex items-center gap-4">
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold" style={{ background: TEAL }}>
-                        {(e.student_name || e.student_username).slice(0,2).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-gray-900">{e.student_name || e.student_username}</p>
-                        <p className="text-xs text-gray-400">→ {e.course_title}</p>
-                        <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                          <Clock className="h-3 w-3" />
-                          {new Date(e.requested_at).toLocaleDateString("en-GB", { day:"numeric", month:"short", year:"numeric" })}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {e.status === "pending" ? (
-                          <>
-                            <Button size="sm" className="h-7 px-3 rounded-lg gap-1 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
-                              onClick={() => enrollMutation.mutate({ id: e.id, status: "approved" })}>
-                              <CheckCircle2 className="h-3 w-3" /> Approve
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-7 px-3 rounded-lg gap-1 text-xs text-red-600 border-red-200 hover:bg-red-50"
-                              onClick={() => enrollMutation.mutate({ id: e.id, status: "rejected" })}>
-                              <XCircle className="h-3 w-3" /> Reject
-                            </Button>
-                          </>
-                        ) : (
-                          <Badge variant={e.status === "approved" ? "default" : "destructive"}
-                            className={`text-[10px] rounded-full ${e.status === "approved" ? "bg-emerald-100 text-emerald-700" : ""}`}>
-                            {e.status}
-                          </Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
+              {pending.length > 0 && (
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide px-1 mb-3">
+                  Pending ({pending.length})
+                </p>
+              )}
+              {pending.map(e => (
+                <EnrollmentRow key={e.id} e={e} onAction={(id, status) => enrollMutation.mutate({ id, status })} />
               ))}
+
+              {enrollments.filter(e => e.status !== "pending").length > 0 && (
+                <>
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide px-1 mt-5 mb-3">
+                    Reviewed
+                  </p>
+                  {enrollments
+                    .filter(e => e.status !== "pending")
+                    .map(e => (
+                      <EnrollmentRow key={e.id} e={e} onAction={(id, status) => enrollMutation.mutate({ id, status })} />
+                    ))}
+                </>
+              )}
             </div>
           )}
         </TabsContent>
       </Tabs>
+
+      {/* ── Delete confirm ── */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={v => !v && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete "{deleteTarget?.title}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently removes the course and all its enrollment data. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white"
+              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+            >
+              Delete Course
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ── Enrolled students sheet ── */}
+      <Sheet open={!!studentsFor} onOpenChange={v => !v && setStudentsFor(null)}>
+        <SheetContent side="right" className="w-80">
+          <SheetHeader>
+            <SheetTitle className="text-base leading-tight">{studentsFor?.title}</SheetTitle>
+            <p className="text-xs text-muted-foreground">Enrolled students</p>
+          </SheetHeader>
+          <div className="mt-4 space-y-2 overflow-y-auto">
+            {courseStudents.length === 0 ? (
+              <div className="text-center text-gray-400 py-10">
+                <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                <p className="text-sm">No enrolled students yet</p>
+              </div>
+            ) : (
+              courseStudents.map(e => (
+                <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold"
+                    style={{ background: TEAL }}
+                  >
+                    {(e.student_name || e.student_username).slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {e.student_name || e.student_username}
+                    </p>
+                    {e.student_email && (
+                      <p className="text-xs text-gray-400 truncate">{e.student_email}</p>
+                    )}
+                    <p className="text-[10px] text-gray-300">
+                      Enrolled {new Date(e.requested_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                    </p>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+          {courseStudents.length > 0 && (
+            <div className="mt-4 p-3 rounded-xl flex items-center gap-2" style={{ background: TEAL_LIGHT }}>
+              <TrendingUp className="h-4 w-4 shrink-0" style={{ color: TEAL }} />
+              <p className="text-xs font-semibold" style={{ color: TEAL }}>
+                {courseStudents.length} student{courseStudents.length !== 1 ? "s" : ""} enrolled
+              </p>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

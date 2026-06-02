@@ -1,7 +1,4 @@
-- [Framer Motion spring type](framer-spring.md) — `type: "spring"` in variant transitions needs `as const` to satisfy TypeScript
-- [Wouter Route component props](wouter-route-props.md) — components passed as `component={}` to wouter Route must take no custom props; use internal defaults or URL params
-- [Three.js OrbitControls types](three-orbitcontrols.md) — `three/examples/jsm/controls/OrbitControls` not resolved by @types/three; suppress with `// @ts-ignore`
-- [Redis stub pattern](redis-stub.md) — api-server has in-memory Redis stub at `artifacts/api-server/src/lib/redis.ts` for Replit compatibility
-- [Aperti JWT auth system](aperti-jwt-auth.md) — JWT_SECRET must match across auth.ts and middleware/auth.ts; db.query needs schema aliases; sessionsTable=lessonsTable (raw SQL must use "lessons"); apiFetch at @/lib/api adds Bearer token for all frontend pages
-- [Aperti routing architecture](aperti-routing.md) — AdminRouter (/ → AdminCommand), TeacherRouter (/ → CoreHub), StudentRouter, ParentRouter; role override via localStorage `aperti_role_override`; inkspace routes mounted at /inkspace with relative /load /save paths
-- [Aperti DB schema gaps](aperti-db-schema-gaps.md) — aperti_courses missing 6 cols + course_enrollments absent; fixed via ALTER/CREATE migration
+- [Subscriptions schema gaps](subscriptions-schema.md) — `subscriptions` table existed without `screenshot_url`/`coupon_id`; Drizzle relational API requires `relations()` which was missing — use plain `db.select()` instead.
+- [Admin password seeding](admin-credentials.md) — bcrypt hash seeded at startup may mismatch; if `admin/admin123` returns 401, reset hash directly in DB via Node bcryptjs.
+- [Drizzle querySchema aliases](drizzle-query-schema.md) — `lib/db/src/index.ts` builds `querySchema` with table aliases but NO `relations()` — never use `db.query.X.findMany({ with: {...} })`; use plain selects with joins.
+- [API routing structure](api-routing.md) — Backend API (port 3001): `/auth/*` and `/courses` mounted directly on app; `/api/*` router holds everything else. Frontend proxies `/api` → 3001.

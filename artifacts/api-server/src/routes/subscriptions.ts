@@ -2,38 +2,48 @@ import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { subscriptionsTable, subscriptionPlansTable, flexSeatsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const subscriptionsRouter = Router();
 
 // ─── PUBLIC / TEACHER ROUTES ───
 
 // GET /subscriptions/plans — available plans
-subscriptionsRouter.get("/plans", authenticate, async (req: AuthRequest, res: Response) => {
-  const plans = await db.query.subscriptionPlans.findMany();
+subscriptionsRouter.get("/plans", authenticate, async (_req: AuthRequest, res: Response) => {
+  const plans = await db.select().from(subscriptionPlansTable).orderBy(subscriptionPlansTable.sortOrder);
   res.json(plans);
 });
 
 // GET /subscriptions/mine — teacher's active subscription
 subscriptionsRouter.get("/mine", authenticate, async (req: AuthRequest, res: Response) => {
   const accountId = req.userId!;
-  const sub = await db.query.subscriptions.findFirst({
-    where: (s, { eq }) => eq(s.accountId, accountId),
-    with: { plan: true },
-  });
-  const flexSeats = sub
-    ? await db.query.flexSeats.findMany({ where: (f, { eq }) => eq(f.subscriptionId, sub.id) })
-    : [];
-  const payments = []; // placeholder – payment history table to be added
-  res.json({ subscription: sub, flexSeats, payments });
+  const subs = await db.select().from(subscriptionsTable)
+    .where(eq(subscriptionsTable.accountId, accountId))
+    .limit(1);
+  const sub = subs[0] ?? null;
+
+  let plan = null;
+  let flexSeats: typeof flexSeatsTable.$inferSelect[] = [];
+
+  if (sub) {
+    const plans = await db.select().from(subscriptionPlansTable)
+      .where(eq(subscriptionPlansTable.id, sub.planId)).limit(1);
+    plan = plans[0] ?? null;
+    flexSeats = await db.select().from(flexSeatsTable)
+      .where(eq(flexSeatsTable.subscriptionId, sub.id));
+  }
+
+  const payments: unknown[] = [];
+  res.json({ subscription: sub ? { ...sub, plan } : null, flexSeats, payments });
 });
 
-// POST /subscriptions/checkout — initiate a new subscription (Stripe or InstaPay)
+// POST /subscriptions/checkout — initiate a new subscription
 subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res: Response) => {
   const accountId = req.userId!;
   const { planId, paymentMethod, instapayCode } = req.body;
-  const plan = await db.query.subscriptionPlans.findFirst({ where: (p, { eq }) => eq(p.id, planId) });
-  if (!plan) return res.status(400).json({ error: "Invalid plan" });
+  const plans = await db.select().from(subscriptionPlansTable)
+    .where(eq(subscriptionPlansTable.id, planId)).limit(1);
+  if (!plans[0]) return res.status(400).json({ error: "Invalid plan" });
 
   const status = paymentMethod === "stripe" ? "active" : "pending_review";
   const [subscription] = await db.insert(subscriptionsTable).values({
@@ -41,13 +51,10 @@ subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res
     planId,
     status,
     startDate: new Date(),
-    endDate: null, // will be set after payment confirmation
+    endDate: null,
     instaPayCode: paymentMethod === "instapay" ? instapayCode : null,
     paymentStatus: paymentMethod === "stripe" ? "paid" : "pending",
   }).returning();
-
-  // Stripe integration would create a checkout session here
-  // For InstaPay, just return the subscription for admin review
 
   res.status(201).json({ subscription });
 });
@@ -56,11 +63,14 @@ subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res
 subscriptionsRouter.post("/flex-seats", authenticate, async (req: AuthRequest, res: Response) => {
   const accountId = req.userId!;
   const { quantity } = req.body;
-  const sub = await db.query.subscriptions.findFirst({
-    where: (s, { eq }) => eq(s.accountId, accountId),
-  });
-  if (!sub) return res.status(400).json({ error: "No active subscription" });
-  const plan = await db.query.subscriptionPlans.findFirst({ where: (p, { eq }) => eq(p.id, sub.planId) });
+  const subs = await db.select().from(subscriptionsTable)
+    .where(eq(subscriptionsTable.accountId, accountId)).limit(1);
+  if (!subs[0]) return res.status(400).json({ error: "No active subscription" });
+  const sub = subs[0];
+
+  const plans = await db.select().from(subscriptionPlansTable)
+    .where(eq(subscriptionPlansTable.id, sub.planId)).limit(1);
+  const plan = plans[0];
   if (!plan?.flexSeatPriceEgp) return res.status(400).json({ error: "Flex seats not available on this plan" });
 
   const priceEgp = Number(plan.flexSeatPriceEgp) * quantity;
@@ -70,19 +80,25 @@ subscriptionsRouter.post("/flex-seats", authenticate, async (req: AuthRequest, r
     priceEgp: priceEgp.toString(),
     active: "active",
   });
-  // In production, charge the teacher via saved payment method
   res.json({ success: true, totalEgp: priceEgp });
 });
 
 // ─── ADMIN ROUTES ───
 
-// GET /subscriptions/admin/all — all subscriptions (admin)
-subscriptionsRouter.get("/admin/all", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
-  const subs = await db.query.subscriptions.findMany({ with: { plan: true } });
-  res.json(subs);
+// GET /subscriptions/admin/all — all subscriptions with joined plan
+subscriptionsRouter.get("/admin/all", authenticate, requireRole("admin"), async (_req: AuthRequest, res: Response) => {
+  const subs = await db.select().from(subscriptionsTable);
+  const planIds = [...new Set(subs.map(s => s.planId))];
+  let plans: typeof subscriptionPlansTable.$inferSelect[] = [];
+  if (planIds.length > 0) {
+    plans = await db.select().from(subscriptionPlansTable);
+  }
+  const planMap = Object.fromEntries(plans.map(p => [p.id, p]));
+  const result = subs.map(s => ({ ...s, plan: planMap[s.planId] ?? null }));
+  res.json(result);
 });
 
-// PUT /subscriptions/admin/:id/approve — approve InstaPay
+// PUT /subscriptions/admin/:id/approve
 subscriptionsRouter.put("/admin/:id/approve", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
   await db.update(subscriptionsTable)
@@ -91,7 +107,7 @@ subscriptionsRouter.put("/admin/:id/approve", authenticate, requireRole("admin")
   res.json({ success: true });
 });
 
-// PUT /subscriptions/admin/:id/reject — reject InstaPay
+// PUT /subscriptions/admin/:id/reject
 subscriptionsRouter.put("/admin/:id/reject", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
   await db.update(subscriptionsTable)
@@ -115,7 +131,7 @@ subscriptionsRouter.post("/admin/plans", authenticate, requireRole("admin"), asy
   res.status(201).json(plan);
 });
 
-// PUT /subscriptions/admin/plans/:id — update plan (price, features, etc.)
+// PUT /subscriptions/admin/plans/:id — update plan
 subscriptionsRouter.put("/admin/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
   const allowed = ["name", "type", "priceEgp", "features", "studentLimit", "flexSeatPriceEgp", "isActive", "sortOrder"];
@@ -129,7 +145,7 @@ subscriptionsRouter.put("/admin/plans/:id", authenticate, requireRole("admin"), 
   res.json({ success: true });
 });
 
-// DELETE /subscriptions/admin/plans/:id — soft delete (deactivate) or hard delete
+// DELETE /subscriptions/admin/plans/:id
 subscriptionsRouter.delete("/admin/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
   await db.delete(subscriptionPlansTable).where(eq(subscriptionPlansTable.id, id));
