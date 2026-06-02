@@ -11,16 +11,18 @@ import { useQuery } from "@tanstack/react-query";
 const tok = () => localStorage.getItem("aperti_token") || "";
 
 const modules = [
-  { to: "/admin/world-pilot", label: "WorldPilot", desc: "Global platform management", icon: Globe },
-  { to: "/admin/shield-core", label: "ShieldCore", desc: "Security & exam integrity", icon: Shield },
-  { to: "/admin/budget-sense", label: "BudgetSense", desc: "Financial overview & billing", icon: Calculator },
-  { to: "/admin/auto-scale", label: "AutoScale", desc: "Capacity & performance", icon: Activity },
-  { to: "/admin/spend-wise", label: "SpendWise", desc: "Expenditure analytics", icon: DollarSign },
-  { to: "/admin/helpdesk", label: "HelpDesk Admin", desc: "Support ticket management", icon: LifeBuoy },
-  { to: "/admin/paper-vault", label: "PaperVault Admin", desc: "Upload & manage past papers", icon: FileText },
-  { to: "/admin/subpilot-settings", label: "SubPilot Admin", desc: "Subscription approvals", icon: Settings },
-  { to: "/admin/quick-switch", label: "QuickSwitch", desc: "Preview as any role", icon: RefreshCw },
-  { to: "/admin/guardian-pulse", label: "GuardianPulse", desc: "Parent notification centre", icon: Bell },
+  { to: "/admin/world-pilot",           label: "WorldPilot",            desc: "Global platform management",          icon: Globe },
+  { to: "/admin/shield-core",           label: "ShieldCore",             desc: "Security & exam integrity",           icon: Shield },
+  { to: "/admin/budget-sense",          label: "BudgetSense",            desc: "Financial overview & billing",        icon: Calculator },
+  { to: "/admin/auto-scale",            label: "AutoScale",              desc: "Capacity & performance",              icon: Activity },
+  { to: "/admin/spend-wise",            label: "SpendWise",              desc: "Expenditure analytics",               icon: DollarSign },
+  { to: "/admin/helpdesk",              label: "HelpDesk Admin",         desc: "Support ticket management",           icon: LifeBuoy },
+  { to: "/admin/paper-vault",           label: "PaperVault Admin",       desc: "Upload & manage past papers",         icon: FileText },
+  { to: "/admin/subpilot-settings",     label: "SubPilot Admin",         desc: "Subscriptions, plans & coupons",      icon: Settings },
+  { to: "/admin/quick-switch",          label: "QuickSwitch",            desc: "Preview as any role",                 icon: RefreshCw },
+  { to: "/admin/guardian-pulse",        label: "GuardianPulse",          desc: "Parent notification centre",          icon: Bell },
+  { to: "/admin/landing-editor",        label: "Landing Editor",         desc: "Edit landing page content live",      icon: Globe },
+  { to: "/admin/assistant-permissions", label: "Assistant Permissions",  desc: "Control assistant access levels",     icon: Shield },
 ];
 
 function LiveStatsBadge({ count, label }: { count: number | string; label: string }) {

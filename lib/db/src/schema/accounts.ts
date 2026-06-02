@@ -25,5 +25,14 @@ export const deviceSessionsTable = pgTable("device_sessions", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+export const assistantPermissionsTable = pgTable("assistant_permissions", {
+  id: serial("id").primaryKey(),
+  assistantId: integer("assistant_id").notNull().references(() => accountsTable.id, { onDelete: "cascade" }),
+  permission: text("permission").notNull(),
+  grantedBy: integer("granted_by"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export type Account = typeof accountsTable.$inferSelect;
 export type DeviceSession = typeof deviceSessionsTable.$inferSelect;
+export type AssistantPermission = typeof assistantPermissionsTable.$inferSelect;

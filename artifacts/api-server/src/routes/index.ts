@@ -45,6 +45,10 @@ import { ascendRouter } from "./ascend";
 import { echoEvolveRouter } from "./echo-evolve";
 import inkspaceRouter from "./inkspace";
 import absenceNotifyRouter from "./absence-notify";
+import { assistantsRouter } from "./assistants";
+import { couponsRouter } from "./coupons";
+import { landingSettingsRouter } from "./landing-settings";
+import { notebooksRouter } from "./notebooks";
 
 const router: IRouter = Router();
 
@@ -94,5 +98,9 @@ router.use("/ascend", ascendRouter);
 router.use("/echo-evolve", echoEvolveRouter);
 router.use("/inkspace", inkspaceRouter);
 router.use("/absence-notify", absenceNotifyRouter);
+router.use("/assistants", assistantsRouter);
+router.use("/coupons", couponsRouter);
+router.use(landingSettingsRouter);
+router.use("/notebooks", notebooksRouter);
 
 export default router;

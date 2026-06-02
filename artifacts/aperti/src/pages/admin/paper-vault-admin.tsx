@@ -24,6 +24,9 @@ export default function PaperVaultAdmin() {
   const [board, setBoard] = useState("CAIE");
   const [subject, setSubject] = useState("");
   const [year, setYear] = useState(String(new Date().getFullYear()));
+  const [session, setSession] = useState("May/June");
+  const [component, setComponent] = useState("");
+  const [paperNumber, setPaperNumber] = useState("");
   const [variant, setVariant] = useState("");
   const [fileUrl, setFileUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -39,7 +42,7 @@ export default function PaperVaultAdmin() {
   });
 
   const uploadMutation = useMutation({
-    mutationFn: async (data: { board: string; subject: string; year: string; variant: string; fileUrl?: string; file?: File }) => {
+    mutationFn: async (data: { board: string; subject: string; year: string; session?: string; component?: string; paperNumber?: string; variant: string; fileUrl?: string; file?: File }) => {
       setUploadProgress(0);
       if (data.file) {
         const form = new FormData();
@@ -47,6 +50,9 @@ export default function PaperVaultAdmin() {
         form.append("board", data.board);
         form.append("subject", data.subject);
         form.append("year", data.year);
+        if (data.session) form.append("session", data.session);
+        if (data.component) form.append("component", data.component);
+        if (data.paperNumber) form.append("paperNumber", data.paperNumber);
         form.append("variant", data.variant);
         return new Promise<any>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
@@ -68,7 +74,7 @@ export default function PaperVaultAdmin() {
         const res = await fetch(`${API}/past-papers`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-          body: JSON.stringify({ board: data.board, subject: data.subject, year: Number(data.year), variant: data.variant, fileUrl: data.fileUrl }),
+          body: JSON.stringify({ board: data.board, subject: data.subject, year: Number(data.year), session: data.session, component: data.component, paperNumber: data.paperNumber, variant: data.variant, fileUrl: data.fileUrl }),
         });
         setUploadProgress(100);
         setTimeout(() => setUploadProgress(null), 800);
@@ -78,7 +84,7 @@ export default function PaperVaultAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "past-papers"] });
-      setSubject(""); setVariant(""); setFileUrl(""); setFile(null);
+      setSubject(""); setSession("May/June"); setComponent(""); setPaperNumber(""); setVariant(""); setFileUrl(""); setFile(null);
       toast({ title: "Paper uploaded successfully" });
     },
     onError: (err: Error) => {
@@ -129,7 +135,7 @@ export default function PaperVaultAdmin() {
       toast({ title: "Provide a PDF file or URL", variant: "destructive" });
       return;
     }
-    uploadMutation.mutate({ board, subject, year, variant, fileUrl: fileUrl || undefined, file: file || undefined });
+    uploadMutation.mutate({ board, subject, year, session, component, paperNumber, variant, fileUrl: fileUrl || undefined, file: file || undefined });
   };
 
   return (
@@ -187,14 +193,50 @@ export default function PaperVaultAdmin() {
             />
           </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-gray-600">Variant / Paper</Label>
-            <Input
-              value={variant}
-              onChange={e => setVariant(e.target.value)}
-              placeholder="e.g. Paper 4 May/June"
-              className="h-9"
-            />
+          {/* Session + Paper Number */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-gray-600">Session</Label>
+              <Select value={session} onValueChange={setSession}>
+                <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {["May/June", "Oct/Nov", "Feb/Mar", "Jan", "Other"].map(s => (
+                    <SelectItem key={s} value={s}>{s}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-gray-600">Paper Number</Label>
+              <Input
+                value={paperNumber}
+                onChange={e => setPaperNumber(e.target.value)}
+                placeholder="e.g. 1, 2, 3"
+                className="h-9"
+              />
+            </div>
+          </div>
+
+          {/* Component + Variant */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-gray-600">Component</Label>
+              <Input
+                value={component}
+                onChange={e => setComponent(e.target.value)}
+                placeholder="e.g. Multiple Choice, Written"
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-gray-600">Variant</Label>
+              <Input
+                value={variant}
+                onChange={e => setVariant(e.target.value)}
+                placeholder="e.g. 1, 2, 3"
+                className="h-9"
+              />
+            </div>
           </div>
 
           {/* Drag-drop zone */}
@@ -324,6 +366,8 @@ export default function PaperVaultAdmin() {
                   <TableHead>Board</TableHead>
                   <TableHead>Subject</TableHead>
                   <TableHead>Year</TableHead>
+                  <TableHead>Session</TableHead>
+                  <TableHead>Paper</TableHead>
                   <TableHead>Variant</TableHead>
                   <TableHead className="w-10" />
                 </TableRow>
@@ -334,6 +378,8 @@ export default function PaperVaultAdmin() {
                     <TableCell><Badge variant="secondary" className="text-xs">{paper.board}</Badge></TableCell>
                     <TableCell className="font-medium text-sm">{paper.subject}</TableCell>
                     <TableCell className="text-sm text-gray-500">{paper.year}</TableCell>
+                    <TableCell className="text-sm text-gray-500">{paper.session || "—"}</TableCell>
+                    <TableCell className="text-sm text-gray-500">{paper.paper_number || "—"}</TableCell>
                     <TableCell className="text-sm text-gray-500">{paper.variant || "—"}</TableCell>
                     <TableCell>
                       <Button

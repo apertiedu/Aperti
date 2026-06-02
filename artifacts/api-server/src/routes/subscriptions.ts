@@ -100,9 +100,38 @@ subscriptionsRouter.put("/admin/:id/reject", authenticate, requireRole("admin"),
   res.json({ success: true });
 });
 
+// POST /subscriptions/admin/plans — create a plan
+subscriptionsRouter.post("/admin/plans", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  const { name, type, priceEgp, features, studentLimit, flexSeatPriceEgp } = req.body;
+  if (!name || !priceEgp) { res.status(400).json({ error: "name and priceEgp required" }); return; }
+  const [plan] = await db.insert(subscriptionPlansTable).values({
+    name,
+    type: type ?? "teacher",
+    priceEgp: String(priceEgp),
+    features: features ?? [],
+    studentLimit: studentLimit ?? null,
+    flexSeatPriceEgp: flexSeatPriceEgp ? String(flexSeatPriceEgp) : null,
+  }).returning();
+  res.status(201).json(plan);
+});
+
 // PUT /subscriptions/admin/plans/:id — update plan (price, features, etc.)
 subscriptionsRouter.put("/admin/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
-  await db.update(subscriptionPlansTable).set(req.body).where(eq(subscriptionPlansTable.id, id));
+  const allowed = ["name", "type", "priceEgp", "features", "studentLimit", "flexSeatPriceEgp", "isActive", "sortOrder"];
+  const updates: Record<string, unknown> = {};
+  for (const k of allowed) {
+    if (req.body[k] !== undefined) updates[k] = req.body[k];
+  }
+  if (updates.priceEgp) updates.priceEgp = String(updates.priceEgp);
+  if (updates.flexSeatPriceEgp) updates.flexSeatPriceEgp = String(updates.flexSeatPriceEgp);
+  await db.update(subscriptionPlansTable).set(updates).where(eq(subscriptionPlansTable.id, id));
+  res.json({ success: true });
+});
+
+// DELETE /subscriptions/admin/plans/:id — soft delete (deactivate) or hard delete
+subscriptionsRouter.delete("/admin/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id);
+  await db.delete(subscriptionPlansTable).where(eq(subscriptionPlansTable.id, id));
   res.json({ success: true });
 });

@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import {
   Pencil, Highlighter, Eraser, Type, Undo2, Redo2, Trash2,
@@ -9,6 +10,8 @@ import {
   Shapes, Upload, ChevronLeft, ChevronRight, Minus,
   MoveRight, Square, Circle as CircleIcon, Triangle, Star,
   Diamond, Hexagon, ZoomIn, ZoomOut,
+  BookOpen, Plus, ChevronDown, ChevronRight as ChevronRightIcon, FileText,
+  FolderOpen, Folder, MoreHorizontal, X,
 } from "lucide-react";
 
 const TEAL = "#00796B";
@@ -214,6 +217,9 @@ const isLineTool = (t: Tool) => t === "line" || t === "arrow";
 const isBoxTool = (t: Tool) => !["pen","highlighter","eraser","text","line","arrow"].includes(t);
 const isPathTool = (t: Tool) => ["pen","highlighter","eraser"].includes(t);
 
+interface Notebook { id: number; title: string; cover_color: string; created_at: string; }
+interface NotebookPage { id: number; notebook_id: number; title: string; page_number: number; updated_at: string; }
+
 export default function InkSpace() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -226,9 +232,104 @@ export default function InkSpace() {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(false);
   const [shapePanelOpen, setShapePanelOpen] = useState(false);
+  const [notebookPanelOpen, setNotebookPanelOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
 
   const [textInput, setTextInput] = useState<{ x: number; y: number; value: string } | null>(null);
+
+  // Notebooks state
+  const [notebooks, setNotebooks] = useState<Notebook[]>([]);
+  const [pages, setPages] = useState<Record<number, NotebookPage[]>>({});
+  const [expandedNotebook, setExpandedNotebook] = useState<number | null>(null);
+  const [activePageId, setActivePageId] = useState<number | null>(null);
+  const [activePageTitle, setActivePageTitle] = useState<string | null>(null);
+  const [newNotebookTitle, setNewNotebookTitle] = useState("");
+  const [creatingNotebook, setCreatingNotebook] = useState(false);
+  const [newPageTitle, setNewPageTitle] = useState<Record<number, string>>({});
+  const [creatingPage, setCreatingPage] = useState<number | null>(null);
+
+  const loadNotebooks = useCallback(async () => {
+    try {
+      const res = await fetch("/api/notebooks", { headers: { Authorization: `Bearer ${tok()}` } });
+      if (res.ok) setNotebooks(await res.json());
+    } catch {}
+  }, []);
+
+  const loadPages = useCallback(async (notebookId: number) => {
+    try {
+      const res = await fetch(`/api/notebooks/${notebookId}/pages`, { headers: { Authorization: `Bearer ${tok()}` } });
+      if (res.ok) {
+        const data = await res.json();
+        setPages(prev => ({ ...prev, [notebookId]: data }));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => { if (notebookPanelOpen) loadNotebooks(); }, [notebookPanelOpen, loadNotebooks]);
+
+  const handleToggleNotebook = async (id: number) => {
+    if (expandedNotebook === id) { setExpandedNotebook(null); return; }
+    setExpandedNotebook(id);
+    if (!pages[id]) await loadPages(id);
+  };
+
+  const handleLoadPage = async (page: NotebookPage) => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/notebooks/pages/${page.id}`, { headers: { Authorization: `Bearer ${tok()}` } });
+      if (res.ok) {
+        const data = await res.json();
+        const content = data.content ? (typeof data.content === "string" ? JSON.parse(data.content) : data.content) : [];
+        strokes.current = Array.isArray(content) ? content : [];
+        undone.current = [];
+        rerender();
+        setActivePageId(page.id);
+        setActivePageTitle(page.title);
+        toast({ title: `Loaded: ${page.title}` });
+      }
+    } catch { toast({ title: "Failed to load page", variant: "destructive" }); }
+    finally { setLoading(false); }
+  };
+
+  const handleCreateNotebook = async () => {
+    const title = newNotebookTitle.trim() || "Untitled Notebook";
+    try {
+      const res = await fetch("/api/notebooks", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ title, coverColor: TEAL }),
+      });
+      if (res.ok) {
+        await loadNotebooks();
+        setNewNotebookTitle("");
+        setCreatingNotebook(false);
+      }
+    } catch {}
+  };
+
+  const handleCreatePage = async (notebookId: number) => {
+    const title = (newPageTitle[notebookId] || "").trim() || "New Page";
+    try {
+      const res = await fetch(`/api/notebooks/${notebookId}/pages`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      if (res.ok) {
+        await loadPages(notebookId);
+        setNewPageTitle(prev => ({ ...prev, [notebookId]: "" }));
+        setCreatingPage(null);
+      }
+    } catch {}
+  };
+
+  const handleDeletePage = async (pageId: number, notebookId: number) => {
+    try {
+      await fetch(`/api/notebooks/pages/${pageId}`, { method: "DELETE", headers: { Authorization: `Bearer ${tok()}` } });
+      if (activePageId === pageId) { setActivePageId(null); setActivePageTitle(null); }
+      await loadPages(notebookId);
+    } catch {}
+  };
 
   const strokes = useRef<Stroke[]>([]);
   const undone = useRef<Stroke[]>([]);
@@ -270,7 +371,7 @@ export default function InkSpace() {
     const ro = new ResizeObserver(resize);
     ro.observe(container);
     return () => ro.disconnect();
-  }, [fullscreen, shapePanelOpen]);
+  }, [fullscreen, shapePanelOpen, notebookPanelOpen]);
 
   const getPos = (e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current!;
@@ -435,13 +536,23 @@ export default function InkSpace() {
   };
   const save = async () => {
     setSaving(true);
+    const payload = strokes.current.map(s => s.type === "image" ? { ...s, imageData: undefined } : s);
     try {
-      await fetch(`/api/inkspace/save`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ strokes: strokes.current.map(s => s.type === "image" ? { ...s, imageData: undefined } : s) }),
-      });
-      toast({ title: "Saved ✅" });
+      if (activePageId) {
+        await fetch(`/api/notebooks/pages/${activePageId}`, {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ content: JSON.stringify(payload) }),
+        });
+        toast({ title: `Saved to "${activePageTitle}" ✅` });
+      } else {
+        await fetch(`/api/inkspace/save`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ strokes: payload }),
+        });
+        toast({ title: "Saved ✅" });
+      }
     } catch { toast({ title: "Save failed", variant: "destructive" }); }
     finally { setSaving(false); }
   };
@@ -482,7 +593,7 @@ export default function InkSpace() {
 
         {/* Shapes toggle */}
         <button
-          onClick={() => setShapePanelOpen(o => !o)}
+          onClick={() => { setShapePanelOpen(o => !o); setNotebookPanelOpen(false); }}
           title="Shape Library"
           className={`h-7 px-2 rounded-lg flex items-center gap-1 text-xs font-medium transition-all ${
             shapePanelOpen ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -491,6 +602,29 @@ export default function InkSpace() {
           <Shapes className="h-3.5 w-3.5" />
           <span className="hidden sm:inline">Shapes</span>
         </button>
+
+        {/* Notebooks toggle */}
+        <button
+          onClick={() => { setNotebookPanelOpen(o => !o); setShapePanelOpen(false); }}
+          title="Notebooks"
+          className={`h-7 px-2 rounded-lg flex items-center gap-1 text-xs font-medium transition-all ${
+            notebookPanelOpen ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+          style={notebookPanelOpen ? { background: TEAL } : {}}>
+          <BookOpen className="h-3.5 w-3.5" />
+          <span className="hidden sm:inline">Notebooks</span>
+        </button>
+
+        {/* Active page indicator */}
+        {activePageTitle && (
+          <div className="flex items-center gap-1.5 px-2 h-7 bg-[#00796B]/10 rounded-lg">
+            <FileText className="h-3 w-3 text-[#00796B]" />
+            <span className="text-xs font-medium text-[#00796B] max-w-[120px] truncate">{activePageTitle}</span>
+            <button onClick={() => { setActivePageId(null); setActivePageTitle(null); strokes.current = []; undone.current = []; rerender(); }} className="text-[#00796B]/60 hover:text-[#00796B] ml-0.5">
+              <X className="h-3 w-3" />
+            </button>
+          </div>
+        )}
 
         {/* Size */}
         <div className="flex items-center gap-1.5 text-xs text-gray-400">
@@ -559,8 +693,127 @@ export default function InkSpace() {
         </div>
       </div>
 
-      {/* ── BODY: shape panel + canvas ── */}
+      {/* ── BODY: notebook panel + shape panel + canvas ── */}
       <div className="flex flex-1 overflow-hidden">
+
+        {/* Notebooks panel */}
+        <AnimatePresence>
+          {notebookPanelOpen && (
+            <motion.div
+              key="notebook-panel"
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 220, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="overflow-hidden shrink-0 bg-white border-r border-gray-100 flex flex-col"
+            >
+              <div className="flex items-center justify-between px-3 py-2.5 border-b border-gray-100">
+                <span className="text-xs font-bold text-gray-700 uppercase tracking-wide">Notebooks</span>
+                <button
+                  onClick={() => setCreatingNotebook(true)}
+                  className="h-5 w-5 flex items-center justify-center rounded text-gray-400 hover:text-[#00796B] hover:bg-[#00796B]/10 transition-colors"
+                  title="New notebook"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {/* New notebook form */}
+                {creatingNotebook && (
+                  <div className="flex gap-1 mb-2">
+                    <Input
+                      autoFocus
+                      value={newNotebookTitle}
+                      onChange={e => setNewNotebookTitle(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") handleCreateNotebook(); if (e.key === "Escape") setCreatingNotebook(false); }}
+                      placeholder="Notebook name…"
+                      className="h-7 text-xs flex-1"
+                    />
+                    <button onClick={handleCreateNotebook} className="h-7 w-7 flex items-center justify-center rounded bg-[#00796B] text-white">
+                      <Plus className="h-3.5 w-3.5" />
+                    </button>
+                    <button onClick={() => setCreatingNotebook(false)} className="h-7 w-7 flex items-center justify-center rounded text-gray-400 hover:bg-gray-100">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {notebooks.length === 0 && !creatingNotebook && (
+                  <div className="py-8 text-center">
+                    <BookOpen className="h-8 w-8 text-gray-200 mx-auto mb-2" />
+                    <p className="text-xs text-gray-400">No notebooks yet</p>
+                    <button onClick={() => setCreatingNotebook(true)} className="mt-2 text-xs text-[#00796B] hover:underline">Create one</button>
+                  </div>
+                )}
+
+                {notebooks.map(nb => (
+                  <div key={nb.id}>
+                    <button
+                      onClick={() => handleToggleNotebook(nb.id)}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                    >
+                      {expandedNotebook === nb.id
+                        ? <FolderOpen className="h-3.5 w-3.5 shrink-0" style={{ color: nb.cover_color || TEAL }} />
+                        : <Folder className="h-3.5 w-3.5 shrink-0" style={{ color: nb.cover_color || TEAL }} />
+                      }
+                      <span className="text-xs font-medium text-gray-700 flex-1 truncate">{nb.title}</span>
+                      {expandedNotebook === nb.id
+                        ? <ChevronDown className="h-3 w-3 text-gray-400 shrink-0" />
+                        : <ChevronRightIcon className="h-3 w-3 text-gray-400 shrink-0" />
+                      }
+                    </button>
+
+                    {expandedNotebook === nb.id && (
+                      <div className="ml-4 mt-0.5 space-y-0.5 border-l border-gray-100 pl-2">
+                        {(pages[nb.id] || []).map(pg => (
+                          <div key={pg.id} className={`group flex items-center gap-1.5 px-2 py-1 rounded-md cursor-pointer transition-colors ${activePageId === pg.id ? "bg-[#00796B]/10 text-[#00796B]" : "hover:bg-gray-50 text-gray-600"}`}>
+                            <FileText className="h-3 w-3 shrink-0" />
+                            <span
+                              className="text-xs flex-1 truncate"
+                              onClick={() => handleLoadPage(pg)}
+                            >{pg.title}</span>
+                            <button
+                              onClick={() => handleDeletePage(pg.id, nb.id)}
+                              className="opacity-0 group-hover:opacity-100 h-4 w-4 flex items-center justify-center rounded text-red-300 hover:text-red-500 transition-opacity"
+                            >
+                              <X className="h-2.5 w-2.5" />
+                            </button>
+                          </div>
+                        ))}
+
+                        {/* New page form */}
+                        {creatingPage === nb.id ? (
+                          <div className="flex gap-1 pt-1">
+                            <Input
+                              autoFocus
+                              value={newPageTitle[nb.id] || ""}
+                              onChange={e => setNewPageTitle(prev => ({ ...prev, [nb.id]: e.target.value }))}
+                              onKeyDown={e => { if (e.key === "Enter") handleCreatePage(nb.id); if (e.key === "Escape") setCreatingPage(null); }}
+                              placeholder="Page name…"
+                              className="h-6 text-xs flex-1"
+                            />
+                            <button onClick={() => handleCreatePage(nb.id)} className="h-6 w-6 flex items-center justify-center rounded bg-[#00796B] text-white">
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => setCreatingPage(nb.id)}
+                            className="w-full flex items-center gap-1.5 px-2 py-1 rounded-md text-gray-400 hover:text-[#00796B] hover:bg-[#00796B]/5 transition-colors"
+                          >
+                            <Plus className="h-3 w-3" />
+                            <span className="text-xs">New page</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Shape panel */}
         <AnimatePresence>

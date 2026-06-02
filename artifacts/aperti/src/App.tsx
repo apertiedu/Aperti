@@ -49,6 +49,9 @@ import ErrorTrace from "@/pages/error-trace";
 // Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
 import SubPilotAdmin from "@/pages/admin/subpilot-settings";
+import LandingEditor from "@/pages/admin/landing-editor";
+import AssistantPermissions from "@/pages/admin/assistant-permissions";
+import CheckoutPage from "@/pages/checkout";
 import HelpDeskAdmin from "@/pages/admin/helpdesk-admin";
 import ShieldCore from "@/pages/admin/shield-core";
 import QuickSwitch from "@/pages/admin/quick-switch";
@@ -256,6 +259,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/auto-scale" component={AutoScale} />
     <Route path="/admin/spend-wise" component={SpendWise} />
     <Route path="/admin/guardian-pulse" component={GuardianPulseAdmin} />
+    <Route path="/admin/landing-editor" component={LandingEditor} />
+    <Route path="/admin/assistant-permissions" component={AssistantPermissions} />
   </>
 );
 
@@ -306,6 +311,7 @@ function PublicRouter() {
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/student-register" component={StudentRegister} />
+      <Route path="/checkout" component={CheckoutPage} />
       <Route path="/courses" component={Courses} />
       <Route path="/courses/:id" component={CourseDetail} />
       <Route path="/terms" component={Terms} />
