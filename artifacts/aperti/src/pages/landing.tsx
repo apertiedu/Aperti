@@ -201,8 +201,8 @@ function Nav() {
 const plans = [
   { name: "Starter", price: 50, seats: "Up to 30", color: "#757575", features: ["30 students", "CheckIn & Attendance", "Homework submissions", "Basic analytics"] },
   { name: "Professional", price: 100, seats: "Up to 80", color: TEAL, highlight: true, features: ["80 students", "All Starter features", "LiveClass streaming", "QueryVault & CardStack", "Parent Guardian Hub"] },
-  { name: "Enterprise", price: 150, seats: "Up to 200", color: "#1976D2", features: ["200 students", "All Professional features", "InsightStream analytics", "Priority support", "API access"] },
-  { name: "Master", price: 200, seats: "Unlimited", color: "#7B1FA2", features: ["Unlimited students", "All features", "Custom integrations", "Dedicated support", "SLA guaranteed"] },
+  { name: "Enterprise", price: 150, seats: "Up to 200", color: "#00695C", features: ["200 students", "All Professional features", "InsightStream analytics", "Priority support", "API access"] },
+  { name: "Master", price: 200, seats: "Unlimited", color: "#004D40", features: ["Unlimited students", "All features", "Custom integrations", "Dedicated support", "SLA guaranteed"] },
 ];
 
 function PricingCard({ plan }: { plan: typeof plans[0] }) {
@@ -244,10 +244,10 @@ function PricingCard({ plan }: { plan: typeof plans[0] }) {
 
 /* ── Feature card ── */
 const features = [
-  { icon: Video, title: "Live Interactive Classes", desc: "Host real-time video sessions with whiteboard collaboration, screen sharing, and live chat. Students join from anywhere.", color: "#1976D2" },
+  { icon: Video, title: "Live Interactive Classes", desc: "Host real-time video sessions with whiteboard collaboration, screen sharing, and live chat. Students join from anywhere.", color: TEAL },
   { icon: Brain, title: "AI-Powered Mentor", desc: "Students get 24/7 tutoring from an intelligent AI mentor trained on your course material and exam syllabi.", color: TEAL },
-  { icon: BarChart3, title: "Smart Attendance", desc: "QR-code check-in, GPS validation, and live attendance dashboards. Never chase a register again.", color: "#388E3C" },
-  { icon: Zap, title: "Auto-Grading Engine", desc: "Submit homework, mark schemes auto-applied. Instant feedback. Teachers review only edge cases.", color: "#F57C00" },
+  { icon: BarChart3, title: "Smart Attendance", desc: "QR-code check-in, GPS validation, and live attendance dashboards. Never chase a register again.", color: TEAL },
+  { icon: Zap, title: "Auto-Grading Engine", desc: "Submit homework, mark schemes auto-applied. Instant feedback. Teachers review only edge cases.", color: TEAL },
 ];
 
 /* ── Subject colour palette ── */
@@ -669,14 +669,14 @@ export default function Landing() {
                 title: "Invite students & parents",
                 desc: "Students register and select you as their teacher. Parents link via a secure pairing code. You approve each connection with one click.",
                 icon: Users,
-                color: "#1976D2",
+                color: TEAL,
               },
               {
                 step: "03",
                 title: "Teach, assess, analyse",
                 desc: "Run live classes, set homework, auto-grade exams, and watch real-time analytics tell you exactly which student needs help — before they fall behind.",
                 icon: BarChart3,
-                color: "#388E3C",
+                color: TEAL,
               },
             ].map((item, i) => (
               <Reveal key={item.step} delay={i * 0.12}>
@@ -817,7 +817,7 @@ export default function Landing() {
                 name: "Mr. Omar Hassan",
                 role: "Math Tutor · IGCSE & A-Level",
                 initials: "OH",
-                color: "#1976D2",
+                color: "#00897B",
                 stars: 5,
               },
               {
@@ -825,7 +825,7 @@ export default function Landing() {
                 name: "Ms. Nadia Farouk",
                 role: "English & Literature · 60 students",
                 initials: "NF",
-                color: "#7B1FA2",
+                color: "#00695C",
                 stars: 5,
               },
             ].map((t, i) => (

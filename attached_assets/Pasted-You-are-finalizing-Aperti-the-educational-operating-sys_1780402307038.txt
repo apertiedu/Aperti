@@ -1,0 +1,103 @@
+You are finalizing **Aperti**, the educational operating system, for a production launch.  
+The codebase is a full‑stack app (Vite + Express + Drizzle) with many features already implemented but requiring thorough debugging, UI/UX consistency enforcement, and completion of any remaining gaps.
+
+**Your mission:**  
+1. Audit the entire platform and fix **every bug, broken import, 404 error, TypeScript error, and missing page**.  
+2. Ensure **100% Liquid Flow 2.0 design compliance** – no custom colors, no ™, no fake reviews, no unprofessional language.  
+3. Make every existing feature **fully functional**; if something cannot be fixed reliably, lock it behind a polished “Coming Soon” badge (teal badge with clock icon, non‑interactive).  
+4. Enhance and perfect the modules that are closest to completion, and ensure the platform feels stable, professional, and delightful to use.
+
+---
+
+## 🔥 PHASE 1 – GLOBAL AUDIT & FIXES
+
+### 1.1 Error Elimination
+- Scan the entire frontend and backend for TypeScript errors, missing imports, and broken API calls. Fix all.
+- Ensure every route defined in `App.tsx` has a corresponding page component (no 404s within the app). Any missing page should be created as a minimal, styled placeholder if not already present.
+- Check all API endpoints: they must be wired in the Express app, protected with JWT middleware, and return valid JSON.
+
+### 1.2 Role Isolation
+- Verify that `/admin/*` routes return a 404 for non‑admin users (not a blank page or error).
+- Confirm QuickSwitch allows temporary role preview with a clear banner and exit button.
+- Ensure teacher‑owned data is scoped correctly (teacherId checks) in all API routes.
+
+### 1.3 Design Cleanup
+- Remove **all ™ symbols** from code, UI, and database seeds (already done, verify).
+- Delete any remaining fake reviews, competitor names, “trusted by 3 countries”, or the planetary diagram (teacher/student/mentor/extras).
+- Enforce the strict color palette: `#F5F5F5` bg, `#FFFFFF` cards, `#121212` text, teal `#00796B` accent. No other accent colors, no custom themes.
+
+---
+
+## 🔥 PHASE 2 – FEATURE COMPLETION & STABILIZATION
+
+### 2.1 LiveClass & TwinControl
+- If share‑screen is broken, disable it with a “Coming Soon” overlay. Ensure core video/audio, mute, hand‑raise, and chat work reliably.
+- TwinControl pairing via QR must be functional. If not, mark as “Coming Soon”.
+
+### 2.2 ShieldCore (Anti‑Cheat)
+- Tab‑switch detection and copy/paste blocking must work during exams.
+- AI face detection / webcam proctoring → “Coming Soon” badge.
+
+### 2.3 The Mentor (AI Tutor)
+- Verify streaming chat works with the configured OpenAI key. If no key, show a friendly “AI tutoring is coming soon” message and disable input.
+
+### 2.4 SimVerse Labs
+- ForgeField, ReactSphere, Geometrix, BioSphere must all load and be interactive. If any lab crashes, replace it with a stable minimal version. Keep the core of Geometrix (3D viewer + shapes + measurements) fully functional; advanced nets/animation can be “Coming Soon”.
+
+### 2.5 InkSpace
+- Notebook system (create notebooks, pages, save/load) must work seamlessly.  
+- Tools: pen, highlighter (with auto‑blend), eraser, text, shapes, hold‑to‑draw straight line, background options (lined, grid, etc.).  
+- PDF annotation and handwriting recognition → “Coming Soon” if not 100% reliable.
+
+### 2.6 Past Papers (PaperVault)
+- Ensure the hierarchical browsing (subject → session → component → variant → paper) works.  
+- Admin upload form must use cascading dropdowns.  
+- Public access from footer and `/paper-vault` must be functional.
+
+### 2.7 Student Checkout & Coupons
+- Checkout page must allow selecting a plan, applying a coupon, entering InstaPay code, and uploading a screenshot.  
+- Admin can create/manage coupons (max uses, expiry).  
+- After submission, enrollment is pending until admin approves.
+
+### 2.8 Landing Page Customization
+- The admin landing editor (`/admin/landing-editor`) must save settings and the public landing page must reflect them.  
+- Default landing page must be exactly the premium design without any placeholder or broken elements.
+
+### 2.9 Tutorial / Onboarding
+- Remove any old tutorial component completely.  
+- Optionally implement a modern, interactive onboarding wizard using tooltips (if it can be done quickly and stable); otherwise, leave it out.
+
+### 2.10 Dynamic Pricing Enforcement
+- Ensure that plan limitations (max students, feature access) are enforced in the backend based on the teacher’s current subscription plan.  
+- Admin must be able to edit plans and the changes reflect immediately.
+
+---
+
+## 🔥 PHASE 3 – UI/UX POLISH & ANIMATIONS
+
+- Add subtle Framer Motion transitions to every page (`AnimatePresence`), card hover, button press.
+- Make the student mobile experience smooth with bottom tab bar and clean “More” modal.
+- Teacher sidebar must be collapsible, with active state in teal.
+- Global search (⌘K) must search across courses, students, lessons (or be removed if not fully functional).
+- All forms must have proper validation, loading states, and success/error feedback.
+
+---
+
+## 🔒 RULES
+
+- **Do not break** any already working module (marketplace, parent linking, attendance, etc.).
+- **No half‑working features** – either fix completely or lock behind “Coming Soon”.
+- **Keep the design system rigid** – Inter font, teal #00796B, no exceptions.
+- **Admin login:** admin / admin123 must work.
+- **Test the platform** by navigating as each role after changes.
+
+---
+
+## 🚀 FINAL OUTPUT
+
+Provide a concise report:
+- Which features are now fully functional and stable.
+- Which features remain “Coming Soon”.
+- Confirm the platform is ready for a live demo.
+
+**Start now – audit, fix, polish, and perfect Aperti for launch.**

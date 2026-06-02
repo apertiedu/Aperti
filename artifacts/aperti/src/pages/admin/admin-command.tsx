@@ -64,8 +64,8 @@ export default function AdminCommand() {
 
   const highlights = [
     { label: "Total Students", value: liveStats?.totalStudents ?? stats?.totalStudents ?? "—", icon: Users, color: "#00796B" },
-    { label: "Active Live Sessions", value: liveStats?.activeLiveSessions ?? "—", icon: Wifi, color: "#1976D2", live: true },
-    { label: "Today's Attendance", value: liveStats?.attendanceRate != null ? `${liveStats.attendanceRate}%` : "—", icon: BarChart3, color: "#388E3C" },
+    { label: "Active Live Sessions", value: liveStats?.activeLiveSessions ?? "—", icon: Wifi, color: "#00796B", live: true },
+    { label: "Today's Attendance", value: liveStats?.attendanceRate != null ? `${liveStats.attendanceRate}%` : "—", icon: BarChart3, color: "#00796B" },
     { label: "Pending InstaPay", value: liveStats?.pendingInstapay ?? "—", icon: CreditCard, color: liveStats?.pendingInstapay > 0 ? "#D32F2F" : "#757575" },
   ];
 

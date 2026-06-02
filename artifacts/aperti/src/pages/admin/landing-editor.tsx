@@ -73,7 +73,7 @@ export default function LandingEditor() {
   const { data: settings, isLoading } = useQuery<Settings>({
     queryKey: ["landing-settings"],
     queryFn: () => fetchJSON("/api/landing-settings"),
-    onSuccess: (data) => {
+    onSuccess: (data: Settings) => {
       if (!dirty) setLocalSettings(data);
     },
   } as any);

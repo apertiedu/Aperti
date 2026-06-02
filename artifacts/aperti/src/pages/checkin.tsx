@@ -158,7 +158,7 @@ export default function CheckIn() {
       await scanner.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 220, height: 220 } },
-        (text) => handleCode(text),
+        (text: string) => handleCode(text),
         () => {},
       );
       setScanning(true);

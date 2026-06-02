@@ -4,3 +4,4 @@
 - [Redis stub pattern](redis-stub.md) — api-server has in-memory Redis stub at `artifacts/api-server/src/lib/redis.ts` for Replit compatibility
 - [Aperti JWT auth system](aperti-jwt-auth.md) — JWT_SECRET must match across auth.ts and middleware/auth.ts; db.query needs schema aliases; sessionsTable=lessonsTable (raw SQL must use "lessons"); apiFetch at @/lib/api adds Bearer token for all frontend pages
 - [Aperti routing architecture](aperti-routing.md) — AdminRouter (/ → AdminCommand), TeacherRouter (/ → CoreHub), StudentRouter, ParentRouter; role override via localStorage `aperti_role_override`; inkspace routes mounted at /inkspace with relative /load /save paths
+- [Aperti DB schema gaps](aperti-db-schema-gaps.md) — aperti_courses missing 6 cols + course_enrollments absent; fixed via ALTER/CREATE migration

@@ -27,9 +27,9 @@ interface Course {
 }
 
 const SUBJECT_COLORS: Record<string, string> = {
-  Physics: "#1976D2", Math: "#388E3C", Chemistry: "#7B1FA2",
-  Biology: "#00796B", English: "#F57C00", "Computer Science": "#455A64",
-  Economics: "#C62828", History: "#6D4C41", Geography: "#0288D1",
+  Physics: "#00796B", Math: "#00796B", Chemistry: "#00796B",
+  Biology: "#00796B", English: "#00796B", "Computer Science": "#00796B",
+  Economics: "#00796B", History: "#00796B", Geography: "#00796B",
 };
 
 function CourseCard({ course, index }: { course: Course; index: number }) {

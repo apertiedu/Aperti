@@ -608,7 +608,7 @@ export default function Geometrix() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 showLabels ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
-              style={showLabels ? { background: "#1976D2" } : {}}>
+              style={showLabels ? { background: "#00796B" } : {}}>
               {showLabels ? <EyeOff className="h-3.5 w-3.5" /> : <Tag className="h-3.5 w-3.5" />}
               Vertices
             </button>
@@ -781,7 +781,7 @@ export default function Geometrix() {
                 </div>
                 <div className="rounded-xl border border-gray-100 p-3">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-1">Volume</p>
-                  <p className="text-2xl font-black" style={{ color: "#1976D2" }}>{volVal}</p>
+                  <p className="text-2xl font-black" style={{ color: "#00796B" }}>{volVal}</p>
                   <p className="text-[9px] text-gray-400">units³</p>
                   {showFormulas && (
                     <p className="text-[10px] text-gray-400 mt-2 font-mono border-t border-gray-50 pt-2 leading-relaxed">

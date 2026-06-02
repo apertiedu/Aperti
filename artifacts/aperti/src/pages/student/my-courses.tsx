@@ -16,9 +16,9 @@ interface Enrollment {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
-  pending:  { label: "Pending Approval", icon: Hourglass,     color: "#F57C00", bg: "#FFF3E0" },
-  approved: { label: "Enrolled",         icon: CheckCircle2,  color: "#388E3C", bg: "#E8F5E9" },
-  rejected: { label: "Rejected",         icon: XCircle,       color: "#C62828", bg: "#FFEBEE" },
+  pending:  { label: "Pending Approval", icon: Hourglass,     color: "#757575", bg: "#F5F5F5" },
+  approved: { label: "Enrolled",         icon: CheckCircle2,  color: "#00796B", bg: "#E0F2F1" },
+  rejected: { label: "Rejected",         icon: XCircle,       color: "#B71C1C", bg: "#FFEBEE" },
 };
 
 function EnrollmentCard({ enroll, index }: { enroll: Enrollment; index: number }) {
