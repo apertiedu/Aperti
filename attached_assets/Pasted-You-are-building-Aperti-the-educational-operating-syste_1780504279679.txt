@@ -1,0 +1,259 @@
+You are building **Aperti**, the educational operating system, from the ground up.  
+This is **Phase 1 – Platform Foundation**. Every future module depends on this layer.  
+You must implement every requirement exactly as specified, with no placeholders, no broken features, and strict adherence to the design system.
+
+**Tech Stack (already configured):**  
+- Frontend: Vite + React + TypeScript + Tailwind CSS + shadcn/ui + Framer Motion  
+- Backend: Express + TypeScript  
+- Database: PostgreSQL with Drizzle ORM  
+- Auth: JWT (stateless)  
+- Real-time: Socket.IO (for notifications)  
+
+**Your mission:** Build the complete foundation described below, ensuring it is stable, secure, and pixel-perfect.
+
+---
+
+## 1. DESIGN SYSTEM — “Liquid Flow”
+
+### Colors
+- **Primary (Soft Teal):** `#0D9488` (Tailwind `teal-600`) – use for buttons, active states, highlights, progress bars.  
+- **Neutrals:** Black (`#111`), White (`#fff`), Grey `50`, `100`, `200`, `300`, `500`, `700`, `900`.  
+- **Semantic:** Success (green), Warning (amber), Danger (red), Info (blue) – only when needed.  
+- **No other colors allowed** – no purple, no neon, no custom themes.
+
+### Typography
+- **Primary font:** Inter (sans-serif).  
+- Weights: Light (300), Regular (400), Medium (500), Semibold (600), Bold (700).  
+- Hierarchy: H1 (2.5rem), H2 (2rem), H3 (1.5rem), H4 (1.25rem), Body (1rem), Caption (0.875rem), Label (0.75rem).
+
+### Component Styles
+- **Border radius:** Cards, buttons, inputs – `0.75rem` (rounded-xl). Modals – `1rem` (rounded-2xl).  
+- **Shadows:** Very subtle – `shadow-sm` on cards, no large glowing shadows.  
+- **Animations:** Framer Motion – duration 150–250ms, ease-out. No bounce, no flashy transitions. Use `AnimatePresence` for page transitions.
+
+### General Rules
+- **Calm, professional, fast.** No clutter, no visual overload.  
+- **Every page must be responsive** (mobile, tablet, desktop).  
+- **Accessibility:** Keyboard navigation, screen‑reader labels, focus indicators.
+
+---
+
+## 2. DATABASE FOUNDATION
+
+Create these core tables (use Drizzle ORM, existing if already present):
+
+- `users` – id, email, password_hash, first_name, last_name, role (enum: admin, teacher, student, parent, assistant, finance, support), is_verified, avatar_url, phone, country, created_at
+- `workspaces` – id, name, type (teacher, school, tutor, student), owner_id (FK users)
+- `roles` – id, name, workspace_id
+- `permissions` – id, name (string like 'create_assignment', 'view_finance', etc.)
+- `role_permissions` – role_id, permission_id
+- `user_roles` – user_id, role_id (for workspace‑specific roles)
+- `sessions` – id, user_id, token, device_info, ip, expires_at
+- `notifications` – id, user_id, type, title, message, is_read, created_at
+- `settings` – id, user_id, key, value (store preferences)
+- `audit_logs` – id, user_id, action, entity, entity_id, metadata, ip, created_at
+- `onboarding_progress` – id, user_id, current_step, completed (boolean)
+
+Run migrations and create a seed script that creates an **admin account**:
+- Email: `admin@aperti.ai`, password: `admin123` (hashed with bcrypt), role: `admin`.
+
+---
+
+## 3. AUTHENTICATION & SECURITY
+
+### Login Page (`/login`)
+- Centered card on a neutral grey background.
+- Fields: Email, Password, “Remember me” checkbox, Forgot Password link.
+- Buttons: “Login” (primary teal), “Continue with Google”, “Continue with Microsoft” (latter two can be placeholders with Coming Soon badge if not yet integrated).
+- States: loading spinner, error message (invalid credentials), success redirect to dashboard.
+- Security: JWT stored in localStorage, sent as `Authorization: Bearer <token>` header. Implement rate limiting on backend (5 attempts per minute per IP). Add suspicious login detection (store IP, user agent) and notify user on new device.
+
+### Registration Page (`/register`)
+- Fields: First Name, Last Name, Email, Password (with strength meter), Confirm Password, Role (dropdown: Teacher, Student, Parent), Country, Phone (optional), agree to terms checkbox.
+- Live validation with error messages below fields.
+- On success, send email verification (mock or real using Nodemailer – if not ready, mark “Coming Soon” but still create account as pending verification).
+- After registration, redirect to appropriate onboarding flow.
+
+### Email Verification
+- Endpoint `/verify-email?token=...` – marks user as verified and redirects to login.
+- If email sending is not implemented, show a notice “Verification email sent (simulated)” and allow manual verification via admin.
+
+---
+
+## 4. ONBOARDING FLOWS
+
+After first login (if `onboarding_progress.completed` is false), redirect to a step‑by‑step wizard.
+
+### Teacher Onboarding
+- Step 1: Profile setup (avatar, bio, phone, teaching experience).
+- Step 2: Select subjects (from admin‑defined list).  
+- Step 3: Choose curriculum/exam boards.  
+- Step 4: Select teaching type – Online, Physical, Hybrid.  
+- Step 5: Create first workspace (enter name).  
+- Completion: mark onboarding complete, redirect to teacher dashboard.
+
+### Student Onboarding
+- Step 1: Profile.  
+- Step 2: Select subjects of interest.  
+- Step 3: Choose exam session (e.g., May/June 2026).  
+- Step 4: Learning goals (optional).  
+- Redirect to student dashboard.
+
+### Parent Onboarding
+- Step 1: Profile.  
+- Step 2: Link child (enter child’s email or pairing code).  
+- Step 3: Notification preferences.  
+- Redirect to parent dashboard.
+
+---
+
+## 5. WORKSPACE ARCHITECTURE
+
+- Every user must belong to at least one workspace.  
+- When a teacher creates a workspace, they become the owner.  
+- Workspaces contain their own roles, permissions, and users.  
+- Students can be added to a workspace via invitation or direct enrollment (handled later).  
+- Admin can view all workspaces.
+
+---
+
+## 6. ROLE SYSTEM & PERMISSION ENGINE
+
+Define default roles with permissions:
+
+- **Super Admin** – all permissions.  
+- **Workspace Owner** – full control within workspace.  
+- **Teacher** – create courses, manage students, assignments, attendance, etc.  
+- **Assistant Teacher** – limited (manage attendance, view students, but not delete).  
+- **Student** – view courses, submit work, view own grades.  
+- **Parent** – view linked child’s progress, attendance, reports.  
+- **Finance Manager** – billing, invoices.  
+- **Support Agent** – helpdesk access.  
+
+Permissions are stored individually (e.g., `create_assignment`, `view_finance`, `manage_users`).  
+When assigning a role to a user in a workspace, the admin or owner can override specific permissions.
+
+---
+
+## 7. GLOBAL NAVIGATION
+
+### Desktop Layout
+- **Top Bar:** Logo (Aperti.), Global Search (OmniBar), Notification bell (with unread count), User avatar (dropdown: Profile, Settings, Logout).  
+- **Left Sidebar:** Collapsible, with sections:  
+  - **Main:** Dashboard  
+  - **Teaching:** Courses, Classes, Assignments, Attendance  
+  - **Resources:** Question Bank, Flashcards, Past Papers  
+  - **Communication:** Messages, Calendar  
+  - **Insights:** Analytics, Reports  
+  - **Manage:** Settings, Workspace (if admin)  
+- Each item has an icon, label, and active teal highlight.
+
+### Mobile Layout
+- Bottom tab bar with 5 icons: Home, Courses, Attendance (or middle action), Notifications, More.  
+- “More” opens a drawer with additional links.
+
+---
+
+## 8. GLOBAL SEARCH (OmniBar)
+
+- Press `Ctrl+K` (or `Cmd+K`) to open search modal.  
+- Type to search across: Lessons, Assignments, Students, Teachers, Resources, Questions, Messages, Settings.  
+- Results grouped by category, displayed with icons.  
+- API: `GET /api/search?q=...` – returns aggregated results.  
+- AI‑powered understanding later; for now, simple text match.
+
+---
+
+## 9. NOTIFICATION SYSTEM
+
+- Backend: create notifications on events (assignment due, class starting, payment received, etc.).  
+- Store in `notifications` table.  
+- Frontend: Bell icon with unread count badge. Click opens dropdown with last 5 notifications; “View all” link to `/notifications` page.  
+- Real‑time updates via Socket.IO (optional, mark “Coming Soon” if not feasible).  
+- Delivery methods (in‑app, email, SMS, WhatsApp) can be configured in settings, but only in‑app is required for Phase 1.
+
+---
+
+## 10. SETTINGS & PROFILE
+
+- `/settings` page with tabs: Profile (edit name, avatar, bio), Security (change password, 2FA placeholder), Notifications (toggle in‑app/email/SMS), Appearance (light/dark mode toggle – but dark mode can be Coming Soon), Language, Billing (link to SubPilot), Connected Accounts, Devices, Privacy.  
+- Each setting must persist via API `PUT /api/settings`.
+
+- `/profile` public view showing avatar, name, role, subjects, achievements, activity history.
+
+---
+
+## 11. SECURITY FOUNDATION
+
+- All API endpoints (except public) protected with JWT middleware.  
+- Refresh tokens (optional, can be “Coming Soon”).  
+- Session tracking: store device and IP on login, allow user to view/revoke sessions.  
+- Audit logs: log every important action (user ID, action, entity, timestamp, IP).  
+- Admin can view audit logs.
+
+---
+
+## 12. LANDING WEBSITE (`/`)
+
+Build a premium, professional landing page exactly as described:
+
+- **Navbar:** Sticky, transparent on scroll. Logo, links: Features, Solutions, Pricing, Resources, About, Contact, Login, “Get Started” (teal button).
+- **Hero:** Large headline “The Educational Operating System”, subheadline “One platform for teaching, learning, assessment, communication, analytics, and AI.”, CTA “Start Free” (scrolls to registration), secondary “Watch Demo” (opens a modal video placeholder). Background: subtle animated SVG network (teal nodes on grey).
+- **Trust Section:** Counters showing (real data from DB): Teachers, Students, Courses, Assignments, Countries (use `1` for now, update dynamically later).
+- **Features Grid:** Cards with icons: AI Tutor, Attendance, Live Classes, Analytics, Revision, Assessments, Parent Portal, Question Banks. Each card links to a feature description page (Coming Soon).
+- **Interactive Product Demo:** Embed a simple tour of the platform using a slideshow or lottie animation. No signup required.
+- **Testimonials:** (leave placeholder with “Coming Soon”).
+- **Pricing:** Show teacher plans (Starter 50 EGP, Pro 100, Enterprise 150, Master 200) and a link to full pricing page.
+- **FAQ:** Accordion with common questions.
+- **Footer:** Links: Terms, Privacy, Support, Contact, Careers, Status, Social media icons.
+
+- **No fake reviews, no competitor names, no “free during beta”.**
+
+---
+
+## 13. API ENDPOINTS (Implement all)
+
+- `POST /api/auth/register`  
+- `POST /api/auth/login`  
+- `POST /api/auth/forgot-password`  
+- `POST /api/auth/reset-password`  
+- `GET /api/auth/me` (returns current user)  
+- `POST /api/onboarding/save-step`  
+- `GET /api/workspace/mine`  
+- `POST /api/workspace`  
+- `GET /api/roles/:workspaceId`  
+- `POST /api/roles/:workspaceId`  
+- `GET /api/permissions`  
+- `PUT /api/user/:id/role` (admin)  
+- `GET /api/search?q=...`  
+- `GET /api/notifications`  
+- `PUT /api/notifications/:id/read`  
+- `GET /api/settings`  
+- `PUT /api/settings`  
+- `GET /api/profile/:id`  
+- `PUT /api/profile`  
+- `GET /api/admin/stats` (returns counts for landing page)  
+
+---
+
+## 14. FINAL DELIVERABLES
+
+After implementing all the above, the Phase 1 foundation must be fully functional:
+
+✅ Public landing website  
+✅ User registration & login (with JWT)  
+✅ Email verification (mock or real)  
+✅ Onboarding flows for each role  
+✅ Workspace creation  
+✅ Role‑based access control  
+✅ Collapsible sidebar & mobile bottom nav  
+✅ Global search (Ctrl+K)  
+✅ In‑app notification system  
+✅ Settings & profile pages  
+✅ Security audit logs  
+✅ Responsive design  
+✅ Admin account seeded (admin@aperti.ai / admin123)  
+
+**Do not build any other features beyond this phase** – no marketplace, no live classes, no labs, no payments. Those will come in Phase 2.
+
+Start building now. Ensure every page is pixel-perfect, every API endpoint is secure, and every component follows the Liquid Flow design system exactly.

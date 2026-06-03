@@ -182,7 +182,7 @@ function Nav() {
               ))}
               <Link href="/courses"><span className="block text-sm font-medium text-gray-600 hover:text-gray-900 py-1" onClick={() => setOpen(false)}>Courses</span></Link>
               <div className="pt-2 flex gap-2">
-                <Link href="/student-register" className="flex-1">
+                <Link href="/register" className="flex-1">
                   <button className="w-full text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700">Register</button>
                 </Link>
                 <Link href="/login" className="flex-1">
@@ -942,9 +942,9 @@ export default function Landing() {
                 info@aperti.ai
               </a>
               <div className="mt-4">
-                <Link href="/student-register">
+                <Link href="/register">
                   <button className="text-sm font-semibold px-5 py-2.5 rounded-xl text-white" style={{ background: TEAL }}>
-                    Student Sign Up
+                    Get Started Free
                   </button>
                 </Link>
               </div>

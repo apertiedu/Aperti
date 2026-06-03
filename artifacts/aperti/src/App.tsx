@@ -96,6 +96,12 @@ import BioSphereLab from "@/pages/student/labs/biosphere";
 import TeamForge from "@/pages/team-forge";
 import PrivacyVault from "@/pages/privacy-vault";
 
+// New Phase 1 pages
+import Register from "@/pages/register";
+import Onboarding from "@/pages/onboarding";
+import Settings from "@/pages/settings";
+import Profile from "@/pages/profile";
+
 // Marketplace & registration
 import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/course-detail";
@@ -177,6 +183,9 @@ function StudentRouter() {
   return (
     <StudentLayout>
       <Switch>
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/profile/:id" component={Profile} />
         <Route path="/courses" component={Courses} />
         <Route path="/courses/:id" component={CourseDetail} />
         <Route path="/my-courses" component={StudentMyCourses} />
@@ -216,6 +225,9 @@ function StudentRouter() {
 
 const TEACHER_ROUTES = (
   <>
+    <Route path="/onboarding" component={Onboarding} />
+    <Route path="/settings" component={Settings} />
+    <Route path="/profile/:id" component={Profile} />
     <Route path="/courses" component={Courses} />
     <Route path="/courses/:id" component={CourseDetail} />
     <Route path="/my-courses" component={MyCourses} />
@@ -296,6 +308,9 @@ function ParentRouter() {
   return (
     <Layout>
       <Switch>
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/settings" component={Settings} />
+        <Route path="/profile/:id" component={Profile} />
         <Route path="/courses" component={Courses} />
         <Route path="/courses/:id" component={CourseDetail} />
         <Route path="/parent/guardian-hub" component={GuardianHub} />
@@ -312,7 +327,9 @@ function PublicRouter() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       <Route path="/student-register" component={StudentRegister} />
+      <Route path="/onboarding" component={Onboarding} />
       <Route path="/checkout" component={CheckoutPage} />
       <Route path="/courses" component={Courses} />
       <Route path="/courses/:id" component={CourseDetail} />

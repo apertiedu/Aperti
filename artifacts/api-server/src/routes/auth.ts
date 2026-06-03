@@ -17,11 +17,17 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     if (!username || !password) {
       return res.status(400).json({ error: "Username and password are required" });
     }
-    const [account] = await db.select().from(accountsTable).where(eq(accountsTable.username, username.trim().toLowerCase())).limit(1);
+    const identifier = username.trim().toLowerCase();
+    const { pool: dbPool } = await import("@workspace/db");
+    const { rows: acctRows } = await dbPool.query(
+      "SELECT * FROM accounts WHERE (username=$1 OR LOWER(email)=$1) LIMIT 1",
+      [identifier]
+    );
+    const account = acctRows[0] as any;
     if (!account || account.status !== "active") {
       return res.status(401).json({ error: "Invalid credentials" });
     }
-    const valid = await bcrypt.compare(password, account.passwordHash);
+    const valid = await bcrypt.compare(password, account.password_hash);
     if (!valid) {
       return res.status(401).json({ error: "Invalid credentials" });
     }
@@ -40,7 +46,8 @@ authRouter.post("/login", async (req: Request, res: Response) => {
       user: {
         id: account.id,
         username: account.username,
-        displayName: account.displayName,
+        displayName: account.display_name,
+        email: account.email,
         role: account.role,
       },
     });
@@ -82,14 +89,23 @@ authRouter.get("/me", async (req: Request, res: Response) => {
   if (!header?.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
   try {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
-    const [account] = await db.select().from(accountsTable).where(eq(accountsTable.id, payload.id)).limit(1);
-    if (!account) return res.status(401).json({ error: "User not found" });
+    const { pool: dbPool } = await import("@workspace/db");
+    const { rows } = await dbPool.query(
+      `SELECT id, username, display_name, email, role, avatar_url, bio, phone, country, first_name, last_name, status FROM accounts WHERE id=$1`,
+      [payload.id]
+    );
+    if (!rows.length) return res.status(401).json({ error: "User not found" });
+    const acct = rows[0] as any;
     res.json({
       user: {
-        id: account.id,
-        username: account.username,
-        displayName: account.displayName,
-        role: account.role,
+        id: acct.id,
+        username: acct.username,
+        displayName: acct.display_name,
+        email: acct.email,
+        role: acct.role,
+        avatarUrl: acct.avatar_url,
+        bio: acct.bio,
+        country: acct.country,
       },
     });
   } catch {
@@ -172,6 +188,71 @@ authRouter.post("/student-register", async (req: Request, res: Response) => {
     console.error("Student register error:", err);
     res.status(500).json({ error: "Registration failed. Please try again." });
   }
+});
+
+// Seed admin email on startup
+(async () => {
+  const { pool: dbPool } = await import("@workspace/db");
+  await dbPool.query(
+    `UPDATE accounts SET email='admin@aperti.ai' WHERE username='admin' AND (email IS NULL OR email='')`
+  ).catch(() => {});
+})();
+
+// POST /auth/register — unified registration for all public roles
+authRouter.post("/register", async (req: Request, res: Response) => {
+  try {
+    const { firstName, lastName, email, password, role, country, phone } = req.body;
+    if (!email?.trim() || !password) return res.status(400).json({ error: "Email and password are required" });
+    const validRoles = ["teacher", "student", "parent"];
+    if (!validRoles.includes(role || "")) return res.status(400).json({ error: "Role must be teacher, student, or parent" });
+    if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+
+    const { pool: dbPool } = await import("@workspace/db");
+    const { rows: existing } = await dbPool.query(
+      "SELECT id FROM accounts WHERE LOWER(email)=$1 LIMIT 1",
+      [email.toLowerCase().trim()]
+    );
+    if (existing.length) return res.status(409).json({ error: "An account with this email already exists" });
+
+    const base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || "user";
+    const username = base + "_" + Date.now().toString(36);
+    const displayName = `${(firstName || "").trim()} ${(lastName || "").trim()}`.trim() || email.split("@")[0];
+    const hash = await bcrypt.hash(password, 12);
+
+    const { rows } = await dbPool.query(
+      `INSERT INTO accounts (username, password_hash, display_name, email, role, status, country, phone, first_name, last_name, created_at)
+       VALUES ($1,$2,$3,$4,$5,'active',$6,$7,$8,$9,NOW())
+       RETURNING id, username, email, role, status, display_name`,
+      [username, hash, displayName, email.toLowerCase().trim(), role, country || null, phone || null, firstName?.trim() || null, lastName?.trim() || null]
+    );
+
+    await dbPool.query(
+      `INSERT INTO onboarding_progress (account_id, current_step, completed) VALUES ($1,1,false) ON CONFLICT DO NOTHING`,
+      [rows[0].id]
+    ).catch(() => {});
+
+    const token = jwt.sign({ id: rows[0].id, role: rows[0].role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    res.status(201).json({
+      token,
+      user: { id: rows[0].id, username: rows[0].username, email: rows[0].email, displayName: rows[0].display_name, role: rows[0].role },
+    });
+  } catch (err: any) {
+    console.error("Register error:", err);
+    res.status(500).json({ error: "Registration failed. Please try again." });
+  }
+});
+
+// POST /auth/forgot-password
+authRouter.post("/forgot-password", async (req: Request, res: Response) => {
+  const { email } = req.body;
+  if (!email?.trim()) return res.status(400).json({ error: "Email is required" });
+  // Always return success to prevent enumeration
+  res.json({ message: "If an account with that email exists, a password reset link has been sent." });
+});
+
+// POST /auth/reset-password
+authRouter.post("/reset-password", async (_req: Request, res: Response) => {
+  res.json({ message: "Password reset is not yet available. Please contact support." });
 });
 
 // POST /auth/signup

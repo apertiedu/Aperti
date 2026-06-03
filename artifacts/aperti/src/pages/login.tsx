@@ -230,11 +230,11 @@ export default function Login() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-slate-400">
-          Need access?{" "}
-          <a href="mailto:info@aperti.ai" style={{ color: TEAL }} className="font-medium hover:underline">
-            Contact your administrator
-          </a>
+        <p className="mt-6 text-center text-sm text-slate-500">
+          Don't have an account?{" "}
+          <Link href="/register" style={{ color: TEAL }} className="font-semibold hover:underline">
+            Create one free
+          </Link>
         </p>
         <p className="mt-2 text-center text-xs text-slate-300">
           <Link href="/" className="hover:text-slate-500 transition-colors">← Back to home</Link>

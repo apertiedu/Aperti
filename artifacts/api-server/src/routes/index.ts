@@ -50,6 +50,10 @@ import { couponsRouter } from "./coupons";
 import { landingSettingsRouter } from "./landing-settings";
 import { notebooksRouter } from "./notebooks";
 import { teacherVerificationRouter } from "./teacher-verification";
+import { workspaceRouter } from "./workspace";
+import { onboardingRouter } from "./onboarding";
+import { settingsRouter } from "./settings";
+import { searchRouter } from "./search";
 
 const router: IRouter = Router();
 
@@ -104,5 +108,9 @@ router.use("/coupons", couponsRouter);
 router.use(landingSettingsRouter);
 router.use("/notebooks", notebooksRouter);
 router.use("/teacher-verification", teacherVerificationRouter);
+router.use("/workspace", workspaceRouter);
+router.use("/onboarding", onboardingRouter);
+router.use("/settings", settingsRouter);
+router.use("/search", searchRouter);
 
 export default router;
