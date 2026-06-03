@@ -606,22 +606,12 @@ export default function Landing() {
                     Explore Courses <ArrowRight className="h-4 w-4" />
                   </motion.button>
                 </a>
-                <a href="#apply">
+                <Link href="/register">
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-gray-700 border border-gray-200 bg-white hover:border-gray-300 transition-colors">
-                    Request Early Access
+                    Create Free Account
                   </motion.button>
-                </a>
-              </div>
-
-              <div className="flex flex-wrap gap-5 text-xs text-gray-400">
-                {["GDPR-compliant data ownership", "Dedicated onboarding support", "No lock-in contracts"].map((t, i) => (
-                  <motion.div key={t} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 + i * 0.1 }}
-                    className="flex items-center gap-1.5">
-                    <CheckCircle2 className="h-3.5 w-3.5" style={{ color: TEAL }} />
-                    {t}
-                  </motion.div>
-                ))}
+                </Link>
               </div>
             </motion.div>
 
@@ -660,7 +650,7 @@ export default function Landing() {
               {
                 step: "01",
                 title: "Create your workspace",
-                desc: "Apply for early access. We personally set up your teacher account, configure your subjects, and onboard your students in under 24 hours.",
+                desc: "Sign up and create your workspace in minutes. Configure your subjects and invite your students — no setup fees, no waiting.",
                 icon: Shield,
                 color: TEAL,
               },
@@ -786,78 +776,6 @@ export default function Landing() {
       {/* ── STATS STRIP ── */}
       <StatsStrip />
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
-        <div className="max-w-7xl mx-auto">
-          <Reveal>
-            <div className="text-center mb-16">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-                style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
-                <Star className="h-3 w-3" />Trusted by educators
-              </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-                Teachers love Aperti.
-              </h2>
-              <p className="text-gray-500 max-w-md mx-auto">From solo tutors to large teaching centres — here's what they say.</p>
-            </div>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[
-              {
-                quote: "I used to spend 3 hours a week just tracking attendance and chasing homework. Aperti cut that to under 20 minutes. My students are more engaged and I actually have time to teach.",
-                name: "Dr. Sara Khalil",
-                role: "Physics Teacher · 85 students",
-                initials: "SK",
-                color: TEAL,
-                stars: 5,
-              },
-              {
-                quote: "The AI mentor is genuinely impressive. My weaker students are asking it questions at midnight and showing up to class with better grasp of the concepts. It's like I have a teaching assistant for every single student.",
-                name: "Mr. Omar Hassan",
-                role: "Math Tutor · IGCSE & A-Level",
-                initials: "OH",
-                color: "#00897B",
-                stars: 5,
-              },
-              {
-                quote: "Parents message me less about 'how is my child doing?' because GuardianHub answers that for them. They see attendance, homework, scores — all live. Trust went up overnight.",
-                name: "Ms. Nadia Farouk",
-                role: "English & Literature · 60 students",
-                initials: "NF",
-                color: "#00695C",
-                stars: 5,
-              },
-            ].map((t, i) => (
-              <Reveal key={t.name} delay={i * 0.1}>
-                <motion.div
-                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm flex flex-col h-full"
-                >
-                  <div className="flex gap-0.5 mb-5">
-                    {Array.from({ length: t.stars }).map((_, s) => (
-                      <Star key={s} className="h-3.5 w-3.5 fill-current" style={{ color: "#F59E0B" }} />
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-600 leading-relaxed flex-1 italic mb-6">"{t.quote}"</p>
-                  <div className="flex items-center gap-3 pt-4 border-t border-gray-50">
-                    <div
-                      className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-                      style={{ background: t.color }}
-                    >
-                      {t.initials}
-                    </div>
-                    <div>
-                      <p className="font-bold text-gray-900 text-sm">{t.name}</p>
-                      <p className="text-xs text-gray-400">{t.role}</p>
-                    </div>
-                  </div>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── PRICING ── */}
       <section id="pricing" className="py-24 px-5 bg-white">
@@ -888,7 +806,7 @@ export default function Landing() {
           <Reveal delay={0.4}>
             <p className="text-center text-sm text-gray-400 mt-8">
               Volume discounts available for large centres. InstaPay accepted.{" "}
-              <a href="#apply" className="underline underline-offset-2 font-medium" style={{ color: TEAL }}>
+              <a href="mailto:info@aperti.ai" className="underline underline-offset-2 font-medium" style={{ color: TEAL }}>
                 Talk to us for custom pricing.
               </a>
             </p>
@@ -896,25 +814,35 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* ── EARLY ACCESS FORM ── */}
+      {/* ── GET STARTED CTA ── */}
       <section id="apply" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-3xl mx-auto text-center">
           <Reveal>
-            <div className="text-center mb-12">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-                style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
-                <Globe className="h-3 w-3" />Exclusive Community
-              </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-                Join Aperti Early Access.
-              </h2>
-              <p className="text-gray-500 max-w-lg mx-auto text-lg leading-relaxed">
-                We are onboarding a select community of pioneering educators. Tell us about your school — we will personally build your workspace together.
-              </p>
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+              style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+              <Globe className="h-3 w-3" />Get started today
+            </span>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+              Start teaching smarter.
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto text-lg leading-relaxed mb-10">
+              Create your workspace, invite your students, and run your first class — all in one place.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <Link href="/register">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-sm text-white shadow-lg"
+                  style={{ background: TEAL, boxShadow: `0 8px 24px ${TEAL}30` }}>
+                  Create Free Account <ArrowRight className="h-4 w-4" />
+                </motion.button>
+              </Link>
+              <Link href="/login">
+                <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-sm text-gray-700 border border-gray-200 bg-white hover:border-gray-300 transition-colors">
+                  Sign In
+                </motion.button>
+              </Link>
             </div>
-          </Reveal>
-          <Reveal delay={0.1}>
-            <EarlyAccessForm />
           </Reveal>
         </div>
       </section>
