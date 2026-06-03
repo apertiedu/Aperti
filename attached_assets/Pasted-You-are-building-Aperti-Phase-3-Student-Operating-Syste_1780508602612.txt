@@ -1,0 +1,341 @@
+You are building **Aperti Phase 3 — Student Operating System** on top of the already completed Phase 1 (Foundation) and Phase 2 (Teacher OS).  
+All user authentication, workspaces, roles, permissions, navigation, teacher modules (courses, live classes, assignments, grading, analytics, etc.) are already built and working. You must not break any existing functionality.
+
+**Your mission:**  
+Implement every student‑facing module described below as a fully functional, production‑ready system.  
+There are no “Coming Soon” placeholders. Every feature must work. Use real data from the existing database (lessons, assignments, attendance, courses, flashcards, etc.). For AI‑powered features, use the existing OpenAI integration if available; otherwise implement rule‑based logic that simulates intelligent behavior convincingly.
+
+Strictly follow the **Liquid Flow** design system: Inter font, teal accent `#0D9488`, neutral grey palette, subtle shadows, Framer Motion transitions, responsive layouts.
+
+---
+
+## 1. STUDENT HOME (StudyStream)
+
+**Route:** `/dashboard` for student role  
+**Real‑time dynamic content:**
+
+- **Welcome Section:** “Good [morning/afternoon], [First Name]!” with current date.
+- **Today’s Goal Progress:** circular progress bar showing completion percentage of daily goals (from Focus Coach).
+- **Current Streak:** 🔥 icon with number of consecutive days active.
+- **XP Earned Today:** from Ascend profile.
+- **Exam Countdown:** if the student has an upcoming exam (from teacher’s exam schedule or student’s selected session), show a countdown timer.
+- **Daily Mission Card:** one or two prioritized tasks: “Revise [weak topic]”, “Complete [assignment]”, “Review 20 flashcards”. Generated using logic: top weak topic from Echo memory + nearest overdue assignment.
+- **AI Insight Card:** “You lose most marks in explanation questions.” or “Vectors mastery improved 18%.” (from Echo/ErrorTrace analysis).
+- **Academic Snapshot:** four small cards showing Current Grade (average), Target Grade (set in settings), Predicted Grade (from InsightStream), Readiness Score (percentage based on attendance + completion + recent quiz scores), Attendance percentage, Homework completion rate.
+
+**Backend:** aggregate data from Echo, Ascend, assignments, attendance, exams. If some data missing, show a friendly nudge to complete profile/onboarding.
+
+---
+
+## 2. STUDY STREAM — Personalized Feed
+
+**A timeline showing:**
+- New lessons released by teacher (from PlanGrid).
+- New assignments (with due dates).
+- Revision recommendations (from Revisit).
+- AI suggestions (e.g., “Try a momentum simulation because you struggled with the last quiz”).
+- Teacher announcements (from Communication Hub).
+- New resources added to courses.
+
+**Smart Prioritization:** items are sorted by a priority score calculated from: due date proximity, weakness level (from Echo), teacher-set priority, and past performance on related topics.
+
+**UI:** infinite scroll, each item in a card with icon and time stamp.
+
+**API:** `GET /api/student/feed` returns aggregated and prioritized feed items.
+
+---
+
+## 3. THE MENTOR — Personalized AI Tutor
+
+**Goal:** A conversational AI that remembers the student’s entire learning history, adapts its teaching style, and continuously helps them improve.
+
+**Features:**
+- **Learner Memory:** reads from Echo (weak topics, strong topics, learning pace, preferred explanation style, mistake history). Updates Echo after each session.
+- **Teaching Modes:** the student can select or the AI auto‑selects: Explain, Simplify, Challenge, Quiz, Guide, Review.
+- **Explanation Styles:** based on Echo’s `preferredStyle`, the AI adjusts: Visual (uses diagrams/analogies), Step‑by‑step, Exam‑focused, Conceptual, Practical, Analogy‑based.
+- **Subject Modes:** aware of the student’s enrolled subjects (physics, math, chemistry, biology, etc.) and the current topic from the active course or recent assignment.
+- **Context Awareness:** knows the current syllabus, the last assignment, recent mistakes, and teacher objectives.
+- **Error Memory:** if the student repeatedly makes the same mistake (e.g., momentum calculations), the Mentor proactively revisits units, formula rearrangement, substitution errors, and exam wording.
+- **Streaming chat interface** using Server‑Sent Events (SSE) or WebSocket. The frontend shows typing indicator and animated avatar.
+
+**Backend:** use OpenAI with a detailed system prompt that includes the student’s memory and context. If no API key, use a rule‑based tutor that can answer common questions from a pre‑loaded knowledge base or by searching QueryVault for similar questions.
+
+**API:** `POST /api/mentor/chat` (streaming), `GET /api/mentor/history`.
+
+---
+
+## 4. REVISIT — Intelligent Revision Engine
+
+**Purpose:** Build a daily, weekly, and exam‑specific revision schedule.
+
+**Inputs:**
+- Assignment scores
+- Exam scores
+- Attendance records
+- Flashcard retention data (from CardStack)
+- Teacher recommendations
+- Upcoming exam dates (from ExamScope or manual entry)
+
+**Outputs:**
+- **Daily Revision Schedule:** shown on Student Home, listing specific tasks (e.g., “Review 10 momentum flashcards”, “Complete 5 circuit questions”, “Watch force diagram video”).
+- **Weekly Plan:** a calendar view with allocated slots for each subject/topic.
+- **Exam Sprint Plan:** intensive revision leading up to an exam, based on predicted topics (from ExamScope) and weakness.
+
+**Prioritization algorithm:** each topic gets a score = (exam weight * weakness level) / (time since last review). Higher score = higher priority.
+
+**API:** `GET /api/revisit/plan?type=daily|weekly|sprint` returns structured plan.
+
+---
+
+## 5. FOCUS COACH — Productivity Engine
+
+**Daily Goals:** auto‑generated from Revisit plan + incomplete assignments + streak goals. Student can check off goals.
+
+**Weekly Goals:** progressive targets (e.g., increase revision minutes by 10%).
+
+**Streak System:** tracks study streak (daily active learning), attendance streak, assignment submission streak, revision streak. Freeze option available using XP.
+
+**Productivity Analytics:** charts showing study hours, completion rates, focus session durations (from FocusZone), achievement rates.
+
+**API:** `GET /api/focus-coach/goals`, `POST /api/focus-coach/complete-goal`, `GET /api/focus-coach/analytics`.
+
+---
+
+## 6. ECHO — Student Memory System
+
+A read‑only view for the student showing what the system knows about them:
+- **Academic History:** grades over time, topics mastered/weak.
+- **Behavior Patterns:** average study time, late submissions, burnout risk.
+- **Preferences:** learning style, pace.
+- **Achievements:** badges, milestones.
+- **Learning Trends:** improvements or declines.
+
+**Purpose:** transparency and motivation.
+
+**API:** `GET /api/echo/profile` returns aggregated memory.
+
+---
+
+## 7. ASCEND — Academic RPG
+
+**XP System:** earn XP from:
+- Attending class (check‑in)
+- Submitting assignments on time
+- Completing revision tasks
+- Reviewing flashcards
+- Taking mock exams
+- Participating in challenges
+- Helping peers (PeerReview)
+
+**Levels:** 1–100, XP thresholds increase linearly.
+
+**Subject Levels:** separate levels for each subject (e.g., Physics Level 12, Math Level 8).
+
+**Ranks:** Bronze (0‑999), Silver (1000‑2499), Gold (2500‑4999), Platinum (5000‑9999), Diamond (10000‑19999), Master (20000‑34999), Apex (35000+).
+
+**Unlockables:** themes (dark mode, high contrast), profile frames, badges, achievement titles.
+
+**UI:** on Student Home, show current level, XP bar, subject levels, and next unlockable. Full Ascend page with detailed stats and leaderboard.
+
+**API:** `GET /api/ascend/profile`, `POST /api/ascend/earn-xp`, `GET /api/ascend/leaderboard`.
+
+---
+
+## 8. PEAK RANKINGS — Leaderboards
+
+**Categories:** XP, Attendance, Revision Streak, Mock Scores, Consistency.
+
+**Scopes:** Class, School, Country, Global (using mock data if no global network).
+
+**Privacy Modes:** Public, Anonymous, Friends Only, Hidden (student choice).
+
+**API:** `GET /api/peak-rankings?type=xp&scope=class`.
+
+---
+
+## 9. SIMVERSE — Unified Simulation World
+
+All four labs must be fully interactive and embedded in a unified hub.
+
+### GEOMETRIX
+- 3D shape viewer (Three.js) with all shapes: cube, cuboid, prism, pyramid, cylinder, cone, sphere, hemisphere, tetrahedron, etc.
+- Interactive nets: fold/unfold animation, color faces, show vertices/edges.
+- Measurements: surface area, volume, diagonal lengths.
+- Vector and bearing visualizations (2D/3D).
+- Dynamic graphing for functions.
+
+### FORGEFIELD
+- Physics simulations: mechanics (motion with graphs), forces, momentum, energy, electricity (circuit builder with real‑time current), magnetism (field lines), waves (amplitude/frequency controls), thermal physics.
+- Adjustable variables with sliders, real‑time graph generation, data export.
+
+### REACTSPHERE
+- Chemistry simulations: atoms, molecules, bonding, reactions (mix chemicals, see precipitate/gas/color change), titrations, electrolysis, organic molecule builder.
+- Lab equipment simulation.
+
+### BIOSPHERE
+- Biology simulations: cell structure (3D interactive), DNA replication, genetics (Punnett squares), ecology (predator‑prey), organ systems, enzyme activity, evolution simulation.
+
+### PULSELAB
+- Experiment evaluation mode: student performs a simulated experiment, then the system evaluates method, variables, data, graphs, conclusion, and gives feedback.
+
+**UI:** Tabbed interface for each lab, full‑screen canvas, control panels styled with teal accents.
+
+**API:** simulations load config from database (`simulations` table), results can be saved for teacher review.
+
+---
+
+## 10. SNAPGRADE — Camera‑Based Assessment
+
+- Student takes a photo of handwritten work (math equations, graphs, diagrams).
+- Using Tesseract.js (or backend OCR), extract text and math expressions.
+- Compare against the assignment’s mark scheme (SchemeCraft) if available, or use The Mentor to analyze and provide feedback.
+- Show annotated feedback: errors highlighted, suggestions for improvement.
+
+**UI:** camera capture or file upload, processing animation, result card with grade and comments.
+
+**API:** `POST /api/snapgrade/scan` (multipart), returns analysis.
+
+---
+
+## 11. EXAMVAULT — Offline Exam Environment
+
+- Student downloads an encrypted exam package.
+- Exam is taken in FocusZone (full‑screen, offline).
+- Answers are saved locally and automatically uploaded when back online.
+- Security: tamper detection, device verification, submission validation.
+
+**Implementation:** use Service Workers and IndexedDB for offline storage. Basic encryption of the exam data.
+
+**API:** `GET /api/exam-vault/download/:examId`, `POST /api/exam-vault/submit`.
+
+---
+
+## 12. TRIALVAULT — Mock Exam System
+
+- AI generates topic tests, section tests, full papers, or prediction papers (using QueryVault).
+- Difficulty scaling: easy, medium, hard, exam‑level, stretch.
+- Time modes: untimed, practice, exam conditions (timer, no hints).
+- Post‑exam analysis: weak topics breakdown, question‑by‑question analysis, time analysis, grade prediction.
+
+**UI:** mock exam selection, exam interface (similar to TakeExam), results dashboard.
+
+**API:** `POST /api/trial-vault/generate`, `GET /api/trial-vault/results/:id`.
+
+---
+
+## 13. FOCUSZONE — Deep Study Environment
+
+- Full‑screen mode with hidden notifications.
+- Background music player (ambient sounds).
+- Study timer with Pomodoro, Deep Work, Custom, and Exam Sprint modes.
+- Break reminders and progress tracking.
+- Session logging to Focus Coach.
+
+**UI:** minimal overlay with timer and music controls, exit button.
+
+---
+
+## 14. FLASHCARD HUB (Student CardStack)
+
+- Student view of their flashcards: Due Today, Mastered, Learning, Difficult, New.
+- Spaced repetition algorithm (SM‑2) already implemented, now with analytics: retention rate, recall accuracy, consistency over time.
+- Swipeable cards with flip animation, star rating for difficulty.
+
+**API:** existing flashcard endpoints for review.
+
+---
+
+## 15. ASSIGNMENT CENTER
+
+- Tabs: Pending, Submitted, Overdue, Returned, Resubmission Needed.
+- Each assignment shows: title, due date, status, marks, teacher feedback, and action button (submit/view).
+- Submission interface: file upload (PDF, image, text), preview, confirmation.
+
+**API:** reuse existing homework/submission endpoints.
+
+---
+
+## 16. COURSE HUB
+
+- List of enrolled courses with progress bars (completion %).
+- Inside a course: lessons, assignments, resources, flashcards, quizzes, discussions, and overall progress.
+- Resource Library within each course.
+
+**API:** read from `courses` and `enrollments` tables.
+
+---
+
+## 17. NOTEBOOK SYSTEM (InkSpace)
+
+- Full digital notebook with: handwriting, typing, drawing, voice notes, highlighting, PDF annotation, LaTeX formulas.
+- Organization: Notebook → Section → Page → Block.
+- Sync across devices via API.
+- Student can create multiple notebooks, rename, color‑code, and search.
+
+**API:** existing InkSpace endpoints extended.
+
+---
+
+## 18. STUDENT ANALYTICS
+
+- Dashboard showing current grade, predicted grade, target grade, attendance, completion, XP.
+- Topic analytics: mastered, developing, weak, critical (from Echo).
+- Time analytics: study hours, revision hours, assignment time, focus sessions.
+
+**UI:** cards and Recharts.
+
+**API:** aggregation endpoints.
+
+---
+
+## 19. SOCIAL LEARNING
+
+- Study Groups: create/join groups with classmates, share flashcards, notes, quizzes.
+- Group Challenges: compete on mock exams or revision tasks.
+- Peer Review: student can review another’s assignment (anonymized) with guidance rubrics.
+
+**Implementation:** new tables `study_groups`, `group_members`, `group_challenges`. Basic collaborative features.
+
+**API:** full CRUD for groups and challenges.
+
+---
+
+## 20. COMMUNICATION CENTER
+
+- Messaging: one‑to‑one with teacher, parent, classmates; group chat for study groups.
+- Announcements: course/school announcements from teacher.
+- Calendar integration: classes, deadlines, exams, revision plans, meetings (synced with PlanGrid).
+
+**API:** reuse messaging endpoints, add calendar feed.
+
+---
+
+## 21. STUDENT SETTINGS
+
+- Profile editing, notification preferences, privacy, themes (light/dark), accessibility (font size, reduced motion, color‑blind modes), device management, language, AI preferences.
+
+---
+
+## 22. SAFETY & ACCESSIBILITY
+
+- Content moderation flag (report inappropriate content).
+- Anti‑bullying detection (simple keyword filter).
+- Block/unblock users.
+- Full keyboard navigation, screen reader support, dyslexia‑friendly font option.
+
+---
+
+## DATABASE CHANGES
+
+Add new tables: `study_groups`, `group_members`, `group_challenges`, `student_goals`, `echo_memory` (if not already), `ascend_profiles`, `focus_sessions`, `exam_vault_packages`, etc. Use Drizzle ORM, run migrations.
+
+---
+
+## IMPORTANT
+
+- All routes must be protected with student role middleware.
+- All data fetched must be scoped to the student (their workspace, courses, teacher).
+- The student dashboard and all modules must be fully responsive, with bottom tab bar on mobile.
+- No mock data — use real database queries. For AI features, if no API key, use basic algorithms that still deliver value.
+
+**Start building now. Implement every module in this Phase, ensuring each works end‑to‑end with the existing backend and database.**
