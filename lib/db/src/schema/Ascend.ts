@@ -9,6 +9,7 @@ export const ascendProfilesTable = pgTable("ascend_profiles", {
   streak: integer("streak").notNull().default(0),
   rank: text("rank").notNull().default("Bronze"),
   archetype: text("archetype").notNull().default("Explorer"),
+  privacyMode: text("privacy_mode").notNull().default("public"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

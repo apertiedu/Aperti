@@ -41,7 +41,14 @@ Your task:
 - Keep responses concise but thorough (max 300 words per message).`;
 
   if (!process.env.OPENAI_API_KEY) {
-    res.status(503).json({ error: "AI mentor not configured" });
+    // Rule-based fallback: structured explanation from question bank
+    const fallbackContent = relatedQuestions.length > 0
+      ? `Here are some practice questions to help you with: **${message}**\n\n${relatedQuestions.map((q, i) =>
+          `**Q${i + 1}:** ${q.questionText}\n\n*Model Answer:* ${q.modelAnswer ?? "Think through the key concepts carefully."}`
+        ).join("\n\n---\n\n")}\n\n*Tip: Focus on your weak areas: ${weakTopics.slice(0, 3).join(", ") || "general revision"}.*`
+      : `I understand you're asking about **${message}**. While full AI is not available right now, here's a structured approach:\n\n1. Review your notes on this topic.\n2. Look at past exam questions.\n3. Practice with flashcards for key terms.\n\nYour preferred learning style is *${preferredStyle}* — try to apply that as you study.`;
+
+    res.json({ content: fallbackContent, fallback: true });
     return;
   }
 

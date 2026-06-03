@@ -45,6 +45,21 @@ const querySchema = {
   subjects: schema.subjectsTable,
   subscriptionPlans: schema.subscriptionPlansTable,
   subscriptions: schema.subscriptionsTable,
+  studyGroups: schema.studyGroupsTable,
+  groupMembers: schema.groupMembersTable,
+  groupChallenges: schema.groupChallengesTable,
+  studentGoals: schema.studentGoalsTable,
+  focusSessions: schema.focusSessionsTable,
+  trialVaultAttempts: schema.trialVaultAttemptsTable,
+  examVaultPackages: schema.examVaultPackagesTable,
+  inkspaceNotebooks: schema.inkspaceNotebooksTable,
+  inkspacePages: schema.inkspacePagesTable,
+  inkspaceBlocks: schema.inkspaceBlocksTable,
+  studentFeedItems: schema.studentFeedItemsTable,
+  snapgradeSubmissions: schema.snapgradeSubmissionsTable,
+  peerReviews: schema.peerReviewsTable,
+  messageThreads: schema.messageThreadsTable,
+  studentMessages: schema.studentMessagesTable,
 };
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });

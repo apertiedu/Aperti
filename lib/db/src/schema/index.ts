@@ -31,3 +31,4 @@ export * from "./sessions";
 export * from "./students";
 export * from "./subjects";
 export * from "./subscriptions";
+export * from "./student-os";

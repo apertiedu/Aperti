@@ -59,6 +59,18 @@ import { rubricsRouter } from "./rubrics";
 import { messagesRouter } from "./messages";
 import { tutorcraftRouter } from "./tutorcraft";
 import { classforgeRouter } from "./classforge";
+import studentFeedRouter from "./student-feed";
+import focusCoachRouter from "./focus-coach";
+import echoProfileRouter from "./echo-profile";
+import peakRankingsRouter from "./peak-rankings";
+import studyGroupsRouter from "./study-groups";
+import studentMessagesThreadedRouter from "./student-messages-threaded";
+import studentCalendarRouter from "./student-calendar";
+import snapgradeRouter from "./snapgrade";
+import trialVaultRouter from "./trial-vault";
+import examVaultRouter from "./exam-vault";
+import studentAnalyticsRouter from "./student-analytics";
+import aiStatusRouter from "./ai-status";
 
 const router: IRouter = Router();
 
@@ -122,5 +134,17 @@ router.use(rubricsRouter);
 router.use(messagesRouter);
 router.use(tutorcraftRouter);
 router.use(classforgeRouter);
+router.use(studentFeedRouter);
+router.use(focusCoachRouter);
+router.use(echoProfileRouter);
+router.use(peakRankingsRouter);
+router.use(studyGroupsRouter);
+router.use(studentMessagesThreadedRouter);
+router.use(studentCalendarRouter);
+router.use(snapgradeRouter);
+router.use(trialVaultRouter);
+router.use(examVaultRouter);
+router.use(studentAnalyticsRouter);
+router.use(aiStatusRouter);
 
 export default router;
