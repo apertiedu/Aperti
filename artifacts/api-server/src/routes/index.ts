@@ -49,6 +49,7 @@ import { assistantsRouter } from "./assistants";
 import { couponsRouter } from "./coupons";
 import { landingSettingsRouter } from "./landing-settings";
 import { notebooksRouter } from "./notebooks";
+import { teacherVerificationRouter } from "./teacher-verification";
 
 const router: IRouter = Router();
 
@@ -102,5 +103,6 @@ router.use("/assistants", assistantsRouter);
 router.use("/coupons", couponsRouter);
 router.use(landingSettingsRouter);
 router.use("/notebooks", notebooksRouter);
+router.use("/teacher-verification", teacherVerificationRouter);
 
 export default router;

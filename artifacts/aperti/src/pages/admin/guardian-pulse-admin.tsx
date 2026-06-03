@@ -76,7 +76,7 @@ export default function GuardianPulseAdmin() {
               {mutation.isPending ? "Sending…" : "Send Weekly Summary Now"}
             </Button>
             <p className="text-xs text-muted-foreground">
-              To automate this, configure a weekly cron job on your server to POST to <code className="bg-muted px-1 rounded">/api/guardian-pulse/trigger</code>.
+              Dispatches a progress summary to every parent with an email address on record.
             </p>
           </CardContent>
         </Card>

@@ -4,14 +4,41 @@ import { pool } from "@workspace/db";
 
 export const coursesRouter = Router();
 
+// Idempotent migration: add all missing columns to aperti_courses
+const COURSE_MIGRATIONS = [
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS subject text`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS thumbnail_url text`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS duration_weeks integer NOT NULL DEFAULT 8`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS enrolled_count integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS is_published boolean NOT NULL DEFAULT false`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS teacher_account_id integer REFERENCES accounts(id) ON DELETE CASCADE`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS delivery_type text NOT NULL DEFAULT 'Online'`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS payment_model text NOT NULL DEFAULT 'monthly'`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS recordings_included boolean NOT NULL DEFAULT true`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS materials_fee_egp numeric(10,2)`,
+  `CREATE TABLE IF NOT EXISTS course_enrollments (
+    id                  serial PRIMARY KEY,
+    course_id           integer NOT NULL REFERENCES aperti_courses(id) ON DELETE CASCADE,
+    student_account_id  integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    status              text NOT NULL DEFAULT 'pending',
+    approved_by         integer,
+    approved_at         timestamptz,
+    requested_at        timestamptz NOT NULL DEFAULT NOW()
+  )`,
+];
+(async () => {
+  for (const q of COURSE_MIGRATIONS) {
+    await pool.query(q).catch(() => {});
+  }
+})();
+
 // ── PUBLIC ────────────────────────────────────────────────────────────────────
 
 coursesRouter.get("/", async (req, res: Response) => {
   try {
     const { search, subject } = req.query as Record<string, string>;
     let q = `
-      SELECT c.id, c.title, c.description, c.subject, c.price_egp, c.thumbnail_url,
-             c.duration_weeks, c.enrolled_count, c.created_at,
+      SELECT c.*,
              a.display_name AS teacher_name, a.username AS teacher_username
       FROM aperti_courses c
       LEFT JOIN accounts a ON c.teacher_account_id = a.id
@@ -84,12 +111,18 @@ coursesRouter.get("/:id", async (req, res: Response) => {
 
 coursesRouter.post("/", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
   try {
-    const { title, description, subject, priceEgp, thumbnailUrl, durationWeeks, isPublished } = req.body;
+    const { title, description, subject, priceEgp, thumbnailUrl, durationWeeks, isPublished,
+      deliveryType, paymentModel, recordingsIncluded, materialsFeeEgp } = req.body;
     if (!title) return res.status(400).json({ error: "Title is required" });
     const { rows } = await pool.query(
-      `INSERT INTO aperti_courses (title,description,subject,price_egp,thumbnail_url,duration_weeks,is_published,teacher_account_id,created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW()) RETURNING *`,
-      [title, description||null, subject||null, priceEgp||null, thumbnailUrl||null, durationWeeks||8, isPublished??false, req.userId]
+      `INSERT INTO aperti_courses
+         (title,description,subject,price_egp,thumbnail_url,duration_weeks,is_published,teacher_account_id,created_at,
+          delivery_type,payment_model,recordings_included,materials_fee_egp)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW(),$9,$10,$11,$12) RETURNING *`,
+      [title, description||null, subject||null, priceEgp||null, thumbnailUrl||null,
+       durationWeeks||8, isPublished??false, req.userId,
+       deliveryType||'Online', paymentModel||'monthly',
+       recordingsIncluded !== false, materialsFeeEgp||null]
     );
     res.status(201).json(rows[0]);
   } catch (err: any) { res.status(500).json({ error: err.message }); }
@@ -97,11 +130,18 @@ coursesRouter.post("/", authenticate, requireRole("teacher","admin"), async (req
 
 coursesRouter.put("/:id", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
   try {
-    const { title,description,subject,priceEgp,thumbnailUrl,durationWeeks,isPublished } = req.body;
+    const { title, description, subject, priceEgp, thumbnailUrl, durationWeeks, isPublished,
+      deliveryType, paymentModel, recordingsIncluded, materialsFeeEgp } = req.body;
     const { rowCount } = await pool.query(
-      `UPDATE aperti_courses SET title=$1,description=$2,subject=$3,price_egp=$4,thumbnail_url=$5,duration_weeks=$6,is_published=$7
-       WHERE id=$8 AND teacher_account_id=$9`,
-      [title,description,subject,priceEgp,thumbnailUrl,durationWeeks,isPublished,parseInt(req.params.id),req.userId]
+      `UPDATE aperti_courses SET
+         title=$1, description=$2, subject=$3, price_egp=$4, thumbnail_url=$5,
+         duration_weeks=$6, is_published=$7,
+         delivery_type=$8, payment_model=$9, recordings_included=$10, materials_fee_egp=$11
+       WHERE id=$12 AND teacher_account_id=$13`,
+      [title, description, subject, priceEgp, thumbnailUrl, durationWeeks, isPublished,
+       deliveryType||'Online', paymentModel||'monthly',
+       recordingsIncluded !== false, materialsFeeEgp||null,
+       parseInt(req.params.id), req.userId]
     );
     if (!rowCount) return res.status(404).json({ error: "Not found or unauthorized" });
     res.json({ success: true });

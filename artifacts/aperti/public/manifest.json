@@ -1,11 +1,11 @@
 {
-  "name": "Aperti Nexus",
+  "name": "Aperti",
   "short_name": "Aperti",
-  "description": "The AI-powered education operating system",
+  "description": "The intelligent educational operating system",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#6366f1",
+  "background_color": "#F5F5F5",
+  "theme_color": "#00796B",
   "orientation": "any",
   "icons": [
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }

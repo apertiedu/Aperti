@@ -2,3 +2,4 @@
 - [Admin password seeding](admin-credentials.md) — bcrypt hash seeded at startup may mismatch; if `admin/admin123` returns 401, reset hash directly in DB via Node bcryptjs.
 - [Drizzle querySchema aliases](drizzle-query-schema.md) — `lib/db/src/index.ts` builds `querySchema` with table aliases but NO `relations()` — never use `db.query.X.findMany({ with: {...} })`; use plain selects with joins.
 - [API routing structure](api-routing.md) — Backend API (port 3001): `/auth/*` and `/courses` mounted directly on app; `/api/*` router holds everything else. Frontend proxies `/api` → 3001.
+- [aperti_courses schema gap](aperti-courses-schema.md) — Drizzle schema only has base columns; routes need teacher_account_id/is_published/subject/etc — add via ALTER TABLE IF NOT EXISTS in courses.ts IIFE migration.

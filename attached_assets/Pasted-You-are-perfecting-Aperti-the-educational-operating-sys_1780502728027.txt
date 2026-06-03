@@ -1,0 +1,152 @@
+You are perfecting **Aperti**, the educational operating system, for a production launch.  
+The codebase is a full‑stack app (Vite + Express + Drizzle, JWT auth). Many features are built but require specific upgrades, bug fixes, and new integrations as detailed below.
+
+**Your mission:**  
+1. Implement the exact requirements listed in each section.  
+2. Do not break any already working functionality (marketplace, parent linking, attendance, etc.).  
+3. Lock any feature that cannot be made 100% reliable behind a polished “Coming Soon” badge (teal badge with clock icon, non‑interactive).  
+4. Enforce the **Liquid Flow 2.0** design system: Inter font, teal `#00796B` accent, `#F5F5F5` background, `#FFFFFF` cards, `#121212` text. No custom colors, no ™ symbols, no fake reviews, no competitor names.  
+5. Remove any remaining references to “Nexus” or other trademarked platform names.  
+6. Admin login must remain functional (admin / admin123).
+
+---
+
+## 1. SYLLABUS BUILDER & CONTENT CRAFT INTEGRATION
+
+- **Link the Syllabus Builder to Content Craft** – when a syllabus is created, it should be possible to generate a lesson structure that feeds into Content Craft.
+- **Subject addition details:** When adding a subject in the Syllabus Builder, the admin must capture:
+  - Name (e.g., “IGCSE Chemistry”)
+  - Board (CAIE, Edexcel, IB, etc.)
+  - Syllabus Code(s) (e.g., 0620 / 0971)
+  - Papers Breakdown – structured as:
+    - Extended: 2 (MCQ Extended), 4 (Theory Extended), 6 (Alternative to Practical)
+    - Core: 1 (MCQ Core), 3 (Theory Core), 5 (Practical)
+  - If multiple codes exist, the interface should explain the differences between them in a clear, parent/student-friendly way.
+  - Optional: Admin can upload the official syllabus specification PDF for the subject; it must be displayed and downloadable for parents/students.
+- **Content Craft Editor Upgrade:**  
+  - Rebuild the editor to be a **full‑screen, Notion/Udemy‑like** experience with:
+    - Rich text: bold, underline, headings, text color, highlighting.
+    - Structural hierarchy: Topics → Subtopics.
+    - Tab button support (indent/nested lists).
+    - LaTeX formula support.
+    - Image importing (PNG, JPG).
+  - This editor must be used when teachers create course content linked to subjects.
+
+---
+
+## 2. COURSE MANAGEMENT & TEACHER WORKFLOW
+
+- **Subject Linking:** When a teacher creates a course, they must select an existing subject from the global list (created by admin). They cannot add new global subjects.
+- **Lesson Delivery Type:** Teacher chooses: Online, Centre‑based, or Both/Hybrid.
+- **Subscription & Payment Settings:**  
+  - Teacher sets course fees and payment methods. Options:
+    - Per lesson
+    - Monthly
+    - Full course (one‑time)
+    - Half‑course installments (teacher specifies number of installments, deadlines, and amount per installment in EGP).
+  - The system must support multiple payment methods for a single course (parents choose at checkout).
+- **Package Inclusions:** Teacher toggles:
+  - Whether lessons are recorded and included in the package.
+  - Whether material fees are included, or if they are separate (and the exact cost).
+- **Flexible Payment Options:** Parents/students can choose from the available payment methods when enrolling.
+
+---
+
+## 3. GUEST ACCESS & AI COMPARISON FEATURE
+
+- **Guest Users** (not logged in) must be able to:
+  - Browse past papers.
+  - View the landing page.
+  - Browse all published courses from teachers (marketplace).
+  - Explore different boards, subjects, exam codes, and papers.
+- **AI Search & Comparison:**  
+  - Create an AI‑powered feature (using the existing OpenAI integration) that clearly explains the differences between exam boards, codes, and papers.  
+  - It must be accessible from the public course browsing area.  
+  - If it cannot be made fully reliable, show a “Coming Soon” badge.
+
+---
+
+## 4. TEACHER VERIFICATION & EVALUATIONS
+
+- **Verified Badge:**  
+  - After a teacher reaches 100+ enrolled students, they become eligible for a “Verified” badge.  
+  - The admin must manually approve the badge from the admin panel.  
+  - The badge is displayed on the teacher’s public profile and course cards.
+- **Weekly Teacher Evaluations:**  
+  - When a student is enrolled with a teacher, both the student and their parent receive a prompt every week to evaluate the teacher (course duration dependent).  
+  - The teacher, during course creation, must define the evaluation prompts/questions.
+  - The evaluation data is stored for future AI analysis.
+- **System‑Wide Website Evaluation:**  
+  - Every 2 weeks, all users see a short, clean form asking them to rate the website and suggest improvements.  
+  - Admin can view aggregated results.
+
+---
+
+## 5. LIVE CLASS HOSTING MAJOR OVERHAUL
+
+**Goal:** Make LiveClass a fully controllable, stable virtual classroom.
+
+- **Chat Controls:**  
+  - Host can set chat to: Off, Public, Private (students can message host only), or Host & Co‑host Only.  
+  - The setting must be changeable during the session.
+- **Camera Controls:**  
+  - Students must turn on cameras, but **only the Host and Co‑host can view student cameras**. Students cannot see each other’s video.  
+  - This setting must be enforced.
+- **Co‑host Management:**  
+  - Co‑hosts are added via a **unique pairing code** generated by the host.  
+  - The pairing code screen should be accessible from the LiveClass host controls.  
+  - Co‑hosts gain privileges: mute/unmute, manage chat, start/stop recording.
+- **Recording:**  
+  - Host can toggle recording on/off.  
+  - Recordings are saved and automatically available to attended students after the session.  
+  - For absent students, a **passcode‑protected link** is generated; the student can enter the passcode to view the recording.
+- **General Stability:**  
+  - Fix the whiteboard performance (it was reported as poor).  
+  - Fix screen sharing (currently not working).  
+  - Ensure the entire WebRTC mesh / Socket.IO system is robust.
+- **Mark any extremely advanced webinar feature (like breakout rooms) as “Coming Soon” if not stable.**
+
+---
+
+## 6. TUTORIAL & ONBOARDING
+
+- **If the existing tutorial is a simple pop‑up that blurs the background and shows text, remove it entirely.**  
+- **Only implement a new tutorial if it is an interactive, modern onboarding wizard (e.g., using tooltips that highlight actual UI elements).** Otherwise, leave it out.  
+- **Remove all mentions of “Inventory & Sales” or any unrelated modules from the tutorial/database.**
+
+---
+
+## 7. LANDING PAGE ADMIN EDITOR
+
+- **Redesign the admin landing page editor (`/admin/landing-editor`)** to be significantly better, more creative, and professional.  
+- It must allow editing all hero text, feature cards, visibility toggles, and upload of custom images/SVGs.  
+- The preview must be live.  
+- If it cannot be made reliable, replace with a simple settings page that works, and mark the “drag‑and‑drop editor” as Coming Soon.
+
+---
+
+## 8. REMOVAL & CLEANUP
+
+- **Remove all trademarked platform names** (e.g., “Nexus”, “Google Classroom”, etc.) from code and content.  
+- **Remove the planetary diagram (teacher/student/mentor/extras) and “trusted by 3 countries”** – already done, verify.  
+- **Remove the broken tutorial** as specified above.
+
+---
+
+## 🔒 STABILITY RULES
+
+- **Do not break** any existing working module.  
+- **If a feature cannot be fully fixed or built within this session, lock it behind a “Coming Soon” badge** (teal outline, clock icon, non‑interactive).  
+- **Enforce design consistency** everywhere.  
+- **Admin credentials:** admin / admin123 must remain working.
+
+---
+
+## 🚀 FINAL OUTPUT
+
+After all changes, provide a summary of:
+- What was successfully upgraded/fixed.
+- What features remain “Coming Soon”.
+- Confirm the platform is stable and ready for live testing.
+
+**Start now – implement these upgrades, fix the live class system, and polish the entire platform.**

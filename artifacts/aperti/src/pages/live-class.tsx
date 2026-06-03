@@ -6,11 +6,20 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Mic, MicOff, Video, VideoOff, PhoneOff, Users,
-  Hand, Monitor, MonitorOff, PenLine, Copy, Send,
-  MessageSquare, ChevronRight,
+  Hand, PenLine, Copy, Send,
+  MessageSquare, ChevronRight, MessageCircleOff, Lock, Globe, Shield,
 } from "lucide-react";
 import { useLiveClass, type Participant } from "@/hooks/use-live-class";
 import Whiteboard from "@/components/whiteboard";
+
+type ChatMode = "public" | "private" | "host_only" | "off";
+
+const CHAT_MODES: { value: ChatMode; label: string; desc: string; icon: React.ReactNode }[] = [
+  { value: "public",    label: "Public",     desc: "Everyone can chat",          icon: <Globe className="h-3.5 w-3.5" /> },
+  { value: "private",   label: "Private",    desc: "Students → host only",       icon: <Lock className="h-3.5 w-3.5" /> },
+  { value: "host_only", label: "Host only",  desc: "Only host can send",         icon: <Shield className="h-3.5 w-3.5" /> },
+  { value: "off",       label: "Off",        desc: "Chat disabled",              icon: <MessageCircleOff className="h-3.5 w-3.5" /> },
+];
 
 function VideoTile({ stream, displayName, muted, audioEnabled, videoEnabled, isLocal }: {
   stream?: MediaStream; displayName: string; muted?: boolean;
@@ -54,7 +63,7 @@ function LobbyView({ onStart }: { onStart: (name: string, title: string) => void
   useEffect(() => {
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
       .then(s => { if (videoRef.current) videoRef.current.srcObject = s; })
-      .catch(() => {/* no preview */});
+      .catch(() => {});
     return () => {
       if (videoRef.current?.srcObject) {
         (videoRef.current.srcObject as MediaStream).getTracks().forEach(t => t.stop());
@@ -68,7 +77,7 @@ function LobbyView({ onStart }: { onStart: (name: string, title: string) => void
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-xl"
       >
-        <h1 className="text-3xl font-bold mb-1">LiveClass<span className="text-primary"></span></h1>
+        <h1 className="text-3xl font-bold mb-1">LiveClass</h1>
         <p className="text-muted-foreground mb-6">Start a live session for your students.</p>
 
         <div className="rounded-2xl overflow-hidden bg-[#0f172a] aspect-video mb-6 flex items-center justify-center">
@@ -103,6 +112,7 @@ export default function LiveClass() {
   const [chatInput, setChatInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
+  const [chatMode, setChatMode] = useState<ChatMode>("public");
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -116,9 +126,7 @@ export default function LiveClass() {
     }
   };
 
-  if (lc.phase === "idle") {
-    return <LobbyView onStart={(n, t) => lc.startRoom(n, t || undefined)} />;
-  }
+  if (lc.phase === "idle") return <LobbyView onStart={(n, t) => lc.startRoom(n, t || undefined)} />;
 
   if (lc.phase === "initializing") {
     return (
@@ -163,6 +171,8 @@ export default function LiveClass() {
 
   const participantList = Array.from(lc.participants.values());
   const handsRaised = participantList.filter(p => p.handRaised);
+  const currentMode = CHAT_MODES.find(m => m.value === chatMode)!;
+  const canSend = chatMode !== "off";
 
   return (
     <div className="h-screen bg-[#0b0b0d] flex flex-col overflow-hidden">
@@ -172,6 +182,11 @@ export default function LiveClass() {
           <span className="font-bold text-primary">LiveClass</span>
           {lc.lessonTitle && <span className="text-sm text-muted-foreground">{lc.lessonTitle}</span>}
           <Badge variant="secondary" className="text-xs">LIVE</Badge>
+          {chatMode !== "public" && (
+            <Badge variant="outline" className="text-xs gap-1">
+              {currentMode.icon} Chat: {currentMode.label}
+            </Badge>
+          )}
         </div>
         {lc.roomId && (
           <button
@@ -262,17 +277,6 @@ export default function LiveClass() {
               label={lc.cameraOn ? "Stop video" : "Start video"}
               danger={!lc.cameraOn}
             />
-            <div className="relative group">
-              <ControlBtn
-                active={false}
-                onClick={() => {}}
-                icon={<Monitor className="h-5 w-5 opacity-40" />}
-                label="Screen"
-              />
-              <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                Coming Soon
-              </span>
-            </div>
             <ControlBtn
               active={lc.whiteboardVisible}
               onClick={() => lc.toggleWhiteboard(!lc.whiteboardVisible)}
@@ -320,6 +324,29 @@ export default function LiveClass() {
             </ScrollArea>
           </div>
 
+          {/* Chat Mode Control */}
+          <div className="p-3 border-b">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wide mb-2">Chat Mode</p>
+            <div className="grid grid-cols-2 gap-1">
+              {CHAT_MODES.map(mode => (
+                <button
+                  key={mode.value}
+                  onClick={() => setChatMode(mode.value)}
+                  title={mode.desc}
+                  className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                    chatMode === mode.value
+                      ? "bg-primary text-white"
+                      : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {mode.icon}
+                  {mode.label}
+                </button>
+              ))}
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-1.5">{currentMode.desc}</p>
+          </div>
+
           {/* Hand raise queue */}
           {handsRaised.length > 0 && (
             <div className="p-3 border-b bg-amber-500/10">
@@ -336,33 +363,55 @@ export default function LiveClass() {
           {/* Chat */}
           {showChat && (
             <div className="flex-1 flex flex-col overflow-hidden">
-              <ScrollArea className="flex-1 p-3">
-                <div className="space-y-2">
-                  {lc.chatMessages.map((m, i) => (
-                    <div key={i} className="text-xs">
-                      <span className="font-semibold text-primary">{m.displayName}: </span>
-                      <span className="text-foreground">{m.text}</span>
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
+              {chatMode === "off" ? (
+                <div className="flex-1 flex items-center justify-center p-4">
+                  <div className="text-center text-muted-foreground">
+                    <MessageCircleOff className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs">Chat is disabled</p>
+                    <p className="text-[10px] mt-1">Change mode above to enable</p>
+                  </div>
                 </div>
-              </ScrollArea>
-              <div className="p-2 border-t flex gap-2">
-                <Input
-                  value={chatInput}
-                  onChange={e => setChatInput(e.target.value)}
-                  onKeyDown={e => { if (e.key === "Enter" && chatInput.trim()) { lc.sendChat(chatInput.trim()); setChatInput(""); } }}
-                  placeholder="Message…"
-                  className="h-8 text-xs"
-                />
-                <Button
-                  size="sm"
-                  className="h-8 w-8 p-0 shrink-0"
-                  onClick={() => { if (chatInput.trim()) { lc.sendChat(chatInput.trim()); setChatInput(""); } }}
-                >
-                  <Send className="h-3.5 w-3.5" />
-                </Button>
-              </div>
+              ) : (
+                <>
+                  <ScrollArea className="flex-1 p-3">
+                    <div className="space-y-2">
+                      {lc.chatMessages.map((m, i) => (
+                        <div key={i} className="text-xs">
+                          <span className="font-semibold text-primary">{m.displayName}: </span>
+                          <span className="text-foreground">{m.text}</span>
+                        </div>
+                      ))}
+                      <div ref={chatEndRef} />
+                    </div>
+                  </ScrollArea>
+                  {chatMode !== "off" && (
+                    <div className="p-2 border-t flex gap-2">
+                      <Input
+                        value={chatInput}
+                        onChange={e => setChatInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === "Enter" && chatInput.trim() && canSend) {
+                            lc.sendChat(chatInput.trim());
+                            setChatInput("");
+                          }
+                        }}
+                        placeholder={chatMode === "private" ? "Visible to host only…" : "Message…"}
+                        className="h-8 text-xs"
+                      />
+                      <Button
+                        size="sm"
+                        className="h-8 w-8 p-0 shrink-0"
+                        disabled={!chatInput.trim()}
+                        onClick={() => {
+                          if (chatInput.trim()) { lc.sendChat(chatInput.trim()); setChatInput(""); }
+                        }}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 

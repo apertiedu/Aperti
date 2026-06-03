@@ -1,20 +1,35 @@
 import { Router, type IRouter } from "express";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db, subjectsTable } from "@workspace/db";
 import { requireTenantAccess } from "../middleware/tenant";
+import { sql } from "drizzle-orm";
 
 const router: IRouter = Router();
+
+// Idempotent migration for new subject fields
+async function ensureSubjectColumns() {
+  try {
+    await db.execute(sql`
+      ALTER TABLE subjects
+        ADD COLUMN IF NOT EXISTS syllabus_codes text,
+        ADD COLUMN IF NOT EXISTS papers_breakdown jsonb,
+        ADD COLUMN IF NOT EXISTS pdf_url text,
+        ADD COLUMN IF NOT EXISTS code_explainer text
+    `);
+  } catch (_) {}
+}
+ensureSubjectColumns();
 
 router.get("/subjects", requireTenantAccess, async (req, res): Promise<void> => {
   const { teacherId, isAdmin } = req.tenant;
   const rows = !isAdmin && teacherId
-    ? await db.select().from(subjectsTable).where(eq(subjectsTable.teacherAccountId, teacherId))
-    : await db.select().from(subjectsTable);
-  res.json(rows);
+    ? await db.execute(sql`SELECT * FROM subjects WHERE teacher_account_id = ${teacherId} ORDER BY name`)
+    : await db.execute(sql`SELECT * FROM subjects ORDER BY name`);
+  res.json(rows.rows ?? rows);
 });
 
 router.post("/subjects", requireTenantAccess, async (req, res): Promise<void> => {
-  const { name } = req.body;
+  const { name, board, code, level, syllabusCodes, papersBreakdown, pdfUrl, codeExplainer } = req.body;
   if (!name?.trim()) { res.status(400).json({ message: "Subject name is required" }); return; }
 
   const { teacherId, isAdmin, accountId } = req.tenant;
@@ -22,17 +37,44 @@ router.post("/subjects", requireTenantAccess, async (req, res): Promise<void> =>
     ? (req.body.teacherAccountId ? parseInt(req.body.teacherAccountId, 10) : accountId)
     : (teacherId ?? accountId);
 
-  const [created] = await db.insert(subjectsTable).values({ name: name.trim(), teacherAccountId: effectiveTeacherId }).returning();
-  res.status(201).json(created);
+  const [created] = await db.execute(sql`
+    INSERT INTO subjects (name, board, code, level, teacher_account_id, syllabus_codes, papers_breakdown, pdf_url, code_explainer)
+    VALUES (
+      ${name.trim()},
+      ${board || "CAIE"},
+      ${code || null},
+      ${level || "IGCSE"},
+      ${effectiveTeacherId},
+      ${syllabusCodes || null},
+      ${papersBreakdown ? JSON.stringify(papersBreakdown) : null},
+      ${pdfUrl || null},
+      ${codeExplainer || null}
+    )
+    RETURNING *
+  `);
+  res.status(201).json((created as any).rows?.[0] ?? created);
 });
 
 router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
-  const { name } = req.body;
+  const { name, board, code, level, syllabusCodes, papersBreakdown, pdfUrl, codeExplainer } = req.body;
   if (!name?.trim()) { res.status(400).json({ message: "Name required" }); return; }
-  const [updated] = await db.update(subjectsTable).set({ name: name.trim() }).where(eq(subjectsTable.id, id)).returning();
-  if (!updated) { res.status(404).json({ message: "Subject not found" }); return; }
-  res.json(updated);
+
+  const [updated] = await db.execute(sql`
+    UPDATE subjects SET
+      name = ${name.trim()},
+      board = ${board || "CAIE"},
+      code = ${code || null},
+      level = ${level || "IGCSE"},
+      syllabus_codes = ${syllabusCodes || null},
+      papers_breakdown = ${papersBreakdown ? JSON.stringify(papersBreakdown) : null},
+      pdf_url = ${pdfUrl || null},
+      code_explainer = ${codeExplainer || null}
+    WHERE id = ${id}
+    RETURNING *
+  `);
+  if (!(updated as any)?.rows?.length) { res.status(404).json({ message: "Subject not found" }); return; }
+  res.json((updated as any).rows[0]);
 });
 
 router.delete("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {

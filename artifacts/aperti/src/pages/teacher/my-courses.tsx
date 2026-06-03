@@ -65,15 +65,27 @@ interface Enrollment {
   requested_at: string;
 }
 
-const SUBJECTS = [
-  "Physics", "Mathematics", "Chemistry", "Biology", "English",
-  "History", "Geography", "Economics", "Computer Science", "Arabic", "Science", "Other",
-];
+const DELIVERY_TYPES = ["Online", "Centre", "Hybrid"] as const;
+const PAYMENT_MODELS = [
+  { value: "monthly", label: "Monthly subscription" },
+  { value: "per_lesson", label: "Per lesson" },
+  { value: "full_course", label: "Full course (one-time)" },
+  { value: "installments", label: "Half-course installments (2 payments)" },
+] as const;
 
 /* ── Course form ─────────────────────────────────────────────────────────── */
 function CourseForm({ course, onClose }: { course?: Course | null; onClose: () => void }) {
   const { toast } = useToast();
   const qc = useQueryClient();
+
+  // Fetch global subjects from API
+  const { data: subjectsData } = useQuery({
+    queryKey: ["global-subjects"],
+    queryFn: () =>
+      authFetch("/api/subjects").then(r => r.ok ? r.json() : []).then(data => Array.isArray(data) ? data : []),
+  });
+  const subjectOptions: { id: number; name: string }[] = Array.isArray(subjectsData) ? subjectsData : [];
+
   const [form, setForm] = useState({
     title: course?.title ?? "",
     description: course?.description ?? "",
@@ -82,10 +94,22 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
     thumbnailUrl: course?.thumbnail_url ?? "",
     durationWeeks: course?.duration_weeks?.toString() ?? "8",
     isPublished: course?.is_published ?? false,
+    deliveryType: (course as any)?.delivery_type ?? "Online",
+    paymentModel: (course as any)?.payment_model ?? "monthly",
+    recordingsIncluded: (course as any)?.recordings_included ?? true,
+    materialsFeeEgp: (course as any)?.materials_fee_egp ?? "",
   });
 
   const f = (k: keyof typeof form, v: string | boolean) =>
     setForm(prev => ({ ...prev, [k]: v }));
+
+  const paymentLabel = PAYMENT_MODELS.find(p => p.value === form.paymentModel)?.label ?? "";
+  const priceHint = {
+    monthly: "EGP per month",
+    per_lesson: "EGP per lesson",
+    full_course: "EGP total (one-time)",
+    installments: "EGP per instalment (×2)",
+  }[form.paymentModel] ?? "EGP";
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -97,6 +121,10 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
         thumbnailUrl: form.thumbnailUrl || null,
         durationWeeks: parseInt(form.durationWeeks) || 8,
         isPublished: form.isPublished,
+        deliveryType: form.deliveryType,
+        paymentModel: form.paymentModel,
+        recordingsIncluded: form.recordingsIncluded,
+        materialsFeeEgp: form.materialsFeeEgp ? parseFloat(form.materialsFeeEgp) : null,
       };
       const res = await authFetch(course ? `/courses/${course.id}` : "/courses", {
         method: course ? "PUT" : "POST",
@@ -118,7 +146,8 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
   });
 
   return (
-    <form onSubmit={e => { e.preventDefault(); mutation.mutate(); }} className="space-y-4 mt-2">
+    <form onSubmit={e => { e.preventDefault(); mutation.mutate(); }} className="space-y-4 mt-2 max-h-[75vh] overflow-y-auto pr-1">
+      {/* Title */}
       <div className="space-y-1.5">
         <Label className="text-xs font-semibold text-gray-700">Course Title *</Label>
         <Input
@@ -130,6 +159,7 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
         />
       </div>
 
+      {/* Description */}
       <div className="space-y-1.5">
         <Label className="text-xs font-semibold text-gray-700">Description</Label>
         <Textarea
@@ -141,6 +171,7 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
         />
       </div>
 
+      {/* Subject from API */}
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label className="text-xs font-semibold text-gray-700">Subject</Label>
@@ -150,11 +181,50 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
             className="w-full h-10 rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="">Select subject…</option>
-            {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+            {subjectOptions.length > 0
+              ? subjectOptions.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)
+              : ["Physics", "Mathematics", "Chemistry", "Biology", "English", "Economics", "Computer Science", "Other"].map(s => <option key={s} value={s}>{s}</option>)
+            }
           </select>
         </div>
         <div className="space-y-1.5">
-          <Label className="text-xs font-semibold text-gray-700">Price (EGP / mo)</Label>
+          <Label className="text-xs font-semibold text-gray-700">Delivery Type</Label>
+          <div className="flex rounded-xl border border-input overflow-hidden h-10">
+            {DELIVERY_TYPES.map(dt => (
+              <button
+                key={dt}
+                type="button"
+                onClick={() => f("deliveryType", dt)}
+                className={`flex-1 text-xs font-semibold transition-colors ${form.deliveryType === dt ? "bg-[#00796B] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+              >
+                {dt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Payment Model */}
+      <div className="space-y-1.5">
+        <Label className="text-xs font-semibold text-gray-700">Payment Model</Label>
+        <div className="grid grid-cols-2 gap-2">
+          {PAYMENT_MODELS.map(pm => (
+            <button
+              key={pm.value}
+              type="button"
+              onClick={() => f("paymentModel", pm.value)}
+              className={`text-xs text-left px-3 py-2 rounded-xl border transition-all font-medium ${form.paymentModel === pm.value ? "border-[#00796B] bg-[#E0F2F1] text-[#00796B]" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
+            >
+              {pm.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Price */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-gray-700">Price ({priceHint})</Label>
           <Input
             type="number"
             min={0}
@@ -164,8 +234,38 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
             className="h-10 rounded-xl"
           />
         </div>
+        <div className="space-y-1.5">
+          <Label className="text-xs font-semibold text-gray-700">Materials Fee (EGP, optional)</Label>
+          <Input
+            type="number"
+            min={0}
+            value={form.materialsFeeEgp}
+            onChange={e => f("materialsFeeEgp", e.target.value)}
+            placeholder="Separate charge for printed materials"
+            className="h-10 rounded-xl"
+          />
+        </div>
       </div>
 
+      {/* Package inclusions */}
+      <div className="bg-gray-50 rounded-xl p-3 space-y-2.5">
+        <p className="text-xs font-bold text-gray-600">Package Inclusions</p>
+        <label className="flex items-center justify-between cursor-pointer">
+          <span className="text-sm text-gray-700">Recordings included for absent students</span>
+          <button
+            type="button"
+            onClick={() => f("recordingsIncluded", !form.recordingsIncluded)}
+            className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.recordingsIncluded ? "bg-[#00796B]" : "bg-gray-200"}`}
+          >
+            <span
+              className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform"
+              style={{ transform: form.recordingsIncluded ? "translateX(20px)" : "translateX(2px)" }}
+            />
+          </button>
+        </label>
+      </div>
+
+      {/* Thumbnail + Duration */}
       <div className="space-y-1.5">
         <Label className="text-xs font-semibold text-gray-700">Thumbnail URL</Label>
         <div className="flex gap-2 items-start">
@@ -177,12 +277,7 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
           />
           {form.thumbnailUrl && (
             <div className="h-10 w-14 rounded-xl overflow-hidden border border-gray-200 shrink-0">
-              <img
-                src={form.thumbnailUrl}
-                alt=""
-                className="h-full w-full object-cover"
-                onError={e => (e.currentTarget.style.display = "none")}
-              />
+              <img src={form.thumbnailUrl} alt="" className="h-full w-full object-cover" onError={e => (e.currentTarget.style.display = "none")} />
             </div>
           )}
         </div>
@@ -200,20 +295,18 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
         />
       </div>
 
+      {/* Publish toggle */}
       <label className="flex items-center gap-2.5 cursor-pointer py-1">
-        <div
+        <button
+          type="button"
           onClick={() => f("isPublished", !form.isPublished)}
-          className={`w-10 h-5.5 rounded-full transition-colors relative cursor-pointer ${form.isPublished ? "bg-[#00796B]" : "bg-gray-200"}`}
-          style={{ minWidth: 40, height: 22 }}
+          className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.isPublished ? "bg-[#00796B]" : "bg-gray-200"}`}
         >
-          <div
-            className={`absolute top-0.5 w-4.5 h-4.5 rounded-full bg-white shadow-sm transition-transform`}
-            style={{
-              width: 18, height: 18,
-              transform: form.isPublished ? "translateX(20px)" : "translateX(2px)",
-            }}
+          <span
+            className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform"
+            style={{ transform: form.isPublished ? "translateX(20px)" : "translateX(2px)" }}
           />
-        </div>
+        </button>
         <span className="text-sm text-gray-700 select-none">
           {form.isPublished ? "Published — visible in marketplace" : "Draft — hidden from students"}
         </span>

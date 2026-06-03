@@ -23,6 +23,7 @@ const modules = [
   { to: "/admin/guardian-pulse",        label: "GuardianPulse",          desc: "Parent notification centre",          icon: Bell },
   { to: "/admin/landing-editor",        label: "Landing Editor",         desc: "Edit landing page content live",      icon: Globe },
   { to: "/admin/assistant-permissions", label: "Assistant Permissions",  desc: "Control assistant access levels",     icon: Shield },
+  { to: "/admin/teacher-verification", label: "Teacher Verification",    desc: "Grant Verified badges to teachers",   icon: Shield },
 ];
 
 function LiveStatsBadge({ count, label }: { count: number | string; label: string }) {
