@@ -3,6 +3,7 @@ import { Server as SocketServer } from "socket.io";
 import app from "./app";
 import { logger } from "./lib/logger";
 import { setupSignaling } from "./socket/signaling";
+import { runMigrations } from "./db/migrate";
 
 const rawPort = process.env["PORT"];
 
@@ -17,6 +18,8 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+runMigrations().catch(err => logger.error({ err }, "Migration error — continuing"));
 
 const httpServer = createServer(app);
 

@@ -45,6 +45,8 @@ import HelpDesk from "@/pages/helpdesk";
 import InsightExams from "@/pages/insight-exams";
 import ScanScribe from "@/pages/scan-scribe";
 import ErrorTrace from "@/pages/error-trace";
+import TutorCraft from "@/pages/tutorcraft";
+import Messages from "@/pages/messages";
 
 // Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
@@ -107,6 +109,7 @@ import Courses from "@/pages/courses";
 import CourseDetail from "@/pages/course-detail";
 import StudentRegister from "@/pages/student-register";
 import MyCourses from "@/pages/teacher/my-courses";
+import TeacherCourses from "@/pages/teacher/teacher-courses";
 import StudentMyCourses from "@/pages/student/my-courses";
 import StudentApprovals from "@/pages/student-approvals";
 import LinkParent from "@/pages/student/link-parent";
@@ -256,6 +259,9 @@ const TEACHER_ROUTES = (
     <Route path="/scan-scribe" component={ScanScribe} />
     <Route path="/error-trace" component={ErrorTrace} />
     <Route path="/papers" component={PastPaperLibrary} />
+    <Route path="/tutorcraft" component={TutorCraft} />
+    <Route path="/messages" component={Messages} />
+    <Route path="/teacher-courses" component={TeacherCourses} />
   </>
 );
 

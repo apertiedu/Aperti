@@ -54,6 +54,11 @@ import { workspaceRouter } from "./workspace";
 import { onboardingRouter } from "./onboarding";
 import { settingsRouter } from "./settings";
 import { searchRouter } from "./search";
+import { teacherCoursesRouter } from "./teacher-courses";
+import { rubricsRouter } from "./rubrics";
+import { messagesRouter } from "./messages";
+import { tutorcraftRouter } from "./tutorcraft";
+import { classforgeRouter } from "./classforge";
 
 const router: IRouter = Router();
 
@@ -112,5 +117,10 @@ router.use("/workspace", workspaceRouter);
 router.use("/onboarding", onboardingRouter);
 router.use("/settings", settingsRouter);
 router.use("/search", searchRouter);
+router.use(teacherCoursesRouter);
+router.use(rubricsRouter);
+router.use(messagesRouter);
+router.use(tutorcraftRouter);
+router.use(classforgeRouter);
 
 export default router;

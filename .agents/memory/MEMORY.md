@@ -1,5 +1,3 @@
-- [Subscriptions schema gaps](subscriptions-schema.md) — `subscriptions` table existed without `screenshot_url`/`coupon_id`; Drizzle relational API requires `relations()` which was missing — use plain `db.select()` instead.
-- [Admin password seeding](admin-credentials.md) — bcrypt hash seeded at startup may mismatch; if `admin/admin123` returns 401, reset hash directly in DB via Node bcryptjs.
-- [Drizzle querySchema aliases](drizzle-query-schema.md) — `lib/db/src/index.ts` builds `querySchema` with table aliases but NO `relations()` — never use `db.query.X.findMany({ with: {...} })`; use plain selects with joins.
-- [API routing structure](api-routing.md) — Backend API (port 3001): `/auth/*` and `/courses` mounted directly on app; `/api/*` router holds everything else. Frontend proxies `/api` → 3001.
-- [aperti_courses schema gap](aperti-courses-schema.md) — Drizzle schema only has base columns; routes need teacher_account_id/is_published/subject/etc — add via ALTER TABLE IF NOT EXISTS in courses.ts IIFE migration.
+- [OpenAI API in api-server](openai-api.md) — use raw fetch(), NOT the openai npm package (not installed in api-server)
+- [Framer-motion import trap](framer-motion-trap.md) — never import React hooks (useState etc.) from framer-motion; only motion/AnimatePresence/etc.
+- [Phase 2 Teacher OS routes](phase2-routes.md) — teacher-courses, rubrics, messages, tutorcraft, classforge all registered in routes/index.ts
