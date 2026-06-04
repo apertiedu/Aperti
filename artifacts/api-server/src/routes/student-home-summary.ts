@@ -268,9 +268,29 @@ router.get("/student/home-summary", ...studentGuard, async (req: AuthRequest, re
     : 80;
 
   const recentQuizAvg = avgGrade ?? 0;
-  const readinessScore = Math.round(
+  const baseReadinessScore = Math.round(
     ((attendancePct ?? 0) * 0.3) + ((hwCompletionRate ?? 0) * 0.3) + (recentQuizAvg * 0.4)
   );
+
+  // CoreMind enrichment: non-blocking, blends AI readiness with local calculation
+  let coremindInsights: {
+    riskLevel: string; recommendedActions: string[]; nextBestTopic: string | null; examReadiness: number;
+  } | null = null;
+  try {
+    const { analyzeStudent } = await import("../lib/coremind");
+    const analysis = await analyzeStudent(studentId);
+    coremindInsights = {
+      riskLevel: analysis.riskLevel,
+      recommendedActions: analysis.recommendedActions,
+      nextBestTopic: analysis.nextBestTopic,
+      examReadiness: analysis.examReadiness,
+    };
+  } catch { /* best-effort — app still works without CoreMind */ }
+
+  // Blend: if CoreMind has data, weight it 40% into the readiness score
+  const readinessScore = coremindInsights
+    ? Math.round(baseReadinessScore * 0.6 + coremindInsights.examReadiness * 0.4)
+    : baseReadinessScore;
 
   // ── Daily mission: BOTH top weak topic AND nearest overdue homework ─────────
   const weakTopics = (echo?.weakTopics as string[]) ?? [];
@@ -358,6 +378,7 @@ router.get("/student/home-summary", ...studentGuard, async (req: AuthRequest, re
       readinessScore,
       attendancePct,
       hwCompletionRate,
+      coremindInsights,
     },
     upcomingHomework: upcomingHomework.map(h => ({
       id: h.id,

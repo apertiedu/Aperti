@@ -51,10 +51,40 @@ router.post("/exams/generate", requireTenantAccess, async (req, res): Promise<vo
     orderBy = "ORDER BY RANDOM()";
   }
 
-  const { rows: questions } = await pool.query(
+  // Weave enrichment: for "predicted" mode, bias toward high-connectivity topics
+  let weaveHighYieldTopics: string[] = [];
+  if (diffMode === "predicted") {
+    try {
+      const { rows: topNodes } = await pool.query(`
+        SELECT n.name, COUNT(e.id) AS edge_count
+        FROM knowledge_nodes n
+        LEFT JOIN knowledge_edges e ON e.from_node_id = n.id OR e.to_node_id = n.id
+        WHERE n.type = 'topic'
+        GROUP BY n.id, n.name
+        ORDER BY edge_count DESC
+        LIMIT 15
+      `);
+      weaveHighYieldTopics = topNodes.map((n: any) => n.name as string);
+    } catch { /* Weave best-effort */ }
+  }
+
+  let { rows: questions } = await pool.query(
     `SELECT id, question_text, topic, max_marks, difficulty FROM question_bank ${where} ${orderBy} LIMIT $${i}`,
-    [...params, count]
+    [...params, count * 3] // fetch 3x, then bias-sort
   );
+
+  // Bias toward Weave high-yield topics for predicted mode
+  if (weaveHighYieldTopics.length > 0 && diffMode === "predicted") {
+    const highYield = questions.filter((q: any) =>
+      weaveHighYieldTopics.some(t => (q.topic ?? "").toLowerCase().includes(t.toLowerCase()))
+    );
+    const rest = questions.filter((q: any) =>
+      !weaveHighYieldTopics.some(t => (q.topic ?? "").toLowerCase().includes(t.toLowerCase()))
+    );
+    questions = [...highYield, ...rest].slice(0, count);
+  } else {
+    questions = questions.slice(0, count);
+  }
 
   if (questions.length === 0) {
     res.status(400).json({ message: "No questions found matching your criteria. Add questions to the question bank first." });
@@ -96,7 +126,8 @@ router.post("/exams/generate", requireTenantAccess, async (req, res): Promise<vo
         easy: questions.filter((q: any) => q.difficulty === "easy").length,
         medium: questions.filter((q: any) => q.difficulty === "medium").length,
         hard: questions.filter((q: any) => q.difficulty === "hard").length,
-      }
+      },
+      weaveHighYieldTopics: weaveHighYieldTopics.length > 0 ? weaveHighYieldTopics.slice(0, 5) : undefined,
     });
   } catch (err) {
     await client.query("ROLLBACK");

@@ -98,8 +98,37 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
       return;
     }
 
+    // CoreMind enrichment: inject class-level intelligence for at-risk / lesson-improvement queries
+    let coremindContext = "";
+    const lowerMsg = message.toLowerCase();
+    const needsCoreMind = lowerMsg.includes("at-risk") || lowerMsg.includes("struggling") ||
+      lowerMsg.includes("lesson improve") || lowerMsg.includes("weak student") ||
+      lowerMsg.includes("underperform") || lowerMsg.includes("below average");
+
+    if (needsCoreMind) {
+      try {
+        const { analyzeStudent } = await import("../lib/coremind");
+        const { db: dbInst, studentsTable: st } = await import("@workspace/db");
+        const { eq: eqOp } = await import("drizzle-orm");
+        const students = await dbInst.select({ id: st.id, name: st.studentName })
+          .from(st).where(eqOp(st.teacherAccountId, req.userId!)).limit(20);
+        const analyses = await Promise.allSettled(students.map(s => analyzeStudent(s.id)));
+        const atRisk = analyses
+          .map((r, i) => r.status === "fulfilled" ? { ...r.value, studentName: students[i].name } : null)
+          .filter(Boolean)
+          .filter((a: any) => a.riskLevel === "high" || a.riskLevel === "medium")
+          .slice(0, 5);
+        if (atRisk.length > 0) {
+          coremindContext = `\n\n[CoreMind Data — ${new Date().toLocaleDateString()}]\n` +
+            atRisk.map((a: any) =>
+              `• ${a.studentName}: Risk=${a.riskLevel}, Readiness=${a.examReadiness}%, WeakTopics=[${(a.weakTopics ?? []).slice(0, 3).join(", ")}], Action="${(a.recommendedActions ?? [])[0] ?? ""}"`
+            ).join("\n");
+        }
+      } catch { /* best-effort */ }
+    }
+
     const messages = [
-      { role: "system", content: SYSTEM_PROMPT },
+      { role: "system", content: SYSTEM_PROMPT + coremindContext },
       ...history.map((m: any) => ({ role: m.role, content: m.content })),
       { role: "user", content: message },
     ];
@@ -224,11 +253,33 @@ Return JSON: { units: [{ title, topics: [{ title, lessons: [{ title, type, durat
 No markdown, just raw JSON.`;
 
     const raw = await openaiChat([{ role: "user", content: prompt }], 1500);
+    let parsed: { units: any[] } | null = null;
+    try { parsed = JSON.parse(raw); } catch { res.json({ units: [], raw }); return; }
+
+    // Weave integration: enrich each unit with prerequisites + register nodes
+    let weaveEnriched = false;
     try {
-      res.json(JSON.parse(raw));
-    } catch {
-      res.json({ units: [], raw });
-    }
+      const { getOrCreateNode, ensureEdge, getRelatedNodes } = await import("../lib/weave-graph");
+      const unitNodeIds: number[] = [];
+      for (const unit of (parsed!.units ?? [])) {
+        if (!unit.title) continue;
+        const nodeId = await getOrCreateNode(unit.title, "topic", { source: "syllabus", subject });
+        if (unitNodeIds.length > 0) {
+          await ensureEdge(unitNodeIds[unitNodeIds.length - 1], nodeId, "prerequisite");
+        }
+        unitNodeIds.push(nodeId);
+        const prereqs = await getRelatedNodes(nodeId, "prerequisite");
+        unit.weavePrerequisites = prereqs.map((n: any) => n.name);
+        for (const topic of (unit.topics ?? [])) {
+          if (!topic.title) continue;
+          const topicId = await getOrCreateNode(topic.title, "topic", { parentUnit: unit.title, subject });
+          await ensureEdge(nodeId, topicId, "includes");
+        }
+      }
+      weaveEnriched = true;
+    } catch { /* Weave best-effort */ }
+
+    res.json({ ...parsed, weaveEnriched });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

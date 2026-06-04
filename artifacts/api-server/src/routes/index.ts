@@ -78,6 +78,7 @@ import { coremindRouter } from "./coremind";
 import { misconceptionsRouter } from "./misconceptions";
 import { gradingRouter } from "./grading";
 import { coremindAnalyticsRouter } from "./coremind-analytics";
+import { parentAiRouter } from "./parent-ai";
 
 const router: IRouter = Router();
 
@@ -160,5 +161,6 @@ router.use("/coremind", coremindRouter);
 router.use(misconceptionsRouter);
 router.use("/grading", gradingRouter);
 router.use("/coremind", coremindAnalyticsRouter);
+router.use(parentAiRouter);
 
 export default router;

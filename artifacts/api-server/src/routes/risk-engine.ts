@@ -109,7 +109,34 @@ router.get("/analytics/risk-report", requireTenantAccess, async (req, res): Prom
     low: result.filter((r: any) => r.riskLevel === "low").length,
   };
 
-  res.json({ students: result, summary });
+  // CoreMind enrichment: enrich top high/critical students with AI analysis (best-effort)
+  const topAtRisk = result
+    .filter((r: any) => r.riskLevel === "critical" || r.riskLevel === "high")
+    .slice(0, 8);
+
+  const enrichedMap: Record<number, any> = {};
+  if (topAtRisk.length > 0) {
+    try {
+      const { analyzeStudent } = await import("../lib/coremind");
+      await Promise.allSettled(topAtRisk.map(async (s: any) => {
+        const analysis = await analyzeStudent(s.studentId);
+        enrichedMap[s.studentId] = {
+          examReadiness: analysis.examReadiness,
+          weakTopics: analysis.weakTopics.slice(0, 3),
+          recommendedActions: analysis.recommendedActions.slice(0, 2),
+          coremindRisk: analysis.riskLevel,
+          nextBestTopic: analysis.nextBestTopic,
+        };
+      }));
+    } catch { /* best-effort — CoreMind may be unavailable */ }
+  }
+
+  const enrichedResult = result.map((r: any) => ({
+    ...r,
+    coremindInsights: enrichedMap[r.studentId] ?? null,
+  }));
+
+  res.json({ students: enrichedResult, summary });
 });
 
 export default router;

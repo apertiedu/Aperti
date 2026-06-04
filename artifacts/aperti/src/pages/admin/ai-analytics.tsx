@@ -223,6 +223,9 @@ export default function AiAnalytics() {
         </div>
       </section>
 
+      {/* Student Impact Score */}
+      <ImpactPanel />
+
       {/* Empty state */}
       {!isLoading && stats?.totalCalls === 0 && (
         <div className="text-center py-16 text-slate-400">
@@ -231,5 +234,71 @@ export default function AiAnalytics() {
         </div>
       )}
     </div>
+  );
+}
+
+function ImpactPanel() {
+  const { data: impact, isLoading } = useQuery({
+    queryKey: ["coremind-impact"],
+    queryFn: async () => {
+      const res = await apiFetch("/api/coremind/analytics/impact");
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+
+  return (
+    <section>
+      <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Student Impact Score</h2>
+      <Card className="border border-slate-100 shadow-sm">
+        <CardContent className="p-5">
+          {isLoading && <p className="text-sm text-slate-400 text-center py-4">Computing impact...</p>}
+          {!isLoading && impact && (
+            <div className="space-y-4">
+              {/* Impact message */}
+              <div className={`rounded-lg px-4 py-3 text-sm font-medium ${
+                impact.impactDelta > 0 ? "bg-emerald-50 text-emerald-700 border border-emerald-100" :
+                impact.impactDelta < 0 ? "bg-amber-50 text-amber-700 border border-amber-100" :
+                "bg-slate-50 text-slate-600 border border-slate-100"
+              }`}>
+                {impact.impactDelta > 0 && "📈 "}
+                {impact.impactDelta < 0 && "⚠️ "}
+                {impact.impactDelta === null && "📊 "}
+                {impact.impactMessage}
+              </div>
+
+              {/* Comparison grid */}
+              {impact.impactDelta !== null && (
+                <div className="grid grid-cols-3 gap-4 pt-1">
+                  <div className="text-center p-3 bg-teal-50 rounded-xl border border-teal-100">
+                    <p className="text-xl font-bold text-teal-700">{impact.mentorAvgGrade}%</p>
+                    <p className="text-xs text-teal-600 mt-0.5">Mentor Users</p>
+                    <p className="text-xs text-slate-400">{impact.mentorCount} students</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center justify-center">
+                    <p className={`text-lg font-bold ${impact.impactDelta > 0 ? "text-emerald-600" : "text-rose-500"}`}>
+                      {impact.impactDelta > 0 ? "+" : ""}{impact.impactDelta}%
+                    </p>
+                    <p className="text-xs text-slate-400">delta</p>
+                  </div>
+                  <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                    <p className="text-xl font-bold text-slate-600">{impact.nonMentorAvgGrade}%</p>
+                    <p className="text-xs text-slate-500 mt-0.5">Non-Users</p>
+                    <p className="text-xs text-slate-400">{impact.nonMentorCount} students</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Totals */}
+              <div className="flex items-center gap-6 text-xs text-slate-500 pt-1 border-t border-slate-50">
+                <span>Total students with grades: <strong className="text-slate-700">{impact.totalStudents}</strong></span>
+                <span>Overall avg: <strong className="text-slate-700">{impact.overallAvg}%</strong></span>
+                <span>AI users tracked: <strong className="text-slate-700">{impact.mentorUsers}</strong></span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </section>
   );
 }

@@ -93,3 +93,105 @@ coremindAnalyticsRouter.post("/safety/review/:id", authenticate, requireRole("ad
     .where(eq(aiInteractionsTable.id, id));
   res.json({ success: true });
 });
+
+// GET /coremind/analytics/impact — Student Impact Score (Mentor users vs non-users grade comparison)
+coremindAnalyticsRouter.get("/analytics/impact", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    // Get distinct student user IDs who have used Mentor
+    const mentorUsers = await db
+      .selectDistinct({ userId: aiInteractionsTable.userId })
+      .from(aiInteractionsTable)
+      .where(eq(aiInteractionsTable.module, "mentor"));
+
+    const mentorUserIds = mentorUsers.map(r => r.userId).filter(Boolean) as number[];
+
+    // Raw SQL for grade comparison — students who use Mentor vs those who don't
+    const { pool } = await import("@workspace/db");
+
+    const { rows: gradeStats } = await pool.query(`
+      WITH student_grades AS (
+        SELECT
+          sm.student_id,
+          ROUND(SUM(sm.marks_scored)::numeric / NULLIF(SUM(eq.max_marks),0) * 100, 1) AS grade_pct
+        FROM student_marks sm
+        JOIN exam_questions eq ON eq.id = sm.question_id
+        GROUP BY sm.student_id
+        HAVING SUM(eq.max_marks) > 0
+      )
+      SELECT
+        COUNT(*)::int AS total_students,
+        ROUND(AVG(grade_pct), 1) AS overall_avg
+      FROM student_grades
+    `);
+
+    let mentorAvg = 0, nonMentorAvg = 0, mentorCount = 0, nonMentorCount = 0;
+
+    if (mentorUserIds.length > 0) {
+      // Get student records for mentor users (users → accounts → students)
+      const { rows: mentorGrades } = await pool.query(`
+        WITH mentor_students AS (
+          SELECT s.id AS student_id
+          FROM students s
+          WHERE s.account_id = ANY($1::int[])
+        ),
+        student_grades AS (
+          SELECT sm.student_id,
+            ROUND(SUM(sm.marks_scored)::numeric / NULLIF(SUM(eq.max_marks),0) * 100, 1) AS grade_pct
+          FROM student_marks sm
+          JOIN exam_questions eq ON eq.id = sm.question_id
+          WHERE sm.student_id IN (SELECT student_id FROM mentor_students)
+          GROUP BY sm.student_id
+          HAVING SUM(eq.max_marks) > 0
+        )
+        SELECT COUNT(*)::int AS cnt, ROUND(AVG(grade_pct),1) AS avg_grade FROM student_grades
+      `, [mentorUserIds]);
+
+      const { rows: nonMentorGrades } = await pool.query(`
+        WITH mentor_students AS (
+          SELECT s.id AS student_id
+          FROM students s
+          WHERE s.account_id = ANY($1::int[])
+        ),
+        student_grades AS (
+          SELECT sm.student_id,
+            ROUND(SUM(sm.marks_scored)::numeric / NULLIF(SUM(eq.max_marks),0) * 100, 1) AS grade_pct
+          FROM student_marks sm
+          JOIN exam_questions eq ON eq.id = sm.question_id
+          WHERE sm.student_id NOT IN (SELECT student_id FROM mentor_students)
+          GROUP BY sm.student_id
+          HAVING SUM(eq.max_marks) > 0
+        )
+        SELECT COUNT(*)::int AS cnt, ROUND(AVG(grade_pct),1) AS avg_grade FROM student_grades
+      `, [mentorUserIds]);
+
+      mentorAvg = parseFloat(mentorGrades[0]?.avg_grade ?? "0");
+      nonMentorAvg = parseFloat(nonMentorGrades[0]?.avg_grade ?? "0");
+      mentorCount = parseInt(mentorGrades[0]?.cnt ?? "0");
+      nonMentorCount = parseInt(nonMentorGrades[0]?.cnt ?? "0");
+    }
+
+    const overallAvg = parseFloat(gradeStats[0]?.overall_avg ?? "0");
+    const totalStudents = parseInt(gradeStats[0]?.total_students ?? "0");
+    const impactDelta = mentorCount > 0 && nonMentorCount > 0 ? Math.round((mentorAvg - nonMentorAvg) * 10) / 10 : null;
+
+    res.json({
+      mentorUsers: mentorUserIds.length,
+      mentorCount,
+      nonMentorCount,
+      mentorAvgGrade: mentorAvg,
+      nonMentorAvgGrade: nonMentorAvg,
+      overallAvg,
+      totalStudents,
+      impactDelta,
+      impactMessage: impactDelta !== null
+        ? impactDelta > 0
+          ? `Students using The Mentor score ${impactDelta}% higher on average than those who don't.`
+          : impactDelta < 0
+          ? `Mentor users are scoring ${Math.abs(impactDelta)}% lower — they may be higher-risk students self-selecting into AI help.`
+          : "No measurable grade difference yet — more data needed."
+        : "Not enough data to compute impact. Students need AI interaction history and exam results.",
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
