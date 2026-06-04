@@ -26,11 +26,38 @@ const upload = multer({
   },
 });
 
-function extractTextHeuristic(_imagePath: string): string {
-  // OCR requires an external library (e.g. tesseract.js). Without it, image-only
-  // submissions cannot be auto-graded. Callers should pass text via req.body.text
-  // (e.g. OCR run client-side) or pair with an AI scan via OPENAI_API_KEY.
-  return "";
+async function extractTextWithOpenAIVision(imagePath: string): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return "";
+  try {
+    const imageBuffer = fs.readFileSync(imagePath);
+    const base64Image = imageBuffer.toString("base64");
+    const ext = path.extname(imagePath).replace(".", "") || "jpeg";
+    const mimeType = ext === "jpg" ? "image/jpeg" : `image/${ext}`;
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{
+          role: "user",
+          content: [
+            { type: "text", text: "Extract all visible handwritten or printed text from this student homework image. Return only the raw text, no formatting." },
+            { type: "image_url", image_url: { url: `data:${mimeType};base64,${base64Image}`, detail: "high" } },
+          ],
+        }],
+        max_tokens: 1000,
+      }),
+    });
+    const data = await response.json() as any;
+    return data.choices?.[0]?.message?.content ?? "";
+  } catch {
+    return "";
+  }
 }
 
 function ruleBasedGrade(ocrText: string, criteria: Array<{ keyword: string; marks: number }>) {
@@ -90,7 +117,7 @@ router.post("/snapgrade/scan", ...studentGuard, upload.single("image"), async (r
 
   let ocrText = req.body.text ?? "";
   if (!ocrText && req.file) {
-    ocrText = extractTextHeuristic(req.file.path);
+    ocrText = await extractTextWithOpenAIVision(req.file.path);
   }
 
   let aiAnalysis: Record<string, unknown> = {};

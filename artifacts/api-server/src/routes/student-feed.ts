@@ -184,12 +184,16 @@ router.get("/student/feed", ...studentGuard, async (req: AuthRequest, res: Respo
 
   feedItems.sort((a, b) => b.priority - a.priority);
 
-  const page = parseInt((req.query.page as string) ?? "1", 10);
-  const pageSize = parseInt((req.query.pageSize as string) ?? "20", 10);
-  const start = (page - 1) * pageSize;
-  const paginated = feedItems.slice(start, start + pageSize);
+  // Cursor-based pagination: cursor is the index of the last seen item
+  const cursorParam = req.query.cursor as string | undefined;
+  const limitParam = parseInt((req.query.limit as string) ?? "20", 10);
+  const startIdx = cursorParam ? parseInt(cursorParam, 10) : 0;
+  const paginated = feedItems.slice(startIdx, startIdx + limitParam);
+  const nextCursor = startIdx + paginated.length < feedItems.length
+    ? String(startIdx + paginated.length)
+    : null;
 
-  res.json({ items: paginated, total: feedItems.length, page, pageSize });
+  res.json({ items: paginated, nextCursor, total: feedItems.length });
 });
 
 export default router;

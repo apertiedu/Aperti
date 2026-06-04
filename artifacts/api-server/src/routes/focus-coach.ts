@@ -151,7 +151,7 @@ router.post("/focus-coach/goals/:id/complete", ...studentGuard, async (req: Auth
   if (existingProfile.length > 0) {
     const p = existingProfile[0];
     const newXp = (p.xp ?? 0) + xpToAward;
-    const newLevel = Math.floor(newXp / 500) + 1;
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
     let newRank = p.rank;
     if (newXp >= 10000) newRank = "Apex";
     else if (newXp >= 5000) newRank = "Diamond";
@@ -245,12 +245,55 @@ router.post("/focus-sessions", ...studentGuard, async (req: AuthRequest, res: Re
   if (existingProfile.length > 0) {
     const p = existingProfile[0];
     const newXp = (p.xp ?? 0) + xpEarned;
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
     await db.update(ascendProfilesTable)
-      .set({ xp: newXp, level: Math.floor(newXp / 500) + 1 })
+      .set({ xp: newXp, level: newLevel })
       .where(eq(ascendProfilesTable.id, p.id));
   }
 
   res.status(201).json({ session, xpEarned });
+});
+
+// PATCH /focus-sessions/:id — complete a session (update mode/duration, finalize XP)
+router.patch("/focus-sessions/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const ctx = await requireStudent(req, res);
+  if (!ctx) return;
+  const { studentId } = ctx;
+
+  const sessionId = parseInt(req.params.id, 10);
+  const [existing] = await db.select().from(focusSessionsTable)
+    .where(and(eq(focusSessionsTable.id, sessionId), eq(focusSessionsTable.studentId, studentId)))
+    .limit(1);
+
+  if (!existing) { res.status(404).json({ message: "Session not found" }); return; }
+
+  const { durationMinutes, mode } = req.body;
+  const finalDuration = durationMinutes ? parseInt(durationMinutes, 10) : existing.durationMinutes;
+  const xpEarned = Math.floor((finalDuration / 25) * 30);
+
+  const [updated] = await db.update(focusSessionsTable)
+    .set({
+      durationMinutes: finalDuration,
+      mode: mode ?? existing.mode,
+      xpEarned,
+      completedAt: new Date(),
+    })
+    .where(eq(focusSessionsTable.id, sessionId))
+    .returning();
+
+  // Reconcile XP in ascend profile
+  const [profile] = await db.select().from(ascendProfilesTable)
+    .where(eq(ascendProfilesTable.studentAccountId, req.userId!)).limit(1);
+  if (profile) {
+    const delta = xpEarned - (existing.xpEarned ?? 0);
+    const newXp = Math.max(0, (profile.xp ?? 0) + delta);
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
+    await db.update(ascendProfilesTable)
+      .set({ xp: newXp, level: newLevel })
+      .where(eq(ascendProfilesTable.id, profile.id));
+  }
+
+  res.json({ session: updated, xpEarned });
 });
 
 export default router;

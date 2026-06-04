@@ -57,8 +57,9 @@ async function requireStudent(req: AuthRequest, res: Response): Promise<{ studen
   return { studentId: student.id, teacherAccountId: student.teacherAccountId };
 }
 
-// GET /exam-vault/packages/:examId
-router.get("/exam-vault/packages/:examId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+// GET /exam-vault/download/:examId — primary contract path
+// GET /exam-vault/packages/:examId — alternate path (backward compat)
+const downloadHandler = async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId, teacherAccountId } = ctx;
@@ -126,7 +127,10 @@ router.get("/exam-vault/packages/:examId", ...studentGuard, async (req: AuthRequ
     questionCount: questions.length,
     totalMarks: exam.totalMarks,
   });
-});
+};
+
+router.get("/exam-vault/download/:examId", ...studentGuard, downloadHandler);
+router.get("/exam-vault/packages/:examId", ...studentGuard, downloadHandler);
 
 // POST /exam-vault/submit
 router.post("/exam-vault/submit", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {

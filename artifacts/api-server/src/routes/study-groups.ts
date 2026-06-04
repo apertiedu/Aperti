@@ -138,8 +138,9 @@ router.post("/study-groups/:id/join", ...studentGuard, async (req: AuthRequest, 
   res.status(201).json(member);
 });
 
-// POST /study-groups/:id/leave
-router.post("/study-groups/:id/leave", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+// DELETE /study-groups/:id/leave — spec contract method
+// POST /study-groups/:id/leave — legacy alias
+const leaveGroupHandler = async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -148,7 +149,10 @@ router.post("/study-groups/:id/leave", ...studentGuard, async (req: AuthRequest,
   await db.delete(groupMembersTable)
     .where(and(eq(groupMembersTable.groupId, groupId), eq(groupMembersTable.studentId, studentId)));
   res.json({ success: true });
-});
+};
+
+router.delete("/study-groups/:id/leave", ...studentGuard, leaveGroupHandler);
+router.post("/study-groups/:id/leave", ...studentGuard, leaveGroupHandler);
 
 // GET /study-groups/:id/members — only members can list
 router.get("/study-groups/:id/members", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
@@ -218,8 +222,8 @@ router.post("/study-groups/:id/challenges/:cid/complete", ...studentGuard, async
   res.json(updated);
 });
 
-// GET /peer-reviews/available — anonymized submissions from classmates in the student's subjects
-router.get("/peer-reviews/available", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+// GET /peer-review/assignments — spec contract path (and legacy /peer-reviews/available alias)
+const peerReviewAssignmentsHandler = async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId, teacherId } = ctx;
@@ -311,10 +315,13 @@ router.get("/peer-reviews/available", ...studentGuard, async (req: AuthRequest, 
     }));
 
   res.json(available);
-});
+};
 
-// POST /peer-reviews
-router.post("/peer-reviews", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/peer-review/assignments", ...studentGuard, peerReviewAssignmentsHandler);
+router.get("/peer-reviews/available", ...studentGuard, peerReviewAssignmentsHandler);
+
+// POST /peer-review/submit — spec contract path; POST /peer-reviews — legacy alias
+const peerReviewSubmitHandler = async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -334,6 +341,9 @@ router.post("/peer-reviews", ...studentGuard, async (req: AuthRequest, res: Resp
   }).returning();
 
   res.status(201).json(review);
-});
+};
+
+router.post("/peer-review/submit", ...studentGuard, peerReviewSubmitHandler);
+router.post("/peer-reviews", ...studentGuard, peerReviewSubmitHandler);
 
 export default router;
