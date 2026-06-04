@@ -304,6 +304,16 @@ const MIGRATIONS: string[] = [
   `ALTER TABLE guardian_links ADD COLUMN IF NOT EXISTS status      text NOT NULL DEFAULT 'pending'`,
   `ALTER TABLE guardian_links ADD COLUMN IF NOT EXISTS pairing_code text`,
   `ALTER TABLE guardian_links ADD COLUMN IF NOT EXISTS requested_at timestamptz NOT NULL DEFAULT NOW()`,
+  /* ── Phase 4 additions ───────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS documents (
+    id          serial PRIMARY KEY,
+    parent_id   integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    student_id  integer REFERENCES students(id) ON DELETE SET NULL,
+    title       text NOT NULL,
+    type        text NOT NULL DEFAULT 'report',
+    file_url    text,
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
 ];
 
 export async function runMigrations(): Promise<void> {

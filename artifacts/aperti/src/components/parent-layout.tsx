@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuth } from "@/context/auth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard, MessageSquare, Calendar, Bell, MoreHorizontal,
   BookOpen, BarChart3, ClipboardList, GraduationCap, Brain,
   AlertTriangle, CreditCard, Settings, LogOut, ChevronRight,
-  ChevronLeft, Users, FileText, Bot, Sun, Moon,
+  ChevronLeft, Users, FileText, Bot, Sun, Moon, Folder,
 } from "lucide-react";
 import { useTheme } from "@/context/theme";
+import { io as SocketIO, Socket } from "socket.io-client";
+import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#0D9488";
 
@@ -59,6 +61,13 @@ const sidebarSections = [
     ],
   },
   {
+    title: "Schedule & Files",
+    items: [
+      { href: "/parent/calendar", label: "Family Calendar", icon: Calendar },
+      { href: "/parent/documents", label: "Documents", icon: Folder },
+    ],
+  },
+  {
     title: "Reports & Tools",
     items: [
       { href: "/parent/reports", label: "Reports", icon: FileText },
@@ -82,6 +91,43 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
   const { dark, toggleDark } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const socketRef = useRef<Socket | null>(null);
+
+  // ── Live Socket.IO notifications ─────────────────────────────────────────
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const socket: Socket = SocketIO("/parent", {
+      path: "/socket.io",
+      transports: ["websocket", "polling"],
+      auth: { token: localStorage.getItem("aperti_token") || "" },
+    });
+
+    socketRef.current = socket;
+
+    socket.on("connect", () => {
+      socket.emit("join", user.id);
+    });
+
+    socket.on("notification", (notif: any) => {
+      // Invalidate notification query so badge re-fetches
+      qc.invalidateQueries({ queryKey: ["parent-notif-count"] });
+      qc.invalidateQueries({ queryKey: ["parent-notifications"] });
+
+      toast({
+        title: notif.title || "New notification",
+        description: notif.message,
+        duration: 5000,
+      });
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [user?.id]);
 
   const { data: notifData } = useQuery({
     queryKey: ["parent-notif-count"],

@@ -136,6 +136,8 @@ import ParentMeetings from "@/pages/parent/meetings";
 import ParentNotifications from "@/pages/parent/notifications";
 import ParentInterventions from "@/pages/parent/interventions";
 import ParentReports from "@/pages/parent/reports";
+import FamilyCalendar from "@/pages/parent/calendar";
+import ParentDocuments from "@/pages/parent/documents";
 import ParentAIAssistant from "@/pages/parent/ai-assistant";
 import ParentBilling from "@/pages/parent/billing";
 import ParentSettings from "@/pages/parent/settings";
@@ -365,6 +367,10 @@ function ParentRouter() {
         <Route path="/parent/notifications" component={ParentNotifications} />
         <Route path="/parent/interventions" component={ParentInterventions} />
         <Route path="/parent/reports" component={ParentReports} />
+
+        {/* Calendar & Documents */}
+        <Route path="/parent/calendar" component={FamilyCalendar} />
+        <Route path="/parent/documents" component={ParentDocuments} />
 
         {/* Tools */}
         <Route path="/parent/ai-assistant" component={ParentAIAssistant} />

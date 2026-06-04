@@ -92,6 +92,33 @@ export default function ParentReports() {
               >
                 {generateMutation.isPending ? <><RefreshCw className="h-4 w-4 animate-spin" />Generating…</> : <><RefreshCw className="h-4 w-4" />Generate</>}
               </Button>
+              <Button
+                variant="outline"
+                className="gap-2 rounded-xl"
+                disabled={!selectedChild}
+                onClick={async () => {
+                  if (!selectedChild) return;
+                  const token = localStorage.getItem("aperti_token") || "";
+                  const res = await fetch(`/api/parent/child/${selectedChild}/report-pdf`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (res.ok) {
+                    const blob = await res.blob();
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `aperti-report-${selectedChild}.pdf`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast({ title: "PDF downloaded ✅" });
+                  } else {
+                    toast({ title: "Failed to download PDF", variant: "destructive" });
+                  }
+                }}
+              >
+                <Download className="h-4 w-4" />
+                PDF
+              </Button>
             </div>
           </CardContent>
         </Card>

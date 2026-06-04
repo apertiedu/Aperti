@@ -26,6 +26,7 @@ import { uploadRouter } from "./routes/upload";
 import { coursesRouter } from "./routes/courses";
 import { parentRouter } from "./routes/parent";
 import { parentDashboardRouter } from "./routes/parent-dashboard";
+import { parentPhase4Router } from "./routes/parent-phase4";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -88,6 +89,7 @@ app.use("/upload", uploadRouter);
 app.use("/courses", coursesRouter);
 app.use("/parent", parentRouter);
 app.use("/api", parentDashboardRouter);
+app.use("/api", parentPhase4Router);
 
 async function seedDefaultAdmin() {
   try {

@@ -3,6 +3,7 @@ import { Server as SocketServer } from "socket.io";
 import app from "./app";
 import { logger } from "./lib/logger";
 import { setupSignaling } from "./socket/signaling";
+import { setupParentNotifications } from "./socket/parent-notifications";
 import { runMigrations } from "./db/migrate";
 
 const rawPort = process.env["PORT"];
@@ -30,6 +31,7 @@ const io = new SocketServer(httpServer, {
 });
 
 setupSignaling(io);
+setupParentNotifications(io);
 
 httpServer.listen(port, (err?: Error) => {
   if (err) {
