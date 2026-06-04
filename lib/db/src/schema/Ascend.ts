@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, timestamp, jsonb } from "drizzle-orm/pg-core";
 import { accountsTable } from "./accounts";
 
 export const ascendProfilesTable = pgTable("ascend_profiles", {
@@ -10,6 +10,7 @@ export const ascendProfilesTable = pgTable("ascend_profiles", {
   rank: text("rank").notNull().default("Bronze"),
   archetype: text("archetype").notNull().default("Explorer"),
   privacyMode: text("privacy_mode").notNull().default("public"),
+  subjectXp: jsonb("subject_xp").$type<Record<string, number>>().default({}),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

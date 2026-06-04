@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { eq, and, gte, lte, desc, lt, sql } from "drizzle-orm";
 import {
-  db, studentsTable, accountsTable, homeworkTable, homeworkSubmissionsTable,
+  db, pool, studentsTable, accountsTable, homeworkTable, homeworkSubmissionsTable,
   examsTable, subjectsTable, attendanceTable, echoMemoryTable,
   ascendProfilesTable, focusSessionsTable, studentGoalsTable,
   studentFeedItemsTable, notificationsTable, questsTable,
@@ -396,6 +396,27 @@ router.get("/student/home-summary", ...studentGuard, async (req: AuthRequest, re
     })),
     unreadCount: notifications.length + feedItems.length,
   });
+});
+
+// GET /student/announcements — fetch announcements from the student's teacher
+router.get("/student/announcements", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const [student] = await db.select({ teacherAccountId: studentsTable.teacherAccountId })
+    .from(studentsTable).where(eq(studentsTable.accountId, req.userId!)).limit(1);
+  if (!student) { res.status(403).json({ message: "No student record" }); return; }
+
+  const { rows } = await pool.query(
+    `SELECT a.id, a.title, a.body, a.audience, a.subject_id,
+            s.name AS subject_name, a.sent_at, a.created_at
+       FROM announcements a
+       LEFT JOIN subjects s ON a.subject_id = s.id
+      WHERE a.teacher_account_id = $1
+        AND (a.audience = 'all' OR a.audience = 'students')
+      ORDER BY a.created_at DESC
+      LIMIT 50`,
+    [student.teacherAccountId],
+  );
+
+  res.json(rows);
 });
 
 export default router;

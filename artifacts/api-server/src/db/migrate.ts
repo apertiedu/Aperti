@@ -111,6 +111,8 @@ const MIGRATIONS: string[] = [
   `ALTER TABLE lessons ADD COLUMN IF NOT EXISTS description text`,
   `ALTER TABLE lessons ADD COLUMN IF NOT EXISTS end_time    text`,
   `ALTER TABLE lessons ADD COLUMN IF NOT EXISTS color       text NOT NULL DEFAULT '#00796B'`,
+  /* ── Ascend subject XP map ──────────────────────────────────────────────── */
+  `ALTER TABLE ascend_profiles ADD COLUMN IF NOT EXISTS subject_xp jsonb NOT NULL DEFAULT '{}'`,
 ];
 
 export async function runMigrations(): Promise<void> {

@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
-  db, studentsTable, questionBankTable, trialVaultAttemptsTable, subjectsTable,
+  db, studentsTable, questionBankTable, trialVaultAttemptsTable, echoMemoryTable,
 } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
@@ -26,13 +26,19 @@ async function requireStudent(req: AuthRequest, res: Response): Promise<{ studen
   return { studentId: student.id, teacherId: student.teacherAccountId! };
 }
 
-// POST /trial-vault/generate
+// POST /trial-vault/generate — weak-topic-aware question selection
 router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId, teacherId } = ctx;
 
   const { subjectId, type, difficulty, timeMode, topicFilter, count } = req.body;
+
+  // Fetch echo memory to bias question selection toward weak topics
+  const memory = await db.query.echoMemory.findFirst({
+    where: (m, { eq }) => eq(m.studentId, studentId),
+  });
+  const weakTopics: string[] = (memory?.weakTopics as string[]) ?? [];
 
   const conditions: any[] = [eq(questionBankTable.teacherAccountId, teacherId)];
   if (subjectId) conditions.push(eq(questionBankTable.subjectId, parseInt(subjectId, 10)));
@@ -54,8 +60,22 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
     questions = questions.filter(q => q.topic?.toLowerCase().includes(topicFilter.toLowerCase()));
   }
 
+  // Bias selection: weak-topic questions first (up to 60% of quota), rest shuffled
   const sessionCount = Math.min(count ?? 20, questions.length);
-  const selected = shuffleArray(questions).slice(0, sessionCount);
+  const weakQuestions = weakTopics.length > 0
+    ? questions.filter(q => weakTopics.some(wt =>
+        (q.topic ?? "").toLowerCase().includes(wt.toLowerCase()) ||
+        (q.subtopic ?? "").toLowerCase().includes(wt.toLowerCase())
+      ))
+    : [];
+  const otherQuestions = questions.filter(q => !weakQuestions.includes(q));
+
+  const weakQuota = Math.min(Math.ceil(sessionCount * 0.6), weakQuestions.length);
+  const otherQuota = sessionCount - weakQuota;
+  const selected = [
+    ...shuffleArray(weakQuestions).slice(0, weakQuota),
+    ...shuffleArray(otherQuestions).slice(0, otherQuota),
+  ];
 
   const totalMarks = selected.reduce((s, q) => s + parseFloat(String(q.maxMarks ?? 1)), 0);
   const estimatedMinutes = type === "full" ? 90 : type === "section" ? 45 : 25;
@@ -68,6 +88,8 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
     totalMarks,
     questionCount: selected.length,
     subjectId,
+    weakTopicsTargeted: weakTopics,
+    weakTopicCoverage: weakQuota,
   };
 
   const [attempt] = await db.insert(trialVaultAttemptsTable).values({
@@ -191,12 +213,56 @@ router.get("/trial-vault/results/:id", ...studentGuard, async (req: AuthRequest,
     studentAnswer: answers[String(q.id)] ?? "",
   }));
 
+  // Grade prediction: map score % to grade bands
+  const scoreNum = parseFloat(String(attempt.score ?? 0));
+  let gradePrediction = "U";
+  if (scoreNum >= 90) gradePrediction = "A*";
+  else if (scoreNum >= 80) gradePrediction = "A";
+  else if (scoreNum >= 70) gradePrediction = "B";
+  else if (scoreNum >= 60) gradePrediction = "C";
+  else if (scoreNum >= 50) gradePrediction = "D";
+  else if (scoreNum >= 40) gradePrediction = "E";
+
+  // Time analysis: derive per-question and per-topic timing from timingData
+  const questionTimings = timingData as Record<string, number>; // questionId → seconds spent
+  const timingValues = Object.values(questionTimings).filter(v => typeof v === "number" && v > 0);
+  const avgTimePerQuestion = timingValues.length > 0
+    ? Math.round(timingValues.reduce((s, v) => s + v, 0) / timingValues.length)
+    : null;
+  const totalTimeSeconds = timingValues.reduce((s, v) => s + v, 0);
+
+  // Topic-level time aggregation
+  const topicTimings: Record<string, { totalSeconds: number; questionCount: number }> = {};
+  for (const q of questions) {
+    const secs = questionTimings[String(q.id)];
+    if (secs && typeof secs === "number") {
+      const topic = q.topic ?? "General";
+      if (!topicTimings[topic]) topicTimings[topic] = { totalSeconds: 0, questionCount: 0 };
+      topicTimings[topic].totalSeconds += secs;
+      topicTimings[topic].questionCount += 1;
+    }
+  }
+  const topicTimeAnalysis = Object.fromEntries(
+    Object.entries(topicTimings).map(([topic, t]) => [
+      topic, { avgSecondsPerQuestion: Math.round(t.totalSeconds / t.questionCount), totalSeconds: t.totalSeconds }
+    ])
+  );
+  const slowestTopic = Object.entries(topicTimeAnalysis).sort((a, b) => b[1].avgSecondsPerQuestion - a[1].avgSecondsPerQuestion)[0]?.[0] ?? null;
+  const fastestTopic = Object.entries(topicTimeAnalysis).sort((a, b) => a[1].avgSecondsPerQuestion - b[1].avgSecondsPerQuestion)[0]?.[0] ?? null;
+
   res.json({
     attemptId: attempt.id,
     config: attempt.config,
     score: attempt.score,
+    gradePrediction,
     topicBreakdown,
-    timingData,
+    timeAnalysis: {
+      totalTimeSeconds,
+      avgTimePerQuestion,
+      topicTimings: topicTimeAnalysis,
+      slowestTopic,
+      fastestTopic,
+    },
     completedAt: attempt.completedAt,
     questions: detailed,
   });

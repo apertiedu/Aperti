@@ -69,8 +69,16 @@ ascendRouter.post("/earn-xp", ...studentGuard, async (req: AuthRequest, res: Res
     else if (newXp >= 1000) newRank = "Gold";
     else if (newXp >= 500) newRank = "Silver";
     else newRank = "Bronze";
+
+    // Subject-level XP tracking: persist per-subject XP separately
+    const currentSubjectXp: Record<string, number> = (profile.subjectXp as Record<string, number>) ?? {};
+    if (subjectId) {
+      const key = String(subjectId);
+      currentSubjectXp[key] = (currentSubjectXp[key] ?? 0) + xpAmount;
+    }
+
     await db.update(ascendProfilesTable).set({
-      xp: newXp, level: newLevel, rank: newRank
+      xp: newXp, level: newLevel, rank: newRank, subjectXp: currentSubjectXp,
     }).where(eq(ascendProfilesTable.id, profile.id));
     profile = { ...profile, xp: newXp, level: newLevel, rank: newRank };
   }
