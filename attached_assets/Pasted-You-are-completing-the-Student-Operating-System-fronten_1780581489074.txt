@@ -1,0 +1,106 @@
+You are completing the **Student Operating System** frontend for Aperti.  
+The following modules have already been built and are fully functional with real backend APIs:  
+StudyStream (home), FocusCoach, PeakRankings, SnapGrade, TrialVault, FocusZone, Echo, Analytics, Study Groups, Messages, ExamVault, InkSpace.
+
+Your task is to build the **remaining student modules** listed below.  
+All necessary backend APIs already exist (created in the Phase 3 backend sprint).  
+You must connect to these APIs, use real data, and follow the Liquid Flow design system: Inter font, teal accent #0D9488, neutral grey palette, shadcn/ui components, rounded-xl cards, shadow-sm, Framer Motion transitions, responsive mobile (bottom tab bar) and desktop (sidebar) layouts.
+
+---
+
+## 1. THE MENTOR – `/mentor`
+
+- Full chat interface.
+- Streaming responses via `POST /api/mentor/chat` (SSE).
+- Assistant messages with sparkle icon; user messages with avatar.
+- Typing indicator while streaming.
+- Sidebar: student memory summary (weak topics, learning style) from `GET /api/echo/profile`.
+- Quick action chips: "Explain [weak topic]", "Quiz me on [topic]", "Review mistakes", "Simplify concept".
+- Conversation history: load previous sessions from `GET /api/mentor/history`.
+
+---
+
+## 2. REVISIT – `/revisit`
+
+- Fetch `GET /api/revisit/plan?type=daily` (default), weekly, sprint tabs.
+- Daily: list of tasks with topic, duration, resource links (flashcards, questions).
+- Weekly: 7‑day calendar with allocated slots.
+- Sprint: intensive plan if exam within 14 days.
+- Each task has a "Start" button linking to the resource.
+
+---
+
+## 3. ASCEND – `/ascend`
+
+- Profile: avatar, level, XP bar, rank badge.
+- Subject levels: per‑subject progress bars.
+- Recent XP earnings log.
+- Leaderboard button → Peak Rankings.
+- Unlockables list (themes, frames, badges).
+- Data from `GET /api/ascend/profile`.
+
+---
+
+## 4. SIMVERSE – `/simverse`
+
+- Unified hub with tabs: Geometrix, ForgeField, ReactSphere, BioSphere.
+- Each lab must be fully interactive (using existing Three.js / Canvas components, ensure they are functional and not placeholder).
+- Geometrix: 3D shape viewer, nets, measurements.
+- ForgeField: physics simulations with sliders and graphs.
+- ReactSphere: chemistry reactions.
+- BioSphere: cell/DNA/ecology explorer.
+- PulseLab: experiment evaluation – perform experiment, click "Evaluate", call The Mentor or dedicated endpoint to analyze.
+
+---
+
+## 5. FLASHCARD HUB – `/flashcards`
+
+- Decks list from `GET /api/flashcards/student/decks`.
+- Swipeable card viewer with flip animation.
+- Star rating (1‑5) → calls `POST /api/flashcards/review`.
+- Show due counts per deck (spaced repetition data).
+- Retention analytics chart.
+
+---
+
+## 6. ASSIGNMENT CENTER – `/assignments`
+
+- Tabs: Pending, Submitted, Overdue, Returned, Resubmission.
+- Cards: title, due date, status, marks, feedback preview.
+- Click to open submission view: upload file, text input, preview.
+- Use existing homework endpoints (`/homework/student`, `/homework/:id/my-submission`, `/homework/:id/submit`).
+
+---
+
+## 7. COURSE HUB – `/courses`
+
+- List enrolled courses with progress bar.
+- Course detail: lessons list, assignments, resources, flashcards, discussions.
+- Resource library per course.
+
+---
+
+## 8. STUDENT SETTINGS – `/settings`
+
+- Profile editing, notifications, privacy, themes (light/dark), accessibility (font size, reduced motion, dyslexia‑friendly font), AI preferences.
+- Extend existing settings page; add student‑specific tabs.
+
+---
+
+## 9. SAFETY & ACCESSIBILITY
+
+- Report button on messages/group content.
+- Block/unblock user.
+- Ensure all pages have proper ARIA labels, keyboard navigation, and screen reader support.
+
+---
+
+## IMPLEMENTATION RULES
+
+- All pages must fetch real data from the corresponding API endpoints (no mock data).
+- Handle loading/error states with skeletons and toasts.
+- Mobile: bottom tab bar with Home, Courses, Mentor, Flashcards, More (drawer).
+- Desktop: left sidebar with links to all student modules.
+- Do not break or modify any already completed module.
+
+**Start building now. Complete each module sequentially, ensuring it is fully functional and integrated with the live backend.**
