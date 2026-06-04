@@ -117,6 +117,8 @@ import StudentRegister from "@/pages/student-register";
 import MyCourses from "@/pages/teacher/my-courses";
 import TeacherCourses from "@/pages/teacher/teacher-courses";
 import StudentMyCourses from "@/pages/student/my-courses";
+import AssignmentCenter from "@/pages/student/assignments";
+import StudentCourseHub from "@/pages/student/course-hub";
 import StudentApprovals from "@/pages/student-approvals";
 import LinkParent from "@/pages/student/link-parent";
 
@@ -200,6 +202,8 @@ function StudentRouter() {
         <Route path="/my-courses" component={StudentMyCourses} />
         <Route path="/" component={StudyStream} />
         <Route path="/my-homework" component={MyHomework} />
+        <Route path="/assignments" component={AssignmentCenter} />
+        <Route path="/course-hub" component={StudentCourseHub} />
         <Route path="/my-timetable" component={MyTimetable} />
         <Route path="/my-attendance" component={MyAttendance} />
         <Route path="/mentor" component={TheMentor} />

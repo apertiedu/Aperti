@@ -1,13 +1,20 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Sparkles, BookOpen, Lightbulb, RefreshCw, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Send, Sparkles, BookOpen, Lightbulb, RefreshCw,
+  Clock, Brain, AlertCircle, ChevronRight, History,
+} from "lucide-react";
+import { useAuth } from "@/context/auth";
 
-const API = "/api";
+const tok = () => localStorage.getItem("aperti_token") || "";
 
 interface Message {
   id: string;
@@ -15,7 +22,35 @@ interface Message {
   content: string;
 }
 
+interface EchoProfile {
+  weakTopics: string[];
+  preferredStyle: string;
+  retentionScores: Record<string, number>;
+}
+
+async function fetchEchoProfile(): Promise<EchoProfile> {
+  const res = await fetch("/api/echo/profile", {
+    headers: { Authorization: `Bearer ${tok()}` },
+  });
+  if (!res.ok) return { weakTopics: [], preferredStyle: "conceptual", retentionScores: {} };
+  const data = await res.json();
+  return {
+    weakTopics: (data.weakTopics as string[]) ?? [],
+    preferredStyle: data.preferredStyle ?? "conceptual",
+    retentionScores: (data.retentionScores as Record<string, number>) ?? {},
+  };
+}
+
+async function fetchHistory(): Promise<any[]> {
+  const res = await fetch("/api/mentor/sessions", {
+    headers: { Authorization: `Bearer ${tok()}` },
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
 export default function TheMentor() {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -25,16 +60,30 @@ export default function TheMentor() {
   ]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null); // null = not yet checked
+  const [aiAvailable, setAiAvailable] = useState<boolean | null>(null);
+  const [showSidebar, setShowSidebar] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const { data: echo, isLoading: echoLoading } = useQuery<EchoProfile>({
+    queryKey: ["echo", "profile"],
+    queryFn: fetchEchoProfile,
+    staleTime: 60000,
+  });
+
+  const { data: history } = useQuery<any[]>({
+    queryKey: ["mentor", "sessions"],
+    queryFn: fetchHistory,
+    staleTime: 60000,
+  });
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim() || streaming) return;
-    const userMsg: Message = { id: Date.now().toString(), role: "user", content: input };
+  const sendMessage = async (overrideText?: string) => {
+    const text = overrideText || input;
+    if (!text.trim() || streaming) return;
+    const userMsg: Message = { id: Date.now().toString(), role: "user", content: text };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setStreaming(true);
@@ -42,26 +91,32 @@ export default function TheMentor() {
     const assistantId = (Date.now() + 1).toString();
     setMessages((prev) => [...prev, { id: assistantId, role: "assistant", content: "" }]);
 
-    const token = localStorage.getItem("aperti_token");
     try {
-      const response = await fetch(`${API}/mentor/chat`, {
+      const response = await fetch("/api/mentor/chat", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: input, sessionId: "demo" }),
+        headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text, sessionId: `web-${Date.now()}` }),
       });
 
       if (!response.ok) {
         setAiAvailable(false);
-        // Replace the empty assistant bubble with a friendly message
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId
-              ? { ...m, content: "AI tutoring is currently unavailable. The team is configuring this feature." }
+              ? { ...m, content: "AI tutoring is being configured for your institution. You'll be notified when it's ready." }
               : m
           )
+        );
+        setStreaming(false);
+        return;
+      }
+
+      const contentType = response.headers.get("content-type") || "";
+      if (!contentType.includes("text/event-stream")) {
+        const data = await response.json();
+        setAiAvailable(false);
+        setMessages((prev) =>
+          prev.map((m) => m.id === assistantId ? { ...m, content: data.content || "No response." } : m)
         );
         setStreaming(false);
         return;
@@ -76,165 +131,245 @@ export default function TheMentor() {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
-        const lines = chunk.split("\n").filter((line) => line.startsWith("data: "));
+        const lines = chunk.split("\n").filter((l) => l.startsWith("data: "));
         for (const line of lines) {
           const data = line.slice(6);
           if (data === "[DONE]") break;
           try {
             const parsed = JSON.parse(data);
             fullContent += parsed.content || "";
-            setMessages((prev) =>
-              prev.map((m) => (m.id === assistantId ? { ...m, content: fullContent } : m))
-            );
+            setMessages((prev) => prev.map((m) => (m.id === assistantId ? { ...m, content: fullContent } : m)));
           } catch {}
         }
       }
     } catch {
       setMessages((prev) =>
         prev.map((m) =>
-          m.id === assistantId
-            ? { ...m, content: "Something went wrong. Please try again." }
-            : m
+          m.id === assistantId ? { ...m, content: "Something went wrong. Please try again." } : m
         )
       );
     }
     setStreaming(false);
   };
 
-  const handleQuickAction = (action: string) => {
-    if (aiAvailable === false) return;
-    setInput(action);
+  const handleQuickChip = (prompt: string) => {
+    setInput(prompt);
+    sendMessage(prompt);
   };
 
-  const isDisabled = aiAvailable === false;
+  const weakTopics = echo?.weakTopics ?? [];
+  const initials = (user?.displayName || user?.username || "S")
+    .split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+
+  const quickChips = [
+    ...weakTopics.slice(0, 2).map((t) => ({ label: `Explain ${t}`, prompt: `Explain ${t} in a clear, simple way` })),
+    ...weakTopics.slice(0, 2).map((t) => ({ label: `Quiz me on ${t}`, prompt: `Give me a practice question on ${t}` })),
+    { label: "Review my mistakes", prompt: "Help me review my recent mistakes and weak areas" },
+    { label: "Simplify a concept", prompt: "Help me simplify a concept I'm struggling with" },
+  ].slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] p-6 flex flex-col">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Sparkles className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">The Mentor</h1>
-            <p className="text-sm text-gray-500">Your personal, adaptive AI tutor</p>
-          </div>
+    <div className="min-h-screen bg-[#F8FAFB] flex flex-col" style={{ fontFamily: "Inter, sans-serif" }}>
+      {/* Header */}
+      <div className="border-b border-gray-100 bg-white px-6 py-4 flex items-center gap-3">
+        <div className="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center">
+          <Sparkles className="h-4.5 w-4.5 text-teal-600" style={{ width: 18, height: 18 }} />
         </div>
-      </motion.div>
-
-      {/* Coming Soon banner */}
-      <AnimatePresence>
-        {isDisabled && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="mb-4 max-w-3xl mx-auto w-full"
-          >
-            <div className="flex items-center gap-3 p-4 rounded-xl bg-amber-50 border border-amber-200">
-              <Clock className="h-5 w-5 text-amber-500 shrink-0" />
-              <div>
-                <p className="text-sm font-semibold text-amber-800">AI tutoring is coming soon</p>
-                <p className="text-xs text-amber-600 mt-0.5">
-                  The Mentor is being configured for your institution. You'll be notified when it's ready.
-                </p>
-              </div>
-              <span className="ml-auto shrink-0 px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-semibold flex items-center gap-1.5">
-                <Clock className="h-3 w-3" /> Coming Soon
-              </span>
-            </div>
-          </motion.div>
+        <div>
+          <h1 className="text-lg font-bold text-gray-900">The Mentor</h1>
+          <p className="text-xs text-gray-500">Adaptive AI tutor personalised to you</p>
+        </div>
+        {aiAvailable === false && (
+          <span className="ml-auto flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full">
+            <Clock className="h-3.5 w-3.5" /> AI coming soon
+          </span>
         )}
-      </AnimatePresence>
+      </div>
 
-      <Card className="flex-1 flex flex-col max-w-3xl mx-auto w-full shadow-sm border-0">
-        <CardContent className="flex-1 flex flex-col p-4">
-          <ScrollArea className="flex-1 pr-4 mb-4 min-h-0" style={{ height: "calc(100vh - 340px)" }}>
-            <div className="space-y-4 py-2">
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
-                >
-                  {msg.role === "assistant" && (
-                    <Avatar className="h-8 w-8 shrink-0" style={{ background: "rgba(0,121,107,0.12)" }}>
-                      <AvatarFallback className="bg-transparent">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
-                  <div
-                    className={`rounded-2xl px-4 py-2.5 max-w-[80%] text-sm ${
-                      msg.role === "user"
-                        ? "bg-primary text-white"
-                        : "bg-slate-100 text-gray-800"
-                    }`}
-                  >
-                    {msg.content ? (
-                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
-                    ) : (
-                      <div className="flex gap-1 py-1">
-                        <span className="animate-pulse text-gray-400">●</span>
-                        <span className="animate-pulse text-gray-400" style={{ animationDelay: "0.15s" }}>●</span>
-                        <span className="animate-pulse text-gray-400" style={{ animationDelay: "0.3s" }}>●</span>
+      <div className="flex flex-1 overflow-hidden max-w-6xl mx-auto w-full p-4 gap-4">
+        {/* Sidebar */}
+        <AnimatePresence>
+          {showSidebar && (
+            <motion.aside
+              initial={{ opacity: 0, x: -16 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -16 }}
+              className="hidden lg:flex flex-col gap-3 w-64 shrink-0"
+            >
+              {/* Echo Memory */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Brain className="h-4 w-4 text-teal-600" />
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Your Learning Profile</h3>
+                </div>
+                {echoLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-3/4" />
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-[10px] font-semibold text-gray-500 uppercase mb-1.5">Learning Style</p>
+                      <Badge variant="secondary" className="text-xs capitalize bg-teal-50 text-teal-700 border-0">
+                        {echo?.preferredStyle || "Conceptual"}
+                      </Badge>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-semibold text-gray-500 uppercase mb-1.5">Weak Topics</p>
+                      {weakTopics.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {weakTopics.slice(0, 5).map((t) => (
+                            <button
+                              key={t}
+                              onClick={() => handleQuickChip(`Explain ${t} in a simple way`)}
+                              className="text-[10px] px-2 py-0.5 bg-orange-50 text-orange-700 rounded-full border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer"
+                            >
+                              {t} <ChevronRight className="inline h-2.5 w-2.5" />
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-400">Keep studying to identify weak spots!</p>
+                      )}
+                    </div>
+                    {echo && Object.keys(echo.retentionScores).length > 0 && (
+                      <div>
+                        <p className="text-[10px] font-semibold text-gray-500 uppercase mb-1.5">Retention</p>
+                        {Object.entries(echo.retentionScores).slice(0, 3).map(([topic, score]) => (
+                          <div key={topic} className="mb-1">
+                            <div className="flex justify-between text-[10px] text-gray-600 mb-0.5">
+                              <span className="truncate max-w-[120px]">{topic}</span>
+                              <span>{Math.round(score)}%</span>
+                            </div>
+                            <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all"
+                                style={{ width: `${score}%`, background: score >= 70 ? "#0D9488" : score >= 40 ? "#F59E0B" : "#EF4444" }}
+                              />
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                  {msg.role === "user" && (
-                    <Avatar className="h-8 w-8 shrink-0 bg-slate-200">
-                      <AvatarFallback className="bg-slate-200 text-slate-600 text-xs font-semibold">U</AvatarFallback>
-                    </Avatar>
-                  )}
-                </motion.div>
-              ))}
-              <div ref={scrollRef} />
-            </div>
-          </ScrollArea>
+                )}
+              </div>
 
-          {/* Quick actions */}
-          <div className="flex gap-2 mb-3 flex-wrap">
-            {[
-              { label: "Explain a concept", prompt: "Explain Newton's Laws visually", icon: Lightbulb },
-              { label: "Practice question", prompt: "Give me a practice question on Momentum", icon: BookOpen },
-              { label: "Weak topics", prompt: "Review my weak topics", icon: RefreshCw },
-            ].map(({ label, prompt, icon: Icon }) => (
-              <Button
-                key={label}
-                variant="outline"
-                size="sm"
-                onClick={() => handleQuickAction(prompt)}
-                disabled={isDisabled}
-                className="text-xs h-7 border-gray-200 bg-white hover:bg-gray-50"
-              >
-                <Icon className="h-3 w-3 mr-1.5" /> {label}
-              </Button>
-            ))}
-          </div>
+              {/* Session history */}
+              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex-1">
+                <div className="flex items-center gap-2 mb-3">
+                  <History className="h-4 w-4 text-gray-400" />
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Recent Sessions</h3>
+                </div>
+                {!history || history.length === 0 ? (
+                  <p className="text-xs text-gray-400">No previous sessions yet.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {history.slice(0, 5).map((s: any, i: number) => (
+                      <div key={i} className="text-xs text-gray-600 p-2 bg-gray-50 rounded-lg truncate">
+                        {s.topic || `Session ${i + 1}`}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.aside>
+          )}
+        </AnimatePresence>
 
-          {/* Input bar */}
-          <form
-            onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
-            className="flex gap-2"
-          >
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder={isDisabled ? "AI tutoring coming soon…" : "Ask anything… e.g., 'Help me understand waves'"}
-              disabled={streaming || isDisabled}
-              className="flex-1 h-10 border-gray-200 bg-white"
-            />
-            <Button
-              type="submit"
-              disabled={streaming || !input.trim() || isDisabled}
-              className="h-10 bg-primary hover:bg-primary/90 text-white"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        {/* Chat area */}
+        <div className="flex-1 flex flex-col gap-3 min-w-0">
+          <Card className="flex-1 flex flex-col shadow-sm border-gray-100 rounded-xl overflow-hidden">
+            <CardContent className="flex-1 flex flex-col p-0">
+              <ScrollArea className="flex-1 p-4" style={{ height: "calc(100vh - 340px)" }}>
+                <div className="space-y-4">
+                  {messages.map((msg) => (
+                    <motion.div
+                      key={msg.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
+                    >
+                      {msg.role === "assistant" && (
+                        <Avatar className="h-8 w-8 shrink-0 bg-teal-50 border-0">
+                          <AvatarFallback className="bg-teal-50">
+                            <Sparkles className="h-4 w-4 text-teal-600" />
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div
+                        className={`rounded-2xl px-4 py-2.5 max-w-[80%] text-sm leading-relaxed ${
+                          msg.role === "user"
+                            ? "bg-teal-600 text-white"
+                            : "bg-gray-50 text-gray-800 border border-gray-100"
+                        }`}
+                      >
+                        {msg.content ? (
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        ) : (
+                          <div className="flex gap-1 py-1 items-center">
+                            {[0, 150, 300].map((delay) => (
+                              <span
+                                key={delay}
+                                className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce"
+                                style={{ animationDelay: `${delay}ms` }}
+                              />
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {msg.role === "user" && (
+                        <Avatar className="h-8 w-8 shrink-0 bg-teal-100 border-0">
+                          <AvatarFallback className="bg-teal-100 text-teal-700 text-xs font-bold">{initials}</AvatarFallback>
+                        </Avatar>
+                      )}
+                    </motion.div>
+                  ))}
+                  <div ref={scrollRef} />
+                </div>
+              </ScrollArea>
+
+              {/* Quick chips */}
+              <div className="px-4 pt-3 pb-2 border-t border-gray-50">
+                <div className="flex gap-2 flex-wrap">
+                  {quickChips.map(({ label, prompt }) => (
+                    <button
+                      key={label}
+                      onClick={() => handleQuickChip(prompt)}
+                      disabled={streaming}
+                      className="text-xs px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-700 transition-all disabled:opacity-50"
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Input */}
+              <div className="p-4 pt-2">
+                <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
+                  <Input
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder="Ask anything… e.g. 'Help me understand waves'"
+                    disabled={streaming}
+                    className="flex-1 h-10 rounded-xl border-gray-200 bg-white text-sm"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={streaming || !input.trim()}
+                    className="h-10 w-10 p-0 rounded-xl shrink-0"
+                    style={{ background: "#0D9488" }}
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

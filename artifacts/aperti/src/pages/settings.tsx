@@ -5,17 +5,19 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Shield, Bell, Palette, Monitor, Eye, EyeOff, LogOut } from "lucide-react";
+import { User, Shield, Bell, Palette, Monitor, Eye, EyeOff, LogOut, Accessibility, Bot } from "lucide-react";
 import { useAuth } from "@/context/auth";
 
 const TEAL = "#0D9488";
 
 const TABS = [
-  { id: "profile",       label: "Profile",       icon: User },
-  { id: "security",      label: "Security",       icon: Shield },
-  { id: "notifications", label: "Notifications",  icon: Bell },
-  { id: "appearance",    label: "Appearance",     icon: Palette },
-  { id: "devices",       label: "Devices",        icon: Monitor },
+  { id: "profile",       label: "Profile",        icon: User },
+  { id: "security",      label: "Security",        icon: Shield },
+  { id: "notifications", label: "Notifications",   icon: Bell },
+  { id: "appearance",    label: "Appearance",      icon: Palette },
+  { id: "devices",       label: "Devices",         icon: Monitor },
+  { id: "accessibility", label: "Accessibility",   icon: Accessibility },
+  { id: "ai",            label: "AI Preferences",  icon: Bot },
 ];
 
 const COUNTRIES = ["Egypt","Saudi Arabia","UAE","United Kingdom","United States","Canada","Australia","Germany","France","Other"];
@@ -272,6 +274,231 @@ export default function Settings() {
                       ))}
                     </div>
                   )}
+                </motion.div>
+              )}
+
+              {tab === "accessibility" && (
+                <motion.div key="accessibility" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
+                  className="space-y-4">
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-semibold text-gray-900">Accessibility & Reading</h2>
+
+                    {/* Font size */}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 mb-1">Font size</p>
+                      <p className="text-xs text-gray-400 mb-3">Adjust the base text size across the platform.</p>
+                      <div className="flex gap-2">
+                        {["small", "medium", "large", "x-large"].map(size => (
+                          <button key={size} onClick={() => saveSetting("font_size", size)}
+                            className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all capitalize ${
+                              (settingsMap["font_size"] || "medium") === size
+                                ? "border-teal-600 text-teal-700 bg-teal-50"
+                                : "border-gray-200 text-gray-600 hover:border-gray-300"
+                            }`}
+                            style={(settingsMap["font_size"] || "medium") === size ? { borderColor: TEAL, color: TEAL } : {}}>
+                            {size}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Dyslexia-friendly font */}
+                    <div className="flex items-center justify-between py-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Dyslexia-friendly font</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Use OpenDyslexic font throughout the app</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["dyslexia_font"] === "true"}
+                        onChange={() => saveSetting("dyslexia_font", settingsMap["dyslexia_font"] === "true" ? "false" : "true")}
+                      />
+                    </div>
+
+                    {/* Reduced motion */}
+                    <div className="flex items-center justify-between py-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Reduce motion</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Disable animations and transitions</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["reduce_motion"] === "true"}
+                        onChange={() => saveSetting("reduce_motion", settingsMap["reduce_motion"] === "true" ? "false" : "true")}
+                      />
+                    </div>
+
+                    {/* High contrast */}
+                    <div className="flex items-center justify-between py-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">High contrast mode</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Increase contrast for better visibility</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["high_contrast"] === "true"}
+                        onChange={() => saveSetting("high_contrast", settingsMap["high_contrast"] === "true" ? "false" : "true")}
+                      />
+                    </div>
+
+                    {/* Screen reader support */}
+                    <div className="flex items-center justify-between py-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Screen reader optimised</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Enhanced ARIA labels and keyboard navigation</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["screen_reader"] !== "false"}
+                        onChange={() => saveSetting("screen_reader", settingsMap["screen_reader"] !== "false" ? "false" : "true")}
+                      />
+                    </div>
+
+                    {/* Colour blindness */}
+                    <div className="border-t border-gray-50 pt-4">
+                      <p className="text-sm font-medium text-gray-900 mb-1">Colour blindness mode</p>
+                      <p className="text-xs text-gray-400 mb-3">Adjust colours for colour vision deficiency</p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { id: "none", label: "None" },
+                          { id: "protanopia", label: "Protanopia" },
+                          { id: "deuteranopia", label: "Deuteranopia" },
+                          { id: "tritanopia", label: "Tritanopia" },
+                        ].map(({ id, label }) => (
+                          <button key={id} onClick={() => saveSetting("color_blindness", id)}
+                            className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+                              (settingsMap["color_blindness"] || "none") === id
+                                ? "border-teal-600 text-teal-700 bg-teal-50"
+                                : "border-gray-200 text-gray-600 hover:border-gray-300"
+                            }`}
+                            style={(settingsMap["color_blindness"] || "none") === id ? { borderColor: TEAL, color: TEAL } : {}}>
+                            {label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Safety */}
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+                    <h2 className="text-base font-semibold text-gray-900">Safety & Wellbeing</h2>
+                    <div className="flex items-center justify-between py-3 border-b border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Content safety filter</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Filter potentially distressing content</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["content_filter"] !== "false"}
+                        onChange={() => saveSetting("content_filter", settingsMap["content_filter"] !== "false" ? "false" : "true")}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between py-3">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Focus mode</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Hide non-essential UI elements during study sessions</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["focus_mode"] === "true"}
+                        onChange={() => saveSetting("focus_mode", settingsMap["focus_mode"] === "true" ? "false" : "true")}
+                      />
+                    </div>
+                    <div className="mt-2 p-3 bg-amber-50 border border-amber-100 rounded-xl">
+                      <p className="text-xs text-amber-700 font-medium">
+                        🛡️ If you're concerned about your safety or someone else's, please speak to a trusted adult or contact your school's counsellor.
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+
+              {tab === "ai" && (
+                <motion.div key="ai" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
+                  className="space-y-4">
+                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+                    <h2 className="text-base font-semibold text-gray-900">AI Tutor Preferences</h2>
+
+                    {/* Explanation style */}
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 mb-1">Explanation style</p>
+                      <p className="text-xs text-gray-400 mb-3">How should your AI Mentor explain things?</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {[
+                          { id: "conceptual", label: "Conceptual", desc: "Big picture, why it matters" },
+                          { id: "step-by-step", label: "Step-by-step", desc: "Methodical and detailed" },
+                          { id: "visual", label: "Visual", desc: "Diagrams and analogies" },
+                          { id: "exam-focused", label: "Exam-focused", desc: "Past paper style answers" },
+                        ].map(({ id, label, desc }) => (
+                          <button key={id} onClick={() => saveSetting("ai_explanation_style", id)}
+                            className={`p-3 rounded-xl border text-left transition-all ${
+                              (settingsMap["ai_explanation_style"] || "conceptual") === id
+                                ? "border-teal-600 bg-teal-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            style={(settingsMap["ai_explanation_style"] || "conceptual") === id ? { borderColor: TEAL } : {}}>
+                            <p className="text-xs font-semibold text-gray-900">{label}</p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">{desc}</p>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Response detail */}
+                    <div className="border-t border-gray-50 pt-4">
+                      <p className="text-sm font-medium text-gray-900 mb-1">Response detail level</p>
+                      <p className="text-xs text-gray-400 mb-3">How much detail should the AI include?</p>
+                      <div className="flex gap-2">
+                        {["brief", "balanced", "detailed"].map(level => (
+                          <button key={level} onClick={() => saveSetting("ai_detail_level", level)}
+                            className={`flex-1 py-2 rounded-xl border text-xs font-medium capitalize transition-all ${
+                              (settingsMap["ai_detail_level"] || "balanced") === level
+                                ? "border-teal-600 text-teal-700 bg-teal-50"
+                                : "border-gray-200 text-gray-600"
+                            }`}
+                            style={(settingsMap["ai_detail_level"] || "balanced") === level ? { borderColor: TEAL, color: TEAL } : {}}>
+                            {level}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Hints vs answers */}
+                    <div className="flex items-center justify-between py-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Hints first mode</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Give hints before full answers to encourage thinking</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["ai_hints_first"] !== "false"}
+                        onChange={() => saveSetting("ai_hints_first", settingsMap["ai_hints_first"] !== "false" ? "false" : "true")}
+                      />
+                    </div>
+
+                    {/* Exam mode */}
+                    <div className="flex items-center justify-between py-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Exam prep mode</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Focus responses on exam technique and mark schemes</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["ai_exam_mode"] === "true"}
+                        onChange={() => saveSetting("ai_exam_mode", settingsMap["ai_exam_mode"] === "true" ? "false" : "true")}
+                      />
+                    </div>
+
+                    {/* Language */}
+                    <div className="flex items-center justify-between py-3 border-t border-gray-50">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">Encouragement messages</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Show motivational messages during study sessions</p>
+                      </div>
+                      <Toggle
+                        value={settingsMap["ai_encouragement"] !== "false"}
+                        onChange={() => saveSetting("ai_encouragement", settingsMap["ai_encouragement"] !== "false" ? "false" : "true")}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="bg-teal-50 border border-teal-100 rounded-2xl p-4">
+                    <p className="text-xs text-teal-700 font-medium">
+                      🤖 These preferences personalise how your AI Mentor interacts with you. Changes take effect on your next conversation.
+                    </p>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
