@@ -1,0 +1,138 @@
+You are building **Phase 5 — The AI Intelligence Layer** for Aperti.  
+The platform already has a fully functional Teacher OS, Student OS, and Parent OS. Many individual AI‑powered features exist: The Mentor (streaming chat), Revisit (revision plans), TrialVault (mock exam generation), GradeFlow (auto‑suggest marks), SnapGrade (OCR feedback), Syllabuilder (curriculum generation), and more.  
+However, these currently work in isolation. Phase 5’s goal is to unite them through a central **CoreMind** and a **Knowledge Graph (The Weave)**, making every AI service smarter and context‑aware.
+
+**Important:**  
+- **Do not break any existing feature.**  
+- **The frontend UI already exists for The Mentor, Revisit, GradeFlow, etc. – you will enhance the backend logic and API responses, not redesign those pages.**  
+- Use the existing OpenAI integration (if API key is present) but **always include rule‑based fallbacks** so the platform works even without it.  
+- Follow Liquid Flow design only if creating new UI components (like an AI Analytics dashboard); otherwise, keep changes backend‑focused.
+
+---
+
+## 1. THE WEAVE — Educational Knowledge Graph
+
+### Database
+- Create two new tables:  
+  `knowledge_nodes` (id, name, type [topic, question, resource, student, teacher, course, etc.], metadata JSON)  
+  `knowledge_edges` (id, source_node_id, target_node_id, relation_type [prerequisite, related_to, includes, tests, etc.], weight).
+- Populate initial nodes from existing data:  
+  - Topics from `subjects` and course units.  
+  - Questions from `question_bank`.  
+  - Flashcards from `flashcard_items`.  
+  - Students from `students`.  
+  - Teachers from `accounts`.  
+  - Courses from `courses`.  
+  Build edges: a question links to its topic(s) via `tests`; a topic links to its prerequisites via `prerequisite`; a student links to their weak topics via `struggles_with` (from Echo memory); a course links to its topics via `includes`.
+- Write a background job (or callable endpoint) that periodically updates edges based on new data (e.g., new mistakes, new resources).
+
+### API
+- **GET /api/weave/related?nodeId=...&relation=...** – returns nodes connected to the given node, filtered by relation type.
+- **GET /api/weave/path?sourceId=...&targetId=...** – returns the shortest path between two nodes (used for prerequisite chains).
+- **GET /api/weave/recommend?studentId=...&type=topic|question|resource** – uses the graph to recommend: for a student, topics they are weak at that are prerequisites for upcoming course topics; questions similar to those they’ve struggled with; resources linked to their weak topics.
+- **POST /api/weave/edges** – admin/teacher can manually add relationships (for custom curriculum mapping).
+
+---
+
+## 2. COREMIND — Central Intelligence Orchestrator
+
+CoreMind is a backend module (not a UI) that coordinates AI services and provides unified data to other modules.
+
+### CoreMind API
+- **POST /api/coremind/analyze** – accepts `{ studentId, context }`.  
+  Returns a comprehensive analysis by calling multiple services:  
+  1. Fetches student profile from Echo.  
+  2. Queries The Weave for weak topics and related concepts.  
+  3. Calls Revisit logic to get recommended actions.  
+  4. Calls InsightStream to get risk predictions.  
+  5. Aggregates into a single response with: `weakTopics`, `recommendedActions`, `riskLevel`, `examReadiness`, `nextBestTopic`.
+- **POST /api/coremind/enhance-mentor** – called by The Mentor to enrich the conversation.  
+  Given a student message and student ID, CoreMind returns:  
+  - Relevant knowledge graph nodes (topics, common mistakes) to inject into the system prompt.  
+  - The student’s preferred explanation style.  
+  - Recent mistakes on the current topic.  
+- **POST /api/coremind/enhance-grading** – called by GradeFlow when a teacher requests auto‑grading.  
+  Returns: potential misconceptions matched from the student’s history and the general Weave; recommended feedback template.
+- **POST /api/coremind/generate-content** – used by Syllabuilder/ContentCraft to generate lessons, worksheets, or quizzes. Accepts `{ type, topicId, difficulty, studentId }`.  
+  Uses The Weave to gather relevant objectives, prerequisite topics, and existing questions, then calls the AI (or rule‑based logic) to create the content. Returns structured content that can be directly saved.
+
+### Integration Points
+- Modify **The Mentor** (`routes/mentor.ts`) to call `coremind/enhance-mentor` before composing the system prompt.  
+- Modify **GradeFlow** (`routes/grading.ts`) to call `coremind/enhance-grading` to get misconception suggestions and feedback.  
+- Modify **Revisit** (`routes/revisit.ts`) to use the Weave when building plans (e.g., include prerequisite topics).  
+- Modify **TrialVault** (`routes/trial-vault.ts`) to use the Weave for question selection (prefer questions linked to weak topics and their prerequisites).  
+- Modify **Syllabuilder** (`routes/syllabuilder.ts`) to use the Weave when generating course structures (add prerequisite relationships).  
+- Ensure all modifications are backward‑compatible – the APIs should work as before but now include richer data when available.
+
+---
+
+## 3. AI CONTENT GENERATION ENHANCEMENTS
+
+Many generation features already exist; enhance them with the knowledge graph.
+
+### Worksheet & Quiz Generation
+- Add a parameter `useWeave: boolean` to existing generation endpoints. If true, select questions that target weak spots of the specified student or class (using The Weave recommendations).
+- Automatically generate scaffolded worksheets: easy → medium → hard, based on topic prerequisite chains from the Weave.
+
+### Flashcard Generation
+- When a student struggles with a concept, The Mentor or CoreMind can trigger automatic flashcard creation from the Weave (using related concepts and common mistakes).  
+- Store auto‑generated flashcards in the student’s private deck (or teacher’s with approval).
+
+### Lesson Generation (for teachers)
+- Enhance ContentCraft’s AI assistant to use the Weave to suggest:
+  - “Include these prerequisite topics before starting.”
+  - “Link to this simulation because students often confuse X and Y.”
+  - “Add these common mistakes as review slides.”
+
+---
+
+## 4. MISCONCEPTION ENGINE & AI SAFETY
+
+### Misconception Detection
+- In **POST /api/coremind/enhance-grading**, use a curated list (stored in DB) of common misconceptions per topic (e.g., “confuses weight and mass”, “forgets to convert units”). Also use the Weave to find patterns in a student’s past mistakes.
+- Build a maintenance endpoint **POST /api/admin/misconceptions** to add/edit/delete misconception patterns. Seed the table with at least 10 common ones per major subject (Physics, Math, Chemistry).
+
+### AI Safety Layer
+- Every AI‑generated output (from CoreMind, The Mentor, GradeFlow, etc.) must include a `confidence` score (0‑1) and a `sources` array (e.g., “based on 3 similar student answers”, “derived from textbook chapter 5”).  
+- Add a `humanOverride` flag to all generated content stored in DB (e.g., lesson content, generated questions) – teacher can mark as “reviewed” or “rejected”.  
+- Create an admin page `/admin/ai-safety` that shows:  
+  - All AI‑generated content pending teacher review.  
+  - Statistics: how often AI suggestions are accepted vs overridden, average confidence scores.  
+- Implement a simple content filter for The Mentor and AI Assistant that checks for unsafe outputs (using OpenAI’s moderation API if available, otherwise a basic keyword blacklist).
+
+---
+
+## 5. AI ANALYTICS DASHBOARD (Admin)
+
+Create a new page **`/admin/ai-analytics`** with:
+
+- **Usage Metrics:** number of AI API calls per module (Mentor, GradeFlow, etc.) over time (charts), cost estimation (if OpenAI key, track token usage).
+- **Accuracy Metrics:** acceptance rate of AI suggestions (e.g., % of auto‑grades accepted by teacher, % of generated questions used).
+- **Student Impact:** average improvement in students who use The Mentor vs those who don’t (if data available), weak topic resolution rate.
+- **Weave Health:** number of nodes, edges, most linked topics, disconnected islands (topics not linked to any resource).
+- Data from the `audit_logs` table and new `ai_interactions` table (create if not exists: id, user_id, module, action, input_summary, output_summary, confidence, accepted boolean, timestamp).
+
+---
+
+## 6. IMPLEMENTATION NOTES
+
+- **All new tables must be created via Drizzle migrations.**  
+- **All new API routes must be protected** with appropriate role (student, teacher, admin).  
+- **Do not remove any existing API endpoints or change their response structure** unless adding new optional fields.  
+- **For any feature that requires heavy AI calls, implement a simple rule‑based fallback** so the platform remains functional without OpenAI.  
+- **Use the existing `fetchJSON` utility and TanStack Query** for any frontend data fetching (though most of this phase is backend, the AI Analytics page is frontend).
+
+---
+
+## 7. DELIVERABLES
+
+At the end of this phase, the platform should:
+
+- ✅ Have a working Knowledge Graph (The Weave) that connects topics, questions, resources, students, and teachers.
+- ✅ CoreMind orchestration that enriches The Mentor, GradeFlow, Revisit, and TrialVault with contextual data.
+- ✅ AI Content Generation that uses the Weave to target student weak spots.
+- ✅ Misconception detection and a safety layer with confidence scores and human override tracking.
+- ✅ An admin AI Analytics dashboard for monitoring AI performance and usage.
+- ✅ No regression in existing features – The Mentor still chats, assignments still grade, etc.
+
+**Start building now. Implement the Weave first, then CoreMind, then integrate into existing modules, then build the safety and analytics pages.**
