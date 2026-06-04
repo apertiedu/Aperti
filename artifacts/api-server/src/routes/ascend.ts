@@ -1,15 +1,17 @@
 import { Router, Response } from "express";
 import { db } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { ascendProfilesTable, questsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 export const ascendRouter = Router();
 
+const studentGuard = [authenticate, requireRole("student")];
+
 // ─── STUDENT ROUTES ───
 
 // GET /ascend/profile — current student's profile
-ascendRouter.get("/profile", authenticate, async (req: AuthRequest, res: Response) => {
+ascendRouter.get("/profile", ...studentGuard, async (req: AuthRequest, res: Response) => {
   const studentId = req.userId!;
   let profile = await db.query.ascendProfiles.findFirst({
     where: (p, { eq }) => eq(p.studentAccountId, studentId),
@@ -25,7 +27,7 @@ ascendRouter.get("/profile", authenticate, async (req: AuthRequest, res: Respons
 });
 
 // POST /ascend/earn-xp — add XP (called internally by other services)
-ascendRouter.post("/earn-xp", authenticate, async (req: AuthRequest, res: Response) => {
+ascendRouter.post("/earn-xp", ...studentGuard, async (req: AuthRequest, res: Response) => {
   const studentId = req.userId!;
   const { xp } = req.body; // xp amount
   let profile = await db.query.ascendProfiles.findFirst({
@@ -53,7 +55,7 @@ ascendRouter.post("/earn-xp", authenticate, async (req: AuthRequest, res: Respon
 });
 
 // POST /ascend/update-streak — called daily when student engages
-ascendRouter.post("/update-streak", authenticate, async (req: AuthRequest, res: Response) => {
+ascendRouter.post("/update-streak", ...studentGuard, async (req: AuthRequest, res: Response) => {
   const studentId = req.userId!;
   let profile = await db.query.ascendProfiles.findFirst({
     where: (p, { eq }) => eq(p.studentAccountId, studentId),
@@ -72,13 +74,13 @@ ascendRouter.post("/update-streak", authenticate, async (req: AuthRequest, res: 
 });
 
 // GET /ascend/quests — available quests
-ascendRouter.get("/quests", authenticate, async (req: AuthRequest, res: Response) => {
+ascendRouter.get("/quests", ...studentGuard, async (req: AuthRequest, res: Response) => {
   const quests = await db.query.quests.findMany();
   res.json(quests);
 });
 
 // GET /ascend/leaderboard — global leaderboard
-ascendRouter.get("/leaderboard", authenticate, async (req: AuthRequest, res: Response) => {
+ascendRouter.get("/leaderboard", ...studentGuard, async (req: AuthRequest, res: Response) => {
   const profiles = await db.query.ascendProfiles.findMany({
     orderBy: (p, { desc }) => [desc(p.xp)],
     limit: 20,

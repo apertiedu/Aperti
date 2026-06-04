@@ -25,7 +25,7 @@ router.get("/student/home-summary", ...studentGuard, async (req: AuthRequest, re
   const teacherId = student.teacherAccountId!;
   const now = new Date();
   const todayStr = now.toISOString().split("T")[0];
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 86400000);
+  const thirtyOneDaysAgo = new Date(now.getTime() - 31 * 86400000);
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 86400000);
   const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split("T")[0];
 
@@ -123,7 +123,7 @@ router.get("/student/home-summary", ...studentGuard, async (req: AuthRequest, re
     }).from(focusSessionsTable)
       .where(and(
         eq(focusSessionsTable.studentId, studentId),
-        gte(focusSessionsTable.completedAt, sevenDaysAgo)
+        gte(focusSessionsTable.completedAt, thirtyOneDaysAgo)
       ))
       .orderBy(desc(focusSessionsTable.completedAt)),
 
@@ -272,7 +272,7 @@ router.get("/student/home-summary", ...studentGuard, async (req: AuthRequest, re
     ((attendancePct ?? 0) * 0.3) + ((hwCompletionRate ?? 0) * 0.3) + (recentQuizAvg * 0.4)
   );
 
-  // ── Daily mission: top weak topic + nearest OVERDUE homework ───────────────
+  // ── Daily mission: BOTH top weak topic AND nearest overdue homework ─────────
   const weakTopics = (echo?.weakTopics as string[]) ?? [];
   const retentionScores = (echo?.retentionScores as Record<string, number>) ?? {};
   const topWeakTopic = weakTopics.length > 0
@@ -281,25 +281,28 @@ router.get("/student/home-summary", ...studentGuard, async (req: AuthRequest, re
       )[0]
     : null;
 
-  // First overdue, unsubmitted homework
   const mostOverdueHw = overdueHomework[0] ?? null;
 
-  const dailyMission: { type: string; title: string; description: string; xpReward: number } | null =
-    topWeakTopic
+  const dailyMission = {
+    revision: topWeakTopic
       ? {
-          type: "revision",
-          title: `Revise: ${topWeakTopic}`,
+          topic: topWeakTopic,
+          retentionScore: retentionScores[topWeakTopic] ?? null,
           description: `Your retention for "${topWeakTopic}" is low. Spend 20 minutes reviewing this topic.`,
           xpReward: 50,
         }
-      : mostOverdueHw
-        ? {
-            type: "homework",
-            title: `Overdue: ${mostOverdueHw.title}`,
-            description: `Due ${mostOverdueHw.dueDate} — this assignment is overdue. Submit it as soon as possible.`,
-            xpReward: 75,
-          }
-        : null;
+      : null,
+    homework: mostOverdueHw
+      ? {
+          id: mostOverdueHw.id,
+          title: mostOverdueHw.title,
+          dueDate: mostOverdueHw.dueDate,
+          subject: mostOverdueHw.subjectName,
+          description: `Due ${mostOverdueHw.dueDate} — this assignment is overdue. Submit it as soon as possible.`,
+          xpReward: 75,
+        }
+      : null,
+  };
 
   // ── AI insight (deterministic from echo data) ─────────────────────────────
   let aiInsight: string | null = null;

@@ -294,4 +294,51 @@ inkspaceRouter.get("/search", ...studentGuard, async (req: AuthRequest, res: Res
   res.json(results.slice(0, 20));
 });
 
+// ── Backward-compat shims: /load and /save ────────────────────────────────────
+// Legacy endpoints that may be called by older frontend code.
+// Map to the new notebook/page/block structure.
+
+inkspaceRouter.get("/load", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const studentId = await requireStudent(req, res);
+  if (!studentId) return;
+
+  const notebooks = await db.select().from(inkspaceNotebooksTable)
+    .where(eq(inkspaceNotebooksTable.studentId, studentId))
+    .orderBy(asc(inkspaceNotebooksTable.createdAt));
+
+  const result = await Promise.all(
+    notebooks.map(async (nb) => {
+      const pages = await db.select().from(inkspacePagesTable)
+        .where(eq(inkspacePagesTable.notebookId, nb.id))
+        .orderBy(asc(inkspacePagesTable.sortOrder));
+      return { ...nb, pages };
+    })
+  );
+
+  res.json({ notebooks: result });
+});
+
+inkspaceRouter.post("/save", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const studentId = await requireStudent(req, res);
+  if (!studentId) return;
+
+  const { notebookId, pageId, content } = req.body;
+  if (!notebookId || !pageId || content === undefined) {
+    res.status(400).json({ message: "notebookId, pageId, and content are required" });
+    return;
+  }
+
+  const nb = await requireNotebook(notebookId, studentId, res);
+  if (!nb) return;
+  const page = await requirePage(pageId, notebookId, res);
+  if (!page) return;
+
+  const [updated] = await db.update(inkspacePagesTable)
+    .set({ content, updatedAt: new Date() })
+    .where(eq(inkspacePagesTable.id, pageId))
+    .returning();
+
+  res.json(updated);
+});
+
 export default inkspaceRouter;
