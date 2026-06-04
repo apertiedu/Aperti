@@ -73,6 +73,11 @@ import studentAnalyticsRouter from "./student-analytics";
 import studentHomeSummaryRouter from "./student-home-summary";
 import aiStatusRouter from "./ai-status";
 import safetyRouter from "./safety";
+import { weaveRouter } from "./weave";
+import { coremindRouter } from "./coremind";
+import { misconceptionsRouter } from "./misconceptions";
+import { gradingRouter } from "./grading";
+import { coremindAnalyticsRouter } from "./coremind-analytics";
 
 const router: IRouter = Router();
 
@@ -150,5 +155,10 @@ router.use(studentAnalyticsRouter);
 router.use(studentHomeSummaryRouter);
 router.use(aiStatusRouter);
 router.use(safetyRouter);
+router.use("/weave", weaveRouter);
+router.use("/coremind", coremindRouter);
+router.use(misconceptionsRouter);
+router.use("/grading", gradingRouter);
+router.use("/coremind", coremindAnalyticsRouter);
 
 export default router;

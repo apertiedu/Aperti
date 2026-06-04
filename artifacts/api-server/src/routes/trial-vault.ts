@@ -41,6 +41,15 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
   });
   const weakTopics: string[] = (memory?.weakTopics as string[]) ?? [];
 
+  // Weave enhancement: also include prerequisite topics of weak topics
+  let weavePrereqTopics: string[] = [];
+  try {
+    const { getRecommendations } = await import("../lib/weave-graph");
+    const recs = await getRecommendations(studentId, "topic");
+    weavePrereqTopics = recs.map(n => n.name);
+  } catch { /* weave best-effort */ }
+  const allWeakTopics = [...new Set([...weakTopics, ...weavePrereqTopics])];
+
   const conditions: any[] = [eq(questionBankTable.teacherAccountId, teacherId)];
   if (subjectId) conditions.push(eq(questionBankTable.subjectId, parseInt(subjectId, 10)));
   if (difficulty) conditions.push(eq(questionBankTable.difficulty, difficulty));
@@ -67,9 +76,10 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
   }
 
   // Bias selection: weak-topic questions first (up to 60% of quota), rest shuffled
+  // allWeakTopics includes prerequisite topics from the Weave
   const sessionCount = Math.min(count ?? 20, questions.length);
-  const weakQuestions = weakTopics.length > 0
-    ? questions.filter(q => weakTopics.some(wt =>
+  const weakQuestions = allWeakTopics.length > 0
+    ? questions.filter(q => allWeakTopics.some(wt =>
         (q.topic ?? "").toLowerCase().includes(wt.toLowerCase()) ||
         (q.subtopic ?? "").toLowerCase().includes(wt.toLowerCase())
       ))
@@ -95,7 +105,9 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
     questionCount: selected.length,
     subjectId,
     weakTopicsTargeted: weakTopics,
+    prerequisiteTopicsIncluded: weavePrereqTopics,
     weakTopicCoverage: weakQuota,
+    weaveEnhanced: weavePrereqTopics.length > 0,
   };
 
   // OpenAI augmentation: generate AI questions + study hints for weak topics

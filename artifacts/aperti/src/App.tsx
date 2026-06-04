@@ -64,6 +64,8 @@ import AdminCommand from "@/pages/admin/admin-command";
 import WorldPilot from "@/pages/admin/world-pilot";
 import GuardianPulseAdmin from "@/pages/admin/guardian-pulse-admin";
 import TeacherVerification from "@/pages/admin/teacher-verification";
+import AiAnalytics from "@/pages/admin/ai-analytics";
+import AiSafety from "@/pages/admin/ai-safety";
 
 // Student Portal
 import PastPaperLibrary from "@/pages/student-portal/past-paper-library";
@@ -313,6 +315,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/landing-editor" component={LandingEditor} />
     <Route path="/admin/assistant-permissions" component={AssistantPermissions} />
     <Route path="/admin/teacher-verification" component={TeacherVerification} />
+    <Route path="/admin/ai-analytics" component={AiAnalytics} />
+    <Route path="/admin/ai-safety" component={AiSafety} />
   </>
 );
 

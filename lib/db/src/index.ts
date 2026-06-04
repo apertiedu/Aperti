@@ -62,6 +62,10 @@ const querySchema = {
   studentMessages: schema.studentMessagesTable,
   simulations: schema.simulationsTable,
   simulationResults: schema.simulationResultsTable,
+  aiInteractions: schema.aiInteractionsTable,
+  misconceptions: schema.misconceptionsTable,
+  knowledgeNodes: schema.knowledgeNodesTable,
+  knowledgeEdges: schema.knowledgeEdgesTable,
 };
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });

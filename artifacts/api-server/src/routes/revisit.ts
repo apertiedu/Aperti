@@ -2,12 +2,13 @@ import { Router, Response } from "express";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { db, studentsTable, examsTable, subjectsTable } from "@workspace/db";
 import { eq, and, gte } from "drizzle-orm";
+import { getRecommendations } from "../lib/weave-graph";
 
 export const revisitRouter = Router();
 
 const studentGuard = [authenticate, requireRole("student")];
 
-// GET /revisit/plan?type=daily|weekly|sprint — generate a revision plan
+// GET /revisit/plan?type=daily|weekly|sprint
 revisitRouter.get("/plan", ...studentGuard, async (req: AuthRequest, res: Response) => {
   const studentId = req.userId!;
   const type = (req.query.type as string) || "daily";
@@ -18,7 +19,6 @@ revisitRouter.get("/plan", ...studentGuard, async (req: AuthRequest, res: Respon
   if (!student) { res.status(403).json({ message: "No student record" }); return; }
 
   const todayStr = new Date().toISOString().split("T")[0];
-  const fourteenDaysOut = new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0];
 
   const [memory, upcomingExams, questions] = await Promise.all([
     db.query.echoMemory.findFirst({
@@ -48,7 +48,18 @@ revisitRouter.get("/plan", ...studentGuard, async (req: AuthRequest, res: Respon
   const learningPace = memory?.learningPace ?? "medium";
   const paceMultiplier = learningPace === "slow" ? 1.5 : learningPace === "fast" ? 0.5 : 1;
 
-  const sortedTopics = [...weakTopics].sort(
+  // Weave enhancement: get prerequisite topics the student should cover first
+  let prerequisiteTopics: string[] = [];
+  let weaveUsed = false;
+  try {
+    const recs = await getRecommendations(student.id, "topic");
+    prerequisiteTopics = recs.map(n => n.name).filter(n => !weakTopics.includes(n));
+    weaveUsed = prerequisiteTopics.length > 0;
+  } catch { /* weave may be empty — no problem */ }
+
+  // Merge prereqs into the topic rotation (prereqs first for the first few days)
+  const allTopics = [...prerequisiteTopics.slice(0, 2), ...weakTopics];
+  const sortedTopics = [...allTopics].sort(
     (a, b) => (retentionScores[a] ?? 50) - (retentionScores[b] ?? 50)
   );
 
@@ -65,6 +76,7 @@ revisitRouter.get("/plan", ...studentGuard, async (req: AuthRequest, res: Respon
     mode: string;
     resources: { questionCount: number; flashcardDeck: string };
     examContext?: string;
+    isPrerequisite?: boolean;
   }[] = [];
 
   for (let i = 0; i < dayCount; i++) {
@@ -84,6 +96,7 @@ revisitRouter.get("/plan", ...studentGuard, async (req: AuthRequest, res: Respon
         flashcardDeck: topic,
       },
       ...(nearbyExam ? { examContext: `${nearbyExam.name} on ${nearbyExam.examDate}` } : {}),
+      ...(prerequisiteTopics.includes(topic) ? { isPrerequisite: true } : {}),
     });
   }
 
@@ -92,6 +105,8 @@ revisitRouter.get("/plan", ...studentGuard, async (req: AuthRequest, res: Respon
     plan,
     weakTopics,
     learningPace,
+    prerequisiteTopics,
+    weaveEnhanced: weaveUsed,
     upcomingExams: upcomingExams.map(e => ({
       id: e.id,
       name: e.name,

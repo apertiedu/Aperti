@@ -4,7 +4,7 @@ import { Link } from "wouter";
 import {
   Calculator, Activity, DollarSign, Shield, LifeBuoy, FileText,
   Settings, Users, Globe, ChevronRight, Bell, RefreshCw,
-  BarChart3, Terminal, Wifi, CreditCard, Clock,
+  BarChart3, Terminal, Wifi, CreditCard, Clock, Brain, ShieldCheck,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -24,6 +24,8 @@ const modules = [
   { to: "/admin/landing-editor",        label: "Landing Editor",         desc: "Edit landing page content live",      icon: Globe },
   { to: "/admin/assistant-permissions", label: "Assistant Permissions",  desc: "Control assistant access levels",     icon: Shield },
   { to: "/admin/teacher-verification", label: "Teacher Verification",    desc: "Grant Verified badges to teachers",   icon: Shield },
+  { to: "/admin/ai-analytics",         label: "AI Analytics",             desc: "Monitor AI usage, costs & impact",    icon: Brain },
+  { to: "/admin/ai-safety",            label: "AI Safety",                desc: "Review AI outputs & misconceptions",  icon: ShieldCheck },
 ];
 
 function LiveStatsBadge({ count, label }: { count: number | string; label: string }) {

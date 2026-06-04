@@ -1,29 +1,23 @@
 import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { markSchemesTable } from "@workspace/db";
-import { examQuestionsTable } from "@workspace/db";
-import { studentMarksTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { markSchemesTable, examQuestionsTable, studentMarksTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { enhanceGrading } from "../lib/coremind";
+import { logInteraction } from "../lib/ai-safety";
 
 export const gradingRouter = Router();
 
 // ─── SCHEME CRAFT (Mark Scheme Builder) ───
 
-// GET /grading/schemes?questionId=123&type=bank|exam
 gradingRouter.get("/schemes", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   const { questionId, type } = req.query as Record<string, string>;
-  const filter = type === "exam"
-    ? { examQuestionId: parseInt(questionId) }
-    : { questionBankId: parseInt(questionId) };
   const scheme = await db.query.markSchemes.findFirst({ where: (s, { eq }) => eq(s.questionBankId || s.examQuestionId, parseInt(questionId)) });
   res.json(scheme || null);
 });
 
-// POST /grading/schemes — create or update a mark scheme
 gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   const { questionBankId, examQuestionId, criteria, totalMarks } = req.body;
-  // Upsert: if scheme exists for this question, update; else insert
   const existing = await db.query.markSchemes.findFirst({
     where: (s, { eq }) => eq(questionBankId ? s.questionBankId : s.examQuestionId, questionBankId || examQuestionId),
   });
@@ -42,9 +36,8 @@ gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), as
 
 // ─── GRADE FLOW (Apply scheme to answers) ───
 
-// POST /grading/grade — auto-grade a single answer
 gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
-  const { answer, questionId, type } = req.body; // type = 'bank' | 'exam'
+  const { answer, questionId, type, topic } = req.body;
   const scheme = await db.query.markSchemes.findFirst({
     where: (s, { eq }) => eq(type === "exam" ? s.examQuestionId : s.questionBankId, questionId),
   });
@@ -60,26 +53,52 @@ gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), asyn
     return { criterion: criterion.keyword, maxMarks: criterion.marks, awarded, found };
   });
 
-  res.json({
+  const baseResponse = {
     totalMarks: scheme.totalMarks,
     totalAwarded,
     breakdown,
-    feedback: totalAwarded < parseFloat(scheme.totalMarks) ? "Some key points missing. Check the highlighted criteria." : "Excellent — all key points covered!",
+    feedback: totalAwarded < parseFloat(scheme.totalMarks)
+      ? "Some key points missing. Check the highlighted criteria."
+      : "Excellent — all key points covered!",
+    confidence: 0.8,
+    sources: ["mark_scheme_keywords"],
+    misconceptions: [] as Array<{ pattern: string; description: string; severity: string }>,
+    misconceptionFeedback: null as string | null,
+  };
+
+  // CoreMind enhancement: check for misconceptions
+  try {
+    const enhancement = await enhanceGrading(questionId, answer, topic);
+    if (enhancement.misconceptions.length > 0) {
+      baseResponse.misconceptions = enhancement.misconceptions;
+      baseResponse.misconceptionFeedback = enhancement.feedbackTemplate;
+      baseResponse.confidence = enhancement.confidence;
+      baseResponse.sources = [...baseResponse.sources, ...enhancement.sources];
+    }
+  } catch { /* enhancement best-effort */ }
+
+  await logInteraction({
+    userId: req.userId,
+    module: "grading",
+    action: "grade",
+    inputSummary: `questionId=${questionId}, answer length=${answer?.length ?? 0}`,
+    outputSummary: `totalAwarded=${totalAwarded}/${scheme.totalMarks}`,
+    confidence: baseResponse.confidence,
+    sources: baseResponse.sources,
   });
+
+  res.json(baseResponse);
 });
 
-// POST /grading/submission/:submissionId/grade — apply scheme and update submission
 gradingRouter.post("/submission/:submissionId/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   const submissionId = parseInt(req.params.submissionId);
-  // Fetch the submission (from homework or exam — we'll use exam for now)
   const mark = await db.query.studentMarks.findFirst({ where: (m, { eq }) => eq(m.id, submissionId) });
   if (!mark) return res.status(404).json({ error: "Submission not found" });
 
-  const question = await db.query.examQuestions.findFirst({ where: (q, { eq }) => eq(q.id, mark.questionId) });
   const scheme = await db.query.markSchemes.findFirst({ where: (s, { eq }) => eq(s.examQuestionId, mark.questionId) });
   if (!scheme) return res.status(404).json({ error: "No scheme for this question" });
 
-  const answer = mark.mistakes || ""; // In studentMarks, 'mistakes' field stores the answer text
+  const answer = mark.mistakes || "";
   const criteria = scheme.criteria as Array<{ keyword: string; marks: number }>;
   let total = 0;
   for (const c of criteria) {
@@ -91,4 +110,13 @@ gradingRouter.post("/submission/:submissionId/grade", authenticate, requireRole(
     .where(eq(studentMarksTable.id, submissionId));
 
   res.json({ totalAwarded: total, totalMarks: scheme.totalMarks });
+});
+
+// POST /grading/accept-suggestion — teacher marks an AI suggestion as accepted or rejected
+gradingRouter.post("/accept-suggestion", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  const { interactionId, accepted } = req.body;
+  if (!interactionId) return res.status(400).json({ error: "interactionId required" });
+  const { markInteractionOutcome } = await import("../lib/ai-safety");
+  await markInteractionOutcome(interactionId, accepted === true);
+  res.json({ success: true });
 });
