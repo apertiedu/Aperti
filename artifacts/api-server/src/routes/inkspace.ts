@@ -4,8 +4,10 @@ import {
   db, studentsTable,
   inkspaceNotebooksTable, inkspacePagesTable, inkspaceBlocksTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import type { Response } from "express";
+
+const studentGuard = [authenticate, requireRole("student")];
 
 const inkspaceRouter = Router();
 
@@ -32,7 +34,7 @@ async function requirePage(pageId: number, notebookId: number, res: Response) {
 
 // ── Notebooks ─────────────────────────────────────────────────────────────────
 
-inkspaceRouter.get("/notebooks", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.get("/notebooks", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -42,7 +44,7 @@ inkspaceRouter.get("/notebooks", authenticate, async (req: AuthRequest, res: Res
   res.json(notebooks);
 });
 
-inkspaceRouter.post("/notebooks", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.post("/notebooks", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -62,7 +64,7 @@ inkspaceRouter.post("/notebooks", authenticate, async (req: AuthRequest, res: Re
   res.status(201).json({ ...notebook, pages: [firstPage] });
 });
 
-inkspaceRouter.put("/notebooks/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.put("/notebooks/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -78,7 +80,7 @@ inkspaceRouter.put("/notebooks/:id", authenticate, async (req: AuthRequest, res:
   res.json(updated);
 });
 
-inkspaceRouter.delete("/notebooks/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.delete("/notebooks/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -92,7 +94,7 @@ inkspaceRouter.delete("/notebooks/:id", authenticate, async (req: AuthRequest, r
 
 // ── Pages ─────────────────────────────────────────────────────────────────────
 
-inkspaceRouter.get("/notebooks/:notebookId/pages", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.get("/notebooks/:notebookId/pages", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -105,7 +107,7 @@ inkspaceRouter.get("/notebooks/:notebookId/pages", authenticate, async (req: Aut
   res.json(pages);
 });
 
-inkspaceRouter.post("/notebooks/:notebookId/pages", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.post("/notebooks/:notebookId/pages", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -126,7 +128,7 @@ inkspaceRouter.post("/notebooks/:notebookId/pages", authenticate, async (req: Au
   res.status(201).json(page);
 });
 
-inkspaceRouter.get("/notebooks/:notebookId/pages/:pageId", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.get("/notebooks/:notebookId/pages/:pageId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -144,7 +146,7 @@ inkspaceRouter.get("/notebooks/:notebookId/pages/:pageId", authenticate, async (
   res.json({ ...page, blocks });
 });
 
-inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -167,7 +169,7 @@ inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId", authenticate, async (
   res.json(updated);
 });
 
-inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -185,7 +187,7 @@ inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId", authenticate, asyn
 // ── Blocks ────────────────────────────────────────────────────────────────────
 // Full ownership chain enforced: block → page (must belong to notebook) → notebook (must belong to student)
 
-inkspaceRouter.post("/notebooks/:notebookId/pages/:pageId/blocks", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.post("/notebooks/:notebookId/pages/:pageId/blocks", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -209,7 +211,7 @@ inkspaceRouter.post("/notebooks/:notebookId/pages/:pageId/blocks", authenticate,
   res.status(201).json(block);
 });
 
-inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -236,7 +238,7 @@ inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", authe
   res.json(updated);
 });
 
-inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
@@ -257,7 +259,7 @@ inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", au
 
 // ── Full-text search across all notebooks ─────────────────────────────────────
 
-inkspaceRouter.get("/search", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+inkspaceRouter.get("/search", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
   if (!studentId) return;
 
