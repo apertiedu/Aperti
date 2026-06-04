@@ -346,4 +346,40 @@ const peerReviewSubmitHandler = async (req: AuthRequest, res: Response): Promise
 router.post("/peer-review/submit", ...studentGuard, peerReviewSubmitHandler);
 router.post("/peer-reviews", ...studentGuard, peerReviewSubmitHandler);
 
+// ─── STANDALONE GROUP-CHALLENGES ROUTES (spec contract paths) ───
+
+// GET /group-challenges/:groupId — list challenges for a group (spec path)
+router.get("/group-challenges/:groupId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const ctx = await requireStudent(req, res);
+  if (!ctx) return;
+  const { studentId } = ctx;
+  const groupId = parseInt(req.params.groupId, 10);
+  if (!(await requireGroupMembership(groupId, studentId, res))) return;
+
+  const challenges = await db.select().from(groupChallengesTable)
+    .where(eq(groupChallengesTable.groupId, groupId))
+    .orderBy(desc(groupChallengesTable.createdAt));
+
+  res.json(challenges);
+});
+
+// POST /group-challenges — create a challenge (spec path; groupId in body)
+router.post("/group-challenges", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const ctx = await requireStudent(req, res);
+  if (!ctx) return;
+  const { studentId } = ctx;
+  const { groupId: rawGroupId, title, type } = req.body;
+  const groupId = parseInt(rawGroupId, 10);
+  if (!groupId) { res.status(400).json({ message: "groupId required" }); return; }
+  if (!title) { res.status(400).json({ message: "title required" }); return; }
+
+  if (!(await requireGroupMembership(groupId, studentId, res))) return;
+
+  const [challenge] = await db.insert(groupChallengesTable).values({
+    groupId, title: title.trim(), type: type ?? "quiz", status: "open",
+  }).returning();
+
+  res.status(201).json(challenge);
+});
+
 export default router;

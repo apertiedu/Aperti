@@ -22,7 +22,7 @@ revisitRouter.get("/plan", ...studentGuard, async (req: AuthRequest, res: Respon
 
   const [memory, upcomingExams, questions] = await Promise.all([
     db.query.echoMemory.findFirst({
-      where: (m, { eq }) => eq(m.studentAccountId, req.userId!),
+      where: (m, { eq }) => eq(m.studentId, student.id),
     }),
     db.select({
       id: examsTable.id,

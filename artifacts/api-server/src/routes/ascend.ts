@@ -25,34 +25,56 @@ ascendRouter.get("/profile", ...studentGuard, async (req: AuthRequest, res: Resp
   res.json(profile);
 });
 
-// POST /ascend/earn-xp — add XP (called internally by other services)
+// XP awarded per source type
+const XP_SOURCE_MAP: Record<string, number> = {
+  attendance_checkin: 20,
+  on_time_submission: 30,
+  revision_task: 50,
+  flashcard_review: 15,
+  mock_exam: 100,
+  peer_review: 40,
+  focus_session: 30,
+  manual: 0, // uses xp field directly
+};
+
+// POST /ascend/earn-xp — source-aware XP award
 ascendRouter.post("/earn-xp", ...studentGuard, async (req: AuthRequest, res: Response) => {
   const studentId = req.userId!;
-  const { xp } = req.body; // xp amount
+  const { xp: rawXp, source, subjectId } = req.body;
+
+  // Derive XP from source taxonomy, or use explicit xp amount
+  const xpAmount: number = source && XP_SOURCE_MAP[source] !== undefined
+    ? (source === "manual" ? (rawXp ?? 0) : XP_SOURCE_MAP[source])
+    : (rawXp ?? 0);
+
+  if (xpAmount <= 0) { res.status(400).json({ message: "xp or valid source is required" }); return; }
+
   let profile = await db.query.ascendProfiles.findFirst({
     where: (p, { eq }) => eq(p.studentAccountId, studentId),
   });
   if (!profile) {
     const [newProfile] = await db.insert(ascendProfilesTable).values({
-      studentAccountId: studentId, xp,
+      studentAccountId: studentId, xp: xpAmount,
     }).returning();
     profile = newProfile;
   } else {
-    profile.xp += xp;
+    const newXp = profile.xp + xpAmount;
     // XP formula: level = floor(sqrt(totalXP / 100))
-    profile.level = Math.max(1, Math.floor(Math.sqrt(profile.xp / 100)));
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
     // rank based on XP thresholds
-    if (profile.xp >= 10000) profile.rank = "Apex";
-    else if (profile.xp >= 5000) profile.rank = "Diamond";
-    else if (profile.xp >= 2000) profile.rank = "Platinum";
-    else if (profile.xp >= 1000) profile.rank = "Gold";
-    else if (profile.xp >= 500) profile.rank = "Silver";
-    else profile.rank = "Bronze";
+    let newRank = profile.rank;
+    if (newXp >= 10000) newRank = "Apex";
+    else if (newXp >= 5000) newRank = "Diamond";
+    else if (newXp >= 2000) newRank = "Platinum";
+    else if (newXp >= 1000) newRank = "Gold";
+    else if (newXp >= 500) newRank = "Silver";
+    else newRank = "Bronze";
     await db.update(ascendProfilesTable).set({
-      xp: profile.xp, level: profile.level, rank: profile.rank
+      xp: newXp, level: newLevel, rank: newRank
     }).where(eq(ascendProfilesTable.id, profile.id));
+    profile = { ...profile, xp: newXp, level: newLevel, rank: newRank };
   }
-  res.json(profile);
+  res.json({ profile, xpAwarded: xpAmount, source: source ?? "manual", subjectId: subjectId ?? null });
 });
 
 // POST /ascend/update-streak — called daily when student engages
@@ -107,16 +129,20 @@ ascendRouter.get("/leaderboard", ...studentGuard, async (req: AuthRequest, res: 
       .limit(50);
   }
 
-  // Respect privacy mode: redact name for profiles with privacy enabled
-  const result = profiles.map((p, idx) => ({
+  // Enforce privacy mode: profiles with privacyMode="private" are excluded unless it's the requester
+  const publicProfiles = profiles.filter(p =>
+    p.studentAccountId === studentId || p.privacyMode !== "private"
+  );
+
+  const result = publicProfiles.map((p, idx) => ({
     rank: idx + 1,
-    accountId: p.studentAccountId === studentId ? p.studentAccountId : undefined,
     isYou: p.studentAccountId === studentId,
     xp: p.xp,
     level: p.level,
     displayRank: p.rank,
     archetype: p.archetype,
     streak: p.streak,
+    privacyMode: p.privacyMode,
   }));
 
   res.json({ scope, leaderboard: result });

@@ -125,7 +125,39 @@ router.post("/focus-coach/goals", ...studentGuard, async (req: AuthRequest, res:
   res.status(201).json(goal);
 });
 
-// POST /focus-coach/goals/:id/complete
+// POST /focus-coach/complete-goal — spec contract path (accepts { goalId })
+router.post("/focus-coach/complete-goal", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const ctx = await requireStudent(req, res);
+  if (!ctx) return;
+  const { studentId } = ctx;
+
+  const goalId = parseInt(req.body.goalId, 10);
+  if (!goalId) { res.status(400).json({ message: "goalId required" }); return; }
+
+  const [goal] = await db.select().from(studentGoalsTable)
+    .where(and(eq(studentGoalsTable.id, goalId), eq(studentGoalsTable.studentId, studentId)));
+  if (!goal) { res.status(404).json({ message: "Goal not found" }); return; }
+  if (goal.completedAt) { res.status(400).json({ message: "Goal already completed" }); return; }
+
+  const [updated] = await db.update(studentGoalsTable)
+    .set({ completedAt: new Date() })
+    .where(eq(studentGoalsTable.id, goalId))
+    .returning();
+
+  const xpToAward = goal.xpReward ?? 50;
+  const [profile] = await db.select().from(ascendProfilesTable)
+    .where(eq(ascendProfilesTable.studentAccountId, req.userId!)).limit(1);
+  if (profile) {
+    const newXp = (profile.xp ?? 0) + xpToAward;
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
+    await db.update(ascendProfilesTable).set({ xp: newXp, level: newLevel })
+      .where(eq(ascendProfilesTable.id, profile.id));
+  }
+
+  res.json({ goal: updated, xpAwarded: xpToAward });
+});
+
+// POST /focus-coach/goals/:id/complete — legacy path alias
 router.post("/focus-coach/goals/:id/complete", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
