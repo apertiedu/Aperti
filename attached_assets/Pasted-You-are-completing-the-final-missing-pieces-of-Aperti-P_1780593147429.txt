@@ -1,0 +1,85 @@
+You are completing the final missing pieces of **Aperti Phase 5 – AI Intelligence Layer**.  
+The Weave graph, CoreMind orchestrator, safety layer, analytics, and most integrations are already built.  
+Now you will implement the following four advanced systems.
+
+---
+
+## 1. FINDWISE — SEMANTIC SEARCH
+
+### Backend
+- Create `POST /api/search/semantic` endpoint that accepts a natural language query (e.g., *"hard momentum problems for IGCSE"*).
+- Use the Weave graph to understand the query:
+  - Identify topics mentioned in the query by matching against `knowledge_nodes` names.
+  - If the query mentions a concept like "students struggling with...", extract the topic and return a list of students whose Echo memory shows that topic as weak (via CoreMind/Weave).
+  - For resource queries, use graph edges to find the most relevant lessons, questions, flashcards, or simulations connected to the identified topic nodes.
+- If the graph doesn't cover the query, fall back to keyword search across questions, lessons, and resources.
+- Return results grouped by type (Topics, Questions, Resources, Students) with relevance scores.
+
+### Frontend
+- The global search bar (OmniBar) already calls a search endpoint. Modify it to use `POST /api/search/semantic` instead of the old keyword search.  
+- Show results in a dropdown with tabs for each category.  
+- For student‑related queries (“who is weak in X”), only teachers/admins should see the student list.
+
+---
+
+## 2. AUTOPILOT — AUTOMATION ENGINE
+
+### Backend
+- Create an `automation_tasks` table: id, teacher_id, type (assignment, reminder, report, risk_check), schedule (cron expression or simple interval), parameters (JSON), enabled boolean, last_run timestamp.
+- Build a background service (using `node-cron` or a simple `setInterval` inside the API server) that:
+  - Every minute, checks for tasks due to run.
+  - If a task is of type `assignment`, calls the ContentCraft generation endpoint to create a new assignment and assign it to the teacher’s class.
+  - If `reminder`, sends a notification (via existing notification system) to students about upcoming deadlines.
+  - If `report`, triggers a Snapshot report generation for a class and emails it.
+  - If `risk_check`, calls CoreMind to analyse all students in a workspace and generates an intervention alert for any high‑risk students.
+- The teacher can manage automation tasks from a new **Automation** page (see below).
+
+### Frontend
+- Create a new teacher page **`/automation`** accessible from the sidebar.
+- List all tasks with status, next run, and an enable/disable toggle.
+- “Add Task” button opens a modal where the teacher selects type, sets frequency, and configures parameters (e.g., “Generate a 10‑question quiz every Monday for Chemistry”).
+- Use the existing `fetchJSON` and TanStack Query for data.
+
+---
+
+## 3. LIVECLASS AI — SESSION INTELLIGENCE
+
+### Backend
+- When a LiveClass session ends, the recording and engagement data are already stored. Enhance the `POST /live-class/end` endpoint (or create a new one `POST /live-class/analyse`) that:
+  - Receives the session’s participant data (who spoke, chat messages, hand raises, poll responses – all already available from `engagement_records`).
+  - Calls CoreMind with a prompt to generate a natural language session summary: who participated most, key discussion points, engagement highlights, and suggested follow‑up actions for the teacher.
+  - Stores the summary in the `live_class_rooms` table (add a `summary` text column).
+- The teacher can view this summary on the past session’s page.
+
+### Frontend
+- In the teacher’s LiveClass history, show the AI‑generated summary below the recording link, with a small sparkle icon.
+- No new page needed.
+
+---
+
+## 4. MODEL MANAGEMENT & MULTILINGUAL FOUNDATION
+
+### Model Management
+- Create a simple configuration file (`ai-config.ts`) that defines the available AI providers and models (currently only OpenAI).  
+- In all AI‑calling modules (CoreMind, The Mentor, etc.), replace hardcoded `openai.createChatCompletion` calls with a helper that reads the configured provider and model from this file.  
+- This allows future addition of providers without changing business logic.
+
+### Multilingual Intelligence
+- Add a `language` parameter to The Mentor, Parent AI, and Teacher AI chat endpoints.  
+- If the language is set (e.g., `ar`), the system prompt should instruct the AI to respond in that language.  
+- For rule‑based fallbacks, add a simple translation map for common educational phrases in Arabic (greetings, “I don’t understand”, “Let’s practice”) to make the fallback feel native.  
+- The UI already supports language switching via settings; ensure the selected language is sent with AI requests.
+
+---
+
+## 5. DESIGN & INTEGRATION RULES
+
+- Strictly follow Liquid Flow for any new UI (teal accents, Inter font, white cards, Framer Motion).  
+- All new API routes must be protected with appropriate role middleware.  
+- Do not break existing Phase 1‑6 functionality.  
+- Use existing `fetchJSON` and TanStack Query for frontend data fetching.  
+- Ensure fallback behaviour for all AI features if no API key is present.
+
+---
+
+**Start now. Build FindWise semantic search first, then AutoPilot, then LiveClass AI, then the model & multilingual enhancements. Verify each with a quick manual test before moving on.**

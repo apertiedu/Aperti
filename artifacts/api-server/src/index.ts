@@ -22,6 +22,10 @@ if (Number.isNaN(port) || port <= 0) {
 
 runMigrations().catch(err => logger.error({ err }, "Migration error — continuing"));
 
+import("./lib/autopilot-service").then(({ startAutopilotService }) => {
+  startAutopilotService();
+}).catch(() => {});
+
 const httpServer = createServer(app);
 
 const io = new SocketServer(httpServer, {

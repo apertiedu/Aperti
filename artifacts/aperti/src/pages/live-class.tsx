@@ -8,9 +8,12 @@ import {
   Mic, MicOff, Video, VideoOff, PhoneOff, Users,
   Hand, PenLine, Copy, Send,
   MessageSquare, ChevronRight, MessageCircleOff, Lock, Globe, Shield,
+  Sparkles, Clock, BarChart2, ChevronDown, Loader2, History,
 } from "lucide-react";
 import { useLiveClass, type Participant } from "@/hooks/use-live-class";
 import Whiteboard from "@/components/whiteboard";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 
 type ChatMode = "public" | "private" | "host_only" | "off";
 
@@ -106,6 +109,177 @@ function LobbyView({ onStart }: { onStart: (name: string, title: string) => void
   );
 }
 
+// ── LiveClass Past Sessions History View ────────────────────────────────
+interface PastSession {
+  id: number;
+  room_name: string;
+  started_at: string;
+  ended_at: string | null;
+  lesson_title: string | null;
+  subject_name: string | null;
+  participant_count: number;
+  avg_attention: number | null;
+  summary: string | null;
+  recording_url: string | null;
+}
+
+function SessionHistoryView({ onBack }: { onBack: () => void }) {
+  const qc = useQueryClient();
+  const [expandedSummary, setExpandedSummary] = useState<number | null>(null);
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["liveclass-history"],
+    queryFn: async () => {
+      const res = await apiFetch("/api/live-class/history");
+      const json = await res.json();
+      return (json.sessions ?? []) as PastSession[];
+    },
+  });
+
+  const analyseMut = useMutation({
+    mutationFn: async (roomId: number) => {
+      const res = await apiFetch("/api/live-class/analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roomId }),
+      });
+      return res.json();
+    },
+    onSuccess: (data, roomId) => {
+      qc.setQueryData(["liveclass-history"], (old: PastSession[] | undefined) =>
+        old?.map(s => s.id === roomId ? { ...s, summary: data.summary } : s) ?? []
+      );
+      setExpandedSummary(roomId);
+    },
+  });
+
+  const sessions = data ?? [];
+
+  return (
+    <div className="min-h-screen bg-background p-6 max-w-3xl mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={onBack} className="text-muted-foreground hover:text-foreground transition-colors text-sm flex items-center gap-1">
+          <ChevronDown className="w-4 h-4 rotate-90" /> Back
+        </button>
+        <div>
+          <h1 className="text-2xl font-bold">Past Sessions</h1>
+          <p className="text-sm text-muted-foreground">AI-powered summaries of your live classes</p>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-24 bg-muted/40 rounded-xl animate-pulse" />)}
+        </div>
+      ) : sessions.length === 0 ? (
+        <div className="text-center py-16 border border-dashed border-border rounded-2xl">
+          <History className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
+          <p className="font-medium text-muted-foreground">No past sessions yet</p>
+          <p className="text-sm text-muted-foreground/70 mt-1">Start your first live class to see session history here.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {sessions.map(session => {
+            const duration = session.started_at && session.ended_at
+              ? Math.round((new Date(session.ended_at).getTime() - new Date(session.started_at).getTime()) / 60000)
+              : null;
+            const isExpanded = expandedSummary === session.id;
+
+            return (
+              <motion.div
+                key={session.id}
+                layout
+                className="bg-card border border-border rounded-xl p-4 space-y-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-sm">
+                      {session.lesson_title ?? session.room_name}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1 text-[11px] text-muted-foreground flex-wrap">
+                      {session.subject_name && <span>{session.subject_name}</span>}
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {new Date(session.started_at).toLocaleDateString()}
+                        {duration ? ` · ${duration}min` : ""}
+                      </span>
+                      {session.participant_count > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {session.participant_count} students
+                        </span>
+                      )}
+                      {session.avg_attention !== null && (
+                        <span className="flex items-center gap-1">
+                          <BarChart2 className="w-3 h-3" />
+                          {session.avg_attention}% attention
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {session.recording_url && (
+                      <a
+                        href={session.recording_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] text-primary hover:underline"
+                      >
+                        Recording
+                      </a>
+                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs gap-1.5"
+                      disabled={analyseMut.isPending && analyseMut.variables === session.id}
+                      onClick={() => {
+                        if (session.summary) {
+                          setExpandedSummary(isExpanded ? null : session.id);
+                        } else {
+                          analyseMut.mutate(session.id);
+                        }
+                      }}
+                    >
+                      {analyseMut.isPending && analyseMut.variables === session.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Sparkles className="w-3 h-3 text-primary" />
+                      )}
+                      {session.summary ? (isExpanded ? "Hide" : "View AI Summary") : "Generate Summary"}
+                    </Button>
+                  </div>
+                </div>
+
+                <AnimatePresence>
+                  {(isExpanded && session.summary) && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <Sparkles className="w-3.5 h-3.5 text-primary" />
+                          <span className="text-xs font-semibold text-primary">AI Session Summary</span>
+                        </div>
+                        <pre className="text-xs text-foreground whitespace-pre-wrap font-sans leading-relaxed">
+                          {session.summary}
+                        </pre>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function LiveClass() {
   const lc = useLiveClass();
   const [showChat, setShowChat] = useState(false);
@@ -113,6 +287,7 @@ export default function LiveClass() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
   const [chatMode, setChatMode] = useState<ChatMode>("public");
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -126,7 +301,23 @@ export default function LiveClass() {
     }
   };
 
-  if (lc.phase === "idle") return <LobbyView onStart={(n, t) => lc.startRoom(n, t || undefined)} />;
+  if (lc.phase === "idle" && showHistory) {
+    return <SessionHistoryView onBack={() => setShowHistory(false)} />;
+  }
+
+  if (lc.phase === "idle") return (
+    <div className="relative">
+      <LobbyView onStart={(n, t) => lc.startRoom(n, t || undefined)} />
+      <div className="flex justify-center pb-6 -mt-2">
+        <button
+          onClick={() => setShowHistory(true)}
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors"
+        >
+          <History className="w-3.5 h-3.5" /> View Past Sessions
+        </button>
+      </div>
+    </div>
+  );
 
   if (lc.phase === "initializing") {
     return (

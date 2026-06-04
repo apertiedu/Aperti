@@ -3,13 +3,14 @@ import { authenticate, AuthRequest } from "../middleware/auth";
 import { db } from "@workspace/db";
 import { enhanceMentor } from "../lib/coremind";
 import { logInteraction, moderateContent } from "../lib/ai-safety";
+import { withLanguage, getFallbackPhrase } from "../lib/ai-config";
 
 export const mentorRouter = Router();
 
 // POST /mentor/chat — streamed conversation
 mentorRouter.post("/chat", authenticate, async (req: AuthRequest, res: Response) => {
   const studentId = req.userId!;
-  const { message, sessionId } = req.body;
+  const { message, sessionId, language } = req.body;
 
   const safety = await moderateContent(message ?? "");
   if (!safety.safe) {
@@ -71,6 +72,8 @@ Your task:
 - Be encouraging, never condescending.
 - Keep responses concise but thorough (max 300 words per message).`;
 
+  const localizedSystemPrompt = withLanguage(systemPrompt, language);
+
   if (!process.env.OPENAI_API_KEY) {
     const fallbackContent = relatedQuestions.length > 0
       ? `Here are some practice questions to help you with: **${message}**\n\n${relatedQuestions.map((q, i) =>
@@ -111,7 +114,7 @@ Your task:
     const body = JSON.stringify({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: localizedSystemPrompt },
         { role: "user", content: message },
       ],
       stream: true,

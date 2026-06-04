@@ -8,7 +8,7 @@ import {
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart,
   RefreshCw, Settings, MessageSquare,
   LogOut, School, ChevronLeft, ChevronRight, Search, KeyRound,
-  Sun, Moon, Sparkles, ShoppingBag, UserCheck, Link2,
+  Sun, Moon, Sparkles, ShoppingBag, UserCheck, Link2, Bot,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -101,6 +101,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Manage",
       items: [
+        { name: "AutoPilot", href: "/automation", icon: Bot, roles: ["admin","teacher"] },
         { name: "KudosEngine", href: "/kudos-engine", icon: Award, roles: ["admin","teacher"] },
         { name: "SubPilot", href: "/subpilot", icon: CreditCard, roles: ["admin","teacher"] },
         { name: "HelpDesk", href: "/helpdesk", icon: HelpCircle, roles: ["admin","teacher","assistant"] },

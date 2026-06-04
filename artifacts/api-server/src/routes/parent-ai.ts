@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
+import { withLanguage } from "../lib/ai-config";
 
 export const parentAiRouter = Router();
 
@@ -34,7 +35,7 @@ parentAiRouter.post(
   async (req: AuthRequest, res: Response) => {
     try {
       const studentId = parseInt(req.params.studentId);
-      const { question } = req.body;
+      const { question, language } = req.body;
 
       if (!question?.trim()) {
         return res.status(400).json({ error: "question is required" });
@@ -111,10 +112,12 @@ parentAiRouter.post(
         return res.json({ reply, studentName, dataCtx, fallback: true });
       }
 
-      const systemPrompt = `You are a caring parent assistant for the Aperti educational platform. 
+      const baseSystemPrompt = `You are a caring parent assistant for the Aperti educational platform. 
 You answer parent questions about their child's academic progress with empathy and clarity.
 You have access to real student data. Be specific, supportive, and actionable.
 Never be alarmist — frame concerns constructively.`;
+
+      const systemPrompt = withLanguage(baseSystemPrompt, language);
 
       const userPrompt = `Parent question: "${question}"
 

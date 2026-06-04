@@ -122,6 +122,7 @@ import StudentMyCourses from "@/pages/student/my-courses";
 import AssignmentCenter from "@/pages/student/assignments";
 import StudentCourseHub from "@/pages/student/course-hub";
 import StudentApprovals from "@/pages/student-approvals";
+import Automation from "@/pages/automation";
 import LinkParent from "@/pages/student/link-parent";
 
 // Parent
@@ -296,6 +297,7 @@ const TEACHER_ROUTES = (
     <Route path="/tutorcraft" component={TutorCraft} />
     <Route path="/messages" component={Messages} />
     <Route path="/teacher-courses" component={TeacherCourses} />
+    <Route path="/automation" component={Automation} />
   </>
 );
 

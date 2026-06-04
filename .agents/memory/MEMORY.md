@@ -4,3 +4,4 @@
 - [Phase 2 Teacher OS routes](phase2-routes.md) — teacher-courses, rubrics, messages, tutorcraft, classforge all registered in routes/index.ts
 - [Student OS API paths](student-os-api-paths.md) — correct API paths for student pages; common gotchas with inkspace, messages, focus-coach analytics fields
 - [Phase 5 AI layer patterns](phase5-ai-patterns.md) — Weave/CoreMind integration patterns, fallback rules, and which routes now have AI enrichment
+- [Phase 5 final systems](phase5-final-systems.md) — FindWise, AutoPilot, LiveClass AI, ai-config.ts patterns and key decisions
