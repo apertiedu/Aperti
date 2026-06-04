@@ -123,9 +123,23 @@ import StudentApprovals from "@/pages/student-approvals";
 import LinkParent from "@/pages/student/link-parent";
 
 // Parent
-import GuardianHub from "@/pages/parent/guardian-hub";
+import GuardianHub from "@/pages/parent/dashboard";
 import GuardianLink from "@/pages/parent/guardian-link";
 import LinkStudent from "@/pages/parent/link-student";
+import ParentLayout from "@/components/parent-layout";
+import ParentGrades from "@/pages/parent/grades";
+import ParentAttendance from "@/pages/parent/attendance";
+import ParentRevision from "@/pages/parent/revision";
+import ParentAssignments from "@/pages/parent/assignments";
+import ParentExamReadiness from "@/pages/parent/exam-readiness";
+import ParentMeetings from "@/pages/parent/meetings";
+import ParentNotifications from "@/pages/parent/notifications";
+import ParentInterventions from "@/pages/parent/interventions";
+import ParentReports from "@/pages/parent/reports";
+import ParentAIAssistant from "@/pages/parent/ai-assistant";
+import ParentBilling from "@/pages/parent/billing";
+import ParentSettings from "@/pages/parent/settings";
+import ChildProfile from "@/pages/parent/child-profile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -328,20 +342,46 @@ function TeacherRouter() {
 
 function ParentRouter() {
   return (
-    <Layout>
+    <ParentLayout>
       <Switch>
-        <Route path="/onboarding" component={Onboarding} />
-        <Route path="/settings" component={Settings} />
+        {/* Dashboard */}
+        <Route path="/" component={GuardianHub} />
+
+        {/* Academic monitoring */}
+        <Route path="/parent/grades" component={ParentGrades} />
+        <Route path="/parent/attendance" component={ParentAttendance} />
+        <Route path="/parent/revision" component={ParentRevision} />
+        <Route path="/parent/assignments" component={ParentAssignments} />
+        <Route path="/parent/exams" component={ParentExamReadiness} />
+
+        {/* Child profile */}
+        <Route path="/parent/child/:studentId" component={ChildProfile} />
+
+        {/* Communication */}
+        <Route path="/parent/messages" component={GuardianLink} />
+        <Route path="/parent/meetings" component={ParentMeetings} />
+
+        {/* Alerts & reports */}
+        <Route path="/parent/notifications" component={ParentNotifications} />
+        <Route path="/parent/interventions" component={ParentInterventions} />
+        <Route path="/parent/reports" component={ParentReports} />
+
+        {/* Tools */}
+        <Route path="/parent/ai-assistant" component={ParentAIAssistant} />
+        <Route path="/parent/billing" component={ParentBilling} />
+        <Route path="/parent/settings" component={ParentSettings} />
+        <Route path="/parent/link-student" component={LinkStudent} />
+
+        {/* Legacy / shared */}
+        <Route path="/parent/guardian-hub" component={GuardianHub} />
+        <Route path="/parent/guardian-link" component={GuardianLink} />
         <Route path="/profile/:id" component={Profile} />
         <Route path="/courses" component={Courses} />
         <Route path="/courses/:id" component={CourseDetail} />
-        <Route path="/parent/guardian-hub" component={GuardianHub} />
-        <Route path="/parent/guardian-link" component={GuardianLink} />
-        <Route path="/parent/link-student" component={LinkStudent} />
-        <Route path="/" component={GuardianHub} />
+
         <Route component={NotFound} />
       </Switch>
-    </Layout>
+    </ParentLayout>
   );
 }
 

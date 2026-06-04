@@ -25,6 +25,7 @@ import examsRouter from "./routes/exams";
 import { uploadRouter } from "./routes/upload";
 import { coursesRouter } from "./routes/courses";
 import { parentRouter } from "./routes/parent";
+import { parentDashboardRouter } from "./routes/parent-dashboard";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -86,6 +87,7 @@ app.use("/exams", examsRouter);
 app.use("/upload", uploadRouter);
 app.use("/courses", coursesRouter);
 app.use("/parent", parentRouter);
+app.use("/api", parentDashboardRouter);
 
 async function seedDefaultAdmin() {
   try {

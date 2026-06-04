@@ -261,6 +261,49 @@ const MIGRATIONS: string[] = [
     read_by    jsonb NOT NULL DEFAULT '[]',
     sent_at    timestamptz NOT NULL DEFAULT NOW()
   )`,
+  /* ── Phase 4: Parent & Guardian OS ─────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS parent_notifications (
+    id         serial PRIMARY KEY,
+    parent_id  integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    type       text NOT NULL DEFAULT 'general',
+    title      text NOT NULL,
+    message    text NOT NULL,
+    is_read    boolean NOT NULL DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE TABLE IF NOT EXISTS meetings (
+    id         serial PRIMARY KEY,
+    parent_id  integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    teacher_id integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    student_id integer REFERENCES students(id) ON DELETE SET NULL,
+    title      text NOT NULL,
+    date       text NOT NULL,
+    time       text NOT NULL,
+    status     text NOT NULL DEFAULT 'requested',
+    notes      text,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE TABLE IF NOT EXISTS parent_settings (
+    id                        serial PRIMARY KEY,
+    parent_id                 integer NOT NULL UNIQUE REFERENCES accounts(id) ON DELETE CASCADE,
+    notification_preferences  jsonb NOT NULL DEFAULT '{"attendance":true,"grades":true,"assignments":true,"messages":true}',
+    language                  text NOT NULL DEFAULT 'en',
+    theme                     text NOT NULL DEFAULT 'light',
+    created_at                timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE TABLE IF NOT EXISTS intervention_alerts (
+    id          serial PRIMARY KEY,
+    student_id  integer NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    type        text NOT NULL DEFAULT 'academic',
+    risk_level  text NOT NULL DEFAULT 'low',
+    message     text NOT NULL,
+    is_resolved boolean NOT NULL DEFAULT false,
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  /* ensure guardian_links has the columns added via raw SQL previously */
+  `ALTER TABLE guardian_links ADD COLUMN IF NOT EXISTS status      text NOT NULL DEFAULT 'pending'`,
+  `ALTER TABLE guardian_links ADD COLUMN IF NOT EXISTS pairing_code text`,
+  `ALTER TABLE guardian_links ADD COLUMN IF NOT EXISTS requested_at timestamptz NOT NULL DEFAULT NOW()`,
 ];
 
 export async function runMigrations(): Promise<void> {
