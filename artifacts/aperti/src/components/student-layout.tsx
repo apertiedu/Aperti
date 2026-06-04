@@ -14,10 +14,9 @@ import {
 
 const primaryNav = [
   { href: "/", label: "Home", icon: Home },
-  { href: "/my-homework", label: "Homework", icon: BookOpen },
+  { href: "/course-hub", label: "Courses", icon: BookOpen },
   { href: "/mentor", label: "Mentor", icon: Brain },
-  { href: "/ascend", label: "Ascend", icon: Flame },
-  { href: "/simverse", label: "SimVerse", icon: FlaskConical },
+  { href: "/flashcards", label: "Flashcards", icon: Layers },
 ];
 
 const allNav = [
@@ -50,6 +49,8 @@ const allNav = [
   { href: "/messages", label: "Messages", icon: MessageSquare, desc: "Communication" },
   { href: "/exam-vault", label: "ExamVault", icon: Lock, desc: "Secure offline exams" },
   { href: "/inkspace", label: "InkSpace", icon: Pencil, desc: "Smart notebooks" },
+  { href: "/course-hub", label: "Course Hub", icon: BookOpen, desc: "My courses" },
+  { href: "/assignments", label: "Assignments", icon: Cpu, desc: "Assignment center" },
 ];
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
@@ -64,12 +65,12 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top bar — desktop */}
-      <header className="hidden md:flex sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/40 px-6 h-12 items-center justify-between shrink-0">
+      <header className="hidden md:flex sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/40 px-6 h-12 items-center justify-between shrink-0" role="banner">
         <div className="flex items-center gap-1.5">
-          <span className="font-bold text-base text-foreground">Aperti<span className="text-primary">.</span></span>
-          <span className="text-muted-foreground/40 text-xs ml-2">Student</span>
+          <span className="font-bold text-base text-foreground">Aperti<span className="text-primary" aria-hidden="true">.</span></span>
+          <span className="text-muted-foreground/40 text-xs ml-2" aria-label="Student portal">Student</span>
         </div>
-        <nav className="flex items-center gap-0.5">
+        <nav className="flex items-center gap-0.5" aria-label="Primary navigation">
           {primaryNav.map((item) => {
             const active = location === item.href;
             return (
@@ -77,9 +78,10 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-7 text-xs gap-1.5 ${active ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"}`}
+                  className={`h-7 text-xs gap-1.5 focus:outline-none focus:ring-2 focus:ring-primary ${active ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"}`}
+                  aria-current={active ? "page" : undefined}
                 >
-                  <item.icon className="h-3.5 w-3.5" />
+                  <item.icon className="h-3.5 w-3.5" aria-hidden="true" />
                   {item.label}
                 </Button>
               </Link>
@@ -87,12 +89,19 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           })}
         </nav>
         <div className="flex items-center gap-2">
-          <button onClick={toggleDark} className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-            {dark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+          <button
+            onClick={toggleDark}
+            className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+            aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {dark ? <Sun className="h-3.5 w-3.5" aria-hidden="true" /> : <Moon className="h-3.5 w-3.5" aria-hidden="true" />}
           </button>
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold">
+              <button
+                className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                aria-label="Open all modules menu"
+              >
                 {initials}
               </button>
             </SheetTrigger>
@@ -100,13 +109,16 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
               <SheetHeader>
                 <SheetTitle>All Modules</SheetTitle>
               </SheetHeader>
-              <div className="mt-4 space-y-1 overflow-y-auto">
+              <nav className="mt-4 space-y-1 overflow-y-auto" aria-label="All modules">
                 {allNav.map((item) => {
                   const active = location === item.href;
                   return (
                     <Link key={item.href} href={item.href} onClick={() => setSheetOpen(false)}>
-                      <div className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${active ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"}`}>
-                        <item.icon className="h-4 w-4 shrink-0" />
+                      <div
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary ${active ? "bg-primary/10 text-primary" : "hover:bg-muted text-foreground"}`}
+                        aria-current={active ? "page" : undefined}
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                         <div>
                           <p className="font-medium text-xs">{item.label}</p>
                           <p className="text-[10px] text-muted-foreground">{item.desc}</p>
@@ -117,19 +129,20 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                 })}
                 <button
                   onClick={logout}
-                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors mt-4"
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-destructive hover:bg-destructive/10 transition-colors mt-4 focus:outline-none focus:ring-2 focus:ring-destructive"
+                  aria-label="Sign out of Aperti"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-4 w-4" aria-hidden="true" />
                   Sign out
                 </button>
-              </div>
+              </nav>
             </SheetContent>
           </Sheet>
         </div>
       </header>
 
       {/* Page content */}
-      <main className="flex-1 pb-16 md:pb-4">
+      <main className="flex-1 pb-16 md:pb-4" id="main-content">
         <AnimatePresence mode="wait">
           <motion.div
             key={location}
@@ -144,14 +157,21 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       </main>
 
       {/* Bottom tab bar — mobile */}
-      <nav className="fixed bottom-0 w-full border-t border-border/60 bg-card/95 backdrop-blur-md z-50 md:hidden">
+      <nav
+        className="fixed bottom-0 w-full border-t border-border/60 bg-card/95 backdrop-blur-md z-50 md:hidden"
+        aria-label="Mobile navigation"
+      >
         <div className="flex justify-around items-center h-14 max-w-lg mx-auto px-2">
           {primaryNav.map((item) => {
             const active = location === item.href;
             return (
               <Link key={item.href} href={item.href}>
-                <button className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors ${active ? "text-primary" : "text-muted-foreground"}`}>
-                  <item.icon className={`h-5 w-5 ${active ? "text-primary" : ""}`} />
+                <button
+                  className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors focus:outline-none focus:ring-2 focus:ring-primary rounded ${active ? "text-primary" : "text-muted-foreground"}`}
+                  aria-label={item.label}
+                  aria-current={active ? "page" : undefined}
+                >
+                  <item.icon className={`h-5 w-5 ${active ? "text-primary" : ""}`} aria-hidden="true" />
                   <span className="text-[9px] font-medium">{item.label}</span>
                 </button>
               </Link>
@@ -159,8 +179,11 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           })}
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button className={`flex flex-col items-center gap-0.5 px-2 py-1 transition-colors text-muted-foreground`}>
-                <MoreHorizontal className="h-5 w-5" />
+              <button
+                className="flex flex-col items-center gap-0.5 px-2 py-1 transition-colors text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded"
+                aria-label="More navigation options"
+              >
+                <MoreHorizontal className="h-5 w-5" aria-hidden="true" />
                 <span className="text-[9px] font-medium">More</span>
               </button>
             </SheetTrigger>
@@ -168,13 +191,16 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
               <SheetHeader>
                 <SheetTitle className="text-left">All Modules</SheetTitle>
               </SheetHeader>
-              <div className="mt-4 grid grid-cols-2 gap-2 overflow-y-auto pb-6">
+              <nav className="mt-4 grid grid-cols-2 gap-2 overflow-y-auto pb-6" aria-label="All modules grid">
                 {allNav.map((item) => {
                   const active = location === item.href;
                   return (
                     <Link key={item.href} href={item.href} onClick={() => setSheetOpen(false)}>
-                      <div className={`flex items-center gap-2 p-3 rounded-xl text-sm border transition-colors ${active ? "border-primary/40 bg-primary/10 text-primary" : "border-border hover:border-primary/20 hover:bg-muted/60"}`}>
-                        <item.icon className="h-4 w-4 shrink-0" />
+                      <div
+                        className={`flex items-center gap-2 p-3 rounded-xl text-sm border transition-colors focus:outline-none focus:ring-2 focus:ring-primary ${active ? "border-primary/40 bg-primary/10 text-primary" : "border-border hover:border-primary/20 hover:bg-muted/60"}`}
+                        aria-current={active ? "page" : undefined}
+                      >
+                        <item.icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                         <div className="min-w-0">
                           <p className="font-medium text-xs truncate">{item.label}</p>
                           <p className="text-[9px] text-muted-foreground truncate">{item.desc}</p>
@@ -183,7 +209,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
                     </Link>
                   );
                 })}
-              </div>
+              </nav>
             </SheetContent>
           </Sheet>
         </div>

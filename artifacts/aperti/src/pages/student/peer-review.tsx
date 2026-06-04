@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, Send, CheckCircle2, MessageSquare, Users, Clock } from "lucide-react";
+import { Star, Send, CheckCircle2, MessageSquare, Users, Clock, Flag } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ReportModal } from "@/components/ReportModal";
 
 const PENDING_REVIEWS = [
   {
@@ -16,7 +17,8 @@ const PENDING_REVIEWS = [
     assignment: "Lab Report: Measuring g",
     dueDate: "2026-06-05",
     wordCount: 420,
-    excerpt: "In this experiment, I measured the acceleration due to gravity using a simple pendulum. My result of 9.76 m/s² is close to the accepted value…",
+    excerpt:
+      "In this experiment, I measured the acceleration due to gravity using a simple pendulum. My result of 9.76 m/s² is close to the accepted value…",
   },
   {
     id: "pr2",
@@ -24,26 +26,45 @@ const PENDING_REVIEWS = [
     assignment: "Problem Set: Calculus",
     dueDate: "2026-06-07",
     wordCount: 180,
-    excerpt: "For question 3, I used integration by substitution where u = x² + 1, giving du = 2x dx. The integral then becomes…",
+    excerpt:
+      "For question 3, I used integration by substitution where u = x² + 1, giving du = 2x dx. The integral then becomes…",
   },
 ];
 
 const RECEIVED_REVIEWS = [
-  { id: "rr1", reviewer: "Anonymous", assignment: "Essay: Biodiversity", rating: 4, comment: "Well-structured argument. Your examples from the Amazon are compelling. Consider adding more quantitative data to support your claims.", date: "2026-05-30" },
-  { id: "rr2", reviewer: "Anonymous", assignment: "Problem Set: Vectors", rating: 5, comment: "Clear working shown throughout. The diagram on question 4 was particularly helpful.", date: "2026-05-25" },
+  {
+    id: "rr1",
+    reviewer: "Anonymous",
+    assignment: "Essay: Biodiversity",
+    rating: 4,
+    comment:
+      "Well-structured argument. Your examples from the Amazon are compelling. Consider adding more quantitative data to support your claims.",
+    date: "2026-05-30",
+  },
+  {
+    id: "rr2",
+    reviewer: "Anonymous",
+    assignment: "Problem Set: Vectors",
+    rating: 5,
+    comment:
+      "Clear working shown throughout. The diagram on question 4 was particularly helpful.",
+    date: "2026-05-25",
+  },
 ];
 
 function StarRating({ rating, onRate }: { rating: number; onRate: (r: number) => void }) {
   const [hover, setHover] = useState(0);
   return (
-    <div className="flex gap-1">
+    <div className="flex gap-1" role="radiogroup" aria-label="Star rating">
       {[1, 2, 3, 4, 5].map((s) => (
         <button
           key={s}
           onMouseEnter={() => setHover(s)}
           onMouseLeave={() => setHover(0)}
           onClick={() => onRate(s)}
-          className="transition-transform hover:scale-110"
+          className="transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary rounded"
+          aria-label={`${s} star${s > 1 ? "s" : ""}`}
+          aria-pressed={(hover || rating) >= s}
         >
           <Star
             className={`h-6 w-6 ${(hover || rating) >= s ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"} transition-colors`}
@@ -67,11 +88,7 @@ function ReviewPanel({ review, onSubmit }: { review: (typeof PENDING_REVIEWS)[0]
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="space-y-4"
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
@@ -80,7 +97,7 @@ function ReviewPanel({ review, onSubmit }: { review: (typeof PENDING_REVIEWS)[0]
               <CardDescription>{review.subject} · {review.wordCount} words</CardDescription>
             </div>
             <Badge variant="outline" className="text-[10px]">
-              <Clock className="h-3 w-3 mr-1" />
+              <Clock className="h-3 w-3 mr-1" aria-hidden="true" />
               Due {new Date(review.dueDate).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
             </Badge>
           </div>
@@ -93,29 +110,30 @@ function ReviewPanel({ review, onSubmit }: { review: (typeof PENDING_REVIEWS)[0]
 
           <div className="space-y-4">
             <div>
-              <p className="text-sm font-medium mb-2">Overall rating</p>
+              <p className="text-sm font-medium mb-2" id="rating-label">Overall rating</p>
               <StarRating rating={rating} onRate={setRating} />
               {rating > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground mt-1" aria-live="polite">
                   {["", "Needs improvement", "Below average", "Average", "Good", "Excellent!"][rating]}
                 </p>
               )}
             </div>
 
             <div>
-              <p className="text-sm font-medium mb-2">Your feedback</p>
+              <label htmlFor="review-comment" className="text-sm font-medium">Your feedback</label>
               <Textarea
+                id="review-comment"
                 placeholder="Be constructive and specific. What worked well? What could be improved? (min 20 characters)"
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 rows={4}
-                className="resize-none text-sm"
+                className="resize-none text-sm mt-1"
               />
               <p className="text-[10px] text-muted-foreground mt-1">{comment.length} chars · Reviews are anonymous</p>
             </div>
 
-            <Button className="w-full gap-2" onClick={handleSubmit}>
-              <Send className="h-4 w-4" /> Submit Review
+            <Button className="w-full gap-2" onClick={handleSubmit} aria-label="Submit peer review">
+              <Send className="h-4 w-4" aria-hidden="true" /> Submit Review
             </Button>
           </div>
         </CardContent>
@@ -127,6 +145,7 @@ function ReviewPanel({ review, onSubmit }: { review: (typeof PENDING_REVIEWS)[0]
 export default function PeerReview() {
   const [activeReview, setActiveReview] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState<Set<string>>(new Set());
+  const [reportTarget, setReportTarget] = useState<{ id: string } | null>(null);
 
   const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
   const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } };
@@ -135,7 +154,7 @@ export default function PeerReview() {
     <div className="min-h-screen bg-background p-6 page-transition">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center" aria-hidden="true">
             <Users className="h-5 w-5 text-primary" />
           </div>
           <h1 className="text-3xl font-bold">PeerReview<span className="text-primary"></span></h1>
@@ -144,24 +163,24 @@ export default function PeerReview() {
       </motion.div>
 
       <Tabs defaultValue="give">
-        <TabsList className="mb-6">
+        <TabsList className="mb-6" aria-label="Peer review tabs">
           <TabsTrigger value="give" className="gap-2">
-            <MessageSquare className="h-4 w-4" /> Reviews to Give
+            <MessageSquare className="h-4 w-4" aria-hidden="true" /> Reviews to Give
             {PENDING_REVIEWS.filter((r) => !submitted.has(r.id)).length > 0 && (
-              <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]">
+              <Badge className="ml-1 h-4 w-4 p-0 flex items-center justify-center text-[10px]" aria-label={`${PENDING_REVIEWS.filter((r) => !submitted.has(r.id)).length} pending`}>
                 {PENDING_REVIEWS.filter((r) => !submitted.has(r.id)).length}
               </Badge>
             )}
           </TabsTrigger>
           <TabsTrigger value="received" className="gap-2">
-            <Star className="h-4 w-4" /> Feedback Received
+            <Star className="h-4 w-4" aria-hidden="true" /> Feedback Received
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="give">
           {activeReview ? (
             <>
-              <Button variant="ghost" size="sm" className="mb-4 gap-2 text-xs" onClick={() => setActiveReview(null)}>
+              <Button variant="ghost" size="sm" className="mb-4 gap-2 text-xs" onClick={() => setActiveReview(null)} aria-label="Back to review list">
                 ← Back to list
               </Button>
               <ReviewPanel
@@ -190,10 +209,10 @@ export default function PeerReview() {
                           </Badge>
                           {submitted.has(review.id) ? (
                             <div className="flex items-center gap-1 text-emerald-600 text-xs">
-                              <CheckCircle2 className="h-3.5 w-3.5" /> Submitted
+                              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" /> Submitted
                             </div>
                           ) : (
-                            <Button size="sm" className="h-7 text-xs" onClick={() => setActiveReview(review.id)}>
+                            <Button size="sm" className="h-7 text-xs" onClick={() => setActiveReview(review.id)} aria-label={`Review ${review.assignment}`}>
                               Review
                             </Button>
                           )}
@@ -204,12 +223,8 @@ export default function PeerReview() {
                 </motion.div>
               ))}
               {PENDING_REVIEWS.every((r) => submitted.has(r.id)) && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
-                >
-                  <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-3" />
+                <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12" role="status">
+                  <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-3" aria-hidden="true" />
                   <p className="font-semibold">All reviews complete!</p>
                   <p className="text-muted-foreground text-sm">+200 XP earned for your contributions.</p>
                 </motion.div>
@@ -225,21 +240,33 @@ export default function PeerReview() {
                 <Card className="card-hover">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <Avatar className="h-9 w-9 shrink-0">
+                      <Avatar className="h-9 w-9 shrink-0" aria-hidden="true">
                         <AvatarFallback className="bg-muted text-xs">Anon</AvatarFallback>
                       </Avatar>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-xs font-semibold text-muted-foreground">Anonymous Reviewer</p>
-                          <div className="flex">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <Star key={s} className={`h-3.5 w-3.5 ${s <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} />
-                            ))}
+                          <div className="flex items-center gap-2">
+                            <div className="flex" role="img" aria-label={`${review.rating} out of 5 stars`}>
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star key={s} className={`h-3.5 w-3.5 ${s <= review.rating ? "text-yellow-400 fill-yellow-400" : "text-muted-foreground"}`} aria-hidden="true" />
+                              ))}
+                            </div>
+                            <button
+                              onClick={() => setReportTarget({ id: review.id })}
+                              className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-destructive transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
+                              aria-label="Report this review"
+                              title="Report review"
+                            >
+                              <Flag className="h-3.5 w-3.5" />
+                            </button>
                           </div>
                         </div>
                         <p className="text-xs font-medium text-primary mb-1">{review.assignment}</p>
                         <p className="text-sm text-foreground/80 leading-relaxed">{review.comment}</p>
-                        <p className="text-[10px] text-muted-foreground mt-2">{new Date(review.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}</p>
+                        <p className="text-[10px] text-muted-foreground mt-2">
+                          {new Date(review.date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -249,6 +276,13 @@ export default function PeerReview() {
           </motion.div>
         </TabsContent>
       </Tabs>
+
+      <ReportModal
+        open={reportTarget !== null}
+        onClose={() => setReportTarget(null)}
+        targetType="review"
+        targetId={reportTarget?.id ?? ""}
+      />
     </div>
   );
 }

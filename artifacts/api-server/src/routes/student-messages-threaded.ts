@@ -94,6 +94,13 @@ router.post("/messages/threads/:id/send", ...studentGuard, async (req: AuthReque
   const { content } = req.body;
   if (!content?.trim()) { res.status(400).json({ message: "content required" }); return; }
 
+  const FLAGGED = ["kill", "hate", "stupid", "idiot", "loser", "ugly", "die", "worthless", "trash"];
+  const lower = content.trim().toLowerCase();
+  if (FLAGGED.some((k) => lower.includes(k))) {
+    res.status(422).json({ message: "Message contains inappropriate content and was not sent." });
+    return;
+  }
+
   const [msg] = await db.insert(studentMessagesTable).values({
     threadId,
     senderId: userId,

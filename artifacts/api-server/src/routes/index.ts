@@ -72,6 +72,7 @@ import examVaultRouter from "./exam-vault";
 import studentAnalyticsRouter from "./student-analytics";
 import studentHomeSummaryRouter from "./student-home-summary";
 import aiStatusRouter from "./ai-status";
+import safetyRouter from "./safety";
 
 const router: IRouter = Router();
 
@@ -148,5 +149,6 @@ router.use(examVaultRouter);
 router.use(studentAnalyticsRouter);
 router.use(studentHomeSummaryRouter);
 router.use(aiStatusRouter);
+router.use(safetyRouter);
 
 export default router;
