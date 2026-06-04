@@ -1,0 +1,145 @@
+You are building **Phase 4 — Parent & Guardian Operating System** for Aperti.  
+The platform already has a solid foundation: Phase 1 (auth, roles, workspaces), Phase 2 (teacher modules), and Phase 3 (student modules). Parents can already log in with the `parent` role, and the basic GuardianHub page exists as a placeholder.  
+Your task is to transform the parent experience into a fully functional, real‑time, AI‑assisted command center that answers every question a parent might have about their child’s education.
+
+**All necessary parent‑specific APIs must be created; existing student/teacher data endpoints should be reused where possible.**  
+**No “Coming Soon” placeholders.**  
+**Strictly follow the Liquid Flow design system: Inter font, teal accent #0D9488, neutral grey palette, rounded‑xl cards, subtle shadows, Framer Motion animations, fully responsive (mobile‑first with a bottom tab bar and desktop sidebar).**
+
+---
+
+## 1. DATABASE & BACKEND PREPARATION
+
+### 1.1 New Tables (Create via Drizzle ORM)
+- `parent_child_links` — already exists (used for linking); verify it has fields: id, parent_id, student_id, status (approved/pending), pairing_code, created_at.
+- `parent_notifications` — id, parent_id, type (attendance, grade, assignment, etc.), title, message, is_read, created_at.
+- `meetings` — id, parent_id, teacher_id, student_id (optional), title, date, time, status (requested/confirmed/canceled), notes, created_at.
+- `parent_settings` — id, parent_id, notifications_preferences (JSON), language, theme, etc.
+- `intervention_alerts` — id, student_id, type, risk_level, message, is_resolved, created_at.
+
+### 1.2 API Endpoints
+Create/update these routes in `artifacts/api-server/src/routes/`:
+
+#### Parent Dashboard Data
+- **GET /api/parent/dashboard** — returns data for all linked children:
+  - Each child: name, grade, today's classes (from lessons), attendance status today, upcoming deadlines (homework due this week), recent teacher messages (latest 3), current grades (average), predicted grade, attendance rate, revision progress (completed goals / total), risk alerts (active intervention_alerts), recent achievements (ascend badges).
+- **GET /api/parent/child/:studentId** — detailed profile: full performance history, learning profile (strong/weak subjects from echo_memory), assessment timeline (last 10 assessments with scores), attendance trends (weekly/monthly), revision heatmap data (focus_sessions grouped by day), assignment overview (pending/submitted/overdue counts), exam readiness (from InsightStream if available, else compute from recent mock scores).
+
+#### Academic Monitoring
+- **GET /api/parent/child/:studentId/grades** — subject breakdown: current performance, mastery %, teacher feedback (from recent assignments), topic strengths/weaknesses, grade trend chart data (last 12 assessments).
+- **GET /api/parent/child/:studentId/attendance** — detailed attendance with trends, per‑subject rates, alerts.
+- **GET /api/parent/child/:studentId/revision** — revision hours (from focus_sessions), topics revised, flashcards reviewed, mock exams completed, consistency score, heatmap data.
+- **GET /api/parent/child/:studentId/assignments** — all assignments with status, due date, grade, teacher feedback. Parent can filter by pending/overdue.
+- **GET /api/parent/child/:studentId/exam-readiness** — readiness %, subject readiness, predicted outcomes, mock performance history, countdown to next exam.
+
+#### GuardianLink (Communication)
+- **GET /api/parent/messages/:teacherId?** — fetch message threads with teachers. Supports sending new messages via **POST /api/parent/messages**.
+- **GET /api/parent/teachers** — list of teachers associated with the parent’s children.
+- **POST /api/parent/meetings** — request a meeting with a teacher.
+- **GET /api/parent/meetings** — list meetings.
+- **PUT /api/parent/meetings/:id** — confirm/cancel/reschedule.
+
+#### Snapshot (Automated Reports)
+- **POST /api/parent/generate-report** — triggers a snapshot report for a child (frequency: daily/weekly/monthly). The backend compiles attendance, grades, achievements, concerns, and sends via email (reuse GuardianPulse logic). Also stores in a `reports` table.
+
+#### Intervention Center
+- **GET /api/parent/intervention-alerts** — lists active alerts for all children.
+- **POST /api/parent/resolve-alert/:id** — mark alert as addressed.
+
+#### Financial Center
+- **GET /api/parent/billing** — invoices, receipts, subscriptions (read from existing SubPilot data, filtered by parent’s linked students).
+
+#### Parent AI Assistant
+- **POST /api/parent/ai‑assistant** — send a question; backend uses OpenAI (if available) or a rule‑based FAQ to provide explanations about educational terms, interpret grades, suggest support strategies. Return a text response.
+
+#### Notifications
+- **GET /api/parent/notifications** — list notifications.
+- **PUT /api/parent/notifications/:id/read** — mark as read.
+- Notification triggers: on assignment overdue, grade drop, attendance alert, new message, meeting confirmation.
+
+#### Privacy & Consent
+- **GET /api/parent/consent** — current consent settings for each child.
+- **PUT /api/parent/consent** — update data sharing, notifications, media permissions.
+
+---
+
+## 2. FRONTEND PAGES
+
+### 2.1 GuardianHub — `/parent/dashboard`
+- **Child Switcher:** If multiple children, a tab bar at the top to switch between them. Selecting a child updates the entire dashboard instantly.
+- **Daily Snapshot Card:** for the selected child: today's classes (time & subject), attendance status (present/absent badge), upcoming deadlines (next 3 homework), revision progress (circular progress bar), recent teacher messages (preview of last 2).
+- **Academic Summary Card:** current grade, predicted grade, target grade (with trend arrow), completion rate (homework), attendance rate.
+- **Risk Alert Panel:** list of intervention alerts with coloured badges (low/moderate/high/critical). Tapping opens details.
+- **Achievement Feed:** last 5 badges/achievements earned.
+- **Quick Actions:** buttons to Message Teacher, Schedule Meeting, View Full Report.
+- **Navigation:** Mobile bottom bar: Dashboard, Messages, Calendar, Notifications, More. Desktop sidebar with links: Dashboard, Attendance, Grades, Assignments, Exams, Revision, Messages, Meetings, Billing, Settings.
+
+### 2.2 Child Profile Center — `/parent/child/:studentId`
+- **Tabs:** Academic Identity, Performance History, Learning Profile.
+- **Academic Identity:** name, grade, subjects, teachers list, enrollment status.
+- **Performance History:** assessment timeline (chronological list), exam history (table with scores), attendance history (calendar heatmap), achievements timeline.
+- **Learning Profile:** strong subjects, weak subjects, learning trends (chart), revision habits, engagement patterns.
+
+### 2.3 Academic Monitoring Pages
+- **Grades — `/parent/child/:studentId/grades`:** subject cards with current performance, mastery percentage, teacher feedback snippet, grade trend line chart (last 6 weeks), topic strengths/weaknesses list.
+- **Attendance — `/parent/child/:studentId/attendance`:** weekly/monthly charts, per‑subject attendance rate, alert log.
+- **Revision — `/parent/child/:studentId/revision`:** study hours per day chart, topics revised list, flashcards reviewed count, mock exams completed, consistency score, heatmap (GitHub‑style).
+- **Assignments — `/parent/child/:studentId/assignments`:** tabs for Pending, Submitted, Overdue. Each assignment card shows title, subject, due date, status, grade, teacher comment.
+- **Exam Readiness — `/parent/child/:studentId/exam-readiness`:** overall readiness gauge, per‑subject readiness bars, predicted grades, mock scores chart, countdown timer to next exam, improvement trend.
+
+### 2.4 GuardianLink (Communication) — `/parent/messages`
+- **Conversation List:** with teachers (avatar, last message preview). Tap to open thread.
+- **Chat View:** message bubbles, file attachment support, input bar. Real‑time polling or WebSocket for new messages.
+- **Teacher Directory:** list of teachers with subjects, quick buttons to message or schedule meeting.
+- **Meeting Management:** calendar view showing confirmed/requested meetings. Button to request new meeting → pick teacher, date, time, notes.
+- **Translation:** each message can be translated to the parent’s preferred language (if AI available; otherwise use a simple dropdown with a “Translate” button that calls the AI assistant endpoint).
+
+### 2.5 Snapshot Reports — `/parent/reports`
+- List of generated reports with date and child name. Tap to view PDF or in‑app preview.
+- Button to generate a new report for a specific child and frequency.
+
+### 2.6 Intervention Center — `/parent/interventions`
+- List of active alerts with type, risk level, child name, description. Each has a “Resolve” button that calls the API.
+
+### 2.7 Financial Center — `/parent/billing`
+- Invoices list, payment history, subscription status (read from SubPilot). Minimal display; full billing management might be in a separate page.
+
+### 2.8 Parent AI Assistant — `/parent/ai‑assistant`
+- Chat‑like interface. Parent asks a question (e.g., “What does this predicted grade mean?”) and the assistant responds. Use the same streaming design as The Mentor but with a parent‑focused system prompt.
+
+### 2.9 Notifications — `/parent/notifications`
+- List of notifications with type icon, message, timestamp, read/unread state. Tap to mark read.
+
+### 2.10 Settings — `/parent/settings`
+- Profile, Language, Notification Preferences (toggle per type), Privacy & Consent (manage data sharing for each child), Payment Methods, Linked Children (view and remove links), Accessibility (font size, high contrast, reduced motion).
+
+---
+
+## 3. DESIGN & UX REQUIREMENTS
+
+- **Liquid Flow** consistency: Inter font, teal #0D9488 for primary actions, white cards with `rounded-xl` and `shadow-sm`, subtle page transitions via Framer Motion.
+- **Mobile First:** bottom tab bar with 5 icons: Home (GuardianHub), Messages, Calendar, Notifications, More (drawer with all other pages).
+- **Desktop Sidebar:** collapsible with sections: Dashboard, Academic (Grades, Attendance, Assignments, Exams, Revision), Communication (Messages, Meetings), Financial, Settings.
+- **Child Switcher:** on every academic page, a top bar showing the selected child with a dropdown to switch. Switching updates the page’s data without reloading the whole app.
+- **All data must be live** — fetched from the new APIs. Use TanStack Query with proper caching and background refetching.
+- **Error/loading states:** skeletons, toasts for errors.
+- **Accessibility:** all interactive elements have `aria-label`, keyboard navigation, screen‑reader support.
+
+---
+
+## 4. IMPLEMENTATION ORDER
+
+1. Database migrations and parent‑specific API routes.
+2. GuardianHub dashboard with child switcher.
+3. Child profile & academic monitoring pages (Grades, Attendance, Revision, Assignments, Exam Readiness).
+4. GuardianLink messaging & meetings.
+5. Snapshot reports (generation & viewing).
+6. Intervention center & notifications.
+7. Financial center (billing).
+8. Parent AI Assistant.
+9. Settings & privacy.
+10. Mobile navigation, desktop sidebar, and global polish.
+
+---
+
+**Start building now. Ensure every module is fully functional, integrated with real data, and styled to perfection. No placeholders.**
