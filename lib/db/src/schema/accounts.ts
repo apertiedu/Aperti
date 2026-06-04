@@ -13,6 +13,15 @@ export const accountsTable = pgTable("accounts", {
   emailVerified: boolean("email_verified").notNull().default(false),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  isVerified: boolean("is_verified"),
+  verifiedAt: timestamp("verified_at", { withTimezone: true }),
+  verifiedBy: integer("verified_by"),
+  avatarUrl: text("avatar_url"),
+  bio: text("bio"),
+  phone: text("phone"),
+  country: text("country"),
+  firstName: text("first_name"),
+  lastName: text("last_name"),
 });
 
 export const deviceSessionsTable = pgTable("device_sessions", {

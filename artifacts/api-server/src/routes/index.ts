@@ -70,6 +70,7 @@ import snapgradeRouter from "./snapgrade";
 import trialVaultRouter from "./trial-vault";
 import examVaultRouter from "./exam-vault";
 import studentAnalyticsRouter from "./student-analytics";
+import studentHomeSummaryRouter from "./student-home-summary";
 import aiStatusRouter from "./ai-status";
 
 const router: IRouter = Router();
@@ -145,6 +146,7 @@ router.use(snapgradeRouter);
 router.use(trialVaultRouter);
 router.use(examVaultRouter);
 router.use(studentAnalyticsRouter);
+router.use(studentHomeSummaryRouter);
 router.use(aiStatusRouter);
 
 export default router;
