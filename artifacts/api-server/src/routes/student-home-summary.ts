@@ -1,10 +1,11 @@
 import { Router } from "express";
-import { eq, and, gte, desc, sql, gt } from "drizzle-orm";
+import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
 import {
-  db, studentsTable, homeworkTable, homeworkSubmissionsTable, examsTable,
-  subjectsTable, attendanceTable, echoMemoryTable, ascendProfilesTable,
-  focusSessionsTable, studentGoalsTable, studentFeedItemsTable,
-  notificationsTable, questsTable,
+  db, studentsTable, accountsTable, homeworkTable, homeworkSubmissionsTable,
+  examsTable, subjectsTable, attendanceTable, echoMemoryTable,
+  ascendProfilesTable, focusSessionsTable, studentGoalsTable,
+  studentFeedItemsTable, notificationsTable, questsTable,
+  studentMarksTable, examQuestionsTable,
 } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import type { Response } from "express";
@@ -15,6 +16,9 @@ router.get("/student/home-summary", authenticate, async (req: AuthRequest, res: 
   const [student] = await db.select().from(studentsTable)
     .where(eq(studentsTable.accountId, req.userId!)).limit(1);
   if (!student) { res.status(403).json({ message: "No student record" }); return; }
+
+  const [account] = await db.select({ displayName: accountsTable.displayName, firstName: accountsTable.firstName })
+    .from(accountsTable).where(eq(accountsTable.id, req.userId!)).limit(1);
 
   const studentId = student.id;
   const teacherId = student.teacherAccountId!;
@@ -31,10 +35,12 @@ router.get("/student/home-summary", authenticate, async (req: AuthRequest, res: 
     upcomingExams,
     recentAttendance,
     focusSessions7d,
+    focusSessionsToday,
     activeGoals,
+    todayCompletedGoals,
     feedItems,
     notifications,
-    allQuests,
+    recentMarks,
   ] = await Promise.all([
     db.select().from(ascendProfilesTable)
       .where(eq(ascendProfilesTable.studentAccountId, req.userId!)).limit(1),
@@ -97,13 +103,27 @@ router.get("/student/home-summary", authenticate, async (req: AuthRequest, res: 
       ))
       .orderBy(desc(focusSessionsTable.completedAt)),
 
+    db.select({ xpEarned: focusSessionsTable.xpEarned })
+      .from(focusSessionsTable)
+      .where(and(
+        eq(focusSessionsTable.studentId, studentId),
+        sql`DATE(${focusSessionsTable.completedAt}) = ${todayStr}`
+      )),
+
     db.select().from(studentGoalsTable)
       .where(and(
         eq(studentGoalsTable.studentId, studentId),
         sql`${studentGoalsTable.completedAt} IS NULL`
       ))
       .orderBy(studentGoalsTable.createdAt)
-      .limit(5),
+      .limit(10),
+
+    db.select({ id: studentGoalsTable.id })
+      .from(studentGoalsTable)
+      .where(and(
+        eq(studentGoalsTable.studentId, studentId),
+        sql`DATE(${studentGoalsTable.completedAt}) = ${todayStr}`
+      )),
 
     db.select().from(studentFeedItemsTable)
       .where(and(
@@ -128,55 +148,149 @@ router.get("/student/home-summary", authenticate, async (req: AuthRequest, res: 
       .orderBy(desc(notificationsTable.createdAt))
       .limit(10),
 
-    db.select().from(questsTable).limit(5),
+    db.select({
+      scored: sql<number>`sum(${studentMarksTable.marksScored})::numeric`,
+      max: sql<number>`sum(${examQuestionsTable.maxMarks})::numeric`,
+      examId: studentMarksTable.examId,
+    }).from(studentMarksTable)
+      .innerJoin(examQuestionsTable, eq(studentMarksTable.questionId, examQuestionsTable.id))
+      .where(eq(studentMarksTable.studentId, studentId))
+      .groupBy(studentMarksTable.examId)
+      .orderBy(desc(studentMarksTable.examId))
+      .limit(10),
   ]);
 
   const ascend = ascendData[0] ?? null;
   const echo = echoData[0] ?? null;
 
-  const present = recentAttendance.find(r => r.status === "Present")?.count ?? 0;
-  const absent = recentAttendance.find(r => r.status === "Absent")?.count ?? 0;
-  const attendancePct = present + absent > 0 ? Math.round((present / (present + absent)) * 100) : null;
+  // ── Greeting ────────────────────────────────────────────────────────────────
+  const hour = now.getHours();
+  const timeGreeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const firstName = account?.firstName
+    ?? account?.displayName?.split(" ")[0]
+    ?? student.studentName.split(" ")[0];
+  const greeting = `${timeGreeting}, ${firstName}!`;
 
-  const totalFocusMinutes7d = focusSessions7d.reduce((s, f) => s + (f.durationMinutes ?? 0), 0);
-  const studyStreakDays = (() => {
-    const byDay = new Set(focusSessions7d.map(f =>
-      (f.completedAt as Date).toISOString().split("T")[0]
-    ));
-    let streak = 0;
-    const d = new Date(now);
-    while (streak < 7) {
-      const key = d.toISOString().split("T")[0];
-      if (byDay.has(key)) { streak++; d.setDate(d.getDate() - 1); }
-      else break;
-    }
-    return streak;
-  })();
+  // ── Goal progress today ─────────────────────────────────────────────────────
+  const todayTotalGoals = activeGoals.length + todayCompletedGoals.length;
+  const todayCompletedCount = todayCompletedGoals.length;
+  const goalProgressPct = todayTotalGoals > 0
+    ? Math.round((todayCompletedCount / todayTotalGoals) * 100)
+    : 0;
 
-  const pendingHomework = upcomingHomework.filter(h =>
-    !h.submissionStatus || h.submissionStatus === "pending"
-  ).length;
+  // ── XP earned today ─────────────────────────────────────────────────────────
+  const xpEarnedToday = focusSessionsToday.reduce((s, f) => s + (f.xpEarned ?? 0), 0);
 
-  const weakTopics = (echo?.weakTopics as string[]) ?? [];
-  const strongTopics = (echo?.strongTopics as string[]) ?? [];
+  // ── Streak (consecutive active days: focus sessions + attendance) ────────────
+  const studyDays = new Set(focusSessions7d.map(f =>
+    (f.completedAt as Date).toISOString().split("T")[0]
+  ));
+  let streak = 0;
+  const d = new Date(now);
+  while (streak < 30) {
+    const key = d.toISOString().split("T")[0];
+    if (studyDays.has(key)) { streak++; d.setDate(d.getDate() - 1); }
+    else break;
+  }
 
-  const daysUntilNextExam = upcomingExams.length > 0 ? (() => {
-    const examDate = new Date(upcomingExams[0].examDate as string);
-    return Math.ceil((examDate.getTime() - now.getTime()) / 86400000);
+  // ── Nearest exam countdown ──────────────────────────────────────────────────
+  const nextExam = upcomingExams[0] ?? null;
+  const daysUntilExam = nextExam ? (() => {
+    const examDate = new Date(nextExam.examDate as string);
+    return Math.max(0, Math.ceil((examDate.getTime() - now.getTime()) / 86400000));
   })() : null;
 
-  const homeworkCompletionRate = upcomingHomework.length > 0
-    ? Math.round(
-        (upcomingHomework.filter(h => h.submissionStatus === "submitted" || h.submissionStatus === "graded").length
-         / upcomingHomework.length) * 100
-      )
+  // ── Attendance ──────────────────────────────────────────────────────────────
+  const present = recentAttendance.find(r => r.status === "Present")?.count ?? 0;
+  const absent = recentAttendance.find(r => r.status === "Absent")?.count ?? 0;
+  const attendancePct = present + absent > 0
+    ? Math.round((present / (present + absent)) * 100)
     : null;
 
+  // ── Homework completion rate ─────────────────────────────────────────────────
+  const hwSubmitted = upcomingHomework.filter(h =>
+    h.submissionStatus === "submitted" || h.submissionStatus === "graded"
+  ).length;
+  const hwCompletionRate = upcomingHomework.length > 0
+    ? Math.round((hwSubmitted / upcomingHomework.length) * 100)
+    : null;
+
+  // ── Average grade from recent marks ─────────────────────────────────────────
+  const gradedExams = recentMarks.filter(m => m.max > 0);
+  const avgGrade = gradedExams.length > 0
+    ? Math.round(gradedExams.reduce((s, m) => s + Math.round((m.scored / m.max) * 100), 0) / gradedExams.length)
+    : null;
+
+  // ── Target grade from echo ───────────────────────────────────────────────────
+  const confidenceScore = echo ? parseFloat(String(echo.confidenceScore ?? 0)) : 0;
+  const targetGrade = avgGrade !== null
+    ? Math.min(100, avgGrade + Math.round(5 + (confidenceScore / 10)))
+    : 80;
+
+  // ── Readiness score ─────────────────────────────────────────────────────────
+  const recentQuizAvg = avgGrade ?? 0;
+  const readinessScore = Math.round(
+    ((attendancePct ?? 0) * 0.3) + ((hwCompletionRate ?? 0) * 0.3) + (recentQuizAvg * 0.4)
+  );
+
+  // ── Daily mission (top weak topic + nearest overdue homework) ───────────────
+  const weakTopics = (echo?.weakTopics as string[]) ?? [];
+  const retentionScores = (echo?.retentionScores as Record<string, number>) ?? {};
+  const topWeakTopic = weakTopics.sort((a, b) =>
+    (retentionScores[a] ?? 100) - (retentionScores[b] ?? 100)
+  )[0] ?? null;
+
+  const pendingHw = upcomingHomework.filter(h =>
+    !h.submissionStatus || h.submissionStatus === "pending"
+  );
+
+  const dailyMission: { type: string; title: string; description: string; xpReward: number } | null =
+    topWeakTopic
+      ? {
+          type: "revision",
+          title: `Revise: ${topWeakTopic}`,
+          description: `Your retention for "${topWeakTopic}" is low — spend 20 minutes reviewing it.`,
+          xpReward: 50,
+        }
+      : pendingHw.length > 0
+        ? {
+            type: "homework",
+            title: `Complete: ${pendingHw[0].title}`,
+            description: `Due ${pendingHw[0].dueDate} — submit before the deadline to earn XP.`,
+            xpReward: 75,
+          }
+        : null;
+
+  // ── AI insight (rule-based from echo data) ───────────────────────────────────
+  let aiInsight: string | null = null;
+  if (echo) {
+    const burnout = parseFloat(String(echo.burnoutRisk ?? 0));
+    if (burnout > 70) {
+      aiInsight = "Your study intensity has been high lately — consider a lighter revision session today and get enough rest before your next exam.";
+    } else if (weakTopics.length > 3) {
+      aiInsight = `Focus on your ${weakTopics.length} flagged weak areas. Even 15 minutes of targeted revision per topic significantly boosts retention.`;
+    } else if (streak >= 3) {
+      aiInsight = `${streak}-day streak! Consistency is your strongest asset — keep the momentum and tackle a quick flashcard review today.`;
+    } else if (daysUntilExam !== null && daysUntilExam <= 7) {
+      aiInsight = `${nextExam?.name} is in ${daysUntilExam} day${daysUntilExam === 1 ? "" : "s"}. Prioritise past-paper practice and your TrialVault mock today.`;
+    } else {
+      aiInsight = `Your learning pace is ${echo.learningPace}. Stay consistent with daily focus sessions to maintain and improve your performance.`;
+    }
+  }
+
   res.json({
+    greeting,
     student: {
       id: studentId,
       name: student.studentName,
+      firstName,
       accountId: req.userId,
+    },
+    todayProgress: {
+      goalProgressPct,
+      completedGoals: todayCompletedCount,
+      totalGoals: todayTotalGoals,
+      xpEarnedToday,
     },
     ascend: ascend ? {
       xp: ascend.xp,
@@ -185,25 +299,22 @@ router.get("/student/home-summary", authenticate, async (req: AuthRequest, res: 
       rank: ascend.rank,
       archetype: ascend.archetype,
     } : null,
-    echo: echo ? {
-      learningPace: echo.learningPace,
-      preferredStyle: echo.preferredStyle,
-      burnoutRisk: parseFloat(String(echo.burnoutRisk)),
-      confidenceScore: parseFloat(String(echo.confidenceScore)),
-      weakTopicCount: weakTopics.length,
-      strongTopicCount: strongTopics.length,
-      topWeakTopics: weakTopics.slice(0, 3),
+    streakDays: streak,
+    nextExam: nextExam ? {
+      id: nextExam.id,
+      name: nextExam.name,
+      examDate: nextExam.examDate,
+      subject: nextExam.subjectName,
+      daysUntil: daysUntilExam,
     } : null,
-    stats: {
+    dailyMission,
+    aiInsight,
+    academicSnapshot: {
+      avgGrade,
+      targetGrade,
+      readinessScore,
       attendancePct,
-      studyStreakDays,
-      totalFocusMinutes7d,
-      focusSessions7d: focusSessions7d.length,
-      pendingHomework,
-      daysUntilNextExam,
-      homeworkCompletionRate,
-      activeGoalCount: activeGoals.length,
-      unreadNotifications: notifications.length + feedItems.length,
+      hwCompletionRate,
     },
     upcomingHomework: upcomingHomework.map(h => ({
       id: h.id,
@@ -212,15 +323,7 @@ router.get("/student/home-summary", authenticate, async (req: AuthRequest, res: 
       subject: h.subjectName,
       status: h.submissionStatus ?? "pending",
     })),
-    upcomingExams: upcomingExams.map(e => ({
-      id: e.id,
-      name: e.name,
-      examDate: e.examDate,
-      subject: e.subjectName,
-      totalMarks: e.totalMarks,
-      timeLimitMinutes: e.timeLimitMinutes,
-    })),
-    activeGoals: activeGoals.map(g => ({
+    activeGoals: activeGoals.slice(0, 5).map(g => ({
       id: g.id,
       title: g.title,
       type: g.type,
@@ -242,13 +345,7 @@ router.get("/student/home-summary", authenticate, async (req: AuthRequest, res: 
       type: n.type,
       createdAt: n.createdAt,
     })),
-    quests: allQuests.map(q => ({
-      id: q.id,
-      title: q.title,
-      description: q.description,
-      type: q.type,
-      xpReward: q.xpReward,
-    })),
+    unreadCount: notifications.length + feedItems.length,
   });
 });
 

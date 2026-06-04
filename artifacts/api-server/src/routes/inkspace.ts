@@ -16,6 +16,20 @@ async function requireStudent(req: AuthRequest, res: Response): Promise<number |
   return s.id;
 }
 
+async function requireNotebook(notebookId: number, studentId: number, res: Response) {
+  const [nb] = await db.select().from(inkspaceNotebooksTable)
+    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
+  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return null; }
+  return nb;
+}
+
+async function requirePage(pageId: number, notebookId: number, res: Response) {
+  const [page] = await db.select().from(inkspacePagesTable)
+    .where(and(eq(inkspacePagesTable.id, pageId), eq(inkspacePagesTable.notebookId, notebookId))).limit(1);
+  if (!page) { res.status(404).json({ message: "Page not found" }); return null; }
+  return page;
+}
+
 // ── Notebooks ─────────────────────────────────────────────────────────────────
 
 inkspaceRouter.get("/notebooks", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
@@ -53,9 +67,8 @@ inkspaceRouter.put("/notebooks/:id", authenticate, async (req: AuthRequest, res:
   if (!studentId) return;
 
   const notebookId = parseInt(req.params.id, 10);
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  const nb = await requireNotebook(notebookId, studentId, res);
+  if (!nb) return;
 
   const { title, color } = req.body;
   const [updated] = await db.update(inkspaceNotebooksTable)
@@ -70,9 +83,8 @@ inkspaceRouter.delete("/notebooks/:id", authenticate, async (req: AuthRequest, r
   if (!studentId) return;
 
   const notebookId = parseInt(req.params.id, 10);
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  const nb = await requireNotebook(notebookId, studentId, res);
+  if (!nb) return;
 
   await db.delete(inkspaceNotebooksTable).where(eq(inkspaceNotebooksTable.id, notebookId));
   res.json({ success: true });
@@ -85,9 +97,7 @@ inkspaceRouter.get("/notebooks/:notebookId/pages", authenticate, async (req: Aut
   if (!studentId) return;
 
   const notebookId = parseInt(req.params.notebookId, 10);
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
 
   const pages = await db.select().from(inkspacePagesTable)
     .where(eq(inkspacePagesTable.notebookId, notebookId))
@@ -100,9 +110,7 @@ inkspaceRouter.post("/notebooks/:notebookId/pages", authenticate, async (req: Au
   if (!studentId) return;
 
   const notebookId = parseInt(req.params.notebookId, 10);
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
 
   const existing = await db.select({ sortOrder: inkspacePagesTable.sortOrder })
     .from(inkspacePagesTable).where(eq(inkspacePagesTable.notebookId, notebookId));
@@ -125,13 +133,9 @@ inkspaceRouter.get("/notebooks/:notebookId/pages/:pageId", authenticate, async (
   const notebookId = parseInt(req.params.notebookId, 10);
   const pageId = parseInt(req.params.pageId, 10);
 
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
-
-  const [page] = await db.select().from(inkspacePagesTable)
-    .where(and(eq(inkspacePagesTable.id, pageId), eq(inkspacePagesTable.notebookId, notebookId))).limit(1);
-  if (!page) { res.status(404).json({ message: "Page not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
+  const page = await requirePage(pageId, notebookId, res);
+  if (!page) return;
 
   const blocks = await db.select().from(inkspaceBlocksTable)
     .where(eq(inkspaceBlocksTable.pageId, pageId))
@@ -147,9 +151,8 @@ inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId", authenticate, async (
   const notebookId = parseInt(req.params.notebookId, 10);
   const pageId = parseInt(req.params.pageId, 10);
 
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
+  if (!await requirePage(pageId, notebookId, res)) return;
 
   const { title, content, sortOrder } = req.body;
   const [updated] = await db.update(inkspacePagesTable)
@@ -161,7 +164,6 @@ inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId", authenticate, async (
     })
     .where(and(eq(inkspacePagesTable.id, pageId), eq(inkspacePagesTable.notebookId, notebookId)))
     .returning();
-  if (!updated) { res.status(404).json({ message: "Page not found" }); return; }
   res.json(updated);
 });
 
@@ -172,9 +174,8 @@ inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId", authenticate, asyn
   const notebookId = parseInt(req.params.notebookId, 10);
   const pageId = parseInt(req.params.pageId, 10);
 
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
+  if (!await requirePage(pageId, notebookId, res)) return;
 
   await db.delete(inkspacePagesTable)
     .where(and(eq(inkspacePagesTable.id, pageId), eq(inkspacePagesTable.notebookId, notebookId)));
@@ -182,6 +183,7 @@ inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId", authenticate, asyn
 });
 
 // ── Blocks ────────────────────────────────────────────────────────────────────
+// Full ownership chain enforced: block → page (must belong to notebook) → notebook (must belong to student)
 
 inkspaceRouter.post("/notebooks/:notebookId/pages/:pageId/blocks", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   const studentId = await requireStudent(req, res);
@@ -190,9 +192,8 @@ inkspaceRouter.post("/notebooks/:notebookId/pages/:pageId/blocks", authenticate,
   const notebookId = parseInt(req.params.notebookId, 10);
   const pageId = parseInt(req.params.pageId, 10);
 
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
+  if (!await requirePage(pageId, notebookId, res)) return;
 
   const existing = await db.select({ sortOrder: inkspaceBlocksTable.sortOrder })
     .from(inkspaceBlocksTable).where(eq(inkspaceBlocksTable.pageId, pageId));
@@ -216,9 +217,12 @@ inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", authe
   const pageId = parseInt(req.params.pageId, 10);
   const blockId = parseInt(req.params.blockId, 10);
 
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
+  if (!await requirePage(pageId, notebookId, res)) return;
+
+  const [block] = await db.select().from(inkspaceBlocksTable)
+    .where(and(eq(inkspaceBlocksTable.id, blockId), eq(inkspaceBlocksTable.pageId, pageId))).limit(1);
+  if (!block) { res.status(404).json({ message: "Block not found" }); return; }
 
   const { type, data, sortOrder } = req.body;
   const [updated] = await db.update(inkspaceBlocksTable)
@@ -227,9 +231,8 @@ inkspaceRouter.put("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", authe
       ...(data !== undefined && { data }),
       ...(sortOrder !== undefined && { sortOrder }),
     })
-    .where(and(eq(inkspaceBlocksTable.id, blockId), eq(inkspaceBlocksTable.pageId, pageId)))
+    .where(eq(inkspaceBlocksTable.id, blockId))
     .returning();
-  if (!updated) { res.status(404).json({ message: "Block not found" }); return; }
   res.json(updated);
 });
 
@@ -241,12 +244,14 @@ inkspaceRouter.delete("/notebooks/:notebookId/pages/:pageId/blocks/:blockId", au
   const pageId = parseInt(req.params.pageId, 10);
   const blockId = parseInt(req.params.blockId, 10);
 
-  const [nb] = await db.select().from(inkspaceNotebooksTable)
-    .where(and(eq(inkspaceNotebooksTable.id, notebookId), eq(inkspaceNotebooksTable.studentId, studentId))).limit(1);
-  if (!nb) { res.status(404).json({ message: "Notebook not found" }); return; }
+  if (!await requireNotebook(notebookId, studentId, res)) return;
+  if (!await requirePage(pageId, notebookId, res)) return;
 
-  await db.delete(inkspaceBlocksTable)
-    .where(and(eq(inkspaceBlocksTable.id, blockId), eq(inkspaceBlocksTable.pageId, pageId)));
+  const [block] = await db.select().from(inkspaceBlocksTable)
+    .where(and(eq(inkspaceBlocksTable.id, blockId), eq(inkspaceBlocksTable.pageId, pageId))).limit(1);
+  if (!block) { res.status(404).json({ message: "Block not found" }); return; }
+
+  await db.delete(inkspaceBlocksTable).where(eq(inkspaceBlocksTable.id, blockId));
   res.json({ success: true });
 });
 
@@ -262,7 +267,10 @@ inkspaceRouter.get("/search", authenticate, async (req: AuthRequest, res: Respon
   const notebooks = await db.select().from(inkspaceNotebooksTable)
     .where(eq(inkspaceNotebooksTable.studentId, studentId));
 
-  const results: Array<{ pageId: number; pageTitle: string; notebookId: number; notebookTitle: string; updatedAt: Date }> = [];
+  const results: Array<{
+    pageId: number; pageTitle: string; notebookId: number;
+    notebookTitle: string; updatedAt: Date;
+  }> = [];
 
   for (const nb of notebooks) {
     const pages = await db.select().from(inkspacePagesTable)
@@ -273,10 +281,8 @@ inkspaceRouter.get("/search", authenticate, async (req: AuthRequest, res: Respon
         JSON.stringify(p.content ?? "").toLowerCase().includes(q)
       ) {
         results.push({
-          pageId: p.id,
-          pageTitle: p.title,
-          notebookId: nb.id,
-          notebookTitle: nb.title,
+          pageId: p.id, pageTitle: p.title,
+          notebookId: nb.id, notebookTitle: nb.title,
           updatedAt: p.updatedAt,
         });
       }
