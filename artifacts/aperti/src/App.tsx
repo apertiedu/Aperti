@@ -89,6 +89,12 @@ import PeakRankings from "@/pages/student/peak-rankings";
 import PeerReview from "@/pages/student/peer-review";
 import SnapGrade from "@/pages/student/snap-grade";
 import LiveClassSession from "@/pages/student/live-class-session";
+import Echo from "@/pages/student/echo";
+import StudentAnalytics from "@/pages/student/analytics";
+import StudyGroups from "@/pages/student/study-groups";
+import StudentMessages from "@/pages/student/messages";
+import ExamVault from "@/pages/student/exam-vault";
+import StudentInkSpace from "@/pages/student/inkspace";
 import ForgeFieldLab from "@/pages/student/labs/forge-field";
 import ReactSphereLab from "@/pages/student/labs/react-sphere";
 import GeometrixLab from "@/pages/student/labs/geometrix";
@@ -220,6 +226,12 @@ function StudentRouter() {
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
         <Route path="/link-parent" component={LinkParent} />
+        <Route path="/echo" component={Echo} />
+        <Route path="/analytics" component={StudentAnalytics} />
+        <Route path="/study-groups" component={StudyGroups} />
+        <Route path="/messages" component={StudentMessages} />
+        <Route path="/exam-vault" component={ExamVault} />
+        <Route path="/inkspace" component={StudentInkSpace} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>

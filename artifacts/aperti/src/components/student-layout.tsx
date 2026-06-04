@@ -9,6 +9,7 @@ import {
   Home, BookOpen, CalendarCheck, Brain, Layers, Flame, FlaskConical,
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
   Sun, Moon, LogOut, Users, Shield, Repeat2, Video, Library, Link2,
+  MessageSquare, BarChart3, Cpu, Pencil, Lock,
 } from "lucide-react";
 
 const primaryNav = [
@@ -43,6 +44,12 @@ const allNav = [
   { href: "/live-class", label: "LiveClass", icon: Video, desc: "Join live session" },
   { href: "/privacy-vault", label: "PrivacyVault", icon: Shield, desc: "My data" },
   { href: "/link-parent", label: "Link Parent", icon: Link2, desc: "Connect to parent" },
+  { href: "/echo", label: "Echo", icon: Brain, desc: "AI learning memory" },
+  { href: "/analytics", label: "Analytics", icon: BarChart3, desc: "Academic insights" },
+  { href: "/study-groups", label: "Study Groups", icon: Users, desc: "Peer learning" },
+  { href: "/messages", label: "Messages", icon: MessageSquare, desc: "Communication" },
+  { href: "/exam-vault", label: "ExamVault", icon: Lock, desc: "Secure offline exams" },
+  { href: "/inkspace", label: "InkSpace", icon: Pencil, desc: "Smart notebooks" },
 ];
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {

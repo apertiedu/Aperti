@@ -1,3 +1,4 @@
 - [OpenAI API in api-server](openai-api.md) — use raw fetch(), NOT the openai npm package (not installed in api-server)
 - [Framer-motion import trap](framer-motion-trap.md) — never import React hooks (useState etc.) from framer-motion; only motion/AnimatePresence/etc.
 - [Phase 2 Teacher OS routes](phase2-routes.md) — teacher-courses, rubrics, messages, tutorcraft, classforge all registered in routes/index.ts
+- [Student OS API paths](student-os-api-paths.md) — correct API paths for student pages; common gotchas with inkspace, messages, focus-coach analytics fields

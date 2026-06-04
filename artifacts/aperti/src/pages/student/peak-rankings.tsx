@@ -1,28 +1,33 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Trophy, Medal, Star, Eye, EyeOff, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Trophy, Medal, Star, TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
 import { useAuth } from "@/context/auth";
 
-const MOCK_RANKINGS = [
-  { rank: 1, name: "Nour El-Din A.", xp: 4820, subject: "Physics 0625", trend: "up", delta: "+120 XP" },
-  { rank: 2, name: "Sara M.", xp: 4650, subject: "Math 0580", trend: "up", delta: "+80 XP" },
-  { rank: 3, name: "Adam K.", xp: 4410, subject: "Chemistry 0620", trend: "down", delta: "-30 XP" },
-  { rank: 4, name: "You", xp: 4200, subject: "Physics 0625", trend: "up", delta: "+95 XP", isCurrentUser: true },
-  { rank: 5, name: "Layla H.", xp: 3980, subject: "Biology 0610", trend: "same", delta: "0 XP" },
-  { rank: 6, name: "Omar S.", xp: 3760, subject: "Math 0580", trend: "up", delta: "+45 XP" },
-  { rank: 7, name: "Aya R.", xp: 3540, subject: "Chemistry 0620", trend: "down", delta: "-20 XP" },
-  { rank: 8, name: "Kareem F.", xp: 3320, subject: "Physics 0625", trend: "up", delta: "+60 XP" },
-  { rank: 9, name: "Mona T.", xp: 3100, subject: "Biology 0610", trend: "same", delta: "0 XP" },
-  { rank: 10, name: "Hassan B.", xp: 2950, subject: "Math 0580", trend: "down", delta: "-15 XP" },
-];
+const token = () => localStorage.getItem("aperti_token");
+async function fetchJSON(url: string) {
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  if (!res.ok) throw new Error("Failed");
+  return res.json();
+}
 
-const SUBJECTS = ["All Subjects", "Physics 0625", "Math 0580", "Chemistry 0620", "Biology 0610"];
+const TYPES = [
+  { value: "xp", label: "XP" },
+  { value: "streak", label: "Streak" },
+  { value: "attendance", label: "Attendance" },
+  { value: "mock_scores", label: "Mock Scores" },
+  { value: "consistency", label: "Consistency" },
+];
+const SCOPES = [
+  { value: "class", label: "Class" },
+  { value: "school", label: "School" },
+];
 
 const rankMedal = (rank: number) => {
   if (rank === 1) return <Trophy className="h-4 w-4 text-yellow-500" />;
@@ -31,42 +36,64 @@ const rankMedal = (rank: number) => {
   return <span className="text-xs font-bold text-muted-foreground w-4 text-center">{rank}</span>;
 };
 
-const trendIcon = (trend: string) => {
-  if (trend === "up") return <TrendingUp className="h-3 w-3 text-emerald-500" />;
-  if (trend === "down") return <TrendingDown className="h-3 w-3 text-destructive" />;
-  return <Minus className="h-3 w-3 text-muted-foreground" />;
-};
-
 const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } };
 const item = { hidden: { opacity: 0, x: -12 }, show: { opacity: 1, x: 0, transition: { type: "spring" as const, stiffness: 280, damping: 24 } } };
 
 export default function PeakRankings() {
-  const [subject, setSubject] = useState("All Subjects");
-  const [privateMode, setPrivateMode] = useState(false);
+  const [type, setType] = useState("xp");
+  const [scope, setScope] = useState("class");
   const { user } = useAuth();
 
-  const filtered = subject === "All Subjects"
-    ? MOCK_RANKINGS
-    : MOCK_RANKINGS.filter((r) => r.subject === subject || r.isCurrentUser);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["peak-rankings", type, scope],
+    queryFn: () => fetchJSON(`/api/peak-rankings?type=${type}&scope=${scope}`),
+    staleTime: 60_000,
+  });
 
-  const currentUserRank = MOCK_RANKINGS.find((r) => r.isCurrentUser);
+  const leaderboard = data?.leaderboard ?? [];
+  const currentUser = data?.currentUser;
 
   return (
-    <div className="min-h-screen bg-background p-6 page-transition">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+    <div className="min-h-screen bg-[#F5F5F5] dark:bg-background p-4 md:p-6">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
             <Trophy className="h-5 w-5 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">PeakRankings<span className="text-primary"></span></h1>
+          <div>
+            <h1 className="text-2xl font-bold">PeakRankings</h1>
+            <p className="text-muted-foreground text-sm">Class leaderboards — compete, improve, and celebrate wins.</p>
+          </div>
         </div>
-        <p className="text-muted-foreground">Class leaderboards — compete, improve, and celebrate wins.</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Your position card */}
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 mb-5">
+        <Select value={type} onValueChange={setType}>
+          <SelectTrigger className="w-40 h-9 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={scope} onValueChange={setScope}>
+          <SelectTrigger className="w-36 h-9 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {SCOPES.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="h-9 gap-1.5 text-sm">
+          <RefreshCw className="h-3.5 w-3.5" /> Refresh
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* My position */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-          <Card className="card-hover border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+          <Card className="shadow-sm border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Star className="h-4 w-4 text-primary" />
@@ -74,108 +101,114 @@ export default function PeakRankings() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-4">
-                <div className="text-6xl font-extrabold text-primary mb-1">#{currentUserRank?.rank}</div>
-                <p className="text-muted-foreground text-sm">of {MOCK_RANKINGS.length} students</p>
-                <div className="mt-4 p-3 rounded-xl bg-primary/10 inline-flex items-center gap-2">
-                  <Star className="h-4 w-4 text-primary" />
-                  <span className="font-bold text-primary">{currentUserRank?.xp.toLocaleString()} XP</span>
-                </div>
-                <div className="mt-3 flex items-center justify-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
-                  <TrendingUp className="h-3 w-3" />
-                  {currentUserRank?.delta} this week
-                </div>
-              </div>
-
-              <div className="border-t border-border/50 pt-4 mt-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground text-xs">Hide my name from others</span>
-                  <Switch checked={privateMode} onCheckedChange={setPrivateMode} />
-                </div>
-                {privateMode && (
-                  <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                    <EyeOff className="h-3 w-3" />
-                    You appear as "Anonymous"
+              {isLoading ? <Skeleton className="h-32 rounded-xl" /> : currentUser ? (
+                <div className="text-center py-2">
+                  <div className="text-5xl font-extrabold text-primary mb-1">#{currentUser.rank}</div>
+                  <p className="text-muted-foreground text-sm">of {leaderboard.length} students</p>
+                  <div className="mt-4 p-3 rounded-xl bg-primary/10 inline-flex items-center gap-2">
+                    <Star className="h-4 w-4 text-primary" />
+                    <span className="font-bold text-primary">
+                      {type === "xp" ? `${currentUser.xp?.toLocaleString()} XP` :
+                       type === "streak" ? `${currentUser.streak} days` :
+                       type === "attendance" ? `${currentUser.attendancePct}%` :
+                       type === "mock_scores" ? `${currentUser.mockScore}%` :
+                       `${currentUser.consistencyScore}%`}
+                    </span>
                   </div>
-                )}
-              </div>
+                  {currentUser.level && (
+                    <p className="text-xs text-muted-foreground mt-2">Level {currentUser.level} · {currentUser.archetype}</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-4">No ranking data yet</p>
+              )}
             </CardContent>
           </Card>
 
-          {/* Top 3 podium */}
-          <Card className="card-hover mt-4">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">This Week's Podium</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {MOCK_RANKINGS.slice(0, 3).map((r) => (
-                <div key={r.rank} className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-5">{rankMedal(r.rank)}</div>
-                  <Avatar className="h-7 w-7">
-                    <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-                      {r.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{r.isCurrentUser ? "You" : r.name}</p>
-                  </div>
-                  <span className="text-xs font-bold text-primary">{r.xp.toLocaleString()}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        {/* Full leaderboard */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Class Leaderboard</h2>
-            <Select value={subject} onValueChange={setSubject}>
-              <SelectTrigger className="w-44 h-8 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {SUBJECTS.map((s) => <SelectItem key={s} value={s} className="text-xs">{s}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Card>
-            <CardContent className="p-0">
-              <motion.div variants={container} initial="hidden" animate="show">
-                {filtered.map((entry, idx) => (
-                  <motion.div
-                    key={entry.rank}
-                    variants={item}
-                    className={`flex items-center gap-4 px-5 py-3 transition-colors ${
-                      entry.isCurrentUser
-                        ? "bg-primary/5 border-l-2 border-primary"
-                        : "hover:bg-muted/40"
-                    } ${idx !== 0 ? "border-t border-border/50" : ""}`}
-                  >
-                    <div className="flex items-center justify-center w-6">{rankMedal(entry.rank)}</div>
-                    <Avatar className="h-8 w-8 shrink-0">
-                      <AvatarFallback className={`text-xs ${entry.isCurrentUser ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                        {entry.isCurrentUser ? "ME" : entry.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
+          {/* Top 3 */}
+          {leaderboard.length >= 3 && (
+            <Card className="shadow-sm mt-4">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">Top 3 Podium</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {leaderboard.slice(0, 3).map((r: any) => (
+                  <div key={r.rank} className="flex items-center gap-3">
+                    <div className="flex items-center justify-center w-5">{rankMedal(r.rank)}</div>
+                    <Avatar className="h-7 w-7">
+                      <AvatarFallback className={`text-[10px] ${r.isYou ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                        {r.isYou ? "ME" : String(r.rank)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium truncate ${entry.isCurrentUser ? "text-primary" : ""}`}>
-                        {entry.isCurrentUser ? `You (${user?.displayName || "You"})` : (privateMode && !entry.isCurrentUser ? entry.name : entry.name)}
-                      </p>
-                      <p className="text-[10px] text-muted-foreground">{entry.subject}</p>
+                      <p className="text-xs font-medium truncate">{r.isYou ? `You (${user?.displayName ?? "You"})` : r.displayName ?? `Rank ${r.rank}`}</p>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
-                        {trendIcon(entry.trend)}
-                        <span>{entry.delta}</span>
-                      </div>
-                      <span className="font-bold text-sm text-primary">{entry.xp.toLocaleString()}</span>
-                      <span className="text-[10px] text-muted-foreground">XP</span>
-                    </div>
-                  </motion.div>
+                    <span className="text-xs font-bold text-primary">
+                      {type === "xp" ? `${r.xp?.toLocaleString()} XP` : r[type] ?? "—"}
+                    </span>
+                  </div>
                 ))}
-              </motion.div>
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+
+        {/* Full leaderboard */}
+        <div className="lg:col-span-2">
+          <Card className="shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">{scope === "class" ? "Class" : "School"} Leaderboard · {TYPES.find(t => t.value === type)?.label}</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              {isLoading ? (
+                <div className="space-y-2 p-4">{[1,2,3,4,5].map(i => <Skeleton key={i} className="h-12 rounded-xl" />)}</div>
+              ) : leaderboard.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">No rankings available yet.</p>
+              ) : (
+                <motion.div variants={container} initial="hidden" animate="show">
+                  {leaderboard.map((entry: any, idx: number) => (
+                    <motion.div
+                      key={entry.rank}
+                      variants={item}
+                      className={`flex items-center gap-4 px-5 py-3 transition-colors ${
+                        entry.isYou
+                          ? "bg-primary/5 border-l-2 border-primary"
+                          : "hover:bg-muted/40"
+                      } ${idx !== 0 ? "border-t border-border/50" : ""}`}
+                    >
+                      <div className="flex items-center justify-center w-6 shrink-0">{rankMedal(entry.rank)}</div>
+                      <Avatar className="h-8 w-8 shrink-0">
+                        <AvatarFallback className={`text-xs ${entry.isYou ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                          {entry.isYou ? "ME" : String(entry.rank)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium truncate ${entry.isYou ? "text-primary" : ""}`}>
+                          {entry.isYou ? `You (${user?.displayName ?? "You"})` : entry.displayRank ?? `Student #${entry.rank}`}
+                        </p>
+                        {entry.archetype && <p className="text-[10px] text-muted-foreground">{entry.archetype}</p>}
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {entry.streak > 0 && (
+                          <span className="text-[10px] text-orange-500 flex items-center gap-0.5">
+                            🔥{entry.streak}
+                          </span>
+                        )}
+                        <div className="text-right">
+                          <p className="font-bold text-sm text-primary">
+                            {type === "xp" ? `${entry.xp?.toLocaleString()} XP` :
+                             type === "streak" ? `${entry.streak}d` :
+                             type === "attendance" ? `${entry.attendancePct ?? 0}%` :
+                             type === "mock_scores" ? `${entry.mockScore ?? 0}%` :
+                             `${entry.consistencyScore ?? 0}%`}
+                          </p>
+                          <p className="text-[9px] text-muted-foreground">Lv {entry.level ?? 1}</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
             </CardContent>
           </Card>
         </div>
