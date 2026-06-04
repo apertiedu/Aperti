@@ -33,7 +33,7 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
   if (!ctx) return;
   const { studentId, teacherId } = ctx;
 
-  const { subjectId, type, difficulty, timeMode, topicFilter, count } = req.body;
+  const { subjectId, type, difficulty, timeMode, topicFilter, topicIds, count } = req.body;
 
   // Fetch echo memory to bias question selection toward weak topics
   const memory = await db.query.echoMemory.findFirst({
@@ -44,6 +44,11 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
   const conditions: any[] = [eq(questionBankTable.teacherAccountId, teacherId)];
   if (subjectId) conditions.push(eq(questionBankTable.subjectId, parseInt(subjectId, 10)));
   if (difficulty) conditions.push(eq(questionBankTable.difficulty, difficulty));
+  // topicIds: filter to specific question bank topic strings
+  if (Array.isArray(topicIds) && topicIds.length > 0) {
+    const { inArray } = await import("drizzle-orm");
+    conditions.push(inArray(questionBankTable.topic, topicIds as string[]));
+  }
 
   let questions = await db.select({
     id: questionBankTable.id,
@@ -93,33 +98,76 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
     weakTopicCoverage: weakQuota,
   };
 
-  // OpenAI augmentation: if API key is present, add study hints aligned to weak topics
+  // OpenAI augmentation: generate AI questions + study hints for weak topics
   let studyHints: { topic: string; hint: string }[] = [];
+  let aiGeneratedQuestions: Array<{
+    id: number; questionText: string; topic: string; subtopic: string | null;
+    difficulty: string; maxMarks: string; modelAnswer: string; aiGenerated: boolean;
+  }> = [];
   const openaiKey = process.env.OPENAI_API_KEY;
   if (openaiKey && weakTopics.length > 0) {
     try {
-      const prompt = `You are a study coach. A student has weak topics: ${weakTopics.slice(0, 5).join(", ")}. Give 1 concise study tip (≤30 words) for each topic. Respond as JSON array: [{"topic":"...","hint":"..."}]`;
-      const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [{ role: "user", content: prompt }],
-          max_tokens: 300,
-          temperature: 0.5,
+      const topicsToAugment = weakTopics.slice(0, 3).join(", ");
+      const augmentPrompt = `You are an exam question writer. Generate ${Math.min(weakQuota, 3)} exam questions for these weak topics: ${topicsToAugment}. Respond as JSON array: [{"questionText":"...","topic":"<one of the topics>","subtopic":"...","difficulty":"medium","maxMarks":"2","modelAnswer":"..."}]`;
+      const hintsPrompt = `You are a study coach. Give 1 concise study tip (≤30 words) for each of these topics: ${topicsToAugment}. Respond as JSON array: [{"topic":"...","hint":"..."}]`;
+
+      const [augRes, hintsRes] = await Promise.all([
+        fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: augmentPrompt }],
+            max_tokens: 800, temperature: 0.7,
+          }),
         }),
-      });
-      const data = await res2.json() as { choices?: { message?: { content?: string } }[] };
-      const content = data.choices?.[0]?.message?.content ?? "[]";
-      studyHints = JSON.parse(content.replace(/```json|```/g, "").trim());
+        fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [{ role: "user", content: hintsPrompt }],
+            max_tokens: 300, temperature: 0.5,
+          }),
+        }),
+      ]);
+
+      const [augData, hintsData] = await Promise.all([
+        augRes.json() as Promise<{ choices?: { message?: { content?: string } }[] }>,
+        hintsRes.json() as Promise<{ choices?: { message?: { content?: string } }[] }>,
+      ]);
+
+      const augContent = augData.choices?.[0]?.message?.content ?? "[]";
+      const parsedAug = JSON.parse(augContent.replace(/```json|```/g, "").trim()) as Array<{
+        questionText: string; topic: string; subtopic?: string; difficulty?: string; maxMarks?: string; modelAnswer?: string;
+      }>;
+      // Assign synthetic negative IDs so client can distinguish AI questions
+      aiGeneratedQuestions = parsedAug.map((q, i) => ({
+        id: -(i + 1),
+        questionText: q.questionText,
+        topic: q.topic ?? weakTopics[0],
+        subtopic: q.subtopic ?? null,
+        difficulty: q.difficulty ?? "medium",
+        maxMarks: q.maxMarks ?? "2",
+        modelAnswer: q.modelAnswer ?? "",
+        aiGenerated: true,
+      }));
+
+      const hintsContent = hintsData.choices?.[0]?.message?.content ?? "[]";
+      studyHints = JSON.parse(hintsContent.replace(/```json|```/g, "").trim());
     } catch { /* augmentation is best-effort — silently skip on error */ }
   }
+
+  // Merge AI-generated questions into selected (they sit alongside bank questions)
+  const allQuestions = [...selected, ...aiGeneratedQuestions];
+  config.questionCount = allQuestions.length;
+  config.aiGeneratedCount = aiGeneratedQuestions.length;
 
   const [attempt] = await db.insert(trialVaultAttemptsTable).values({
     studentId,
     subjectId: subjectId ? parseInt(subjectId, 10) : null,
     config,
-    questions: selected,
+    questions: allQuestions,
     answers: {},
   }).returning();
 
@@ -127,13 +175,14 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
     attemptId: attempt.id,
     config,
     studyHints,
-    questions: selected.map(q => ({
+    questions: allQuestions.map(q => ({
       id: q.id,
       questionText: q.questionText,
       topic: q.topic,
       subtopic: q.subtopic,
       difficulty: q.difficulty,
       maxMarks: q.maxMarks,
+      aiGenerated: (q as any).aiGenerated ?? false,
     })),
   });
 });

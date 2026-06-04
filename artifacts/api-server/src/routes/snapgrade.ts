@@ -26,9 +26,25 @@ const upload = multer({
   },
 });
 
+// Tesseract OCR fallback (used when OPENAI_API_KEY is absent)
+async function extractTextWithTesseract(imagePath: string): Promise<string> {
+  try {
+    const { createWorker } = await import("tesseract.js");
+    const worker = await createWorker("eng");
+    const { data: { text } } = await worker.recognize(imagePath);
+    await worker.terminate();
+    return text.trim();
+  } catch {
+    return "";
+  }
+}
+
 async function extractTextWithOpenAIVision(imagePath: string): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return "";
+  if (!apiKey) {
+    // Fall back to Tesseract when no OpenAI key is configured
+    return extractTextWithTesseract(imagePath);
+  }
   try {
     const imageBuffer = fs.readFileSync(imagePath);
     const base64Image = imageBuffer.toString("base64");

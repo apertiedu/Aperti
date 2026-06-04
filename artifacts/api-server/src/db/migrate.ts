@@ -113,6 +113,9 @@ const MIGRATIONS: string[] = [
   `ALTER TABLE lessons ADD COLUMN IF NOT EXISTS color       text NOT NULL DEFAULT '#00796B'`,
   /* ── Ascend subject XP map ──────────────────────────────────────────────── */
   `ALTER TABLE ascend_profiles ADD COLUMN IF NOT EXISTS subject_xp jsonb NOT NULL DEFAULT '{}'`,
+  /* ── Accounts: first_name / last_name ───────────────────────────────────── */
+  `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS first_name text`,
+  `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS last_name  text`,
   /* ── Focus sessions: start/complete lifecycle ───────────────────────────── */
   `ALTER TABLE focus_sessions ADD COLUMN IF NOT EXISTS started_at timestamptz NOT NULL DEFAULT NOW()`,
   `ALTER TABLE focus_sessions ALTER COLUMN completed_at DROP NOT NULL`,

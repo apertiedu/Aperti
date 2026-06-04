@@ -12,10 +12,10 @@ import type { Response } from "express";
 
 const router = Router();
 
-async function requireStudent(req: AuthRequest, res: Response): Promise<{ studentId: number } | null> {
+async function requireStudent(req: AuthRequest, res: Response): Promise<{ studentId: number; teacherAccountId: number | null } | null> {
   const [student] = await db.select().from(studentsTable).where(eq(studentsTable.accountId, req.userId!));
   if (!student) { res.status(403).json({ message: "No student record" }); return null; }
-  return { studentId: student.id };
+  return { studentId: student.id, teacherAccountId: student.teacherAccountId ?? null };
 }
 
 // GET /focus-coach/goals
@@ -25,6 +25,15 @@ router.get("/focus-coach/goals", ...studentGuard, async (req: AuthRequest, res: 
   const { studentId } = ctx;
 
   const today = new Date().toISOString().split("T")[0];
+
+  const { teacherAccountId } = ctx;
+
+  const hwConditions: any[] = [
+    eq(homeworkTable.isPublished, true),
+    sql`${homeworkSubmissionsTable.id} IS NULL`,
+  ];
+  // Scope homework to student's teacher to avoid cross-class data
+  if (teacherAccountId) hwConditions.push(eq(homeworkTable.teacherAccountId, teacherAccountId));
 
   const [goals, echoMem, pendingHw] = await Promise.all([
     db.select().from(studentGoalsTable)
@@ -44,10 +53,7 @@ router.get("/focus-coach/goals", ...studentGuard, async (req: AuthRequest, res: 
         eq(homeworkSubmissionsTable.homeworkId, homeworkTable.id),
         eq(homeworkSubmissionsTable.studentId, studentId)
       ))
-      .where(and(
-        eq(homeworkTable.isPublished, true),
-        sql`${homeworkSubmissionsTable.id} IS NULL`
-      ))
+      .where(and(...hwConditions))
       .orderBy(homeworkTable.dueDate)
       .limit(3),
   ]);
