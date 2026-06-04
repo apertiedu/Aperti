@@ -2,6 +2,7 @@ import { Router } from "express";
 import { eq, and } from "drizzle-orm";
 import {
   db, studentsTable, questionBankTable, trialVaultAttemptsTable, echoMemoryTable,
+  ascendProfilesTable,
 } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
@@ -92,6 +93,28 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
     weakTopicCoverage: weakQuota,
   };
 
+  // OpenAI augmentation: if API key is present, add study hints aligned to weak topics
+  let studyHints: { topic: string; hint: string }[] = [];
+  const openaiKey = process.env.OPENAI_API_KEY;
+  if (openaiKey && weakTopics.length > 0) {
+    try {
+      const prompt = `You are a study coach. A student has weak topics: ${weakTopics.slice(0, 5).join(", ")}. Give 1 concise study tip (≤30 words) for each topic. Respond as JSON array: [{"topic":"...","hint":"..."}]`;
+      const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          max_tokens: 300,
+          temperature: 0.5,
+        }),
+      });
+      const data = await res2.json() as { choices?: { message?: { content?: string } }[] };
+      const content = data.choices?.[0]?.message?.content ?? "[]";
+      studyHints = JSON.parse(content.replace(/```json|```/g, "").trim());
+    } catch { /* augmentation is best-effort — silently skip on error */ }
+  }
+
   const [attempt] = await db.insert(trialVaultAttemptsTable).values({
     studentId,
     subjectId: subjectId ? parseInt(subjectId, 10) : null,
@@ -103,6 +126,7 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
   res.status(201).json({
     attemptId: attempt.id,
     config,
+    studyHints,
     questions: selected.map(q => ({
       id: q.id,
       questionText: q.questionText,
@@ -164,7 +188,7 @@ router.post("/trial-vault/submit", ...studentGuard, async (req: AuthRequest, res
 
   const scorePercent = totalMax > 0 ? Math.round((totalScored / totalMax) * 100) : 0;
 
-  const [updated] = await db.update(trialVaultAttemptsTable)
+  await db.update(trialVaultAttemptsTable)
     .set({
       answers: answers ?? {},
       score: String(scorePercent),
@@ -172,8 +196,41 @@ router.post("/trial-vault/submit", ...studentGuard, async (req: AuthRequest, res
       timingData: timingData ?? {},
       completedAt: new Date(),
     })
-    .where(eq(trialVaultAttemptsTable.id, attempt.id))
-    .returning();
+    .where(eq(trialVaultAttemptsTable.id, attempt.id));
+
+  // Update echo_memory mistake history: topics where scored < 50% of max are weak
+  const weakTopicUpdates = Object.entries(topicBreakdown)
+    .filter(([, v]) => v.max > 0 && (v.scored / v.max) < 0.5)
+    .map(([topic]) => topic);
+
+  if (weakTopicUpdates.length > 0) {
+    const existingMemory = await db.query.echoMemory.findFirst({
+      where: (m, { eq }) => eq(m.studentId, studentId),
+    });
+    if (existingMemory) {
+      const currentMistakes = (existingMemory.mistakeHistory as Record<string, number>) ?? {};
+      for (const topic of weakTopicUpdates) {
+        currentMistakes[topic] = (currentMistakes[topic] ?? 0) + 1;
+      }
+      const currentWeak = (existingMemory.weakTopics as string[]) ?? [];
+      const mergedWeak = Array.from(new Set([...currentWeak, ...weakTopicUpdates])).slice(0, 20);
+      await db.update(echoMemoryTable)
+        .set({ mistakeHistory: currentMistakes, weakTopics: mergedWeak })
+        .where(eq(echoMemoryTable.id, existingMemory.id));
+    }
+  }
+
+  // Award XP for completing a trial vault session
+  const xpToAward = Math.max(10, Math.round(scorePercent * 1.0)); // 1 XP per % point, min 10
+  const [profile] = await db.select().from(ascendProfilesTable)
+    .where(eq(ascendProfilesTable.studentAccountId, req.userId!)).limit(1);
+  if (profile) {
+    const newXp = (profile.xp ?? 0) + xpToAward;
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
+    await db.update(ascendProfilesTable)
+      .set({ xp: newXp, level: newLevel })
+      .where(eq(ascendProfilesTable.id, profile.id));
+  }
 
   res.json({
     attemptId: attempt.id,
@@ -181,6 +238,8 @@ router.post("/trial-vault/submit", ...studentGuard, async (req: AuthRequest, res
     totalScored,
     totalMax,
     topicBreakdown,
+    weakTopicsUpdated: weakTopicUpdates,
+    xpAwarded: xpToAward,
   });
 });
 

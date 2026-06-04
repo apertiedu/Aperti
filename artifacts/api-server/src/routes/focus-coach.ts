@@ -250,7 +250,7 @@ router.get("/focus-coach/analytics", ...studentGuard, async (req: AuthRequest, r
   });
 });
 
-// POST /focus-sessions
+// POST /focus-sessions — START a session (no XP awarded yet)
 router.post("/focus-sessions", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
@@ -261,29 +261,15 @@ router.post("/focus-sessions", ...studentGuard, async (req: AuthRequest, res: Re
     res.status(400).json({ message: "durationMinutes required" }); return;
   }
 
-  const xpEarned = Math.floor((durationMinutes / 25) * 30);
-
+  // Session is started — completedAt is null until PATCH /focus-sessions/:id completes it
   const [session] = await db.insert(focusSessionsTable).values({
     studentId,
     mode: mode ?? "pomodoro",
     durationMinutes: parseInt(durationMinutes, 10),
-    xpEarned,
+    xpEarned: 0,
   }).returning();
 
-  // Award XP
-  const existingProfile = await db.select().from(ascendProfilesTable)
-    .where(eq(ascendProfilesTable.studentAccountId, req.userId!)).limit(1);
-
-  if (existingProfile.length > 0) {
-    const p = existingProfile[0];
-    const newXp = (p.xp ?? 0) + xpEarned;
-    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
-    await db.update(ascendProfilesTable)
-      .set({ xp: newXp, level: newLevel })
-      .where(eq(ascendProfilesTable.id, p.id));
-  }
-
-  res.status(201).json({ session, xpEarned });
+  res.status(201).json({ session, status: "started" });
 });
 
 // PATCH /focus-sessions/:id — complete a session (update mode/duration, finalize XP)

@@ -55,7 +55,8 @@ export const focusSessionsTable = pgTable("focus_sessions", {
   mode: text("mode").notNull().default("pomodoro"),
   durationMinutes: integer("duration_minutes").notNull().default(25),
   xpEarned: integer("xp_earned").notNull().default(0),
-  completedAt: timestamp("completed_at", { withTimezone: true }).notNull().defaultNow(),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
 });
 
 // ── Trial Vault ───────────────────────────────────────────────────────────────

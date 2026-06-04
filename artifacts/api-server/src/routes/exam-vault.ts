@@ -2,6 +2,7 @@ import { Router } from "express";
 import { eq, and } from "drizzle-orm";
 import {
   db, studentsTable, examsTable, examQuestionsTable, examVaultPackagesTable, studentMarksTable,
+  echoMemoryTable,
 } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
@@ -152,6 +153,18 @@ router.post("/exam-vault/submit", ...studentGuard, async (req: AuthRequest, res:
     .where(and(eq(examVaultPackagesTable.id, parseInt(packageId, 10)), eq(examVaultPackagesTable.studentId, studentId)));
   if (!pkg) { res.status(404).json({ message: "Package not found or not authorized" }); return; }
   if (pkg.submittedAt) { res.status(400).json({ message: "Already submitted" }); return; }
+
+  // Validate submission window: exam must have been downloaded and not expired
+  const [exam] = await db.select({ examDate: examsTable.examDate, timeLimitMinutes: examsTable.timeLimitMinutes })
+    .from(examsTable).where(eq(examsTable.id, pkg.examId)).limit(1);
+  if (exam?.examDate) {
+    const examStart = new Date(exam.examDate as string);
+    const gracePeriodMs = ((exam.timeLimitMinutes ?? 180) + 30) * 60 * 1000; // time limit + 30 min grace
+    const deadline = new Date(examStart.getTime() + gracePeriodMs);
+    if (new Date() > deadline) {
+      res.status(400).json({ message: "Submission window has closed", deadline: deadline.toISOString() }); return;
+    }
+  }
 
   // Decrypt using the same per-student-exam derived key
   let decoded: { answers?: Record<string, string> };
