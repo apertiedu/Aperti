@@ -5,7 +5,9 @@ import {
   subjectsTable, resourcesTable, notificationsTable, echoMemoryTable,
   lessonsTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
@@ -17,7 +19,7 @@ async function requireStudent(req: AuthRequest, res: Response): Promise<{ studen
   return { studentId: student.id, teacherId: student.teacherAccountId! };
 }
 
-router.get("/student/feed", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/student/feed", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId, teacherId } = ctx;

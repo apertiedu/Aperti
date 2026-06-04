@@ -3,7 +3,9 @@ import { eq, desc } from "drizzle-orm";
 import {
   db, messageThreadsTable, studentMessagesTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
@@ -14,7 +16,7 @@ function isParticipant(thread: { participants: unknown }, userId: number): boole
 }
 
 // GET /messages/threads
-router.get("/messages/threads", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/messages/threads", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.userId!;
 
   const threads = await db.select().from(messageThreadsTable)
@@ -26,7 +28,7 @@ router.get("/messages/threads", authenticate, async (req: AuthRequest, res: Resp
 });
 
 // POST /messages/threads
-router.post("/messages/threads", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/messages/threads", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.userId!;
   const { participantIds, subject, firstMessage } = req.body;
 
@@ -57,7 +59,7 @@ router.post("/messages/threads", authenticate, async (req: AuthRequest, res: Res
 });
 
 // GET /messages/threads/:id
-router.get("/messages/threads/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/messages/threads/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.userId!;
   const threadId = parseInt(req.params.id, 10);
 
@@ -77,7 +79,7 @@ router.get("/messages/threads/:id", authenticate, async (req: AuthRequest, res: 
 });
 
 // POST /messages/threads/:id/send
-router.post("/messages/threads/:id/send", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/messages/threads/:id/send", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.userId!;
   const threadId = parseInt(req.params.id, 10);
 
@@ -107,7 +109,7 @@ router.post("/messages/threads/:id/send", authenticate, async (req: AuthRequest,
 });
 
 // PUT /messages/:id/read — verifies thread participation before mutation
-router.put("/messages/:id/read", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.put("/messages/:id/read", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const userId = req.userId!;
   const msgId = parseInt(req.params.id, 10);
 

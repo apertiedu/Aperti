@@ -5,7 +5,9 @@ import {
   studentGoalsTable, focusSessionsTable, ascendProfilesTable,
   echoMemoryTable, homeworkTable, homeworkSubmissionsTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
@@ -17,7 +19,7 @@ async function requireStudent(req: AuthRequest, res: Response): Promise<{ studen
 }
 
 // GET /focus-coach/goals
-router.get("/focus-coach/goals", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/focus-coach/goals", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -103,7 +105,7 @@ router.get("/focus-coach/goals", authenticate, async (req: AuthRequest, res: Res
 });
 
 // POST /focus-coach/goals
-router.post("/focus-coach/goals", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/focus-coach/goals", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -124,7 +126,7 @@ router.post("/focus-coach/goals", authenticate, async (req: AuthRequest, res: Re
 });
 
 // POST /focus-coach/goals/:id/complete
-router.post("/focus-coach/goals/:id/complete", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/focus-coach/goals/:id/complete", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -166,7 +168,7 @@ router.post("/focus-coach/goals/:id/complete", authenticate, async (req: AuthReq
 });
 
 // GET /focus-coach/analytics
-router.get("/focus-coach/analytics", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/focus-coach/analytics", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -217,7 +219,7 @@ router.get("/focus-coach/analytics", authenticate, async (req: AuthRequest, res:
 });
 
 // POST /focus-sessions
-router.post("/focus-sessions", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/focus-sessions", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;

@@ -1,8 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "@workspace/db";
+import { db, ascendProfilesTable, questsTable, studentsTable } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { ascendProfilesTable, questsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 
 export const ascendRouter = Router();
 
@@ -40,8 +39,8 @@ ascendRouter.post("/earn-xp", ...studentGuard, async (req: AuthRequest, res: Res
     profile = newProfile;
   } else {
     profile.xp += xp;
-    // level up logic (simple: every 500 XP per level)
-    profile.level = Math.floor(profile.xp / 500) + 1;
+    // XP formula: level = floor(sqrt(totalXP / 100))
+    profile.level = Math.max(1, Math.floor(Math.sqrt(profile.xp / 100)));
     // rank based on XP thresholds
     if (profile.xp >= 10000) profile.rank = "Apex";
     else if (profile.xp >= 5000) profile.rank = "Diamond";
@@ -49,7 +48,9 @@ ascendRouter.post("/earn-xp", ...studentGuard, async (req: AuthRequest, res: Res
     else if (profile.xp >= 1000) profile.rank = "Gold";
     else if (profile.xp >= 500) profile.rank = "Silver";
     else profile.rank = "Bronze";
-    await db.update(ascendProfilesTable).set(profile).where(eq(ascendProfilesTable.id, profile.id));
+    await db.update(ascendProfilesTable).set({
+      xp: profile.xp, level: profile.level, rank: profile.rank
+    }).where(eq(ascendProfilesTable.id, profile.id));
   }
   res.json(profile);
 });
@@ -79,13 +80,46 @@ ascendRouter.get("/quests", ...studentGuard, async (req: AuthRequest, res: Respo
   res.json(quests);
 });
 
-// GET /ascend/leaderboard — global leaderboard
+// GET /ascend/leaderboard?scope=class|school — privacy-aware ranked leaderboard
 ascendRouter.get("/leaderboard", ...studentGuard, async (req: AuthRequest, res: Response) => {
-  const profiles = await db.query.ascendProfiles.findMany({
-    orderBy: (p, { desc }) => [desc(p.xp)],
-    limit: 20,
-  });
-  res.json(profiles);
+  const scope = (req.query.scope as string) || "class";
+  const studentId = req.userId!;
+
+  // Fetch the requesting student's teacher (for class scope filtering)
+  const [student] = await db.select({ teacherAccountId: studentsTable.teacherAccountId })
+    .from(studentsTable).where(eq(studentsTable.accountId, studentId)).limit(1);
+
+  const teacherAccountId = student?.teacherAccountId;
+
+  // Fetch all profiles; for class scope, filter to students under the same teacher
+  let profiles;
+  if (scope === "class" && teacherAccountId) {
+    const classStudents = await db.select({ accountId: studentsTable.accountId })
+      .from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherAccountId));
+    const classAccountIds = classStudents.map(s => s.accountId);
+    profiles = await db.select().from(ascendProfilesTable)
+      .where(inArray(ascendProfilesTable.studentAccountId, classAccountIds))
+      .orderBy(desc(ascendProfilesTable.xp))
+      .limit(50);
+  } else {
+    profiles = await db.select().from(ascendProfilesTable)
+      .orderBy(desc(ascendProfilesTable.xp))
+      .limit(50);
+  }
+
+  // Respect privacy mode: redact name for profiles with privacy enabled
+  const result = profiles.map((p, idx) => ({
+    rank: idx + 1,
+    accountId: p.studentAccountId === studentId ? p.studentAccountId : undefined,
+    isYou: p.studentAccountId === studentId,
+    xp: p.xp,
+    level: p.level,
+    displayRank: p.rank,
+    archetype: p.archetype,
+    streak: p.streak,
+  }));
+
+  res.json({ scope, leaderboard: result });
 });
 
 // ─── TEACHER / ADMIN ROUTES ───

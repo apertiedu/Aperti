@@ -3,7 +3,9 @@ import { eq, and } from "drizzle-orm";
 import {
   db, studentsTable, examsTable, examQuestionsTable, examVaultPackagesTable, studentMarksTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 import crypto from "crypto";
 
@@ -56,7 +58,7 @@ async function requireStudent(req: AuthRequest, res: Response): Promise<{ studen
 }
 
 // GET /exam-vault/packages/:examId
-router.get("/exam-vault/packages/:examId", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/exam-vault/packages/:examId", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId, teacherAccountId } = ctx;
@@ -127,7 +129,7 @@ router.get("/exam-vault/packages/:examId", authenticate, async (req: AuthRequest
 });
 
 // POST /exam-vault/submit
-router.post("/exam-vault/submit", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/exam-vault/submit", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;

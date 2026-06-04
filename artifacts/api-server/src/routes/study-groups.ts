@@ -6,7 +6,9 @@ import {
   snapgradeSubmissionsTable, peerReviewsTable,
   homeworkTable, lessonsTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
@@ -29,7 +31,7 @@ async function requireGroupMembership(groupId: number, studentId: number, res: R
 }
 
 // GET /study-groups
-router.get("/study-groups", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/study-groups", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -46,7 +48,7 @@ router.get("/study-groups", authenticate, async (req: AuthRequest, res: Response
 });
 
 // POST /study-groups
-router.post("/study-groups", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/study-groups", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -66,7 +68,7 @@ router.post("/study-groups", authenticate, async (req: AuthRequest, res: Respons
 });
 
 // GET /study-groups/:id — only members can view
-router.get("/study-groups/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/study-groups/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -81,7 +83,7 @@ router.get("/study-groups/:id", authenticate, async (req: AuthRequest, res: Resp
 });
 
 // PUT /study-groups/:id — only creator (admin) can update
-router.put("/study-groups/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.put("/study-groups/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -101,7 +103,7 @@ router.put("/study-groups/:id", authenticate, async (req: AuthRequest, res: Resp
 });
 
 // DELETE /study-groups/:id — only creator can delete
-router.delete("/study-groups/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.delete("/study-groups/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -116,7 +118,7 @@ router.delete("/study-groups/:id", authenticate, async (req: AuthRequest, res: R
 });
 
 // POST /study-groups/:id/join
-router.post("/study-groups/:id/join", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/study-groups/:id/join", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -137,7 +139,7 @@ router.post("/study-groups/:id/join", authenticate, async (req: AuthRequest, res
 });
 
 // POST /study-groups/:id/leave
-router.post("/study-groups/:id/leave", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/study-groups/:id/leave", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -149,7 +151,7 @@ router.post("/study-groups/:id/leave", authenticate, async (req: AuthRequest, re
 });
 
 // GET /study-groups/:id/members — only members can list
-router.get("/study-groups/:id/members", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/study-groups/:id/members", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -163,7 +165,7 @@ router.get("/study-groups/:id/members", authenticate, async (req: AuthRequest, r
 });
 
 // GET /study-groups/:id/challenges — only members can view
-router.get("/study-groups/:id/challenges", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/study-groups/:id/challenges", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -177,7 +179,7 @@ router.get("/study-groups/:id/challenges", authenticate, async (req: AuthRequest
 });
 
 // POST /study-groups/:id/challenges — only members can create
-router.post("/study-groups/:id/challenges", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/study-groups/:id/challenges", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -196,7 +198,7 @@ router.post("/study-groups/:id/challenges", authenticate, async (req: AuthReques
 });
 
 // POST /study-groups/:id/challenges/:cid/complete — only members can complete
-router.post("/study-groups/:id/challenges/:cid/complete", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/study-groups/:id/challenges/:cid/complete", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -217,7 +219,7 @@ router.post("/study-groups/:id/challenges/:cid/complete", authenticate, async (r
 });
 
 // GET /peer-reviews/available — anonymized submissions from classmates in the student's subjects
-router.get("/peer-reviews/available", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/peer-reviews/available", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId, teacherId } = ctx;
@@ -312,7 +314,7 @@ router.get("/peer-reviews/available", authenticate, async (req: AuthRequest, res
 });
 
 // POST /peer-reviews
-router.post("/peer-reviews", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/peer-reviews", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;

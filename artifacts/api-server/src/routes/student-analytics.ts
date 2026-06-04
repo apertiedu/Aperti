@@ -5,12 +5,14 @@ import {
   attendanceTable, homeworkTable, homeworkSubmissionsTable,
   echoMemoryTable, focusSessionsTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
 
-router.get("/student/analytics", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/student/analytics", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const [student] = await db.select().from(studentsTable)
     .where(eq(studentsTable.accountId, req.userId!)).limit(1);
   if (!student) { res.status(403).json({ message: "No student record" }); return; }

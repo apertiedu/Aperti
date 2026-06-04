@@ -4,7 +4,9 @@ import {
   db, studentsTable, homeworkTable, examsTable, subjectsTable,
   homeworkSubmissionsTable, lessonsTable, echoMemoryTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
@@ -37,7 +39,7 @@ function formatDate(d: Date): string {
   return d.toISOString().split("T")[0];
 }
 
-router.get("/student/calendar", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/student/calendar", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const [student] = await db.select().from(studentsTable)
     .where(eq(studentsTable.accountId, req.userId!)).limit(1);
   if (!student) { res.status(403).json({ message: "No student record" }); return; }

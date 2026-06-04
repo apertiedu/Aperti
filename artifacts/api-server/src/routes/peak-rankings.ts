@@ -4,12 +4,14 @@ import {
   db, studentsTable, ascendProfilesTable, attendanceTable, studentMarksTable,
   examQuestionsTable, examsTable, accountsTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
 
-router.get("/peak-rankings", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/peak-rankings", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const type = (req.query.type as string) ?? "xp";
   const scope = (req.query.scope as string) ?? "school";
 

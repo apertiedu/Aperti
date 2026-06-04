@@ -3,7 +3,9 @@ import { eq, and, inArray } from "drizzle-orm";
 import {
   db, studentsTable, questionBankTable, trialVaultAttemptsTable, subjectsTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
@@ -25,7 +27,7 @@ async function requireStudent(req: AuthRequest, res: Response): Promise<{ studen
 }
 
 // POST /trial-vault/generate
-router.post("/trial-vault/generate", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId, teacherId } = ctx;
@@ -91,7 +93,7 @@ router.post("/trial-vault/generate", authenticate, async (req: AuthRequest, res:
 });
 
 // POST /trial-vault/submit
-router.post("/trial-vault/submit", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/trial-vault/submit", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -161,7 +163,7 @@ router.post("/trial-vault/submit", authenticate, async (req: AuthRequest, res: R
 });
 
 // GET /trial-vault/results/:id
-router.get("/trial-vault/results/:id", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/trial-vault/results/:id", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;
@@ -201,7 +203,7 @@ router.get("/trial-vault/results/:id", authenticate, async (req: AuthRequest, re
 });
 
 // GET /trial-vault/history
-router.get("/trial-vault/history", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/trial-vault/history", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const ctx = await requireStudent(req, res);
   if (!ctx) return;
   const { studentId } = ctx;

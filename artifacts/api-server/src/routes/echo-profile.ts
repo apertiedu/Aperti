@@ -6,12 +6,14 @@ import {
   behaviorPatternsTable, ascendProfilesTable, subjectsTable,
   flashcardProgressTable, flashcardItemsTable, flashcardDecksTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 
 const router = Router();
 
-router.get("/echo/profile", authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+router.get("/echo/profile", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
   const [student] = await db.select().from(studentsTable)
     .where(eq(studentsTable.accountId, req.userId!));
   if (!student) { res.status(403).json({ message: "No student record" }); return; }

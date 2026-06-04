@@ -4,7 +4,9 @@ import {
   db, studentsTable, snapgradeSubmissionsTable, markSchemesTable,
   homeworkTable, questionBankTable,
 } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+
+const studentGuard = [authenticate, requireRole("student")];
 import type { Response } from "express";
 import multer from "multer";
 import path from "path";
@@ -78,7 +80,7 @@ Respond with JSON: { "grade": <number 0-${totalMarks}>, "feedback": "<brief feed
   }
 }
 
-router.post("/snapgrade/scan", authenticate, upload.single("image"), async (req: AuthRequest, res: Response): Promise<void> => {
+router.post("/snapgrade/scan", ...studentGuard, upload.single("image"), async (req: AuthRequest, res: Response): Promise<void> => {
   const [student] = await db.select().from(studentsTable)
     .where(eq(studentsTable.accountId, req.userId!)).limit(1);
   if (!student) { res.status(403).json({ message: "No student record" }); return; }
