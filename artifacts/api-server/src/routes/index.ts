@@ -84,6 +84,7 @@ import { assessmentHubRouter } from "./assessment-hub";
 import { examSessionRouter } from "./exam-session";
 import { assessmentGradingRouter } from "./assessment-grading";
 import { certificationsRouter } from "./certifications";
+import { assessmentExtrasRouter } from "./assessment-extras";
 
 const router: IRouter = Router();
 
@@ -174,5 +175,6 @@ router.use(assessmentHubRouter);
 router.use("/exam-session", examSessionRouter);
 router.use(assessmentGradingRouter);
 router.use(certificationsRouter);
+router.use(assessmentExtrasRouter);
 
 export default router;

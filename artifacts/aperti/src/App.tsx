@@ -130,6 +130,19 @@ import AssessmentHub from "@/pages/assessment-hub";
 import GradebookPlus from "@/pages/gradebook-plus";
 import Certifications from "@/pages/certifications";
 import ExamRoom from "@/pages/student/exam-room";
+// Phase 6 Extended pages
+import TeacherAssessments from "@/pages/teacher/assessments";
+import AssessmentBuilder from "@/pages/teacher/assessment-builder";
+import AssessmentMonitor from "@/pages/teacher/assessment-monitor";
+import TeacherGradebook from "@/pages/teacher/gradebook";
+import ModerationCenter from "@/pages/teacher/moderation";
+import ExamArchives from "@/pages/teacher/archives";
+import AdminCertificates from "@/pages/admin/certificates";
+import StudentExamSession from "@/pages/student/exam-session";
+import ExamResults from "@/pages/student/exam-results";
+import StudentTranscript from "@/pages/student/transcript";
+import StudentAppeals from "@/pages/student/appeals";
+import ExamReadiness from "@/pages/student/exam-readiness";
 
 // Parent
 import GuardianHub from "@/pages/parent/dashboard";
@@ -262,6 +275,11 @@ function StudentRouter() {
         <Route path="/exam-vault" component={ExamVault} />
         <Route path="/inkspace" component={StudentInkSpace} />
         <Route path="/exam-room" component={ExamRoom} />
+        <Route path="/student/exams/:id/results" component={ExamResults} />
+        <Route path="/student/exams/:id" component={StudentExamSession} />
+        <Route path="/student/transcript" component={StudentTranscript} />
+        <Route path="/student/appeals" component={StudentAppeals} />
+        <Route path="/student/exam-readiness" component={ExamReadiness} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -308,12 +326,19 @@ const TEACHER_ROUTES = (
     <Route path="/assessment-hub" component={AssessmentHub} />
     <Route path="/gradebook-plus" component={GradebookPlus} />
     <Route path="/certifications" component={Certifications} />
+    <Route path="/teacher/assessments" component={TeacherAssessments} />
+    <Route path="/teacher/assessments/:id/builder" component={AssessmentBuilder} />
+    <Route path="/teacher/assessments/:id/monitor" component={AssessmentMonitor} />
+    <Route path="/teacher/gradebook" component={TeacherGradebook} />
+    <Route path="/teacher/moderation" component={ModerationCenter} />
+    <Route path="/teacher/archives" component={ExamArchives} />
   </>
 );
 
 const ADMIN_ROUTES = (
   <>
     <Route path="/admin/command" component={AdminCommand} />
+    <Route path="/admin/certificates" component={AdminCertificates} />
     <Route path="/admin/world-pilot" component={WorldPilot} />
     <Route path="/admin/paper-vault" component={PaperVaultAdmin} />
     <Route path="/admin/subpilot-settings" component={SubPilotAdmin} />
