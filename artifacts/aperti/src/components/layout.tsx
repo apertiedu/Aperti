@@ -9,6 +9,7 @@ import {
   RefreshCw, Settings, MessageSquare,
   LogOut, School, ChevronLeft, ChevronRight, Search, KeyRound,
   Sun, Moon, Sparkles, ShoppingBag, UserCheck, Link2, Bot,
+  GraduationCap, TableProperties, Medal,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -60,6 +61,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Teaching",
       items: [
+        { name: "Assessment Hub", href: "/assessment-hub", icon: GraduationCap, roles: ["admin","teacher"] },
         { name: "SubmitFlow", href: "/submit-flow", icon: ClipboardList, roles: ["admin","teacher"] },
         { name: "GradeFlow", href: "/grade-flow", icon: CheckSquare2, roles: ["admin","teacher","assistant"] },
         { name: "SchemeCraft", href: "/scheme-craft", icon: FileText, roles: ["admin","teacher"] },
@@ -84,6 +86,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Insights",
       items: [
+        { name: "Gradebook+", href: "/gradebook-plus", icon: TableProperties, roles: ["admin","teacher"] },
         { name: "Pulse", href: "/pulse", icon: BarChart3, roles: ["admin","teacher"] },
         { name: "InsightStream", href: "/insight-stream", icon: TrendingUp, roles: ["admin","teacher"] },
         { name: "InsightExams", href: "/insight-exams", icon: ClipboardCheck, roles: ["admin","teacher","assistant"] },
@@ -101,6 +104,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Manage",
       items: [
+        { name: "Certifications", href: "/certifications", icon: Medal, roles: ["admin","teacher"] },
         { name: "AutoPilot", href: "/automation", icon: Bot, roles: ["admin","teacher"] },
         { name: "KudosEngine", href: "/kudos-engine", icon: Award, roles: ["admin","teacher"] },
         { name: "SubPilot", href: "/subpilot", icon: CreditCard, roles: ["admin","teacher"] },

@@ -80,6 +80,10 @@ import { misconceptionsRouter } from "./misconceptions";
 import { gradingRouter } from "./grading";
 import { coremindAnalyticsRouter } from "./coremind-analytics";
 import { parentAiRouter } from "./parent-ai";
+import { assessmentHubRouter } from "./assessment-hub";
+import { examSessionRouter } from "./exam-session";
+import { assessmentGradingRouter } from "./assessment-grading";
+import { certificationsRouter } from "./certifications";
 
 const router: IRouter = Router();
 
@@ -164,5 +168,11 @@ router.use(misconceptionsRouter);
 router.use("/grading", gradingRouter);
 router.use("/coremind", coremindAnalyticsRouter);
 router.use(parentAiRouter);
+
+// Phase 6 — Assessment, Examination & Certification Ecosystem
+router.use(assessmentHubRouter);
+router.use("/exam-session", examSessionRouter);
+router.use(assessmentGradingRouter);
+router.use(certificationsRouter);
 
 export default router;

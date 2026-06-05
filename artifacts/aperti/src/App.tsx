@@ -125,6 +125,12 @@ import StudentApprovals from "@/pages/student-approvals";
 import Automation from "@/pages/automation";
 import LinkParent from "@/pages/student/link-parent";
 
+// Phase 6 — Assessment, Examination & Certification Ecosystem
+import AssessmentHub from "@/pages/assessment-hub";
+import GradebookPlus from "@/pages/gradebook-plus";
+import Certifications from "@/pages/certifications";
+import ExamRoom from "@/pages/student/exam-room";
+
 // Parent
 import GuardianHub from "@/pages/parent/dashboard";
 import GuardianLink from "@/pages/parent/guardian-link";
@@ -255,6 +261,7 @@ function StudentRouter() {
         <Route path="/messages" component={StudentMessages} />
         <Route path="/exam-vault" component={ExamVault} />
         <Route path="/inkspace" component={StudentInkSpace} />
+        <Route path="/exam-room" component={ExamRoom} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -298,6 +305,9 @@ const TEACHER_ROUTES = (
     <Route path="/messages" component={Messages} />
     <Route path="/teacher-courses" component={TeacherCourses} />
     <Route path="/automation" component={Automation} />
+    <Route path="/assessment-hub" component={AssessmentHub} />
+    <Route path="/gradebook-plus" component={GradebookPlus} />
+    <Route path="/certifications" component={Certifications} />
   </>
 );
 

@@ -1,0 +1,100 @@
+rtificates/:id/verify` – public verification endpoint (returns certificate data).
+- `GET /api/transcripts/:studentId` – generate an academic transcript.
+
+### Exam Archive
+- `POST /api/assessments/:id/archive` – save paper, mark scheme, report files.
+- `GET /api/archives` – search/filter archived exams.
+
+### Appeals
+- `POST /api/appeals` – student requests re‑mark.
+- `PUT /api/appeals/:id/resolve` – teacher/moderator resolves appeal.
+
+### Exam Readiness Dashboard
+- `GET /api/analytics/exam-readiness/:studentId` – combine coverage, mock performance, weak topics, predicted outcomes (from CoreMind).
+
+---
+
+## 3. FRONTEND PAGES
+
+Create these pages following Liquid Flow design, using real API data, no mocks.
+
+### Assessment Hub (`/teacher/assessments`)
+- List of assessments with status badges, creation date, quick actions (edit, delete, view submissions).
+- “Create Assessment” button opens a multi‑step wizard: select type → enter details → add questions (drag‑and‑drop from bank or create new) → set time/security → publish.
+- Each assessment card shows stats (submissions count, average score).
+
+### Exam Builder (`/teacher/assessments/:id/builder`)
+- Left panel: list of sections; right panel: question list.
+- Drag questions between sections; click to edit marks, add sub‑questions.
+- Buttons to import from question bank, add custom question, generate AI questions (via CoreMind).
+- Preview mode.
+
+### Exam Monitoring (`/teacher/assessments/:id/monitor`)
+- During an active exam, teacher sees list of students with status (not started, in progress, submitted), any security flags, and a live view of suspicious activity.
+- Ability to extend time, pause, or end exam for individual students.
+
+### Student Exam Taking (`/student/exams/:id`)
+- Secure full‑screen interface with timer, navigation (free/sequential as per settings), question palette.
+- Supports all question types: MCQ (click to select), written (rich text/textarea), file upload for practicals, media playback.
+- Anti‑cheat measures: tab‑switch detection, copy/paste block, periodic focus checks.
+- Auto‑save answers locally; submit button with confirmation.
+
+### Student Assessment Results (`/student/exams/:id/results`)
+- After submission, see score, per‑question breakdown, correct/incorrect, AI feedback, teacher comments.
+- Option to request appeal.
+
+### Gradebook (`/teacher/gradebook`)
+- Spreadsheet‑like view: rows = students, columns = assessments/components, cells = marks.
+- Formula editor for weighted categories.
+- Import/export CSV, PDF.
+- Link to individual submissions for marking.
+
+### Standardization Center (`/teacher/moderation`)
+- List assessments that need moderation.
+- Double‑marking interface: side‑by‑side view of two markers’ grades with discrepancy highlight.
+- Benchmark calibration: review sample answers and adjust own marking.
+
+### Certification Dashboard (`/admin/certificates`)
+- Issue certificates manually or automatically (triggered by course completion).
+- Manage certificate templates (customisable via a simple builder – drag text fields, logos, signatures).
+- View verification logs.
+
+### Transcript Viewer (`/student/transcript`)
+- Downloadable PDF transcript showing all courses and grades.
+
+### Exam Archive (`/teacher/archives`)
+- Searchable repository of past papers, mark schemes, and reports.
+
+### Appeals Portal (`/student/appeals`)
+- List of submitted appeals with status; button to request new appeal on a returned submission.
+
+### Exam Readiness Dashboard (`/student/exam-readiness`)
+- Visual gauge for each enrolled subject, powered by CoreMind: coverage %, predicted grade, weak topics, recommended actions.
+
+---
+
+## 4. INTEGRATION WITH PHASE 5 AI
+
+- All auto‑grading and feedback suggestions must call CoreMind (via `/coremind/enhance-grading` or new endpoints).  
+- The exam readiness dashboard uses the Weave graph and Echo memory.  
+- Question generation (AI) uses the existing `POST /coremind/generate-content` with appropriate prompt.  
+- Anti‑cheat suspicious activity analysis can use a simple rule engine (log tab switches, long focus loss, etc.) with optional AI flagging later.
+
+---
+
+## 5. IMPLEMENTATION ORDER
+
+1. Database schema and migrations.  
+2. API endpoints for assessment creation, submission, grading basics.  
+3. Frontend: Assessment Hub, Exam Builder, Student Exam Taking (basic).  
+4. Secure exam mode (anti‑cheat) and monitoring.  
+5. Gradebook and grade calculation engine.  
+6. Reporting, certification, transcripts.  
+7. Moderation, standardization, appeals.  
+8. Exam archive and readiness dashboard.  
+9. Integration with AI layer for auto‑grading and readiness.  
+10. Final polish, accessibility, testing.
+
+**Do not stop until every feature in this prompt is implemented and functional. No placeholder pages. All endpoints must exist, all UI must be connected to live data.**
+
+Start building now.

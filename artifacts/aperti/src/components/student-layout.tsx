@@ -9,7 +9,7 @@ import {
   Home, BookOpen, CalendarCheck, Brain, Layers, Flame, FlaskConical,
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
   Sun, Moon, LogOut, Users, Shield, Repeat2, Video, Library, Link2,
-  MessageSquare, BarChart3, Cpu, Pencil, Lock,
+  MessageSquare, BarChart3, Cpu, Pencil, Lock, GraduationCap,
 } from "lucide-react";
 
 const primaryNav = [
@@ -48,6 +48,7 @@ const allNav = [
   { href: "/study-groups", label: "Study Groups", icon: Users, desc: "Peer learning" },
   { href: "/messages", label: "Messages", icon: MessageSquare, desc: "Communication" },
   { href: "/exam-vault", label: "ExamVault", icon: Lock, desc: "Secure offline exams" },
+  { href: "/exam-room", label: "Exam Room", icon: GraduationCap, desc: "Take your exams" },
   { href: "/inkspace", label: "InkSpace", icon: Pencil, desc: "Smart notebooks" },
   { href: "/course-hub", label: "Course Hub", icon: BookOpen, desc: "My courses" },
   { href: "/assignments", label: "Assignments", icon: Cpu, desc: "Assignment center" },
