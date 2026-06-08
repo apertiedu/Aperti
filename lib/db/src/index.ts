@@ -66,6 +66,16 @@ const querySchema = {
   misconceptions: schema.misconceptionsTable,
   knowledgeNodes: schema.knowledgeNodesTable,
   knowledgeEdges: schema.knowledgeEdgesTable,
+  // Phase 8 — Learning Experience
+  masteryRecords: schema.masteryRecordsTable,
+  learningPaths: schema.learningPathsTable,
+  microAssessments: schema.microAssessmentsTable,
+  learningGoals: schema.learningGoalsTable,
+  challenges: schema.challengesTable,
+  challengeParticipations: schema.challengeParticipationsTable,
+  learningAnalyticsSnapshots: schema.learningAnalyticsSnapshotsTable,
+  offlineContent: schema.offlineContentTable,
+  recommendationFeedback: schema.recommendationFeedbackTable,
   // Phase 7 — Communication
   messageThreadsExt: schema.messageThreadsExtTable,
   threadParticipants: schema.threadParticipantsTable,

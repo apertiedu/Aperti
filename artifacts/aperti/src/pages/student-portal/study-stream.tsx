@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CalendarCheck, Clock, CheckCircle, AlertCircle, Zap, Target,
   TrendingUp, Flame, ArrowRight, Brain, FlaskConical, Layers, Trophy,
-  Sparkles, Star, Calendar,
+  Sparkles, Star, Calendar, BarChart3, Route, Shield,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/auth";
@@ -61,6 +61,18 @@ export default function StudyStream() {
     queryKey: ["focus-coach", "goals"],
     queryFn: () => fetchJSON("/api/focus-coach/goals"),
     staleTime: 30_000,
+  });
+
+  const { data: recData } = useQuery({
+    queryKey: ["recommendations"],
+    queryFn: () => fetchJSON("/api/recommendations"),
+    staleTime: 60_000,
+  });
+
+  const { data: masteryData } = useQuery({
+    queryKey: ["mastery", 0],
+    queryFn: () => fetchJSON("/api/mastery/0"),
+    staleTime: 60_000,
   });
 
   const displayName = summary?.student?.studentName || user?.displayName || "Student";
@@ -283,6 +295,87 @@ export default function StudyStream() {
               </CardContent>
             </Card>
           </motion.div>
+
+          {/* AI Recommendations Preview */}
+          {(recData?.recommendations?.length ?? 0) > 0 && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <Card className="shadow-sm">
+                <CardHeader className="pb-2 px-4 pt-4">
+                  <CardTitle className="flex items-center justify-between text-base">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-primary" />
+                      Recommended for You
+                    </div>
+                    <Link href="/recommendations">
+                      <Button variant="ghost" size="sm" className="h-6 text-xs gap-1 text-primary">
+                        See all <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </Link>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 space-y-2">
+                  {recData.recommendations.slice(0, 3).map((rec: any) => (
+                    <Link key={rec.id} href={rec.actionUrl ?? "/"}>
+                      <div className="flex items-center justify-between p-2.5 rounded-xl bg-muted/40 hover:bg-muted/70 transition-colors cursor-pointer">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium truncate">{rec.title}</p>
+                          <p className="text-[10px] text-muted-foreground truncate mt-0.5">{rec.reason}</p>
+                        </div>
+                        {rec.urgent && (
+                          <Badge variant="destructive" className="text-[10px] h-4 ml-2 shrink-0">Urgent</Badge>
+                        )}
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground ml-2 shrink-0" />
+                      </div>
+                    </Link>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+
+          {/* Mastery Progress */}
+          {(masteryData?.total ?? 0) > 0 && (
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+              <Card className="shadow-sm">
+                <CardHeader className="pb-2 px-4 pt-4">
+                  <CardTitle className="flex items-center justify-between text-base">
+                    <div className="flex items-center gap-2">
+                      <Brain className="h-4 w-4 text-primary" />
+                      Mastery Progress
+                    </div>
+                    <Link href="/learning-path">
+                      <Button variant="ghost" size="sm" className="h-6 text-xs gap-1 text-primary">
+                        View path <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </Link>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="flex-1">
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-muted-foreground">Overall mastery</span>
+                        <span className="font-bold text-primary">{masteryData.masteryPct}%</span>
+                      </div>
+                      <Progress value={masteryData.masteryPct} className="h-2.5" />
+                    </div>
+                    <div className="text-center shrink-0">
+                      <p className="text-lg font-bold text-primary">{masteryData.total}</p>
+                      <p className="text-[10px] text-muted-foreground">topics</p>
+                    </div>
+                  </div>
+                  {(masteryData.weakTopics?.length ?? 0) > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="text-[10px] text-muted-foreground mr-1">Focus on:</span>
+                      {masteryData.weakTopics.slice(0, 3).map((t: string) => (
+                        <Badge key={t} variant="outline" className="text-[10px] h-4 border-amber-300 text-amber-700 dark:text-amber-400">{t}</Badge>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
         </div>
 
         {/* Right column */}
@@ -338,9 +431,15 @@ export default function StudyStream() {
                     { href: "/mentor", label: "The Mentor", icon: Brain, color: "text-purple-500" },
                     { href: "/revisit", label: "Revisit", icon: Target, color: "text-blue-500" },
                     { href: "/focus-zone", label: "FocusZone", icon: Clock, color: "text-teal-500" },
+                    { href: "/learning-path", label: "Learn Path", icon: Route, color: "text-primary" },
+                    { href: "/challenges", label: "Challenges", icon: Trophy, color: "text-amber-500" },
+                    { href: "/goals", label: "Goals", icon: Shield, color: "text-emerald-500" },
+                    { href: "/micro-assessment", label: "Quick Quiz", icon: Zap, color: "text-yellow-500" },
+                    { href: "/learning-analytics", label: "Analytics", icon: BarChart3, color: "text-blue-500" },
                     { href: "/simverse", label: "SimVerse", icon: FlaskConical, color: "text-orange-500" },
                     { href: "/flashcards", label: "Flashcards", icon: Layers, color: "text-green-500" },
                     { href: "/my-homework", label: "Assignments", icon: BookOpen, color: "text-rose-500" },
+                    { href: "/recommendations", label: "For You", icon: Sparkles, color: "text-violet-500" },
                   ].map(({ href, label, icon: Icon, color }) => (
                     <Link key={href} href={href}>
                       <button className="w-full flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border hover:border-primary/30 hover:bg-primary/5 transition-colors">

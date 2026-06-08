@@ -34,3 +34,4 @@ export * from "./subscriptions";
 export * from "./student-os";
 export * from "./ai-phase5";
 export * from "./communication";
+export * from "./learning-experience";

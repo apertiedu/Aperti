@@ -136,6 +136,15 @@ import NotificationCenter from "@/pages/notification-center";
 import AdminModeration from "@/pages/admin/moderation";
 import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 
+// Phase 8 — Learning Experience, Content Delivery & Adaptive Personalization
+import LearningPathPage from "@/pages/student/learning-path";
+import RecommendationHub from "@/pages/student/recommendations";
+import GoalsDashboard from "@/pages/student/goals-dashboard";
+import ChallengesPage from "@/pages/student/challenges";
+import LearningAnalyticsPage from "@/pages/student/learning-analytics";
+import MicroAssessmentPage from "@/pages/student/micro-assessment";
+import FocusZoneV2 from "@/pages/student/focus-zone-v2";
+
 // Phase 6 — Assessment, Examination & Certification Ecosystem
 import AssessmentHub from "@/pages/assessment-hub";
 import GradebookPlus from "@/pages/gradebook-plus";
@@ -291,6 +300,14 @@ function StudentRouter() {
         <Route path="/student/transcript" component={StudentTranscript} />
         <Route path="/student/appeals" component={StudentAppeals} />
         <Route path="/student/exam-readiness" component={ExamReadiness} />
+        {/* Phase 8 — Learning Experience */}
+        <Route path="/learning-path" component={LearningPathPage} />
+        <Route path="/recommendations" component={RecommendationHub} />
+        <Route path="/goals" component={GoalsDashboard} />
+        <Route path="/challenges" component={ChallengesPage} />
+        <Route path="/learning-analytics" component={LearningAnalyticsPage} />
+        <Route path="/micro-assessment" component={MicroAssessmentPage} />
+        <Route path="/focus-zone" component={FocusZoneV2} />
         {/* Phase 7 — Communication */}
         <Route path="/inbox" component={UnifiedInbox} />
         <Route path="/channels/:courseId" component={ClassChannel} />

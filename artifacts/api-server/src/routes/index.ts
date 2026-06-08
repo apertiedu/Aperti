@@ -88,6 +88,7 @@ import { assessmentExtrasRouter } from "./assessment-extras";
 import { commThreadsRouter } from "./comm-threads";
 import { commRoomsRouter } from "./comm-rooms";
 import { commSupportRouter } from "./comm-support";
+import { learningExperienceRouter } from "./learning-experience";
 
 const router: IRouter = Router();
 
@@ -177,6 +178,9 @@ router.use(parentAiRouter);
 router.use(commThreadsRouter);
 router.use(commRoomsRouter);
 router.use(commSupportRouter);
+
+// Phase 8 — Learning Experience, Content Delivery & Adaptive Personalization
+router.use(learningExperienceRouter);
 
 // Phase 6 — Assessment, Examination & Certification Ecosystem
 router.use(assessmentHubRouter);
