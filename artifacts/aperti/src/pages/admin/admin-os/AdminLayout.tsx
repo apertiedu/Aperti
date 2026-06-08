@@ -5,36 +5,48 @@ import {
   LayoutDashboard, Users, Building2, Shield, BookOpen, CreditCard,
   BarChart3, Activity, Flag, FileText, Lock, TicketCheck, Library,
   Settings, Scale, Database, ChevronLeft, ChevronRight, Menu, X,
-  Layers, ShoppingCart, UserCheck, GraduationCap, Bell, ListTodo,
-  Zap, BookMarked,
+  Layers, ShoppingCart, UserCheck, GraduationCap, ListTodo,
+  Zap, BookMarked, UserCog, AlertTriangle, ShieldCheck, Grid3X3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/admin/os" },
+
+  { label: "— Users & Access", header: true },
   { label: "Users", icon: Users, href: "/admin/os/users" },
-  { label: "Organizations", icon: Building2, href: "/admin/os/organizations" },
+  { label: "User Access", icon: UserCheck, href: "/admin/os/user-access" },
+  { label: "Assistants", icon: UserCog, href: "/admin/os/assistants" },
+
+  { label: "— Governance", header: true },
   { label: "Roles & Permissions", icon: Shield, href: "/admin/os/roles" },
   { label: "Enrollments", icon: GraduationCap, href: "/admin/os/enrollments" },
+  { label: "Features & Access", icon: Grid3X3, href: "/admin/os/features-matrix" },
+  { label: "Conflict Center", icon: AlertTriangle, href: "/admin/os/conflicts" },
+  { label: "Integrity Check", icon: ShieldCheck, href: "/admin/os/integrity" },
+
+  { label: "— Platform", header: true },
+  { label: "Organizations", icon: Building2, href: "/admin/os/organizations" },
   { label: "Courses", icon: BookOpen, href: "/admin/os/courses" },
   { label: "Plans", icon: Layers, href: "/admin/os/plans" },
   { label: "Subscriptions", icon: ShoppingCart, href: "/admin/os/subscriptions" },
   { label: "Payments", icon: CreditCard, href: "/admin/os/payments" },
+
+  { label: "— Operations", header: true },
   { label: "Analytics", icon: BarChart3, href: "/admin/os/analytics" },
   { label: "System Health", icon: Activity, href: "/admin/os/health" },
   { label: "Feature Flags", icon: Flag, href: "/admin/os/features" },
-  { label: "Moderation", icon: UserCheck, href: "/admin/os/moderation" },
   { label: "Audit Logs", icon: FileText, href: "/admin/os/audit" },
   { label: "Security", icon: Lock, href: "/admin/os/security" },
   { label: "Support Tickets", icon: TicketCheck, href: "/admin/os/tickets" },
   { label: "Knowledge Base", icon: Library, href: "/admin/os/kb" },
-  { label: "Platform Settings", icon: Settings, href: "/admin/os/settings" },
   { label: "Compliance", icon: Scale, href: "/admin/os/compliance" },
   { label: "Backups", icon: Database, href: "/admin/os/backups" },
   { label: "Job Queue", icon: ListTodo, href: "/admin/os/queue" },
   { label: "Performance", icon: Zap, href: "/admin/os/performance" },
+  { label: "Platform Settings", icon: Settings, href: "/admin/os/settings" },
   { label: "Docs", icon: BookMarked, href: "/admin/os/docs" },
-];
+] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -63,7 +75,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       {/* Nav items */}
       <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
-        {NAV.map((item) => {
+        {NAV.map((item: any) => {
+          if (item.header) {
+            if (collapsed && !mobile) return null;
+            return (
+              <div key={item.label} className="px-3 pt-4 pb-1">
+                <p className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">{item.label.replace("— ", "")}</p>
+              </div>
+            );
+          }
           const active = location === item.href || (item.href !== "/admin/os" && location.startsWith(item.href));
           return (
             <Link key={item.href} href={item.href}>
@@ -91,7 +111,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <div className="px-4 py-3 border-t border-gray-100 space-y-0.5">
           <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Aperti Platform</p>
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-gray-400">v10.0</span>
+            <span className="text-[10px] text-gray-400">v11.0</span>
             {import.meta.env.VITE_COMMIT_HASH && import.meta.env.VITE_COMMIT_HASH !== "dev" && (
               <>
                 <span className="text-gray-200">·</span>

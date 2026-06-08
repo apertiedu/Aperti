@@ -50,6 +50,7 @@ import { metricsRouter } from "./routes/prometheus";
 import { queueAdminRouter } from "./routes/queue-admin";
 import { performanceRouter } from "./routes/performance";
 import { startBackupScheduler } from "./lib/backup-scheduler";
+import { governanceRouter } from "./routes/governance";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -199,6 +200,9 @@ app.use("/api/admin/courses", adminCoursesRouter);
 // Phase 10 — Infrastructure
 app.use("/api/admin/queue", queueAdminRouter);
 app.use("/api/admin/performance", performanceRouter);
+
+// Phase 11 — Governance
+app.use("/api/admin/governance", governanceRouter);
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

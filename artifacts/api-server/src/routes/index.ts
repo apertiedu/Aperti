@@ -190,3 +190,5 @@ router.use(certificationsRouter);
 router.use(assessmentExtrasRouter);
 
 export default router;
+
+// Phase 11 governance router is registered in app.ts under /api/admin/governance

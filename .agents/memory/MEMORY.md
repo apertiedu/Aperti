@@ -12,3 +12,4 @@
 - [MathRenderer component](math-renderer.md) — universal KaTeX + markdown renderer; auto-detects $…$ inline and $$…$$ block; smartTextToHtml() for paste conversion; applied to mentor, cardstack, exam, micro-assessment, content-craft
 - [Phase 9 Admin OS](phase9-admin-os.md) — full admin command centre at /admin/os; 14 API route files, 15 frontend pages, Egypt-first payment verification flow; fetchJSON/postJSON/putJSON added to lib/api.ts
 - [Phase 10 Infrastructure](phase10-infrastructure.md) — commit hash, prom-client peer deps, TOTP MFA, PWA sw.js, lite mode, Phase 10 DB tables, queue patterns
+- [Phase 11 Governance](phase11-governance.md) — 13 gov_ tables, governance.ts routes at /api/admin/governance, ownership middleware, 7 new admin-os pages

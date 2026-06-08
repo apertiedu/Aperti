@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route } from "wouter";
 import AdminLayout from "./AdminLayout";
 import Dashboard from "./Dashboard";
 import UsersPage from "./UsersPage";
@@ -19,19 +19,39 @@ import QueuePage from "./QueuePage";
 import PerformancePage from "./PerformancePage";
 import DocsPage from "./DocsPage";
 import BackupsPage from "./BackupsPage";
+import EnrollmentsPage from "./EnrollmentsPage";
+import AssistantsPage from "./AssistantsPage";
+import FeaturesMatrixPage from "./FeaturesMatrixPage";
+import ConflictPage from "./ConflictPage";
+import IntegrityPage from "./IntegrityPage";
+import UserAccessPage from "./UserAccessPage";
 
 export default function AdminOS() {
   return (
     <AdminLayout>
       <Switch>
         <Route path="/admin/os" component={Dashboard} />
+
+        {/* Users & Access */}
         <Route path="/admin/os/users" component={UsersPage} />
-        <Route path="/admin/os/organizations" component={OrgsPage} />
+        <Route path="/admin/os/user-access" component={UserAccessPage} />
+        <Route path="/admin/os/assistants" component={AssistantsPage} />
+
+        {/* Governance */}
         <Route path="/admin/os/roles" component={RolesPage} />
+        <Route path="/admin/os/enrollments" component={EnrollmentsPage} />
+        <Route path="/admin/os/features-matrix" component={FeaturesMatrixPage} />
+        <Route path="/admin/os/conflicts" component={ConflictPage} />
+        <Route path="/admin/os/integrity" component={IntegrityPage} />
+
+        {/* Platform */}
+        <Route path="/admin/os/organizations" component={OrgsPage} />
         <Route path="/admin/os/courses" component={CoursesAdminPage} />
         <Route path="/admin/os/subscriptions" component={SubscriptionsPage} />
         <Route path="/admin/os/plans" component={SubscriptionsPage} />
         <Route path="/admin/os/payments" component={PaymentsPage} />
+
+        {/* Operations */}
         <Route path="/admin/os/analytics" component={AnalyticsPage} />
         <Route path="/admin/os/health" component={HealthPage} />
         <Route path="/admin/os/features" component={FeaturesPage} />
@@ -46,7 +66,6 @@ export default function AdminOS() {
         <Route path="/admin/os/docs" component={DocsPage} />
         <Route path="/admin/os/settings" component={CompliancePage} />
         <Route path="/admin/os/moderation" component={UsersPage} />
-        <Route path="/admin/os/enrollments" component={SubscriptionsPage} />
         <Route component={Dashboard} />
       </Switch>
     </AdminLayout>
