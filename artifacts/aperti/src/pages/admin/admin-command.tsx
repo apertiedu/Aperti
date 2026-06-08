@@ -5,12 +5,14 @@ import {
   Calculator, Activity, DollarSign, Shield, LifeBuoy, FileText,
   Settings, Users, Globe, ChevronRight, Bell, RefreshCw,
   BarChart3, Terminal, Wifi, CreditCard, Clock, Brain, ShieldCheck,
+  LayoutDashboard,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const tok = () => localStorage.getItem("aperti_token") || "";
 
 const modules = [
+  { to: "/admin/os",                    label: "Admin OS ✦ New",        desc: "Full command center — users, payments, analytics, health",  icon: LayoutDashboard, highlight: true },
   { to: "/admin/world-pilot",           label: "WorldPilot",            desc: "Global platform management",          icon: Globe },
   { to: "/admin/shield-core",           label: "ShieldCore",             desc: "Security & exam integrity",           icon: Shield },
   { to: "/admin/budget-sense",          label: "BudgetSense",            desc: "Financial overview & billing",        icon: Calculator },
@@ -167,17 +169,17 @@ export default function AdminCommand() {
             transition={{ delay: 0.15 + i * 0.05 }}
           >
             <Link href={mod.to}>
-              <Card className="border-0 shadow-sm bg-white cursor-pointer group hover:shadow-md transition-shadow">
+              <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white" : "bg-white"}`}>
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
-                    style={{ background: "rgba(0,121,107,0.07)" }}>
-                    <mod.icon className="h-5 w-5 text-primary" />
+                    style={{ background: (mod as any).highlight ? "rgba(255,255,255,0.2)" : "rgba(0,121,107,0.07)" }}>
+                    <mod.icon className={`h-5 w-5 ${(mod as any).highlight ? "text-white" : "text-primary"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm text-gray-900">{mod.label}</p>
-                    <p className="text-xs text-gray-400 truncate">{mod.desc}</p>
+                    <p className={`font-semibold text-sm ${(mod as any).highlight ? "text-white" : "text-gray-900"}`}>{mod.label}</p>
+                    <p className={`text-xs truncate ${(mod as any).highlight ? "text-white/70" : "text-gray-400"}`}>{mod.desc}</p>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                  <ChevronRight className={`h-4 w-4 group-hover:translate-x-0.5 transition-all ${(mod as any).highlight ? "text-white/60 group-hover:text-white" : "text-gray-300 group-hover:text-primary"}`} />
                 </CardContent>
               </Card>
             </Link>

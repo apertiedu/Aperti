@@ -27,6 +27,20 @@ import { coursesRouter } from "./routes/courses";
 import { parentRouter } from "./routes/parent";
 import { parentDashboardRouter } from "./routes/parent-dashboard";
 import { parentPhase4Router } from "./routes/parent-phase4";
+import { adminUsersRouter } from "./routes/admin-users";
+import { adminOrgsRouter } from "./routes/admin-organizations";
+import { adminSubscriptionsRouter } from "./routes/admin-subscriptions";
+import { adminPaymentsRouter } from "./routes/admin-payments";
+import { adminAnalyticsRouter } from "./routes/admin-analytics";
+import { adminHealthRouter } from "./routes/admin-health";
+import { adminFeaturesRouter } from "./routes/admin-features";
+import { adminAuditRouter } from "./routes/admin-audit";
+import { adminSecurityRouter } from "./routes/admin-security";
+import { adminSupportRouter } from "./routes/admin-support";
+import { adminKbRouter } from "./routes/admin-kb";
+import { adminComplianceRouter } from "./routes/admin-compliance";
+import { adminRolesRouter } from "./routes/admin-roles";
+import { adminCoursesRouter } from "./routes/admin-courses";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -90,6 +104,22 @@ app.use("/courses", coursesRouter);
 app.use("/parent", parentRouter);
 app.use("/api", parentDashboardRouter);
 app.use("/api", parentPhase4Router);
+
+// Phase 9 — Admin OS
+app.use("/api/admin/users", adminUsersRouter);
+app.use("/api/admin/organizations", adminOrgsRouter);
+app.use("/api/admin/subscriptions", adminSubscriptionsRouter);
+app.use("/api/admin/payments", adminPaymentsRouter);
+app.use("/api/admin/analytics", adminAnalyticsRouter);
+app.use("/api/admin/health", adminHealthRouter);
+app.use("/api/admin/feature-flags", adminFeaturesRouter);
+app.use("/api/admin/audit-logs", adminAuditRouter);
+app.use("/api/admin/security", adminSecurityRouter);
+app.use("/api/admin/support", adminSupportRouter);
+app.use("/api/admin/kb", adminKbRouter);
+app.use("/api/admin/compliance", adminComplianceRouter);
+app.use("/api/admin/roles", adminRolesRouter);
+app.use("/api/admin/courses", adminCoursesRouter);
 
 async function seedDefaultAdmin() {
   try {

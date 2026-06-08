@@ -136,6 +136,9 @@ import NotificationCenter from "@/pages/notification-center";
 import AdminModeration from "@/pages/admin/moderation";
 import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 
+// Phase 9 — Admin OS
+import AdminOS from "@/pages/admin/admin-os";
+
 // Phase 8 — Learning Experience, Content Delivery & Adaptive Personalization
 import LearningPathPage from "@/pages/student/learning-path";
 import RecommendationHub from "@/pages/student/recommendations";
@@ -381,6 +384,8 @@ const TEACHER_ROUTES = (
 
 const ADMIN_ROUTES = (
   <>
+    <Route path="/admin/os/:rest*" component={AdminOS} />
+    <Route path="/admin/os" component={AdminOS} />
     <Route path="/admin/command" component={AdminCommand} />
     <Route path="/admin/certificates" component={AdminCertificates} />
     <Route path="/admin/world-pilot" component={WorldPilot} />

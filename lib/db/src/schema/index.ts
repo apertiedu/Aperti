@@ -35,3 +35,4 @@ export * from "./student-os";
 export * from "./ai-phase5";
 export * from "./communication";
 export * from "./learning-experience";
+export * from "./admin-phase9";
