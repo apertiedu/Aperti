@@ -288,3 +288,23 @@ input:focus, textarea:focus {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground)); }
+
+/* ── Lite mode: suppress animations on slow connections ────────────────────── */
+html.lite-mode *,
+html.lite-mode *::before,
+html.lite-mode *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* ── Touch targets: 44px minimum ──────────────────────────────────────────── */
+button, a, [role="button"], input[type="checkbox"], input[type="radio"], select {
+  min-height: 44px;
+  min-width: 44px;
+}
+button.icon-btn, a.icon-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

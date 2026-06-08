@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 import Layout from "@/components/layout";
 import StudentLayout from "@/components/student-layout";
 import Login from "@/pages/login";
+import LowBandwidthBanner from "@/components/LowBandwidthBanner";
 import { useEffect } from "react";
 
 // Public & Legal
@@ -565,6 +566,7 @@ export default function App() {
             </TourProvider>
           </AuthProvider>
           <Toaster />
+          <LowBandwidthBanner />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

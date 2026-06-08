@@ -3,6 +3,15 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { execSync } from "child_process";
+
+function getCommitHash(): string {
+  try {
+    return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+  } catch {
+    return process.env.COMMIT_HASH || "dev";
+  }
+}
 
 const rawPort = process.env.PORT;
 
@@ -48,6 +57,9 @@ export default defineConfig({
         ]
       : []),
   ],
+  define: {
+    "import.meta.env.VITE_COMMIT_HASH": JSON.stringify(getCommitHash()),
+  },
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),

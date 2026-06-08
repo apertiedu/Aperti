@@ -86,6 +86,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         })}
       </nav>
 
+      {/* Version footer */}
+      {(!collapsed || mobile) && (
+        <div className="px-4 py-3 border-t border-gray-100 space-y-0.5">
+          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wide">Aperti Platform</p>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[10px] text-gray-400">v10.0</span>
+            {import.meta.env.VITE_COMMIT_HASH && import.meta.env.VITE_COMMIT_HASH !== "dev" && (
+              <>
+                <span className="text-gray-200">·</span>
+                <span className="font-mono text-[10px] text-teal-500 bg-teal-50 px-1.5 py-0.5 rounded">
+                  {import.meta.env.VITE_COMMIT_HASH}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Collapse toggle (desktop only) */}
       {!mobile && (
         <button
