@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { MathRenderer } from "@/components/math-renderer";
 
 function Timer({ seconds, onExpire }: { seconds: number; onExpire: () => void }) {
   const [rem, setRem] = useState(seconds);
@@ -218,9 +219,9 @@ export default function StudentExamSession({ params }: { params: { id: string } 
                       <Badge variant="outline" className="text-[10px]">{q.marks} mark{q.marks !== 1 ? "s" : ""}</Badge>
                       {q.topic && <Badge variant="secondary" className="text-[10px]">{q.topic}</Badge>}
                     </div>
-                    <p className="text-sm font-medium leading-relaxed">
-                      {q.question_text ?? q.custom_question?.text ?? "Question not available"}
-                    </p>
+                    <div className="text-sm font-medium leading-relaxed">
+                      <MathRenderer content={q.question_text ?? q.custom_question?.text ?? "Question not available"} />
+                    </div>
                     {q.image_url && <img src={q.image_url} alt="Question" className="mt-3 max-h-48 rounded-lg object-contain border" />}
                   </div>
                   <button onClick={() => setFlagged(f => { const n = new Set(f); if (n.has(currentQ)) n.delete(currentQ); else n.add(currentQ); return n; })}
@@ -239,7 +240,7 @@ export default function StudentExamSession({ params }: { params: { id: string } 
                         <span className={`w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold shrink-0 ${answers[q.id] === opt ? "border-primary bg-primary text-primary-foreground" : "border-border"}`}>
                           {["A","B","C","D","E"][i]}
                         </span>
-                        {opt}
+                        <MathRenderer content={opt} inline />
                       </button>
                     ))}
                   </div>

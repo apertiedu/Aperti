@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { MathRenderer } from "@/components/math-renderer";
 
 const token = () => localStorage.getItem("aperti_token");
 
@@ -154,7 +155,9 @@ export default function MicroAssessmentPage() {
                   <Progress value={((currentQ) / totalQ) * 100} className="h-1.5 mb-6" />
 
                   {/* Question */}
-                  <p className="font-semibold text-base leading-relaxed mb-6">{currentQuestion.question}</p>
+                  <div className="font-semibold text-base leading-relaxed mb-6">
+                    <MathRenderer content={currentQuestion.question} />
+                  </div>
 
                   {/* Options */}
                   <div className="space-y-3">
@@ -172,7 +175,7 @@ export default function MicroAssessmentPage() {
                           <span className="w-6 h-6 inline-flex items-center justify-center rounded-full bg-muted text-xs font-bold mr-2">
                             {String.fromCharCode(65 + idx)}
                           </span>
-                          {opt}
+                          <MathRenderer content={opt} inline />
                         </motion.button>
                       );
                     })}
@@ -226,8 +229,11 @@ export default function MicroAssessmentPage() {
                       <div className="flex items-start gap-2">
                         {r.correct ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" /> : <XCircle className="h-4 w-4 text-red-500 shrink-0 mt-0.5" />}
                         <div>
-                          <p className="font-medium">Q{idx + 1}: {r.correct ? "Correct" : `Incorrect — Answer: ${r.correctAnswer}`}</p>
-                          <p className="text-muted-foreground mt-0.5">{r.explanation}</p>
+                          <p className="font-medium">Q{idx + 1}: {r.correct ? "Correct" : "Incorrect"}</p>
+                          {!r.correct && r.correctAnswer && (
+                            <p className="text-xs mt-0.5">Correct answer: <MathRenderer content={String(r.correctAnswer)} inline /></p>
+                          )}
+                          {r.explanation && <MathRenderer content={r.explanation} className="text-muted-foreground mt-0.5" />}
                         </div>
                       </div>
                     </div>

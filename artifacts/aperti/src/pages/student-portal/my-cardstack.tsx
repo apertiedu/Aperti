@@ -11,6 +11,7 @@ import {
   BookOpen, TrendingUp, ChevronRight, Zap,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { MathRenderer } from "@/components/math-renderer";
 
 const tok = () => localStorage.getItem("aperti_token") || "";
 
@@ -235,9 +236,9 @@ export default function MyCardStack() {
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-0.5 bg-gray-100 rounded-full">Question</span>
                 )}
               </div>
-              <p className={`text-lg font-bold leading-relaxed ${showBack ? "text-teal-800" : "text-gray-900"}`}>
-                {showBack ? currentCard.back : currentCard.front}
-              </p>
+              <div className={`text-lg font-bold leading-relaxed ${showBack ? "text-teal-800" : "text-gray-900"}`}>
+                <MathRenderer content={showBack ? currentCard.back : currentCard.front} />
+              </div>
               {currentCard.difficulty && (
                 <div className="mt-4 flex items-center gap-1 text-xs text-gray-400">
                   Difficulty: <DifficultyDot d={currentCard.difficulty} />

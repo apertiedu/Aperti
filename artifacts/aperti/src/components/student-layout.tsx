@@ -62,6 +62,12 @@ const allNav = [
   { href: "/inkspace", label: "InkSpace", icon: Pencil, desc: "Smart notebooks" },
   { href: "/course-hub", label: "Course Hub", icon: BookOpen, desc: "My courses" },
   { href: "/assignments", label: "Assignments", icon: Cpu, desc: "Assignment center" },
+  { href: "/learning-path", label: "Learning Path", icon: Target, desc: "Adaptive journey" },
+  { href: "/recommendations", label: "For You", icon: Star, desc: "Personalised picks" },
+  { href: "/goals", label: "My Goals", icon: Shield, desc: "Learning goals & XP" },
+  { href: "/challenges", label: "Challenges", icon: Trophy, desc: "Compete & earn XP" },
+  { href: "/learning-analytics", label: "Analytics", icon: BarChart3, desc: "Deep learning insights" },
+  { href: "/micro-assessment", label: "Quick Quiz", icon: Flame, desc: "Adaptive micro-quiz" },
 ];
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {

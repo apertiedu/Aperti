@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Timer, AlertTriangle, Flag, ArrowLeft, ArrowRight } from "lucide-react";
 import { useLocation } from "wouter";
+import { MathRenderer } from "@/components/math-renderer";
 
 const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
@@ -157,7 +158,7 @@ export default function TakeExam() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-base">{current?.questionText}</p>
+            <div className="text-base"><MathRenderer content={current?.questionText ?? ""} /></div>
             <Textarea
               rows={6}
               placeholder="Type your answer..."

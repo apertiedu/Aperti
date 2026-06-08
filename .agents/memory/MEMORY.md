@@ -9,3 +9,4 @@
 - [Phase 7 Communication Ecosystem](phase7-communication.md) — 15 tables, 3 route files, 6 frontend pages; drizzle push is interactive so use executeSql directly instead
 - [DiscussButton component](discuss-button.md) — reusable floating chat panel; token key is aperti_token; never nest inside a <button> (HTML invalid), place in expanded sections instead
 - [Phase 8 Learning Experience](phase8-learning-experience.md) — 9 DB tables, 1 route file (no prefix), 7 frontend pages; focus-zone replaced by V2 at same URL; mastery states enum order matters
+- [MathRenderer component](math-renderer.md) — universal KaTeX + markdown renderer; auto-detects $…$ inline and $$…$$ block; smartTextToHtml() for paste conversion; applied to mentor, cardstack, exam, micro-assessment, content-craft

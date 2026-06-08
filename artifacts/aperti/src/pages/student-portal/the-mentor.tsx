@@ -13,6 +13,7 @@ import {
   Clock, Brain, AlertCircle, ChevronRight, History,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
+import { MathRenderer } from "@/components/math-renderer";
 
 const tok = () => localStorage.getItem("aperti_token") || "";
 
@@ -306,7 +307,11 @@ export default function TheMentor() {
                         }`}
                       >
                         {msg.content ? (
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                          msg.role === "assistant" ? (
+                            <MathRenderer content={msg.content} className="text-sm leading-relaxed" />
+                          ) : (
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                          )
                         ) : (
                           <div className="flex gap-1 py-1 items-center">
                             {[0, 150, 300].map((delay) => (

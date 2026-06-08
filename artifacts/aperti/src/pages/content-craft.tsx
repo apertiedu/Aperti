@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,9 +13,11 @@ import {
 import {
   Plus, Trash2, ArrowUp, ArrowDown, FileText, Video,
   HelpCircle, FlaskConical, Layers, Image, Heading1, Heading2,
-  Bold, Italic, Underline, X, Save, ChevronRight, Clock,
-  AlignLeft, Palette,
+  Bold, Italic, Underline, X, Save, ChevronRight, AlignLeft,
+  Palette, Eye, EyeOff, Code, List, ListOrdered, Link2,
+  Sigma, Check,
 } from "lucide-react";
+import { MathHtml, smartTextToHtml } from "@/components/math-renderer";
 
 const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
@@ -50,8 +52,103 @@ interface Lesson {
   updatedAt: string;
 }
 
+/* ── LaTeX Insert Popover ─────────────────────────────────────────────────── */
+function LatexInsertBtn({ onInsert }: { onInsert: (latex: string, display: boolean) => void }) {
+  const [open, setOpen] = useState(false);
+  const [tex, setTex] = useState("");
+  const [display, setDisplay] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { if (open) setTimeout(() => inputRef.current?.focus(), 50); }, [open]);
+
+  const insert = () => {
+    if (!tex.trim()) return;
+    onInsert(tex.trim(), display);
+    setTex("");
+    setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        title="Insert LaTeX formula"
+        onMouseDown={e => { e.preventDefault(); setOpen(o => !o); }}
+        className="flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-200 transition-colors text-gray-700 font-mono"
+      >
+        <Sigma className="h-3.5 w-3.5" />
+        <span className="text-[10px] font-bold">TeX</span>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-72">
+          <p className="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wide">Insert LaTeX Formula</p>
+          <input
+            ref={inputRef}
+            value={tex}
+            onChange={e => setTex(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") insert(); if (e.key === "Escape") setOpen(false); }}
+            placeholder="e.g. E = mc^2"
+            className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 mb-2"
+          />
+          <div className="flex items-center gap-2 mb-2">
+            <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
+              <input type="checkbox" checked={display} onChange={e => setDisplay(e.target.checked)} className="rounded" />
+              Display (centered block)
+            </label>
+          </div>
+          <div className="flex gap-2">
+            <Button size="sm" onClick={insert} className="flex-1 h-7 text-xs bg-primary text-white gap-1">
+              <Check className="h-3 w-3" /> Insert
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setOpen(false)} className="h-7 text-xs">Cancel</Button>
+          </div>
+          <p className="text-[9px] text-gray-400 mt-2">
+            Inline: $E=mc^2$ · Block: $$\int f\,dx$$<br/>
+            Works everywhere in the text editor
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Toolbar Button ──────────────────────────────────────────────────────── */
+function ToolbarBtn({ onClick, children, title, active }: {
+  onClick: () => void; children: React.ReactNode; title?: string; active?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onMouseDown={e => { e.preventDefault(); onClick(); }}
+      className={`flex items-center justify-center px-2 py-1 rounded transition-colors text-gray-700 ${active ? "bg-primary/10 text-primary" : "hover:bg-gray-200"}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ── Smart Paste Handler ──────────────────────────────────────────────────── */
+function handleSmartPaste(e: React.ClipboardEvent<HTMLDivElement>) {
+  const plain = e.clipboardData.getData("text/plain");
+  if (!plain) return;
+  const hasMarkdown = /\*\*|__|\$\$?|\\[\[(]/.test(plain);
+  if (!hasMarkdown) return;
+  e.preventDefault();
+  const html = smartTextToHtml(plain);
+  document.execCommand("insertHTML", false, html);
+}
+
 /* ── Rich Text Editor ─────────────────────────────────────────────────────── */
-function RichTextEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function RichTextEditor({
+  value,
+  onChange,
+  preview,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  preview: boolean;
+}) {
   const editorRef = useRef<HTMLDivElement>(null);
 
   const exec = (cmd: string, val?: string) => {
@@ -64,82 +161,80 @@ function RichTextEditor({ value, onChange }: { value: string; onChange: (v: stri
     document.execCommand("formatBlock", false, tag);
   };
 
+  const insertLatex = useCallback((tex: string, display: boolean) => {
+    editorRef.current?.focus();
+    const wrapped = display ? `$$${tex}$$` : `$${tex}$`;
+    document.execCommand("insertHTML", false, wrapped);
+    onChange(editorRef.current?.innerHTML || "");
+  }, [onChange]);
+
+  const insertLink = () => {
+    const url = prompt("Enter URL:");
+    if (url) exec("createLink", url);
+  };
+
   return (
     <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-gray-50 border-b">
-        <ToolbarBtn title="Bold" onClick={() => exec("bold")}><Bold className="h-3.5 w-3.5" /></ToolbarBtn>
-        <ToolbarBtn title="Italic" onClick={() => exec("italic")}><Italic className="h-3.5 w-3.5" /></ToolbarBtn>
-        <ToolbarBtn title="Underline" onClick={() => exec("underline")}><Underline className="h-3.5 w-3.5" /></ToolbarBtn>
-        <div className="w-px h-5 bg-gray-300 mx-1" />
-        <ToolbarBtn title="Heading 1" onClick={() => setBlock("h1")}><span className="text-[11px] font-black">H1</span></ToolbarBtn>
-        <ToolbarBtn title="Heading 2" onClick={() => setBlock("h2")}><span className="text-[11px] font-black">H2</span></ToolbarBtn>
-        <ToolbarBtn title="Heading 3" onClick={() => setBlock("h3")}><span className="text-[11px] font-black">H3</span></ToolbarBtn>
-        <ToolbarBtn title="Paragraph" onClick={() => setBlock("p")}><AlignLeft className="h-3.5 w-3.5" /></ToolbarBtn>
-        <div className="w-px h-5 bg-gray-300 mx-1" />
-        <ToolbarBtn title="Bullet list" onClick={() => exec("insertUnorderedList")}>
-          <span className="text-xs font-medium">• List</span>
-        </ToolbarBtn>
-        <ToolbarBtn title="Numbered list" onClick={() => exec("insertOrderedList")}>
-          <span className="text-xs font-medium">1. List</span>
-        </ToolbarBtn>
-        <div className="w-px h-5 bg-gray-300 mx-1" />
-        <label className="flex items-center gap-1 cursor-pointer px-2 py-1 rounded hover:bg-gray-200 transition-colors" title="Text color">
-          <Palette className="h-3.5 w-3.5" />
-          <input type="color" defaultValue="#121212" onChange={e => exec("foreColor", e.target.value)} className="sr-only" />
-          <span className="text-[10px] text-gray-500">Color</span>
-        </label>
-        <label className="flex items-center gap-1 cursor-pointer px-2 py-1 rounded hover:bg-gray-200 transition-colors" title="Highlight color">
-          <span className="text-[10px] font-bold" style={{ background: "#fef08a", padding: "0 2px" }}>A</span>
-          <input type="color" defaultValue="#fef08a" onChange={e => exec("hiliteColor", e.target.value)} className="sr-only" />
-          <span className="text-[10px] text-gray-500">Highlight</span>
-        </label>
-        <div className="w-px h-5 bg-gray-300 mx-1" />
-        <div className="flex items-center gap-1 px-2 py-1 opacity-50 cursor-not-allowed" title="LaTeX coming soon">
-          <span className="text-xs font-mono">∑</span>
-          <Badge className="text-[9px] h-4 px-1.5 bg-[#E6F4F1] text-[#00796B] border-0 gap-0.5">
-            <Clock className="h-2.5 w-2.5" />Soon
-          </Badge>
+      {!preview && (
+        <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-gray-50 border-b">
+          <ToolbarBtn title="Bold (Ctrl+B)" onClick={() => exec("bold")}><Bold className="h-3.5 w-3.5" /></ToolbarBtn>
+          <ToolbarBtn title="Italic (Ctrl+I)" onClick={() => exec("italic")}><Italic className="h-3.5 w-3.5" /></ToolbarBtn>
+          <ToolbarBtn title="Underline (Ctrl+U)" onClick={() => exec("underline")}><Underline className="h-3.5 w-3.5" /></ToolbarBtn>
+          <ToolbarBtn title="Code" onClick={() => exec("insertHTML", "<code style='background:#f1f5f9;padding:1px 5px;border-radius:4px;font-family:monospace'>code</code>")}><Code className="h-3.5 w-3.5" /></ToolbarBtn>
+          <div className="w-px h-5 bg-gray-300 mx-1" />
+          <ToolbarBtn title="Heading 1" onClick={() => setBlock("h2")}><span className="text-[11px] font-black">H1</span></ToolbarBtn>
+          <ToolbarBtn title="Heading 2" onClick={() => setBlock("h3")}><span className="text-[11px] font-black">H2</span></ToolbarBtn>
+          <ToolbarBtn title="Heading 3" onClick={() => setBlock("h4")}><span className="text-[11px] font-black">H3</span></ToolbarBtn>
+          <ToolbarBtn title="Paragraph" onClick={() => setBlock("p")}><AlignLeft className="h-3.5 w-3.5" /></ToolbarBtn>
+          <div className="w-px h-5 bg-gray-300 mx-1" />
+          <ToolbarBtn title="Bullet list" onClick={() => exec("insertUnorderedList")}><List className="h-3.5 w-3.5" /></ToolbarBtn>
+          <ToolbarBtn title="Numbered list" onClick={() => exec("insertOrderedList")}><ListOrdered className="h-3.5 w-3.5" /></ToolbarBtn>
+          <ToolbarBtn title="Insert link" onClick={insertLink}><Link2 className="h-3.5 w-3.5" /></ToolbarBtn>
+          <div className="w-px h-5 bg-gray-300 mx-1" />
+          <label className="flex items-center gap-1 cursor-pointer px-2 py-1 rounded hover:bg-gray-200 transition-colors" title="Text color">
+            <Palette className="h-3.5 w-3.5 text-gray-700" />
+            <input type="color" defaultValue="#121212" onChange={e => exec("foreColor", e.target.value)} className="sr-only" />
+            <span className="text-[10px] text-gray-500">Color</span>
+          </label>
+          <label className="flex items-center gap-1 cursor-pointer px-2 py-1 rounded hover:bg-gray-200 transition-colors" title="Highlight">
+            <span className="text-[10px] font-bold" style={{ background: "#fef08a", padding: "0 3px", borderRadius: 2 }}>A</span>
+            <input type="color" defaultValue="#fef08a" onChange={e => exec("hiliteColor", e.target.value)} className="sr-only" />
+            <span className="text-[10px] text-gray-500">Highlight</span>
+          </label>
+          <div className="w-px h-5 bg-gray-300 mx-1" />
+          <LatexInsertBtn onInsert={insertLatex} />
         </div>
-      </div>
+      )}
 
-      {/* Editor area */}
-      <div
-        ref={editorRef}
-        contentEditable
-        suppressContentEditableWarning
-        dangerouslySetInnerHTML={{ __html: value || "<p></p>" }}
-        onInput={e => onChange((e.target as HTMLDivElement).innerHTML)}
-        onKeyDown={e => {
-          if (e.key === "Tab") {
-            e.preventDefault();
-            document.execCommand("insertHTML", false, "\u00A0\u00A0\u00A0\u00A0");
-          }
-        }}
-        className="min-h-[120px] max-h-80 overflow-y-auto p-3 outline-none text-sm leading-relaxed focus:bg-slate-50/60 prose prose-sm max-w-none"
-        style={{ direction: "ltr" }}
-      />
+      {preview ? (
+        <div className="min-h-[120px] max-h-80 overflow-y-auto p-3">
+          <MathHtml html={value} className="text-sm" />
+        </div>
+      ) : (
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          dangerouslySetInnerHTML={{ __html: value || "<p></p>" }}
+          onInput={e => onChange((e.target as HTMLDivElement).innerHTML)}
+          onPaste={handleSmartPaste}
+          onKeyDown={e => {
+            if (e.key === "Tab") {
+              e.preventDefault();
+              document.execCommand("insertHTML", false, "\u00A0\u00A0\u00A0\u00A0");
+            }
+          }}
+          className="min-h-[120px] max-h-80 overflow-y-auto p-3 outline-none text-sm leading-relaxed focus:bg-slate-50/60 prose prose-sm max-w-none"
+          style={{ direction: "ltr" }}
+        />
+      )}
     </div>
-  );
-}
-
-function ToolbarBtn({ onClick, children, title }: { onClick: () => void; children: React.ReactNode; title?: string }) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onMouseDown={e => { e.preventDefault(); onClick(); }}
-      className="flex items-center justify-center px-2 py-1 rounded hover:bg-gray-200 transition-colors text-gray-700"
-    >
-      {children}
-    </button>
   );
 }
 
 /* ── Image section ─────────────────────────────────────────────────────────── */
 function ImageSection({ section, onChange }: { section: Section; onChange: (field: string, val: any) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
-
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -147,36 +242,43 @@ function ImageSection({ section, onChange }: { section: Section; onChange: (fiel
     reader.onload = ev => onChange("imageUrl", ev.target?.result as string);
     reader.readAsDataURL(file);
   };
-
   return (
     <div className="space-y-2">
-      <Input
-        placeholder="Paste image URL (https://…)"
-        value={section.imageUrl || ""}
-        onChange={e => onChange("imageUrl", e.target.value)}
-        className="text-sm"
-      />
+      <Input placeholder="Paste image URL (https://…)" value={section.imageUrl || ""} onChange={e => onChange("imageUrl", e.target.value)} className="text-sm" />
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-400">or</span>
-        <button
-          type="button"
-          onClick={() => fileRef.current?.click()}
-          className="text-xs text-primary underline"
-        >
-          Upload from device (PNG, JPG)
-        </button>
+        <button type="button" onClick={() => fileRef.current?.click()} className="text-xs text-primary underline">Upload from device (PNG, JPG)</button>
         <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handleFile} />
       </div>
       {section.imageUrl && (
-        <img
-          src={section.imageUrl}
-          alt="Section"
-          className="max-h-64 rounded-xl object-contain border border-gray-200 bg-gray-50"
-        />
+        <img src={section.imageUrl} alt="Section" className="max-h-64 rounded-xl object-contain border border-gray-200 bg-gray-50" />
       )}
     </div>
   );
 }
+
+/* ── Section type config ──────────────────────────────────────────────────── */
+const SECTION_ICONS: Record<SectionType, React.ReactNode> = {
+  heading: <Heading1 className="h-4 w-4" />,
+  subheading: <Heading2 className="h-4 w-4" />,
+  text: <FileText className="h-4 w-4" />,
+  video: <Video className="h-4 w-4" />,
+  image: <Image className="h-4 w-4" />,
+  quiz: <HelpCircle className="h-4 w-4" />,
+  simulation: <FlaskConical className="h-4 w-4" />,
+  flashcards: <Layers className="h-4 w-4" />,
+};
+
+const SECTION_COLORS: Record<SectionType, string> = {
+  heading: "bg-primary/10 text-primary",
+  subheading: "bg-blue-100 text-blue-700",
+  text: "bg-slate-100 text-slate-700",
+  video: "bg-purple-100 text-purple-700",
+  image: "bg-green-100 text-green-700",
+  quiz: "bg-amber-100 text-amber-700",
+  simulation: "bg-teal-100 text-teal-700",
+  flashcards: "bg-pink-100 text-pink-700",
+};
 
 /* ── Full-screen editor ────────────────────────────────────────────────────── */
 function FullScreenEditor({
@@ -193,6 +295,8 @@ function FullScreenEditor({
   const [sections, setSections] = useState<Section[]>(lesson?.sections || []);
   const [newSectionType, setNewSectionType] = useState<SectionType>("text");
   const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [previewAll, setPreviewAll] = useState(false);
+  const [saved, setSaved] = useState(false);
   const qc = useQueryClient();
 
   const mutation = useMutation({
@@ -205,7 +309,8 @@ function FullScreenEditor({
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["content-craft"] });
       onRefresh();
-      onClose();
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
     },
   });
 
@@ -229,47 +334,32 @@ function FullScreenEditor({
   };
 
   const move = (idx: number, dir: "up" | "down") => {
-    const newIdx = dir === "up" ? idx - 1 : idx + 1;
-    if (newIdx < 0 || newIdx >= sections.length) return;
+    const ni = dir === "up" ? idx - 1 : idx + 1;
+    if (ni < 0 || ni >= sections.length) return;
     setSections(prev => {
       const arr = [...prev];
-      [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+      [arr[idx], arr[ni]] = [arr[ni], arr[idx]];
       return arr;
     });
-    setActiveIdx(newIdx);
+    setActiveIdx(ni);
   };
 
-  const SECTION_ICONS: Record<SectionType, React.ReactNode> = {
-    heading: <Heading1 className="h-4 w-4" />,
-    subheading: <Heading2 className="h-4 w-4" />,
-    text: <FileText className="h-4 w-4" />,
-    video: <Video className="h-4 w-4" />,
-    image: <Image className="h-4 w-4" />,
-    quiz: <HelpCircle className="h-4 w-4" />,
-    simulation: <FlaskConical className="h-4 w-4" />,
-    flashcards: <Layers className="h-4 w-4" />,
-  };
-
-  const SECTION_COLORS: Record<SectionType, string> = {
-    heading: "bg-primary/10 text-primary",
-    subheading: "bg-blue-100 text-blue-700",
-    text: "bg-slate-100 text-slate-700",
-    video: "bg-purple-100 text-purple-700",
-    image: "bg-green-100 text-green-700",
-    quiz: "bg-amber-100 text-amber-700",
-    simulation: "bg-teal-100 text-teal-700",
-    flashcards: "bg-pink-100 text-pink-700",
-  };
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        mutation.mutate({ title, description, sections });
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [title, description, sections]);
 
   return (
     <div className="fixed inset-0 z-[999] bg-[#F5F5F5] flex flex-col overflow-hidden">
       {/* Top bar */}
       <div className="flex items-center h-14 border-b bg-white px-4 gap-3 shrink-0 shadow-sm">
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors"
-        >
+        <button type="button" onClick={onClose} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors">
           <X className="h-4 w-4" />
           <span className="text-sm">Back</span>
         </button>
@@ -280,22 +370,29 @@ function FullScreenEditor({
           placeholder="Lesson title…"
           className="flex-1 text-base font-semibold border-0 outline-none bg-transparent text-gray-900 placeholder:text-gray-400"
         />
+        <button
+          type="button"
+          onClick={() => setPreviewAll(p => !p)}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${previewAll ? "bg-primary/10 text-primary" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+          title="Toggle render preview (shows LaTeX, bold, etc.)"
+        >
+          {previewAll ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          {previewAll ? "Edit" : "Preview"}
+        </button>
         <Button
           onClick={() => mutation.mutate({ title, description, sections })}
           disabled={mutation.isPending}
-          className="h-9 bg-primary hover:bg-primary/90 text-white gap-2 shrink-0"
+          className={`h-9 text-white gap-2 shrink-0 transition-colors ${saved ? "bg-emerald-500 hover:bg-emerald-500" : "bg-primary hover:bg-primary/90"}`}
         >
-          <Save className="h-3.5 w-3.5" />
-          {mutation.isPending ? "Saving…" : "Save Lesson"}
+          {saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
+          {mutation.isPending ? "Saving…" : saved ? "Saved!" : "Save  ⌘S"}
         </Button>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel – structure */}
-        <div className="w-56 shrink-0 border-r bg-white overflow-auto p-3 space-y-1">
+        <div className="w-60 shrink-0 border-r bg-white overflow-auto p-3 space-y-0.5">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">Structure</p>
-
-          {/* Description */}
           <button
             type="button"
             onClick={() => setActiveIdx(-1)}
@@ -313,183 +410,224 @@ function FullScreenEditor({
                 s.type === "heading" ? "px-2 py-1.5" : s.type === "subheading" ? "px-4 py-1.5" : "px-6 py-1"
               } ${activeIdx === idx ? "bg-primary/10 text-primary font-medium" : "text-gray-500 hover:bg-gray-100"}`}
             >
-              <span className={`shrink-0 p-0.5 rounded ${SECTION_COLORS[s.type]}`}>
-                {SECTION_ICONS[s.type]}
-              </span>
+              <span className={`shrink-0 p-0.5 rounded ${SECTION_COLORS[s.type]}`}>{SECTION_ICONS[s.type]}</span>
               <span className="truncate">
                 {s.type === "heading" || s.type === "subheading" ? (s.content || s.type) : (s.title || s.type)}
               </span>
             </button>
           ))}
 
-          <div className="pt-2 border-t">
-            <p className="text-[10px] text-gray-400 px-2 mb-1.5">Add section</p>
+          <div className="pt-3 border-t mt-2 space-y-1.5">
+            <p className="text-[10px] text-gray-400 px-1 font-medium">Add section</p>
             <Select value={newSectionType} onValueChange={(v: SectionType) => setNewSectionType(v)}>
-              <SelectTrigger className="h-8 text-xs rounded-lg"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-8 text-xs rounded-lg">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
-                <SelectItem value="heading">Heading (Topic)</SelectItem>
-                <SelectItem value="subheading">Subheading</SelectItem>
-                <SelectItem value="text">Rich Text</SelectItem>
-                <SelectItem value="video">Video</SelectItem>
-                <SelectItem value="image">Image</SelectItem>
-                <SelectItem value="quiz">Quiz</SelectItem>
-                <SelectItem value="simulation">Simulation</SelectItem>
-                <SelectItem value="flashcards">Flashcards</SelectItem>
+                <SelectItem value="heading">🏷️ Heading (Topic)</SelectItem>
+                <SelectItem value="subheading">📌 Subheading</SelectItem>
+                <SelectItem value="text">📝 Rich Text</SelectItem>
+                <SelectItem value="video">🎬 Video</SelectItem>
+                <SelectItem value="image">🖼️ Image</SelectItem>
+                <SelectItem value="quiz">❓ Quiz</SelectItem>
+                <SelectItem value="simulation">🧪 Simulation</SelectItem>
+                <SelectItem value="flashcards">🃏 Flashcards</SelectItem>
               </SelectContent>
             </Select>
             <button
               type="button"
               onClick={addSection}
-              className="mt-1.5 w-full flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
+              className="w-full flex items-center justify-center gap-1.5 rounded-lg py-1.5 text-xs bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-medium"
             >
-              <Plus className="h-3 w-3" /> Add
+              <Plus className="h-3 w-3" /> Add Section
             </button>
+          </div>
+
+          <div className="pt-3 border-t mt-2 px-1">
+            <p className="text-[10px] text-gray-400 font-medium mb-1.5">LaTeX quick guide</p>
+            <div className="space-y-1 text-[10px] text-gray-500 font-mono">
+              <p className="bg-gray-50 px-2 py-1 rounded">$E=mc^2$</p>
+              <p className="bg-gray-50 px-2 py-1 rounded">$$\int_0^\infty$$</p>
+              <p className="bg-gray-50 px-2 py-1 rounded">\frac{"{a}"}{"{b}"}</p>
+              <p className="bg-gray-50 px-2 py-1 rounded">\sqrt{"{x}"}</p>
+            </div>
+            <p className="text-[9px] text-gray-400 mt-1.5">Paste markdown too: **bold**, *italic*, `code`</p>
           </div>
         </div>
 
         {/* Main editor */}
-        <div className="flex-1 overflow-auto p-6 space-y-4 max-w-3xl mx-auto">
-          {/* Overview */}
-          {(activeIdx === -1 || activeIdx === null) && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="border-0 shadow-sm">
-                <CardContent className="p-5 space-y-3">
-                  <Label className="text-xs font-bold text-gray-500">Lesson Description</Label>
-                  <textarea
-                    rows={3}
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    placeholder="Brief summary of what students will learn…"
-                    className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
-                  />
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
-
-          {/* Sections */}
-          {sections.map((s, idx) => {
-            const isActive = activeIdx === idx;
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                onClick={() => setActiveIdx(idx)}
-                className={`cursor-pointer ${isActive ? "ring-2 ring-primary/40 rounded-2xl" : ""}`}
-              >
+        <div className="flex-1 overflow-auto p-6 space-y-4">
+          <div className="max-w-3xl mx-auto space-y-4">
+            {/* Overview */}
+            {(activeIdx === -1 || activeIdx === null) && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
                 <Card className="border-0 shadow-sm">
-                  <CardContent className="p-4">
-                    {/* Section header */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className={`p-1 rounded ${SECTION_COLORS[s.type]}`}>
-                        {SECTION_ICONS[s.type]}
-                      </span>
-                      <Badge variant="secondary" className="text-[10px] capitalize">{s.type}</Badge>
-                      <div className="ml-auto flex gap-1">
-                        <button type="button" onClick={e => { e.stopPropagation(); move(idx, "up"); }} className="p-1 rounded hover:bg-gray-100">
-                          <ArrowUp className="h-3.5 w-3.5 text-gray-400" />
-                        </button>
-                        <button type="button" onClick={e => { e.stopPropagation(); move(idx, "down"); }} className="p-1 rounded hover:bg-gray-100">
-                          <ArrowDown className="h-3.5 w-3.5 text-gray-400" />
-                        </button>
-                        <button type="button" onClick={e => { e.stopPropagation(); remove(idx); }} className="p-1 rounded hover:bg-red-50">
-                          <Trash2 className="h-3.5 w-3.5 text-red-400" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Section content */}
-                    {(s.type === "heading" || s.type === "subheading") && (
-                      <Input
-                        placeholder={s.type === "heading" ? "Topic title…" : "Subtopic title…"}
-                        value={s.content || ""}
-                        onChange={e => update(idx, "content", e.target.value)}
-                        className={`border-0 border-b rounded-none px-0 text-sm focus-visible:ring-0 ${s.type === "heading" ? "text-lg font-bold" : "text-base font-semibold"}`}
+                  <CardContent className="p-5 space-y-3">
+                    <Label className="text-xs font-bold text-gray-500">Lesson Description</Label>
+                    {previewAll ? (
+                      <div className="min-h-[64px] text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{description || <span className="text-gray-300 italic">No description</span>}</div>
+                    ) : (
+                      <textarea
+                        rows={3}
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                        placeholder="Brief summary of what students will learn…"
+                        className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30"
                       />
-                    )}
-
-                    {s.type === "text" && (
-                      <div>
-                        <Input
-                          placeholder="Section title (optional)"
-                          value={s.title || ""}
-                          onChange={e => update(idx, "title", e.target.value)}
-                          className="mb-2 text-sm h-8"
-                        />
-                        <RichTextEditor
-                          value={s.htmlContent || s.content || ""}
-                          onChange={v => { update(idx, "htmlContent", v); update(idx, "content", v.replace(/<[^>]+>/g, "")); }}
-                        />
-                      </div>
-                    )}
-
-                    {s.type === "video" && (
-                      <div className="space-y-2">
-                        <Input
-                          placeholder="Section title (optional)"
-                          value={s.title || ""}
-                          onChange={e => update(idx, "title", e.target.value)}
-                          className="text-sm h-8"
-                        />
-                        <Input
-                          placeholder="Video URL (YouTube, Vimeo, or direct mp4)"
-                          value={s.content || ""}
-                          onChange={e => update(idx, "content", e.target.value)}
-                          className="text-sm h-8"
-                        />
-                        {s.content && s.content.includes("youtube") && (
-                          <div className="aspect-video rounded-xl overflow-hidden bg-black">
-                            <iframe
-                              src={s.content.replace("watch?v=", "embed/")}
-                              className="w-full h-full"
-                              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {s.type === "image" && <ImageSection section={s} onChange={(f, v) => update(idx, f, v)} />}
-
-                    {s.type === "quiz" && (
-                      <div className="space-y-2">
-                        <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
-                        <Input
-                          placeholder="Question IDs from QueryVault (e.g. 12, 34, 56)"
-                          value={(s.quizQuestionIds || []).join(", ")}
-                          onChange={e => update(idx, "quizQuestionIds", e.target.value.split(",").map(x => Number(x.trim())).filter(n => !isNaN(n) && n > 0))}
-                          className="text-sm h-8"
-                        />
-                      </div>
-                    )}
-
-                    {s.type === "simulation" && (
-                      <div className="space-y-2">
-                        <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
-                        <Input type="number" placeholder="SimVerse simulation ID" value={s.simulationId ?? ""} onChange={e => update(idx, "simulationId", e.target.value ? Number(e.target.value) : undefined)} className="text-sm h-8" />
-                      </div>
-                    )}
-
-                    {s.type === "flashcards" && (
-                      <div className="space-y-2">
-                        <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
-                        <Input type="number" placeholder="CardStack deck ID" value={s.flashcardDeckId ?? ""} onChange={e => update(idx, "flashcardDeckId", e.target.value ? Number(e.target.value) : undefined)} className="text-sm h-8" />
-                      </div>
                     )}
                   </CardContent>
                 </Card>
               </motion.div>
-            );
-          })}
+            )}
 
-          {sections.length === 0 && (
-            <div className="text-center py-16 text-gray-400">
-              <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Add a heading or text section to begin building your lesson.</p>
-            </div>
-          )}
+            {/* Sections */}
+            {sections.map((s, idx) => {
+              const isActive = activeIdx === idx;
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => setActiveIdx(idx)}
+                  className={`cursor-pointer ${isActive ? "ring-2 ring-primary/40 rounded-2xl" : ""}`}
+                >
+                  <Card className="border-0 shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className={`p-1 rounded ${SECTION_COLORS[s.type]}`}>{SECTION_ICONS[s.type]}</span>
+                        <Badge variant="secondary" className="text-[10px] capitalize">{s.type}</Badge>
+                        <div className="ml-auto flex gap-1">
+                          <button type="button" onClick={e => { e.stopPropagation(); move(idx, "up"); }} className="p-1 rounded hover:bg-gray-100" title="Move up">
+                            <ArrowUp className="h-3.5 w-3.5 text-gray-400" />
+                          </button>
+                          <button type="button" onClick={e => { e.stopPropagation(); move(idx, "down"); }} className="p-1 rounded hover:bg-gray-100" title="Move down">
+                            <ArrowDown className="h-3.5 w-3.5 text-gray-400" />
+                          </button>
+                          <button type="button" onClick={e => { e.stopPropagation(); remove(idx); }} className="p-1 rounded hover:bg-red-50" title="Delete">
+                            <Trash2 className="h-3.5 w-3.5 text-red-400" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {(s.type === "heading" || s.type === "subheading") && (
+                        previewAll ? (
+                          <div className={s.type === "heading" ? "text-xl font-bold text-gray-900" : "text-base font-semibold text-gray-800"}>
+                            {s.content || <span className="text-gray-300 italic">No title</span>}
+                          </div>
+                        ) : (
+                          <Input
+                            placeholder={s.type === "heading" ? "Topic title…" : "Subtopic title…"}
+                            value={s.content || ""}
+                            onChange={e => update(idx, "content", e.target.value)}
+                            className={`border-0 border-b rounded-none px-0 text-sm focus-visible:ring-0 ${s.type === "heading" ? "text-lg font-bold" : "text-base font-semibold"}`}
+                          />
+                        )
+                      )}
+
+                      {s.type === "text" && (
+                        <div className="space-y-2">
+                          {!previewAll && (
+                            <Input
+                              placeholder="Section title (optional)"
+                              value={s.title || ""}
+                              onChange={e => update(idx, "title", e.target.value)}
+                              className="text-sm h-8"
+                            />
+                          )}
+                          {previewAll && s.title && (
+                            <p className="font-semibold text-sm text-gray-800">{s.title}</p>
+                          )}
+                          <RichTextEditor
+                            value={s.htmlContent || s.content || ""}
+                            onChange={v => { update(idx, "htmlContent", v); update(idx, "content", v.replace(/<[^>]+>/g, "")); }}
+                            preview={previewAll}
+                          />
+                        </div>
+                      )}
+
+                      {s.type === "video" && (
+                        <div className="space-y-2">
+                          {!previewAll && (
+                            <>
+                              <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
+                              <Input placeholder="YouTube or direct MP4 URL" value={s.content || ""} onChange={e => update(idx, "content", e.target.value)} className="text-sm h-8" />
+                            </>
+                          )}
+                          {s.content && (s.content.includes("youtube") || s.content.includes("youtu.be")) && (
+                            <div className="aspect-video rounded-xl overflow-hidden bg-black">
+                              <iframe
+                                src={s.content.replace("watch?v=", "embed/").replace("youtu.be/", "www.youtube.com/embed/")}
+                                className="w-full h-full"
+                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                allowFullScreen
+                              />
+                            </div>
+                          )}
+                          {s.content && s.content.endsWith(".mp4") && (
+                            <video src={s.content} controls className="w-full rounded-xl" />
+                          )}
+                        </div>
+                      )}
+
+                      {s.type === "image" && !previewAll && <ImageSection section={s} onChange={(f, v) => update(idx, f, v)} />}
+                      {s.type === "image" && previewAll && s.imageUrl && (
+                        <img src={s.imageUrl} alt={s.title || "Image"} className="max-h-64 rounded-xl object-contain border border-gray-200" />
+                      )}
+
+                      {s.type === "quiz" && (
+                        <div className="space-y-2">
+                          {!previewAll && (
+                            <>
+                              <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
+                              <Input
+                                placeholder="Question IDs from QueryVault (e.g. 12, 34, 56)"
+                                value={(s.quizQuestionIds || []).join(", ")}
+                                onChange={e => update(idx, "quizQuestionIds", e.target.value.split(",").map(x => Number(x.trim())).filter(n => !isNaN(n) && n > 0))}
+                                className="text-sm h-8"
+                              />
+                            </>
+                          )}
+                          {previewAll && <div className="flex items-center gap-2 py-2 text-sm text-amber-700 bg-amber-50 rounded-lg px-3"><HelpCircle className="h-4 w-4" /> Quiz · {s.quizQuestionIds?.length || 0} questions</div>}
+                        </div>
+                      )}
+
+                      {s.type === "simulation" && (
+                        <div className="space-y-2">
+                          {!previewAll && (
+                            <>
+                              <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
+                              <Input type="number" placeholder="SimVerse simulation ID" value={s.simulationId ?? ""} onChange={e => update(idx, "simulationId", e.target.value ? Number(e.target.value) : undefined)} className="text-sm h-8" />
+                            </>
+                          )}
+                          {previewAll && <div className="flex items-center gap-2 py-2 text-sm text-teal-700 bg-teal-50 rounded-lg px-3"><FlaskConical className="h-4 w-4" /> Simulation #{s.simulationId || "—"}</div>}
+                        </div>
+                      )}
+
+                      {s.type === "flashcards" && (
+                        <div className="space-y-2">
+                          {!previewAll && (
+                            <>
+                              <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
+                              <Input type="number" placeholder="CardStack deck ID" value={s.flashcardDeckId ?? ""} onChange={e => update(idx, "flashcardDeckId", e.target.value ? Number(e.target.value) : undefined)} className="text-sm h-8" />
+                            </>
+                          )}
+                          {previewAll && <div className="flex items-center gap-2 py-2 text-sm text-pink-700 bg-pink-50 rounded-lg px-3"><Layers className="h-4 w-4" /> Flashcard Deck #{s.flashcardDeckId || "—"}</div>}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+
+            {sections.length === 0 && (
+              <div className="text-center py-16 text-gray-400">
+                <FileText className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="text-sm font-medium">Start building your lesson</p>
+                <p className="text-xs mt-1 max-w-xs mx-auto">Add a heading or text section from the panel on the left. Rich text supports LaTeX formulas ($E=mc^2$), bold, italic, and more.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -502,14 +640,34 @@ export default function ContentCraft() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
 
-  const { data: lessons, isLoading } = useQuery<Lesson[]>({
+  const { data: lessons, isLoading, refetch } = useQuery<Lesson[]>({
     queryKey: ["content-craft"],
     queryFn: () => fetchJSON("/content-craft"),
+  });
+
+  const deleteLesson = useMutation({
+    mutationFn: (id: number) =>
+      fetch(`${API}/content-craft/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token()}` },
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["content-craft"] }),
   });
 
   const openNew = () => { setEditingLesson(null); setEditorOpen(true); };
   const openEdit = (l: Lesson) => { setEditingLesson(l); setEditorOpen(true); };
   const closeEditor = () => { setEditorOpen(false); setEditingLesson(null); };
+
+  const TYPE_BADGE_COLORS: Record<string, string> = {
+    text: "bg-slate-100 text-slate-600",
+    video: "bg-purple-100 text-purple-700",
+    image: "bg-green-100 text-green-700",
+    quiz: "bg-amber-100 text-amber-700",
+    heading: "bg-primary/10 text-primary",
+    subheading: "bg-blue-100 text-blue-700",
+    simulation: "bg-teal-100 text-teal-700",
+    flashcards: "bg-pink-100 text-pink-700",
+  };
 
   return (
     <>
@@ -517,46 +675,63 @@ export default function ContentCraft() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Content Craft</h1>
-            <p className="text-gray-500 text-sm mt-0.5">Build structured, interactive lessons for your courses.</p>
+            <p className="text-gray-500 text-sm mt-0.5">Build rich, interactive lessons — with LaTeX formulas, videos, quizzes, and more.</p>
           </div>
           <Button onClick={openNew} className="bg-primary hover:bg-primary/90 text-white gap-2">
             <Plus className="h-4 w-4" /> New Lesson
           </Button>
         </motion.div>
 
+        {/* Feature chips */}
+        <div className="flex gap-2 mb-6 flex-wrap">
+          {["LaTeX formulas", "Rich text", "Video embed", "Quizzes", "Simulations", "Flashcard decks"].map(f => (
+            <span key={f} className="text-[11px] bg-white border border-border rounded-full px-3 py-1 text-gray-500">{f}</span>
+          ))}
+        </div>
+
         {isLoading ? (
           <div className="grid gap-4">{[1, 2, 3].map(i => <Skeleton key={i} className="h-20 rounded-2xl" />)}</div>
-        ) : lessons?.length === 0 ? (
+        ) : !lessons?.length ? (
           <Card className="border-0 shadow-sm">
             <CardContent className="p-16 text-center text-gray-400">
-              <FileText className="h-10 w-10 mx-auto mb-3 opacity-20" />
-              <p className="font-semibold">No lessons yet</p>
-              <p className="text-sm mt-1">Create your first interactive lesson to get started.</p>
-              <Button onClick={openNew} className="mt-5 bg-primary text-white" size="sm">Create Lesson</Button>
+              <FileText className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p className="font-semibold text-gray-700">No lessons yet</p>
+              <p className="text-sm mt-1 max-w-sm mx-auto">Create your first interactive lesson. You can embed LaTeX formulas like $E = mc^2$, videos, quizzes, and more.</p>
+              <Button onClick={openNew} className="mt-5 bg-primary text-white" size="sm">Create First Lesson</Button>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-3">
-            {lessons?.map((lesson, i) => (
+            {lessons.map((lesson, i) => (
               <motion.div key={lesson.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}>
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => openEdit(lesson)}>
+                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
                   <CardContent className="p-4 flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                       <FileText className="h-5 w-5 text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-gray-900">{lesson.title}</p>
-                      <p className="text-sm text-gray-400 mt-0.5">
-                        {lesson.sections?.length || 0} sections · Updated {new Date(lesson.updatedAt).toLocaleDateString()}
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">
+                        {lesson.description || "No description"} · {lesson.sections?.length || 0} sections · Updated {new Date(lesson.updatedAt).toLocaleDateString()}
                       </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1 flex-wrap max-w-32">
-                        {[...new Set(lesson.sections?.map(s => s.type))].slice(0, 3).map(t => (
-                          <Badge key={t} variant="secondary" className="text-[10px] capitalize">{t}</Badge>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="flex gap-1 flex-wrap max-w-36 justify-end">
+                        {[...new Set(lesson.sections?.map(s => s.type))].slice(0, 4).map(t => (
+                          <span key={t} className={`text-[10px] px-2 py-0.5 rounded-full font-medium capitalize ${TYPE_BADGE_COLORS[t] || "bg-gray-100 text-gray-600"}`}>{t}</span>
                         ))}
                       </div>
-                      <Button variant="outline" size="sm" className="h-8 text-xs shrink-0">Edit <ChevronRight className="h-3 w-3 ml-1" /></Button>
+                      <Button variant="ghost" size="sm" className="h-8 text-xs" onClick={() => openEdit(lesson)}>
+                        Edit <ChevronRight className="h-3 w-3 ml-1" />
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={e => { e.stopPropagation(); if (confirm("Delete this lesson?")) deleteLesson.mutate(lesson.id); }}
+                        className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
+                        title="Delete lesson"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
@@ -568,17 +743,8 @@ export default function ContentCraft() {
 
       <AnimatePresence>
         {editorOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.2 }}
-          >
-            <FullScreenEditor
-              lesson={editingLesson}
-              onClose={closeEditor}
-              onRefresh={() => qc.invalidateQueries({ queryKey: ["content-craft"] })}
-            />
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }} transition={{ duration: 0.2 }}>
+            <FullScreenEditor lesson={editingLesson} onClose={closeEditor} onRefresh={refetch} />
           </motion.div>
         )}
       </AnimatePresence>
