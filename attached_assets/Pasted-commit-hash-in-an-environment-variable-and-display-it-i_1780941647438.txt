@@ -1,0 +1,48 @@
+commit hash in an environment variable and display it in the admin dashboard footer.
+
+---
+
+## 10. PERFORMANCE TARGETS & TESTING
+
+- **Lighthouse score:** aim for >90 on Performance, Accessibility, Best Practices.  
+- **Backend:** all API responses under 500ms (excluding AI calls).  
+- **Implement simple load testing** using a script or `artillery` (just instructions, not in codebase) – but note in documentation.  
+- **Add a `performance` admin page** that shows average response times per endpoint (use the audit log or a custom `api_metrics` table).  
+
+---
+
+## 11. DOCUMENTATION & MAINTENANCE
+
+- **Generate a `README.md`** with:  
+  - Project overview.  
+  - Setup instructions (environment variables, database, Redis, Spaceship).  
+  - Deployment guide.  
+  - API documentation (brief, or link to Postman collection).  
+- **Internal docs:** add a `/docs` page in the admin panel that lists all modules with status and last update. (Simple markdown render.)
+
+---
+
+## 12. MOBILE RELIABILITY & OFFLINE
+
+- **Offline support:** ensure the PWA manifest is configured, and service worker caches critical assets.  
+- **Touch optimisation:** ensure all interactive elements have sufficient touch targets (44px minimum).  
+- **Low bandwidth mode:** detect slow connections (using Network Information API) and show a “lite mode” toggle that disables animations and heavy graphics.
+
+---
+
+## IMPLEMENTATION ORDER
+
+1. Set up Redis caching and apply to most‑read endpoints.  
+2. Add rate limiting, Helmet, input validation, and CORS.  
+3. Implement MFA setup and login rate limiting.  
+4. Build BullMQ queues and move email/AI tasks to queues.  
+5. Create health endpoint and Prometheus metrics.  
+6. Build admin monitoring dashboards (System Health, Queue, Performance).  
+7. Automate backups with node‑cron and backup logs.  
+8. Enhance storage with CDN support and file compression.  
+9. Database indexing and encryption.  
+10. Write deployment scripts, PM2 config, and documentation.  
+11. Mobile reliability adjustments and PWA updates.  
+12. Final performance tuning and testing.
+
+**Start building now. Transform Aperti into an unshakeable, high‑performance, secure foundation that will support every future phase.**
