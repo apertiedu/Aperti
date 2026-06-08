@@ -10,6 +10,7 @@ import {
   LogOut, School, ChevronLeft, ChevronRight, Search, KeyRound,
   Sun, Moon, Sparkles, ShoppingBag, UserCheck, Link2, Bot,
   GraduationCap, TableProperties, Medal, Scale, Archive,
+  Bell, Inbox, Hash, Megaphone, Users, Ticket,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
@@ -132,6 +133,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "SubPilot Settings",      href: "/admin/subpilot-settings",    icon: Settings,    roles: ["admin"] },
         { name: "HelpDesk Admin",         href: "/admin/helpdesk",             icon: MessageSquare, roles: ["admin"] },
         { name: "GuardianPulse",          href: "/admin/guardian-pulse",       icon: Sparkles,    roles: ["admin"] },
+        { name: "Moderation Panel",       href: "/admin/moderation",           icon: Shield,      roles: ["admin"] },
+        { name: "Comm Analytics",         href: "/admin/communication-analytics", icon: BarChart3, roles: ["admin"] },
+      ],
+    },
+    {
+      label: "Communication",
+      items: [
+        { name: "Inbox",        href: "/inbox",          icon: Inbox,        roles: ["admin","teacher","assistant"] },
+        { name: "Announcements",href: "/announcements",  icon: Megaphone,    roles: ["admin","teacher","assistant"] },
+        { name: "Study Rooms",  href: "/rooms",          icon: Users,        roles: ["admin","teacher","assistant"] },
+        { name: "Support",      href: "/support",        icon: Ticket,       roles: ["admin","teacher","assistant"] },
+        { name: "Notifications",href: "/notifications",  icon: Bell,         roles: ["admin","teacher","assistant"] },
+        { name: "Messages",     href: "/messages",       icon: MessageSquare,roles: ["admin","teacher","assistant"] },
       ],
     },
   ];

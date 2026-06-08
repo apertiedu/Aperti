@@ -132,6 +132,9 @@ import AnnouncementsPage from "@/pages/announcements";
 import StudyRooms from "@/pages/study-rooms";
 import CollaborateRoom from "@/pages/collaborate";
 import SupportTickets from "@/pages/support-tickets";
+import NotificationCenter from "@/pages/notification-center";
+import AdminModeration from "@/pages/admin/moderation";
+import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 
 // Phase 6 — Assessment, Examination & Certification Ecosystem
 import AssessmentHub from "@/pages/assessment-hub";
@@ -295,6 +298,7 @@ function StudentRouter() {
         <Route path="/rooms" component={StudyRooms} />
         <Route path="/collaborate/:roomId" component={CollaborateRoom} />
         <Route path="/support" component={SupportTickets} />
+        <Route path="/notifications" component={NotificationCenter} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -354,6 +358,7 @@ const TEACHER_ROUTES = (
     <Route path="/rooms" component={StudyRooms} />
     <Route path="/collaborate/:roomId" component={CollaborateRoom} />
     <Route path="/support" component={SupportTickets} />
+    <Route path="/notifications" component={NotificationCenter} />
   </>
 );
 
@@ -376,6 +381,9 @@ const ADMIN_ROUTES = (
     <Route path="/admin/teacher-verification" component={TeacherVerification} />
     <Route path="/admin/ai-analytics" component={AiAnalytics} />
     <Route path="/admin/ai-safety" component={AiSafety} />
+    {/* Phase 7 — Admin Communication */}
+    <Route path="/admin/moderation" component={AdminModeration} />
+    <Route path="/admin/communication-analytics" component={CommunicationAnalytics} />
   </>
 );
 

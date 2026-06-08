@@ -224,48 +224,59 @@ commSupportRouter.put("/notifications/preferences", authenticate, async (req: Au
 // ── GET /api/analytics/communication ────────────────────────────────────────
 commSupportRouter.get("/analytics/communication", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
-    const { rows: threadStats } = await pool.query(
-      `SELECT COUNT(*) AS total_threads,
-        SUM(CASE WHEN type='direct' THEN 1 ELSE 0 END) AS direct_threads,
-        SUM(CASE WHEN type='class' THEN 1 ELSE 0 END) AS class_threads,
-        SUM(CASE WHEN type='parent' THEN 1 ELSE 0 END) AS parent_threads
-       FROM message_threads_ext WHERE created_at > NOW() - INTERVAL '30 days'`,
-    );
-    const { rows: msgStats } = await pool.query(
-      `SELECT COUNT(*) AS total_messages,
-        SUM(CASE WHEN is_read = false THEN 1 ELSE 0 END) AS unread_count,
-        ROUND(AVG(EXTRACT(EPOCH FROM (CASE WHEN is_read THEN created_at ELSE NULL END)))) AS avg_read_seconds
-       FROM thread_messages WHERE created_at > NOW() - INTERVAL '30 days'`,
-    );
-    const { rows: roomStats } = await pool.query(
-      `SELECT COUNT(*) AS total_rooms, COUNT(DISTINCT user_id) AS active_members FROM collaboration_rooms r JOIN room_members rm ON rm.room_id = r.id WHERE r.created_at > NOW() - INTERVAL '30 days'`,
-    );
-    const { rows: ticketStats } = await pool.query(
-      `SELECT status, COUNT(*) AS count FROM support_tickets WHERE created_at > NOW() - INTERVAL '30 days' GROUP BY status`,
-    );
-    const { rows: announcementStats } = await pool.query(
-      `SELECT COUNT(*) AS total, SUM(CASE WHEN status='delivered' THEN 1 ELSE 0 END) AS delivered FROM announcements WHERE created_at > NOW() - INTERVAL '30 days'`,
-    );
-    const { rows: inactiveStudents } = await pool.query(
-      `SELECT a.display_name, MAX(tm.created_at) AS last_active
-       FROM accounts a LEFT JOIN thread_messages tm ON tm.sender_id = a.id
-       WHERE a.role = 'student'
-       GROUP BY a.id, a.display_name
-       HAVING MAX(tm.created_at) < NOW() - INTERVAL '5 days' OR MAX(tm.created_at) IS NULL
-       LIMIT 10`,
+    const days = parseInt(req.query.days as string) || 30;
+    const interval = `${days} days`;
+
+    const { rows: [summary] } = await pool.query(
+      `SELECT
+        (SELECT COUNT(*) FROM message_threads_ext WHERE created_at > NOW() - $1::interval) AS total_threads,
+        (SELECT COUNT(*) FROM thread_messages WHERE created_at > NOW() - $1::interval) AS total_messages,
+        (SELECT COUNT(*) FROM announcements WHERE created_at > NOW() - $1::interval) AS total_announcements,
+        (SELECT COUNT(*) FROM support_tickets) AS total_tickets,
+        (SELECT COUNT(*) FROM support_tickets WHERE status = 'open') AS open_tickets,
+        (SELECT COUNT(*) FROM support_tickets WHERE status = 'resolved') AS resolved_tickets,
+        (SELECT COUNT(*) FROM collaboration_rooms WHERE created_at > NOW() - $1::interval) AS active_rooms,
+        (SELECT COUNT(*) FROM class_channels) AS total_channels`,
+      [interval],
     );
 
-    res.json({
-      threads: threadStats[0],
-      messages: msgStats[0],
-      rooms: roomStats[0],
-      tickets: ticketStats,
-      announcements: announcementStats[0],
-      insights: {
-        inactiveStudents,
-        period: "Last 30 days",
-      },
-    });
+    const { rows: top_messagers } = await pool.query(
+      `SELECT a.display_name AS name, a.role,
+        COUNT(tm.id) AS message_count
+       FROM thread_messages tm
+       JOIN accounts a ON a.id = tm.sender_id
+       WHERE tm.created_at > NOW() - $1::interval
+       GROUP BY a.id, a.display_name, a.role
+       ORDER BY message_count DESC LIMIT 10`,
+      [interval],
+    );
+
+    const { rows: ticket_stats } = await pool.query(
+      `SELECT status, COUNT(*) AS count FROM support_tickets GROUP BY status ORDER BY count DESC`,
+    );
+
+    const { rows: daily_activity } = await pool.query(
+      `SELECT DATE(created_at) AS day, COUNT(*) AS count
+       FROM thread_messages
+       WHERE created_at > NOW() - $1::interval
+       GROUP BY DATE(created_at)
+       ORDER BY day ASC`,
+      [interval],
+    );
+
+    const { rows: channel_activity } = await pool.query(
+      `SELECT cc.name AS channel_name, c.title AS course_name,
+        COUNT(cm.id) AS message_count
+       FROM class_channels cc
+       LEFT JOIN courses c ON c.id = cc.course_id
+       LEFT JOIN channel_messages cm ON cm.channel_id = cc.id
+         AND cm.created_at > NOW() - $1::interval
+       GROUP BY cc.id, cc.name, c.title
+       ORDER BY message_count DESC LIMIT 10`,
+      [interval],
+    );
+
+    res.json({ summary, top_messagers, ticket_stats, daily_activity, channel_activity });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
@@ -289,12 +300,17 @@ commSupportRouter.post("/moderation/flag", authenticate, async (req: AuthRequest
 // ── GET /api/moderation/reports – list flagged content ──────────────────────
 commSupportRouter.get("/moderation/reports", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
+    const status = req.query.status as string | undefined;
+    const where = status && status !== "all" ? `WHERE ml.status = $1` : "";
+    const params = status && status !== "all" ? [status] : [];
     const { rows } = await pool.query(
-      `SELECT ml.*, a.display_name AS reporter_name, a2.display_name AS resolver_name
+      `SELECT ml.*, a.display_name AS reported_by_name, a2.display_name AS resolver_name
        FROM moderation_logs ml
        JOIN accounts a ON a.id = ml.reported_by
        LEFT JOIN accounts a2 ON a2.id = ml.resolved_by
+       ${where}
        ORDER BY ml.created_at DESC`,
+      params,
     );
     res.json(rows);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
@@ -312,5 +328,66 @@ commSupportRouter.put("/moderation/reports/:id", authenticate, requireRole("teac
       resolvedBy: req.userId!,
     }).where(eq(moderationLogsTable.id, id)).returning();
     res.json(updated);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// ── GET /api/moderation/stats ─────────────────────────────────────────────
+commSupportRouter.get("/moderation/stats", authenticate, requireRole("teacher", "admin"), async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows: [totals] } = await pool.query(
+      `SELECT
+        COUNT(*) AS total_reports,
+        SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pending,
+        SUM(CASE WHEN status = 'resolved' THEN 1 ELSE 0 END) AS resolved,
+        COALESCE(AVG(EXTRACT(EPOCH FROM (updated_at - created_at)) / 3600) FILTER (WHERE status = 'resolved'), 0) AS avg_response_hours
+       FROM moderation_logs`,
+    );
+    const { rows: by_type } = await pool.query(
+      `SELECT content_type, COUNT(*) AS count FROM moderation_logs GROUP BY content_type ORDER BY count DESC`,
+    );
+    res.json({ ...totals, by_type });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// ── GET /api/moderation/blocklist ─────────────────────────────────────────
+commSupportRouter.get("/moderation/blocklist", authenticate, requireRole("teacher", "admin"), async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM blocked_words ORDER BY severity DESC, word ASC`);
+    res.json(rows);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// ── POST /api/moderation/blocklist ────────────────────────────────────────
+commSupportRouter.post("/moderation/blocklist", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    const { word, severity = "medium" } = req.body;
+    if (!word?.trim()) return res.status(400).json({ error: "word required" });
+    const { rows: [w] } = await pool.query(
+      `INSERT INTO blocked_words (word, severity, created_by) VALUES ($1, $2, $3) ON CONFLICT (word) DO UPDATE SET severity = EXCLUDED.severity RETURNING *`,
+      [word.trim().toLowerCase(), severity, req.userId],
+    );
+    res.status(201).json(w);
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// ── DELETE /api/moderation/blocklist/:id ──────────────────────────────────
+commSupportRouter.delete("/moderation/blocklist/:id", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    await pool.query(`DELETE FROM blocked_words WHERE id = $1`, [req.params.id]);
+    res.json({ deleted: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// ── PUT /api/tickets/:id – assign/update ticket (admin/teacher) ───────────
+commSupportRouter.put("/tickets/:id/assign", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { assigned_to } = req.body;
+    const [ticket] = await db.update(supportTicketsTable).set({
+      assignedTo: assigned_to ? Number(assigned_to) : null,
+      status: assigned_to ? "assigned" : "open",
+      updatedAt: new Date(),
+    }).where(eq(supportTicketsTable.id, id)).returning();
+    res.json(ticket);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });

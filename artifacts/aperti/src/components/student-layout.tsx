@@ -10,11 +10,13 @@ import {
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
   Sun, Moon, LogOut, Users, Shield, Repeat2, Video, Library, Link2,
   MessageSquare, BarChart3, Cpu, Pencil, Lock, GraduationCap,
+  Bell, Inbox, Megaphone, Ticket,
 } from "lucide-react";
 
 const primaryNav = [
   { href: "/", label: "Home", icon: Home },
   { href: "/course-hub", label: "Courses", icon: BookOpen },
+  { href: "/inbox", label: "Inbox", icon: Inbox },
   { href: "/mentor", label: "Mentor", icon: Brain },
   { href: "/flashcards", label: "Flashcards", icon: Layers },
 ];
@@ -47,6 +49,11 @@ const allNav = [
   { href: "/analytics", label: "Analytics", icon: BarChart3, desc: "Academic insights" },
   { href: "/study-groups", label: "Study Groups", icon: Users, desc: "Peer learning" },
   { href: "/messages", label: "Messages", icon: MessageSquare, desc: "Communication" },
+  { href: "/inbox", label: "Inbox", icon: Inbox, desc: "Unified messaging" },
+  { href: "/announcements", label: "Announcements", icon: Megaphone, desc: "Class announcements" },
+  { href: "/rooms", label: "Study Rooms", icon: Users, desc: "Collaboration rooms" },
+  { href: "/support", label: "Support", icon: Ticket, desc: "Help & tickets" },
+  { href: "/notifications", label: "Notifications", icon: Bell, desc: "Notification settings" },
   { href: "/exam-vault", label: "ExamVault", icon: Lock, desc: "Secure offline exams" },
   { href: "/exam-room", label: "Exam Room", icon: GraduationCap, desc: "Take your exams" },
   { href: "/student/exam-readiness", label: "Exam Readiness", icon: Target, desc: "AI readiness dashboard" },
