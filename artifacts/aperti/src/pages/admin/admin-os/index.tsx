@@ -15,6 +15,10 @@ import SupportPage from "./SupportPage";
 import KBPage from "./KBPage";
 import CompliancePage from "./CompliancePage";
 import CoursesAdminPage from "./CoursesAdminPage";
+import QueuePage from "./QueuePage";
+import PerformancePage from "./PerformancePage";
+import DocsPage from "./DocsPage";
+import BackupsPage from "./BackupsPage";
 
 export default function AdminOS() {
   return (
@@ -36,7 +40,10 @@ export default function AdminOS() {
         <Route path="/admin/os/tickets" component={SupportPage} />
         <Route path="/admin/os/kb" component={KBPage} />
         <Route path="/admin/os/compliance" component={CompliancePage} />
-        <Route path="/admin/os/backups" component={CompliancePage} />
+        <Route path="/admin/os/backups" component={BackupsPage} />
+        <Route path="/admin/os/queue" component={QueuePage} />
+        <Route path="/admin/os/performance" component={PerformancePage} />
+        <Route path="/admin/os/docs" component={DocsPage} />
         <Route path="/admin/os/settings" component={CompliancePage} />
         <Route path="/admin/os/moderation" component={UsersPage} />
         <Route path="/admin/os/enrollments" component={SubscriptionsPage} />

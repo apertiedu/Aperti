@@ -5,7 +5,8 @@ import {
   LayoutDashboard, Users, Building2, Shield, BookOpen, CreditCard,
   BarChart3, Activity, Flag, FileText, Lock, TicketCheck, Library,
   Settings, Scale, Database, ChevronLeft, ChevronRight, Menu, X,
-  Layers, ShoppingCart, UserCheck, GraduationCap, Bell,
+  Layers, ShoppingCart, UserCheck, GraduationCap, Bell, ListTodo,
+  Zap, BookMarked,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,6 +31,9 @@ const NAV = [
   { label: "Platform Settings", icon: Settings, href: "/admin/os/settings" },
   { label: "Compliance", icon: Scale, href: "/admin/os/compliance" },
   { label: "Backups", icon: Database, href: "/admin/os/backups" },
+  { label: "Job Queue", icon: ListTodo, href: "/admin/os/queue" },
+  { label: "Performance", icon: Zap, href: "/admin/os/performance" },
+  { label: "Docs", icon: BookMarked, href: "/admin/os/docs" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

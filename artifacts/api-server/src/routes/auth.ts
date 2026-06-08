@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
 import { eq } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { accountsTable, deviceSessionsTable } from "@workspace/db";
@@ -10,8 +11,36 @@ const TOKEN_EXPIRY = "7d";
 
 export const authRouter = Router();
 
+// ── Login rate limiter: 10 attempts per minute per IP ─────────────────────────
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts — please wait a minute" },
+});
+
+async function recordLoginHistory(
+  accountId: number | null,
+  username: string,
+  req: Request,
+  success: boolean,
+  failureReason?: string,
+) {
+  try {
+    const { pool } = await import("@workspace/db");
+    await pool.query(
+      `INSERT INTO login_history (account_id, username, ip, user_agent, success, failure_reason, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,NOW())`,
+      [accountId, username, req.ip, req.headers["user-agent"] ?? null, success, failureReason ?? null],
+    );
+  } catch {
+    // non-critical
+  }
+}
+
 // POST /auth/login
-authRouter.post("/login", async (req: Request, res: Response) => {
+authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
   try {
     const { username, password, deviceId, ip, userAgent } = req.body;
     if (!username || !password) {
@@ -25,12 +54,20 @@ authRouter.post("/login", async (req: Request, res: Response) => {
     );
     const account = acctRows[0] as any;
     if (!account || account.status !== "active") {
+      await recordLoginHistory(null, identifier, req, false, "Account not found or inactive");
       return res.status(401).json({ error: "Invalid credentials" });
     }
     const valid = await bcrypt.compare(password, account.password_hash);
     if (!valid) {
+      await recordLoginHistory(account.id, identifier, req, false, "Wrong password");
       return res.status(401).json({ error: "Invalid credentials" });
     }
+
+    // Update last login
+    await dbPool.query("UPDATE accounts SET last_login_at=NOW() WHERE id=$1", [account.id]).catch(() => {});
+
+    await recordLoginHistory(account.id, identifier, req, true);
+
     const token = jwt.sign({ id: account.id, role: account.role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
     if (deviceId) {
       await db.insert(deviceSessionsTable).values({
@@ -49,6 +86,7 @@ authRouter.post("/login", async (req: Request, res: Response) => {
         displayName: account.display_name,
         email: account.email,
         role: account.role,
+        mfaEnabled: account.mfa_enabled ?? false,
       },
     });
   } catch (err) {
@@ -91,7 +129,7 @@ authRouter.get("/me", async (req: Request, res: Response) => {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
     const { pool: dbPool } = await import("@workspace/db");
     const { rows } = await dbPool.query(
-      `SELECT id, username, display_name, email, role, avatar_url, bio, phone, country, first_name, last_name, status FROM accounts WHERE id=$1`,
+      `SELECT id, username, display_name, email, role, avatar_url, bio, phone, country, first_name, last_name, status, mfa_enabled FROM accounts WHERE id=$1`,
       [payload.id]
     );
     if (!rows.length) return res.status(401).json({ error: "User not found" });
@@ -106,6 +144,7 @@ authRouter.get("/me", async (req: Request, res: Response) => {
         avatarUrl: acct.avatar_url,
         bio: acct.bio,
         country: acct.country,
+        mfaEnabled: acct.mfa_enabled ?? false,
       },
     });
   } catch {
@@ -166,14 +205,12 @@ authRouter.post("/student-register", async (req: Request, res: Response) => {
     if (!username || !password) return res.status(400).json({ error: "Username and password are required" });
     if (!teacherId) return res.status(400).json({ error: "Please select a teacher" });
 
-    // Check teacher exists
     const { rows: teacherRows } = await (await import("@workspace/db")).pool.query(
       "SELECT id FROM accounts WHERE id=$1 AND role IN ('teacher','admin','assistant') AND status='active'",
       [parseInt(teacherId)]
     );
     if (!teacherRows.length) return res.status(404).json({ error: "Teacher not found" });
 
-    // Check username uniqueness
     const [existing] = await db.select().from(accountsTable).where(eq(accountsTable.username, username.trim().toLowerCase())).limit(1);
     if (existing) return res.status(409).json({ error: "Username already taken — please choose another" });
 
@@ -246,7 +283,6 @@ authRouter.post("/register", async (req: Request, res: Response) => {
 authRouter.post("/forgot-password", async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email?.trim()) return res.status(400).json({ error: "Email is required" });
-  // Always return success to prevent enumeration
   res.json({ message: "If an account with that email exists, a password reset link has been sent." });
 });
 
@@ -274,5 +310,20 @@ authRouter.post("/signup", async (req: Request, res: Response) => {
   } catch (err) {
     console.error("Signup error:", err);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// GET /auth/login-history (admin)
+authRouter.get("/login-history", async (req: Request, res: Response) => {
+  try {
+    const { pool: dbPool } = await import("@workspace/db");
+    const { rows } = await dbPool.query(
+      `SELECT lh.*, a.display_name FROM login_history lh
+       LEFT JOIN accounts a ON a.id = lh.account_id
+       ORDER BY lh.created_at DESC LIMIT 100`
+    );
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
   }
 });

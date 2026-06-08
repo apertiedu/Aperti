@@ -316,6 +316,66 @@ const MIGRATIONS: string[] = [
   )`,
 ];
 
+/* ── Phase 10 – Infrastructure, Security, Performance ─────────────────────── */
+const PHASE10_MIGRATIONS: string[] = [
+  /* MFA columns on accounts */
+  `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS mfa_enabled boolean NOT NULL DEFAULT false`,
+  `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS mfa_secret text`,
+
+  /* Login history table */
+  `CREATE TABLE IF NOT EXISTS login_history (
+    id           serial PRIMARY KEY,
+    account_id   integer REFERENCES accounts(id) ON DELETE SET NULL,
+    username     text,
+    ip           text,
+    user_agent   text,
+    success      boolean NOT NULL DEFAULT false,
+    failure_reason text,
+    created_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* API metrics table for performance tracking */
+  `CREATE TABLE IF NOT EXISTS api_metrics (
+    id          serial PRIMARY KEY,
+    method      text NOT NULL,
+    endpoint    text NOT NULL,
+    status_code integer NOT NULL,
+    duration_ms integer NOT NULL,
+    recorded_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* Entity versions table for data versioning */
+  `CREATE TABLE IF NOT EXISTS entity_versions (
+    id          serial PRIMARY KEY,
+    entity_type text NOT NULL,
+    entity_id   integer NOT NULL,
+    version     integer NOT NULL DEFAULT 1,
+    data        jsonb,
+    changed_by  integer REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* Migrations log table */
+  `CREATE TABLE IF NOT EXISTS migrations_log (
+    id         serial PRIMARY KEY,
+    name       text NOT NULL UNIQUE,
+    applied_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* ── Performance indexes ──────────────────────────────────────────── */
+  `CREATE INDEX IF NOT EXISTS idx_accounts_role ON accounts(role)`,
+  `CREATE INDEX IF NOT EXISTS idx_accounts_status ON accounts(status)`,
+  `CREATE INDEX IF NOT EXISTS idx_accounts_teacher_id ON accounts(teacher_account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_accounts_email ON accounts(email)`,
+  `CREATE INDEX IF NOT EXISTS idx_login_history_account_id ON login_history(account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_login_history_created_at ON login_history(created_at)`,
+  `CREATE INDEX IF NOT EXISTS idx_api_metrics_endpoint ON api_metrics(endpoint)`,
+  `CREATE INDEX IF NOT EXISTS idx_api_metrics_recorded_at ON api_metrics(recorded_at)`,
+  `CREATE INDEX IF NOT EXISTS idx_entity_versions_entity ON entity_versions(entity_type, entity_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)`,
+  `CREATE INDEX IF NOT EXISTS idx_device_sessions_account_id ON device_sessions(account_id)`,
+];
+
 export async function runMigrations(): Promise<void> {
   for (const sql of MIGRATIONS) {
     try {
@@ -324,5 +384,20 @@ export async function runMigrations(): Promise<void> {
       // already applied or non-critical — continue
     }
   }
-  console.log("[migrate] Phase-2 migrations applied");
+
+  for (const sql of PHASE10_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
+  // Log migration run
+  await pool.query(
+    `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
+    [`phase10-${new Date().toISOString().split("T")[0]}`],
+  ).catch(() => {});
+
+  console.log("[migrate] Phase-2 + Phase-10 migrations applied");
 }

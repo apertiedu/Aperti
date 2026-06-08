@@ -56,6 +56,30 @@ adminHealthRouter.get("/history", async (_req, res) => {
   }
 });
 
+// GET /api/admin/health/backup-logs
+adminHealthRouter.get("/backup-logs", async (_req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM backup_logs ORDER BY created_at DESC LIMIT 50`,
+    ).catch(() => ({ rows: [] }));
+    res.json(rows);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/admin/health/run-backup
+adminHealthRouter.post("/run-backup", async (_req, res) => {
+  try {
+    const { runBackup } = await import("../lib/backup-scheduler");
+    // Fire and forget — backup runs async
+    runBackup().catch(() => {});
+    res.json({ success: true, message: "Backup started. Check backup logs in a few seconds." });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 adminHealthRouter.get("/scaling/metrics", async (_req, res) => {
   try {
     const [userGrowth, storageEst] = await Promise.all([
