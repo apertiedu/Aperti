@@ -85,6 +85,9 @@ import { examSessionRouter } from "./exam-session";
 import { assessmentGradingRouter } from "./assessment-grading";
 import { certificationsRouter } from "./certifications";
 import { assessmentExtrasRouter } from "./assessment-extras";
+import { commThreadsRouter } from "./comm-threads";
+import { commRoomsRouter } from "./comm-rooms";
+import { commSupportRouter } from "./comm-support";
 
 const router: IRouter = Router();
 
@@ -169,6 +172,11 @@ router.use(misconceptionsRouter);
 router.use("/grading", gradingRouter);
 router.use("/coremind", coremindAnalyticsRouter);
 router.use(parentAiRouter);
+
+// Phase 7 — Communication, Collaboration & Community Ecosystem
+router.use(commThreadsRouter);
+router.use(commRoomsRouter);
+router.use(commSupportRouter);
 
 // Phase 6 — Assessment, Examination & Certification Ecosystem
 router.use(assessmentHubRouter);

@@ -125,6 +125,14 @@ import StudentApprovals from "@/pages/student-approvals";
 import Automation from "@/pages/automation";
 import LinkParent from "@/pages/student/link-parent";
 
+// Phase 7 — Communication, Collaboration & Community Ecosystem
+import UnifiedInbox from "@/pages/unified-inbox";
+import ClassChannel from "@/pages/class-channel";
+import AnnouncementsPage from "@/pages/announcements";
+import StudyRooms from "@/pages/study-rooms";
+import CollaborateRoom from "@/pages/collaborate";
+import SupportTickets from "@/pages/support-tickets";
+
 // Phase 6 — Assessment, Examination & Certification Ecosystem
 import AssessmentHub from "@/pages/assessment-hub";
 import GradebookPlus from "@/pages/gradebook-plus";
@@ -280,6 +288,13 @@ function StudentRouter() {
         <Route path="/student/transcript" component={StudentTranscript} />
         <Route path="/student/appeals" component={StudentAppeals} />
         <Route path="/student/exam-readiness" component={ExamReadiness} />
+        {/* Phase 7 — Communication */}
+        <Route path="/inbox" component={UnifiedInbox} />
+        <Route path="/channels/:courseId" component={ClassChannel} />
+        <Route path="/announcements" component={AnnouncementsPage} />
+        <Route path="/rooms" component={StudyRooms} />
+        <Route path="/collaborate/:roomId" component={CollaborateRoom} />
+        <Route path="/support" component={SupportTickets} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -332,6 +347,13 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/gradebook" component={TeacherGradebook} />
     <Route path="/teacher/moderation" component={ModerationCenter} />
     <Route path="/teacher/archives" component={ExamArchives} />
+    {/* Phase 7 — Communication */}
+    <Route path="/inbox" component={UnifiedInbox} />
+    <Route path="/channels/:courseId" component={ClassChannel} />
+    <Route path="/announcements" component={AnnouncementsPage} />
+    <Route path="/rooms" component={StudyRooms} />
+    <Route path="/collaborate/:roomId" component={CollaborateRoom} />
+    <Route path="/support" component={SupportTickets} />
   </>
 );
 

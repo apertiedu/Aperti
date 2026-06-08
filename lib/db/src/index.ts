@@ -66,6 +66,22 @@ const querySchema = {
   misconceptions: schema.misconceptionsTable,
   knowledgeNodes: schema.knowledgeNodesTable,
   knowledgeEdges: schema.knowledgeEdgesTable,
+  // Phase 7 — Communication
+  messageThreadsExt: schema.messageThreadsExtTable,
+  threadParticipants: schema.threadParticipantsTable,
+  threadMessages: schema.threadMessagesTable,
+  announcements: schema.announcementsTable,
+  announcementReads: schema.announcementReadsTable,
+  collaborationRooms: schema.collaborationRoomsTable,
+  roomMembers: schema.roomMembersTable,
+  roomMessages: schema.roomMessagesTable,
+  sharedResources: schema.sharedResourcesTable,
+  supportTickets: schema.supportTicketsTable,
+  ticketResponses: schema.ticketResponsesTable,
+  notificationPreferences: schema.notificationPreferencesTable,
+  moderationLogs: schema.moderationLogsTable,
+  classChannels: schema.classChannelsTable,
+  channelMessages: schema.channelMessagesTable,
 };
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
