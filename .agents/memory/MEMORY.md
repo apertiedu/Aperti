@@ -7,3 +7,4 @@
 - [Phase 5 final systems](phase5-final-systems.md) — FindWise, AutoPilot, LiveClass AI, ai-config.ts patterns and key decisions
 - [Phase 6 Assessment Ecosystem](phase6-assessment.md) — 13 new tables, 4 route files, 4 frontend pages; key schema constraints and wiring decisions
 - [Phase 7 Communication Ecosystem](phase7-communication.md) — 15 tables, 3 route files, 6 frontend pages; drizzle push is interactive so use executeSql directly instead
+- [DiscussButton component](discuss-button.md) — reusable floating chat panel; token key is aperti_token; never nest inside a <button> (HTML invalid), place in expanded sections instead

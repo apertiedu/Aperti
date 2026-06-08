@@ -3,6 +3,7 @@ import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { ArrowLeft, BookOpen, Clock, Users, GraduationCap, CheckCircle2, LogIn } from "lucide-react";
+import DiscussButton from "@/components/discuss-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth";
@@ -117,7 +118,10 @@ export default function CourseDetail() {
                   )}
                 </div>
                 <div className="p-6">
-                  <h1 className="text-2xl font-extrabold text-gray-900 mb-2">{course.title}</h1>
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <h1 className="text-2xl font-extrabold text-gray-900">{course.title}</h1>
+                    <DiscussButton contextType="course" contextId={courseId} contextTitle={course.title} size="sm" />
+                  </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
                     <GraduationCap className="h-4 w-4" style={{ color: TEAL }} />
                     <span>by <strong className="text-gray-800">{course.teacher_name || course.teacher_username}</strong></span>

@@ -1,4 +1,5 @@
 import { apiFetch } from "@/lib/api";
+import DiscussButton from "@/components/discuss-button";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -234,6 +235,10 @@ export default function MyHomework() {
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25 }}
                       className="overflow-hidden">
                       <div className="px-5 pb-5 space-y-4 border-t border-gray-50 pt-4">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-400 font-medium">Have a question?</p>
+                          <DiscussButton contextType="homework" contextId={hw.id} contextTitle={hw.title} size="sm" />
+                        </div>
                         {hw.description && <p className="text-sm text-gray-600">{hw.description}</p>}
                         {hw.instructions && (
                           <div className="bg-primary/5 border border-primary/15 rounded-xl p-3">

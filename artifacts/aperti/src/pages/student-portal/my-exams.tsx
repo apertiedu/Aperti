@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
 import { Award, TrendingUp, TrendingDown, Minus, Monitor, Play, CheckCircle, Clock, BookOpen, ChevronRight } from "lucide-react";
+import DiscussButton from "@/components/discuss-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -120,10 +121,13 @@ export default function MyExams() {
                         <p className="font-semibold text-sm text-foreground truncate">{exam.name}</p>
                         <p className="text-xs text-muted-foreground">{exam.subject_name ?? "General"} · {exam.question_count} questions</p>
                       </div>
-                      <Button size="sm" onClick={() => navigate(`/exams/${exam.id}/take`)}
-                        className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5 flex-shrink-0">
-                        <Play className="h-3.5 w-3.5" />Resume
-                      </Button>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <DiscussButton contextType="exam" contextId={exam.id} contextTitle={exam.name} size="sm" />
+                        <Button size="sm" onClick={() => navigate(`/exams/${exam.id}/take`)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5">
+                          <Play className="h-3.5 w-3.5" />Resume
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -150,10 +154,13 @@ export default function MyExams() {
                             {exam.total_marks && ` · ${exam.total_marks} marks`}
                           </p>
                         </div>
-                        <Button size="sm" onClick={() => navigate(`/exams/${exam.id}/take`)}
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 flex-shrink-0">
-                          <Play className="h-3.5 w-3.5" />Start
-                        </Button>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <DiscussButton contextType="exam" contextId={exam.id} contextTitle={exam.name} size="sm" />
+                          <Button size="sm" onClick={() => navigate(`/exams/${exam.id}/take`)}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5">
+                            <Play className="h-3.5 w-3.5" />Start
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   </motion.div>
