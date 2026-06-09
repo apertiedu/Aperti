@@ -37,3 +37,4 @@ export * from "./communication";
 export * from "./learning-experience";
 export * from "./admin-phase9";
 export * from "./governance";
+export * from "./qa-phase13";

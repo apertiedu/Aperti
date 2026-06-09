@@ -9,6 +9,7 @@ import {
   Zap, BookMarked, UserCog, AlertTriangle, ShieldCheck, Grid3X3,
   Rocket, Package, TestTube, Map, Layout, Quote, HelpCircle,
   Calendar, Palette, Megaphone, TrendingUp, PieChart, Globe, Star,
+  Bug, FlaskConical, History,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -51,6 +52,13 @@ const NAV = [
   { label: "Plans", icon: Layers, href: "/admin/os/plans" },
   { label: "Subscriptions", icon: ShoppingCart, href: "/admin/os/subscriptions" },
   { label: "Payments", icon: CreditCard, href: "/admin/os/payments" },
+
+  { label: "— Quality & Testing", header: true },
+  { label: "Bug Tracker",         icon: Bug,          href: "/admin/os/qa/bugs" },
+  { label: "Test Cases",          icon: FlaskConical, href: "/admin/os/qa/test-cases" },
+  { label: "Test Runs",           icon: History,      href: "/admin/os/qa/test-runs" },
+  { label: "Launch Readiness",    icon: Rocket,       href: "/admin/os/qa/readiness" },
+  { label: "Security Scan",       icon: ShieldCheck,  href: "/admin/os/qa/security" },
 
   { label: "— Operations", header: true },
   { label: "Analytics", icon: BarChart3, href: "/admin/os/analytics" },

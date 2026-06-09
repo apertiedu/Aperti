@@ -89,6 +89,7 @@ import { commThreadsRouter } from "./comm-threads";
 import { commRoomsRouter } from "./comm-rooms";
 import { commSupportRouter } from "./comm-support";
 import { learningExperienceRouter } from "./learning-experience";
+import { qaRouter } from "./qa";
 
 const router: IRouter = Router();
 
@@ -188,6 +189,9 @@ router.use("/exam-session", examSessionRouter);
 router.use(assessmentGradingRouter);
 router.use(certificationsRouter);
 router.use(assessmentExtrasRouter);
+
+// Phase 13 — Quality Assurance, Validation, Testing & Launch Readiness
+router.use(qaRouter);
 
 export default router;
 

@@ -5,7 +5,7 @@ import {
   Calculator, Activity, DollarSign, Shield, LifeBuoy, FileText,
   Settings, Users, Globe, ChevronRight, Bell, RefreshCw,
   BarChart3, Terminal, Wifi, CreditCard, Clock, Brain, ShieldCheck,
-  LayoutDashboard,
+  LayoutDashboard, Bug,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -28,6 +28,7 @@ const modules = [
   { to: "/admin/teacher-verification", label: "Teacher Verification",    desc: "Grant Verified badges to teachers",   icon: Shield },
   { to: "/admin/ai-analytics",         label: "AI Analytics",             desc: "Monitor AI usage, costs & impact",    icon: Brain },
   { to: "/admin/ai-safety",            label: "AI Safety",                desc: "Review AI outputs & misconceptions",  icon: ShieldCheck },
+  { to: "/admin/os/qa/readiness",      label: "QualityOS ✦ New",          desc: "Bug tracker, test runs & launch readiness", icon: Bug, highlight2: true },
 ];
 
 function LiveStatsBadge({ count, label }: { count: number | string; label: string }) {
@@ -169,17 +170,17 @@ export default function AdminCommand() {
             transition={{ delay: 0.15 + i * 0.05 }}
           >
             <Link href={mod.to}>
-              <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white" : "bg-white"}`}>
+              <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white" : (mod as any).highlight2 ? "bg-gradient-to-r from-violet-600 to-purple-700 text-white" : "bg-white"}`}>
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
-                    style={{ background: (mod as any).highlight ? "rgba(255,255,255,0.2)" : "rgba(0,121,107,0.07)" }}>
-                    <mod.icon className={`h-5 w-5 ${(mod as any).highlight ? "text-white" : "text-primary"}`} />
+                    style={{ background: (mod as any).highlight || (mod as any).highlight2 ? "rgba(255,255,255,0.2)" : "rgba(0,121,107,0.07)" }}>
+                    <mod.icon className={`h-5 w-5 ${(mod as any).highlight || (mod as any).highlight2 ? "text-white" : "text-primary"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-semibold text-sm ${(mod as any).highlight ? "text-white" : "text-gray-900"}`}>{mod.label}</p>
-                    <p className={`text-xs truncate ${(mod as any).highlight ? "text-white/70" : "text-gray-400"}`}>{mod.desc}</p>
+                    <p className={`font-semibold text-sm ${(mod as any).highlight || (mod as any).highlight2 ? "text-white" : "text-gray-900"}`}>{mod.label}</p>
+                    <p className={`text-xs truncate ${(mod as any).highlight || (mod as any).highlight2 ? "text-white/70" : "text-gray-400"}`}>{mod.desc}</p>
                   </div>
-                  <ChevronRight className={`h-4 w-4 group-hover:translate-x-0.5 transition-all ${(mod as any).highlight ? "text-white/60 group-hover:text-white" : "text-gray-300 group-hover:text-primary"}`} />
+                  <ChevronRight className={`h-4 w-4 group-hover:translate-x-0.5 transition-all ${(mod as any).highlight || (mod as any).highlight2 ? "text-white/60 group-hover:text-white" : "text-gray-300 group-hover:text-primary"}`} />
                 </CardContent>
               </Card>
             </Link>

@@ -41,6 +41,11 @@ import ConversionAnalyticsPage from "./ConversionAnalyticsPage";
 import PlatformStatusPage from "./PlatformStatusPage";
 import AnnouncementsAdminPage from "./AnnouncementsAdminPage";
 import FeatureAdoptionPage from "./FeatureAdoptionPage";
+import QABugsPage from "./QABugsPage";
+import QATestCasesPage from "./QATestCasesPage";
+import QATestRunsPage from "./QATestRunsPage";
+import QAReadinessPage from "./QAReadinessPage";
+import QASecurityScanPage from "./QASecurityScanPage";
 
 export default function AdminOS() {
   return (
@@ -100,6 +105,13 @@ export default function AdminOS() {
         <Route path="/admin/os/platform-status" component={PlatformStatusPage} />
         <Route path="/admin/os/announcements" component={AnnouncementsAdminPage} />
         <Route path="/admin/os/adoption" component={FeatureAdoptionPage} />
+
+        {/* Phase 13 — Quality Assurance, Testing & Launch Readiness */}
+        <Route path="/admin/os/qa/bugs" component={QABugsPage} />
+        <Route path="/admin/os/qa/test-cases" component={QATestCasesPage} />
+        <Route path="/admin/os/qa/test-runs" component={QATestRunsPage} />
+        <Route path="/admin/os/qa/readiness" component={QAReadinessPage} />
+        <Route path="/admin/os/qa/security" component={QASecurityScanPage} />
 
         <Route component={Dashboard} />
       </Switch>
