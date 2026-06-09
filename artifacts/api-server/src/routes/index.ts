@@ -90,6 +90,7 @@ import { commRoomsRouter } from "./comm-rooms";
 import { commSupportRouter } from "./comm-support";
 import { learningExperienceRouter } from "./learning-experience";
 import { qaRouter } from "./qa";
+import { phase14Router } from "./phase14";
 
 const router: IRouter = Router();
 
@@ -192,6 +193,9 @@ router.use(assessmentExtrasRouter);
 
 // Phase 13 — Quality Assurance, Validation, Testing & Launch Readiness
 router.use(qaRouter);
+
+// Phase 14 — Platform Authenticity, Trust & Content Governance
+router.use(phase14Router);
 
 export default router;
 

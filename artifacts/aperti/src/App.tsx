@@ -23,6 +23,7 @@ import StatusPublic from "@/pages/status-public";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Contact from "@/pages/contact";
+import TrustCenter from "@/pages/trust";
 import Sitemap from "@/pages/sitemap";
 import PaperVaultPublic from "@/pages/paper-vault-public";
 
@@ -503,6 +504,7 @@ function PublicRouter() {
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
       <Route path="/contact" component={Contact} />
+      <Route path="/trust" component={TrustCenter} />
       <Route path="/sitemap" component={Sitemap} />
       <Route path="/paper-vault" component={PaperVaultPublic} />
       <Route path="/features" component={FeatureShowcase} />

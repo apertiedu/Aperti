@@ -9,7 +9,7 @@ import {
   Zap, BookMarked, UserCog, AlertTriangle, ShieldCheck, Grid3X3,
   Rocket, Package, TestTube, Map, Layout, Quote, HelpCircle,
   Calendar, Palette, Megaphone, TrendingUp, PieChart, Globe, Star,
-  Bug, FlaskConical, History,
+  Bug, FlaskConical, History, ClipboardList,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +33,6 @@ const NAV = [
   { label: "Release Notes",       icon: FileText,     href: "/admin/os/release-notes" },
   { label: "Roadmap",             icon: Map,          href: "/admin/os/roadmap-admin" },
   { label: "Landing CMS",         icon: Layout,       href: "/admin/os/landing-cms" },
-  { label: "Testimonials",        icon: Quote,        href: "/admin/os/testimonials" },
   { label: "FAQs",                icon: HelpCircle,   href: "/admin/os/faqs" },
   { label: "Events",              icon: Calendar,     href: "/admin/os/events" },
   { label: "Demo & Branding",     icon: Palette,      href: "/admin/os/demo-branding" },
@@ -59,6 +58,10 @@ const NAV = [
   { label: "Test Runs",           icon: History,      href: "/admin/os/qa/test-runs" },
   { label: "Launch Readiness",    icon: Rocket,       href: "/admin/os/qa/readiness" },
   { label: "Security Scan",       icon: ShieldCheck,  href: "/admin/os/qa/security" },
+
+  { label: "— Trust & Content", header: true },
+  { label: "Content Governance",  icon: ClipboardList, href: "/admin/os/content-governance" },
+  { label: "Testimonials",        icon: Quote,         href: "/admin/os/testimonials" },
 
   { label: "— Operations", header: true },
   { label: "Analytics", icon: BarChart3, href: "/admin/os/analytics" },

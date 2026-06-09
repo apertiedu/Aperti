@@ -14,3 +14,4 @@
 - [Phase 10 Infrastructure](phase10-infrastructure.md) — commit hash, prom-client peer deps, TOTP MFA, PWA sw.js, lite mode, Phase 10 DB tables, queue patterns
 - [Phase 11 Governance](phase11-governance.md) — 13 gov_ tables, governance.ts routes at /api/admin/governance, ownership middleware, 7 new admin-os pages
 - [Phase 12 Launch CMS](phase12-launch-cms.md) — 67 API endpoints, 17 admin pages, 6 public pages; countdown timer + waitlist/beta CTAs in features-detail.tsx; release_notes type CHECK excludes "feature"
+- [Public routes before main router](public-routes-before-main-router.md) — qaRouter has global authenticate (no path prefix) so ANY public route must be registered in app.ts BEFORE app.use("/api", router)

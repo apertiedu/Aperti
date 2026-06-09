@@ -46,6 +46,7 @@ import QATestCasesPage from "./QATestCasesPage";
 import QATestRunsPage from "./QATestRunsPage";
 import QAReadinessPage from "./QAReadinessPage";
 import QASecurityScanPage from "./QASecurityScanPage";
+import ContentGovernancePage from "./ContentGovernancePage";
 
 export default function AdminOS() {
   return (
@@ -112,6 +113,9 @@ export default function AdminOS() {
         <Route path="/admin/os/qa/test-runs" component={QATestRunsPage} />
         <Route path="/admin/os/qa/readiness" component={QAReadinessPage} />
         <Route path="/admin/os/qa/security" component={QASecurityScanPage} />
+
+        {/* Phase 14 — Trust & Content Governance */}
+        <Route path="/admin/os/content-governance" component={ContentGovernancePage} />
 
         <Route component={Dashboard} />
       </Switch>

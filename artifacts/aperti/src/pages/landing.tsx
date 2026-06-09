@@ -1,5 +1,5 @@
 import { useState, useRef, FormEvent, useEffect } from "react";
-import { motion, useInView, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { motion, useInView, AnimatePresence, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -317,7 +317,10 @@ function useCountUp(target: number, duration = 1600) {
   return { count, ref };
 }
 
-interface PlatformStats { activeStudents: number; activeTeachers: number; publishedCourses: number; attendanceRecords: number; }
+interface LiveStats {
+  students: number; teachers: number; courses: number;
+  assessments_completed: number; resources_uploaded: number; live_sessions: number;
+}
 
 function StatItem({ value, suffix = "", label, delay }: { value: number; suffix?: string; label: string; delay: number }) {
   const { count, ref } = useCountUp(value);
@@ -332,17 +335,21 @@ function StatItem({ value, suffix = "", label, delay }: { value: number; suffix?
 }
 
 function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: string }> }) {
-  const { data: stats } = useQuery<PlatformStats>({
-    queryKey: ["platform-stats"],
-    queryFn: async () => { const res = await fetch("/auth/stats"); if (!res.ok) throw new Error("Failed"); return res.json(); },
+  const { data: stats } = useQuery<LiveStats>({
+    queryKey: ["landing-live-stats"],
+    queryFn: async () => {
+      const res = await fetch("/api/landing/stats");
+      if (!res.ok) throw new Error("Failed");
+      return res.json();
+    },
     staleTime: 5 * 60 * 1000,
   });
 
   const liveItems = [
-    { value: stats?.activeStudents ?? 0, suffix: stats && stats.activeStudents > 0 ? "+" : "", label: "Active students" },
-    { value: stats?.activeTeachers ?? 0, suffix: "", label: "Educators on the platform" },
-    { value: stats?.publishedCourses ?? 0, suffix: "", label: "Published courses" },
-    { value: stats?.attendanceRecords ?? 0, suffix: stats && stats.attendanceRecords > 0 ? "+" : "", label: "Attendance records logged" },
+    { value: stats?.students ?? 0, suffix: (stats?.students ?? 0) > 0 ? "+" : "", label: "Active students" },
+    { value: stats?.teachers ?? 0, suffix: "", label: "Educators on the platform" },
+    { value: stats?.courses ?? 0, suffix: "", label: "Published courses" },
+    { value: stats?.assessments_completed ?? 0, suffix: (stats?.assessments_completed ?? 0) > 0 ? "+" : "", label: "Assessments submitted" },
   ];
 
   const displayItems = cmsStats.length >= 4
@@ -414,8 +421,31 @@ const FALLBACK_PLANS: CMSPlan[] = [
 ];
 
 /* ─────────────────────────── Testimonials ─────────────────────────── */
-function TestimonialsSection({ testimonials }: { testimonials: CMSTestimonial[] }) {
-  if (!testimonials.length) return null;
+interface VerifiedTestimonial extends CMSTestimonial { is_verified?: boolean; }
+
+function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimonial[] }) {
+  if (!testimonials.length) return (
+    <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+      <div className="max-w-7xl mx-auto text-center">
+        <Reveal>
+          <div className="mb-10">
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+              style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+              <Star className="h-3 w-3" />Trusted by educators
+            </span>
+            <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4">
+              What teachers are <span style={{ color: TEAL }}>saying.</span>
+            </h2>
+          </div>
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 max-w-md mx-auto">
+            <Quote className="h-10 w-10 mx-auto mb-4 opacity-20" style={{ color: TEAL }} />
+            <p className="text-sm text-gray-500 leading-relaxed">Be the first educator to share your experience with Aperti.</p>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+
   return (
     <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
       <div className="max-w-7xl mx-auto">
@@ -436,7 +466,15 @@ function TestimonialsSection({ testimonials }: { testimonials: CMSTestimonial[] 
             <Reveal key={t.id} delay={i * 0.08}>
               <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
                 className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full flex flex-col">
-                <Quote className="h-6 w-6 mb-4 opacity-30" style={{ color: TEAL }} />
+                <div className="flex items-start justify-between mb-4">
+                  <Quote className="h-6 w-6 opacity-30" style={{ color: TEAL }} />
+                  {t.is_verified && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      style={{ background: TEAL_LIGHT, color: TEAL, border: `1px solid ${TEAL}25` }}>
+                      <Shield className="h-2.5 w-2.5" />Verified
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-600 leading-relaxed flex-1 mb-5 italic">"{t.quote}"</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-50">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
@@ -445,7 +483,7 @@ function TestimonialsSection({ testimonials }: { testimonials: CMSTestimonial[] 
                   </div>
                   <div>
                     <p className="text-sm font-bold text-gray-900 leading-tight">{t.name}</p>
-                    <p className="text-xs text-gray-400">{t.role} · {t.organization}</p>
+                    <p className="text-xs text-gray-400">{t.role}{t.organization ? ` · ${t.organization}` : ""}</p>
                   </div>
                   <div className="ml-auto flex gap-0.5">
                     {Array.from({ length: t.rating }).map((_, ri) => (
@@ -917,6 +955,7 @@ export default function Landing() {
               <a href="/terms" className="hover:text-gray-700 transition-colors">Terms</a>
               <a href="/privacy" className="hover:text-gray-700 transition-colors">Privacy</a>
               <a href="/contact" className="hover:text-gray-700 transition-colors">Contact</a>
+              <Link href="/trust"><span className="hover:text-gray-700 transition-colors cursor-pointer">Trust Center</span></Link>
               <a href="/sitemap" className="hover:text-gray-700 transition-colors">Sitemap</a>
             </div>
             <div>
