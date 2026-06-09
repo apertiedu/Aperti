@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import UpgradeModal from "@/components/upgrade-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -65,7 +66,7 @@ const DEFAULT_FORM = {
   due_at: "",
 };
 
-function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+function CreateModal({ open, onClose, onLimitExceeded }: { open: boolean; onClose: () => void; onLimitExceeded?: (msg: string) => void }) {
   const qc = useQueryClient();
   const { toast } = useToast();
   const [form, setForm] = useState(DEFAULT_FORM);
@@ -83,10 +84,16 @@ function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) 
           due_at: form.due_at || null,
         }),
       });
-      if (!res.ok) throw new Error("Failed to create");
-      return res.json();
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403 && data.code === "LIMIT_EXCEEDED") {
+        onLimitExceeded?.(data.error);
+        return null;
+      }
+      if (!res.ok) throw new Error(data.error || "Failed to create");
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (!data) return;
       qc.invalidateQueries({ queryKey: ["assessments"] });
       onClose();
       setForm(DEFAULT_FORM);
@@ -222,11 +229,27 @@ export default function AssessmentHub() {
       : 0,
   };
 
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeMsg, setUpgradeMsg] = useState<string | undefined>(undefined);
+
   return (
     <div className="space-y-6">
       <AnimatePresence>
-        {showCreate && <CreateModal open={showCreate} onClose={() => setShowCreate(false)} />}
+        {showCreate && (
+          <CreateModal
+            open={showCreate}
+            onClose={() => setShowCreate(false)}
+            onLimitExceeded={(msg) => { setUpgradeMsg(msg); setUpgradeOpen(true); }}
+          />
+        )}
       </AnimatePresence>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        resource="assessments"
+        message={upgradeMsg}
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between">

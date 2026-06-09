@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import UpgradeModal from "@/components/upgrade-modal";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -49,6 +50,8 @@ export default function QueryVault() {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState("all");
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeMsg, setUpgradeMsg] = useState<string | undefined>(undefined);
 
   const { data: questions, isLoading } = useQuery<Question[]>({
     queryKey: ["question-bank", search, difficultyFilter],
@@ -77,6 +80,7 @@ export default function QueryVault() {
               question={editingQuestion}
               onClose={() => { setDialogOpen(false); setEditingQuestion(null); }}
               onRefresh={() => queryClient.invalidateQueries({ queryKey: ["question-bank"] })}
+              onLimitExceeded={(msg) => { setDialogOpen(false); setUpgradeMsg(msg); setUpgradeOpen(true); }}
             />
           </DialogContent>
         </Dialog>
@@ -141,11 +145,21 @@ export default function QueryVault() {
           ))}
         </div>
       )}
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        resource="questions"
+        message={upgradeMsg}
+      />
     </div>
   );
 }
 
-function QuestionForm({ question, onClose, onRefresh }: { question: Question | null; onClose: () => void; onRefresh: () => void }) {
+function QuestionForm({ question, onClose, onRefresh, onLimitExceeded }: {
+  question: Question | null; onClose: () => void; onRefresh: () => void;
+  onLimitExceeded?: (msg: string) => void;
+}) {
   const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
@@ -162,13 +176,26 @@ function QuestionForm({ question, onClose, onRefresh }: { question: Question | n
 
   const queryClient = useQueryClient();
   const mutation = useMutation({
-    mutationFn: (data: any) =>
-      fetch(`${API}/question-bank${question ? `/${question.id}` : ""}`, {
+    mutationFn: async (data: any) => {
+      const res = await fetch(`${API}/question-bank${question ? `/${question.id}` : ""}`, {
         method: question ? "PUT" : "POST",
         headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      }).then(r => r.json()),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["question-bank"] }); onClose(); onRefresh(); },
+      });
+      const json = await res.json().catch(() => ({}));
+      if (res.status === 403 && json.code === "LIMIT_EXCEEDED") {
+        onLimitExceeded?.(json.error);
+        return null;
+      }
+      if (!res.ok) throw new Error(json.error || "Failed");
+      return json;
+    },
+    onSuccess: (data) => {
+      if (!data) return;
+      queryClient.invalidateQueries({ queryKey: ["question-bank"] });
+      onClose();
+      onRefresh();
+    },
   });
 
   const handleImageUpload = async (file: File) => {

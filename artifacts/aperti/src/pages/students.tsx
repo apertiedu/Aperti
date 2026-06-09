@@ -13,6 +13,7 @@ import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Pack
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
+import UpgradeModal from "@/components/upgrade-modal";
 
 const NONE_VALUE = "__none__";
 
@@ -161,6 +162,8 @@ export default function Students() {
   const [createAccountPassword, setCreateAccountPassword] = useState("");
   const [createAccountSaving, setCreateAccountSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeMsg, setUpgradeMsg] = useState<string | undefined>(undefined);
 
   const blankStudent = { studentCode: "", studentName: "", lesson1SessionId: null as number | null, lesson2SessionId: null as number | null, lesson3SessionId: null as number | null };
 
@@ -180,7 +183,10 @@ export default function Students() {
     try {
       const res = await apiFetch("/api/students", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
       const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.message || "Failed");
+      if (res.status === 403 && json.code === "LIMIT_EXCEEDED") {
+        setUpgradeMsg(json.error); setUpgradeOpen(true); return;
+      }
+      if (!res.ok) throw new Error(json.error || json.message || "Failed");
       await load(); setIsAddOpen(false); toast({ title: "Student added" });
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
     finally { setAddSaving(false); }
@@ -215,9 +221,12 @@ export default function Students() {
     try {
       const res = await apiFetch("/api/students/bulk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ students: parsed }) });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.message || "Failed");
+      if (res.status === 403 && data.code === "LIMIT_EXCEEDED") {
+        setUpgradeMsg(data.error); setUpgradeOpen(true); return;
+      }
+      if (!res.ok) throw new Error(data.error || data.message || "Failed");
       await load(); setIsBulkOpen(false); setBulkData("");
-      toast({ title: "Import complete", description: `Added ${data.added}, skipped ${data.skipped}` });
+      toast({ title: "Import complete", description: `Added ${data.length} student(s)` });
     } catch (err: any) { toast({ title: "Error", description: err.message, variant: "destructive" }); }
     finally { setBulkSaving(false); }
   };
@@ -391,6 +400,13 @@ export default function Students() {
           )}
         </CardContent>
       </Card>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        resource="students"
+        message={upgradeMsg}
+      />
     </div>
   );
 }

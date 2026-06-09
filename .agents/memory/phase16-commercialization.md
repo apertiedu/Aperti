@@ -1,6 +1,6 @@
 ---
 name: Phase 16 Commercialization & Business Operations
-description: Deprecated module removals, subscription billing infrastructure, commerce API, and 7 new frontend pages.
+description: Deprecated module removals, subscription billing infrastructure, commerce API, enforced plan limits, and frontend pages.
 ---
 
 ## Deprecated modules removed (Phase 16)
@@ -49,11 +49,21 @@ description: Deprecated module removals, subscription billing infrastructure, co
 - `GET /api/practice/modes`, `GET /api/practice/start`, `POST /api/practice/submit`
 - `CRUD /api/revision-notes`, `POST /api/revision-notes/generate`
 
+## enforceLimit wired to creation routes
+`enforceLimit(resource)` middleware + `incrementUsage` + `decrementUsage` wired to:
+- `routes/courses.ts` — POST `/` (creates aperti_courses) + DELETE (decrements)
+- `routes/teacher-courses.ts` — POST `/teacher-courses`
+- `routes/students.ts` — POST `/` (single) + POST `/bulk` (delta = inserted.length)
+- `routes/question-bank.ts` — POST `/`
+- `routes/assessment-hub.ts` — POST `/assessments`
+
+**Why**: Subscription plan limits (e.g. Free = 2 courses, 30 students) are enforced at creation. Returns HTTP 403 with `{ code: "LIMIT_EXCEEDED", resource, limit, current, upgradeUrl }`.
+
 ## New middleware
 - `artifacts/api-server/src/middleware/enforce-limit.ts`
   - `enforceLimit(resource)` — Express middleware, returns 403 with `upgradeUrl: "/pricing"` if limit exceeded
-  - `getUserLimits(userId)`, `getUserUsage`, `incrementUsage`, `decrementUsage`
-  - Default plan limits defined in PLAN_DEFAULTS map
+  - `getUserLimits(userId)`, `getUserUsage`, `incrementUsage(userId, resource, delta=1)`, `decrementUsage`
+  - Default plan limits defined in PLAN_DEFAULTS map (free/essential/plus/pro/elite)
 
 ## Frontend pages (all use Liquid Flow 2.0)
 - `/pricing` — `pages/pricing.tsx` — public plan grid, teacher + student sections
@@ -61,11 +71,23 @@ description: Deprecated module removals, subscription billing infrastructure, co
 - `/account/subscription` — `pages/my-subscription.tsx` — usage bars, invoice history, cancel
 - `/coming-soon` — `pages/coming-soon.tsx` — feature cards with waitlist CTA
 - `/revision-notes` — `pages/revision-notes.tsx` — two-panel editor with AI generation
-- `/admin/commerce` — `pages/admin/admin-commerce.tsx` — 5-tab panel (payments/subs/plans/invoices/coming-soon)
+- `/admin/commerce` — `pages/admin/admin-commerce.tsx` — 6-tab panel (payments/subs/plans/invoices/analytics/coming-soon)
 - `/admin/executive` — `pages/admin/executive-dashboard.tsx` — KPI grid + plan bars + recent subs
 
-## Reusable component
-- `components/upgrade-modal.tsx` — animated modal with 2 highlight plans; trigger when enforceLimit returns 403
+## Analytics tab in admin-commerce (recharts)
+- AnalyticsPanel component (added after ComingSoonPanel in admin-commerce.tsx)
+- Fetches `/api/admin/commerce/analytics/revenue` (MRR/ARR/history) and `.../subscriptions` (byPlan/byStatus)
+- Charts: BarChart (monthly revenue), PieChart (plan distribution), BarChart horizontal (status breakdown), LineChart (new subs/month)
+
+## Upgrade modal wiring (frontend 403 handling)
+- `components/upgrade-modal.tsx` — animated modal with 2 highlight plans; navigates to /pricing
+- `hooks/use-plan-limits.ts` — `usePlanLimits()` hook; calls `/api/commerce/my`; provides `isAtLimit(resource)`, `getUsagePercent(resource)`, `getRemaining(resource)`
+- 403 `LIMIT_EXCEEDED` handled in: `pages/students.tsx`, `pages/teacher/my-courses.tsx`, `pages/assessment-hub.tsx`, `pages/query-vault.tsx`
+- Pattern: check `res.status === 403 && json.code === "LIMIT_EXCEEDED"` → `setUpgradeMsg(json.error); setUpgradeOpen(true)`
+
+## Flashcard Hub smart stats
+- `pages/student-portal/my-cardstack.tsx` decks view — shows 4-KPI strip (Total Cards / Mastery % / Due Review / Weak Cards) from `/api/flashcards/smart-stats`
+- Stats only shown when data is available (conditional render)
 
 ## Key decisions
 - **Why no Stripe**: Egypt-first market; InstaPay is the local standard. All payment flow is manual verification.

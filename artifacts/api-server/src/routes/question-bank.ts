@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { questionBankTable } from "@workspace/db";
 import { eq, and, like } from "drizzle-orm";
+import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enforce-limit";
 
 export const questionBankRouter = Router();
 
@@ -33,7 +34,7 @@ questionBankRouter.get("/", authenticate, requireRole("teacher", "admin", "assis
 });
 
 // POST /question-bank — create new question
-questionBankRouter.post("/", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+questionBankRouter.post("/", authenticate, requireRole("teacher", "admin", "assistant"), enforceLimit("questions"), async (req: AuthRequest, res: Response) => {
   const teacherId = req.userId!;
   const { subjectId, questionText, topic, subtopic, difficulty, maxMarks, modelAnswer, commonMistakes, tags, imageUrl } = req.body;
   const [q] = await db.insert(questionBankTable).values({
@@ -49,6 +50,7 @@ questionBankRouter.post("/", authenticate, requireRole("teacher", "admin", "assi
     tags,
     imageUrl: imageUrl || null,
   }).returning();
+  await incrementUsage(teacherId, "questions");
   res.status(201).json(q);
 });
 

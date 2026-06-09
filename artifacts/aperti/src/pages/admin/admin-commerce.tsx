@@ -4,10 +4,15 @@ import { motion } from "framer-motion";
 import {
   CreditCard, Package, Users, CheckCircle2, XCircle, Clock,
   Plus, Edit2, Trash2, Eye, BarChart3, ArrowRight, Loader2,
-  Receipt, DollarSign, AlertCircle, RefreshCw, ChevronDown, ChevronUp, Rocket
+  Receipt, DollarSign, AlertCircle, RefreshCw, ChevronDown, ChevronUp, Rocket,
+  TrendingUp, TrendingDown, Activity
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import {
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Legend
+} from "recharts";
 
 const token = () => localStorage.getItem("aperti_token") || "";
 const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${token()}` });
@@ -28,7 +33,7 @@ async function deleteReq(url: string) {
   return r.json();
 }
 
-type Tab = "plans" | "subscriptions" | "payments" | "invoices" | "coming-soon";
+type Tab = "plans" | "subscriptions" | "payments" | "invoices" | "analytics" | "coming-soon";
 
 export default function AdminCommercePage() {
   const [tab, setTab] = useState<Tab>("payments");
@@ -36,10 +41,11 @@ export default function AdminCommercePage() {
   const { toast } = useToast();
 
   const tabs: { id: Tab; label: string; icon: React.ComponentType<any> }[] = [
-    { id: "payments",     label: "Payment Requests", icon: CreditCard },
+    { id: "payments",     label: "Payments",         icon: CreditCard },
     { id: "subscriptions",label: "Subscriptions",    icon: Users },
     { id: "plans",        label: "Plans",            icon: Package },
     { id: "invoices",     label: "Invoices",         icon: Receipt },
+    { id: "analytics",    label: "Analytics",        icon: BarChart3 },
     { id: "coming-soon",  label: "Coming Soon",      icon: Rocket },
   ];
 
@@ -79,6 +85,7 @@ export default function AdminCommercePage() {
       {tab === "subscriptions"&& <SubscriptionsPanel />}
       {tab === "plans"        && <PlansPanel qc={qc} toast={toast} />}
       {tab === "invoices"     && <InvoicesPanel />}
+      {tab === "analytics"    && <AnalyticsPanel />}
       {tab === "coming-soon"  && <ComingSoonPanel qc={qc} toast={toast} />}
     </div>
   );
@@ -416,6 +423,156 @@ function ComingSoonPanel({ qc, toast }: { qc: any; toast: any }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+/* ─── ANALYTICS ──────────────────────────────────────────────────────────── */
+const PLAN_COLORS = ["#0D9488","#6366F1","#F59E0B","#EC4899","#10B981","#3B82F6"];
+
+function KpiCard({ label, value, sub, icon: Icon, trend }: {
+  label: string; value: string; sub?: string;
+  icon: React.ComponentType<any>; trend?: "up"|"down"|"flat";
+}) {
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-start gap-4">
+      <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
+        <Icon className="w-5 h-5 text-teal-600" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-xs text-gray-500 mb-0.5">{label}</p>
+        <p className="text-2xl font-bold text-gray-900 leading-none">{value}</p>
+        {sub && <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+          {trend === "up"   && <TrendingUp   className="w-3 h-3 text-green-500" />}
+          {trend === "down" && <TrendingDown className="w-3 h-3 text-red-500" />}
+          {trend === "flat" && <Activity     className="w-3 h-3 text-gray-400" />}
+          {sub}
+        </p>}
+      </div>
+    </div>
+  );
+}
+
+function AnalyticsPanel() {
+  const { data: rev, isLoading: revLoading } = useQuery({
+    queryKey: ["admin-analytics-revenue"],
+    queryFn: () => fetchJSON("/api/admin/commerce/analytics/revenue"),
+  });
+  const { data: subs, isLoading: subsLoading } = useQuery({
+    queryKey: ["admin-analytics-subs"],
+    queryFn: () => fetchJSON("/api/admin/commerce/analytics/subscriptions"),
+  });
+
+  const revenueHistory: Array<{ month: string; revenue: number; count: number }> =
+    (rev?.history ?? []).map((h: any) => ({
+      month: h.month ?? "",
+      revenue: parseFloat(h.revenue ?? 0),
+      count: parseInt(h.count ?? 0),
+    }));
+
+  const planDist: Array<{ name: string; value: number }> =
+    (subs?.byPlan ?? []).map((p: any) => ({ name: p.plan_name ?? "Unknown", value: parseInt(p.count ?? 0) }));
+
+  const statusDist: Array<{ name: string; value: number }> =
+    (subs?.byStatus ?? []).map((s: any) => ({ name: s.status ?? "unknown", value: parseInt(s.count ?? 0) }));
+
+  if (revLoading || subsLoading) return <LoadingSpin />;
+
+  const mrr = rev?.mrr ?? 0;
+  const arr = rev?.arr ?? 0;
+  const totalSubs = subs?.total ?? 0;
+  const activeSubs = subs?.active ?? 0;
+
+  return (
+    <div className="space-y-6">
+      {/* KPI Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <KpiCard label="MRR" value={`${Number(mrr).toLocaleString()} EGP`}
+          sub="Monthly Recurring Revenue" icon={DollarSign} trend="up" />
+        <KpiCard label="ARR" value={`${Number(arr).toLocaleString()} EGP`}
+          sub="Annualised Recurring Revenue" icon={TrendingUp} />
+        <KpiCard label="Active Subs" value={String(activeSubs)}
+          sub={`of ${totalSubs} total`} icon={Users} trend="up" />
+        <KpiCard label="Avg Revenue / Sub" value={activeSubs > 0 ? `${Math.round(mrr / activeSubs).toLocaleString()} EGP` : "—"}
+          sub="Per active subscription" icon={Activity} />
+      </div>
+
+      {/* Revenue Over Time */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 className="text-sm font-semibold text-gray-700 mb-4">Monthly Revenue (EGP)</h3>
+        {revenueHistory.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-8">No revenue history yet</p>
+        ) : (
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={revenueHistory} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} />
+              <Tooltip formatter={(v: any) => [`${Number(v).toLocaleString()} EGP`, "Revenue"]} />
+              <Bar dataKey="revenue" fill="#0D9488" radius={[4,4,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+
+      {/* Plan Distribution + Status Breakdown */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">Subscribers by Plan</h3>
+          {planDist.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No data</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie data={planDist} cx="50%" cy="50%" outerRadius={80}
+                  dataKey="value" nameKey="name" label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}>
+                  {planDist.map((_, i) => (
+                    <Cell key={i} fill={PLAN_COLORS[i % PLAN_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">Subscriptions by Status</h3>
+          {statusDist.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-8">No data</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={statusDist} layout="vertical"
+                margin={{ top: 4, right: 16, left: 60, bottom: 4 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
+                <XAxis type="number" tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} />
+                <Tooltip />
+                <Bar dataKey="value" fill="#6366F1" radius={[0,4,4,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      {/* New subscriptions per month (line chart) */}
+      {revenueHistory.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-4">New Subscriptions per Month</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <LineChart data={revenueHistory} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+              <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+              <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+              <Tooltip />
+              <Line type="monotone" dataKey="count" stroke="#F59E0B" strokeWidth={2}
+                dot={{ r: 3 }} activeDot={{ r: 5 }} name="New Subs" />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

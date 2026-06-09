@@ -6,6 +6,7 @@ import {
   Eye, EyeOff, Clock, Search, GraduationCap, TrendingUp, Globe,
   ImageIcon, ChevronRight, AlertTriangle,
 } from "lucide-react";
+import UpgradeModal from "@/components/upgrade-modal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -74,7 +75,7 @@ const PAYMENT_MODELS = [
 ] as const;
 
 /* ── Course form ─────────────────────────────────────────────────────────── */
-function CourseForm({ course, onClose }: { course?: Course | null; onClose: () => void }) {
+function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | null; onClose: () => void; onLimitExceeded?: (msg: string) => void }) {
   const { toast } = useToast();
   const qc = useQueryClient();
 
@@ -130,13 +131,16 @@ function CourseForm({ course, onClose }: { course?: Course | null; onClose: () =
         method: course ? "PUT" : "POST",
         body: JSON.stringify(body),
       });
-      if (!res.ok) {
-        const e = await res.json().catch(() => ({}));
-        throw new Error(e.error || "Failed to save");
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 403 && data.code === "LIMIT_EXCEEDED") {
+        onLimitExceeded?.(data.error);
+        return null;
       }
-      return res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save");
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (!data) return;
       qc.invalidateQueries({ queryKey: ["teacher-courses"] });
       toast({ title: course ? "Course updated" : "Course created" });
       onClose();
@@ -404,6 +408,9 @@ export default function MyCourses() {
   const [studentsFor, setStudentsFor] = useState<Course | null>(null);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("courses");
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [upgradeMsg, setUpgradeMsg] = useState<string | undefined>(undefined);
+  const handleLimitExceeded = (msg: string) => { setUpgradeMsg(msg); setUpgradeOpen(true); };
 
   /* ── queries ── */
   const { data: courses = [], isLoading: coursesLoading } = useQuery<Course[]>({
@@ -510,7 +517,7 @@ export default function MyCourses() {
             <DialogHeader>
               <DialogTitle>{editing ? "Edit Course" : "Create New Course"}</DialogTitle>
             </DialogHeader>
-            <CourseForm course={editing} onClose={closeDialog} />
+            <CourseForm course={editing} onClose={closeDialog} onLimitExceeded={handleLimitExceeded} />
           </DialogContent>
         </Dialog>
       </div>
@@ -819,6 +826,13 @@ export default function MyCourses() {
           )}
         </SheetContent>
       </Sheet>
+
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        resource="courses"
+        message={upgradeMsg}
+      />
     </div>
   );
 }

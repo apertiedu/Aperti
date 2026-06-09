@@ -69,6 +69,18 @@ export default function MyCardStack() {
     },
   });
 
+  const { data: smartStats } = useQuery({
+    queryKey: ["flashcards", "smart-stats"],
+    queryFn: async () => {
+      const res = await fetch("/api/flashcards/smart-stats", {
+        headers: { Authorization: `Bearer ${tok()}` },
+      });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    staleTime: 60_000,
+  });
+
   const { data: cards, isLoading: cardsLoading } = useQuery<CardItem[]>({
     queryKey: ["flashcards", "decks", selectedDeck?.id, "cards"],
     queryFn: async () => {
@@ -130,7 +142,7 @@ export default function MyCardStack() {
     return (
       <div className="min-h-screen bg-[#F8FAFB] px-4 py-6 max-w-4xl mx-auto" style={{ fontFamily: "Inter, sans-serif" }}>
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 mb-4">
             <div className="h-9 w-9 rounded-xl bg-blue-50 flex items-center justify-center">
               <Layers className="h-4.5 w-4.5 text-blue-600" style={{ width: 18, height: 18 }} />
             </div>
@@ -139,6 +151,21 @@ export default function MyCardStack() {
               <p className="text-xs text-gray-500">Spaced repetition for deep retention</p>
             </div>
           </div>
+          {smartStats?.stats && (
+            <div className="grid grid-cols-4 gap-2 mb-2">
+              {[
+                { label: "Total Cards", value: smartStats.stats.total_cards ?? 0, color: "#6366F1" },
+                { label: "Mastery", value: `${smartStats.stats.mastery_pct ?? 0}%`, color: "#0D9488" },
+                { label: "Due Review", value: smartStats.stats.due_review ?? 0, color: "#F59E0B" },
+                { label: "Weak Cards", value: smartStats.stats.weak_cards ?? 0, color: "#EF4444" },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 text-center">
+                  <p className="text-lg font-black" style={{ color }}>{value}</p>
+                  <p className="text-[10px] text-gray-400 mt-0.5">{label}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {decksLoading ? (

@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
+import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enforce-limit";
 
 export const coursesRouter = Router();
 
@@ -109,7 +110,7 @@ coursesRouter.get("/:id", async (req, res: Response) => {
 
 // ── TEACHER CRUD ──────────────────────────────────────────────────────────────
 
-coursesRouter.post("/", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
+coursesRouter.post("/", authenticate, requireRole("teacher","admin"), enforceLimit("courses"), async (req: AuthRequest, res: Response) => {
   try {
     const { title, description, subject, priceEgp, thumbnailUrl, durationWeeks, isPublished,
       deliveryType, paymentModel, recordingsIncluded, materialsFeeEgp } = req.body;
@@ -124,6 +125,7 @@ coursesRouter.post("/", authenticate, requireRole("teacher","admin"), async (req
        deliveryType||'Online', paymentModel||'monthly',
        recordingsIncluded !== false, materialsFeeEgp||null]
     );
+    await incrementUsage(req.userId!, "courses");
     res.status(201).json(rows[0]);
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
@@ -150,7 +152,8 @@ coursesRouter.put("/:id", authenticate, requireRole("teacher","admin"), async (r
 
 coursesRouter.delete("/:id", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
   try {
-    await pool.query("DELETE FROM aperti_courses WHERE id=$1 AND teacher_account_id=$2", [parseInt(req.params.id), req.userId]);
+    const { rowCount } = await pool.query("DELETE FROM aperti_courses WHERE id=$1 AND teacher_account_id=$2", [parseInt(req.params.id), req.userId]);
+    if (rowCount && rowCount > 0) await decrementUsage(req.userId!, "courses");
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });

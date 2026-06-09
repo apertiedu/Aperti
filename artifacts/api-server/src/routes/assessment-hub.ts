@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import crypto from "crypto";
+import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enforce-limit";
 
 export const assessmentHubRouter = Router();
 
@@ -9,7 +10,7 @@ const teacherOrAdmin = [authenticate, requireRole("teacher", "admin")];
 const anyAuth = [authenticate];
 
 // ── CREATE ASSESSMENT ────────────────────────────────────────────────────────
-assessmentHubRouter.post("/assessments", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
+assessmentHubRouter.post("/assessments", ...teacherOrAdmin, enforceLimit("assessments"), async (req: AuthRequest, res: Response) => {
   try {
     const teacherId = req.userId!;
     const {
@@ -31,6 +32,7 @@ assessmentHubRouter.post("/assessments", ...teacherOrAdmin, async (req: AuthRequ
        passing_mark ?? null, scheduled_for ?? null, due_at ?? null,
        JSON.stringify(settings)]
     );
+    await incrementUsage(teacherId, "assessments");
     res.status(201).json({ assessment: rows[0] });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });

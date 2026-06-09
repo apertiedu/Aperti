@@ -4,6 +4,7 @@ import { authenticate, AuthRequest } from "../middleware/auth";
 import { studentsTable, accountsTable } from "@workspace/db";
 import { eq, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
+import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enforce-limit";
 
 export const studentsRouter = Router();
 
@@ -16,7 +17,7 @@ studentsRouter.get("/", authenticate, async (req: AuthRequest, res: Response) =>
   res.json(students);
 });
 
-studentsRouter.post("/bulk", authenticate, async (req: AuthRequest, res: Response) => {
+studentsRouter.post("/bulk", authenticate, enforceLimit("students"), async (req: AuthRequest, res: Response) => {
   const teacherId = req.userId!;
   const { students } = req.body as { students: Array<{ studentName: string; studentCode: string }> };
   if (!Array.isArray(students) || students.length === 0) {
@@ -29,6 +30,7 @@ studentsRouter.post("/bulk", authenticate, async (req: AuthRequest, res: Respons
   }));
   try {
     const inserted = await db.insert(studentsTable).values(rows).returning();
+    await incrementUsage(teacherId, "students", inserted.length);
     res.json(inserted);
   } catch (err: any) {
     if (err.code === "23505" || err.message?.includes("unique")) {
@@ -38,7 +40,7 @@ studentsRouter.post("/bulk", authenticate, async (req: AuthRequest, res: Respons
   }
 });
 
-studentsRouter.post("/", authenticate, async (req: AuthRequest, res: Response) => {
+studentsRouter.post("/", authenticate, enforceLimit("students"), async (req: AuthRequest, res: Response) => {
   const teacherId = req.userId!;
   const { studentName, studentCode, lesson1SessionId, lesson2SessionId, lesson3SessionId } = req.body;
   if (!studentName || !studentCode) return res.status(400).json({ error: "studentName and studentCode required" });
@@ -51,6 +53,7 @@ studentsRouter.post("/", authenticate, async (req: AuthRequest, res: Response) =
       lesson2SessionId: lesson2SessionId || null,
       lesson3SessionId: lesson3SessionId || null,
     }).returning();
+    await incrementUsage(teacherId, "students");
     res.status(201).json(student);
   } catch (err: any) {
     if (err.code === "23505" || err.message?.includes("unique")) {
