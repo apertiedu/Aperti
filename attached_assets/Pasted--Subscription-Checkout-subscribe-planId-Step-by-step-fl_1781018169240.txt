@@ -1,0 +1,52 @@
+### Subscription Checkout (`/subscribe/:planId`)
+- Step‑by‑step flow: select plan → review details → generate payment request → show InstaPay instructions (reference code, amount) → upload proof → confirmation screen with “Pending Verification” status.
+
+### My Subscription (`/account/subscription`)
+- User sees current plan, usage bars for each limit, renewal date, upgrade button, payment history.
+
+### Admin Commercial Center (`/admin/commerce`)
+- Tabs: Plans (create/edit), Subscriptions (view/verify), Billing (invoices, revenue charts), Analytics (MRR, ARR, churn).
+
+### Coming Soon Page (`/coming-soon`)
+- Public/private page showing all planned labs with descriptions, demo screenshots, release windows, and waitlist buttons.
+
+### Flashcard Center (enhance existing `/flashcards`)
+- Add smart stats, difficulty tracking, and AI generation from different sources.
+
+### Revision Notes Center (`/revision-notes`)
+- List/grid of notes, create/edit with rich text, AI generation button.
+
+### Practice Center (enhance existing student practice)
+- Mode selector (study/exam/challenge), advanced filters (by command word, paper, etc.).
+
+### Executive Dashboard (`/admin/executive`)
+- Widgets with MRR, ARR, active users, growth rate, churn, recent subscriptions.
+
+### Upgrade Modal (reusable)
+- If a user hits a limit, a modal appears explaining the limit, showing upgrade options.
+
+---
+
+## 5. PLAN ENFORCEMENT & INTEGRATION
+
+- Wire up the `enforceLimit` middleware to all creation endpoints across the platform.
+- Create a `usage_tracking` trigger on key events (create student, create course, upload resource, create question, generate assessment, etc.) to increment counts.
+- On the frontend, for features not included in the user’s plan, either hide the button or show a “Upgrade” lock overlay with a link to plans.
+
+---
+
+## 6. IMPLEMENTATION ORDER
+
+1. Remove deprecated modules (FlexSeats, TwinControl, LiveClass, InkSpace) cleanly.
+2. Database migrations: plans, subscriptions, payment_requests, invoices, usage_tracking, coming_soon, revision_notes, and update lessons with meeting_link.
+3. API routes for plans, subscriptions, payment verification, usage enforcement.
+4. Frontend: pricing page, checkout flow, my subscription page.
+5. Frontend: admin commercial center (plans, subs, billing, analytics).
+6. Middleware for plan enforcement and feature gating.
+7. Upgrade modals and limit notifications.
+8. Coming Soon governance (admin page + public/student view).
+9. Flashcard 2.0 enhancements, revision notes center, practice center 2.0.
+10. Executive dashboard.
+11. Integration testing: verify limits are enforced, payment flow works manually, all deprecated code is gone.
+
+**Do not stop until the platform has a complete, enforced subscription model, manual InstaPay verification, and all business operations tools are fully functional.**
