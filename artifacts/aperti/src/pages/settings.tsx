@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Shield, Bell, Palette, Monitor, Eye, EyeOff, LogOut, Accessibility, Bot } from "lucide-react";
+import { User, Shield, Bell, Palette, Monitor, Eye, EyeOff, LogOut, Accessibility, Bot, Download, Trash2, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/context/auth";
 
 const TEAL = "#0D9488";
@@ -18,6 +18,7 @@ const TABS = [
   { id: "devices",       label: "Devices",         icon: Monitor },
   { id: "accessibility", label: "Accessibility",   icon: Accessibility },
   { id: "ai",            label: "AI Preferences",  icon: Bot },
+  { id: "privacy",       label: "Privacy & Data",  icon: Shield },
 ];
 
 const COUNTRIES = ["Egypt","Saudi Arabia","UAE","United Kingdom","United States","Canada","Australia","Germany","France","Other"];
@@ -56,6 +57,10 @@ export default function Settings() {
   const [pwSaving, setPwSaving] = useState(false);
 
   const [sessions, setSessions] = useState<any[]>([]);
+  const [privacyExporting, setPrivacyExporting] = useState(false);
+  const [deletionRequested, setDeletionRequested] = useState(false);
+  const [deletionReason, setDeletionReason] = useState("");
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     apiFetch("/api/settings")
@@ -497,6 +502,91 @@ export default function Settings() {
                   <div className="bg-teal-50 border border-teal-100 rounded-2xl p-4">
                     <p className="text-xs text-teal-700 font-medium">
                       🤖 These preferences personalise how your AI Mentor interacts with you. Changes take effect on your next conversation.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {tab === "privacy" && (
+                <motion.div key="privacy" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.2 }} className="space-y-6">
+                  <h2 className="text-lg font-semibold text-gray-900">Privacy & Data</h2>
+
+                  {/* Data Export */}
+                  <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0"><Download size={16} className="text-blue-600" /></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900">Export My Data</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Download a copy of all your Aperti data including profile, submissions, grades, messages, and subscription history.</p>
+                      </div>
+                    </div>
+                    <button
+                      disabled={privacyExporting}
+                      onClick={async () => {
+                        setPrivacyExporting(true);
+                        try {
+                          const res = await apiFetch("/api/user/export", { method: "POST" });
+                          if (res.ok) {
+                            const blob = await res.blob();
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement("a");
+                            a.href = url; a.download = "aperti-data-export.json"; a.click();
+                            URL.revokeObjectURL(url);
+                            toast({ title: "Export ready", description: "Your data file has been downloaded." });
+                          } else { toast({ title: "Export failed", variant: "destructive" }); }
+                        } finally { setPrivacyExporting(false); }
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 transition-colors">
+                      <Download size={14} />
+                      {privacyExporting ? "Preparing export…" : "Download my data"}
+                    </button>
+                  </div>
+
+                  {/* Account Deletion */}
+                  <div className="bg-white rounded-2xl border border-red-100 p-5 space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center shrink-0"><Trash2 size={16} className="text-red-500" /></div>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900">Request Account Deletion</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Submit a deletion request. Your account and data will be permanently removed within 30 days. Active subscriptions must be cancelled first.</p>
+                      </div>
+                    </div>
+
+                    {deletionRequested ? (
+                      <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+                        <AlertTriangle size={14} /> Your deletion request has been submitted and is under review.
+                      </div>
+                    ) : showDeleteConfirm ? (
+                      <div className="space-y-3 p-4 bg-red-50 border border-red-200 rounded-xl">
+                        <p className="text-sm font-medium text-red-700 flex items-center gap-2"><AlertTriangle size={14} /> This action cannot be undone. Please confirm.</p>
+                        <textarea value={deletionReason} onChange={e => setDeletionReason(e.target.value)}
+                          placeholder="Optional: reason for leaving…"
+                          className="w-full text-sm border border-red-200 rounded-lg px-3 py-2 bg-white resize-none" rows={2} />
+                        <div className="flex gap-2">
+                          <button onClick={async () => {
+                            try {
+                              const res = await apiFetch("/api/user/deletion-request", {
+                                method: "POST", headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ reason: deletionReason }),
+                              });
+                              if (res.ok) { setDeletionRequested(true); setShowDeleteConfirm(false); toast({ title: "Request submitted", description: "We'll process your deletion within 30 days." }); }
+                              else toast({ title: "Failed to submit request", variant: "destructive" });
+                            } catch { toast({ title: "Error", variant: "destructive" }); }
+                          }} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">Confirm deletion request</button>
+                          <button onClick={() => setShowDeleteConfirm(false)} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => setShowDeleteConfirm(true)}
+                        className="flex items-center gap-2 px-4 py-2 border border-red-200 text-red-600 rounded-lg text-sm hover:bg-red-50 transition-colors">
+                        <Trash2 size={14} /> Request account deletion
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="bg-gray-50 rounded-2xl p-4">
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                      Your privacy is important to us. Data exports include all personal data associated with your account. Deletion requests are reviewed by our team and fulfilled within 30 days in accordance with applicable data protection regulations.
                     </p>
                   </div>
                 </motion.div>

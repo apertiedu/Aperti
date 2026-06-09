@@ -47,6 +47,8 @@ import QATestRunsPage from "./QATestRunsPage";
 import QAReadinessPage from "./QAReadinessPage";
 import QASecurityScanPage from "./QASecurityScanPage";
 import ContentGovernancePage from "./ContentGovernancePage";
+import AiUsagePage from "./AiUsagePage";
+import LaunchAuditPage from "./LaunchAuditPage";
 
 export default function AdminOS() {
   return (
@@ -116,6 +118,10 @@ export default function AdminOS() {
 
         {/* Phase 14 — Trust & Content Governance */}
         <Route path="/admin/os/content-governance" component={ContentGovernancePage} />
+
+        {/* Phase 18 — Enterprise Readiness & Governance */}
+        <Route path="/admin/os/ai-usage" component={AiUsagePage} />
+        <Route path="/admin/os/launch-audit" component={LaunchAuditPage} />
 
         <Route component={Dashboard} />
       </Switch>

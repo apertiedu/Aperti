@@ -415,7 +415,7 @@ function CMSPricingCard({ plan, colorIdx }: { plan: CMSPlan; colorIdx: number })
 
 const FALLBACK_PLANS: CMSPlan[] = [
   { id: 1, name: "Starter",      price_egp: 50,  max_students: 30,  badge: null,      is_highlighted: false, features: ["30 students","Attendance","Homework submissions","Basic analytics"] },
-  { id: 2, name: "Professional", price_egp: 100, max_students: 80,  badge: "POPULAR", is_highlighted: true,  features: ["80 students","All Starter features","LiveClass streaming","QueryVault & CardStack","Parent Hub"] },
+  { id: 2, name: "Professional", price_egp: 100, max_students: 80,  badge: "POPULAR", is_highlighted: true,  features: ["80 students","All Starter features","AI Tutor (Mentor)","QueryVault & CardStack","Parent Hub"] },
   { id: 3, name: "Enterprise",   price_egp: 150, max_students: 200, badge: null,      is_highlighted: false, features: ["200 students","All Professional features","InsightStream analytics","Priority support","API access"] },
   { id: 4, name: "Master",       price_egp: 200, max_students: null, badge: null,     is_highlighted: false, features: ["Unlimited students","All features","Custom integrations","Dedicated support","SLA guaranteed"] },
 ];
@@ -862,7 +862,7 @@ export default function Landing() {
               <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
                 {pricingHeadline}{pricingAccent && <> <span style={{ color: teal }}>{pricingAccent}</span></>}
               </h2>
-              <p className="text-gray-500 max-w-lg mx-auto">Pay per student, per month. Adjust seats at any time with FlexSeats — no lock-in, no surprise invoices.</p>
+              <p className="text-gray-500 max-w-lg mx-auto">Pay per student, per month. Simple transparent pricing — no lock-in, no surprise invoices.</p>
             </div>
           </Reveal>
           <div className={`grid grid-cols-1 sm:grid-cols-2 ${plans.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-5`}>

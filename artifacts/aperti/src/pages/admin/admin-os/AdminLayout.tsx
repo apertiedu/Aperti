@@ -66,6 +66,7 @@ const NAV = [
   { label: "— Operations", header: true },
   { label: "Analytics", icon: BarChart3, href: "/admin/os/analytics" },
   { label: "System Health", icon: Activity, href: "/admin/os/health" },
+  { label: "AI Usage", icon: Zap, href: "/admin/os/ai-usage" },
   { label: "Feature Flags", icon: Flag, href: "/admin/os/features" },
   { label: "Audit Logs", icon: FileText, href: "/admin/os/audit" },
   { label: "Security", icon: Lock, href: "/admin/os/security" },
@@ -77,6 +78,7 @@ const NAV = [
   { label: "Performance", icon: Zap, href: "/admin/os/performance" },
   { label: "Platform Settings", icon: Settings, href: "/admin/os/settings" },
   { label: "Docs", icon: BookMarked, href: "/admin/os/docs" },
+  { label: "Launch Audit", icon: Rocket, href: "/admin/os/launch-audit" },
 ] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

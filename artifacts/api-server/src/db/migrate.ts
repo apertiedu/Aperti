@@ -696,6 +696,146 @@ const PHASE17_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_offline_sync_user ON offline_sync_queue(user_id)`,
 ];
 
+const PHASE18_MIGRATIONS: string[] = [
+  /* ── Audit Logs: add details + severity ──────────────────────────────── */
+  `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS details  jsonb`,
+  `ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS severity text NOT NULL DEFAULT 'info'
+     CHECK (severity IN ('info','warning','critical'))`,
+
+  /* ── Currencies ──────────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS currencies (
+    id            serial PRIMARY KEY,
+    code          text NOT NULL UNIQUE,
+    symbol        text NOT NULL,
+    name          text NOT NULL,
+    exchange_rate numeric(12,6) NOT NULL DEFAULT 1.0,
+    is_default    boolean NOT NULL DEFAULT false,
+    created_at    timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO currencies (code, symbol, name, exchange_rate, is_default) VALUES
+     ('EGP', 'ج.م', 'Egyptian Pound', 1.0, true),
+     ('USD', '$',   'US Dollar',      0.021, false),
+     ('EUR', '€',   'Euro',           0.019, false)
+   ON CONFLICT (code) DO NOTHING`,
+
+  /* ── Languages ───────────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS languages (
+    id         serial PRIMARY KEY,
+    code       text NOT NULL UNIQUE,
+    name       text NOT NULL,
+    direction  text NOT NULL DEFAULT 'ltr' CHECK (direction IN ('ltr','rtl')),
+    is_default boolean NOT NULL DEFAULT false
+  )`,
+  `INSERT INTO languages (code, name, direction, is_default) VALUES
+     ('en', 'English', 'ltr', false),
+     ('ar', 'Arabic',  'rtl', true)
+   ON CONFLICT (code) DO NOTHING`,
+
+  /* ── Doc Articles ────────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS doc_articles (
+    id         serial PRIMARY KEY,
+    title      text NOT NULL,
+    category   text NOT NULL DEFAULT 'general',
+    content    text NOT NULL DEFAULT '',
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    updated_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO doc_articles (title, category, content) VALUES
+     ('Getting Started for Teachers', 'onboarding',
+      '# Getting Started for Teachers\n\nWelcome to Aperti! This guide will walk you through your first steps on the platform.\n\n## 1. Set Up Your Profile\nNavigate to Settings and complete your teacher profile with your subject specialisations.\n\n## 2. Create a Course\nGo to My Courses and click "New Course". Add a title, subject, and description.\n\n## 3. Add Students\nFrom Students, invite students by email or share your enrolment code.\n\n## 4. Assign Homework\nUse the Homework section to publish assignments with due dates and total marks.\n\n## 5. Grade Submissions\nStudents submit digitally; you review and grade from the Submissions tab.'),
+     ('Creating Your First Assessment', 'assessment',
+      '# Creating Your First Assessment\n\nAperti''s Assessment Hub lets you build exams, quizzes, and practice sets.\n\n## Step 1: Open Assessment Builder\nNavigate to Assessment Builder under the Teacher menu.\n\n## Step 2: Choose Type\nSelect from MCQ, short answer, essay, or mixed format.\n\n## Step 3: Add Questions\nUse the Question Studio to create questions with images, equations, and explanations.\n\n## Step 4: Set Time Limits\nConfigure time limits, attempts allowed, and randomisation options.\n\n## Step 5: Publish\nOnce ready, publish to make it available to your enrolled students.'),
+     ('Understanding Subscription Plans', 'billing',
+      '# Understanding Subscription Plans\n\nAperti offers flexible plans for every teaching context.\n\n## Starter\nUp to 30 students. Includes attendance, homework, and basic analytics. Ideal for individual tutors.\n\n## Professional\nUp to 80 students. Adds AI Tutor, QueryVault, CardStack, and the Parent Hub.\n\n## Enterprise\nUp to 200 students. Adds InsightStream advanced analytics and priority support.\n\n## Master\nUnlimited students. Full feature access plus custom integrations and SLA guarantee.\n\n## Payment\nAll plans are paid monthly via InstaPay. Payments are verified by the Aperti team within 24 hours.'),
+     ('AI Tutor Usage Guidelines', 'ai',
+      '# AI Tutor Usage Guidelines\n\nAperti''s AI Tutor (Mentor) uses OpenAI to provide personalised learning support.\n\n## What It Can Do\n- Answer subject questions with step-by-step explanations\n- Generate practice questions on any topic\n- Provide exam readiness feedback\n- Explain concepts in multiple ways\n\n## Best Practices\n- Encourage students to attempt problems first, then use Mentor to check\n- Review AI-generated content before sharing with students\n- Use the AI safety filters — content is moderated automatically\n\n## Limits\nEach student has a daily AI interaction quota based on their plan. Admins can adjust limits in Settings.')
+   ON CONFLICT DO NOTHING`,
+
+  /* ── AI Interactions ─────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS ai_interactions (
+    id               serial PRIMARY KEY,
+    account_id       integer REFERENCES accounts(id) ON DELETE SET NULL,
+    interaction_type text NOT NULL DEFAULT 'chat',
+    prompt_tokens    integer NOT NULL DEFAULT 0,
+    completion_tokens integer NOT NULL DEFAULT 0,
+    tokens_used      integer NOT NULL DEFAULT 0,
+    model            text,
+    status           text NOT NULL DEFAULT 'success',
+    created_at       timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_interactions_account ON ai_interactions(account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_interactions_created ON ai_interactions(created_at)`,
+
+  /* ── System Health Logs ──────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS system_health_logs (
+    id        serial PRIMARY KEY,
+    service   text NOT NULL DEFAULT 'api',
+    metric    text NOT NULL,
+    value     text NOT NULL,
+    status    text NOT NULL DEFAULT 'healthy',
+    timestamp timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_system_health_timestamp ON system_health_logs(timestamp)`,
+
+  /* ── Knowledge Base Articles ─────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS knowledge_base_articles (
+    id         serial PRIMARY KEY,
+    title      text NOT NULL,
+    content    text NOT NULL DEFAULT '',
+    category   text NOT NULL DEFAULT 'general',
+    language   text NOT NULL DEFAULT 'en',
+    is_published boolean NOT NULL DEFAULT true,
+    created_by integer REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    updated_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_kb_articles_category ON knowledge_base_articles(category)`,
+
+  /* ── Launch Audit Items ──────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS launch_audit_items (
+    id               serial PRIMARY KEY,
+    check_key        text NOT NULL UNIQUE,
+    status           text NOT NULL DEFAULT 'pending'
+                     CHECK (status IN ('pass','fail','pending')),
+    notes            text,
+    checked_manually boolean NOT NULL DEFAULT false,
+    updated_at       timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* ── AutoPilot automation_tasks (Phase 10 back-fill) ────────────────── */
+  `CREATE TABLE IF NOT EXISTS automation_tasks (
+    id          serial PRIMARY KEY,
+    name        text NOT NULL,
+    description text,
+    type        text NOT NULL DEFAULT 'cron',
+    schedule    text,
+    action      text NOT NULL DEFAULT 'noop',
+    parameters  jsonb NOT NULL DEFAULT '{}',
+    enabled     boolean NOT NULL DEFAULT true,
+    last_run    timestamptz,
+    run_count   integer NOT NULL DEFAULT 0,
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO automation_tasks (name, description, type, action, schedule, enabled) VALUES
+     ('Daily Analytics Rollup',   'Aggregate analytics data daily at 02:30 UTC', 'cron', 'analytics_rollup',  '02:30', true),
+     ('Subscription Expiry Check','Mark overdue subscriptions as inactive',       'cron', 'check_subscriptions','03:00', true),
+     ('Weekly Health Snapshot',   'Record a system health snapshot every Sunday', 'cron', 'health_snapshot',   'sun 04:00', true)
+   ON CONFLICT DO NOTHING`,
+
+  /* ── Compliance Requests ─────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS compliance_requests (
+    id           serial PRIMARY KEY,
+    user_id      integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    type         text NOT NULL DEFAULT 'account_deletion',
+    status       text NOT NULL DEFAULT 'pending'
+                 CHECK (status IN ('pending','in_review','completed','rejected')),
+    notes        text,
+    requested_at timestamptz NOT NULL DEFAULT NOW(),
+    completed_at timestamptz
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_compliance_requests_user ON compliance_requests(user_id)`,
+];
+
 export async function runMigrations(): Promise<void> {
   for (const sql of MIGRATIONS) {
     try {
@@ -737,11 +877,19 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE18_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
-    [`phase17-${new Date().toISOString().split("T")[0]}`],
+    [`phase18-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 migrations applied");
 }

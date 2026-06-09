@@ -39,10 +39,7 @@ function StatCard({ label, value, icon, sub }: any) {
 export default function ClassForge() {
   const [sessionId, setSessionId] = useState("1");
 
-  const { data: sessions } = useQuery<any[]>({
-    queryKey: ["live-class-sessions"],
-    queryFn: () => apiFetch("/live-class/sessions"),
-  });
+  const sessions: any[] = [];
 
   const { data, isLoading } = useQuery({
     queryKey: ["class-forge", "heatmap", sessionId],

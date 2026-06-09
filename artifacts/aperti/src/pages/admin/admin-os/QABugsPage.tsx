@@ -31,7 +31,7 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string }>
   closed:      { label: "Closed",      icon: X,             color: "text-gray-400" },
 };
 
-const MODULES = ["auth","students","subjects","attendance","exams","assessment","liveclass","billing","ai","notifications","gradebook","homework","resources","dashboard","ui","api","other"];
+const MODULES = ["auth","students","subjects","attendance","exams","assessment","billing","ai","notifications","gradebook","homework","resources","dashboard","ui","api","other"];
 
 export default function QABugsPage() {
   const qc = useQueryClient();

@@ -92,6 +92,15 @@ import { contentEcosystemRouter } from "./content-ecosystem";
 import { commerceRouter } from "./commerce";
 import { revisionNotesRouter } from "./revision-notes";
 import { mobileRouter } from "./mobile";
+import { adminAuditRouter } from "./admin-audit";
+import { adminHealthRouter } from "./admin-health";
+import { adminDocsRouter } from "./admin-docs";
+import { adminKbRouter } from "./admin-kb";
+import { adminAiUsageRouter } from "./admin-ai-usage";
+import { adminComplianceRouter } from "./admin-compliance";
+import { adminLaunchAuditRouter } from "./admin-launch-audit";
+import { i18nRouter } from "./i18n";
+import { userExportRouter } from "./user-export";
 
 const router: IRouter = Router();
 
@@ -204,6 +213,17 @@ router.use(revisionNotesRouter);
 
 // Phase 17 — Mobile Ecosystem
 router.use(mobileRouter);
+
+// Phase 18 — Enterprise Readiness & Master Governance
+router.use("/admin/audit-logs", adminAuditRouter);
+router.use("/admin/health", adminHealthRouter);
+router.use("/admin/docs-articles", adminDocsRouter);
+router.use("/admin/kb", adminKbRouter);
+router.use("/admin/ai-usage", adminAiUsageRouter);
+router.use("/admin/compliance", adminComplianceRouter);
+router.use("/admin/launch-audit", adminLaunchAuditRouter);
+router.use(i18nRouter);
+router.use(userExportRouter);
 
 export default router;
 

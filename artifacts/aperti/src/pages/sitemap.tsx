@@ -45,7 +45,6 @@ const sections = [
       { label: "Revisit", href: "/revisit" },
       { label: "Focus Coach", href: "/focus-coach" },
       { label: "Peak Rankings", href: "/peak-rankings" },
-      { label: "Live Class", href: "/live-class" },
     ],
   },
   {
