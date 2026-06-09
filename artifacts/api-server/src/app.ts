@@ -53,6 +53,7 @@ import { governanceRouter } from "./routes/governance";
 import { launchCmsRouter } from "./routes/launch-cms";
 import { phase14PublicRouter } from "./routes/phase14-public";
 import { commerceRouter } from "./routes/commerce";
+import { mobileRouter } from "./routes/mobile";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -166,6 +167,9 @@ app.use("/api", phase14PublicRouter);
 // Phase 16 — Commercialization (must be BEFORE main router for public plan endpoints)
 app.use("/api", commerceRouter);
 
+// Phase 17 — Mobile Ecosystem (must be BEFORE main router so /push/vapid-key is public)
+app.use("/api", mobileRouter);
+
 // ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);
 
@@ -213,6 +217,7 @@ app.use("/api/admin/governance", governanceRouter);
 
 // Phase 12 — Launch CMS & Growth
 app.use("/api", launchCmsRouter);
+
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

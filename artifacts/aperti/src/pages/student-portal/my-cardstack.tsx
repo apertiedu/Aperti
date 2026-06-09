@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -57,6 +57,11 @@ export default function MyCardStack() {
   const [showBack, setShowBack] = useState(false);
   const [reviewed, setReviewed] = useState<Record<number, number>>({});
   const [view, setView] = useState<"decks" | "study" | "analytics">("decks");
+
+  const dragX = useMotionValue(0);
+  const cardRotate = useTransform(dragX, [-200, 0, 200], [-8, 0, 8]);
+  const easyOpacity = useTransform(dragX, [40, 120], [0, 1]);
+  const againOpacity = useTransform(dragX, [-120, -40], [1, 0]);
 
   const { data: decks, isLoading: decksLoading } = useQuery<Deck[]>({
     queryKey: ["flashcards", "student", "decks"],
@@ -244,15 +249,35 @@ export default function MyCardStack() {
           <Skeleton className="h-64 w-full rounded-2xl" />
         ) : currentCard ? (
           <motion.div
-            key={currentCard.id + (showBack ? "-b" : "-f")}
-            initial={{ opacity: 0, rotateY: showBack ? -60 : 60, scale: 0.95 }}
-            animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            onClick={() => setShowBack(!showBack)}
-            className="cursor-pointer"
-            style={{ perspective: 1000 }}
+            key={currentCard.id + "-card"}
+            drag={showBack ? "x" : false}
+            dragConstraints={{ left: -200, right: 200 }}
+            dragElastic={0.15}
+            onDragEnd={(_, info) => {
+              if (info.offset.x > 100) { handleReview(5); dragX.set(0); }
+              else if (info.offset.x < -100) { handleReview(1); dragX.set(0); }
+              else dragX.set(0);
+            }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9, y: -10 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            onClick={() => !showBack && setShowBack(true)}
+            className="cursor-pointer relative select-none overflow-hidden"
+            style={{ x: dragX, rotate: cardRotate }}
           >
+            <motion.div style={{ opacity: easyOpacity }}
+              className="absolute inset-0 flex items-center justify-end pr-6 pointer-events-none z-10 rounded-2xl bg-emerald-500/10">
+              <div className="flex items-center gap-2 bg-emerald-500 text-white px-3 py-1.5 rounded-xl shadow-md">
+                <Check className="h-4 w-4" /><span className="text-sm font-bold">Easy!</span>
+              </div>
+            </motion.div>
+            <motion.div style={{ opacity: againOpacity }}
+              className="absolute inset-0 flex items-center justify-start pl-6 pointer-events-none z-10 rounded-2xl bg-red-500/10">
+              <div className="flex items-center gap-2 bg-red-500 text-white px-3 py-1.5 rounded-xl shadow-md">
+                <X className="h-4 w-4" /><span className="text-sm font-bold">Again</span>
+              </div>
+            </motion.div>
             <div className={`min-h-[260px] rounded-2xl border shadow-sm flex flex-col items-center justify-center p-8 text-center transition-colors ${
               showBack ? "bg-teal-50 border-teal-100" : "bg-white border-gray-100"
             }`}>
@@ -273,7 +298,10 @@ export default function MyCardStack() {
                 </div>
               )}
               {!showBack && (
-                <p className="text-[11px] text-gray-300 mt-4">Tap to reveal answer</p>
+                <p className="text-[11px] text-gray-300 mt-4">Tap to reveal · swipe to rate</p>
+              )}
+              {showBack && (
+                <p className="text-[11px] text-teal-400 mt-4">← Again &nbsp;·&nbsp; Easy →</p>
               )}
             </div>
           </motion.div>

@@ -131,44 +131,70 @@ export default function TakeExam() {
   const current = questions[currentQuestion];
 
   return (
-    <div className="min-h-screen bg-background p-6 page-transition">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 max-w-3xl mx-auto">
-        <h1 className="text-xl font-bold">{data?.exam?.name}</h1>
-        <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-background page-transition">
+      {/* Header — sticky on mobile */}
+      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur-sm border-b border-border/50 px-4 py-3 flex items-center justify-between">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-base lg:text-xl font-bold truncate">{data?.exam?.name}</h1>
+          <p className="text-xs text-muted-foreground">{currentQuestion + 1} of {questions.length}</p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
           {violations > 0 && (
-            <Alert variant="destructive" className="py-1 px-3">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{violations} warning(s)</AlertDescription>
+            <Alert variant="destructive" className="py-1 px-2 hidden sm:flex">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              <AlertDescription className="text-xs">{violations}w</AlertDescription>
             </Alert>
           )}
-          <Badge className={`text-lg ${timeLeft < 60 ? "bg-destructive" : "bg-primary"}`}>
-            <Timer className="h-4 w-4 mr-1" /> {formatTime(timeLeft)}
+          <Badge className={`text-sm font-bold ${timeLeft < 60 ? "bg-destructive" : "bg-primary"}`}>
+            <Timer className="h-3.5 w-3.5 mr-1" /> {formatTime(timeLeft)}
           </Badge>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto space-y-6">
-        <Progress value={((currentQuestion + 1) / questions.length) * 100} className="h-1" />
+      {/* Question progress bar */}
+      <Progress value={((currentQuestion + 1) / questions.length) * 100} className="h-1 rounded-none" />
 
+      {/* Question dots (mobile) */}
+      <div className="lg:hidden flex gap-1.5 px-4 py-3 overflow-x-auto no-scrollbar">
+        {questions.map((_: any, i: number) => (
+          <button
+            key={i}
+            onClick={() => setCurrentQuestion(i)}
+            className={`shrink-0 w-7 h-7 rounded-full text-[10px] font-bold transition-all min-h-[28px] ${
+              i === currentQuestion
+                ? "bg-primary text-primary-foreground scale-110"
+                : answers[questions[i]?.id]
+                ? "bg-primary/20 text-primary"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+      </div>
+
+      {/* Main content */}
+      <div className="max-w-3xl mx-auto px-4 pb-28 lg:pb-8 pt-4 lg:pt-6 space-y-5">
         <Card className="card-hover">
-          <CardHeader>
-            <CardTitle className="text-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base lg:text-lg">
               Question {currentQuestion + 1} of {questions.length}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="text-base"><MathRenderer content={current?.questionText ?? ""} /></div>
+            <div className="text-base leading-relaxed"><MathRenderer content={current?.questionText ?? ""} /></div>
             <Textarea
               rows={6}
-              placeholder="Type your answer..."
+              placeholder="Type your answer here..."
               value={answers[current?.id] || ""}
               onChange={(e) => handleAnswerChange(current.id, e.target.value)}
+              className="text-base resize-none"
             />
           </CardContent>
         </Card>
 
-        <div className="flex justify-between">
+        {/* Desktop nav */}
+        <div className="hidden lg:flex justify-between">
           <Button variant="outline" disabled={currentQuestion === 0} onClick={() => setCurrentQuestion(currentQuestion - 1)}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Previous
           </Button>
@@ -179,6 +205,35 @@ export default function TakeExam() {
           ) : (
             <Button onClick={handleSubmit}>
               <Flag className="h-4 w-4 mr-1" /> Submit Exam
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile fixed bottom nav */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-t border-border/60 p-3 safe-area-inset-bottom">
+        <div className="flex gap-3 max-w-lg mx-auto">
+          <Button
+            variant="outline"
+            disabled={currentQuestion === 0}
+            onClick={() => setCurrentQuestion(currentQuestion - 1)}
+            className="flex-1 h-12 text-sm font-semibold rounded-xl"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1.5" /> Prev
+          </Button>
+          {currentQuestion < questions.length - 1 ? (
+            <Button
+              onClick={() => setCurrentQuestion(currentQuestion + 1)}
+              className="flex-1 h-12 text-sm font-semibold rounded-xl"
+            >
+              Next <ArrowRight className="h-4 w-4 ml-1.5" />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              className="flex-1 h-12 text-sm font-semibold rounded-xl bg-destructive hover:bg-destructive/90"
+            >
+              <Flag className="h-4 w-4 mr-1.5" /> Submit
             </Button>
           )}
         </div>
