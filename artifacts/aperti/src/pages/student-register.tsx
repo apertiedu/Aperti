@@ -107,7 +107,7 @@ export default function StudentRegister() {
             Join your teacher's<br />workspace today.
           </h2>
           <p className="text-white/70 text-sm leading-relaxed mb-8">
-            Register as a student, select your teacher, and start learning with live classes, AI mentoring, and smart flashcards.
+            Register as a student, select your teacher, and start learning with on-demand courses, AI mentoring, and smart flashcards.
           </p>
           <div className="space-y-3">
             {["Live interactive lessons", "AI-powered mentor", "Smart flashcards & quizzes", "Real-time attendance tracking"].map((f, i) => (

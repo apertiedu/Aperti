@@ -83,7 +83,7 @@ async function runAutoChecks() {
 
 adminLaunchAuditRouter.get("/", async (_req: Request, res: Response) => {
   try {
-    const { rows: saved } = await pool.query(`SELECT * FROM launch_audit_items ORDER BY category, check_key`);
+    const { rows: saved } = await pool.query(`SELECT * FROM launch_audit_items ORDER BY check_key`);
     const savedMap: Record<string, any> = {};
     saved.forEach((r: any) => { savedMap[r.check_key] = r; });
 

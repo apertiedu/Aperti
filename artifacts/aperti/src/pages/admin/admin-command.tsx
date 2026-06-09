@@ -155,7 +155,7 @@ export default function AdminCommand() {
         >
           <Wifi className="h-4 w-4 text-blue-600 shrink-0" />
           <p className="text-sm text-blue-800 font-medium">
-            {liveStats.activeLiveSessions} live class session{liveStats.activeLiveSessions !== 1 ? "s" : ""} in progress
+            {liveStats.activeLiveSessions} active session{liveStats.activeLiveSessions !== 1 ? "s" : ""} in progress
           </p>
         </motion.div>
       )}

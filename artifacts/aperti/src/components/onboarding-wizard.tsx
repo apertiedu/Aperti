@@ -45,7 +45,7 @@ export default function OnboardingWizard({ onComplete }: { onComplete: () => voi
   );
 }
 
-function WelcomeStep() { return <p>We're excited to have you! Aperti will help you manage attendance, assignments, live classes, and much more — all in one place.</p>; }
+function WelcomeStep() { return <p>We're excited to have you! Aperti will help you manage attendance, assignments, courses, and much more — all in one place.</p>; }
 function SubjectsStep() { return <Input placeholder="e.g., Physics 0625 CAIE" />; }
 function LessonStep() { return <Input placeholder="e.g., Monday 9:00 AM Physics" />; }
 function InviteStep() { return <p>Your teacher code is <strong>APR-12345</strong>. Share this with your students to join your classes.</p>; }

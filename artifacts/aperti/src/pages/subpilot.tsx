@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Sparkles, Plus, CreditCard, MessageSquare, Phone, Save,
+  Sparkles, CreditCard, MessageSquare, Phone, Save,
   CheckCircle2, Clock, ExternalLink,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
@@ -82,7 +82,6 @@ export default function SubPilot() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [flexQty, setFlexQty] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"instapay" | "stripe">("instapay");
   const [instapayCode, setInstapayCode] = useState("");
@@ -133,14 +132,6 @@ export default function SubPilot() {
     },
   });
 
-  const flexMutation = useMutation({
-    mutationFn: (qty: number) => fetchJSON("/subscriptions/flex-seats", { method: "POST", body: JSON.stringify({ quantity: qty }) }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["mySub"] });
-      toast({ title: "FlexSeats added" });
-    },
-  });
-
   const saveSettingsMutation = useMutation({
     mutationFn: (settings: NotifySettings) =>
       fetchJSON("/absence-notify/settings", { method: "PUT", body: JSON.stringify(settings) }),
@@ -181,7 +172,6 @@ export default function SubPilot() {
         <TabsList className="bg-white border">
           <TabsTrigger value="current">Current Plan</TabsTrigger>
           <TabsTrigger value="plans">Upgrade</TabsTrigger>
-          <TabsTrigger value="flex">FlexSeats</TabsTrigger>
           <TabsTrigger value="notifications" className="gap-1.5">
             <MessageSquare className="h-3.5 w-3.5" /> Notifications
           </TabsTrigger>
@@ -207,10 +197,6 @@ export default function SubPilot() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Status</span>
                   <Badge className="bg-primary/10 text-primary border-0">{activeSub.status}</Badge>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">FlexSeats</span>
-                  <span>{mySub?.flexSeats?.length || 0} active</span>
                 </div>
               </CardContent>
             </Card>
@@ -291,40 +277,6 @@ export default function SubPilot() {
               ))}
             </div>
           )}
-        </TabsContent>
-
-        {/* ── FlexSeats ── */}
-        <TabsContent value="flex">
-          <Card className="shadow-sm border-0 max-w-md">
-            <CardHeader>
-              <CardTitle className="text-base">FlexSeats</CardTitle>
-              <CardDescription>
-                Add extra students without upgrading.{" "}
-                {activePlan?.flexSeatPriceEgp ? `${activePlan.flexSeatPriceEgp} EGP each.` : ""}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex gap-3 items-end">
-                <div className="space-y-1.5 flex-1">
-                  <Label className="text-xs font-medium">Number of students</Label>
-                  <Input type="number" min={1} value={flexQty} onChange={e => setFlexQty(Number(e.target.value))} className="h-9" />
-                </div>
-                <Button
-                  onClick={() => flexMutation.mutate(flexQty)}
-                  disabled={flexMutation.isPending}
-                  className="h-9 bg-primary text-white hover:bg-primary/90"
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" />
-                  {flexMutation.isPending ? "Adding…" : `Add ${flexQty} seat${flexQty !== 1 ? "s" : ""}`}
-                </Button>
-              </div>
-              {(mySub?.flexSeats?.length ?? 0) > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  Active: {mySub!.flexSeats.map((fs: any) => `${fs.quantity} seat(s)`).join(", ")}
-                </p>
-              )}
-            </CardContent>
-          </Card>
         </TabsContent>
 
         {/* ── Notifications ── */}

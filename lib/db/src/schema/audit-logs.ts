@@ -9,6 +9,8 @@ export const auditLogsTable = pgTable("audit_logs", {
   resourceId: integer("resource_id"),
   details: jsonb("details"),
   ipAddress: text("ip_address"),
+  severity: text("severity").notNull().default("info"),
+  userAgent: text("user_agent"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

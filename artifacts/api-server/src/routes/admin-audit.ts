@@ -7,15 +7,23 @@ import { requireRole } from "../middleware/auth";
 export const adminAuditRouter = Router();
 adminAuditRouter.use(requireRole("admin", "super_admin"));
 
+const SEVERITY_COLORS: Record<string, string> = {
+  info: "bg-blue-50 text-blue-700",
+  warning: "bg-amber-50 text-amber-700",
+  error: "bg-red-50 text-red-700",
+  critical: "bg-red-100 text-red-800",
+};
+
 adminAuditRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const { search, from, to, page = "1", limit = "100" } = req.query as Record<string, string>;
+    const { search, from, to, severity, page = "1", limit = "100" } = req.query as Record<string, string>;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     const conditions: any[] = [];
     if (search) conditions.push(ilike(auditLogsTable.action, `%${search}%`));
     if (from) conditions.push(gte(auditLogsTable.createdAt, new Date(from)));
     if (to) conditions.push(lte(auditLogsTable.createdAt, new Date(to)));
+    if (severity) conditions.push(sql`${auditLogsTable.severity} = ${severity}`);
     const where = conditions.length ? and(...conditions) : undefined;
 
     const [logs, cnt] = await Promise.all([
@@ -27,6 +35,8 @@ adminAuditRouter.get("/", async (req: Request, res: Response) => {
         resourceId: auditLogsTable.resourceId,
         details: auditLogsTable.details,
         ipAddress: auditLogsTable.ipAddress,
+        severity: auditLogsTable.severity,
+        userAgent: auditLogsTable.userAgent,
         createdAt: auditLogsTable.createdAt,
         username: accountsTable.username,
         displayName: accountsTable.displayName,
@@ -46,11 +56,31 @@ adminAuditRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
-adminAuditRouter.get("/export", async (req: Request, res: Response) => {
+adminAuditRouter.get("/stats", async (_req, res: Response) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        severity,
+        count(*)::int AS count
+      FROM audit_logs
+      WHERE created_at > now() - interval '30 days'
+      GROUP BY severity
+    `);
+    const totals: Record<string, number> = {};
+    for (const r of rows) totals[r.severity] = r.count;
+    res.json(totals);
+  } catch {
+    res.json({});
+  }
+});
+
+adminAuditRouter.get("/export", async (_req: Request, res: Response) => {
   try {
     const logs = await db.select().from(auditLogsTable).orderBy(desc(auditLogsTable.createdAt)).limit(5000);
-    const header = "id,accountId,action,resource,resourceId,ipAddress,createdAt\n";
-    const rows = logs.map(l => `${l.id},${l.accountId || ""},${l.action},${l.resource},${l.resourceId || ""},${l.ipAddress || ""},${l.createdAt}`).join("\n");
+    const header = "id,accountId,action,resource,resourceId,severity,ipAddress,createdAt\n";
+    const rows = logs.map(l =>
+      `${l.id},${l.accountId || ""},${l.action},${l.resource},${l.resourceId || ""},${l.severity || "info"},${l.ipAddress || ""},${l.createdAt}`
+    ).join("\n");
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", "attachment; filename=audit-logs.csv");
     res.send(header + rows);

@@ -54,6 +54,11 @@ import { launchCmsRouter } from "./routes/launch-cms";
 import { phase14PublicRouter } from "./routes/phase14-public";
 import { commerceRouter } from "./routes/commerce";
 import { mobileRouter } from "./routes/mobile";
+import { adminAiUsageRouter } from "./routes/admin-ai-usage";
+import { adminDocsRouter } from "./routes/admin-docs";
+import { adminLaunchAuditRouter } from "./routes/admin-launch-audit";
+import { userExportRouter } from "./routes/user-export";
+import { i18nRouter } from "./routes/i18n";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -170,6 +175,9 @@ app.use("/api", commerceRouter);
 // Phase 17 — Mobile Ecosystem (must be BEFORE main router so /push/vapid-key is public)
 app.use("/api", mobileRouter);
 
+// Phase 18 — i18n (public endpoints, must be BEFORE main router)
+app.use("/api", i18nRouter);
+
 // ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);
 
@@ -217,6 +225,12 @@ app.use("/api/admin/governance", governanceRouter);
 
 // Phase 12 — Launch CMS & Growth
 app.use("/api", launchCmsRouter);
+
+// Phase 18 — Enterprise Readiness
+app.use("/api/admin/ai-usage", adminAiUsageRouter);
+app.use("/api/admin/docs", adminDocsRouter);
+app.use("/api/admin/launch-audit", adminLaunchAuditRouter);
+app.use("/api", userExportRouter);
 
 
 // ── Global error handler ──────────────────────────────────────────────────────

@@ -20,7 +20,7 @@ const DEFAULTS: Record<string, unknown> = {
   show_stats: true,
   features: [
     { icon: "BarChart3",    title: "Insight Stream",    desc: "Real-time analytics: attendance, grades, risk alerts, and AI-generated action plans." },
-    { icon: "Video",        title: "LiveClass",         desc: "WebRTC-powered live classes with recording, screen-share, and interactive whiteboard." },
+    { icon: "BookOpen",     title: "CourseBuilder",     desc: "AI-assisted course creation with drag-and-drop lesson plans, media embeds, and auto-assessments." },
     { icon: "Brain",        title: "AI Mentor",         desc: "24/7 AI tutor trained on your material. Students get instant help anytime." },
     { icon: "BookOpen",     title: "QueryVault",        desc: "Smart question bank with AI generation — build balanced exams in seconds." },
     { icon: "CheckSquare",  title: "CheckIn",           desc: "QR-code or manual attendance. Auto-absence detection. CSV export." },

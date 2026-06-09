@@ -733,7 +733,7 @@ export default function Landing() {
             {[
               { step: "01", title: "Create your workspace", desc: "Sign up and create your workspace in minutes. Configure your subjects and invite your students — no setup fees, no waiting.", icon: Shield },
               { step: "02", title: "Invite students & parents", desc: "Students register and select you as their teacher. Parents link via a secure pairing code. You approve each connection with one click.", icon: Users },
-              { step: "03", title: "Teach, assess, analyse", desc: "Run live classes, set homework, auto-grade exams, and watch real-time analytics tell you exactly which student needs help — before they fall behind.", icon: BarChart3 },
+              { step: "03", title: "Teach, assess, analyse", desc: "Deliver courses, set homework, auto-grade exams, and watch real-time analytics tell you exactly which student needs help — before they fall behind.", icon: BarChart3 },
             ].map((item, i) => (
               <Reveal key={item.step} delay={i * 0.12}>
                 <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
