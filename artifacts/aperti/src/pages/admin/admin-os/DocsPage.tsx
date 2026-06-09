@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, CheckCircle, Clock, Settings, Database, Shield, Zap, Activity, Server, Monitor, Package, GitBranch } from "lucide-react";
+import { BookOpen, CheckCircle, Clock, Settings, Database, Shield, Zap, Activity, Server, Monitor, Package, GitBranch, Smartphone } from "lucide-react";
 
 const MODULES = [
   { name: "Authentication & Sessions", status: "stable", icon: Shield, version: "10.0", lastUpdated: "Phase 10", description: "JWT-based auth with MFA support, login history tracking, brute-force protection via rate limiting. Session management via PostgreSQL." },
@@ -12,13 +12,14 @@ const MODULES = [
   { name: "File Storage", status: "stable", icon: Server, version: "10.0", lastUpdated: "Phase 10", description: "Local disk storage with CDN_URL prefix support. File uploads up to 10MB. Images stored in /uploads." },
   { name: "Backup System", status: "stable", icon: Database, version: "10.0", lastUpdated: "Phase 10", description: "Automated pg_dump backups via node-cron (daily at 02:00 UTC). Stored in /backups, logged in backup_logs table." },
   { name: "Performance Tracking", status: "stable", icon: Monitor, version: "10.0", lastUpdated: "Phase 10", description: "Every API request logged to api_metrics. View dashboard at /admin/os/performance. P95 latency, error rates, slow queries." },
-  { name: "Teacher OS", status: "stable", icon: BookOpen, version: "9.0", lastUpdated: "Phase 9", description: "Full teacher dashboard, gradebook, lesson planning, live classes, attendance, homework, exams, and AI-powered insights." },
-  { name: "Student OS", status: "stable", icon: BookOpen, version: "9.0", lastUpdated: "Phase 9", description: "Study stream, InkSpace notes, Ascend gamification, SimVerse labs, Trial Vault, flashcards, mentor AI, and focus coaching." },
-  { name: "Parent OS", status: "stable", icon: BookOpen, version: "9.0", lastUpdated: "Phase 9", description: "Guardian dashboard, attendance alerts, progress reports, meeting scheduling, and real-time notifications." },
-  { name: "Admin OS", status: "stable", icon: Settings, version: "9.0", lastUpdated: "Phase 9", description: "Multi-tenant management, user CRUD, subscriptions, analytics, audit logs, feature flags, and compliance tools." },
+  { name: "Teacher OS", status: "stable", icon: BookOpen, version: "17.0", lastUpdated: "Phase 17", description: "Full teacher dashboard, gradebook, lesson planning, attendance, homework, exams, ContentCraft, CourseBuilder, and AI-powered insights. Responsive on mobile." },
+  { name: "Student OS", status: "stable", icon: BookOpen, version: "17.0", lastUpdated: "Phase 17", description: "Study stream, Ascend gamification, SimVerse labs, Trial Vault, Flashcard 3.0, mentor AI, focus coaching, mobile dashboards, and offline sync." },
+  { name: "Parent OS", status: "stable", icon: BookOpen, version: "17.0", lastUpdated: "Phase 17", description: "Guardian dashboard, attendance alerts, progress reports, meeting scheduling, real-time notifications, and mobile home view." },
+  { name: "Admin OS", status: "stable", icon: Settings, version: "18.0", lastUpdated: "Phase 18", description: "Multi-tenant management, user CRUD, subscriptions, analytics, audit logs, feature flags, compliance, AI usage dashboard, launch audit, and governance." },
   { name: "AI Engine (Coremind)", status: "stable", icon: Zap, version: "8.0", lastUpdated: "Phase 8", description: "OpenAI-powered tutoring, homework feedback, syllabus generation, exam analysis, and adaptive learning paths." },
-  { name: "Live Classes (LiveKit)", status: "stable", icon: Monitor, version: "7.0", lastUpdated: "Phase 7", description: "Video rooms, screen sharing, recording, breakout rooms, and attendance tracking via LiveKit SDK." },
+  { name: "Mobile Ecosystem", status: "stable", icon: Monitor, version: "17.0", lastUpdated: "Phase 17", description: "PWA with offline support, push notifications (VAPID), mobile bottom nav, camera upload, low-bandwidth mode, and role-specific mobile dashboards." },
   { name: "Version Control", status: "stable", icon: GitBranch, version: "10.0", lastUpdated: "Phase 10", description: "entity_versions table tracks changes to assessments, question_bank, and courses with full data snapshots." },
+  { name: "Enterprise Governance", status: "stable", icon: CheckCircle, version: "18.0", lastUpdated: "Phase 18", description: "Advanced audit logging with severity, AI usage tracking, internationalization framework (currencies/languages), legal compliance (data export, deletion), and launch audit checklist." },
 ];
 
 const ENV_VARS = [
@@ -30,9 +31,8 @@ const ENV_VARS = [
   { key: "CDN_URL", desc: "CDN base URL for file uploads (optional)", required: false },
   { key: "MFA_ENCRYPTION_KEY", desc: "32-char key for encrypting MFA secrets", required: false },
   { key: "PORT", desc: "API server port (default: 3001)", required: false },
-  { key: "LIVEKIT_URL", desc: "LiveKit server URL for live classes", required: false },
-  { key: "LIVEKIT_API_KEY", desc: "LiveKit API key", required: false },
-  { key: "LIVEKIT_API_SECRET", desc: "LiveKit API secret", required: false },
+  { key: "VAPID_PUBLIC_KEY", desc: "VAPID public key for push notifications (auto-generated if absent)", required: false },
+  { key: "VAPID_PRIVATE_KEY", desc: "VAPID private key for push notifications (auto-generated if absent)", required: false },
 ];
 
 const statusBadge: Record<string, string> = {
