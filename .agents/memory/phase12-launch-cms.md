@@ -15,14 +15,25 @@ feature_registry, feature_waitlist, beta_testers, release_notes, roadmap_items, 
 - Public endpoints (no auth): `/api/landing`, `/api/features/public`, `/api/roadmap`, `/api/release-notes`, `/api/platform-status`, `/api/faqs/public`, `/api/testimonials/public`
 - `/api/landing` returns: `{ sections, testimonials, faqs, plans, branding }` — full assembly for CMS-driven landing
 
-## Frontend — Admin (15 pages at /admin/os/)
-feature-registry, waitlist, beta, release-notes, roadmap-admin, landing-cms, testimonials, faqs-admin, events, demo-branding, campaigns, growth-dashboard, conversion-analytics, platform-status + AdminLayout "Growth & Launch" nav section
+## Frontend — Admin (17 pages at /admin/os/)
+feature-registry, waitlist, beta, release-notes, roadmap-admin, landing-cms, testimonials, faqs-admin, events, demo-branding, campaigns, growth-dashboard, conversion-analytics, platform-status, announcements, adoption + AdminLayout "Growth & Launch" nav section
 
-## Frontend — Public (4 pages)
+## Frontend — Public (5 pages + detail)
 - `/features` → features-showcase.tsx — searchable grid, 15 features, waitlist modal
+- `/features/:id` → features-detail.tsx — full detail: status badge, countdown timer, waitlist/beta CTA, dependencies list
 - `/roadmap` → roadmap-public.tsx — grouped by status (planned/in_progress/completed)
 - `/release-notes` → release-notes-public.tsx — changelog with type badges
 - `/status` → status-public.tsx — component status grid + incident feed
+
+## Countdown Timer
+- Self-contained in features-detail.tsx, not a shared component
+- Reads `launch_countdown_seconds` from `/api/features/:id` (EXTRACT EPOCH, null for released)
+- Shows days/hrs/min/sec tiles in teal; hides if 0 or null
+
+## CTA logic in features-detail.tsx
+- released → "Use This Feature" → /login
+- coming_soon or scheduled → "Join Waitlist" modal → POST /api/features/:id/waitlist
+- beta → "Apply for Beta" modal (reuses WaitlistModal) → same endpoint
 
 ## Landing CMS Rewrite (landing.tsx)
 - Fully CMS-driven via `useLandingCMS()` hook fetching `/api/landing`

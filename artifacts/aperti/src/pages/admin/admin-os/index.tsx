@@ -39,6 +39,8 @@ import CampaignsPage from "./CampaignsPage";
 import GrowthDashboardPage from "./GrowthDashboardPage";
 import ConversionAnalyticsPage from "./ConversionAnalyticsPage";
 import PlatformStatusPage from "./PlatformStatusPage";
+import AnnouncementsAdminPage from "./AnnouncementsAdminPage";
+import FeatureAdoptionPage from "./FeatureAdoptionPage";
 
 export default function AdminOS() {
   return (
@@ -96,6 +98,8 @@ export default function AdminOS() {
         <Route path="/admin/os/campaigns" component={CampaignsPage} />
         <Route path="/admin/os/conversion" component={ConversionAnalyticsPage} />
         <Route path="/admin/os/platform-status" component={PlatformStatusPage} />
+        <Route path="/admin/os/announcements" component={AnnouncementsAdminPage} />
+        <Route path="/admin/os/adoption" component={FeatureAdoptionPage} />
 
         <Route component={Dashboard} />
       </Switch>

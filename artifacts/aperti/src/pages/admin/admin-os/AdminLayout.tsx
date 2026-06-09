@@ -38,6 +38,8 @@ const NAV = [
   { label: "Demo & Branding",     icon: Palette,      href: "/admin/os/demo-branding" },
   { label: "Campaigns",           icon: Megaphone,    href: "/admin/os/campaigns" },
   { label: "Conversion Analytics",icon: PieChart,     href: "/admin/os/conversion" },
+  { label: "Feature Adoption",    icon: BarChart3,    href: "/admin/os/adoption" },
+  { label: "Announcements",       icon: Megaphone,    href: "/admin/os/announcements" },
   { label: "Platform Status",     icon: Globe,        href: "/admin/os/platform-status" },
   { label: "Features & Access", icon: Grid3X3, href: "/admin/os/features-matrix" },
   { label: "Conflict Center", icon: AlertTriangle, href: "/admin/os/conflicts" },

@@ -16,6 +16,7 @@ import { useEffect } from "react";
 // Public & Legal
 import Landing from "@/pages/landing";
 import FeatureShowcase from "@/pages/features-showcase";
+import FeatureDetail from "@/pages/features-detail";
 import RoadmapPublic from "@/pages/roadmap-public";
 import ReleaseNotesPublic from "@/pages/release-notes-public";
 import StatusPublic from "@/pages/status-public";
@@ -505,6 +506,7 @@ function PublicRouter() {
       <Route path="/sitemap" component={Sitemap} />
       <Route path="/paper-vault" component={PaperVaultPublic} />
       <Route path="/features" component={FeatureShowcase} />
+      <Route path="/features/:id" component={FeatureDetail} />
       <Route path="/roadmap" component={RoadmapPublic} />
       <Route path="/release-notes" component={ReleaseNotesPublic} />
       <Route path="/status" component={StatusPublic} />
