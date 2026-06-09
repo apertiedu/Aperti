@@ -51,6 +51,7 @@ import { queueAdminRouter } from "./routes/queue-admin";
 import { performanceRouter } from "./routes/performance";
 import { startBackupScheduler } from "./lib/backup-scheduler";
 import { governanceRouter } from "./routes/governance";
+import { launchCmsRouter } from "./routes/launch-cms";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -203,6 +204,9 @@ app.use("/api/admin/performance", performanceRouter);
 
 // Phase 11 — Governance
 app.use("/api/admin/governance", governanceRouter);
+
+// Phase 12 — Launch CMS & Growth
+app.use("/api", launchCmsRouter);
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

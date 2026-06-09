@@ -7,6 +7,8 @@ import {
   Settings, Scale, Database, ChevronLeft, ChevronRight, Menu, X,
   Layers, ShoppingCart, UserCheck, GraduationCap, ListTodo,
   Zap, BookMarked, UserCog, AlertTriangle, ShieldCheck, Grid3X3,
+  Rocket, Package, TestTube, Map, Layout, Quote, HelpCircle,
+  Calendar, Palette, Megaphone, TrendingUp, PieChart, Globe, Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +23,22 @@ const NAV = [
   { label: "— Governance", header: true },
   { label: "Roles & Permissions", icon: Shield, href: "/admin/os/roles" },
   { label: "Enrollments", icon: GraduationCap, href: "/admin/os/enrollments" },
+
+  { label: "— Growth & Launch", header: true },
+  { label: "Growth Dashboard",    icon: TrendingUp,   href: "/admin/os/growth" },
+  { label: "Feature Registry",    icon: Package,      href: "/admin/os/feature-registry" },
+  { label: "Waitlists",           icon: Users,        href: "/admin/os/waitlists" },
+  { label: "Beta Program",        icon: TestTube,     href: "/admin/os/beta" },
+  { label: "Release Notes",       icon: FileText,     href: "/admin/os/release-notes" },
+  { label: "Roadmap",             icon: Map,          href: "/admin/os/roadmap-admin" },
+  { label: "Landing CMS",         icon: Layout,       href: "/admin/os/landing-cms" },
+  { label: "Testimonials",        icon: Quote,        href: "/admin/os/testimonials" },
+  { label: "FAQs",                icon: HelpCircle,   href: "/admin/os/faqs" },
+  { label: "Events",              icon: Calendar,     href: "/admin/os/events" },
+  { label: "Demo & Branding",     icon: Palette,      href: "/admin/os/demo-branding" },
+  { label: "Campaigns",           icon: Megaphone,    href: "/admin/os/campaigns" },
+  { label: "Conversion Analytics",icon: PieChart,     href: "/admin/os/conversion" },
+  { label: "Platform Status",     icon: Globe,        href: "/admin/os/platform-status" },
   { label: "Features & Access", icon: Grid3X3, href: "/admin/os/features-matrix" },
   { label: "Conflict Center", icon: AlertTriangle, href: "/admin/os/conflicts" },
   { label: "Integrity Check", icon: ShieldCheck, href: "/admin/os/integrity" },

@@ -15,6 +15,10 @@ import { useEffect } from "react";
 
 // Public & Legal
 import Landing from "@/pages/landing";
+import FeatureShowcase from "@/pages/features-showcase";
+import RoadmapPublic from "@/pages/roadmap-public";
+import ReleaseNotesPublic from "@/pages/release-notes-public";
+import StatusPublic from "@/pages/status-public";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
 import Contact from "@/pages/contact";
@@ -500,6 +504,10 @@ function PublicRouter() {
       <Route path="/contact" component={Contact} />
       <Route path="/sitemap" component={Sitemap} />
       <Route path="/paper-vault" component={PaperVaultPublic} />
+      <Route path="/features" component={FeatureShowcase} />
+      <Route path="/roadmap" component={RoadmapPublic} />
+      <Route path="/release-notes" component={ReleaseNotesPublic} />
+      <Route path="/status" component={StatusPublic} />
       <Route component={Landing} />
     </Switch>
   );

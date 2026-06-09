@@ -25,6 +25,20 @@ import FeaturesMatrixPage from "./FeaturesMatrixPage";
 import ConflictPage from "./ConflictPage";
 import IntegrityPage from "./IntegrityPage";
 import UserAccessPage from "./UserAccessPage";
+import FeatureRegistryPage from "./FeatureRegistryPage";
+import WaitlistPage from "./WaitlistPage";
+import BetaPage from "./BetaPage";
+import ReleaseNotesAdminPage from "./ReleaseNotesAdminPage";
+import RoadmapAdminPage from "./RoadmapAdminPage";
+import LandingCMSPage from "./LandingCMSPage";
+import TestimonialsAdminPage from "./TestimonialsAdminPage";
+import FAQsAdminPage from "./FAQsAdminPage";
+import EventsAdminPage from "./EventsAdminPage";
+import DemoBrandingPage from "./DemoBrandingPage";
+import CampaignsPage from "./CampaignsPage";
+import GrowthDashboardPage from "./GrowthDashboardPage";
+import ConversionAnalyticsPage from "./ConversionAnalyticsPage";
+import PlatformStatusPage from "./PlatformStatusPage";
 
 export default function AdminOS() {
   return (
@@ -66,6 +80,23 @@ export default function AdminOS() {
         <Route path="/admin/os/docs" component={DocsPage} />
         <Route path="/admin/os/settings" component={CompliancePage} />
         <Route path="/admin/os/moderation" component={UsersPage} />
+
+        {/* Phase 12 — Growth & Launch */}
+        <Route path="/admin/os/growth" component={GrowthDashboardPage} />
+        <Route path="/admin/os/feature-registry" component={FeatureRegistryPage} />
+        <Route path="/admin/os/waitlists" component={WaitlistPage} />
+        <Route path="/admin/os/beta" component={BetaPage} />
+        <Route path="/admin/os/release-notes" component={ReleaseNotesAdminPage} />
+        <Route path="/admin/os/roadmap-admin" component={RoadmapAdminPage} />
+        <Route path="/admin/os/landing-cms" component={LandingCMSPage} />
+        <Route path="/admin/os/testimonials" component={TestimonialsAdminPage} />
+        <Route path="/admin/os/faqs" component={FAQsAdminPage} />
+        <Route path="/admin/os/events" component={EventsAdminPage} />
+        <Route path="/admin/os/demo-branding" component={DemoBrandingPage} />
+        <Route path="/admin/os/campaigns" component={CampaignsPage} />
+        <Route path="/admin/os/conversion" component={ConversionAnalyticsPage} />
+        <Route path="/admin/os/platform-status" component={PlatformStatusPage} />
+
         <Route component={Dashboard} />
       </Switch>
     </AdminLayout>
