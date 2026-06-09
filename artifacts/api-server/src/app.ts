@@ -52,6 +52,7 @@ import { startBackupScheduler } from "./lib/backup-scheduler";
 import { governanceRouter } from "./routes/governance";
 import { launchCmsRouter } from "./routes/launch-cms";
 import { phase14PublicRouter } from "./routes/phase14-public";
+import { commerceRouter } from "./routes/commerce";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -161,6 +162,9 @@ app.get("/api/health", async (_req, res) => {
 
 // Phase 14 — Public stats & testimonials (no auth, must be BEFORE main router)
 app.use("/api", phase14PublicRouter);
+
+// Phase 16 — Commercialization (must be BEFORE main router for public plan endpoints)
+app.use("/api", commerceRouter);
 
 // ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);

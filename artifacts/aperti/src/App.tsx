@@ -39,12 +39,10 @@ import CardStack from "@/pages/cardstack";
 import Syllabuilder from "@/pages/syllabuilder";
 import KudosEngine from "@/pages/kudos-engine";
 import Pulse from "@/pages/pulse";
-import ClassForge from "@/pages/class-forge";
 import ContentCraft from "@/pages/content-craft";
 import LabBuilder from "@/pages/lab-builder";
 import MarkerMind from "@/pages/marker-mind";
 import InsightStream from "@/pages/insight-stream";
-import SubPilot from "@/pages/subpilot";
 import HelpDesk from "@/pages/helpdesk";
 import InsightExams from "@/pages/insight-exams";
 import ScanScribe from "@/pages/scan-scribe";
@@ -54,7 +52,6 @@ import Messages from "@/pages/messages";
 
 // Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
-import SubPilotAdmin from "@/pages/admin/subpilot-settings";
 import LandingEditor from "@/pages/admin/landing-editor";
 import AssistantPermissions from "@/pages/admin/assistant-permissions";
 import CheckoutPage from "@/pages/checkout";
@@ -389,12 +386,10 @@ const TEACHER_ROUTES = (
     <Route path="/syllabuilder" component={Syllabuilder} />
     <Route path="/kudos-engine" component={KudosEngine} />
     <Route path="/pulse" component={Pulse} />
-    <Route path="/class-forge" component={ClassForge} />
     <Route path="/content-craft" component={ContentCraft} />
     <Route path="/lab-builder" component={LabBuilder} />
     <Route path="/marker-mind" component={MarkerMind} />
     <Route path="/insight-stream" component={InsightStream} />
-    <Route path="/subpilot" component={SubPilot} />
     <Route path="/helpdesk" component={HelpDesk} />
     <Route path="/insight-exams" component={InsightExams} />
     <Route path="/scan-scribe" component={ScanScribe} />
@@ -451,7 +446,6 @@ const ADMIN_ROUTES = (
     <Route path="/admin/certificates" component={AdminCertificates} />
     <Route path="/admin/world-pilot" component={WorldPilot} />
     <Route path="/admin/paper-vault" component={PaperVaultAdmin} />
-    <Route path="/admin/subpilot-settings" component={SubPilotAdmin} />
     <Route path="/admin/helpdesk" component={HelpDeskAdmin} />
     <Route path="/admin/shield-core" component={ShieldCore} />
     <Route path="/admin/quick-switch" component={QuickSwitch} />

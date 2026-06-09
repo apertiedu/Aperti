@@ -72,3 +72,5 @@ description: Deprecated module removals, subscription billing infrastructure, co
 - **payment_requests.status flow**: `pending` → (user uploads proof) → `paid` → (admin verifies) → `verified`; subscription activated on verify
 - **ON CONFLICT for subscriptions**: verify handler uses try/catch fallback because subscriptions table may or may not have a UNIQUE(account_id) constraint
 - **Import ordering**: Phase 16 route imports were moved BEFORE `const router = Router()` — dynamic imports after export default are invalid in TypeScript ESM
+- **commerceRouter must be mounted BEFORE main router**: `app.use("/api", commerceRouter)` must appear before `app.use("/api", router)` in app.ts. The main router has a global `authenticate` middleware (via qaRouter) that blocks all unmatched requests — public routes in commerceRouter will get 401 if mounted after. See public-routes-before-main-router.md.
+- **Default subscription plans**: seeded via executeSql on first setup — 4 teacher plans (Free/Starter/Pro/Elite) and 2 student plans (Student Free/Student Plus) in EGP; use `ON CONFLICT DO NOTHING` to be idempotent.

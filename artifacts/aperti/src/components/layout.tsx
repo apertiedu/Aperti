@@ -70,7 +70,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "SubmitFlow", href: "/submit-flow", icon: ClipboardList, roles: ["admin","teacher"] },
         { name: "GradeFlow", href: "/grade-flow", icon: CheckSquare2, roles: ["admin","teacher","assistant"] },
         { name: "SchemeCraft", href: "/scheme-craft", icon: FileText, roles: ["admin","teacher"] },
-        { name: "ClassForge", href: "/class-forge", icon: Users2, roles: ["admin","teacher"] },
       ],
     },
     {
@@ -113,7 +112,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Archives", href: "/teacher/archives", icon: Archive, roles: ["admin","teacher"] },
         { name: "AutoPilot", href: "/automation", icon: Bot, roles: ["admin","teacher"] },
         { name: "KudosEngine", href: "/kudos-engine", icon: Award, roles: ["admin","teacher"] },
-        { name: "SubPilot", href: "/subpilot", icon: CreditCard, roles: ["admin","teacher"] },
         { name: "HelpDesk", href: "/helpdesk", icon: HelpCircle, roles: ["admin","teacher","assistant"] },
       ],
     },
@@ -130,7 +128,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "AutoScale",              href: "/admin/auto-scale",           icon: Cpu,         roles: ["admin"] },
         { name: "SpendWise",              href: "/admin/spend-wise",           icon: PieChart,    roles: ["admin"] },
         { name: "QuickSwitch",            href: "/admin/quick-switch",         icon: RefreshCw,   roles: ["admin"] },
-        { name: "SubPilot Settings",      href: "/admin/subpilot-settings",    icon: Settings,    roles: ["admin"] },
         { name: "HelpDesk Admin",         href: "/admin/helpdesk",             icon: MessageSquare, roles: ["admin"] },
         { name: "GuardianPulse",          href: "/admin/guardian-pulse",       icon: Sparkles,    roles: ["admin"] },
         { name: "Moderation Panel",       href: "/admin/moderation",           icon: Shield,      roles: ["admin"] },

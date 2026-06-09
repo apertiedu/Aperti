@@ -135,7 +135,6 @@ export default function CoreHub() {
   const quickActions = [
     { label: "New Assignment", icon: <ClipboardList className="h-4 w-4" />, href: "/submit-flow" },
     { label: "Check In", icon: <CalendarCheck className="h-4 w-4" />, href: "/checkin" },
-    { label: "Start LiveClass", icon: <Video className="h-4 w-4" />, href: "/live-class" },
     { label: "Query Vault", icon: <Brain className="h-4 w-4" />, href: "/query-vault" },
     { label: "Grade Flow", icon: <CheckCircle2 className="h-4 w-4" />, href: "/grade-flow" },
     { label: "TutorCraft AI", icon: <Sparkles className="h-4 w-4" />, href: "/tutorcraft" },
@@ -210,11 +209,11 @@ export default function CoreHub() {
                       <p className="text-xs text-muted-foreground">{c.start_time}{c.end_time ? ` – ${c.end_time}` : ""} · {c.type ?? "Class"}</p>
                     </div>
                     {c.online_link && (
-                      <Link href="/live-class">
+                      <a href={c.online_link} target="_blank" rel="noopener noreferrer">
                         <Button variant="outline" size="sm" className="h-7 text-xs shrink-0">
                           <Video className="h-3 w-3 mr-1" /> Join
                         </Button>
-                      </Link>
+                      </a>
                     )}
                   </div>
                 ))
