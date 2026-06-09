@@ -150,6 +150,15 @@ import RevisionNotesPage from "@/pages/revision-notes";
 import AdminCommercePage from "@/pages/admin/admin-commerce";
 import ExecutiveDashboardPage from "@/pages/admin/executive-dashboard";
 
+// Phase 17 — Mobile Ecosystem
+import StudentMobileHome from "@/pages/mobile/student-home";
+import TeacherMobileHome from "@/pages/mobile/teacher-home";
+import ParentMobileHome from "@/pages/mobile/parent-home";
+import AdminMobileHome from "@/pages/mobile/admin-home";
+import FlashcardSwipe from "@/pages/student/flashcard-swipe";
+import AdminPushPage from "@/pages/admin/admin-push";
+import PWAInstallBanner from "@/components/pwa-install-banner";
+
 // Phase 15 — Educational Content Ecosystem
 import ContentCraftStudio from "@/pages/teacher/contentcraft-studio";
 import CourseBuilder from "@/pages/teacher/course-builder";
@@ -352,6 +361,9 @@ function StudentRouter() {
         <Route path="/account/subscription" component={MySubscriptionPage} />
         <Route path="/coming-soon" component={ComingSoonPage} />
         <Route path="/revision-notes" component={RevisionNotesPage} />
+        {/* Phase 17 — Mobile */}
+        <Route path="/mobile/home" component={StudentMobileHome} />
+        <Route path="/flashcards/swipe" component={FlashcardSwipe} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -425,6 +437,9 @@ const TEACHER_ROUTES = (
     <Route path="/account/subscription" component={MySubscriptionPage} />
     <Route path="/coming-soon" component={ComingSoonPage} />
     <Route path="/revision-notes" component={RevisionNotesPage} />
+    {/* Phase 17 — Mobile */}
+    <Route path="/mobile/home" component={TeacherMobileHome} />
+    <Route path="/flashcards/swipe" component={FlashcardSwipe} />
   </>
 );
 
@@ -455,6 +470,9 @@ const ADMIN_ROUTES = (
     {/* Phase 16 — Commerce Admin */}
     <Route path="/admin/commerce" component={AdminCommercePage} />
     <Route path="/admin/executive" component={ExecutiveDashboardPage} />
+    {/* Phase 17 — Mobile Admin */}
+    <Route path="/admin/push" component={AdminPushPage} />
+    <Route path="/mobile/home" component={AdminMobileHome} />
   </>
 );
 
@@ -526,6 +544,8 @@ function ParentRouter() {
         <Route path="/profile/:id" component={Profile} />
         <Route path="/courses" component={Courses} />
         <Route path="/courses/:id" component={CourseDetail} />
+        {/* Phase 17 — Mobile */}
+        <Route path="/mobile/home" component={ParentMobileHome} />
 
         <Route component={NotFound} />
       </Switch>
@@ -621,6 +641,7 @@ export default function App() {
           </AuthProvider>
           <Toaster />
           <LowBandwidthBanner />
+          <PWAInstallBanner />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

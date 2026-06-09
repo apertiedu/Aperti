@@ -670,6 +670,32 @@ const PHASE16_MIGRATIONS: string[] = [
    ON CONFLICT DO NOTHING`,
 ];
 
+const PHASE17_MIGRATIONS: string[] = [
+  /* ── Push Subscriptions ──────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS push_subscriptions (
+    id         serial PRIMARY KEY,
+    user_id    integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    endpoint   text NOT NULL,
+    auth       text NOT NULL,
+    p256dh     text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, endpoint)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_push_subscriptions_user ON push_subscriptions(user_id)`,
+
+  /* ── Offline Sync Queue ───────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS offline_sync_queue (
+    id         serial PRIMARY KEY,
+    user_id    integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    action     text NOT NULL,
+    payload    jsonb NOT NULL DEFAULT '{}',
+    status     text NOT NULL DEFAULT 'pending'
+               CHECK (status IN ('pending','synced','failed')),
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_offline_sync_user ON offline_sync_queue(user_id)`,
+];
+
 export async function runMigrations(): Promise<void> {
   for (const sql of MIGRATIONS) {
     try {
@@ -703,11 +729,19 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE17_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
-    [`phase16-${new Date().toISOString().split("T")[0]}`],
+    [`phase17-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 migrations applied");
 }

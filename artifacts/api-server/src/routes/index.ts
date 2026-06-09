@@ -92,6 +92,7 @@ import { phase14Router } from "./phase14";
 import { contentEcosystemRouter } from "./content-ecosystem";
 import { commerceRouter } from "./commerce";
 import { revisionNotesRouter } from "./revision-notes";
+import { mobileRouter } from "./mobile";
 
 const router: IRouter = Router();
 
@@ -202,6 +203,9 @@ router.use(contentEcosystemRouter);
 // Phase 16 — Commercialization & Business Operations
 router.use(commerceRouter);
 router.use(revisionNotesRouter);
+
+// Phase 17 — Mobile Ecosystem
+router.use(mobileRouter);
 
 export default router;
 

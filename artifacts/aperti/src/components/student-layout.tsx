@@ -8,8 +8,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, BookOpen, CalendarCheck, Brain, Layers, Flame, FlaskConical,
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
-  Sun, Moon, LogOut, Users, Shield, Repeat2, Video, Library, Link2,
-  MessageSquare, BarChart3, Cpu, Pencil, Lock, GraduationCap,
+  Sun, Moon, LogOut, Users, Shield, Repeat2, Library, Link2,
+  MessageSquare, BarChart3, Cpu, Lock, GraduationCap,
   Bell, Inbox, Megaphone, Ticket,
 } from "lucide-react";
 
@@ -42,7 +42,6 @@ const allNav = [
   { href: "/learn-path", label: "LearnPath", icon: Target, desc: "Learning journey" },
   { href: "/discover", label: "DiscoverFeed", icon: Star, desc: "Curated content" },
   { href: "/team-forge", label: "TeamForge", icon: Users, desc: "Class competitions" },
-  { href: "/live-class", label: "LiveClass", icon: Video, desc: "Join live session" },
   { href: "/privacy-vault", label: "PrivacyVault", icon: Shield, desc: "My data" },
   { href: "/link-parent", label: "Link Parent", icon: Link2, desc: "Connect to parent" },
   { href: "/echo", label: "Echo", icon: Brain, desc: "AI learning memory" },
@@ -59,7 +58,6 @@ const allNav = [
   { href: "/student/exam-readiness", label: "Exam Readiness", icon: Target, desc: "AI readiness dashboard" },
   { href: "/student/transcript", label: "Transcript", icon: FileText, desc: "Academic record" },
   { href: "/student/appeals", label: "Appeals", icon: MessageSquare, desc: "Grade review requests" },
-  { href: "/inkspace", label: "InkSpace", icon: Pencil, desc: "Smart notebooks" },
   { href: "/course-hub", label: "Course Hub", icon: BookOpen, desc: "My courses" },
   { href: "/assignments", label: "Assignments", icon: Cpu, desc: "Assignment center" },
   { href: "/learning-path", label: "Learning Path", icon: Target, desc: "Adaptive journey" },
