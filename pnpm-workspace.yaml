@@ -39,6 +39,8 @@ onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
   - msw
+  - msgpackr-extract
+  - tesseract.js
   - unrs-resolver
 
 overrides:
