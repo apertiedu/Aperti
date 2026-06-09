@@ -59,6 +59,15 @@ import { adminDocsRouter } from "./routes/admin-docs";
 import { adminLaunchAuditRouter } from "./routes/admin-launch-audit";
 import { userExportRouter } from "./routes/user-export";
 import { i18nRouter } from "./routes/i18n";
+// Phase 19 — Founder Control Center & Operational Layer
+import { founderRouter } from "./routes/founder";
+import { launchCmdRouter, releasesRouter } from "./routes/launch-releases";
+import { notificationRulesRouter } from "./routes/notification-rules-admin";
+import { searchRouter } from "./routes/search";
+import { contentQualityRouter, aiCostsRouter } from "./routes/content-quality-admin";
+import { revisionV3Router } from "./routes/revision-v3";
+import { flashcardV3Router } from "./routes/flashcard-v3";
+import { startFounderAlertsWorker } from "./routes/founder-alerts-worker";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -178,6 +187,10 @@ app.use("/api", mobileRouter);
 // Phase 18 — i18n (public endpoints, must be BEFORE main router)
 app.use("/api", i18nRouter);
 
+// Phase 19 — Public endpoints (must be BEFORE main router)
+app.use("/api/search", searchRouter);
+app.use("/api", releasesRouter);
+
 // ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);
 
@@ -232,6 +245,15 @@ app.use("/api/admin/docs", adminDocsRouter);
 app.use("/api/admin/launch-audit", adminLaunchAuditRouter);
 app.use("/api", userExportRouter);
 
+// Phase 19 — Founder Control Center & Operational Layer
+app.use("/api/founder", founderRouter);
+app.use("/api/launch", launchCmdRouter);
+app.use("/api/admin/notification-rules", notificationRulesRouter);
+app.use("/api/admin/content-quality", contentQualityRouter);
+app.use("/api/admin/ai", aiCostsRouter);
+app.use("/api/revision", revisionV3Router);
+app.use("/api/flashcards/v3", flashcardV3Router);
+
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -255,5 +277,6 @@ async function seedDefaultAdmin() {
 
 seedDefaultAdmin();
 startBackupScheduler();
+startFounderAlertsWorker();
 
 export default app;

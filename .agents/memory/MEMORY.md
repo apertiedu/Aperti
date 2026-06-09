@@ -19,3 +19,4 @@
 - [Public routes before main router](public-routes-before-main-router.md) — qaRouter has global authenticate (no path prefix) so ANY public route must be registered in app.ts BEFORE app.use("/api", router)
 - [Phase 15 Content Ecosystem](phase15-content-ecosystem.md) — 13 new DB tables, content-ecosystem.ts route file, 10 frontend pages; ContentCraft block editor, Course Builder, Question Studio, Practice Center, SimVerse Labs, Geometrix, Handwriting AI, Resource Library, Analytics
 - [Phase 18 Enterprise Readiness](phase18-enterprise.md) — 11 DB tables (incl. automation_tasks back-fill), 9 route files, 2 new admin-os pages; Privacy & Data tab in settings; logAudit helper in tenant.ts
+- [Phase 19 Founder Control Center](phase19-founder-control.md) — 9 DB tables, 8 route files, 8 admin-os pages; search+releases are PUBLIC routes (before main router); Smart Pack + Learning Mode added to student pages

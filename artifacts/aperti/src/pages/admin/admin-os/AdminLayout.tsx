@@ -10,6 +10,7 @@ import {
   Rocket, Package, TestTube, Map, Layout, Quote, HelpCircle,
   Calendar, Palette, Megaphone, TrendingUp, PieChart, Globe, Star,
   Bug, FlaskConical, History, ClipboardList,
+  Crown, DollarSign, Bell, Tag, Award,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -79,6 +80,17 @@ const NAV = [
   { label: "Platform Settings", icon: Settings, href: "/admin/os/settings" },
   { label: "Docs", icon: BookMarked, href: "/admin/os/docs" },
   { label: "Launch Audit", icon: Rocket, href: "/admin/os/launch-audit" },
+
+  { label: "— Founder Control", header: true },
+  { label: "Founder Overview",    icon: Crown,       href: "/admin/os/founder" },
+  { label: "Revenue Dashboard",   icon: DollarSign,  href: "/admin/os/founder-revenue" },
+  { label: "Growth Analytics",    icon: TrendingUp,  href: "/admin/os/founder-growth" },
+  { label: "Content Quality",     icon: Award,       href: "/admin/os/content-quality" },
+  { label: "AI Cost Management",  icon: Zap,         href: "/admin/os/ai-costs" },
+  { label: "Notification Rules",  icon: Bell,        href: "/admin/os/notification-rules" },
+  { label: "Founder Alerts",      icon: AlertTriangle, href: "/admin/os/founder-alerts" },
+  { label: "Launch Command",      icon: Rocket,      href: "/admin/os/launch-command" },
+  { label: "Releases",            icon: Tag,         href: "/admin/os/releases" },
 ] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

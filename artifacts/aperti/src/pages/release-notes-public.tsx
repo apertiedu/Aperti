@@ -37,7 +37,7 @@ function MarkdownContent({ content }: { content: string }) {
 export default function ReleaseNotesPublicPage() {
   const { data: notes = [], isLoading } = useQuery({
     queryKey: ["public-release-notes"],
-    queryFn: () => fetch("/api/release-notes").then((r) => r.json()),
+    queryFn: () => fetch("/api/releases").then((r) => r.json()).then(d => d.releases ?? []),
   });
 
   return (

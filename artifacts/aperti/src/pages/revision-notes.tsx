@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FileText, Plus, Sparkles, Trash2, Edit2, Check, X,
-  Loader2, BookOpen, ArrowRight, Search, ChevronDown, ChevronUp
+  Loader2, BookOpen, ArrowRight, Search, ChevronDown, ChevronUp, Package2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -25,6 +25,9 @@ export default function RevisionNotesPage() {
   const [editTitle, setEditTitle] = useState("");
   const [aiTopic, setAiTopic] = useState("");
   const [showAiForm, setShowAiForm] = useState(false);
+  const [showSmartPack, setShowSmartPack] = useState(false);
+  const [packSubject, setPackSubject] = useState("");
+  const [generatedPack, setGeneratedPack] = useState<any>(null);
 
   const { data: notes = [], isLoading } = useQuery({
     queryKey: ["revision-notes"],
@@ -50,6 +53,12 @@ export default function RevisionNotesPage() {
   const deleteMut = useMutation({
     mutationFn: (id: number) => deleteReq(`/api/revision-notes/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["revision-notes"] }); setSelected(null); toast({ title: "Note deleted" }); },
+  });
+
+  const smartPackMut = useMutation({
+    mutationFn: () => postJSON("/api/revision/generate-smart-pack", { subject: packSubject }),
+    onSuccess: (data) => { setGeneratedPack(data); setShowSmartPack(false); setPackSubject(""); toast({ title: "Smart Pack generated!" }); },
+    onError: () => toast({ title: "Failed to generate Smart Pack", variant: "destructive" }),
   });
 
   const filtered = (notes as any[]).filter((n: any) =>
@@ -86,6 +95,30 @@ export default function RevisionNotesPage() {
             <Sparkles className="w-3.5 h-3.5" /> Generate with AI
             {showAiForm ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
           </button>
+          {/* Smart Pack */}
+          <button onClick={() => setShowSmartPack(v => !v)}
+            className="w-full flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-100 text-purple-700 rounded-xl text-sm font-medium hover:border-purple-200 transition-colors">
+            <Package2 className="w-3.5 h-3.5" /> Smart Pack
+            {showSmartPack ? <ChevronUp className="w-3 h-3 ml-auto" /> : <ChevronDown className="w-3 h-3 ml-auto" />}
+          </button>
+          <AnimatePresence>
+            {showSmartPack && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                <div className="space-y-2 p-3 bg-purple-50/50 border border-purple-100 rounded-xl">
+                  <p className="text-xs text-purple-600 font-medium">AI generates a pack from your weak areas + exam date</p>
+                  <input value={packSubject} onChange={e => setPackSubject(e.target.value)}
+                    placeholder="Subject (e.g. Chemistry, History)"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-300"
+                    onKeyDown={e => { if (e.key === "Enter" && packSubject.trim()) smartPackMut.mutate(); }}
+                  />
+                  <button onClick={() => smartPackMut.mutate()} disabled={!packSubject.trim() || smartPackMut.isPending}
+                    className="w-full py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2">
+                    {smartPackMut.isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</> : "Generate Smart Pack"}
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
           <AnimatePresence>
             {showAiForm && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">

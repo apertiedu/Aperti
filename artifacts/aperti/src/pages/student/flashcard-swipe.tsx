@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchJSON, postJSON } from "@/lib/api";
 import { motion, useMotionValue, useTransform, AnimatePresence } from "framer-motion";
-import { Check, X, Minus, RotateCcw, BookOpen, Flame } from "lucide-react";
+import { Check, X, Minus, RotateCcw, BookOpen, Flame, Layers } from "lucide-react";
 
 type Confidence = "easy" | "medium" | "hard";
 type Card = { id: number; front: string; back: string; subject?: string; tags?: string[] };
@@ -130,12 +130,23 @@ function ConfidenceDots({ history }: { history: Confidence[] }) {
   );
 }
 
+const LEARNING_MODES = [
+  { value: "classic",           label: "Classic",           desc: "Review all cards in order" },
+  { value: "exam",              label: "Exam Mode",         desc: "Timed — no peeking at hints" },
+  { value: "rapid_review",      label: "Rapid Review",      desc: "Quick fire — 5s per card" },
+  { value: "weakness_recovery", label: "Weakness Recovery", desc: "Focus on Hard-rated cards" },
+  { value: "mastery_challenge", label: "Mastery Challenge", desc: "Only Mastered cards to confirm" },
+] as const;
+type LearningMode = typeof LEARNING_MODES[number]["value"];
+
 export default function FlashcardSwipe() {
   const qc = useQueryClient();
   const [current, setCurrent] = useState(0);
   const [history, setHistory] = useState<Confidence[]>([]);
   const [session, setSession] = useState<{ card: Card; confidence: Confidence }[]>([]);
   const [finished, setFinished] = useState(false);
+  const [learningMode, setLearningMode] = useState<LearningMode>("classic");
+  const [showModeSelector, setShowModeSelector] = useState(false);
 
   const { data: cards = [], isLoading } = useQuery<Card[]>({
     queryKey: ["flashcards-swipe"],
@@ -248,10 +259,40 @@ export default function FlashcardSwipe() {
       <div className="px-5 pt-5 pb-3 space-y-3">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-foreground">Flashcards 3.0</h1>
-          <span className="text-sm text-muted-foreground">
-            {current + 1} / {cards.length}
-          </span>
+          <div className="flex items-center gap-2">
+            <button onClick={() => setShowModeSelector(v => !v)}
+              className="flex items-center gap-1.5 text-xs font-medium text-primary bg-primary/10 px-2.5 py-1 rounded-full hover:bg-primary/20 transition-colors">
+              <Layers className="w-3 h-3" />
+              {LEARNING_MODES.find(m => m.value === learningMode)?.label ?? "Classic"}
+            </button>
+            <span className="text-sm text-muted-foreground">
+              {current + 1} / {cards.length}
+            </span>
+          </div>
         </div>
+
+        {/* Learning mode selector */}
+        <AnimatePresence>
+          {showModeSelector && (
+            <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
+              className="bg-white rounded-2xl border border-border/60 shadow-lg p-3 space-y-1.5">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pb-1">Learning Mode</p>
+              {LEARNING_MODES.map(mode => (
+                <button key={mode.value}
+                  onClick={() => { setLearningMode(mode.value); setShowModeSelector(false); }}
+                  className={`w-full flex items-start gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
+                    learningMode === mode.value ? "bg-primary/10 border border-primary/30" : "hover:bg-muted/40"
+                  }`}>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground">{mode.label}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{mode.desc}</p>
+                  </div>
+                  {learningMode === mode.value && <Check className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Progress bar */}
         <div className="bg-muted/40 rounded-full h-2 overflow-hidden">

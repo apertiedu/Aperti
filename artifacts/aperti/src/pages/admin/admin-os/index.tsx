@@ -49,6 +49,15 @@ import QASecurityScanPage from "./QASecurityScanPage";
 import ContentGovernancePage from "./ContentGovernancePage";
 import AiUsagePage from "./AiUsagePage";
 import LaunchAuditPage from "./LaunchAuditPage";
+// Phase 19 — Founder Control Center
+import FounderControlPage from "./FounderControlPage";
+import FounderRevenuePage from "./FounderRevenuePage";
+import FounderGrowthPage from "./FounderGrowthPage";
+import ContentQualityPage from "./ContentQualityPage";
+import AiCostsPage from "./AiCostsPage";
+import NotificationRulesPage from "./NotificationRulesPage";
+import FounderAlertsPage from "./FounderAlertsPage";
+import LaunchCommandPage from "./LaunchCommandPage";
 
 export default function AdminOS() {
   return (
@@ -122,6 +131,17 @@ export default function AdminOS() {
         {/* Phase 18 — Enterprise Readiness & Governance */}
         <Route path="/admin/os/ai-usage" component={AiUsagePage} />
         <Route path="/admin/os/launch-audit" component={LaunchAuditPage} />
+
+        {/* Phase 19 — Founder Control Center & Operational Layer */}
+        <Route path="/admin/os/founder" component={FounderControlPage} />
+        <Route path="/admin/os/founder-revenue" component={FounderRevenuePage} />
+        <Route path="/admin/os/founder-growth" component={FounderGrowthPage} />
+        <Route path="/admin/os/content-quality" component={ContentQualityPage} />
+        <Route path="/admin/os/ai-costs" component={AiCostsPage} />
+        <Route path="/admin/os/notification-rules" component={NotificationRulesPage} />
+        <Route path="/admin/os/founder-alerts" component={FounderAlertsPage} />
+        <Route path="/admin/os/launch-command" component={LaunchCommandPage} />
+        <Route path="/admin/os/releases" component={ReleaseNotesAdminPage} />
 
         <Route component={Dashboard} />
       </Switch>
