@@ -7,6 +7,7 @@ import {
   ImageIcon, ChevronRight, AlertTriangle,
 } from "lucide-react";
 import UpgradeModal from "@/components/upgrade-modal";
+import PlanUsageBar from "@/components/plan-usage-bar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -521,6 +522,9 @@ export default function MyCourses() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* ── Plan usage bar ── */}
+      <PlanUsageBar resource="courses" label="Course Slots" />
 
       {/* ── Stats strip ── */}
       <div className="grid grid-cols-3 gap-3">

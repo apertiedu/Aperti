@@ -1,6 +1,6 @@
 ---
 name: Phase 17 Mobile Ecosystem
-description: PWA, responsive layout, push notifications (web-push), offline sync, mobile dashboards, Flashcard 3.0 swipe, admin push page.
+description: PWA, responsive layout, push notifications (web-push), offline sync, mobile dashboards, Flashcard 3.0 swipe, admin push page, push triggers on key events.
 ---
 
 ## DB tables added (PHASE17_MIGRATIONS)
@@ -28,15 +28,26 @@ description: PWA, responsive layout, push notifications (web-push), offline sync
 - Expired subs (410/404 from sendNotification) are auto-deleted
 - Key functions: saveSubscription, removeSubscription, sendPushToUser, sendPushToRole, sendPushToAll
 
-## CRITICAL: requireRole middleware does NOT exist
-- There is no `artifacts/api-server/src/middleware/require-role.ts`
-- Use inline function: `const adminOnly = (req, res, next) => { if (req.user?.role !== "admin") return res.status(403)...; next(); }`
-- Existing pattern in other files: just check `req.user?.role` inline
+## Push triggers on existing routes (added Phase 17 completion)
+- **Homework published** (`routes/homework.ts` POST `/`) → `sendPushToRole("student", ...)`
+- **Homework graded** (`routes/homework.ts` POST `/:id/submissions/:subId/grade`) → `sendPushToUser(studentId, ...)`
+- **Subscription verified** (`routes/commerce.ts` PUT `/admin/commerce/payment-requests/:id/verify`) → `sendPushToUser(pr.user_id, ...)`
+- **Announcement created** (`routes/comm-threads.ts` POST `/announcements`) → `sendPushToRole(audience_type, ...)` or `sendPushToAll()` for "all"; skipped for scheduled
+
+## requireRole middleware
+- `requireRole` DOES exist in `middleware/auth.ts` — used in homework.ts, comm-threads.ts, commerce.ts etc.
+- Earlier note saying it doesn't exist was WRONG. It is a valid export.
 
 ## Frontend components
 - `components/mobile-bottom-nav.tsx` — role-specific 5-tab bottom nav, hidden on `lg:` screens; uses Framer Motion `layoutId` indicator
 - `components/pwa-install-banner.tsx` — beforeinstallprompt banner + push permission banner (both dismissible, persisted in localStorage)
 - `hooks/use-pwa.ts` — usePWA() hook: canInstall, triggerInstall, pushSupported, pushPermission, isSubscribed, subscribeToPush, unsubscribeFromPush; also exports openOfflineDB(), queueOfflineAction(), saveOfflineContent(), getOfflineContent()
+
+## Camera capture on handwritten-submit.tsx
+- Two hidden `<input type="file">` elements: one with `capture="environment"` (camera), one without (gallery picker)
+- FileReader converts file to data URL — fed into imageUrl state for preview + AI processing
+- Process button appears only when imageUrl is set
+- URL input still present as fallback (shows empty if data URL is selected)
 
 ## Layout changes (layout.tsx)
 - Desktop sidebar: `hidden lg:flex` — hidden on mobile
@@ -73,6 +84,7 @@ description: PWA, responsive layout, push notifications (web-push), offline sync
 - Background sync tag `offline-sync` → calls syncOfflineQueue()
 - `public/offline.html` — styled offline fallback page
 - `public/manifest.json` — already present with correct theme_color and standalone display
+- SW registered only in PROD (`import.meta.env.PROD`) in main.tsx
 
 ## Student layout cleanup
 - Removed deprecated nav items: `/live-class` (LiveClass removed Ph16), `/inkspace` (InkSpace removed Ph16)

@@ -12,6 +12,7 @@ import {
 } from "@workspace/db";
 import { eq, and, desc, or, inArray, sql } from "drizzle-orm";
 import { AI_CONFIG } from "../lib/ai-config";
+import { sendPushToRole, sendPushToAll } from "../lib/push";
 
 export const commThreadsRouter = Router();
 
@@ -292,6 +293,16 @@ commThreadsRouter.post("/announcements", authenticate, requireRole("teacher", "a
       status: scheduled_at ? "scheduled" : "delivered",
       deliveredAt: scheduled_at ? null : new Date(),
     }).returning();
+    // Push notification — only for immediately-delivered announcements
+    if (!scheduled_at) {
+      const targetRole = audience_type === "all" ? null : (audience_type || "student");
+      const pushPayload = { title: `📢 ${title}`, body: body.slice(0, 120), url: "/announcements" };
+      if (targetRole) {
+        sendPushToRole(targetRole as any, pushPayload).catch(() => {});
+      } else {
+        sendPushToAll(pushPayload).catch(() => {});
+      }
+    }
     res.status(201).json(ann);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });

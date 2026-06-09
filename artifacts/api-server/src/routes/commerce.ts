@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { openaiChat } from "../lib/ai-config";
+import { sendPushToUser } from "../lib/push";
 import crypto from "crypto";
 
 export const commerceRouter = Router();
@@ -248,6 +249,13 @@ commerceRouter.put("/admin/commerce/payment-requests/:id/verify", authenticate, 
      VALUES ($1, $2, $3, $4, $5, 'paid')`,
     [pr.user_id, subRes.rows[0]?.id, pr.amount, planRes.rows[0]?.name ?? "Plan", endDate.toISOString()],
   ).catch(() => {});
+
+  // Push notification to user
+  sendPushToUser(pr.user_id, {
+    title: "Subscription Activated 🎉",
+    body: `Your ${planRes.rows[0]?.name ?? "plan"} subscription is now active. Welcome to Aperti!`,
+    url: "/account/subscription",
+  }).catch(() => {});
 
   res.json({ success: true, subscription: subRes.rows[0] });
 });

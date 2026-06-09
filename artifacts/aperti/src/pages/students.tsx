@@ -14,6 +14,7 @@ import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
 import UpgradeModal from "@/components/upgrade-modal";
+import PlanUsageBar from "@/components/plan-usage-bar";
 
 const NONE_VALUE = "__none__";
 
@@ -271,6 +272,7 @@ export default function Students() {
 
   return (
     <div className="space-y-6">
+      <PlanUsageBar resource="students" label="Student Slots" />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Student Database</h1>

@@ -1,8 +1,9 @@
 import { Router, Response } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { homeworkTable, homeworkSubmissionsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
+import { sendPushToRole, sendPushToUser } from "../lib/push";
 
 export const homeworkRouter = Router();
 
@@ -27,6 +28,12 @@ homeworkRouter.post("/", authenticate, requireRole("teacher", "admin"), async (r
     subjectId, title, description, instructions, dueDate, totalMarks: totalMarks?.toString(),
     allowLate, classFilter, isPublished: true,
   }).returning();
+  // Push notification to all students
+  sendPushToRole("student", {
+    title: "New Assignment Posted 📚",
+    body: title ? `"${title}" has been assigned.` : "A new homework assignment has been posted.",
+    url: "/my-homework",
+  }).catch(() => {});
   res.status(201).json(hw);
 });
 
@@ -63,9 +70,21 @@ homeworkRouter.get("/:id/submissions", authenticate, requireRole("teacher", "adm
 homeworkRouter.post("/:id/submissions/:subId/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   const subId = parseInt(req.params.subId);
   const { marksAwarded, teacherFeedback, status } = req.body;
+  // Fetch submission to get the student's account ID before updating
+  const sub = await db.query.homeworkSubmissions.findFirst({ where: (s, { eq }) => eq(s.id, subId) });
   await db.update(homeworkSubmissionsTable)
     .set({ marksAwarded: marksAwarded?.toString(), teacherFeedback, status, gradedAt: new Date() })
     .where(eq(homeworkSubmissionsTable.id, subId));
+  // Push grade notification to the specific student
+  if (sub?.studentId) {
+    sendPushToUser(sub.studentId, {
+      title: "Assignment Graded ✅",
+      body: marksAwarded != null
+        ? `Your work has been graded: ${marksAwarded} marks awarded.`
+        : "Your assignment has been reviewed by your teacher.",
+      url: "/my-homework",
+    }).catch(() => {});
+  }
   res.json({ success: true });
 });
 

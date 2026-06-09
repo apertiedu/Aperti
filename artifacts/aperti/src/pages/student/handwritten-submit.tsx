@@ -30,6 +30,18 @@ export default function HandwrittenSubmit() {
   const [imageUrl, setImageUrl] = useState("");
   const [result, setResult] = useState<any>(null);
   const [previewError, setPreviewError] = useState(false);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      setImageUrl(dataUrl);
+      setPreviewError(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const processHandwriting = useMutation({
     mutationFn: (data: any) => fetchJSON("/submissions/handwritten", { method: "POST", body: JSON.stringify(data) }),
@@ -86,17 +98,42 @@ export default function HandwrittenSubmit() {
               <Card className="bg-white border-0 shadow-sm">
                 <CardHeader><CardTitle className="text-base">Upload Your Work</CardTitle></CardHeader>
                 <CardContent className="space-y-6">
-                  {/* URL input */}
+                  {/* Hidden file inputs */}
+                  <input ref={cameraRef} type="file" accept="image/*" capture="environment"
+                    className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
+                  <input ref={galleryRef} type="file" accept="image/*"
+                    className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFileSelect(f); }} />
+
+                  {/* Mobile-first capture buttons */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <button onClick={() => cameraRef.current?.click()}
+                      className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-teal-200 bg-teal-50 hover:bg-teal-100 transition-colors min-h-[80px]">
+                      <Camera size={22} className="text-teal-600" />
+                      <span className="text-xs font-semibold text-teal-700">Take Photo</span>
+                    </button>
+                    <button onClick={() => galleryRef.current?.click()}
+                      className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors min-h-[80px]">
+                      <Upload size={22} className="text-gray-500" />
+                      <span className="text-xs font-semibold text-gray-600">Choose File</span>
+                    </button>
+                  </div>
+
+                  {/* URL input fallback */}
                   <div>
-                    <label className="text-xs font-semibold text-gray-600 mb-2 block">Image URL</label>
+                    <label className="text-xs font-semibold text-gray-400 mb-2 block">Or paste an image URL</label>
                     <div className="flex gap-3">
-                      <Input value={imageUrl} onChange={e => { setImageUrl(e.target.value); setPreviewError(false); }}
-                        placeholder="https://... (paste link to image)" className="flex-1" />
-                      <Button onClick={handleProcess} disabled={!imageUrl.trim()} className="bg-teal-600 hover:bg-teal-700 text-white shrink-0">
-                        <Zap size={14} className="mr-1" /> Process
-                      </Button>
+                      <Input value={imageUrl.startsWith("data:") ? "" : imageUrl}
+                        onChange={e => { setImageUrl(e.target.value); setPreviewError(false); }}
+                        placeholder="https://..." className="flex-1 text-sm" />
                     </div>
                   </div>
+
+                  {/* Process button */}
+                  {imageUrl && (
+                    <Button onClick={handleProcess} className="w-full bg-teal-600 hover:bg-teal-700 text-white h-11">
+                      <Zap size={14} className="mr-2" /> Analyse with AI
+                    </Button>
+                  )}
 
                   {/* Image preview */}
                   {imageUrl && !previewError && (

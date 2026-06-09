@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import UpgradeModal from "@/components/upgrade-modal";
+import PlanUsageBar from "@/components/plan-usage-bar";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -65,6 +66,9 @@ export default function QueryVault() {
 
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
+      <div className="mb-6">
+        <PlanUsageBar resource="questions" label="Question Bank Slots" />
+      </div>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold">QueryVault</h1>
