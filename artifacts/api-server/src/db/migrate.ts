@@ -836,6 +836,134 @@ const PHASE18_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_compliance_requests_user ON compliance_requests(user_id)`,
 ];
 
+const PHASE19_MIGRATIONS: string[] = [
+  /* ── Platform Metrics ────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS platform_metrics (
+    id          serial PRIMARY KEY,
+    date        date NOT NULL,
+    metric_name text NOT NULL,
+    value       numeric(18,4) NOT NULL DEFAULT 0,
+    category    text NOT NULL DEFAULT 'general',
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_platform_metrics_name_date ON platform_metrics(metric_name, date)`,
+
+  /* ── Content Quality Scores ──────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS content_quality_scores (
+    id           serial PRIMARY KEY,
+    content_type text NOT NULL,
+    content_id   integer NOT NULL,
+    quality_score numeric(5,2) NOT NULL DEFAULT 50,
+    usage_count  integer NOT NULL DEFAULT 0,
+    avg_rating   numeric(4,2),
+    reviewed_at  timestamptz NOT NULL DEFAULT NOW(),
+    UNIQUE (content_type, content_id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_cqs_type ON content_quality_scores(content_type)`,
+  `CREATE INDEX IF NOT EXISTS idx_cqs_score ON content_quality_scores(quality_score)`,
+
+  /* ── User Lifecycle Stages ───────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS user_lifecycle_stages (
+    id         serial PRIMARY KEY,
+    user_id    integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    stage      text NOT NULL DEFAULT 'registered'
+               CHECK (stage IN ('visitor','registered','active','subscriber','long_term')),
+    entered_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_user_lifecycle_user ON user_lifecycle_stages(user_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_user_lifecycle_stage ON user_lifecycle_stages(stage)`,
+
+  /* ── Search Logs ─────────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS search_logs (
+    id            serial PRIMARY KEY,
+    user_id       integer REFERENCES accounts(id) ON DELETE SET NULL,
+    query         text NOT NULL,
+    filters       jsonb NOT NULL DEFAULT '{}',
+    results_count integer NOT NULL DEFAULT 0,
+    created_at    timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_search_logs_created ON search_logs(created_at)`,
+  `CREATE INDEX IF NOT EXISTS idx_search_logs_user ON search_logs(user_id)`,
+
+  /* ── Notification Rules ──────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS notification_rules (
+    id         serial PRIMARY KEY,
+    user_id    integer REFERENCES accounts(id) ON DELETE CASCADE,
+    rule_type  text NOT NULL DEFAULT 'rate_limit',
+    config     jsonb NOT NULL DEFAULT '{}',
+    is_active  boolean NOT NULL DEFAULT true,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* ── Founder Alerts ──────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS founder_alerts (
+    id         serial PRIMARY KEY,
+    type       text NOT NULL DEFAULT 'info',
+    message    text NOT NULL,
+    severity   text NOT NULL DEFAULT 'info'
+               CHECK (severity IN ('info','warning','critical')),
+    is_read    boolean NOT NULL DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_founder_alerts_unread ON founder_alerts(is_read, created_at)`,
+
+  /* ── Releases ────────────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS releases (
+    id           serial PRIMARY KEY,
+    version      text NOT NULL UNIQUE,
+    description  text NOT NULL DEFAULT '',
+    release_date date NOT NULL DEFAULT CURRENT_DATE,
+    notes        text NOT NULL DEFAULT '',
+    is_published boolean NOT NULL DEFAULT true,
+    created_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO releases (version, description, release_date, notes) VALUES
+     ('1.0.0', 'Initial Aperti Platform Launch', '2025-01-01',
+      '## Aperti 1.0.0 — Initial Release\n\nThis release marks the initial launch of the Aperti Educational OS. Core features include:\n\n- Teacher & Student OS with course management\n- Assignment & homework system\n- AI-powered mentor (Mentor AI)\n- Assessment builder and exam vault\n- Parent communication hub\n- Subscription management with InstaPay\n- Mobile PWA support'),
+     ('1.1.0', 'Phase 2–5: AI, Governance, Assessment', '2025-03-01',
+      '## Aperti 1.1.0\n\nMajor feature additions:\n\n- AI Tutor with CoreMind and Weave graph\n- Assessment Ecosystem with 13 new tables\n- Communication Hub (announcements, messaging)\n- Governance and role management'),
+     ('1.2.0', 'Phase 6–10: Mobile & Infrastructure', '2025-06-01',
+      '## Aperti 1.2.0\n\nInfrastructure and mobile release:\n\n- Progressive Web App (PWA) with offline support\n- Push notifications\n- MFA (TOTP) authentication\n- Performance monitoring\n- Backup scheduler'),
+     ('2.0.0', 'Phase 11–18: Enterprise Readiness', '2025-11-01',
+      '## Aperti 2.0.0 — Enterprise Edition\n\nEnterprise readiness and governance:\n\n- Admin OS command centre\n- Launch CMS and public landing pages\n- Content Ecosystem (ContentCraft, Course Builder, Question Studio)\n- Mobile ecosystem with flashcard swipe and offline\n- Full compliance and audit logging\n- AI usage monitoring and cost control')
+   ON CONFLICT (version) DO NOTHING`,
+
+  /* ── Feature Retirement Log ──────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS feature_retirement_log (
+    id           serial PRIMARY KEY,
+    feature_name text NOT NULL UNIQUE,
+    retired_at   timestamptz NOT NULL DEFAULT NOW(),
+    reason       text,
+    retired_by   integer REFERENCES accounts(id) ON DELETE SET NULL
+  )`,
+  `INSERT INTO feature_retirement_log (feature_name, reason) VALUES
+     ('live_class',   'Removed in Phase 16 — replaced by async course delivery'),
+     ('twin_control', 'Removed in Phase 16 — feature superseded by new AI layer'),
+     ('inkspace',     'Removed in Phase 16 — replaced by Handwriting AI in Content Ecosystem'),
+     ('flex_seats',   'Removed in Phase 16 — seat limits now managed via subscription plan limits')
+   ON CONFLICT (feature_name) DO NOTHING`,
+
+  /* ── Revision Smart Packs ────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS revision_smart_packs (
+    id           serial PRIMARY KEY,
+    student_id   integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    title        text NOT NULL,
+    subject      text,
+    topics       jsonb NOT NULL DEFAULT '[]',
+    content      jsonb NOT NULL DEFAULT '[]',
+    ai_generated boolean NOT NULL DEFAULT false,
+    created_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_revision_packs_student ON revision_smart_packs(student_id)`,
+
+  /* ── Question quality & moderation columns ───────────────────────────── */
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS quality_score  numeric(5,2)`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS moderation_status text NOT NULL DEFAULT 'approved'
+     CHECK (moderation_status IN ('pending','approved','rejected','flagged'))`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS moderated_by   integer REFERENCES accounts(id) ON DELETE SET NULL`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS moderated_at   timestamptz`,
+];
+
 export async function runMigrations(): Promise<void> {
   for (const sql of MIGRATIONS) {
     try {
