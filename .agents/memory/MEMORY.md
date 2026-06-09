@@ -15,3 +15,4 @@
 - [Phase 11 Governance](phase11-governance.md) — 13 gov_ tables, governance.ts routes at /api/admin/governance, ownership middleware, 7 new admin-os pages
 - [Phase 12 Launch CMS](phase12-launch-cms.md) — 67 API endpoints, 17 admin pages, 6 public pages; countdown timer + waitlist/beta CTAs in features-detail.tsx; release_notes type CHECK excludes "feature"
 - [Public routes before main router](public-routes-before-main-router.md) — qaRouter has global authenticate (no path prefix) so ANY public route must be registered in app.ts BEFORE app.use("/api", router)
+- [Phase 15 Content Ecosystem](phase15-content-ecosystem.md) — 13 new DB tables, content-ecosystem.ts route file, 10 frontend pages; ContentCraft block editor, Course Builder, Question Studio, Practice Center, SimVerse Labs, Geometrix, Handwriting AI, Resource Library, Analytics

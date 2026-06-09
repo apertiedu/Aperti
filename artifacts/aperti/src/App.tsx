@@ -146,6 +146,18 @@ import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 // Phase 9 — Admin OS
 import AdminOS from "@/pages/admin/admin-os";
 
+// Phase 15 — Educational Content Ecosystem
+import ContentCraftStudio from "@/pages/teacher/contentcraft-studio";
+import CourseBuilder from "@/pages/teacher/course-builder";
+import QuestionStudio from "@/pages/teacher/question-studio";
+import QuestionImport from "@/pages/teacher/question-import";
+import ContentAnalytics from "@/pages/teacher/content-analytics";
+import PracticeCenter from "@/pages/student/practice-center";
+import HandwrittenSubmit from "@/pages/student/handwritten-submit";
+import ResourcesLibrary from "@/pages/resources-library";
+import SimverseLabs from "@/pages/simverse-labs";
+import SimverseGeometrix from "@/pages/simverse-geometrix";
+
 // Phase 8 — Learning Experience, Content Delivery & Adaptive Personalization
 import LearningPathPage from "@/pages/student/learning-path";
 import RecommendationHub from "@/pages/student/recommendations";
@@ -326,6 +338,12 @@ function StudentRouter() {
         <Route path="/collaborate/:roomId" component={CollaborateRoom} />
         <Route path="/support" component={SupportTickets} />
         <Route path="/notifications" component={NotificationCenter} />
+        {/* Phase 15 — Educational Content Ecosystem */}
+        <Route path="/practice" component={PracticeCenter} />
+        <Route path="/submit/handwritten" component={HandwrittenSubmit} />
+        <Route path="/resources/library" component={ResourcesLibrary} />
+        <Route path="/simverse/labs" component={SimverseLabs} />
+        <Route path="/simverse/geometrix" component={SimverseGeometrix} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -386,6 +404,16 @@ const TEACHER_ROUTES = (
     <Route path="/collaborate/:roomId" component={CollaborateRoom} />
     <Route path="/support" component={SupportTickets} />
     <Route path="/notifications" component={NotificationCenter} />
+    {/* Phase 15 — Educational Content Ecosystem */}
+    <Route path="/teacher/contentcraft" component={ContentCraftStudio} />
+    <Route path="/teacher/contentcraft/:pageId" component={ContentCraftStudio} />
+    <Route path="/courses/:courseId/builder" component={CourseBuilder} />
+    <Route path="/teacher/question-studio" component={QuestionStudio} />
+    <Route path="/teacher/questions/import" component={QuestionImport} />
+    <Route path="/teacher/analytics/content" component={ContentAnalytics} />
+    <Route path="/resources/library" component={ResourcesLibrary} />
+    <Route path="/simverse/labs" component={SimverseLabs} />
+    <Route path="/simverse/geometrix" component={SimverseGeometrix} />
   </>
 );
 

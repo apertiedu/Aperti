@@ -91,6 +91,7 @@ import { commSupportRouter } from "./comm-support";
 import { learningExperienceRouter } from "./learning-experience";
 import { qaRouter } from "./qa";
 import { phase14Router } from "./phase14";
+import { contentEcosystemRouter } from "./content-ecosystem";
 
 const router: IRouter = Router();
 
@@ -196,6 +197,9 @@ router.use(qaRouter);
 
 // Phase 14 — Platform Authenticity, Trust & Content Governance
 router.use(phase14Router);
+
+// Phase 15 — Educational Content Ecosystem
+router.use(contentEcosystemRouter);
 
 export default router;
 

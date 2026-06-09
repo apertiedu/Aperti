@@ -376,6 +376,194 @@ const PHASE10_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_device_sessions_account_id ON device_sessions(account_id)`,
 ];
 
+/* ── Phase 15 – Educational Content Ecosystem ─────────────────────────────── */
+const PHASE15_MIGRATIONS: string[] = [
+  /* Content Blocks */
+  `CREATE TABLE IF NOT EXISTS content_blocks (
+    id          serial PRIMARY KEY,
+    page_id     integer NOT NULL REFERENCES lesson_content(id) ON DELETE CASCADE,
+    block_type  text NOT NULL DEFAULT 'text',
+    content     jsonb NOT NULL DEFAULT '{}',
+    ord         integer NOT NULL DEFAULT 0,
+    settings    jsonb NOT NULL DEFAULT '{}',
+    created_by  integer REFERENCES accounts(id) ON DELETE SET NULL,
+    version     integer NOT NULL DEFAULT 1,
+    created_at  timestamptz NOT NULL DEFAULT NOW(),
+    updated_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_content_blocks_page_id ON content_blocks(page_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_content_blocks_ord ON content_blocks(page_id, ord)`,
+
+  /* Block Version History */
+  `CREATE TABLE IF NOT EXISTS block_version_history (
+    id          serial PRIMARY KEY,
+    block_id    integer NOT NULL,
+    version     integer NOT NULL,
+    content     jsonb NOT NULL DEFAULT '{}',
+    settings    jsonb NOT NULL DEFAULT '{}',
+    changed_by  integer REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_block_versions_block ON block_version_history(block_id)`,
+
+  /* Content Comments */
+  `CREATE TABLE IF NOT EXISTS content_comments (
+    id         serial PRIMARY KEY,
+    block_id   integer NOT NULL,
+    user_id    integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    comment    text NOT NULL,
+    resolved   boolean NOT NULL DEFAULT false,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* Curriculum Mappings */
+  `CREATE TABLE IF NOT EXISTS curriculum_mappings (
+    id                  serial PRIMARY KEY,
+    content_type        text NOT NULL,
+    content_id          integer NOT NULL,
+    board               text,
+    subject             text,
+    paper               text,
+    topic               text,
+    subtopic            text,
+    learning_objective  text,
+    skill               text,
+    command_word        text,
+    difficulty          text,
+    created_at          timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_curriculum_mappings_content ON curriculum_mappings(content_type, content_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_curriculum_mappings_board ON curriculum_mappings(board, subject)`,
+
+  /* Course Builder Templates */
+  `CREATE TABLE IF NOT EXISTS course_builder_templates (
+    id          serial PRIMARY KEY,
+    name        text NOT NULL,
+    description text,
+    type        text NOT NULL DEFAULT 'teacher',
+    structure   jsonb NOT NULL DEFAULT '{}',
+    created_by  integer REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* Question Metadata Extensions */
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS board             text`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS qualification     text`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS paper             text`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS session_name      text`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS variant           text`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS learning_objectives jsonb NOT NULL DEFAULT '[]'`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS diagram_url       text`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS mark_scheme_id    integer`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS author            text`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS question_type     text NOT NULL DEFAULT 'structured'`,
+
+  /* Question Import Logs */
+  `CREATE TABLE IF NOT EXISTS question_import_logs (
+    id                  serial PRIMARY KEY,
+    user_id             integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    source_type         text NOT NULL DEFAULT 'pdf',
+    source_url          text,
+    questions_imported  integer NOT NULL DEFAULT 0,
+    status              text NOT NULL DEFAULT 'pending',
+    errors              jsonb NOT NULL DEFAULT '[]',
+    created_at          timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* Question Extraction Jobs */
+  `CREATE TABLE IF NOT EXISTS question_extraction_jobs (
+    id              serial PRIMARY KEY,
+    user_id         integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    file_url        text,
+    status          text NOT NULL DEFAULT 'pending',
+    extracted_data  jsonb NOT NULL DEFAULT '{}',
+    reviewed_by     integer REFERENCES accounts(id) ON DELETE SET NULL,
+    reviewed_at     timestamptz,
+    created_at      timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_question_extraction_jobs_user ON question_extraction_jobs(user_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_question_extraction_jobs_status ON question_extraction_jobs(status)`,
+
+  /* Handwritten Submissions */
+  `CREATE TABLE IF NOT EXISTS handwritten_submissions (
+    id                serial PRIMARY KEY,
+    submission_id     integer,
+    student_id        integer REFERENCES accounts(id) ON DELETE CASCADE,
+    image_url         text,
+    processed_text    text,
+    diagram_data      jsonb NOT NULL DEFAULT '{}',
+    equation_data     jsonb NOT NULL DEFAULT '{}',
+    step_analysis     jsonb NOT NULL DEFAULT '{}',
+    confidence_score  numeric(5,2),
+    created_at        timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* Lab Configurations */
+  `CREATE TABLE IF NOT EXISTS lab_configurations (
+    id           serial PRIMARY KEY,
+    teacher_id   integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    lab_type     text NOT NULL,
+    config       jsonb NOT NULL DEFAULT '{}',
+    is_published boolean NOT NULL DEFAULT false,
+    created_at   timestamptz NOT NULL DEFAULT NOW(),
+    updated_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_lab_configurations_teacher ON lab_configurations(teacher_id)`,
+
+  /* Resource Library extensions */
+  `ALTER TABLE resources ADD COLUMN IF NOT EXISTS version              integer NOT NULL DEFAULT 1`,
+  `ALTER TABLE resources ADD COLUMN IF NOT EXISTS approval_status      text NOT NULL DEFAULT 'draft'`,
+  `ALTER TABLE resources ADD COLUMN IF NOT EXISTS published_at         timestamptz`,
+  `ALTER TABLE resources ADD COLUMN IF NOT EXISTS resource_tags        jsonb NOT NULL DEFAULT '[]'`,
+  `ALTER TABLE resources ADD COLUMN IF NOT EXISTS curriculum_mapping_id integer`,
+
+  /* Practice Sessions */
+  `CREATE TABLE IF NOT EXISTS practice_sessions (
+    id                  serial PRIMARY KEY,
+    student_id          integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    subject             text,
+    topics              jsonb NOT NULL DEFAULT '[]',
+    questions_answered  integer NOT NULL DEFAULT 0,
+    correct             integer NOT NULL DEFAULT 0,
+    time_spent          integer NOT NULL DEFAULT 0,
+    answers             jsonb NOT NULL DEFAULT '[]',
+    started_at          timestamptz NOT NULL DEFAULT NOW(),
+    ended_at            timestamptz
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_practice_sessions_student ON practice_sessions(student_id)`,
+
+  /* Academic Analytics */
+  `CREATE TABLE IF NOT EXISTS academic_analytics (
+    id           serial PRIMARY KEY,
+    content_type text NOT NULL,
+    content_id   integer NOT NULL,
+    metrics      jsonb NOT NULL DEFAULT '{}',
+    recorded_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_academic_analytics_content ON academic_analytics(content_type, content_id)`,
+
+  /* Geometrix Sessions */
+  `CREATE TABLE IF NOT EXISTS geometrix_sessions (
+    id         serial PRIMARY KEY,
+    student_id integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    module     text NOT NULL,
+    tool       text,
+    data       jsonb NOT NULL DEFAULT '{}',
+    score      numeric(5,2),
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* Question Relationships */
+  `CREATE TABLE IF NOT EXISTS question_relationships (
+    id             serial PRIMARY KEY,
+    question_id    integer NOT NULL REFERENCES question_bank(id) ON DELETE CASCADE,
+    related_type   text NOT NULL,
+    related_id     integer NOT NULL,
+    created_at     timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_question_relationships ON question_relationships(question_id)`,
+];
+
 export async function runMigrations(): Promise<void> {
   for (const sql of MIGRATIONS) {
     try {
@@ -393,11 +581,19 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE15_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
-    [`phase10-${new Date().toISOString().split("T")[0]}`],
+    [`phase15-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 migrations applied");
 }
