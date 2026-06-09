@@ -977,59 +977,6 @@ contentEcosystemRouter.get("/flashcards/card-types", authenticate, async (_req: 
 });
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   INKSPACE AI CONVERSION
-   ═══════════════════════════════════════════════════════════════════════════ */
-
-contentEcosystemRouter.post("/inkspace/ai/convert", authenticate, async (req: AuthRequest, res: Response) => {
-  try {
-    const { pageId, targetType, content } = req.body;
-    let sourceContent = content;
-    if (pageId && !content) {
-      const blocks = await pool.query(`SELECT data FROM inkspace_blocks WHERE page_id = $1 ORDER BY sort_order`, [pageId]);
-      sourceContent = blocks.rows.map((b: any) => JSON.stringify(b.data)).join("\n");
-    }
-    
-    const prompts: Record<string, string> = {
-      flashcards: `Convert these notes into flashcards. Return JSON array: [{"front":"...","back":"..."}]`,
-      questions: `Convert these notes into exam questions. Return JSON array: [{"questionText":"...","modelAnswer":"...","maxMarks":4}]`,
-      summary: `Summarize these notes concisely. Return JSON: {"summary":"...", "keyPoints":["..."], "keyTerms":["..."]}`,
-      mindmap: `Convert these notes into a mind map. Return JSON: {"center":"main topic","branches":[{"label":"...","children":["..."]}]}`,
-      lesson: `Convert these notes into a structured lesson. Return JSON: {"title":"...","objectives":["..."],"sections":[{"heading":"...","content":"..."}]}`,
-    };
-    
-    const aiResponse = await openaiChat({
-      systemPrompt: "You are an educational content converter. Return only valid JSON.",
-      userMessage: `${prompts[targetType] || prompts.summary}\n\nContent: ${(sourceContent || "").substring(0, 1500)}`,
-      maxTokens: 1500,
-    });
-
-    let converted: any = {};
-    if (aiResponse) {
-      try {
-        const m = aiResponse.match(/[\[\{][\s\S]*[\]\}]/);
-        if (m) converted = JSON.parse(m[0]);
-      } catch { converted = { rawContent: aiResponse }; }
-    }
-    
-    res.json({ type: targetType, converted, pageId });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-contentEcosystemRouter.get("/inkspace/templates", authenticate, async (_req: AuthRequest, res: Response) => {
-  res.json([
-    { id: "mind-map", name: "Mind Map", icon: "GitBranch", description: "Visual concept mapping" },
-    { id: "cornell", name: "Cornell Notes", icon: "FileText", description: "Two-column note-taking" },
-    { id: "timeline", name: "Timeline", icon: "Clock", description: "Chronological events" },
-    { id: "flowchart", name: "Flowchart", icon: "GitBranch", description: "Process flows and decisions" },
-    { id: "comparison", name: "Comparison Table", icon: "Table", description: "Compare multiple items" },
-    { id: "cause-effect", name: "Cause & Effect", icon: "ArrowRight", description: "Fishbone diagram" },
-    { id: "concept-map", name: "Concept Map", icon: "Network", description: "Linked concepts" },
-  ]);
-});
-
-/* ═══════════════════════════════════════════════════════════════════════════
    GEOMETRIX — Interactive Geometry Suite
    ═══════════════════════════════════════════════════════════════════════════ */
 

@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
-import { lessonsTable, attendanceTable, homeworkSubmissionsTable, studentsTable, liveClassRoomsTable, subscriptionsTable } from "@workspace/db";
+import { lessonsTable, attendanceTable, homeworkSubmissionsTable, studentsTable, subscriptionsTable } from "@workspace/db";
 import { eq, and, isNull, isNotNull, sql } from "drizzle-orm";
 
 export const dashboardRouter = Router();
@@ -134,10 +134,7 @@ dashboardRouter.get("/admin/live-stats", authenticate, async (req: AuthRequest, 
       ? Math.round((presentToday / totalStudents) * 100)
       : 0;
 
-    const activeSessions = await db.select({ count: sql<number>`count(*)` })
-      .from(liveClassRoomsTable)
-      .where(and(isNotNull(liveClassRoomsTable.startedAt), isNull(liveClassRoomsTable.endedAt)));
-    const activeSessionCount = Number(activeSessions[0]?.count ?? 0);
+    const activeSessionCount = 0; // live_class_rooms removed in Phase 16
 
     const pendingInstaPay = await db.select({ count: sql<number>`count(*)` })
       .from(subscriptionsTable)

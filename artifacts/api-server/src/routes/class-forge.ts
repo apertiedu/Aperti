@@ -2,7 +2,6 @@ import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { engagementRecordsTable } from "@workspace/db";
-import { liveClassRoomsTable } from "@workspace/db";
 import { echoMemoryTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 

@@ -90,35 +90,6 @@ export const examVaultPackagesTable = pgTable("exam_vault_packages", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-// ── InkSpace ──────────────────────────────────────────────────────────────────
-
-export const inkspaceNotebooksTable = pgTable("inkspace_notebooks", {
-  id: serial("id").primaryKey(),
-  studentId: integer("student_id").notNull().references(() => studentsTable.id, { onDelete: "cascade" }),
-  title: text("title").notNull().default("Untitled Notebook"),
-  color: text("color").notNull().default("#00796B"),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const inkspacePagesTable = pgTable("inkspace_pages", {
-  id: serial("id").primaryKey(),
-  notebookId: integer("notebook_id").notNull().references(() => inkspaceNotebooksTable.id, { onDelete: "cascade" }),
-  title: text("title").notNull().default("Untitled Page"),
-  sortOrder: integer("sort_order").notNull().default(0),
-  content: jsonb("content").$type<unknown>(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
-export const inkspaceBlocksTable = pgTable("inkspace_blocks", {
-  id: serial("id").primaryKey(),
-  pageId: integer("page_id").notNull().references(() => inkspacePagesTable.id, { onDelete: "cascade" }),
-  type: text("type").notNull().default("text"),
-  data: jsonb("data").$type<unknown>(),
-  sortOrder: integer("sort_order").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
 // ── Student Feed ──────────────────────────────────────────────────────────────
 
 export const studentFeedItemsTable = pgTable("student_feed_items", {
@@ -189,9 +160,6 @@ export type StudentGoal = typeof studentGoalsTable.$inferSelect;
 export type FocusSession = typeof focusSessionsTable.$inferSelect;
 export type TrialVaultAttempt = typeof trialVaultAttemptsTable.$inferSelect;
 export type ExamVaultPackage = typeof examVaultPackagesTable.$inferSelect;
-export type InkspaceNotebook = typeof inkspaceNotebooksTable.$inferSelect;
-export type InkspacePage = typeof inkspacePagesTable.$inferSelect;
-export type InkspaceBlock = typeof inkspaceBlocksTable.$inferSelect;
 export type StudentFeedItem = typeof studentFeedItemsTable.$inferSelect;
 export type SnapgradeSubmission = typeof snapgradeSubmissionsTable.$inferSelect;
 export type PeerReview = typeof peerReviewsTable.$inferSelect;

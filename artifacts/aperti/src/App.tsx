@@ -39,14 +39,11 @@ import CardStack from "@/pages/cardstack";
 import Syllabuilder from "@/pages/syllabuilder";
 import KudosEngine from "@/pages/kudos-engine";
 import Pulse from "@/pages/pulse";
-import LiveClass from "@/pages/live-class";
 import ClassForge from "@/pages/class-forge";
 import ContentCraft from "@/pages/content-craft";
 import LabBuilder from "@/pages/lab-builder";
 import MarkerMind from "@/pages/marker-mind";
 import InsightStream from "@/pages/insight-stream";
-import InkSpace from "@/pages/inkspace";
-import TwinControl from "@/pages/twin-control";
 import SubPilot from "@/pages/subpilot";
 import HelpDesk from "@/pages/helpdesk";
 import InsightExams from "@/pages/insight-exams";
@@ -97,13 +94,11 @@ import TrialVault from "@/pages/student/trial-vault";
 import PeakRankings from "@/pages/student/peak-rankings";
 import PeerReview from "@/pages/student/peer-review";
 import SnapGrade from "@/pages/student/snap-grade";
-import LiveClassSession from "@/pages/student/live-class-session";
 import Echo from "@/pages/student/echo";
 import StudentAnalytics from "@/pages/student/analytics";
 import StudyGroups from "@/pages/student/study-groups";
 import StudentMessages from "@/pages/student/messages";
 import ExamVault from "@/pages/student/exam-vault";
-import StudentInkSpace from "@/pages/student/inkspace";
 import ForgeFieldLab from "@/pages/student/labs/forge-field";
 import ReactSphereLab from "@/pages/student/labs/react-sphere";
 import GeometrixLab from "@/pages/student/labs/geometrix";
@@ -145,6 +140,15 @@ import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 
 // Phase 9 — Admin OS
 import AdminOS from "@/pages/admin/admin-os";
+
+// Phase 16 — Commercialization & Business Operations
+import PricingPage from "@/pages/pricing";
+import SubscribePage from "@/pages/subscribe";
+import MySubscriptionPage from "@/pages/my-subscription";
+import ComingSoonPage from "@/pages/coming-soon";
+import RevisionNotesPage from "@/pages/revision-notes";
+import AdminCommercePage from "@/pages/admin/admin-commerce";
+import ExecutiveDashboardPage from "@/pages/admin/executive-dashboard";
 
 // Phase 15 — Educational Content Ecosystem
 import ContentCraftStudio from "@/pages/teacher/contentcraft-studio";
@@ -301,7 +305,6 @@ function StudentRouter() {
         <Route path="/peak-rankings" component={PeakRankings} />
         <Route path="/peer-review" component={PeerReview} />
         <Route path="/snap-grade" component={SnapGrade} />
-        <Route path="/live-class" component={LiveClassSession} />
         <Route path="/labs/forge-field" component={ForgeFieldLab} />
         <Route path="/labs/react-sphere" component={ReactSphereLab} />
         <Route path="/labs/geometrix" component={GeometrixLab} />
@@ -315,7 +318,6 @@ function StudentRouter() {
         <Route path="/study-groups" component={StudyGroups} />
         <Route path="/messages" component={StudentMessages} />
         <Route path="/exam-vault" component={ExamVault} />
-        <Route path="/inkspace" component={StudentInkSpace} />
         <Route path="/exam-room" component={ExamRoom} />
         <Route path="/student/exams/:id/results" component={ExamResults} />
         <Route path="/student/exams/:id" component={StudentExamSession} />
@@ -344,6 +346,12 @@ function StudentRouter() {
         <Route path="/resources/library" component={ResourcesLibrary} />
         <Route path="/simverse/labs" component={SimverseLabs} />
         <Route path="/simverse/geometrix" component={SimverseGeometrix} />
+        {/* Phase 16 — Commercialization */}
+        <Route path="/pricing" component={PricingPage} />
+        <Route path="/subscribe/:planId" component={SubscribePage} />
+        <Route path="/account/subscription" component={MySubscriptionPage} />
+        <Route path="/coming-soon" component={ComingSoonPage} />
+        <Route path="/revision-notes" component={RevisionNotesPage} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -369,14 +377,11 @@ const TEACHER_ROUTES = (
     <Route path="/syllabuilder" component={Syllabuilder} />
     <Route path="/kudos-engine" component={KudosEngine} />
     <Route path="/pulse" component={Pulse} />
-    <Route path="/live-class" component={LiveClass} />
     <Route path="/class-forge" component={ClassForge} />
     <Route path="/content-craft" component={ContentCraft} />
     <Route path="/lab-builder" component={LabBuilder} />
     <Route path="/marker-mind" component={MarkerMind} />
     <Route path="/insight-stream" component={InsightStream} />
-    <Route path="/inkspace" component={InkSpace} />
-    <Route path="/twin-control" component={TwinControl} />
     <Route path="/subpilot" component={SubPilot} />
     <Route path="/helpdesk" component={HelpDesk} />
     <Route path="/insight-exams" component={InsightExams} />
@@ -414,6 +419,12 @@ const TEACHER_ROUTES = (
     <Route path="/resources/library" component={ResourcesLibrary} />
     <Route path="/simverse/labs" component={SimverseLabs} />
     <Route path="/simverse/geometrix" component={SimverseGeometrix} />
+    {/* Phase 16 — Commercialization */}
+    <Route path="/pricing" component={PricingPage} />
+    <Route path="/subscribe/:planId" component={SubscribePage} />
+    <Route path="/account/subscription" component={MySubscriptionPage} />
+    <Route path="/coming-soon" component={ComingSoonPage} />
+    <Route path="/revision-notes" component={RevisionNotesPage} />
   </>
 );
 
@@ -441,6 +452,9 @@ const ADMIN_ROUTES = (
     {/* Phase 7 — Admin Communication */}
     <Route path="/admin/moderation" component={AdminModeration} />
     <Route path="/admin/communication-analytics" component={CommunicationAnalytics} />
+    {/* Phase 16 — Commerce Admin */}
+    <Route path="/admin/commerce" component={AdminCommercePage} />
+    <Route path="/admin/executive" component={ExecutiveDashboardPage} />
   </>
 );
 

@@ -2,7 +2,7 @@
 - [pdfkit esbuild external](pdfkit-esbuild-external.md) — pdfkit + fontkit must be in build.mjs externals or runtime crashes on @swc/helpers
 - [Framer-motion import trap](framer-motion-trap.md) — never import React hooks (useState etc.) from framer-motion; only motion/AnimatePresence/etc.
 - [Phase 2 Teacher OS routes](phase2-routes.md) — teacher-courses, rubrics, messages, tutorcraft, classforge all registered in routes/index.ts
-- [Student OS API paths](student-os-api-paths.md) — correct API paths for student pages; common gotchas with inkspace, messages, focus-coach analytics fields
+- [Student OS API paths](student-os-api-paths.md) — correct API paths for student pages; common gotchas with messages, focus-coach analytics fields (inkspace removed Ph16)
 - [Phase 5 AI layer patterns](phase5-ai-patterns.md) — Weave/CoreMind integration patterns, fallback rules, and which routes now have AI enrichment
 - [Phase 5 final systems](phase5-final-systems.md) — FindWise, AutoPilot, LiveClass AI, ai-config.ts patterns and key decisions
 - [Phase 6 Assessment Ecosystem](phase6-assessment.md) — 13 new tables, 4 route files, 4 frontend pages; key schema constraints and wiring decisions
@@ -14,5 +14,6 @@
 - [Phase 10 Infrastructure](phase10-infrastructure.md) — commit hash, prom-client peer deps, TOTP MFA, PWA sw.js, lite mode, Phase 10 DB tables, queue patterns
 - [Phase 11 Governance](phase11-governance.md) — 13 gov_ tables, governance.ts routes at /api/admin/governance, ownership middleware, 7 new admin-os pages
 - [Phase 12 Launch CMS](phase12-launch-cms.md) — 67 API endpoints, 17 admin pages, 6 public pages; countdown timer + waitlist/beta CTAs in features-detail.tsx; release_notes type CHECK excludes "feature"
+- [Phase 16 Commercialization](phase16-commercialization.md) — deprecated 4 modules (LiveClass/TwinControl/InkSpace/FlexSeats), added billing/commerce API, enforceLimit middleware, 7 frontend pages; InstaPay manual verification flow; import ordering gotcha
 - [Public routes before main router](public-routes-before-main-router.md) — qaRouter has global authenticate (no path prefix) so ANY public route must be registered in app.ts BEFORE app.use("/api", router)
 - [Phase 15 Content Ecosystem](phase15-content-ecosystem.md) — 13 new DB tables, content-ecosystem.ts route file, 10 frontend pages; ContentCraft block editor, Course Builder, Question Studio, Practice Center, SimVerse Labs, Geometrix, Handwriting AI, Resource Library, Analytics

@@ -38,12 +38,10 @@ import gradebookRouter from "./gradebook";
 import notifyBroadcastRouter from "./notify-broadcast";
 import { lessonsRouter } from "./lessons";
 import { subscriptionsRouter } from "./subscriptions";
-import { liveClassRouter } from "./live-class";
 import { mentorRouter } from "./mentor";
 import { revisitRouter } from "./revisit";
 import { ascendRouter } from "./ascend";
 import { echoEvolveRouter } from "./echo-evolve";
-import inkspaceRouter from "./inkspace";
 import absenceNotifyRouter from "./absence-notify";
 import { assistantsRouter } from "./assistants";
 import { couponsRouter } from "./coupons";
@@ -92,6 +90,8 @@ import { learningExperienceRouter } from "./learning-experience";
 import { qaRouter } from "./qa";
 import { phase14Router } from "./phase14";
 import { contentEcosystemRouter } from "./content-ecosystem";
+import { commerceRouter } from "./commerce";
+import { revisionNotesRouter } from "./revision-notes";
 
 const router: IRouter = Router();
 
@@ -134,12 +134,10 @@ router.use(gradebookRouter);
 router.use(notifyBroadcastRouter);
 router.use("/lessons", lessonsRouter);
 router.use("/subscriptions", subscriptionsRouter);
-router.use("/live-class", liveClassRouter);
 router.use("/mentor", mentorRouter);
 router.use("/revisit", revisitRouter);
 router.use("/ascend", ascendRouter);
 router.use("/echo-evolve", echoEvolveRouter);
-router.use("/inkspace", inkspaceRouter);
 router.use("/absence-notify", absenceNotifyRouter);
 router.use("/assistants", assistantsRouter);
 router.use("/coupons", couponsRouter);
@@ -200,6 +198,10 @@ router.use(phase14Router);
 
 // Phase 15 — Educational Content Ecosystem
 router.use(contentEcosystemRouter);
+
+// Phase 16 — Commercialization & Business Operations
+router.use(commerceRouter);
+router.use(revisionNotesRouter);
 
 export default router;
 

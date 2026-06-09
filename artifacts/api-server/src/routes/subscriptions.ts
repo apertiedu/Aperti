@@ -1,12 +1,10 @@
 import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { subscriptionsTable, subscriptionPlansTable, flexSeatsTable } from "@workspace/db";
+import { subscriptionsTable, subscriptionPlansTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 export const subscriptionsRouter = Router();
-
-// ─── PUBLIC / TEACHER ROUTES ───
 
 // GET /subscriptions/plans — available plans
 subscriptionsRouter.get("/plans", authenticate, async (_req: AuthRequest, res: Response) => {
@@ -23,18 +21,13 @@ subscriptionsRouter.get("/mine", authenticate, async (req: AuthRequest, res: Res
   const sub = subs[0] ?? null;
 
   let plan = null;
-  let flexSeats: typeof flexSeatsTable.$inferSelect[] = [];
-
   if (sub) {
     const plans = await db.select().from(subscriptionPlansTable)
       .where(eq(subscriptionPlansTable.id, sub.planId)).limit(1);
     plan = plans[0] ?? null;
-    flexSeats = await db.select().from(flexSeatsTable)
-      .where(eq(flexSeatsTable.subscriptionId, sub.id));
   }
 
-  const payments: unknown[] = [];
-  res.json({ subscription: sub ? { ...sub, plan } : null, flexSeats, payments });
+  res.json({ subscription: sub ? { ...sub, plan } : null, payments: [] });
 });
 
 // POST /subscriptions/checkout — initiate a new subscription
@@ -59,40 +52,12 @@ subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res
   res.status(201).json({ subscription });
 });
 
-// POST /subscriptions/flex-seats — add flex seats
-subscriptionsRouter.post("/flex-seats", authenticate, async (req: AuthRequest, res: Response) => {
-  const accountId = req.userId!;
-  const { quantity } = req.body;
-  const subs = await db.select().from(subscriptionsTable)
-    .where(eq(subscriptionsTable.accountId, accountId)).limit(1);
-  if (!subs[0]) return res.status(400).json({ error: "No active subscription" });
-  const sub = subs[0];
-
-  const plans = await db.select().from(subscriptionPlansTable)
-    .where(eq(subscriptionPlansTable.id, sub.planId)).limit(1);
-  const plan = plans[0];
-  if (!plan?.flexSeatPriceEgp) return res.status(400).json({ error: "Flex seats not available on this plan" });
-
-  const priceEgp = Number(plan.flexSeatPriceEgp) * quantity;
-  await db.insert(flexSeatsTable).values({
-    subscriptionId: sub.id,
-    quantity,
-    priceEgp: priceEgp.toString(),
-    active: "active",
-  });
-  res.json({ success: true, totalEgp: priceEgp });
-});
-
 // ─── ADMIN ROUTES ───
 
 // GET /subscriptions/admin/all — all subscriptions with joined plan
 subscriptionsRouter.get("/admin/all", authenticate, requireRole("admin"), async (_req: AuthRequest, res: Response) => {
   const subs = await db.select().from(subscriptionsTable);
-  const planIds = [...new Set(subs.map(s => s.planId))];
-  let plans: typeof subscriptionPlansTable.$inferSelect[] = [];
-  if (planIds.length > 0) {
-    plans = await db.select().from(subscriptionPlansTable);
-  }
+  const plans = await db.select().from(subscriptionPlansTable);
   const planMap = Object.fromEntries(plans.map(p => [p.id, p]));
   const result = subs.map(s => ({ ...s, plan: planMap[s.planId] ?? null }));
   res.json(result);
@@ -118,7 +83,7 @@ subscriptionsRouter.put("/admin/:id/reject", authenticate, requireRole("admin"),
 
 // POST /subscriptions/admin/plans — create a plan
 subscriptionsRouter.post("/admin/plans", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
-  const { name, type, priceEgp, features, studentLimit, flexSeatPriceEgp } = req.body;
+  const { name, type, priceEgp, features, studentLimit } = req.body;
   if (!name || !priceEgp) { res.status(400).json({ error: "name and priceEgp required" }); return; }
   const [plan] = await db.insert(subscriptionPlansTable).values({
     name,
@@ -126,7 +91,6 @@ subscriptionsRouter.post("/admin/plans", authenticate, requireRole("admin"), asy
     priceEgp: String(priceEgp),
     features: features ?? [],
     studentLimit: studentLimit ?? null,
-    flexSeatPriceEgp: flexSeatPriceEgp ? String(flexSeatPriceEgp) : null,
   }).returning();
   res.status(201).json(plan);
 });
@@ -134,13 +98,12 @@ subscriptionsRouter.post("/admin/plans", authenticate, requireRole("admin"), asy
 // PUT /subscriptions/admin/plans/:id — update plan
 subscriptionsRouter.put("/admin/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
-  const allowed = ["name", "type", "priceEgp", "features", "studentLimit", "flexSeatPriceEgp", "isActive", "sortOrder"];
+  const allowed = ["name", "type", "priceEgp", "features", "studentLimit", "isActive", "sortOrder"];
   const updates: Record<string, unknown> = {};
   for (const k of allowed) {
     if (req.body[k] !== undefined) updates[k] = req.body[k];
   }
   if (updates.priceEgp) updates.priceEgp = String(updates.priceEgp);
-  if (updates.flexSeatPriceEgp) updates.flexSeatPriceEgp = String(updates.flexSeatPriceEgp);
   await db.update(subscriptionPlansTable).set(updates).where(eq(subscriptionPlansTable.id, id));
   res.json({ success: true });
 });

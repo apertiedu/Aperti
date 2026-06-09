@@ -1,7 +1,7 @@
 import { useLocation, Link } from "wouter";
 import {
   LayoutDashboard, QrCode, CalendarDays, ClipboardList, CheckSquare2,
-  FileText, Video, Smartphone, Users2, PenLine,
+  FileText, Users2,
   BookMarked, Layers, Wand2, Palette, FlaskConical, Brain, ScanLine,
   BarChart3, TrendingUp, ClipboardCheck,
   Award, CreditCard, HelpCircle,
@@ -67,10 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "SubmitFlow", href: "/submit-flow", icon: ClipboardList, roles: ["admin","teacher"] },
         { name: "GradeFlow", href: "/grade-flow", icon: CheckSquare2, roles: ["admin","teacher","assistant"] },
         { name: "SchemeCraft", href: "/scheme-craft", icon: FileText, roles: ["admin","teacher"] },
-        { name: "LiveClass", href: "/live-class", icon: Video, roles: ["admin","teacher"] },
-        { name: "TwinControl", href: "/twin-control", icon: Smartphone, roles: ["admin","teacher"] },
         { name: "ClassForge", href: "/class-forge", icon: Users2, roles: ["admin","teacher"] },
-        { name: "InkSpace", href: "/inkspace", icon: PenLine, roles: ["admin","teacher","assistant"] },
       ],
     },
     {
@@ -135,6 +132,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "GuardianPulse",          href: "/admin/guardian-pulse",       icon: Sparkles,    roles: ["admin"] },
         { name: "Moderation Panel",       href: "/admin/moderation",           icon: Shield,      roles: ["admin"] },
         { name: "Comm Analytics",         href: "/admin/communication-analytics", icon: BarChart3, roles: ["admin"] },
+        { name: "Commerce Admin",         href: "/admin/commerce",             icon: DollarSign,  roles: ["admin"] },
+        { name: "Executive Dashboard",    href: "/admin/executive",            icon: TrendingUp,  roles: ["admin"] },
+      ],
+    },
+    {
+      label: "Billing",
+      items: [
+        { name: "Pricing Plans",          href: "/pricing",               icon: CreditCard, roles: ["admin","teacher","assistant"] },
+        { name: "My Subscription",        href: "/account/subscription",  icon: CreditCard, roles: ["admin","teacher","assistant"] },
+        { name: "Coming Soon",            href: "/coming-soon",           icon: Sparkles,   roles: ["admin","teacher","assistant"] },
+        { name: "Revision Notes",         href: "/revision-notes",        icon: FileText,   roles: ["admin","teacher","assistant"] },
       ],
     },
     {

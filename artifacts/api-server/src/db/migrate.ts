@@ -564,6 +564,112 @@ const PHASE15_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_question_relationships ON question_relationships(question_id)`,
 ];
 
+const PHASE16_MIGRATIONS: string[] = [
+  /* ── Deprecation Cleanup ─────────────────────────────────────────────── */
+  `DROP TABLE IF EXISTS twin_control_sessions CASCADE`,
+  `DROP TABLE IF EXISTS engagement_heatmap CASCADE`,
+  `DROP TABLE IF EXISTS live_class_rooms CASCADE`,
+  `DROP TABLE IF EXISTS flex_seats CASCADE`,
+  `DROP TABLE IF EXISTS inkspace_blocks CASCADE`,
+  `DROP TABLE IF EXISTS inkspace_pages CASCADE`,
+  `DROP TABLE IF EXISTS inkspace_notebooks CASCADE`,
+
+  /* ── Lessons: meeting link ───────────────────────────────────────────── */
+  `ALTER TABLE lessons ADD COLUMN IF NOT EXISTS meeting_link TEXT`,
+
+  /* ── Accounts: commerce flag ─────────────────────────────────────────── */
+  `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS verified_for_commerce BOOLEAN NOT NULL DEFAULT FALSE`,
+
+  /* ── Subscription Plans: extended limits + visibility ────────────────── */
+  `ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS limits       JSONB NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS visibility   BOOLEAN NOT NULL DEFAULT TRUE`,
+
+  /* ── Subscriptions: payment tracking fields ──────────────────────────── */
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS payment_reference  TEXT`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS payment_proof_url  TEXT`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS verified_by        INTEGER REFERENCES accounts(id) ON DELETE SET NULL`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS verified_at        TIMESTAMPTZ`,
+
+  /* ── Payment Requests ────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS payment_requests (
+    id              serial PRIMARY KEY,
+    user_id         integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    plan_id         integer NOT NULL REFERENCES subscription_plans(id) ON DELETE CASCADE,
+    amount          numeric(10,2) NOT NULL,
+    reference_code  text NOT NULL UNIQUE,
+    instructions    text,
+    status          text NOT NULL DEFAULT 'pending'
+                    CHECK (status IN ('pending','paid','verified','rejected')),
+    proof_url       text,
+    transaction_id  text,
+    webhook_url     text,
+    reviewed_by     integer REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at      timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_payment_requests_user   ON payment_requests(user_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_payment_requests_status ON payment_requests(status)`,
+
+  /* ── Billing Invoices ────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS billing_invoices (
+    id              serial PRIMARY KEY,
+    user_id         integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    subscription_id integer REFERENCES subscriptions(id) ON DELETE SET NULL,
+    amount          numeric(10,2) NOT NULL,
+    plan_name       text NOT NULL,
+    issued_at       timestamptz NOT NULL DEFAULT NOW(),
+    due_at          timestamptz,
+    status          text NOT NULL DEFAULT 'issued'
+                    CHECK (status IN ('issued','paid','overdue','void'))
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_billing_invoices_user ON billing_invoices(user_id)`,
+
+  /* ── Usage Tracking ──────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS usage_tracking (
+    id            serial PRIMARY KEY,
+    user_id       integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    resource      text NOT NULL,
+    current_count integer NOT NULL DEFAULT 0,
+    updated_at    timestamptz NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, resource)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_usage_tracking_user ON usage_tracking(user_id)`,
+
+  /* ── Coming Soon Items ───────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS coming_soon_items (
+    id               serial PRIMARY KEY,
+    feature_name     text NOT NULL,
+    description      text,
+    demo_url         text,
+    release_window   text,
+    waitlist_enabled boolean NOT NULL DEFAULT true,
+    display_order    integer NOT NULL DEFAULT 0,
+    created_at       timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* ── Revision Notes ──────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS revision_notes (
+    id           serial PRIMARY KEY,
+    user_id      integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    title        text NOT NULL DEFAULT 'Untitled Note',
+    content      text NOT NULL DEFAULT '',
+    source_type  text,
+    source_id    integer,
+    ai_generated boolean NOT NULL DEFAULT false,
+    created_at   timestamptz NOT NULL DEFAULT NOW(),
+    updated_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_revision_notes_user ON revision_notes(user_id)`,
+
+  /* ── Seed default Coming Soon items (SimVerse, Geometrix) ────────────── */
+  `INSERT INTO coming_soon_items (feature_name, description, release_window, waitlist_enabled, display_order)
+   VALUES
+     ('SimVerse Labs', 'Full interactive virtual science labs for Physics, Chemistry and Biology — run experiments without any equipment.', 'Q3 2026', true, 1),
+     ('Geometrix', 'Advanced interactive geometry suite with construction tools, 3D visualization, and AI-guided proofs.', 'Q3 2026', true, 2),
+     ('AI Tutor Video', 'Step-by-step AI-generated video lessons personalized to each student''s pace.', 'Q4 2026', true, 3),
+     ('Parent Learning Portal', 'A dedicated portal for parents to follow lesson content alongside their child.', 'Q4 2026', true, 4)
+   ON CONFLICT DO NOTHING`,
+];
+
 export async function runMigrations(): Promise<void> {
   for (const sql of MIGRATIONS) {
     try {
@@ -589,11 +695,19 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE16_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
-    [`phase15-${new Date().toISOString().split("T")[0]}`],
+    [`phase16-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 migrations applied");
 }
