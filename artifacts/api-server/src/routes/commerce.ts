@@ -149,12 +149,12 @@ commerceRouter.get("/admin/commerce/plans", authenticate, requireRole("admin"), 
 
 // POST /api/admin/commerce/plans
 commerceRouter.post("/admin/commerce/plans", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
-  const { name, type, priceEgp, features, limits, visibility, sortOrder } = req.body;
+  const { name, type, priceEgp, features, limits, visibility, sortOrder, discountPct } = req.body;
   if (!name || priceEgp === undefined) { res.status(400).json({ error: "name and priceEgp required" }); return; }
   const { rows } = await pool.query(
-    `INSERT INTO subscription_plans (name, type, price_egp, features, limits, visibility, sort_order)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-    [name, type ?? "teacher", String(priceEgp), JSON.stringify(features ?? []), JSON.stringify(limits ?? {}), visibility ?? true, sortOrder ?? 0],
+    `INSERT INTO subscription_plans (name, type, price_egp, features, limits, visibility, sort_order, discount_pct)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+    [name, type ?? "teacher", String(priceEgp), JSON.stringify(features ?? []), JSON.stringify(limits ?? {}), visibility ?? true, sortOrder ?? 0, discountPct ?? 0],
   );
   res.status(201).json(rows[0]);
 });
@@ -162,7 +162,7 @@ commerceRouter.post("/admin/commerce/plans", authenticate, requireRole("admin"),
 // PUT /api/admin/commerce/plans/:id
 commerceRouter.put("/admin/commerce/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
-  const { name, type, priceEgp, features, limits, visibility, sortOrder, studentLimit, is_visible_landing, badge, display_order } = req.body;
+  const { name, type, priceEgp, features, limits, visibility, sortOrder, studentLimit, is_visible_landing, badge, display_order, discountPct } = req.body;
   const { rows } = await pool.query(
     `UPDATE subscription_plans SET
        name               = COALESCE($1, name),
@@ -175,11 +175,12 @@ commerceRouter.put("/admin/commerce/plans/:id", authenticate, requireRole("admin
        student_limit      = COALESCE($8, student_limit),
        is_visible_landing = COALESCE($9, is_visible_landing),
        badge              = COALESCE($10, badge),
-       display_order      = COALESCE($11, display_order)
-     WHERE id = $12 RETURNING *`,
+       display_order      = COALESCE($11, display_order),
+       discount_pct       = COALESCE($12, discount_pct)
+     WHERE id = $13 RETURNING *`,
     [name, type, priceEgp ? String(priceEgp) : null, features ? JSON.stringify(features) : null,
      limits ? JSON.stringify(limits) : null, visibility, sortOrder, studentLimit,
-     is_visible_landing, badge, display_order, id],
+     is_visible_landing, badge, display_order, discountPct ?? null, id],
   );
   res.json(rows[0] ?? { success: true });
 });

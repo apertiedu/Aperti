@@ -20,12 +20,13 @@ type Plan = {
   price_egp: string; features: string[]; limits: Record<string, number>;
   visibility: boolean; is_visible_landing: boolean; sort_order: number;
   display_order: number; badge: string | null; student_limit: number | null;
+  discount_pct: number;
 };
 
 const BLANK: Partial<Plan> & { featuresText: string } = {
   name: "", type: "teacher", price_egp: "", features: [], featuresText: "",
   limits: {}, visibility: true, is_visible_landing: true,
-  sort_order: 0, display_order: 0, badge: "", student_limit: null,
+  sort_order: 0, display_order: 0, badge: "", student_limit: null, discount_pct: 0,
 };
 
 const PLAN_ICONS: Record<string, React.ElementType> = {
@@ -109,6 +110,11 @@ function PlanForm({
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Display order</label>
           <input type="number" value={form.display_order ?? 0} onChange={e => set("display_order", parseInt(e.target.value) || 0)} placeholder="0"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Discount % <span className="text-gray-400">(0 = no discount)</span></label>
+          <input type="number" min={0} max={100} value={form.discount_pct ?? 0} onChange={e => set("discount_pct", parseInt(e.target.value) || 0)} placeholder="0"
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
         </div>
       </div>
@@ -252,6 +258,7 @@ export default function PlansAdminPage() {
       visibility: form.visibility, is_visible_landing: form.is_visible_landing,
       sortOrder: form.display_order, display_order: form.display_order,
       badge: form.badge || null, studentLimit: form.student_limit ?? null,
+      discountPct: form.discount_pct ?? 0,
     }),
     onSuccess: () => { invalidate(); setShowCreate(false); toast({ title: "Plan created" }); },
     onError: () => toast({ title: "Failed to create plan", variant: "destructive" }),
@@ -265,6 +272,7 @@ export default function PlansAdminPage() {
       visibility: form.visibility, is_visible_landing: form.is_visible_landing,
       sortOrder: form.display_order, display_order: form.display_order,
       badge: form.badge || null, studentLimit: form.student_limit ?? null,
+      discountPct: form.discount_pct ?? 0,
     }),
     onSuccess: () => { invalidate(); setEditingPlan(null); toast({ title: "Plan updated" }); },
     onError: () => toast({ title: "Failed to update plan", variant: "destructive" }),
