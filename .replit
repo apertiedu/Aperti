@@ -16,6 +16,7 @@ API_PORT = "3001"
 VAPID_PUBLIC_KEY = "BEj0LpGapT4H_yn2Cg2lIVhF-3Jee-0Vfm3s0T--SON1-SXywOmFB2y7ZulQinIZ20qcbbBV_JYa5vBn6PFGwQQ"
 VAPID_SUBJECT = "mailto:admin@aperti.app"
 VAPID_PRIVATE_KEY = "iIy_kICYah9OLybxWq2nBjXtHmsLEsNGesz95EP4rcc"
+OPENAI_API_KEY = "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"
 
 [userenv.development]
 
