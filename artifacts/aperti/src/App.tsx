@@ -14,6 +14,7 @@ import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import LowBandwidthBanner from "@/components/LowBandwidthBanner";
 import { useEffect } from "react";
+import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 
 // Public & Legal
 import Landing from "@/pages/landing";
@@ -651,6 +652,7 @@ export default function App() {
           <Toaster />
           <LowBandwidthBanner />
           <PWAInstallBanner />
+          <KeyboardShortcutsHelp />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

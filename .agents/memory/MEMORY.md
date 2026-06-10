@@ -1,3 +1,4 @@
 - [Aperti DB tables](aperti-db-tables.md) — many tables are created by push-schema.ts at startup; several extras required manual SQL creation
 - [Aperti missing tables](aperti-missing-tables.md) — full list of tables created manually outside the schema push
 - [Aperti route structure](aperti-route-structure.md) — how app.ts mounts routes at bare paths AND /api, and the proxy BARE_OK list
+- [Aperti Phase 21 features](aperti-phase21.md) — all Phase 21 features built; key patterns for slash commands, confetti, and landing sections

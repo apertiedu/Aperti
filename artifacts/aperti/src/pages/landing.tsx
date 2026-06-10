@@ -6,7 +6,7 @@ import {
   ArrowRight, BookOpen, Brain, BarChart3, Video, CheckCircle2,
   Menu, X, GraduationCap, Clock, Users, ChevronRight, Sparkles,
   Shield, Zap, Target, Star, Globe, Quote, ChevronDown, ExternalLink,
-  Rocket, Map, FileText, Activity,
+  Rocket, Map, FileText, Activity, Check, Minus, Building2,
 } from "lucide-react";
 
 const TEAL = "#00796B";
@@ -495,6 +495,145 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
             </Reveal>
           ))}
         </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────── Get Started Steps ─────────────────────────── */
+function GetStartedSteps({ teal }: { teal: string }) {
+  const steps = [
+    { step: "01", icon: "🏫", title: "Create your workspace", desc: "Sign up, name your centre, and configure your subjects in under 3 minutes. No credit card required." },
+    { step: "02", icon: "👨‍🎓", title: "Invite your students", desc: "Share a unique join code. Students register instantly and land on their personalised portal." },
+    { step: "03", icon: "📈", title: "Teach, track & grow", desc: "Assign work, run live sessions, auto-mark quizzes, and watch every student improve in real time." },
+  ];
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  return (
+    <section className="py-24 px-5 bg-white" ref={ref}>
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-14">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+            style={{ background: "#E6F4F1", color: teal, borderColor: `${teal}25` }}>
+            <Rocket className="h-3 w-3" />Up and running in minutes
+          </span>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
+            Three steps to your <span style={{ color: teal }}>first class.</span>
+          </h2>
+        </div>
+        <div className="relative">
+          <div className="hidden md:block absolute top-10 left-[16.67%] right-[16.67%] h-0.5 bg-gray-100" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {steps.map((s, i) => (
+              <motion.div key={i}
+                initial={{ opacity: 0, y: 24 }} animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: i * 0.15, duration: 0.5 }}
+                className="flex flex-col items-center text-center">
+                <div className="relative mb-5">
+                  <div className="w-20 h-20 rounded-2xl bg-gray-50 border-2 border-gray-100 flex items-center justify-center text-4xl shadow-sm">
+                    {s.icon}
+                  </div>
+                  <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full text-xs font-extrabold flex items-center justify-center text-white"
+                    style={{ background: teal }}>
+                    {s.step.replace("0", "")}
+                  </div>
+                </div>
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Step {s.step}</p>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{s.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+        <div className="text-center mt-12">
+          <Link href="/register">
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-sm text-white shadow-lg"
+              style={{ background: teal }}>
+              Get started free <ArrowRight className="h-4 w-4" />
+            </motion.button>
+          </Link>
+          <p className="text-xs text-gray-400 mt-3">No credit card · Free 30-day trial · Cancel anytime</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─────────────────────────── Comparison Table ─────────────────────────── */
+function ComparisonSection({ teal }: { teal: string }) {
+  const rows = [
+    { feature: "Lesson planning & ContentCraft", aperti: true,  paper: false, sheet: false },
+    { feature: "Automated quiz marking",         aperti: true,  paper: false, sheet: false },
+    { feature: "Student progress analytics",     aperti: true,  paper: false, sheet: "partial" },
+    { feature: "AI revision plan generator",     aperti: true,  paper: false, sheet: false },
+    { feature: "Flashcard system (ECHO)",        aperti: true,  paper: false, sheet: false },
+    { feature: "AI question extraction",         aperti: true,  paper: false, sheet: false },
+    { feature: "Parent portal & notifications",  aperti: true,  paper: false, sheet: false },
+    { feature: "Live session tools",             aperti: true,  paper: false, sheet: false },
+    { feature: "Past paper library",             aperti: true,  paper: "partial", sheet: false },
+    { feature: "Mobile & tablet access",         aperti: true,  paper: "partial", sheet: "partial" },
+    { feature: "Invoicing & payments",           aperti: true,  paper: false, sheet: "partial" },
+    { feature: "AI mentor 24/7",                 aperti: true,  paper: false, sheet: false },
+  ];
+
+  const Cell = ({ val }: { val: boolean | "partial" }) => (
+    <td className="py-3 px-4 text-center">
+      {val === true  ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-100"><Check size={13} style={{ color: teal }} strokeWidth={3} /></span>
+       : val === "partial" ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100"><Minus size={13} className="text-amber-600" strokeWidth={3} /></span>
+       : <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100"><X size={13} className="text-gray-300" strokeWidth={3} /></span>}
+    </td>
+  );
+
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+  return (
+    <section className="py-24 px-5" style={{ background: "#F5F5F5" }} ref={ref}>
+      <div className="max-w-4xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} className="text-center mb-12">
+          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+            style={{ background: "#E6F4F1", color: teal, borderColor: `${teal}25` }}>
+            <Building2 className="h-3 w-3" />Why Aperti?
+          </span>
+          <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">
+            Replace the <span className="line-through text-gray-400">spreadsheets</span>{" "}
+            and <span style={{ color: teal }}>the chaos.</span>
+          </h2>
+          <p className="text-gray-500 mt-3 max-w-lg mx-auto text-sm">Everything that used to live in five different tools — now in one.</p>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.15 }}
+          className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-gray-100">
+                <th className="py-4 px-4 text-left text-sm font-semibold text-gray-600 w-1/2">Feature</th>
+                <th className="py-4 px-4 text-center text-sm font-bold w-[16.67%]" style={{ color: teal }}>
+                  Aperti
+                </th>
+                <th className="py-4 px-4 text-center text-xs font-semibold text-gray-400 w-[16.67%]">Pen & paper</th>
+                <th className="py-4 px-4 text-center text-xs font-semibold text-gray-400 w-[16.67%]">Spreadsheet</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <motion.tr key={i}
+                  initial={{ opacity: 0, x: -8 }} animate={inView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ delay: 0.2 + i * 0.04 }}
+                  className={`border-b border-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
+                  <td className="py-3 px-4 text-sm text-gray-700">{row.feature}</td>
+                  <Cell val={row.aperti} />
+                  <Cell val={row.paper} />
+                  <Cell val={row.sheet} />
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center gap-4 text-xs text-gray-400">
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-full bg-teal-100 inline-flex items-center justify-center"><Check size={9} style={{ color: teal }} /></span>Full support</span>
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-full bg-amber-100 inline-flex items-center justify-center"><Minus size={9} className="text-amber-600" /></span>Partial / workaround</span>
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-full bg-gray-100 inline-flex items-center justify-center"><X size={9} className="text-gray-300" /></span>Not available</span>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
@@ -1219,6 +1358,12 @@ export default function Landing() {
           </Reveal>
         </div>
       </section>
+
+      {/* ── GET STARTED IN 3 STEPS ── */}
+      <GetStartedSteps teal={teal} />
+
+      {/* ── COMPARISON TABLE ── */}
+      <ComparisonSection teal={teal} />
 
       {/* ── FAQ (CMS-driven) ── */}
       <FAQSection faqs={faqs} />
