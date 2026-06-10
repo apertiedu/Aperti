@@ -5,8 +5,15 @@ import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enfo
 
 export const coursesRouter = Router();
 
-// Idempotent migration: add all missing columns to aperti_courses
+// Idempotent migration: create aperti_courses if missing, then add columns
 const COURSE_MIGRATIONS = [
+  `CREATE TABLE IF NOT EXISTS aperti_courses (
+    id          serial PRIMARY KEY,
+    title       text NOT NULL,
+    description text,
+    created_at  timestamptz NOT NULL DEFAULT NOW(),
+    updated_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
   `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS subject text`,
   `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS thumbnail_url text`,
   `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS duration_weeks integer NOT NULL DEFAULT 8`,

@@ -7,7 +7,7 @@ import {
   MessageSquare, Hash, Users,
 } from "lucide-react";
 
-const token = () => localStorage.getItem("token") ?? "";
+const token = () => localStorage.getItem("aperti_token") ?? "";
 const fetchJSON = (url: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${token()}` } }).then((r) => r.json());
 const postJSON = (url: string, body: unknown) =>

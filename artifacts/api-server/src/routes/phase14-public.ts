@@ -15,8 +15,8 @@ router.get("/landing/stats", async (_req, res) => {
 
     const [students, teachers, courses, assessments, resources, sessions] =
       await Promise.all([
-        pool.query("SELECT COUNT(*)::int AS n FROM students WHERE status='active'"),
-        pool.query("SELECT COUNT(*)::int AS n FROM accounts WHERE role='teacher' AND status='active'"),
+        pool.query("SELECT COUNT(*)::int AS n FROM students"),
+        pool.query("SELECT COUNT(*)::int AS n FROM accounts WHERE role='teacher'"),
         pool.query("SELECT COUNT(*)::int AS n FROM courses WHERE status='published'").catch(() => pool.query("SELECT 0::int AS n")),
         pool.query("SELECT COUNT(*)::int AS n FROM homework").catch(() => pool.query("SELECT 0::int AS n")),
         pool.query("SELECT COUNT(*)::int AS n FROM resources").catch(() => pool.query("SELECT 0::int AS n")),

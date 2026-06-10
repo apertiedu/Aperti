@@ -7,7 +7,7 @@ import {
   Award, CreditCard, HelpCircle,
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart, Package,
   RefreshCw, Settings, MessageSquare,
-  LogOut, School, ChevronLeft, ChevronRight, Search, KeyRound,
+  LogOut, ChevronLeft, ChevronRight, Search, KeyRound,
   Sun, Moon, Sparkles, ShoppingBag, UserCheck, Link2, Bot,
   GraduationCap, TableProperties, Medal, Scale, Archive,
   Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X,
@@ -41,7 +41,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const { toast } = useToast();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsedRaw] = useState(() => {
+    try { return localStorage.getItem("aperti_sidebar_collapsed") === "1"; } catch { return false; }
+  });
+  const setCollapsed = (v: boolean) => {
+    setCollapsedRaw(v);
+    try { localStorage.setItem("aperti_sidebar_collapsed", v ? "1" : "0"); } catch {}
+  };
   const [mobileOpen, setMobileOpen] = useState(false);
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
   const { dark, toggleDark } = useTheme();
@@ -202,14 +208,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={`p-3 border-b border-sidebar-border flex items-center ${(!isMobile && collapsed) ? "justify-center" : "justify-between"} gap-2 shrink-0`}
       >
         {(!isMobile && collapsed) ? (
-          <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
-            <School className="w-4 h-4" />
-          </div>
+          <span className="font-bold text-sm tracking-tight text-foreground">A<span className="text-primary">.</span></span>
         ) : (
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shrink-0">
-              <School className="w-4 h-4" />
-            </div>
             <div className="min-w-0">
               <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">
                 Aperti<span className="text-primary">.</span>

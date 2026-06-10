@@ -89,7 +89,13 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
   const [location] = useLocation();
   const { user, logout } = useAuth();
   const { dark, toggleDark } = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsedRaw] = useState(() => {
+    try { return localStorage.getItem("aperti_sidebar_collapsed") === "1"; } catch { return false; }
+  });
+  const setCollapsed = (v: boolean) => {
+    setCollapsedRaw(v);
+    try { localStorage.setItem("aperti_sidebar_collapsed", v ? "1" : "0"); } catch {}
+  };
   const [sheetOpen, setSheetOpen] = useState(false);
   const { toast } = useToast();
   const qc = useQueryClient();

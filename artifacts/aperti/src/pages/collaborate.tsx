@@ -10,7 +10,7 @@ import {
 import { useAuth } from "@/context/auth";
 import { useLocation } from "wouter";
 
-const token = () => localStorage.getItem("token") ?? "";
+const token = () => localStorage.getItem("aperti_token") ?? "";
 const fetchJSON = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${token()}` } }).then((r) => r.json());
 const postJSON = (url: string, body: unknown) =>
   fetch(url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify(body) }).then((r) => r.json());
@@ -91,7 +91,7 @@ export default function CollaborateRoom() {
     try {
       const context = messages.slice(-10).map((m) => `${m.sender_name}: ${m.content}`).join("\n");
       const r = await postJSON("/api/messages/translate", { content: `Room context:\n${context}\n\nQuestion: ${aiQuery}`, target_language: "English" });
-      const key = localStorage.getItem("token");
+      const key = localStorage.getItem("aperti_token");
       const resp = await fetch("/api/coremind/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },

@@ -22,7 +22,7 @@ interface GovernanceEntry {
 }
 
 function fetchJSON(url: string, opts?: RequestInit) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("aperti_token");
   return fetch(url, {
     ...opts,
     headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}), ...opts?.headers },

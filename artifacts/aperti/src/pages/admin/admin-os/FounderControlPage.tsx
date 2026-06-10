@@ -5,12 +5,31 @@ import { useLocation } from "wouter";
 import {
   Users, TrendingUp, BookOpen, DollarSign, AlertCircle,
   Layers, Activity, Zap, ArrowUpRight, ArrowDownRight,
-  BarChart3, ShieldCheck,
+  BarChart3, ShieldCheck, Gauge,
 } from "lucide-react";
+
 import {
-  BarChart, Bar, LineChart, Line, XAxis, YAxis,
-  Tooltip, ResponsiveContainer, Cell,
+  BarChart, Bar, XAxis, YAxis,
+  Tooltip, ResponsiveContainer,
 } from "recharts";
+
+function QualityGauge({ score }: { score: number }) {
+  const color = score >= 85 ? "#16a34a" : score >= 70 ? "#2563eb" : score >= 50 ? "#d97706" : "#dc2626";
+  const label = score >= 85 ? "Excellent" : score >= 70 ? "Good" : score >= 50 ? "Fair" : "Needs Work";
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative w-28 h-16 overflow-hidden">
+        <svg viewBox="0 0 160 96" className="w-full h-full">
+          <path d="M 16 80 A 64 64 0 0 1 144 80" stroke="#e5e7eb" strokeWidth="14" fill="none" strokeLinecap="round" />
+          <path d="M 16 80 A 64 64 0 0 1 144 80" stroke={color} strokeWidth="14" fill="none"
+            strokeLinecap="round" strokeDasharray={`${(score / 100) * 201} 201`} />
+        </svg>
+      </div>
+      <p className="text-2xl font-black -mt-2" style={{ color }}>{score}</p>
+      <p className="text-xs font-medium" style={{ color }}>{label}</p>
+    </div>
+  );
+}
 
 function StatCard({
   label, value, sub, icon: Icon, color = "teal", trend, onClick,
@@ -67,12 +86,19 @@ export default function FounderControlPage() {
     refetchInterval: 30000,
   });
 
+  const { data: qualityScore } = useQuery({
+    queryKey: ["founder-quality-score"],
+    queryFn: () => fetchJSON("/api/admin/quality/score"),
+    retry: false,
+  });
+
   const unread = (alerts?.alerts ?? []).filter((a: any) => !a.is_read).length;
   const monthly = (rev?.monthly ?? []).slice(-6);
   const users = ov?.users ?? {};
   const content = ov?.content ?? {};
   const revenue = ov?.revenue ?? {};
   const readiness = ov?.readiness;
+  const platformScore = qualityScore?.score ?? null;
 
   return (
     <div className="space-y-6">
@@ -136,6 +162,45 @@ export default function FounderControlPage() {
               <StatCard label="Readiness" value={`${readiness ?? "—"}%`} icon={ShieldCheck} color="green" />
             </div>
           </div>
+
+          {/* Platform Quality Score */}
+          {platformScore !== null && (
+            <div>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Platform Quality</h2>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                      <Gauge className="w-4 h-4 text-teal-600" /> Platform Quality Score
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-0.5">Composite score: error rate, performance, accessibility, open bugs</p>
+                  </div>
+                  <button onClick={() => nav("/admin/os/qa/readiness")}
+                    className="text-xs text-teal-600 hover:underline flex items-center gap-1">
+                    QA Details <ArrowUpRight className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-8">
+                  <QualityGauge score={platformScore} />
+                  <div className="flex-1 space-y-2">
+                    {[
+                      { label: "Error Rate", value: qualityScore?.metrics?.errorRate ?? null, good: (v: number) => v <= 2, fmt: (v: number) => `${v.toFixed(1)}%` },
+                      { label: "Performance", value: qualityScore?.metrics?.performance ?? null, good: (v: number) => v >= 85, fmt: (v: number) => `${v}/100` },
+                      { label: "Accessibility", value: qualityScore?.metrics?.accessibility ?? null, good: (v: number) => v >= 80, fmt: (v: number) => `${v}/100` },
+                      { label: "Open Bugs", value: qualityScore?.metrics?.openBugs ?? null, good: (v: number) => v === 0, fmt: (v: number) => String(v) },
+                    ].map(({ label, value, good, fmt }) => (
+                      <div key={label} className="flex items-center gap-2 text-sm">
+                        <span className="text-gray-500 w-28 shrink-0">{label}</span>
+                        <span className={`font-medium ${value !== null ? (good(value) ? "text-green-600" : "text-amber-600") : "text-gray-300"}`}>
+                          {value !== null ? fmt(value) : "—"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 

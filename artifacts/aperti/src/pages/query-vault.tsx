@@ -18,7 +18,7 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
-import { Plus, Search, Pencil, Trash2, ImageIcon, X, Upload } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, ImageIcon, X, Upload, Brain } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
@@ -111,7 +111,22 @@ export default function QueryVault() {
       {isLoading ? (
         <div className="space-y-3">{Array.from({length:5}).map((_,i)=><Skeleton key={i} className="h-20 w-full rounded-xl"/>)}</div>
       ) : questions?.length === 0 ? (
-        <Card className="card-hover"><CardContent className="p-8 text-center text-muted-foreground">No questions yet. Click "Add Question" to create your first one.</CardContent></Card>
+        <div className="rounded-xl border border-border bg-card">
+          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: "#0D948815" }}>
+              <Brain className="w-6 h-6" style={{ color: "#0D9488" }} />
+            </div>
+            <h3 className="text-base font-semibold text-foreground mb-1">Your question bank is empty</h3>
+            <p className="text-sm text-muted-foreground max-w-xs mb-5">Build a library of questions to reuse across assessments and homework tasks.</p>
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white"
+              style={{ background: "#0D9488" }}
+            >
+              <Plus className="w-4 h-4" /> Add your first question
+            </button>
+          </div>
+        </div>
       ) : (
         <div className="space-y-3">
           {questions?.map((q) => (

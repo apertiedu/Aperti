@@ -37,16 +37,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [token]);
 
   const login = async (username: string, password: string) => {
-    const res = await fetch(`${API}/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password, deviceId: `web-${Date.now()}` }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Login failed");
+    let res: Response;
+    try {
+      res = await fetch(`${API}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password, deviceId: `web-${Date.now()}` }),
+      });
+    } catch {
+      throw new Error("Cannot reach the server — check your connection and try again.");
+    }
+    const text = await res.text();
+    let data: Record<string, string> = {};
+    try { data = JSON.parse(text); } catch {
+      if (!res.ok) throw new Error(`Server error (${res.status}) — please try again.`);
+    }
+    if (!res.ok) {
+      const msg =
+        res.status === 401 ? (data.error || "Incorrect username or password") :
+        res.status === 403 ? "Your account has been suspended. Contact support." :
+        res.status === 429 ? "Too many attempts — please wait a moment and try again." :
+        res.status >= 500 ? "Server error — please try again in a moment." :
+        data.error || "Login failed";
+      throw new Error(msg);
+    }
     localStorage.setItem("aperti_token", data.token);
     setToken(data.token);
-    setUser(data.user);
+    setUser(data.user as unknown as User);
   };
 
   const logout = () => {

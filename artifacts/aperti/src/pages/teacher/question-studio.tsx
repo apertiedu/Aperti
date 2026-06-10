@@ -333,11 +333,15 @@ export default function QuestionStudio() {
             {isLoading ? (
               <div className="space-y-3">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}</div>
             ) : questions.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
-                <BookOpen size={48} className="mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">No questions found</p>
-                <p className="text-sm mt-1">Create your first question or adjust your filters</p>
-                <Button className="mt-4 bg-teal-600 text-white" onClick={() => setShowCreate(true)}><Plus size={14} className="mr-1" /> New Question</Button>
+              <div className="rounded-xl border border-border bg-card flex flex-col items-center justify-center py-16 text-center px-4">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: "#0D948815" }}>
+                  <BookOpen className="w-6 h-6" style={{ color: "#0D9488" }} />
+                </div>
+                <p className="text-base font-semibold text-foreground mb-1">No questions found</p>
+                <p className="text-sm text-muted-foreground max-w-xs mb-5">Create your first question or adjust your search filters.</p>
+                <Button style={{ background: "#0D9488", color: "white" }} onClick={() => setShowCreate(true)}>
+                  <Plus size={14} className="mr-1" /> New Question
+                </Button>
               </div>
             ) : (
               <>

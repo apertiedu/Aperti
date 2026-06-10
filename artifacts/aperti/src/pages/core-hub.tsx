@@ -11,7 +11,7 @@ import {
   BookOpen, CalendarCheck, Users, TrendingUp, Clock, Bell,
   ChevronRight, Zap, Sparkles, MessageSquare, FileText,
   Video, AlertTriangle, CheckCircle2, PlusCircle, BarChart2,
-  ClipboardList, Brain,
+  ClipboardList, Brain, Rocket,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/auth";
@@ -142,6 +142,15 @@ export default function CoreHub() {
     { label: "Analytics", icon: <BarChart2 className="h-4 w-4" />, href: "/pulse" },
   ];
 
+  const isNewUser = !sumLoading && (summary?.lessonsToday ?? 0) === 0 && (summary?.studentsPresent ?? 0) === 0 && (summary?.studentsTotal ?? 0) === 0;
+
+  const quickStartSteps = [
+    { step: 1, icon: Users, label: "Add your first student", desc: "Register or invite students to your workspace", href: "/students", done: (summary?.studentsTotal ?? 0) > 0 },
+    { step: 2, icon: BookOpen, label: "Create a subject", desc: "Organise your teaching by subject or class", href: "/subjects", done: false },
+    { step: 3, icon: CalendarCheck, label: "Schedule a session", desc: "Plan your first lesson in PlanGrid", href: "/plan-grid", done: false },
+    { step: 4, icon: ClipboardList, label: "Set an assignment", desc: "Give students their first homework task", href: "/submit-flow", done: false },
+  ];
+
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       {/* Header */}
@@ -172,6 +181,40 @@ export default function CoreHub() {
           </Link>
         </div>
       </motion.div>
+
+      {/* Quick Start — shown for brand-new workspaces */}
+      {isNewUser && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+          className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-5"
+        >
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Rocket className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-foreground text-sm">Welcome to Aperti! Let's get you set up</h2>
+              <p className="text-xs text-muted-foreground">Complete these steps to launch your workspace</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {quickStartSteps.map(({ step, icon: Icon, label, desc, href, done }) => (
+              <Link key={step} href={href}>
+                <div className={`group p-4 rounded-xl border transition-all cursor-pointer ${done ? "border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30" : "border-border bg-card hover:border-primary/40 hover:bg-primary/5"}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${done ? "bg-emerald-500 text-white" : "bg-muted text-muted-foreground"}`}>
+                      {done ? "✓" : step}
+                    </span>
+                    <Icon className={`h-4 w-4 ${done ? "text-emerald-500" : "text-muted-foreground group-hover:text-primary transition-colors"}`} />
+                  </div>
+                  <p className={`text-xs font-semibold ${done ? "text-emerald-700 dark:text-emerald-400 line-through" : "text-foreground"}`}>{label}</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </motion.div>
+      )}
 
       {/* Stats row */}
       <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">

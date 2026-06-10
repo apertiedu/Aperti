@@ -2,3 +2,5 @@
 - [Aperti missing tables](aperti-missing-tables.md) — full list of tables created manually outside the schema push
 - [Aperti route structure](aperti-route-structure.md) — how app.ts mounts routes at bare paths AND /api, and the proxy BARE_OK list
 - [Aperti Phase 21 features](aperti-phase21.md) — all Phase 21 features built; key patterns for slash commands, confetti, and landing sections
+- [Aperti Phase 22 UX system](aperti-phase22.md) — all Phase 22 UX infrastructure: tokens, skeletons, empty states, auto-save, error boundaries, sidebar persist
+- [Aperti DB runtime gaps](aperti-db-runtime-gaps.md) — aperti_courses missing at runtime; students has no status column; phase14-public and courses.ts fixes
