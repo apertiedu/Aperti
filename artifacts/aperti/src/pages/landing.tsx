@@ -1,4 +1,4 @@
-import { useState, useRef, FormEvent, useEffect } from "react";
+import { useState, useRef, FormEvent, useEffect, useMemo } from "react";
 import { motion, useInView, AnimatePresence, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
@@ -23,8 +23,8 @@ interface CMSFAQ {
   id: number; question: string; answer: string; category: string; order: number;
 }
 interface CMSPlan {
-  id: number; name: string; price_egp: number; max_students: number | null; badge: string | null;
-  is_highlighted: boolean; features: string[];
+  id: number; name: string; type?: "teacher" | "student"; price_egp: number; max_students: number | null;
+  badge: string | null; is_highlighted: boolean; features: string[];
 }
 interface CMSBranding { primary_color: string | null; logo_url: string | null; }
 interface LandingData {
@@ -372,52 +372,80 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
 }
 
 /* ─────────────────────────── Pricing ─────────────────────────── */
-const PLAN_COLORS = [TEAL, "#00695C", "#004D40", "#1565C0"];
+const TEACHER_COLORS = [TEAL, "#00897B", "#00695C", "#004D40"];
+const STUDENT_COLORS = ["#0277BD", "#0288D1", "#01579B"];
 
-function CMSPricingCard({ plan, colorIdx }: { plan: CMSPlan; colorIdx: number }) {
-  const color = PLAN_COLORS[colorIdx % PLAN_COLORS.length];
+const PLAN_ICONS: Record<string, React.ElementType> = {
+  starter: Zap, essential: Star, pro: Target, elite: Shield,
+  basic: BookOpen, learner: Brain, scholar: GraduationCap,
+};
+
+function CMSPricingCard({ plan, colorIdx, isStudent }: { plan: CMSPlan; colorIdx: number; isStudent?: boolean }) {
+  const palette = isStudent ? STUDENT_COLORS : TEACHER_COLORS;
+  const color = palette[colorIdx % palette.length];
   const featuresArr: string[] = Array.isArray(plan.features) ? plan.features : [];
+  const Icon = PLAN_ICONS[plan.name?.toLowerCase()] ?? Star;
+  const popular = plan.is_highlighted || plan.badge === "POPULAR";
   return (
-    <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
-      className={`bg-white rounded-2xl p-6 shadow-sm border-2 relative overflow-hidden ${plan.is_highlighted ? "" : "border-gray-100"}`}
-      style={{ borderColor: plan.is_highlighted ? color : undefined }}>
-      {(plan.badge || plan.is_highlighted) && (
-        <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[10px] font-bold text-white" style={{ background: color }}>
-          {plan.badge ?? "POPULAR"}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: colorIdx * 0.07, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -5, boxShadow: `0 20px 48px ${color}18`, transition: { duration: 0.2 } }}
+      className="bg-white rounded-2xl p-6 border-2 relative flex flex-col"
+      style={{ borderColor: popular ? color : "#f0f0f0" }}>
+      {popular && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold text-white whitespace-nowrap"
+          style={{ background: color }}>
+          {plan.badge ?? "MOST POPULAR"}
         </div>
       )}
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${color}15` }}>
-        <Star className="h-5 w-5" style={{ color }} />
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${color}14` }}>
+        <Icon className="h-5 w-5" style={{ color }} />
       </div>
       <h3 className="font-extrabold text-gray-900 text-lg mb-1">{plan.name}</h3>
-      <div className="mb-1">
-        <span className="text-3xl font-black" style={{ color }}>{plan.price_egp}</span>
-        <span className="text-gray-400 text-sm ml-1">EGP / mo</span>
+      <div className="mb-1 flex items-end gap-1">
+        {plan.price_egp === 0 ? (
+          <span className="text-3xl font-black" style={{ color }}>Free</span>
+        ) : (
+          <>
+            <span className="text-3xl font-black" style={{ color }}>{Number(plan.price_egp).toLocaleString()}</span>
+            <span className="text-gray-400 text-sm mb-1">EGP / mo</span>
+          </>
+        )}
       </div>
-      <p className="text-xs text-gray-400 mb-5">{plan.max_students ? `Up to ${plan.max_students} students` : "Unlimited"}</p>
-      <div className="space-y-2 mb-6">
+      <p className="text-xs text-gray-400 mb-5">
+        {plan.max_students ? `Up to ${plan.max_students} students` : "Unlimited"}
+      </p>
+      <div className="space-y-2 mb-6 flex-1">
         {featuresArr.map((f, fi) => (
-          <div key={fi} className="flex items-center gap-2 text-sm text-gray-600">
-            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" style={{ color }} />
+          <div key={fi} className="flex items-start gap-2 text-sm text-gray-600">
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0 mt-0.5" style={{ color }} />
             {f}
           </div>
         ))}
       </div>
-      <a href="#apply">
-        <button className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
-          style={{ background: plan.is_highlighted ? color : `${color}12`, color: plan.is_highlighted ? "white" : color }}>
-          Get Started
+      <Link href="/register">
+        <button className="w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 hover:opacity-90"
+          style={{ background: popular ? color : `${color}12`, color: popular ? "white" : color }}>
+          Get Started →
         </button>
-      </a>
+      </Link>
     </motion.div>
   );
 }
 
-const FALLBACK_PLANS: CMSPlan[] = [
-  { id: 1, name: "Starter",      price_egp: 50,  max_students: 30,  badge: null,      is_highlighted: false, features: ["30 students","Attendance","Homework submissions","Basic analytics"] },
-  { id: 2, name: "Professional", price_egp: 100, max_students: 80,  badge: "POPULAR", is_highlighted: true,  features: ["80 students","All Starter features","AI Tutor (Mentor)","QueryVault & CardStack","Parent Hub"] },
-  { id: 3, name: "Enterprise",   price_egp: 150, max_students: 200, badge: null,      is_highlighted: false, features: ["200 students","All Professional features","InsightStream analytics","Priority support","API access"] },
-  { id: 4, name: "Master",       price_egp: 200, max_students: null, badge: null,     is_highlighted: false, features: ["Unlimited students","All features","Custom integrations","Dedicated support","SLA guaranteed"] },
+const FALLBACK_TEACHER_PLANS: CMSPlan[] = [
+  { id: 1, name: "Starter",   type: "teacher", price_egp: 2500,  max_students: 30,  badge: null,      is_highlighted: false, features: ["Up to 30 students","Core teaching tools","Attendance & homework","Basic analytics","Email support"] },
+  { id: 2, name: "Essential", type: "teacher", price_egp: 5000,  max_students: 75,  badge: "POPULAR", is_highlighted: true,  features: ["Up to 75 students","All Starter features","AI grading & mentor","Live classes","Question bank","Priority support"] },
+  { id: 3, name: "Pro",       type: "teacher", price_egp: 7500,  max_students: 150, badge: null,      is_highlighted: false, features: ["Up to 150 students","All Essential features","SnapGrade AI","Parent portal","Advanced analytics","Custom branding"] },
+  { id: 4, name: "Elite",     type: "teacher", price_egp: 10000, max_students: null, badge: null,     is_highlighted: false, features: ["Unlimited students","All Pro features","Dedicated support","Custom integrations","White-label option","SLA guarantee"] },
+];
+
+const FALLBACK_STUDENT_PLANS: CMSPlan[] = [
+  { id: 5, name: "Basic",   type: "student", price_egp: 0,   max_students: null, badge: null, is_highlighted: false, features: ["Access to assigned lessons","Homework submission","Basic progress tracking"] },
+  { id: 6, name: "Learner", type: "student", price_egp: 299, max_students: null, badge: "POPULAR", is_highlighted: true, features: ["All Basic features","AI mentor access","Flashcards & revision","Exam practice vault"] },
+  { id: 7, name: "Scholar", type: "student", price_egp: 599, max_students: null, badge: null, is_highlighted: false, features: ["All Learner features","SnapGrade AI grading","Study groups","Parent progress reports","Priority AI responses"] },
 ];
 
 /* ─────────────────────────── Testimonials ─────────────────────────── */
@@ -1094,6 +1122,78 @@ function InteractiveDemo({ teal }: { teal: string }) {
   );
 }
 
+/* ─────────────────────────── Pricing Section ─────────────────────────── */
+function PricingSection({ teal, teacherPlans, studentPlans, pricingHeadline, pricingAccent, contactEmail }: {
+  teal: string; teacherPlans: CMSPlan[]; studentPlans: CMSPlan[];
+  pricingHeadline: string; pricingAccent: string; contactEmail: string;
+}) {
+  const [tab, setTab] = useState<"teacher" | "student">("teacher");
+  const activePlans = tab === "teacher" ? teacherPlans : studentPlans;
+  const isStudent = tab === "student";
+  const cols = activePlans.length >= 4 ? "lg:grid-cols-4" : activePlans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2";
+
+  return (
+    <section id="pricing" className="py-24 px-5 bg-white">
+      <div className="max-w-7xl mx-auto">
+        <Reveal>
+          <div className="text-center mb-10">
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+              style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+              Transparent Pricing
+            </span>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+              {pricingHeadline}{pricingAccent && <> <span style={{ color: teal }}>{pricingAccent}</span></>}
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto mb-8">
+              Simple, transparent pricing in EGP — no lock-in, no surprise invoices. InstaPay accepted.
+            </p>
+            {/* Tab toggle */}
+            <div className="inline-flex items-center rounded-xl border border-gray-200 p-1 bg-gray-50 gap-1">
+              {(["teacher", "student"] as const).map(t => (
+                <button key={t} onClick={() => setTab(t)}
+                  className="px-5 py-2 rounded-lg text-sm font-semibold transition-all duration-200"
+                  style={{
+                    background: tab === t ? teal : "transparent",
+                    color: tab === t ? "white" : "#6B7280",
+                    boxShadow: tab === t ? `0 2px 8px ${teal}30` : "none",
+                  }}>
+                  {t === "teacher" ? "👩‍🏫 For Teachers" : "🎓 For Students"}
+                </button>
+              ))}
+            </div>
+          </div>
+        </Reveal>
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={tab}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.25 }}
+            className={`grid grid-cols-1 sm:grid-cols-2 ${cols} gap-6 mt-8`}
+          >
+            {activePlans.map((p, i) => (
+              <CMSPricingCard key={p.id} plan={p} colorIdx={i} isStudent={isStudent} />
+            ))}
+          </motion.div>
+        </AnimatePresence>
+
+        {tab === "teacher" && <SmartCalculator teal={teal} />}
+
+        <Reveal delay={0.4}>
+          <p className="text-center text-sm text-gray-400 mt-8">
+            Volume discounts available for large centres.{" "}
+            <a href={`mailto:${contactEmail}`} className="underline underline-offset-2 font-medium" style={{ color: teal }}>
+              Talk to us for custom pricing.
+            </a>
+          </p>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────────────────────── MAIN LANDING ─────────────────────────── */
 export default function Landing() {
   const { scrollYProgress } = useScroll();
@@ -1103,7 +1203,15 @@ export default function Landing() {
   const sections = cms?.sections ?? [];
   const testimonials = cms?.testimonials ?? [];
   const faqs = cms?.faqs ?? [];
-  const plans: CMSPlan[] = (cms?.plans ?? []).length > 0 ? (cms?.plans ?? []) : FALLBACK_PLANS;
+  const allPlans: CMSPlan[] = cms?.plans ?? [];
+  const teacherPlans: CMSPlan[] = useMemo(() => {
+    const t = allPlans.filter(p => !p.type || p.type === "teacher");
+    return t.length > 0 ? t : FALLBACK_TEACHER_PLANS;
+  }, [allPlans]);
+  const studentPlans: CMSPlan[] = useMemo(() => {
+    const s = allPlans.filter(p => p.type === "student");
+    return s.length > 0 ? s : FALLBACK_STUDENT_PLANS;
+  }, [allPlans]);
   const teal = cms?.branding?.primary_color ?? TEAL;
 
   const hero     = getSection(sections, "hero");
@@ -1326,38 +1434,14 @@ export default function Landing() {
       <TestimonialsSection testimonials={testimonials} />
 
       {/* ── PRICING ── */}
-      <section id="pricing" className="py-24 px-5 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <Reveal>
-            <div className="text-center mb-16">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-                style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
-                Transparent Pricing
-              </span>
-              <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-                {pricingHeadline}{pricingAccent && <> <span style={{ color: teal }}>{pricingAccent}</span></>}
-              </h2>
-              <p className="text-gray-500 max-w-lg mx-auto">Pay per student, per month. Simple transparent pricing — no lock-in, no surprise invoices.</p>
-            </div>
-          </Reveal>
-          <div className={`grid grid-cols-1 sm:grid-cols-2 ${plans.length >= 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-5`}>
-            {plans.map((p, i) => (
-              <Reveal key={p.id} delay={i * 0.1}>
-                <CMSPricingCard plan={p} colorIdx={i} />
-              </Reveal>
-            ))}
-          </div>
-          <SmartCalculator teal={teal} />
-          <Reveal delay={0.4}>
-            <p className="text-center text-sm text-gray-400 mt-8">
-              Volume discounts available for large centres. InstaPay accepted.{" "}
-              <a href={`mailto:${contactEmail}`} className="underline underline-offset-2 font-medium" style={{ color: teal }}>
-                Talk to us for custom pricing.
-              </a>
-            </p>
-          </Reveal>
-        </div>
-      </section>
+      <PricingSection
+        teal={teal}
+        teacherPlans={teacherPlans}
+        studentPlans={studentPlans}
+        pricingHeadline={pricingHeadline}
+        pricingAccent={pricingAccent}
+        contactEmail={contactEmail}
+      />
 
       {/* ── GET STARTED IN 3 STEPS ── */}
       <GetStartedSteps teal={teal} />

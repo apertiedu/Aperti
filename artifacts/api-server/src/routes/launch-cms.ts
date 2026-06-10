@@ -504,7 +504,7 @@ router.get("/landing", async (req, res) => {
       pool.query('SELECT * FROM landing_sections WHERE is_published=true ORDER BY "order" ASC').catch(() => ({ rows: [] })),
       pool.query("SELECT id, name, role, organization, photo_url, quote, rating, is_verified, is_approved, created_at FROM testimonials WHERE is_approved=true ORDER BY is_verified DESC, created_at DESC LIMIT 6").catch(() => ({ rows: [] })),
       pool.query('SELECT * FROM faqs WHERE is_published=true ORDER BY "order" ASC').catch(() => ({ rows: [] })),
-      pool.query("SELECT id, name, price_egp, max_students, badge, is_highlighted, features FROM subscription_plans ORDER BY price_egp ASC").catch(() => ({ rows: [] })),
+      pool.query("SELECT id, name, type, price_egp, student_limit AS max_students, badge, (badge IS NOT NULL) AS is_highlighted, features FROM subscription_plans WHERE is_active=true ORDER BY sort_order ASC, price_egp ASC").catch(() => ({ rows: [] })),
       pool.query("SELECT * FROM branding_settings ORDER BY id DESC LIMIT 1").catch(() => ({ rows: [] })),
     ]);
     res.json({
