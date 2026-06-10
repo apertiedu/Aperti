@@ -1,8 +1,6 @@
 import { createServer } from "http";
 import { Server as SocketServer } from "socket.io";
-import app from "./app";
 import { logger } from "./lib/logger";
-import { setupParentNotifications } from "./socket/parent-notifications";
 import { runMigrations } from "./db/migrate";
 
 const rawPort = process.env["PORT"];
@@ -19,26 +17,43 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-runMigrations().catch(err => logger.error({ err }, "Migration error — continuing"));
-
-import("./lib/autopilot-service").then(({ startAutopilotService }) => {
-  startAutopilotService();
-}).catch(() => {});
-
-const httpServer = createServer(app);
-
-const io = new SocketServer(httpServer, {
-  cors: { origin: true, credentials: true },
-  transports: ["websocket", "polling"],
-  path: "/socket.io",
-});
-
-setupParentNotifications(io);
-
-httpServer.listen(port, (err?: Error) => {
-  if (err) {
-    logger.error({ err }, "Error listening on port");
-    process.exit(1);
+async function main() {
+  // Run migrations first — must complete before anything else
+  try {
+    await runMigrations();
+  } catch (err) {
+    logger.error({ err }, "Migration error — continuing");
   }
-  logger.info({ port }, "Server listening");
+
+  // Import app AFTER migrations so seedDefaultAdmin runs against a ready DB
+  const { default: app } = await import("./app");
+
+  import("./lib/autopilot-service").then(({ startAutopilotService }) => {
+    startAutopilotService();
+  }).catch(() => {});
+
+  const { setupParentNotifications } = await import("./socket/parent-notifications");
+
+  const httpServer = createServer(app);
+
+  const io = new SocketServer(httpServer, {
+    cors: { origin: true, credentials: true },
+    transports: ["websocket", "polling"],
+    path: "/socket.io",
+  });
+
+  setupParentNotifications(io);
+
+  httpServer.listen(port, (err?: Error) => {
+    if (err) {
+      logger.error({ err }, "Error listening on port");
+      process.exit(1);
+    }
+    logger.info({ port }, "Server listening");
+  });
+}
+
+main().catch(err => {
+  console.error("Fatal startup error:", err);
+  process.exit(1);
 });

@@ -15,7 +15,7 @@ BASE_PATH = "/"
 API_PORT = "3001"
 VAPID_PUBLIC_KEY = "BEj0LpGapT4H_yn2Cg2lIVhF-3Jee-0Vfm3s0T--SON1-SXywOmFB2y7ZulQinIZ20qcbbBV_JYa5vBn6PFGwQQ"
 VAPID_SUBJECT = "mailto:admin@aperti.app"
-OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1"
+JWT_SECRET = "e2ac09efb4f0e7123b629c69af235642cf12927a34f8e6624e8a13f5307151ffdf6efae06247fb6d6c578f66c3ec0196"
 
 [userenv.development]
 
@@ -44,7 +44,7 @@ outputType = "webview"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=5000 BASE_PATH=/ API_PORT=3001 pnpm --filter @workspace/aperti run dev"
+args = "cd artifacts/aperti && PORT=5000 BASE_PATH=/ API_PORT=3001 pnpm run dev"
 waitForPort = 5000
 
 [[workflows.workflow]]
@@ -56,7 +56,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "PORT=3001 pnpm --filter @workspace/api-server run dev"
+args = "cd artifacts/api-server && PORT=3001 pnpm run dev"
 waitForPort = 3001
 
 [[ports]]
