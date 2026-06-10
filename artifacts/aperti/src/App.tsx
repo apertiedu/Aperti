@@ -45,6 +45,7 @@ import MarkerMind from "@/pages/marker-mind";
 import InsightStream from "@/pages/insight-stream";
 import HelpDesk from "@/pages/helpdesk";
 import InsightExams from "@/pages/insight-exams";
+import Exams from "@/pages/exams";
 import ScanScribe from "@/pages/scan-scribe";
 import ErrorTrace from "@/pages/error-trace";
 import TutorCraft from "@/pages/tutorcraft";
@@ -390,6 +391,7 @@ const TEACHER_ROUTES = (
     <Route path="/pulse" component={Pulse} />
     <Route path="/content-craft" component={ContentCraft} />
     <Route path="/lab-builder" component={LabBuilder} />
+    <Route path="/exams" component={Exams} />
     <Route path="/marker-mind" component={MarkerMind} />
     <Route path="/insight-stream" component={InsightStream} />
     <Route path="/helpdesk" component={HelpDesk} />

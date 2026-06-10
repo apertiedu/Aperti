@@ -215,7 +215,7 @@ export default function Settings() {
                       <Input value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)} placeholder="https://..." className="h-9 rounded-xl border-gray-200 text-sm" />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">First name</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jane" className="h-10 rounded-xl border-gray-200" /></div>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Last name</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Smith" className="h-10 rounded-xl border-gray-200" /></div>
                   </div>
@@ -226,7 +226,7 @@ export default function Settings() {
                   <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Bio</Label>
                     <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="Tell us a bit about yourself..."
                       className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600" /></div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20..." className="h-10 rounded-xl border-gray-200" /></div>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
                       <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-white">
@@ -466,7 +466,7 @@ export default function Settings() {
                     <div>
                       <p className="text-sm font-medium text-gray-900 mb-1">Explanation style</p>
                       <p className="text-xs text-gray-400 mb-3">How should your AI Mentor explain things?</p>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {[
                           { id: "conceptual", label: "Conceptual", desc: "Big picture, why it matters" },
                           { id: "step-by-step", label: "Step-by-step", desc: "Methodical and detailed" },
