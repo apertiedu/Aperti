@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "tpRu_38r2V02ZJH8dWyvr"
+uri = "file://artifacts/mockup-sandbox/public/images/abstract-teal.png"
+type = "image"
+title = "Abstract teal 3D geometric shapes"
+
+[[generated]]
+id = "qb_XWkP1hhhyE3bkyMMTo"
+uri = "file://artifacts/mockup-sandbox/public/images/ai-brain.png"
+type = "image"
+title = "AI mentor neural network concept"
+
+[[generated]]
+id = "fnrfhJOmq6JfH43ewQSZg"
+uri = "file://artifacts/mockup-sandbox/public/images/blocks-ui.png"
+type = "image"
+title = "Content editor blocks abstract UI"
