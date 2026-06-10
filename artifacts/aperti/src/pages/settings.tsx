@@ -137,9 +137,23 @@ export default function Settings() {
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
           <p className="text-gray-500 text-sm mt-1">Manage your account, preferences, and security.</p>
         </div>
+        {/* Mobile horizontal tab bar */}
+        <div className="flex gap-1 overflow-x-auto pb-2 mb-4 md:hidden scrollbar-hide">
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${tab === t.id ? "bg-teal-50" : "text-gray-600 hover:bg-gray-100"}`}
+              style={tab === t.id ? { color: TEAL } : {}}>
+              <t.icon className="w-3.5 h-3.5 flex-shrink-0" />{t.label}
+            </button>
+          ))}
+          <button onClick={() => logout()} className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-red-500 hover:bg-red-50 transition-all duration-150">
+            <LogOut className="w-3.5 h-3.5" />Sign out
+          </button>
+        </div>
+
         <div className="flex gap-6">
-          {/* Sidebar */}
-          <nav className="w-44 flex-shrink-0 space-y-1">
+          {/* Sidebar — desktop only */}
+          <nav className="hidden md:block w-44 flex-shrink-0 space-y-1">
             {TABS.map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
                 className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center gap-2.5 text-sm font-medium transition-all duration-150 ${tab === t.id ? "bg-teal-50" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}

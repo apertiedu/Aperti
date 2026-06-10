@@ -224,6 +224,7 @@ app.use("/api/admin/payments", adminPaymentsRouter);
 app.use("/api/admin/analytics", adminAnalyticsRouter);
 app.use("/api/admin/health", adminHealthRouter);
 app.use("/api/admin/feature-flags", adminFeaturesRouter);
+app.use("/api/admin/features", adminFeaturesRouter);
 app.use("/api/admin/audit-logs", adminAuditRouter);
 app.use("/api/admin/security", adminSecurityRouter);
 app.use("/api/admin/support", adminSupportRouter);

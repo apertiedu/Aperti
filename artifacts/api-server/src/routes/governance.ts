@@ -918,12 +918,12 @@ governanceRouter.get("/integrity", async (_req, res: Response) => {
   await check("No duplicate active enrollments", `SELECT COUNT(*)::int AS count FROM (SELECT student_id, course_id FROM gov_enrollments WHERE status='active' GROUP BY student_id, course_id HAVING COUNT(*)>1) x`, []);
   await check("No orphaned enrollments", `SELECT COUNT(*)::int AS count FROM gov_enrollments ge LEFT JOIN aperti_courses ac ON ac.id=ge.course_id WHERE ac.id IS NULL AND ge.status='active'`, []);
   await check("All assistant approvals have teacher", `SELECT COUNT(*)::int AS count FROM gov_assistant_approvals ga LEFT JOIN accounts a ON a.id=ga.teacher_id WHERE a.id IS NULL`, []);
-  await check("No suspended users with active sessions", `SELECT COUNT(*)::int AS count FROM device_sessions ds JOIN accounts a ON a.id=ds.user_id WHERE a.status='suspended'`, []);
+  await check("No suspended users with active sessions", `SELECT COUNT(*)::int AS count FROM device_sessions ds JOIN accounts a ON a.id=ds.account_id WHERE a.status='suspended'`, []);
   await check("Gov roles table populated", `SELECT COUNT(*)::int AS count FROM gov_roles`, [], false);
   await check("Feature matrix populated", `SELECT COUNT(*)::int AS count FROM gov_feature_access_matrix`, [], false);
   await check("No open critical conflicts", `SELECT COUNT(*)::int AS count FROM gov_conflict_logs WHERE status='open'`, []);
   await check("Audit log recording", `SELECT COUNT(*)::int AS count FROM gov_audit_enforcement`, [], false);
-  await check("All courses have a teacher", `SELECT COUNT(*)::int AS count FROM aperti_courses WHERE teacher_id IS NULL`, []);
+  await check("All courses have a teacher", `SELECT COUNT(*)::int AS count FROM aperti_courses WHERE teacher_account_id IS NULL`, []);
 
   const passed = checks.filter((c) => c.pass).length;
   const score = Math.round((passed / checks.length) * 100);
