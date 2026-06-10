@@ -143,7 +143,7 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [role, setRole] = useState("");
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPassword: "", country: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", username: "", email: "", password: "", confirmPassword: "", country: "" });
   const [showPw, setShowPw] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -156,6 +156,8 @@ export default function Register() {
   const validateStep2 = () => {
     if (!form.firstName.trim()) return "First name is required";
     if (!form.lastName.trim()) return "Last name is required";
+    if (!form.username.trim()) return "Username is required";
+    if (!/^[a-z0-9_]{3,20}$/.test(form.username.trim())) return "Username must be 3–20 characters (letters, numbers, underscores only)";
     if (!form.email.includes("@")) return "Enter a valid email address";
     if (form.password.length < 8) return "Password must be at least 8 characters";
     if (form.password !== form.confirmPassword) return "Passwords do not match";
@@ -173,11 +175,12 @@ export default function Register() {
     if (!agreed) { setError("Please agree to the Terms of Service to continue"); return; }
     setError(""); setSubmitting(true);
     try {
-      const res = await fetch("/api/auth/register", {
+      const res = await fetch("/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           firstName: form.firstName.trim(), lastName: form.lastName.trim(),
+          username: form.username.trim().toLowerCase(),
           email: form.email.toLowerCase().trim(), password: form.password, role, country: form.country,
         }),
       });
@@ -315,6 +318,7 @@ export default function Register() {
                     <Field label="First name" value={form.firstName} onChange={v => set("firstName", v)} placeholder="Jane" />
                     <Field label="Last name" value={form.lastName} onChange={v => set("lastName", v)} placeholder="Smith" />
                   </div>
+                  <Field label="Username" value={form.username} onChange={v => set("username", v.toLowerCase().replace(/[^a-z0-9_]/g, ""))} placeholder="e.g. jane_smith" />
                   <Field label="Email address" type="email" value={form.email} onChange={v => set("email", v)} placeholder="jane@example.com" />
                   <div>
                     <Field label="Password" type={showPw ? "text" : "password"} value={form.password} onChange={v => set("password", v)} placeholder="At least 8 characters">
@@ -373,6 +377,7 @@ export default function Register() {
                     <div className="grid grid-cols-2 gap-y-2 text-sm">
                       {[
                         ["Name", `${form.firstName} ${form.lastName}`],
+                        ["Username", `@${form.username}`],
                         ["Email", form.email],
                         ["Role", role],
                         ...(form.country ? [["Country", form.country]] : []),

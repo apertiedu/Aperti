@@ -238,21 +238,38 @@ authRouter.post("/student-register", async (req: Request, res: Response) => {
 // POST /auth/register — unified registration for all public roles
 authRouter.post("/register", async (req: Request, res: Response) => {
   try {
-    const { firstName, lastName, email, password, role, country, phone } = req.body;
+    const { firstName, lastName, username: rawUsername, email, password, role, country, phone } = req.body;
     if (!email?.trim() || !password) return res.status(400).json({ error: "Email and password are required" });
     const validRoles = ["teacher", "student", "parent"];
     if (!validRoles.includes(role || "")) return res.status(400).json({ error: "Role must be teacher, student, or parent" });
     if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
 
     const { pool: dbPool } = await import("@workspace/db");
+
+    // Determine username: use provided one, or auto-generate from email
+    let username: string;
+    if (rawUsername?.trim()) {
+      username = rawUsername.trim().toLowerCase();
+      if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        return res.status(400).json({ error: "Username must be 3–20 characters (letters, numbers, underscores only)" });
+      }
+      // Check username uniqueness
+      const { rows: usernameCheck } = await dbPool.query(
+        "SELECT id FROM accounts WHERE username=$1 LIMIT 1",
+        [username]
+      );
+      if (usernameCheck.length) return res.status(409).json({ error: "Username already taken — please choose another" });
+    } else {
+      const base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || "user";
+      username = base + "_" + Date.now().toString(36);
+    }
+
     const { rows: existing } = await dbPool.query(
       "SELECT id FROM accounts WHERE LOWER(email)=$1 LIMIT 1",
       [email.toLowerCase().trim()]
     );
     if (existing.length) return res.status(409).json({ error: "An account with this email already exists" });
 
-    const base = email.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 14) || "user";
-    const username = base + "_" + Date.now().toString(36);
     const displayName = `${(firstName || "").trim()} ${(lastName || "").trim()}`.trim() || email.split("@")[0];
     const hash = await bcrypt.hash(password, 12);
 
