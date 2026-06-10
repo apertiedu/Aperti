@@ -1,0 +1,136 @@
+You are building **Phase 21 – Experience, Delight, Conversion, Differentiation & Product Excellence** for Aperti.  
+The platform already contains Phases 1–20, a complete educational OS, business layer, mobile experience, governance, QA, trust systems, and the Founder Control Center.  
+Now you must add the **“wow” factor** that turns a functional platform into an extraordinary, world‑class product.  
+Focus on the five most impactful features, then enhance other areas as specified.
+
+**Critical Rules:**  
+- **Do not break any existing feature.**  
+- Follow **Liquid Flow 2.0**: Inter font, teal `#0D9488`, white cards, rounded‑xl shadow‑sm, Framer Motion animations (fast, smooth, premium).  
+- Use existing utilities (`fetchJSON`, TanStack Query, Drizzle ORM). New routes must be protected where appropriate.  
+- **No “Coming Soon” placeholders** for the top‑priority items – they must be fully functional.  
+- **All new UI must be responsive and accessible.**
+
+---
+
+## 🔥 TOP 5 PRIORITIES (Must be fully implemented)
+
+### 1. Interactive Landing Page Demo & Product Tour
+- **Hero Section:** Replace static content with a **live animated dashboard** that auto‑cycles between Teacher, Student, Parent, and Admin dashboards every 4 seconds. Use real UI components (not marketing illustrations). Framer Motion for smooth transitions.
+- **Interactive Product Demo:** Add a “Try Aperti” bar with role‑selector buttons. When a visitor clicks “Teacher”, they see a guided walkthrough of creating a course, adding an assessment, and viewing analytics – all using real (mock) data without requiring signup. Implement as a modal overlay with step‑by‑step tooltips.
+- **Product Tour:** Create a dedicated `/tour` page that takes a visitor through the entire educational journey (Teacher → Course → Assessment → Student → Parent → Analytics) with animated flow diagrams.
+- **Feature Showcase:** Instead of static cards, each feature (Assessment Hub, Question Bank, etc.) opens a mini interactive demo (e.g., a working MCQ, a flip‑able flashcard) directly on the landing page.
+- **Academic Command Center Demo:** Add a section that simulates: “Student struggles with Physics” → platform detects weakness → revision pack generated → teacher notified → parent receives report. Show this as a series of animated steps.
+- **Smart Calculator:** Add a “Plan Calculator” on the pricing page where teachers input number of students, subjects, courses; the tool recommends the optimal plan and shows monthly cost. Real‑time calculation.
+
+### 2. ContentCraft Upgrade (Educational Notion)
+- **Slash Commands:** Implement `/` commands inside the editor for inserting blocks (headings, lists, code, LaTeX, images, etc.).
+- **Database View:** Allow creating simple databases (tables) for tracking student progress, question banks, etc., inside a ContentCraft page.
+- **Education Blocks:** Add specialized blocks: Learning Objective, Exam Tip, Mark Scheme Reference, Flashcard Embed, Question Embed, Assessment Embed.
+- **Nested Pages & Breadcrumbs:** Support sub‑pages with a sidebar tree and breadcrumb navigation.
+- **Templates:** Pre‑built templates for lesson plans, revision notes, worksheets, and course outlines.
+
+### 3. Automatic Question Extraction & Classification
+- **Upload Interface:** Teacher/admin uploads a past paper (PDF/image).  
+- **AI Processing:** Using CoreMind (or Tesseract + rule‑based), extract individual questions, subparts, marks, diagrams.  
+- **Classification:** Automatically tag each question with subject, topic, difficulty, command word, paper type, and link to curriculum objectives.  
+- **Duplicate Detection:** Compare against existing questions and flag duplicates.  
+- **Review Workflow:** Extracted questions go to a moderation queue where teacher/admin can approve, edit, or reject.
+
+### 4. Smart Revision Plan Generator (Revision Center 2.0)
+- **Student View:** Student selects “Exam in X days” or “Weak Topics” mode.  
+- **Generator:** Combines Echo memory (weak topics), exam dates, teacher priorities, and available flashcards/questions to create a daily revision schedule.  
+- **Output:** A calendar with specific tasks each day (review 10 flashcards on Momentum, attempt 5 questions on Electricity, watch a simulation).  
+- **One‑Click Generation:** Button “Generate My Revision Plan” on the student dashboard.
+
+### 5. Universal Platform Search (Ctrl+K)
+- **Global Search Modal:** Press `Ctrl+K` (or `Cmd+K`) anywhere to open a command‑palette‑style overlay.  
+- **Search Scope:** Indexes courses, lessons, questions, assessments, flashcards, revision notes, resources, students (teacher only), reports, settings.  
+- **Autocomplete & Quick Actions:** Shows suggestions as you type. Can also perform actions like “Create new assessment”, “Go to attendance”, “Search for momentum questions”.  
+- **Backend:** `GET /api/search/universal?q=...` returns categorized results with relevance scores.
+
+---
+
+## 🎨 SECONDARY ENHANCEMENTS (Implement as many as possible without sacrificing top 5)
+
+### Landing Page Enhancements
+- **Smart Comparison Engine:** Interactive plan comparison tool with toggleable features, not a static table.
+- **Trust Center:** Dedicated section explaining security, privacy, teacher isolation, data ownership, and refund policies.
+- **Founder Story:** “Why I Built Aperti” – authentic narrative about Youssef’s experience as a student, replacing a generic “CEO Message”.
+- **Roadmap Center:** Visually appealing timeline with “Available Today”, “Coming Soon”, and “Future Vision” sections.
+
+### Achievement System
+- **Professional Badges:** Award badges for: 100/1000/5000 questions solved, 7/30/100‑day revision streaks, subject mastery, perfect attendance.  
+- **Profile Display:** Show earned badges on student and teacher profiles.
+
+### Smart Announcement System
+- **Admin Broadcast Tool:** Create announcements targeted by role, course, subject, plan, or specific users.  
+- **Delivery:** In‑app notification, email, push (via existing notification system).  
+- **Scheduling:** Option to schedule announcements for a future date.
+
+### Micro Animations
+- **Refine existing animations:** Ensure every button press, hover, card expand, modal open, and success/error state has a subtle, fast Framer Motion effect.  
+- **Scroll‑triggered reveals:** Use `useInView` to animate elements as they enter the viewport on landing page and dashboards.
+
+### Aperti Intelligence Layer Visibility
+- **The Weave Visualization:** In the admin AI Analytics page, add a simple interactive graph that shows relationships between topics, questions, and students. (Use a lightweight D3 or vis‑network component).  
+- **Auto‑generation Demonstrated:** On the teacher dashboard, add a section “What Aperti can do for you” that shows a small preview of auto‑generated flashcards or revision notes based on recent activity.
+
+---
+
+## 🗄️ DATABASE CHANGES (only if needed for new features)
+
+- `achievements` – id, name, description, icon, criteria (JSON), created_at.  
+- `user_achievements` – id, user_id, achievement_id, earned_at.  
+- `content_blocks` (already exists) – extend to support `education_block_type` enum (learning_objective, exam_tip, etc.).  
+- `extraction_jobs` – for question extraction status tracking.  
+- No changes needed for search if using existing full‑text search capabilities; otherwise add a `search_index` table.
+
+---
+
+## 📡 API ENDPOINTS (new or extended)
+
+- `POST /api/questions/extract` – upload paper, start extraction job.  
+- `GET /api/questions/extract/:jobId` – job status and results.  
+- `PUT /api/questions/extract/:jobId/approve` – batch approve extracted questions.  
+- `POST /api/revision/generate-plan` – generate student revision plan.  
+- `GET /api/search/universal?q=...` – global search.  
+- `POST /api/achievements/check` – trigger check for new achievements (can be automatic after key actions).  
+- `GET /api/achievements/user` – list user’s badges.  
+- `POST /api/announcements` – already exists; extend with targeting fields.  
+- `PUT /api/admin/features/comparison` – update comparison data for plans.
+
+---
+
+## 🖥️ FRONTEND PAGES TO CREATE OR ENHANCE
+
+- **Landing Page 2.0 (`/`)** – completely rebuilt as described.  
+- **Interactive Tour Page (`/tour`)** – optional, can be a modal.  
+- **ContentCraft Editor (`/contentcraft`)** – upgrade with slash commands, databases, education blocks.  
+- **Question Extraction Dashboard (`/admin/questions/extract`)** – upload, review, approve.  
+- **Revision Plan Generator UI (inside student dashboard)** – button and plan display.  
+- **Global Search Modal (component)** – integrate into Layout.  
+- **Achievements Page (`/achievements`)** – for both student and teacher profiles.  
+- **Admin Announcement Composer** – enhance existing.  
+- **Founder Story Section on Landing Page.**  
+- **Trust Center Page (`/trust`).**  
+- **Roadmap Page (`/roadmap`)** – enhance existing with improved visuals.  
+- **Plan Comparison Tool on Pricing Page.**
+
+---
+
+## ⚡ IMPLEMENTATION ORDER
+
+1. Global Search Modal & API (infrastructure)  
+2. Landing Page hero animation & interactive demo  
+3. Smart Calculator on Pricing page  
+4. Question Extraction pipeline (backend → UI)  
+5. Revision Plan Generator  
+6. ContentCraft upgrades (slash commands, education blocks)  
+7. Achievement System  
+8. Smart Announcement targeting  
+9. Micro animations pass  
+10. Landing page Trust Center, Founder Story, Roadmap enhancements  
+11. Aperti Intelligence Layer visibility (The Weave graph)  
+12. Final polish and testing
+
+**Start building now. Deliver the five priority features first, then enrich the experience. Make Aperti unforgettable.**
