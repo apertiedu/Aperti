@@ -1,6 +1,6 @@
 export const AI_CONFIG = {
   provider: "openai" as const,
-  model: process.env.OPENAI_MODEL || "meta/llama-3.1-70b-instruct",
+  model: process.env.OPENAI_MODEL || "gpt-4o-mini",
   maxTokens: {
     default: 1000,
     feedback: 200,
