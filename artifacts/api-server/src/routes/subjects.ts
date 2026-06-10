@@ -37,7 +37,7 @@ router.post("/subjects", requireTenantAccess, async (req, res): Promise<void> =>
     ? (req.body.teacherAccountId ? parseInt(req.body.teacherAccountId, 10) : accountId)
     : (teacherId ?? accountId);
 
-  const [created] = await db.execute(sql`
+  const insertResult = await db.execute(sql`
     INSERT INTO subjects (name, board, code, level, teacher_account_id, syllabus_codes, papers_breakdown, pdf_url, code_explainer)
     VALUES (
       ${name.trim()},
@@ -52,7 +52,7 @@ router.post("/subjects", requireTenantAccess, async (req, res): Promise<void> =>
     )
     RETURNING *
   `);
-  res.status(201).json((created as any).rows?.[0] ?? created);
+  res.status(201).json(insertResult.rows[0]);
 });
 
 router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {
@@ -60,7 +60,7 @@ router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<voi
   const { name, board, code, level, syllabusCodes, papersBreakdown, pdfUrl, codeExplainer } = req.body;
   if (!name?.trim()) { res.status(400).json({ message: "Name required" }); return; }
 
-  const [updated] = await db.execute(sql`
+  const updateResult = await db.execute(sql`
     UPDATE subjects SET
       name = ${name.trim()},
       board = ${board || "CAIE"},
@@ -73,8 +73,8 @@ router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<voi
     WHERE id = ${id}
     RETURNING *
   `);
-  if (!(updated as any)?.rows?.length) { res.status(404).json({ message: "Subject not found" }); return; }
-  res.json((updated as any).rows[0]);
+  if (!updateResult.rows.length) { res.status(404).json({ message: "Subject not found" }); return; }
+  res.json(updateResult.rows[0]);
 });
 
 router.delete("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {

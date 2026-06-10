@@ -126,7 +126,7 @@ ascendRouter.get("/leaderboard", ...studentGuard, async (req: AuthRequest, res: 
   if (scope === "class" && teacherAccountId) {
     const classStudents = await db.select({ accountId: studentsTable.accountId })
       .from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherAccountId));
-    const classAccountIds = classStudents.map(s => s.accountId);
+    const classAccountIds = classStudents.map(s => s.accountId).filter((id): id is number => id !== null);
     profiles = await db.select().from(ascendProfilesTable)
       .where(inArray(ascendProfilesTable.studentAccountId, classAccountIds))
       .orderBy(desc(ascendProfilesTable.xp))

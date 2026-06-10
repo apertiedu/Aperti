@@ -27,13 +27,13 @@ router.post("/testimonials", authenticate, async (req: AuthRequest, res) => {
     }
 
     // Check if user is verified
-    const userRes = await pool.query("SELECT verified FROM accounts WHERE id=$1", [req.user!.id]);
+    const userRes = await pool.query("SELECT verified FROM accounts WHERE id=$1", [req.userId!]);
     const isVerified = userRes.rows[0]?.verified ?? false;
 
     const { rows } = await pool.query(
       `INSERT INTO testimonials (user_id, name, role, organization, photo_url, quote, rating, is_verified, is_approved)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,false) RETURNING *`,
-      [req.user!.id, name, role || "teacher", organization || null, photo_url || null, quote, rating, isVerified],
+      [req.userId!, name, role || "teacher", organization || null, photo_url || null, quote, rating, isVerified],
     );
     res.status(201).json({ ok: true, testimonial: rows[0], pending_approval: true });
   } catch (e: any) {
