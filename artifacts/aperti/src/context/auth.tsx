@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-const API = "/api/auth";
+const API = "/auth";
 
 interface User {
   id: number;
