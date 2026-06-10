@@ -56,6 +56,7 @@ import Messages from "@/pages/messages";
 
 // Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
+import SubpilotSettings from "@/pages/admin/subpilot-settings";
 import LandingEditor from "@/pages/admin/landing-editor";
 import AssistantPermissions from "@/pages/admin/assistant-permissions";
 import CheckoutPage from "@/pages/checkout";
@@ -402,6 +403,11 @@ const TEACHER_ROUTES = (
     <Route path="/exams" component={Exams} />
     <Route path="/marker-mind" component={MarkerMind} />
     <Route path="/insight-stream" component={InsightStream} />
+    {/* Aliases — teacher dashboard quick links */}
+    <Route path="/analytics" component={InsightStream} />
+    <Route path="/risk-report" component={InsightStream} />
+    <Route path="/timetable" component={PlanGrid} />
+    <Route path="/attendance" component={CheckIn} />
     <Route path="/helpdesk" component={HelpDesk} />
     <Route path="/insight-exams" component={InsightExams} />
     <Route path="/scan-scribe" component={ScanScribe} />
@@ -471,6 +477,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/teacher-verification" component={TeacherVerification} />
     <Route path="/admin/ai-analytics" component={AiAnalytics} />
     <Route path="/admin/ai-safety" component={AiSafety} />
+    <Route path="/admin/subpilot-settings" component={SubpilotSettings} />
     {/* Phase 7 — Admin Communication */}
     <Route path="/admin/moderation" component={AdminModeration} />
     <Route path="/admin/communication-analytics" component={CommunicationAnalytics} />
