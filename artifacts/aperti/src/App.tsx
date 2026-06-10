@@ -146,6 +146,7 @@ import MySubscriptionPage from "@/pages/my-subscription";
 import ComingSoonPage from "@/pages/coming-soon";
 import RevisionNotesPage from "@/pages/revision-notes";
 import AdminCommercePage from "@/pages/admin/admin-commerce";
+import PlansAdminPage from "@/pages/admin/plans-admin";
 import ExecutiveDashboardPage from "@/pages/admin/executive-dashboard";
 
 // Phase 17 — Mobile Ecosystem
@@ -466,6 +467,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/moderation" component={AdminModeration} />
     <Route path="/admin/communication-analytics" component={CommunicationAnalytics} />
     {/* Phase 16 — Commerce Admin */}
+    <Route path="/admin/plans" component={PlansAdminPage} />
     <Route path="/admin/commerce" component={AdminCommercePage} />
     <Route path="/admin/executive" component={ExecutiveDashboardPage} />
     {/* Phase 17 — Mobile Admin */}
