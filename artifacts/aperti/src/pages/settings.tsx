@@ -86,6 +86,36 @@ export default function Settings() {
     }
   }, [tab]);
 
+  useEffect(() => {
+    const fontSizeMap: Record<string, string> = {
+      small: "13px",
+      medium: "15px",
+      large: "17px",
+      "x-large": "19px",
+    };
+    const size = settingsMap["font_size"] || "medium";
+    document.documentElement.style.setProperty("--app-font-size", fontSizeMap[size] || "15px");
+    document.documentElement.style.fontSize = fontSizeMap[size] || "15px";
+
+    if (settingsMap["dyslexia_font"] === "true") {
+      document.documentElement.style.fontFamily = "OpenDyslexic, Arial, sans-serif";
+    } else {
+      document.documentElement.style.fontFamily = "";
+    }
+
+    if (settingsMap["high_contrast"] === "true") {
+      document.documentElement.classList.add("high-contrast");
+    } else {
+      document.documentElement.classList.remove("high-contrast");
+    }
+
+    if (settingsMap["reduce_motion"] === "true") {
+      document.documentElement.classList.add("reduce-motion");
+    } else {
+      document.documentElement.classList.remove("reduce-motion");
+    }
+  }, [settingsMap]);
+
   const saveProfile = async () => {
     setSaving(true);
     try {

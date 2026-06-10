@@ -216,6 +216,7 @@ import ParentAIAssistant from "@/pages/parent/ai-assistant";
 import ParentBilling from "@/pages/parent/billing";
 import ParentSettings from "@/pages/parent/settings";
 import ChildProfile from "@/pages/parent/child-profile";
+import Subjects from "@/pages/subjects";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -377,6 +378,7 @@ const TEACHER_ROUTES = (
     <Route path="/my-courses" component={MyCourses} />
     <Route path="/student-approvals" component={StudentApprovals} />
     <Route path="/plan-grid" component={PlanGrid} />
+    <Route path="/subjects" component={Subjects} />
     <Route path="/checkin" component={CheckIn} />
     <Route path="/submit-flow" component={SubmitFlow} />
     <Route path="/grade-flow" component={GradeFlow} />

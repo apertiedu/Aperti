@@ -101,6 +101,7 @@ import { adminComplianceRouter } from "./admin-compliance";
 import { adminLaunchAuditRouter } from "./admin-launch-audit";
 import { i18nRouter } from "./i18n";
 import { userExportRouter } from "./user-export";
+import { contentCraftRouter } from "./content-craft";
 
 const router: IRouter = Router();
 
@@ -224,6 +225,7 @@ router.use("/admin/compliance", adminComplianceRouter);
 router.use("/admin/launch-audit", adminLaunchAuditRouter);
 router.use(i18nRouter);
 router.use(userExportRouter);
+router.use("/content-craft", contentCraftRouter);
 
 export default router;
 

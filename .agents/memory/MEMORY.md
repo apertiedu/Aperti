@@ -1,23 +1,3 @@
-- [OpenAI API in api-server](openai-api.md) — use raw fetch(), NOT the openai npm package (not installed in api-server)
-- [pdfkit esbuild external](pdfkit-esbuild-external.md) — pdfkit + fontkit must be in build.mjs externals or runtime crashes on @swc/helpers
-- [Framer-motion import trap](framer-motion-trap.md) — never import React hooks (useState etc.) from framer-motion; only motion/AnimatePresence/etc.
-- [Phase 2 Teacher OS routes](phase2-routes.md) — teacher-courses, rubrics, messages, tutorcraft, classforge all registered in routes/index.ts
-- [Student OS API paths](student-os-api-paths.md) — correct API paths for student pages; common gotchas with messages, focus-coach analytics fields (inkspace removed Ph16)
-- [Phase 5 AI layer patterns](phase5-ai-patterns.md) — Weave/CoreMind integration patterns, fallback rules, and which routes now have AI enrichment
-- [Phase 5 final systems](phase5-final-systems.md) — FindWise, AutoPilot, LiveClass AI, ai-config.ts patterns and key decisions
-- [Phase 6 Assessment Ecosystem](phase6-assessment.md) — 13 new tables, 4 route files, 4 frontend pages; key schema constraints and wiring decisions
-- [Phase 7 Communication Ecosystem](phase7-communication.md) — 15 tables, 3 route files, 6 frontend pages; drizzle push is interactive so use executeSql directly instead
-- [DiscussButton component](discuss-button.md) — reusable floating chat panel; token key is aperti_token; never nest inside a <button> (HTML invalid), place in expanded sections instead
-- [Phase 8 Learning Experience](phase8-learning-experience.md) — 9 DB tables, 1 route file (no prefix), 7 frontend pages; focus-zone replaced by V2 at same URL; mastery states enum order matters
-- [MathRenderer component](math-renderer.md) — universal KaTeX + markdown renderer; auto-detects $…$ inline and $$…$$ block; smartTextToHtml() for paste conversion; applied to mentor, cardstack, exam, micro-assessment, content-craft
-- [Phase 9 Admin OS](phase9-admin-os.md) — full admin command centre at /admin/os; 14 API route files, 15 frontend pages, Egypt-first payment verification flow; fetchJSON/postJSON/putJSON added to lib/api.ts
-- [Phase 10 Infrastructure](phase10-infrastructure.md) — commit hash, prom-client peer deps, TOTP MFA, PWA sw.js, lite mode, Phase 10 DB tables, queue patterns
-- [Phase 11 Governance](phase11-governance.md) — 13 gov_ tables, governance.ts routes at /api/admin/governance, ownership middleware, 7 new admin-os pages
-- [Phase 12 Launch CMS](phase12-launch-cms.md) — 67 API endpoints, 17 admin pages, 6 public pages; countdown timer + waitlist/beta CTAs in features-detail.tsx; release_notes type CHECK excludes "feature"
-- [Phase 16 Commercialization](phase16-commercialization.md) — deprecated 4 modules (LiveClass/TwinControl/InkSpace/FlexSeats), added billing/commerce API, enforceLimit middleware, 7 frontend pages; InstaPay manual verification flow; import ordering gotcha
-- [Phase 17 Mobile Ecosystem](phase17-mobile-ecosystem.md) — responsive layout, bottom nav, PWA/sw.js v3, web-push push triggers (homework/grade/announce/subscribe), offline IndexedDB, 4 mobile dashboards, camera capture on handwritten-submit
-- [Public routes before main router](public-routes-before-main-router.md) — qaRouter has global authenticate (no path prefix) so ANY public route must be registered in app.ts BEFORE app.use("/api", router)
-- [Phase 15 Content Ecosystem](phase15-content-ecosystem.md) — 13 new DB tables, content-ecosystem.ts route file, 10 frontend pages; ContentCraft block editor, Course Builder, Question Studio, Practice Center, SimVerse Labs, Geometrix, Handwriting AI, Resource Library, Analytics
-- [Phase 18 Enterprise Readiness](phase18-enterprise.md) — 11 DB tables (incl. automation_tasks back-fill), 9 route files, 2 new admin-os pages; Privacy & Data tab in settings; logAudit helper in tenant.ts
-- [Phase 19 Founder Control Center](phase19-founder-control.md) — 9 DB tables, 8 route files, 8 admin-os pages; search+releases are PUBLIC routes (before main router); Smart Pack + Learning Mode added to student pages
-- [Vite proxy for split ports](vite-proxy-split-ports.md) — catch-all proxy with whitelist/rewrite pattern to handle mixed bare-path and /api-path backend routes
+- [Aperti DB tables](aperti-db-tables.md) — many tables are created by push-schema.ts at startup; several extras required manual SQL creation
+- [Aperti missing tables](aperti-missing-tables.md) — full list of tables created manually outside the schema push
+- [Aperti route structure](aperti-route-structure.md) — how app.ts mounts routes at bare paths AND /api, and the proxy BARE_OK list
