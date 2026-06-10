@@ -57,6 +57,47 @@ flashcardsRouter.delete("/cards/:id", authenticate, requireRole("teacher", "admi
   res.json({ success: true });
 });
 
+// ─── STUDENT SWIPE ROUTES ───
+
+// GET /flashcards?limit=N — cards for student swipe mode (all cards across all decks)
+flashcardsRouter.get("/", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string || "20", 10), 100);
+    const cards = await db.query.flashcardItems.findMany({ limit });
+    res.json(cards);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /flashcards/track — track card confidence (student)
+flashcardsRouter.post("/track", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const studentId = req.userId!;
+    const { cardId, confidence } = req.body;
+    if (!cardId) return res.status(400).json({ error: "cardId required" });
+    const quality = confidence === "know" ? 5 : confidence === "unsure" ? 3 : 1;
+    const existing = await db.query.flashcardProgress.findFirst({
+      where: (p, { and, eq }) => and(eq(p.studentId, studentId), eq(p.cardId, cardId)),
+    });
+    if (existing) {
+      await db.update(flashcardProgressTable).set({
+        lastReview: new Date(),
+        masteryLevel: quality >= 4 ? "mastered" : quality >= 3 ? "learning" : "struggling",
+      }).where(eq(flashcardProgressTable.id, existing.id));
+    } else {
+      await db.insert(flashcardProgressTable).values({
+        studentId, cardId, repetitions: 1, easeFactor: 250, interval: 1,
+        nextReview: new Date(Date.now() + 86400000), lastReview: new Date(),
+        masteryLevel: quality >= 4 ? "mastered" : "new",
+      });
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── STUDENT ROUTES ───
 
 // GET /flashcards/student/decks — decks available to student

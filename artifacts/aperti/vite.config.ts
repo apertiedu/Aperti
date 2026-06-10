@@ -82,25 +82,30 @@ export default defineConfig({
         changeOrigin: true,
         ws: true,
       },
-      "/api": {
+      "^/": {
         target: `http://localhost:${apiPort}`,
         changeOrigin: true,
-      },
-      "/auth": {
-        target: `http://localhost:${apiPort}`,
-        changeOrigin: true,
-      },
-      "/courses": {
-        target: `http://localhost:${apiPort}`,
-        changeOrigin: true,
-      },
-      "/parent": {
-        target: `http://localhost:${apiPort}`,
-        changeOrigin: true,
-      },
-      "/uploads": {
-        target: `http://localhost:${apiPort}`,
-        changeOrigin: true,
+        rewrite: (path) => {
+          // These paths work at the bare root level (relative-path routers mounted directly)
+          const BARE_OK = [
+            "/api", "/auth", "/courses", "/parent", "/uploads",
+            "/socket.io", "/dashboard", "/flashcards", "/lessons",
+            "/subscriptions", "/homework", "/question-bank",
+            "/mentor", "/revisit", "/attendance", "/students",
+          ];
+          if (
+            path === "/" ||
+            BARE_OK.some(p => path === p || path.startsWith(p + "/") || path.startsWith(p + "?"))
+          ) return path;
+          // Everything else is served under /api on the backend
+          return `/api${path}`;
+        },
+        bypass(req) {
+          const url = req.url ?? "";
+          if (url.startsWith("/@") || url.startsWith("/__")) return url;
+          if (url.match(/\.(tsx?|jsx?|css|scss|svg|png|jpe?g|gif|webp|ico|woff2?|ttf|eot|map)(\?.*)?$/)) return url;
+          if ((req.headers.accept ?? "").includes("text/html")) return "/index.html";
+        },
       },
     },
     fs: {
