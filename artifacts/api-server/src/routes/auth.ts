@@ -283,12 +283,77 @@ authRouter.post("/register", async (req: Request, res: Response) => {
 authRouter.post("/forgot-password", async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email?.trim()) return res.status(400).json({ error: "Email is required" });
-  res.json({ message: "If an account with that email exists, a password reset link has been sent." });
+  const SAFE = { message: "If an account with that email exists, a password reset link has been sent." };
+  try {
+    const { pool: dbPool } = await import("@workspace/db");
+    const { rows } = await dbPool.query(
+      "SELECT id, email, display_name FROM accounts WHERE LOWER(email)=$1 AND status='active' LIMIT 1",
+      [email.toLowerCase().trim()]
+    );
+    if (!rows.length) return res.json(SAFE);
+    const account = rows[0] as any;
+
+    const crypto = await import("crypto");
+    const token = crypto.randomBytes(32).toString("hex");
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    await dbPool.query(
+      `INSERT INTO password_reset_tokens (account_id, token, expires_at) VALUES ($1, $2, $3)`,
+      [account.id, token, expires]
+    );
+
+    const appUrl = process.env.APP_URL || `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
+    const resetLink = `${appUrl}/reset-password?token=${token}`;
+
+    try {
+      const { sendEmail } = await import("../lib/email");
+      await sendEmail({
+        to: account.email,
+        subject: "Reset your Aperti password",
+        html: `
+          <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1e293b">
+            <h1 style="font-size:22px;font-weight:800;margin:0 0 8px">Aperti<span style="color:#00796B">.</span></h1>
+            <p style="color:#64748b;margin:0 0 24px;font-size:14px">Where every mind finds its rhythm.</p>
+            <h2 style="font-size:18px;font-weight:700;margin:0 0 12px">Reset your password</h2>
+            <p style="font-size:15px;margin:0 0 24px">Hi ${account.display_name || "there"},<br><br>
+            We received a request to reset the password for your Aperti account. Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
+            <a href="${resetLink}" style="display:inline-block;background:#00796B;color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 28px;border-radius:10px">Reset Password</a>
+            <p style="font-size:13px;color:#94a3b8;margin:24px 0 0">If you didn't request this, you can safely ignore this email — your password won't change.<br><br>
+            Or copy this link: <a href="${resetLink}" style="color:#00796B;word-break:break-all">${resetLink}</a></p>
+          </div>`,
+      });
+    } catch {
+      // Email send failed (not configured) — still return success to avoid leaking info
+    }
+
+    res.json(SAFE);
+  } catch (err) {
+    console.error("Forgot password error:", err);
+    res.json(SAFE); // always return safe message
+  }
 });
 
 // POST /auth/reset-password
-authRouter.post("/reset-password", async (_req: Request, res: Response) => {
-  res.json({ message: "Password reset is not yet available. Please contact support." });
+authRouter.post("/reset-password", async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+  if (!token || !password) return res.status(400).json({ error: "Token and new password are required" });
+  if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+  try {
+    const { pool: dbPool } = await import("@workspace/db");
+    const { rows } = await dbPool.query(
+      `SELECT * FROM password_reset_tokens WHERE token=$1 AND used_at IS NULL AND expires_at > NOW() LIMIT 1`,
+      [token]
+    );
+    if (!rows.length) return res.status(400).json({ error: "This reset link is invalid or has expired. Please request a new one." });
+    const record = rows[0] as any;
+    const hash = await bcrypt.hash(password, 12);
+    await dbPool.query("UPDATE accounts SET password_hash=$1 WHERE id=$2", [hash, record.account_id]);
+    await dbPool.query("UPDATE password_reset_tokens SET used_at=NOW() WHERE id=$1", [record.id]);
+    res.json({ message: "Password updated successfully. You can now sign in." });
+  } catch (err) {
+    console.error("Reset password error:", err);
+    res.status(500).json({ error: "Failed to reset password. Please try again." });
+  }
 });
 
 // POST /auth/signup

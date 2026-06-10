@@ -40,7 +40,7 @@ export default function Contact() {
               </div>
               <div>
                 <p className="font-medium text-sm">Email Support</p>
-                <p className="text-xs text-muted-foreground mt-1">support@aperti.education</p>
+                <p className="text-xs text-muted-foreground mt-1">support@aperti.ai</p>
                 <p className="text-xs text-muted-foreground">For account and billing questions.</p>
               </div>
             </CardContent>

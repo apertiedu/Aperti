@@ -60,8 +60,11 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
 
   const [semanticResults, setSemanticResults] = useState<Record<string, SemanticResult[]>>({});
   const [semanticLoading, setSemanticLoading] = useState(false);
+  const [universalResults, setUniversalResults] = useState<SemanticResult[]>([]);
+  const [universalLoading, setUniversalLoading] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+  const uAbortRef = useRef<AbortController | null>(null);
 
   const routes = ALL_ROUTES.filter(r =>
     user && (r.roles as string[]).includes(user.role) &&
@@ -69,8 +72,9 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
   );
 
   const isSemantic = query.length >= 3 && SEMANTIC_TRIGGER.test(query);
+  const isUniversal = query.length >= 2 && !isSemantic;
 
-  // Fetch semantic results with debounce
+  // Semantic search
   useEffect(() => {
     if (!isSemantic) {
       setSemanticResults({});
@@ -98,11 +102,41 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
         setSemanticLoading(false);
       }
     }, 350);
-
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query, isSemantic]);
+
+  // Universal (non-semantic) search
+  useEffect(() => {
+    if (!isUniversal) { setUniversalResults([]); return; }
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      if (uAbortRef.current) uAbortRef.current.abort();
+      uAbortRef.current = new AbortController();
+      setUniversalLoading(true);
+      try {
+        const res = await apiFetch(`/api/search?q=${encodeURIComponent(query)}`, {
+          signal: uAbortRef.current.signal,
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUniversalResults(data.results ?? []);
+        }
+      } catch (e: any) {
+        if (e?.name !== "AbortError") setUniversalResults([]);
+      } finally {
+        setUniversalLoading(false);
+      }
+    }, 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query, isUniversal]);
+
+  // Group universal results by category
+  const universalGrouped = universalResults.reduce((acc: Record<string, SemanticResult[]>, item) => {
+    const cat = (item as any).category ?? "Results";
+    if (!acc[cat]) acc[cat] = [];
+    acc[cat].push(item);
+    return acc;
+  }, {});
 
   const totalSemanticCount = Object.values(semanticResults).reduce((s, a) => s + a.length, 0);
 
@@ -118,6 +152,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
       setQuery("");
       setSelected(0);
       setSemanticResults({});
+      setUniversalResults([]);
     }
   }, [open]);
 
@@ -175,6 +210,40 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                   <ChevronRight className="h-3.5 w-3.5 opacity-50" />
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Universal search results (non-semantic) */}
+          {isUniversal && (universalLoading || Object.keys(universalGrouped).length > 0) && (
+            <div className="pb-2">
+              {routes.length > 0 && <div className="h-px bg-border mx-4 my-1" />}
+              {universalLoading ? (
+                <div className="flex items-center gap-2 px-5 py-3 text-xs text-muted-foreground">
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Searching…
+                </div>
+              ) : (
+                Object.entries(universalGrouped).map(([category, items]) => (
+                  <div key={category} className="px-2 mb-2">
+                    <p className="text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase px-3 py-1">{category}</p>
+                    {items.map((item: any) => {
+                      const Icon = TYPE_ICONS[item.type] ?? BookOpen;
+                      return (
+                        <div key={`${item.type}-${item.id}`}
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted cursor-pointer"
+                          onClick={() => onOpenChange(false)}>
+                          <Icon className="h-4 w-4 flex-shrink-0 text-primary/70" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{item.name}</p>
+                            {item.subtitle && (
+                              <p className="text-[11px] text-muted-foreground truncate">{item.subtitle}</p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))
+              )}
             </div>
           )}
 

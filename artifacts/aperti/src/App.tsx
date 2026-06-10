@@ -10,6 +10,8 @@ import NotFound from "@/pages/not-found";
 import Layout from "@/components/layout";
 import StudentLayout from "@/components/student-layout";
 import Login from "@/pages/login";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 import LowBandwidthBanner from "@/components/LowBandwidthBanner";
 import { useEffect } from "react";
 
@@ -557,6 +559,8 @@ function PublicRouter() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
       <Route path="/register" component={Register} />
       <Route path="/student-register" component={StudentRegister} />
       <Route path="/onboarding" component={Onboarding} />

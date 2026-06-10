@@ -1029,14 +1029,35 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE21_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
     [`phase20-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 migrations applied");
 }
+
+const PHASE21_MIGRATIONS: string[] = [
+  `CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id         serial PRIMARY KEY,
+    account_id integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    token      text NOT NULL UNIQUE,
+    expires_at timestamptz NOT NULL,
+    used_at    timestamptz,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_prt_token ON password_reset_tokens(token)`,
+  `CREATE INDEX IF NOT EXISTS idx_prt_account_id ON password_reset_tokens(account_id)`,
+];
 
 const PHASE20_MIGRATIONS: string[] = [
   /* ── Release Notes ─────────────────────────────────────────────────── */

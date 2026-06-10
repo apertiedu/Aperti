@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Settings, Eye, Save, RotateCcw, Plus, Trash2, GripVertical, Check, X, ExternalLink } from "lucide-react";
+import { Settings, Eye, Save, RotateCcw, Plus, Trash2, GripVertical, Check, X, ExternalLink, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#00796B";
@@ -64,11 +64,28 @@ function TextField({ label, value, onChange, multiline = false }: {
   );
 }
 
+interface LandingSection {
+  id: number;
+  slug: string;
+  type: string;
+  content: Record<string, unknown>;
+  is_published: boolean;
+  order: number;
+}
+
+interface ContactContent {
+  email: string;
+  headline: string;
+  cta_text: string;
+}
+
 export default function LandingEditor() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const [dirty, setDirty] = useState(false);
   const [localSettings, setLocalSettings] = useState<Settings>({});
+  const [contactDirty, setContactDirty] = useState(false);
+  const [contactLocal, setContactLocal] = useState<ContactContent>({ email: "", headline: "", cta_text: "" });
 
   const { data: settings, isLoading } = useQuery<Settings>({
     queryKey: ["landing-settings"],
@@ -77,6 +94,52 @@ export default function LandingEditor() {
       if (!dirty) setLocalSettings(data);
     },
   } as any);
+
+  const { data: allSections = [] } = useQuery<LandingSection[]>({
+    queryKey: ["admin-landing-sections"],
+    queryFn: () => fetchJSON("/api/admin/landing-sections"),
+  });
+
+  const contactSection = allSections.find(s => s.slug === "contact");
+
+  useEffect(() => {
+    if (contactSection && !contactDirty) {
+      const c = contactSection.content as any;
+      setContactLocal({
+        email: (c.email as string) ?? "support@aperti.ai",
+        headline: (c.headline as string) ?? "",
+        cta_text: (c.cta_text as string) ?? "",
+      });
+    }
+  }, [contactSection]);
+
+  const contactMutation = useMutation({
+    mutationFn: async () => {
+      const content = { ...(contactSection?.content ?? {}), ...contactLocal };
+      if (contactSection) {
+        return fetchJSON(`/api/admin/landing-sections/${contactSection.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ content, is_published: true }),
+        });
+      } else {
+        return fetchJSON("/api/admin/landing-sections", {
+          method: "POST",
+          body: JSON.stringify({ slug: "contact", type: "contact", content, is_published: true, order: 99 }),
+        });
+      }
+    },
+    onSuccess: () => {
+      toast({ title: "Contact section saved!" });
+      qc.invalidateQueries({ queryKey: ["admin-landing-sections"] });
+      setContactDirty(false);
+    },
+    onError: () => toast({ title: "Save failed", variant: "destructive" }),
+  });
+
+  const setContactField = (key: keyof ContactContent, value: string) => {
+    setContactLocal(p => ({ ...p, [key]: value }));
+    setContactDirty(true);
+  };
 
   const merged: Settings = { ...settings, ...localSettings };
 
@@ -241,6 +304,62 @@ export default function LandingEditor() {
             })}
           </div>
         </SectionCard>
+
+        {/* Contact Section */}
+        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4" style={{ color: TEAL }} />
+              <h3 className="font-bold text-gray-800 text-sm">Contact Section</h3>
+            </div>
+            <div className="flex items-center gap-2">
+              {contactDirty && (
+                <span className="text-xs text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full font-medium">Unsaved</span>
+              )}
+              <button
+                onClick={() => contactMutation.mutate()}
+                disabled={!contactDirty || contactMutation.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40"
+                style={{ background: TEAL }}
+              >
+                <Save className="h-3 w-3" />
+                {contactMutation.isPending ? "Saving…" : "Save"}
+              </button>
+            </div>
+          </div>
+          <div className="p-5 space-y-4">
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                Support Email <span className="text-gray-400 font-normal">(shown on landing page &amp; contact page)</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-[#00796B]/30 focus-within:border-[#00796B] transition-all">
+                  <Mail className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                  <input
+                    type="email"
+                    value={contactLocal.email}
+                    onChange={e => setContactField("email", e.target.value)}
+                    placeholder="support@aperti.ai"
+                    className="flex-1 text-sm bg-transparent outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+            <TextField
+              label="Section Headline"
+              value={contactLocal.headline}
+              onChange={v => setContactField("headline", v)}
+            />
+            <TextField
+              label="CTA Button Text"
+              value={contactLocal.cta_text}
+              onChange={v => setContactField("cta_text", v)}
+            />
+            <p className="text-xs text-gray-400">
+              Changes saved here reflect live on the landing page immediately. The email also appears in mailto links throughout the site.
+            </p>
+          </div>
+        </div>
 
         {/* Color note */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-700">

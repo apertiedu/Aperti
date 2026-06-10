@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   ArrowLeft, Check, X, RefreshCw, Layers, Clock, BarChart3,
-  BookOpen, TrendingUp, ChevronRight, Zap,
+  BookOpen, TrendingUp, ChevronRight, Zap, Sparkles,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { MathRenderer } from "@/components/math-renderer";
@@ -96,6 +96,26 @@ export default function MyCardStack() {
       return res.json();
     },
     enabled: !!selectedDeck?.id,
+  });
+
+  const [enhancingId, setEnhancingId] = useState<number | null>(null);
+
+  const enhanceMutation = useMutation({
+    mutationFn: (deckId: number) =>
+      fetch(`/api/flashcards/v3/decks/${deckId}/ai-enhance`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${tok()}` },
+      }).then((r) => r.json()),
+    onMutate: (deckId) => setEnhancingId(deckId),
+    onSettled: () => setEnhancingId(null),
+    onSuccess: (data) => {
+      toast({
+        title: data.ok ? "Cards enhanced!" : "Nothing to enhance",
+        description: data.message ?? "",
+      });
+      queryClient.invalidateQueries({ queryKey: ["flashcards"] });
+    },
+    onError: () => toast({ title: "Enhancement failed", variant: "destructive" }),
   });
 
   const reviewMutation = useMutation({
@@ -203,9 +223,18 @@ export default function MyCardStack() {
                 </div>
                 <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{deck.title}</h3>
                 <p className="text-xs text-gray-400 line-clamp-2 mb-3">{deck.description || "No description"}</p>
-                <div className="flex items-center justify-between">
-                  <Button size="sm" className="h-8 text-xs rounded-xl gap-1.5" style={{ background: "#0D9488" }}>
+                <div className="flex items-center gap-2">
+                  <Button size="sm" className="h-8 text-xs rounded-xl gap-1.5 flex-1" style={{ background: "#0D9488" }}
+                    onClick={(e) => { e.stopPropagation(); openDeck(deck); }}>
                     <Zap className="h-3 w-3" /> Study
+                  </Button>
+                  <Button size="sm" variant="outline"
+                    className="h-8 text-xs rounded-xl gap-1 border-purple-200 text-purple-600 hover:bg-purple-50"
+                    disabled={enhancingId === deck.id}
+                    onClick={(e) => { e.stopPropagation(); enhanceMutation.mutate(deck.id); }}
+                  >
+                    <Sparkles className={`h-3 w-3 ${enhancingId === deck.id ? "animate-pulse" : ""}`} />
+                    {enhancingId === deck.id ? "…" : "AI"}
                   </Button>
                 </div>
               </motion.div>

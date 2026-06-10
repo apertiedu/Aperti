@@ -198,6 +198,13 @@ export default function Login() {
               )}
             </AnimatePresence>
 
+            {/* Forgot password */}
+            <div className="flex justify-end">
+              <Link href="/forgot-password" className="text-xs hover:underline" style={{ color: TEAL }}>
+                Forgot password?
+              </Link>
+            </div>
+
             {/* Submit */}
             <Button
               type="submit"

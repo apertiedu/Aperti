@@ -73,7 +73,8 @@ const app: Express = express();
 const PgSession = connectPgSimple(session);
 
 const isProduction = process.env.NODE_ENV === "production";
-if (isProduction) {
+const isReplit = !!process.env.REPL_ID;
+if (isProduction || isReplit) {
   app.set("trust proxy", 1);
 }
 

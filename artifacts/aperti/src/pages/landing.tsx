@@ -663,7 +663,7 @@ export default function Landing() {
   const pricingAccent   = (pricingS.headline_accent as string) ?? "";
   const contactHeadline = (contactS.headline as string) ?? "Start teaching smarter.";
   const contactCta      = (contactS.cta_text as string) ?? "Request Early Access";
-  const contactEmail    = (contactS.email as string)    ?? "hello@aperti.io";
+  const contactEmail    = (contactS.email as string)    ?? "support@aperti.ai";
 
   return (
     <div className="min-h-screen font-sans" style={{ background: "#F5F5F5", color: "#121212" }}>
