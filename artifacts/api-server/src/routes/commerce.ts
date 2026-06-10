@@ -152,22 +152,26 @@ commerceRouter.post("/admin/commerce/plans", authenticate, requireRole("admin"),
 // PUT /api/admin/commerce/plans/:id
 commerceRouter.put("/admin/commerce/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id);
-  const { name, type, priceEgp, features, limits, visibility, sortOrder, studentLimit } = req.body;
-  await pool.query(
+  const { name, type, priceEgp, features, limits, visibility, sortOrder, studentLimit, is_visible_landing, badge, display_order } = req.body;
+  const { rows } = await pool.query(
     `UPDATE subscription_plans SET
-       name         = COALESCE($1, name),
-       type         = COALESCE($2, type),
-       price_egp    = COALESCE($3, price_egp),
-       features     = COALESCE($4, features),
-       limits       = COALESCE($5, limits),
-       visibility   = COALESCE($6, visibility),
-       sort_order   = COALESCE($7, sort_order),
-       student_limit = COALESCE($8, student_limit)
-     WHERE id = $9`,
+       name               = COALESCE($1, name),
+       type               = COALESCE($2, type),
+       price_egp          = COALESCE($3, price_egp),
+       features           = COALESCE($4, features),
+       limits             = COALESCE($5, limits),
+       visibility         = COALESCE($6, visibility),
+       sort_order         = COALESCE($7, sort_order),
+       student_limit      = COALESCE($8, student_limit),
+       is_visible_landing = COALESCE($9, is_visible_landing),
+       badge              = COALESCE($10, badge),
+       display_order      = COALESCE($11, display_order)
+     WHERE id = $12 RETURNING *`,
     [name, type, priceEgp ? String(priceEgp) : null, features ? JSON.stringify(features) : null,
-     limits ? JSON.stringify(limits) : null, visibility, sortOrder, studentLimit, id],
+     limits ? JSON.stringify(limits) : null, visibility, sortOrder, studentLimit,
+     is_visible_landing, badge, display_order, id],
   );
-  res.json({ success: true });
+  res.json(rows[0] ?? { success: true });
 });
 
 // DELETE /api/admin/commerce/plans/:id (archive = set visibility false)

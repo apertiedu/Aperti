@@ -1021,11 +1021,71 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE20_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
-    [`phase19-${new Date().toISOString().split("T")[0]}`],
+    [`phase20-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 migrations applied");
 }
+
+const PHASE20_MIGRATIONS: string[] = [
+  /* ── Release Notes ─────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS release_notes (
+    id           serial PRIMARY KEY,
+    title        text NOT NULL,
+    summary      text,
+    content      text,
+    type         text NOT NULL DEFAULT 'minor' CHECK (type IN ('major','minor','patch','security','deprecation')),
+    feature_id   integer REFERENCES feature_registry(id) ON DELETE SET NULL,
+    version      text,
+    status       text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','scheduled','published')),
+    scheduled_at timestamptz,
+    published_at timestamptz,
+    created_at   timestamptz NOT NULL DEFAULT NOW(),
+    updated_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_release_notes_status ON release_notes(status)`,
+  `CREATE INDEX IF NOT EXISTS idx_release_notes_published_at ON release_notes(published_at DESC)`,
+
+  /* ── Roadmap Items ──────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS roadmap_items (
+    id           serial PRIMARY KEY,
+    title        text NOT NULL,
+    description  text,
+    category     text,
+    status       text NOT NULL DEFAULT 'planned' CHECK (status IN ('planned','in_progress','beta','released','cancelled')),
+    target_date  date,
+    feature_id   integer REFERENCES feature_registry(id) ON DELETE SET NULL,
+    "order"      integer NOT NULL DEFAULT 0,
+    created_at   timestamptz NOT NULL DEFAULT NOW(),
+    updated_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_roadmap_items_status ON roadmap_items(status)`,
+
+  /* ── Platform Status ────────────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS platform_status (
+    id         serial PRIMARY KEY,
+    status     text NOT NULL DEFAULT 'operational' CHECK (status IN ('operational','degraded','partial_outage','major_outage','maintenance')),
+    message    text,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO platform_status (status, message)
+   SELECT 'operational', 'All systems operational'
+   WHERE NOT EXISTS (SELECT 1 FROM platform_status LIMIT 1)`,
+
+  /* ── Branding Settings — add missing columns ────────────────────────── */
+  `ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS seasonal_theme jsonb NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS typography_prefs jsonb NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS favicon_url text`,
+  `ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT NOW()`,
+];

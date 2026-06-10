@@ -191,6 +191,9 @@ app.use("/api", i18nRouter);
 app.use("/api/search", searchRouter);
 app.use("/api", releasesRouter);
 
+// Phase 12 — Launch CMS & Growth (must be BEFORE main router for public /api/landing, /api/roadmap, /api/release-notes, /api/features/public, /api/branding)
+app.use("/api", launchCmsRouter);
+
 // ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);
 
@@ -235,9 +238,6 @@ app.use("/api/admin/performance", performanceRouter);
 
 // Phase 11 — Governance
 app.use("/api/admin/governance", governanceRouter);
-
-// Phase 12 — Launch CMS & Growth
-app.use("/api", launchCmsRouter);
 
 // Phase 18 — Enterprise Readiness
 app.use("/api/admin/ai-usage", adminAiUsageRouter);

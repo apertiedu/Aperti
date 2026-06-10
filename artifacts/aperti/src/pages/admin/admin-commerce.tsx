@@ -252,10 +252,13 @@ function SubscriptionsPanel() {
 }
 
 /* ─── PLANS ──────────────────────────────────────────────────────────────── */
+const BLANK_PLAN = { name: "", type: "teacher", priceEgp: "", features: "", visibility: true, is_visible_landing: false, badge: "", display_order: 0 };
+
 function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
   const [editing, setEditing] = useState<any>(null);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: "", type: "teacher", priceEgp: "", features: "", visibility: true });
+  const [form, setForm] = useState(BLANK_PLAN);
+  const [editForm, setEditForm] = useState<any>(null);
 
   const { data: plans = [], isLoading } = useQuery({ queryKey: ["admin-plans"], queryFn: () => fetchJSON("/api/admin/commerce/plans") });
 
@@ -263,23 +266,57 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
     mutationFn: () => postJSON("/api/admin/commerce/plans", {
       ...form,
       priceEgp: parseFloat(form.priceEgp),
-      features: form.features.split("\n").map(f => f.trim()).filter(Boolean),
+      features: form.features.split("\n").map((f: string) => f.trim()).filter(Boolean),
     }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-plans"] }); setShowForm(false); toast({ title: "Plan created" }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-plans"] }); setShowForm(false); setForm(BLANK_PLAN); toast({ title: "Plan created" }); },
   });
+
+  const updateMut = useMutation({
+    mutationFn: (plan: any) => putJSON(`/api/admin/commerce/plans/${plan.id}`, {
+      name: plan.name,
+      type: plan.type,
+      priceEgp: parseFloat(plan.priceEgp),
+      features: typeof plan.features === "string" ? plan.features.split("\n").map((f: string) => f.trim()).filter(Boolean) : plan.features,
+      visibility: plan.visibility,
+      is_visible_landing: plan.is_visible_landing,
+      badge: plan.badge || null,
+      display_order: parseInt(plan.display_order) || 0,
+    }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-plans"] }); setEditing(null); setEditForm(null); toast({ title: "Plan updated" }); },
+  });
+
+  const toggleLandingMut = useMutation({
+    mutationFn: ({ id, val }: { id: number; val: boolean }) => putJSON(`/api/admin/commerce/plans/${id}`, { is_visible_landing: val }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-plans"] }); toast({ title: "Landing visibility updated" }); },
+  });
+
   const deleteMut = useMutation({
     mutationFn: (id: number) => deleteReq(`/api/admin/commerce/plans/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-plans"] }); toast({ title: "Plan archived" }); },
   });
 
+  const openEdit = (plan: any) => {
+    setEditing(plan.id);
+    setEditForm({
+      ...plan,
+      priceEgp: String(plan.price_egp),
+      features: Array.isArray(plan.features) ? plan.features.join("\n") : plan.features,
+      badge: plan.badge || "",
+      display_order: plan.display_order || 0,
+    });
+  };
+
   if (isLoading) return <LoadingSpin />;
 
   return (
     <div className="space-y-4">
-      <button onClick={() => setShowForm(v => !v)}
-        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 transition-colors">
-        <Plus className="w-4 h-4" /> Add Plan
-      </button>
+      <div className="flex items-center justify-between">
+        <button onClick={() => { setShowForm(v => !v); setEditing(null); }}
+          className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 transition-colors">
+          <Plus className="w-4 h-4" /> Add Plan
+        </button>
+        <p className="text-xs text-gray-400">Toggle "On Landing" to show a plan on the public pricing page</p>
+      </div>
 
       {showForm && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
@@ -295,8 +332,21 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
             <input placeholder="Price EGP/mo" type="number" value={form.priceEgp} onChange={e => setForm(f => ({...f, priceEgp: e.target.value}))}
               className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
           </div>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <input placeholder="Badge label (e.g. POPULAR)" value={form.badge} onChange={e => setForm(f => ({...f, badge: e.target.value}))}
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            <input placeholder="Display order (0 = first)" type="number" value={form.display_order} onChange={e => setForm(f => ({...f, display_order: parseInt(e.target.value) || 0}))}
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+          </div>
           <textarea placeholder="Features (one per line)" value={form.features} onChange={e => setForm(f => ({...f, features: e.target.value}))} rows={4}
             className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <div onClick={() => setForm(f => ({...f, is_visible_landing: !f.is_visible_landing}))}
+              className={`w-9 h-5 rounded-full transition-colors relative ${form.is_visible_landing ? "bg-teal-500" : "bg-gray-200"}`}>
+              <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.is_visible_landing ? "translate-x-4" : "translate-x-0.5"}`} />
+            </div>
+            <span className="text-sm text-gray-600">Show on landing page pricing section</span>
+          </label>
           <button onClick={() => createMut.mutate()} disabled={createMut.isPending || !form.name || !form.priceEgp}
             className="px-5 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 disabled:opacity-50 transition-colors">
             {createMut.isPending ? "Creating…" : "Create Plan"}
@@ -307,23 +357,71 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {(plans as any[]).map((plan: any) => (
           <div key={plan.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-start justify-between mb-3">
-              <div>
-                <p className="font-bold text-gray-900">{plan.name}</p>
-                <p className="text-xs text-gray-400 capitalize">{plan.type}</p>
+            {editing === plan.id && editForm ? (
+              <div className="space-y-2">
+                <input value={editForm.name} onChange={e => setEditForm((f: any) => ({...f, name: e.target.value}))} placeholder="Name"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="number" value={editForm.priceEgp} onChange={e => setEditForm((f: any) => ({...f, priceEgp: e.target.value}))} placeholder="Price EGP"
+                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                  <input value={editForm.badge} onChange={e => setEditForm((f: any) => ({...f, badge: e.target.value}))} placeholder="Badge (e.g. POPULAR)"
+                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                </div>
+                <textarea value={editForm.features} onChange={e => setEditForm((f: any) => ({...f, features: e.target.value}))} rows={4} placeholder="Features (one per line)"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <div onClick={() => setEditForm((f: any) => ({...f, is_visible_landing: !f.is_visible_landing}))}
+                    className={`w-9 h-5 rounded-full transition-colors relative flex-shrink-0 ${editForm.is_visible_landing ? "bg-teal-500" : "bg-gray-200"}`}>
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editForm.is_visible_landing ? "translate-x-4" : "translate-x-0.5"}`} />
+                  </div>
+                  <span className="text-xs text-gray-600">Show on landing page</span>
+                </label>
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => updateMut.mutate(editForm)} disabled={updateMut.isPending}
+                    className="flex-1 px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-semibold hover:bg-teal-600 disabled:opacity-50 transition-colors">
+                    {updateMut.isPending ? "Saving…" : "Save"}
+                  </button>
+                  <button onClick={() => { setEditing(null); setEditForm(null); }}
+                    className="px-3 py-1.5 border border-gray-200 text-gray-500 rounded-lg text-xs hover:bg-gray-50 transition-colors">Cancel</button>
+                </div>
               </div>
-              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${plan.visibility ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
-                {plan.visibility ? "LIVE" : "HIDDEN"}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-teal-600 mb-3">{Number(plan.price_egp).toLocaleString()} <span className="text-sm font-normal text-gray-400">EGP/mo</span></p>
-            {Array.isArray(plan.features) && (
-              <ul className="text-xs text-gray-500 space-y-1 mb-4">
-                {plan.features.slice(0, 4).map((f: string, i: number) => <li key={i}>• {f}</li>)}
-              </ul>
+            ) : (
+              <>
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-gray-900">{plan.name}</p>
+                      {plan.badge && <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 tracking-wide">{plan.badge}</span>}
+                    </div>
+                    <p className="text-xs text-gray-400 capitalize">{plan.type}</p>
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${plan.visibility ? "bg-green-100 text-green-600" : "bg-gray-100 text-gray-400"}`}>
+                    {plan.visibility ? "LIVE" : "HIDDEN"}
+                  </span>
+                </div>
+                <p className="text-2xl font-bold text-teal-600 mb-3">{Number(plan.price_egp).toLocaleString()} <span className="text-sm font-normal text-gray-400">EGP/mo</span></p>
+                {Array.isArray(plan.features) && (
+                  <ul className="text-xs text-gray-500 space-y-1 mb-4">
+                    {plan.features.slice(0, 4).map((f: string, i: number) => <li key={i}>• {f}</li>)}
+                    {plan.features.length > 4 && <li className="text-gray-400">+{plan.features.length - 4} more</li>}
+                  </ul>
+                )}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-50">
+                  <label className="flex items-center gap-1.5 cursor-pointer select-none" title="Show on landing page pricing section">
+                    <div onClick={() => toggleLandingMut.mutate({ id: plan.id, val: !plan.is_visible_landing })}
+                      className={`w-8 h-4 rounded-full transition-colors relative ${plan.is_visible_landing ? "bg-teal-500" : "bg-gray-200"}`}>
+                      <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${plan.is_visible_landing ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </div>
+                    <span className="text-[10px] text-gray-500">On landing</span>
+                  </label>
+                  <div className="flex gap-3">
+                    <button onClick={() => openEdit(plan)} className="text-xs text-teal-500 hover:text-teal-700 transition-colors font-medium">Edit</button>
+                    <button onClick={() => { if (confirm(`Archive plan ${plan.name}?`)) deleteMut.mutate(plan.id); }}
+                      className="text-xs text-red-400 hover:text-red-600 transition-colors">Archive</button>
+                  </div>
+                </div>
+              </>
             )}
-            <button onClick={() => { if (confirm(`Archive plan ${plan.name}?`)) deleteMut.mutate(plan.id); }}
-              className="text-xs text-red-400 hover:text-red-600 transition-colors">Archive</button>
           </div>
         ))}
       </div>
