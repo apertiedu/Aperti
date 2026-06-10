@@ -25,10 +25,20 @@ const INSTAPAY_NAME  = process.env.INSTAPAY_NAME  || "Aperti Educational Platfor
 // GET /api/plans/public
 commerceRouter.get("/plans/public", async (_req, res: Response) => {
   const { rows } = await pool.query(
-    `SELECT id, name, type, price_egp, features, limits, visibility, sort_order
+    `SELECT id, name, type, price_egp, features, limits, visibility, sort_order,
+            COALESCE(discount_pct, 0) AS discount_pct
      FROM subscription_plans WHERE visibility = true OR visibility IS NULL ORDER BY sort_order, type, price_egp`,
   );
-  res.json(rows);
+  const plans = rows.map((p: any) => {
+    const discountPct = Number(p.discount_pct) || 0;
+    const priceEgp = Number(p.price_egp);
+    return {
+      ...p,
+      discount_pct: discountPct,
+      final_price_egp: discountPct > 0 ? Math.round(priceEgp * (1 - discountPct / 100)) : priceEgp,
+    };
+  });
+  res.json(plans);
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

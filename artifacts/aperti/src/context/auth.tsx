@@ -12,7 +12,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<User>;
   logout: () => void;
   token: string | null;
 }
@@ -61,9 +61,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data.error || "Login failed";
       throw new Error(msg);
     }
+    const loggedInUser = data.user as unknown as User;
     localStorage.setItem("aperti_token", data.token);
     setToken(data.token);
-    setUser(data.user as unknown as User);
+    setUser(loggedInUser);
+    return loggedInUser;
   };
 
   const logout = () => {

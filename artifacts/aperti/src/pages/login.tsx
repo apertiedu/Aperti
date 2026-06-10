@@ -140,9 +140,11 @@ export default function Login() {
     }
     setIsSubmitting(true);
     try {
-      await login(username.trim(), password);
+      const loggedInUser = await login(username.trim(), password);
       setSuccess(true);
-      setTimeout(() => setLocation("/"), 600);
+      const dest =
+        loggedInUser.role === "admin" || loggedInUser.role === "assistant" ? "/admin/command" : "/";
+      setTimeout(() => setLocation(dest), 600);
     } catch (err: any) {
       setAttempts(a => a + 1);
       setError(err.message || "Invalid credentials. Please try again.");

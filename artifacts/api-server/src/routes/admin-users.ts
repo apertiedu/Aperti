@@ -59,6 +59,37 @@ adminUsersRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 
+/* ── Export Users ────────────────────────────────────────────────────────── */
+adminUsersRouter.get("/export/csv", async (req: Request, res: Response) => {
+  try {
+    const users = await db.select({ id: accountsTable.id, username: accountsTable.username, displayName: accountsTable.displayName, email: accountsTable.email, role: accountsTable.role, status: accountsTable.status, createdAt: accountsTable.createdAt }).from(accountsTable).orderBy(desc(accountsTable.createdAt));
+    const header = "id,username,displayName,email,role,status,createdAt\n";
+    const rows = users.map(u => `${u.id},"${u.username}","${u.displayName}","${u.email || ""}",${u.role},${u.status},${u.createdAt}`).join("\n");
+    res.setHeader("Content-Type", "text/csv");
+    res.setHeader("Content-Disposition", "attachment; filename=users.csv");
+    res.send(header + rows);
+  } catch (err) {
+    res.status(500).json({ error: "Export failed" });
+  }
+});
+
+/* ── Stats ───────────────────────────────────────────────────────────────── */
+adminUsersRouter.get("/stats/overview", async (req: Request, res: Response) => {
+  try {
+    const [total, teachers, students, admins, active, suspended] = await Promise.all([
+      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable),
+      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "teacher")),
+      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "student")),
+      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "admin")),
+      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.status, "active")),
+      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.status, "suspended")),
+    ]);
+    res.json({ total: total[0].c, teachers: teachers[0].c, students: students[0].c, admins: admins[0].c, active: active[0].c, suspended: suspended[0].c });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
 /* ── Get Single User ─────────────────────────────────────────────────────── */
 adminUsersRouter.get("/:id", async (req: Request, res: Response) => {
   try {
@@ -181,36 +212,5 @@ adminUsersRouter.post("/bulk-import", async (req: Request, res: Response) => {
     res.json(results);
   } catch (err) {
     res.status(500).json({ error: "Bulk import failed" });
-  }
-});
-
-/* ── Export Users ────────────────────────────────────────────────────────── */
-adminUsersRouter.get("/export/csv", async (req: Request, res: Response) => {
-  try {
-    const users = await db.select({ id: accountsTable.id, username: accountsTable.username, displayName: accountsTable.displayName, email: accountsTable.email, role: accountsTable.role, status: accountsTable.status, createdAt: accountsTable.createdAt }).from(accountsTable).orderBy(desc(accountsTable.createdAt));
-    const header = "id,username,displayName,email,role,status,createdAt\n";
-    const rows = users.map(u => `${u.id},"${u.username}","${u.displayName}","${u.email || ""}",${u.role},${u.status},${u.createdAt}`).join("\n");
-    res.setHeader("Content-Type", "text/csv");
-    res.setHeader("Content-Disposition", "attachment; filename=users.csv");
-    res.send(header + rows);
-  } catch (err) {
-    res.status(500).json({ error: "Export failed" });
-  }
-});
-
-/* ── Stats ───────────────────────────────────────────────────────────────── */
-adminUsersRouter.get("/stats/overview", async (req: Request, res: Response) => {
-  try {
-    const [total, teachers, students, admins, active, suspended] = await Promise.all([
-      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable),
-      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "teacher")),
-      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "student")),
-      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "admin")),
-      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.status, "active")),
-      db.select({ c: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.status, "suspended")),
-    ]);
-    res.json({ total: total[0].c, teachers: teachers[0].c, students: students[0].c, admins: admins[0].c, active: active[0].c, suspended: suspended[0].c });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch stats" });
   }
 });

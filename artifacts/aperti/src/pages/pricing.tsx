@@ -146,8 +146,19 @@ function PlanCard({ plan, index, onSelect }: { plan: any; index: number; onSelec
       </div>
 
       <div>
-        <span className="text-3xl font-bold text-gray-900">{Number(plan.price_egp).toLocaleString()}</span>
-        <span className="text-sm text-gray-400 ml-1">EGP/mo</span>
+        {plan.discount_pct > 0 ? (
+          <>
+            <span className="text-3xl font-bold text-gray-900">{Number(plan.final_price_egp).toLocaleString()}</span>
+            <span className="text-sm text-gray-400 ml-1">EGP/mo</span>
+            <span className="ml-2 line-through text-sm text-gray-400">{Number(plan.price_egp).toLocaleString()}</span>
+            <span className="ml-1.5 inline-flex items-center bg-green-100 text-green-700 text-[10px] font-bold px-1.5 py-0.5 rounded-full">{plan.discount_pct}% off</span>
+          </>
+        ) : (
+          <>
+            <span className="text-3xl font-bold text-gray-900">{Number(plan.price_egp).toLocaleString()}</span>
+            <span className="text-sm text-gray-400 ml-1">EGP/mo</span>
+          </>
+        )}
       </div>
 
       {/* Limits */}
