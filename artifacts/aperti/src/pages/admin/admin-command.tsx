@@ -5,11 +5,133 @@ import {
   Calculator, Activity, DollarSign, Shield, LifeBuoy, FileText,
   Settings, Users, Globe, ChevronRight, Bell, RefreshCw,
   BarChart3, Terminal, Wifi, CreditCard, Clock, Brain, ShieldCheck,
-  LayoutDashboard, Bug,
+  LayoutDashboard, Bug, Flame,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
 const tok = () => localStorage.getItem("aperti_token") || "";
+
+const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const HOURS = Array.from({ length: 24 }, (_, i) => i);
+
+function ActivityHeatmap() {
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-activity-heatmap"],
+    queryFn: async () => {
+      const res = await fetch("/dashboard/admin/activity-heatmap?days=30", {
+        headers: { Authorization: `Bearer ${tok()}` },
+      });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    refetchInterval: 5 * 60_000,
+    retry: false,
+  });
+
+  const cells: { dow: number; hour: number; count: number }[] = data?.cells ?? [];
+
+  const grid: number[][] = Array.from({ length: 7 }, () => Array(24).fill(0));
+  let maxCount = 1;
+  cells.forEach(({ dow, hour, count }) => {
+    grid[dow][hour] = count;
+    if (count > maxCount) maxCount = count;
+  });
+
+  const totalLogins = cells.reduce((s, c) => s + c.count, 0);
+  const peakCell = cells.reduce((best, c) => (c.count > (best?.count ?? 0) ? c : best), cells[0]);
+  const peakLabel = peakCell
+    ? `${DAYS[peakCell.dow]} ${peakCell.hour}:00–${peakCell.hour + 1}:00`
+    : null;
+
+  function cellColor(count: number) {
+    if (count === 0) return "bg-gray-100";
+    const intensity = count / maxCount;
+    if (intensity < 0.15) return "bg-teal-100";
+    if (intensity < 0.30) return "bg-teal-200";
+    if (intensity < 0.50) return "bg-teal-300";
+    if (intensity < 0.70) return "bg-teal-400";
+    if (intensity < 0.85) return "bg-teal-500";
+    return "bg-teal-600";
+  }
+
+  return (
+    <Card className="border-0 shadow-sm bg-white mb-8">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-teal-50 flex items-center justify-center">
+              <Flame className="h-4 w-4 text-teal-600" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">Activity Heatmap</h2>
+              <p className="text-xs text-gray-400">Login activity by day &amp; hour · last 30 days</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 text-xs text-gray-500">
+            {peakLabel && (
+              <span className="hidden sm:flex items-center gap-1 bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium">
+                <Flame className="h-3 w-3" /> Peak: {peakLabel}
+              </span>
+            )}
+            <span>{totalLogins.toLocaleString()} logins</span>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="min-w-[560px]">
+              {/* Hour labels */}
+              <div className="flex mb-1 ml-9">
+                {HOURS.map(h => (
+                  <div key={h} className="flex-1 text-center">
+                    {h % 3 === 0 && (
+                      <span className="text-[9px] text-gray-400 font-medium">
+                        {h === 0 ? "12a" : h < 12 ? `${h}a` : h === 12 ? "12p" : `${h - 12}p`}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Rows */}
+              {DAYS.map((day, dow) => (
+                <div key={day} className="flex items-center gap-1 mb-1">
+                  <span className="text-[10px] text-gray-400 font-medium w-8 text-right shrink-0">{day}</span>
+                  <div className="flex flex-1 gap-0.5">
+                    {HOURS.map(hour => {
+                      const count = grid[dow][hour];
+                      return (
+                        <div
+                          key={hour}
+                          title={count > 0 ? `${day} ${hour}:00 — ${count} login${count !== 1 ? "s" : ""}` : undefined}
+                          className={`flex-1 rounded-sm cursor-default transition-opacity hover:opacity-80 ${cellColor(count)}`}
+                          style={{ height: 14 }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+
+              {/* Legend */}
+              <div className="flex items-center justify-end gap-1.5 mt-3">
+                <span className="text-[10px] text-gray-400">Less</span>
+                {["bg-gray-100", "bg-teal-100", "bg-teal-200", "bg-teal-300", "bg-teal-400", "bg-teal-500", "bg-teal-600"].map(c => (
+                  <div key={c} className={`w-3 h-3 rounded-sm ${c}`} />
+                ))}
+                <span className="text-[10px] text-gray-400">More</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 const modules = [
   { to: "/admin/os",                    label: "Admin OS ✦ New",        desc: "Full command center — users, payments, analytics, health",  icon: LayoutDashboard, highlight: true },
@@ -160,6 +282,15 @@ export default function AdminCommand() {
         </motion.div>
       )}
 
+      {/* Activity heatmap */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <ActivityHeatmap />
+      </motion.div>
+
       {/* Module grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((mod, i) => (
@@ -167,7 +298,7 @@ export default function AdminCommand() {
             key={mod.to}
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + i * 0.05 }}
+            transition={{ delay: 0.35 + i * 0.05 }}
           >
             <Link href={mod.to}>
               <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white" : (mod as any).highlight2 ? "bg-gradient-to-r from-violet-600 to-purple-700 text-white" : "bg-white"}`}>

@@ -118,6 +118,27 @@ dashboardRouter.get("/extended-summary", authenticate, async (req: AuthRequest, 
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
+dashboardRouter.get("/admin/activity-heatmap", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { pool } = await import("@workspace/db");
+    const days = parseInt((req.query.days as string) || "30");
+    const { rows } = await pool.query(
+      `SELECT
+         EXTRACT(dow  FROM created_at AT TIME ZONE 'UTC')::int AS dow,
+         EXTRACT(hour FROM created_at AT TIME ZONE 'UTC')::int AS hour,
+         COUNT(*)::int AS count
+       FROM login_history
+       WHERE created_at >= NOW() - INTERVAL '${days} days'
+         AND success = true
+       GROUP BY dow, hour
+       ORDER BY dow, hour`,
+    );
+    res.json({ cells: rows, days });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 dashboardRouter.get("/admin/live-stats", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const today = new Date().toISOString().split("T")[0];
