@@ -76,6 +76,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       label: "Content",
       items: [
         { name: "QueryVault", href: "/query-vault", icon: BookMarked, roles: ["admin","teacher"] },
+        { name: "Question Extract", href: "/teacher/questions/extract", icon: Sparkles, roles: ["admin","teacher"] },
         { name: "CardStack", href: "/cardstack", icon: Layers, roles: ["admin","teacher"] },
         { name: "Syllabuilder", href: "/syllabuilder", icon: Wand2, roles: ["admin","teacher"] },
         { name: "ContentCraft", href: "/content-craft", icon: Palette, roles: ["admin","teacher"] },

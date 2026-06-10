@@ -1,6 +1,6 @@
 export const AI_CONFIG = {
   provider: "openai" as const,
-  model: "gpt-4o-mini",
+  model: process.env.OPENAI_MODEL || "meta/llama-3.1-70b-instruct",
   maxTokens: {
     default: 1000,
     feedback: 200,
@@ -8,7 +8,7 @@ export const AI_CONFIG = {
     summary: 800,
     syllabus: 2000,
   },
-  baseUrl: "https://api.openai.com/v1",
+  baseUrl: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
 };
 
 const LANG_NAMES: Record<string, string> = {

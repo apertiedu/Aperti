@@ -501,11 +501,11 @@ router.put("/admin/landing-sections/reorder", ...adminOnly, async (req, res) => 
 router.get("/landing", async (req, res) => {
   try {
     const [sections, testimonials, faqs, plans, branding] = await Promise.all([
-      pool.query('SELECT * FROM landing_sections WHERE is_published=true ORDER BY "order" ASC'),
-      pool.query("SELECT id, name, role, organization, photo_url, quote, rating, is_verified, is_approved, created_at FROM testimonials WHERE is_approved=true ORDER BY is_verified DESC, created_at DESC LIMIT 6"),
-      pool.query('SELECT * FROM faqs WHERE is_published=true ORDER BY "order" ASC'),
-      pool.query("SELECT * FROM subscription_plans WHERE is_visible_landing=true ORDER BY display_order ASC, price_egp ASC"),
-      pool.query("SELECT * FROM branding_settings ORDER BY id DESC LIMIT 1"),
+      pool.query('SELECT * FROM landing_sections WHERE is_published=true ORDER BY "order" ASC').catch(() => ({ rows: [] })),
+      pool.query("SELECT id, name, role, organization, photo_url, quote, rating, is_verified, is_approved, created_at FROM testimonials WHERE is_approved=true ORDER BY is_verified DESC, created_at DESC LIMIT 6").catch(() => ({ rows: [] })),
+      pool.query('SELECT * FROM faqs WHERE is_published=true ORDER BY "order" ASC').catch(() => ({ rows: [] })),
+      pool.query("SELECT id, name, price_egp, max_students, badge, is_highlighted, features FROM subscription_plans ORDER BY price_egp ASC").catch(() => ({ rows: [] })),
+      pool.query("SELECT * FROM branding_settings ORDER BY id DESC LIMIT 1").catch(() => ({ rows: [] })),
     ]);
     res.json({
       sections: sections.rows,

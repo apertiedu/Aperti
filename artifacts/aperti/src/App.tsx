@@ -86,6 +86,8 @@ import SimVerse from "@/pages/student/simverse";
 import TakeExam from "@/pages/student/take-exam";
 import SkillBadge from "@/pages/student/skill-badge";
 import LearnPath from "@/pages/student/learn-path";
+import RevisionPlanPage from "@/pages/student/revision-plan";
+import QuestionExtractionPage from "@/pages/teacher/question-extraction";
 import DiscoverFeed from "@/pages/student/discover-feed";
 import Revisit from "@/pages/student/revisit";
 import FocusCoach from "@/pages/student/focus-coach";
@@ -363,6 +365,8 @@ function StudentRouter() {
         <Route path="/account/subscription" component={MySubscriptionPage} />
         <Route path="/coming-soon" component={ComingSoonPage} />
         <Route path="/revision-notes" component={RevisionNotesPage} />
+        {/* Phase 21 — Experience & Product Excellence */}
+        <Route path="/revision-plan" component={RevisionPlanPage} />
         {/* Phase 17 — Mobile */}
         <Route path="/mobile/home" component={StudentMobileHome} />
         <Route path="/flashcards/swipe" component={FlashcardSwipe} />
@@ -429,6 +433,7 @@ const TEACHER_ROUTES = (
     <Route path="/courses/:courseId/builder" component={CourseBuilder} />
     <Route path="/teacher/question-studio" component={QuestionStudio} />
     <Route path="/teacher/questions/import" component={QuestionImport} />
+    <Route path="/teacher/questions/extract" component={QuestionExtractionPage} />
     <Route path="/teacher/analytics/content" component={ContentAnalytics} />
     <Route path="/resources/library" component={ResourcesLibrary} />
     <Route path="/simverse/labs" component={SimverseLabs} />

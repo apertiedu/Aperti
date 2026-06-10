@@ -68,6 +68,9 @@ import { contentQualityRouter, aiCostsRouter } from "./routes/content-quality-ad
 import { revisionV3Router } from "./routes/revision-v3";
 import { flashcardV3Router } from "./routes/flashcard-v3";
 import { startFounderAlertsWorker } from "./routes/founder-alerts-worker";
+// Phase 21 — Experience, Delight, Conversion & Product Excellence
+import { revisionPlanRouter } from "./routes/revision-plan";
+import { questionExtractionRouter } from "./routes/question-extraction";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -255,6 +258,9 @@ app.use("/api/admin/content-quality", contentQualityRouter);
 app.use("/api/admin/ai", aiCostsRouter);
 app.use("/api/revision", revisionV3Router);
 app.use("/api/flashcards/v3", flashcardV3Router);
+
+app.use("/api/revision", revisionPlanRouter);
+app.use("/api/questions/extract", questionExtractionRouter);
 
 
 // ── Global error handler ──────────────────────────────────────────────────────

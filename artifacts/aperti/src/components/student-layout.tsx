@@ -31,6 +31,7 @@ const allNav = [
   { href: "/ascend", label: "Ascend", icon: Flame, desc: "Academic RPG" },
   { href: "/simverse", label: "SimVerse", icon: FlaskConical, desc: "Labs & simulations" },
   { href: "/revisit", label: "Revisit", icon: Repeat2, desc: "Revision planner" },
+  { href: "/revision-plan", label: "Revision Plan", icon: Target, desc: "AI daily study calendar" },
   { href: "/focus-coach", label: "FocusCoach", icon: Target, desc: "Weak topic tracker" },
   { href: "/focus-zone", label: "FocusZone", icon: Clock, desc: "Distraction-free study" },
   { href: "/papers", label: "Past Papers", icon: Library, desc: "Past paper library" },

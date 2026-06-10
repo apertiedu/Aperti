@@ -622,6 +622,339 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string; style?:
 };
 const getIcon = (name?: string) => ICON_MAP[name ?? ""] ?? Zap;
 
+/* ─────────────────────────── LIVE DASHBOARD PREVIEW ─────────────────────────── */
+const DASHBOARD_SLIDES = [
+  {
+    role: "Teacher",
+    label: "For Teachers",
+    color: "#00796B",
+    badge: "CoreHub",
+    title: "Your class at a glance",
+    widgets: [
+      { title: "Active Students", value: "34", sub: "2 need attention", icon: Users, color: "#00796B", bg: "#E6F4F1" },
+      { title: "Avg. Score", value: "78%", sub: "↑ 6% this week", icon: BarChart3, color: "#7C3AED", bg: "#F3F0FF" },
+      { title: "Homework Rate", value: "91%", sub: "29/32 submitted", icon: CheckCircle2, color: "#059669", bg: "#D1FAE5" },
+    ],
+    list: ["Maya Hassan — needs help with Forces", "Ahmed Karim — excellent progress", "Lena Wolff — attendance drop"],
+  },
+  {
+    role: "Student",
+    label: "For Students",
+    color: "#7C3AED",
+    badge: "StudyStream",
+    title: "Your study session",
+    widgets: [
+      { title: "Today's Tasks", value: "4", sub: "2 completed", icon: CheckCircle2, color: "#00796B", bg: "#E6F4F1" },
+      { title: "Streak", value: "12 days", sub: "Keep it up!", icon: Zap, color: "#DC2626", bg: "#FEF2F2" },
+      { title: "Next Exam", value: "6 days", sub: "Physics Paper 2", icon: Target, color: "#D97706", bg: "#FEF3C7" },
+    ],
+    list: ["Flashcards: Organic Chemistry (15 cards due)", "Practice: Forces & Motion — 12 questions", "Mentor session booked for 4:00 PM"],
+  },
+  {
+    role: "Parent",
+    label: "For Parents",
+    color: "#D97706",
+    badge: "GuardianHub",
+    title: "Zara's progress this week",
+    widgets: [
+      { title: "Attendance", value: "100%", sub: "All sessions attended", icon: Shield, color: "#059669", bg: "#D1FAE5" },
+      { title: "Last Exam", value: "84%", sub: "Chemistry: Atoms", icon: Star, color: "#7C3AED", bg: "#F3F0FF" },
+      { title: "Homework", value: "8/9", sub: "1 overdue", icon: BookOpen, color: "#D97706", bg: "#FEF3C7" },
+    ],
+    list: ["Teacher message: 'Excellent focus this week'", "Upcoming: Maths exam in 3 days", "New grade posted: Biology Lab report 91%"],
+  },
+  {
+    role: "Admin",
+    label: "For Admins",
+    color: "#DC2626",
+    badge: "CommandCenter",
+    title: "Centre operations",
+    widgets: [
+      { title: "Total Students", value: "248", sub: "↑ 12 this month", icon: Users, color: "#00796B", bg: "#E6F4F1" },
+      { title: "Revenue", value: "EGP 42K", sub: "On track for target", icon: BarChart3, color: "#DC2626", bg: "#FEF2F2" },
+      { title: "AI Usage", value: "3.2K", sub: "queries this week", icon: Brain, color: "#7C3AED", bg: "#F3F0FF" },
+    ],
+    list: ["3 new teacher applications pending", "Subscription renewals: 8 due this week", "System health: All services nominal"],
+  },
+];
+
+function LiveDashboardPreview() {
+  const [active, setActive] = useState(0);
+  const prefersReduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  useEffect(() => {
+    if (prefersReduced) return;
+    const id = setInterval(() => setActive(a => (a + 1) % DASHBOARD_SLIDES.length), 3200);
+    return () => clearInterval(id);
+  }, [prefersReduced]);
+
+  const slide = DASHBOARD_SLIDES[active];
+
+  return (
+    <div className="relative w-full max-w-[440px] mx-auto select-none">
+      {/* Browser chrome */}
+      <div className="rounded-2xl shadow-2xl overflow-hidden border border-gray-200/70" style={{ background: "#F8FAFC" }}>
+        {/* Top bar */}
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-200/60" style={{ background: "#fff" }}>
+          <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+          <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
+          <span className="w-2.5 h-2.5 rounded-full bg-green-400/80" />
+          <div className="flex-1 mx-3 h-5 rounded-full bg-gray-100 flex items-center px-3">
+            <span className="text-[9px] text-gray-400 font-mono">app.aperti.ai</span>
+          </div>
+        </div>
+
+        {/* Dashboard body */}
+        <div className="p-4 min-h-[280px]">
+          <AnimatePresence mode="wait">
+            <motion.div key={active}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35 }}>
+              {/* Header */}
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md" style={{ background: `${slide.color}15`, color: slide.color }}>
+                    {slide.badge}
+                  </span>
+                  <p className="text-xs font-bold text-gray-800 mt-1">{slide.title}</p>
+                </div>
+                <span className="text-[9px] text-gray-400">{new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</span>
+              </div>
+              {/* Widgets row */}
+              <div className="grid grid-cols-3 gap-2 mb-3">
+                {slide.widgets.map((w, i) => (
+                  <motion.div key={i} initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: i * 0.07 }}
+                    className="rounded-xl p-2.5" style={{ background: w.bg }}>
+                    <w.icon className="h-3.5 w-3.5 mb-1.5" style={{ color: w.color }} />
+                    <p className="text-sm font-black" style={{ color: w.color }}>{w.value}</p>
+                    <p className="text-[8px] text-gray-500 leading-tight mt-0.5">{w.title}</p>
+                    <p className="text-[7px] text-gray-400 leading-tight">{w.sub}</p>
+                  </motion.div>
+                ))}
+              </div>
+              {/* List items */}
+              <div className="space-y-1.5">
+                {slide.list.map((item, i) => (
+                  <motion.div key={i} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 + i * 0.06 }}
+                    className="flex items-start gap-2 text-[9px] text-gray-600 bg-white rounded-lg px-2.5 py-1.5">
+                    <span className="w-1 h-1 rounded-full mt-1 shrink-0" style={{ background: slide.color }} />
+                    {item}
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Role tabs at bottom */}
+        <div className="flex border-t border-gray-200/60" style={{ background: "#fff" }}>
+          {DASHBOARD_SLIDES.map((s, i) => (
+            <button key={i} onClick={() => setActive(i)}
+              className="flex-1 py-2 text-[9px] font-semibold transition-all"
+              style={{ color: i === active ? s.color : "#9CA3AF", borderTop: i === active ? `2px solid ${s.color}` : "2px solid transparent" }}>
+              {s.role}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Glow */}
+      <div className="absolute -inset-4 -z-10 rounded-3xl opacity-20 blur-2xl"
+        style={{ background: `radial-gradient(circle, ${slide.color}50, transparent 70%)` }} />
+    </div>
+  );
+}
+
+/* ─────────────────────────── SMART CALCULATOR ─────────────────────────── */
+function SmartCalculator({ teal }: { teal: string }) {
+  const [students, setStudents] = useState(30);
+  const [months, setMonths] = useState(12);
+  const perStudentPerMonth = 45;
+  const total = students * months * perStudentPerMonth;
+  const savings = Math.round(total * 0.4);
+  const hoursPerMonth = Math.round(students * 0.8);
+
+  return (
+    <Reveal>
+      <div className="max-w-2xl mx-auto mt-12 bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+        <div className="flex items-center gap-2 mb-1">
+          <Zap className="h-4 w-4" style={{ color: teal }} />
+          <span className="text-sm font-bold text-gray-900">ROI Calculator</span>
+        </div>
+        <p className="text-xs text-gray-500 mb-6">See exactly what Aperti costs — and what you get back.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label className="text-xs font-semibold text-gray-600 flex justify-between mb-2">
+              Students <span style={{ color: teal }}>{students}</span>
+            </label>
+            <input type="range" min={5} max={300} step={5} value={students}
+              onChange={e => setStudents(Number(e.target.value))}
+              className="w-full accent-teal-600 cursor-pointer" />
+            <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>5</span><span>300</span></div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-gray-600 flex justify-between mb-2">
+              Months <span style={{ color: teal }}>{months}</span>
+            </label>
+            <input type="range" min={1} max={24} step={1} value={months}
+              onChange={e => setMonths(Number(e.target.value))}
+              className="w-full accent-teal-600 cursor-pointer" />
+            <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>1</span><span>24</span></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Total investment", value: `EGP ${total.toLocaleString()}`, sub: `EGP ${perStudentPerMonth}/student/mo`, color: teal },
+            { label: "Admin hours saved", value: `${hoursPerMonth * months}h`, sub: `~${hoursPerMonth}h/month`, color: "#7C3AED" },
+            { label: "Est. extra revenue", value: `EGP ${savings.toLocaleString()}`, sub: "from retention & upsell", color: "#059669" },
+          ].map((item, i) => (
+            <motion.div key={i} layout className="rounded-xl p-3 text-center" style={{ background: `${item.color}08` }}>
+              <p className="text-base font-black" style={{ color: item.color }}>{item.value}</p>
+              <p className="text-[9px] font-semibold text-gray-700 mt-0.5">{item.label}</p>
+              <p className="text-[8px] text-gray-400">{item.sub}</p>
+            </motion.div>
+          ))}
+        </div>
+        <p className="text-[10px] text-gray-400 text-center mt-4">
+          Estimates based on average tutor centre data. Actual results may vary.{" "}
+          <a href="#apply" className="underline" style={{ color: teal }}>Contact us for a custom quote →</a>
+        </p>
+      </div>
+    </Reveal>
+  );
+}
+
+/* ─────────────────────────── INTERACTIVE DEMO ─────────────────────────── */
+const DEMO_STEPS = [
+  {
+    role: "Teacher",
+    icon: GraduationCap,
+    color: "#00796B",
+    step: "Create an assessment",
+    desc: "Choose your question bank, set a time limit, and publish. Students receive it instantly.",
+    visual: { title: "New Assessment", items: ["Topic: Forces & Motion", "Questions: 12 (auto-selected)", "Time limit: 45 min", "Due: Tomorrow 5 PM"] },
+  },
+  {
+    role: "Student",
+    icon: Brain,
+    color: "#7C3AED",
+    step: "Receive & attempt",
+    desc: "Students open their ExamRoom, complete timed questions, and submit — all from any device.",
+    visual: { title: "Forces & Motion Quiz", items: ["Q4 of 12 — Multiple Choice", "Calculate the net force on a 5kg block…", "Option A: 10N ● Option B: 25N ○", "Time remaining: 28:14"] },
+  },
+  {
+    role: "AI",
+    icon: Zap,
+    color: "#DC2626",
+    step: "Auto-graded instantly",
+    desc: "Aperti grades structured questions in seconds, flags edge cases for teacher review, and updates the gradebook.",
+    visual: { title: "Grading complete", items: ["Graded: 32/34 students", "Auto: 29 • Review flagged: 3", "Class avg: 74%", "Weak area: Newton's 3rd Law"] },
+  },
+  {
+    role: "Analytics",
+    icon: BarChart3,
+    color: "#D97706",
+    step: "Act on insights",
+    desc: "The AI Mentor automatically creates personalised revision packs for each student based on their errors.",
+    visual: { title: "Mentor action taken", items: ["12 students: weak on Forces", "Revision pack sent to each", "Next session: re-test in 7 days", "Parent notifications: sent"] },
+  },
+];
+
+function InteractiveDemo({ teal }: { teal: string }) {
+  const [active, setActive] = useState(0);
+  const step = DEMO_STEPS[active];
+
+  return (
+    <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+      <div className="max-w-6xl mx-auto">
+        <Reveal>
+          <div className="text-center mb-12">
+            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
+              style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+              <Activity className="h-3 w-3" />See it in action
+            </span>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
+              From lesson to insight<br />
+              <span style={{ color: teal }}>in four steps.</span>
+            </h2>
+            <p className="text-gray-500 max-w-md mx-auto">The complete teaching cycle — from setting work to acting on results — happens inside Aperti.</p>
+          </div>
+        </Reveal>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          {/* Step selector */}
+          <div className="space-y-3">
+            {DEMO_STEPS.map((s, i) => (
+              <motion.button key={i} onClick={() => setActive(i)} whileHover={{ x: 4 }}
+                className={`w-full text-left rounded-2xl p-5 border transition-all ${
+                  i === active ? "bg-white shadow-md" : "bg-white/40 border-transparent hover:bg-white/70"
+                }`}
+                style={{ borderColor: i === active ? `${s.color}30` : "transparent" }}>
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ background: i === active ? `${s.color}15` : `${s.color}08` }}>
+                    <s.icon className="h-5 w-5" style={{ color: s.color }} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-[10px] font-bold rounded-full px-2 py-0.5"
+                        style={{ background: `${s.color}12`, color: s.color }}>{s.role}</span>
+                      <span className="text-xs font-bold text-gray-800">{s.step}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed">{s.desc}</p>
+                  </div>
+                </div>
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Visual mockup */}
+          <Reveal>
+            <AnimatePresence mode="wait">
+              <motion.div key={active}
+                initial={{ opacity: 0, scale: 0.96, y: 12 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -12 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                {/* Mock top bar */}
+                <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-3"
+                  style={{ background: `${step.color}08` }}>
+                  <step.icon className="h-4 w-4" style={{ color: step.color }} />
+                  <span className="text-sm font-bold text-gray-800">{step.visual.title}</span>
+                  <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
+                    style={{ background: `${step.color}15`, color: step.color }}>Live</span>
+                </div>
+                <div className="p-5 space-y-3">
+                  {step.visual.items.map((item, i) => (
+                    <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 bg-gray-50/70">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: step.color }} />
+                      <span className="text-sm text-gray-700">{item}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </Reveal>
+        </div>
+
+        {/* Step indicators */}
+        <div className="flex justify-center gap-2 mt-8">
+          {DEMO_STEPS.map((s, i) => (
+            <button key={i} onClick={() => setActive(i)}
+              className="h-2 rounded-full transition-all"
+              style={{ width: i === active ? 24 : 8, background: i === active ? teal : "#E5E7EB" }} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─────────────────────────── MAIN LANDING ─────────────────────────── */
 export default function Landing() {
   const { scrollYProgress } = useScroll();
@@ -708,7 +1041,7 @@ export default function Landing() {
             <motion.div style={{ y: heroY }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.22,1,0.36,1] }}
               className="relative hidden lg:block">
-              <AbstractGeometry />
+              <LiveDashboardPreview />
             </motion.div>
           </div>
         </div>
@@ -763,6 +1096,9 @@ export default function Landing() {
           </Reveal>
         </div>
       </section>
+
+      {/* ── INTERACTIVE DEMO ── */}
+      <InteractiveDemo teal={teal} />
 
       {/* ── COURSE PREVIEW ── */}
       <section id="courses-preview" className="py-24 px-5 bg-white">
@@ -872,6 +1208,7 @@ export default function Landing() {
               </Reveal>
             ))}
           </div>
+          <SmartCalculator teal={teal} />
           <Reveal delay={0.4}>
             <p className="text-center text-sm text-gray-400 mt-8">
               Volume discounts available for large centres. InstaPay accepted.{" "}
