@@ -36,8 +36,23 @@ const DIFFICULTIES = ["easy", "medium", "hard"];
 const COMMAND_WORDS = ["Define","State","Describe","Explain","Calculate","Determine","Derive","Show","Discuss","Evaluate","Analyse","Suggest","Predict","Compare","Justify","Outline","Draw","Sketch","Plot","Identify","Name","Give"];
 const QUESTION_TYPES = ["structured","mcq","essay","calculation","short-answer","data-response","practical"];
 
+function questionQualityScore(q: any): { score: number; label: string; color: string } {
+  let pts = 0;
+  if (q.question_text && q.question_text.length >= 30) pts += 25;
+  else if (q.question_text && q.question_text.length >= 10) pts += 10;
+  if (q.topic) pts += 20;
+  if (q.difficulty) pts += 15;
+  if (q.max_marks > 0) pts += 15;
+  if (q.command_word) pts += 15;
+  if (q.model_answer && q.model_answer.length >= 20) pts += 10;
+  if (pts >= 80) return { score: pts, label: "High Quality", color: "bg-emerald-100 text-emerald-700" };
+  if (pts >= 50) return { score: pts, label: "Fair", color: "bg-amber-100 text-amber-700" };
+  return { score: pts, label: "Needs Work", color: "bg-red-100 text-red-600" };
+}
+
 function QuestionCard({ q, onEdit, onDuplicate, onDelete }: { q: any; onEdit: () => void; onDuplicate: () => void; onDelete: () => void }) {
   const diffColors: Record<string, string> = { easy: "bg-green-100 text-green-700", medium: "bg-amber-100 text-amber-700", hard: "bg-red-100 text-red-700" };
+  const quality = questionQualityScore(q);
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
       className="bg-white border border-gray-100 rounded-xl p-5 hover:border-gray-200 hover:shadow-sm transition-all group">
@@ -58,6 +73,7 @@ function QuestionCard({ q, onEdit, onDuplicate, onDelete }: { q: any; onEdit: ()
         {q.year && <Badge className="text-xs bg-gray-100 text-gray-600">{q.year}</Badge>}
         {q.paper && <Badge variant="outline" className="text-xs">{q.paper}</Badge>}
         {q.source === "import" && <Badge className="text-xs bg-orange-100 text-orange-700"><Upload size={10} className="mr-1" />Imported</Badge>}
+        <Badge className={`text-xs ml-auto ${quality.color}`}>{quality.label}</Badge>
       </div>
       {q.model_answer && (
         <details className="mt-3">

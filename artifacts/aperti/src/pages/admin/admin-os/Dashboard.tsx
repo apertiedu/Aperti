@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { fetchJSON } from "@/lib/api";
 import { Link } from "wouter";
+import SystemHealthWidget from "@/components/system-health-widget";
 
 function StatCard({ title, value, subtitle, icon: Icon, color, href }: any) {
   const card = (
@@ -125,6 +126,31 @@ export default function AdminDashboard() {
         <StatCard title="Total Subscriptions" value={subStats?.total?.toLocaleString()} subtitle={`${subStats?.expired} expired`} icon={Shield} color="bg-indigo-500" href="/admin/os/subscriptions" />
         <StatCard title="Active Feature Flags" value={activeFlags} subtitle="Features enabled" icon={Flag} color="bg-pink-500" href="/admin/os/features" />
         <StatCard title="Total Revenue" value={`EGP ${((revenue?.totalRevenue || 0)).toLocaleString()}`} subtitle="All time" icon={BarChart3} color="bg-amber-500" href="/admin/os/payments" />
+      </div>
+
+      {/* System Health Widget */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="md:col-span-1">
+          <SystemHealthWidget />
+        </div>
+        <div className="md:col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+          <p className="text-xs font-bold text-gray-900 mb-3">Operational Intelligence</p>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {[
+              { label: "Active Sessions", value: dash?.activeSessions ?? "—", color: "text-teal-600" },
+              { label: "Avg Response", value: health ? `${health.apiLatency}ms` : "—", color: "text-blue-600" },
+              { label: "DB Latency", value: health ? `${health.dbLatency}ms` : "—", color: "text-indigo-600" },
+              { label: "Memory", value: health ? `${health.memory?.percent}%` : "—", color: "text-purple-600" },
+              { label: "Uptime", value: health ? `${Math.floor((health.uptime || 0) / 3600)}h` : "—", color: "text-emerald-600" },
+              { label: "Error Rate", value: dash?.errorRate ?? "0%", color: "text-amber-600" },
+            ].map(item => (
+              <div key={item.label} className="bg-gray-50 rounded-lg px-3 py-2">
+                <p className={`text-sm font-black ${item.color}`}>{item.value}</p>
+                <p className="text-[10px] text-gray-400 font-medium mt-0.5">{item.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Quick links */}

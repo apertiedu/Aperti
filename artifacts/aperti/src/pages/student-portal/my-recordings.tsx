@@ -30,10 +30,14 @@ const PLATFORM_LABELS: Record<string, string> = {
   zoom: "Zoom", meet: "Google Meet", teams: "MS Teams", other: "Recording",
 };
 
+const PLATFORMS = ["all", "zoom", "meet", "teams", "other"] as const;
+type PlatformFilter = typeof PLATFORMS[number];
+
 export default function MyRecordings() {
   const [recordings, setRecordings] = useState<Recording[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [platformFilter, setPlatformFilter] = useState<PlatformFilter>("all");
   const [copiedId, setCopiedId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -51,9 +55,11 @@ export default function MyRecordings() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const filtered = recordings.filter(r =>
-    !search || r.title.toLowerCase().includes(search.toLowerCase()) || (r.subjectName?.toLowerCase().includes(search.toLowerCase()) ?? false)
-  );
+  const filtered = recordings.filter(r => {
+    const matchSearch = !search || r.title.toLowerCase().includes(search.toLowerCase()) || (r.subjectName?.toLowerCase().includes(search.toLowerCase()) ?? false);
+    const matchPlatform = platformFilter === "all" || r.platform === platformFilter;
+    return matchSearch && matchPlatform;
+  });
 
   if (loading) {
     return (
@@ -74,15 +80,37 @@ export default function MyRecordings() {
       </motion.div>
 
       {recordings.length > 0 && (
-        <div className="relative">
-          <Search className="absolute left-4 top-3 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search recordings..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white rounded-2xl border border-indigo-100 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
-          />
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="absolute left-4 top-3 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search recordings..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-white rounded-2xl border border-indigo-100 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            />
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            {PLATFORMS.map(p => {
+              const labels: Record<string, string> = { all: "All", zoom: "Zoom", meet: "Meet", teams: "Teams", other: "Other" };
+              const count = p === "all" ? recordings.length : recordings.filter(r => r.platform === p).length;
+              if (p !== "all" && count === 0) return null;
+              return (
+                <button
+                  key={p}
+                  onClick={() => setPlatformFilter(p)}
+                  className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all border ${
+                    platformFilter === p
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                      : "bg-white text-gray-600 border-gray-200 hover:border-indigo-200"
+                  }`}
+                >
+                  {labels[p]} {count > 0 && <span className="opacity-60 ml-0.5">({count})</span>}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
 

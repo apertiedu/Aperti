@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Package, BarChart2, KeyRound, UserCheck } from "lucide-react";
+import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Package, BarChart2, KeyRound, UserCheck, AlertTriangle } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -270,6 +270,15 @@ export default function Students() {
     s.studentName.toLowerCase().includes(search.toLowerCase()) || s.studentCode.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Duplicate name detection — flag students with similar names (potential duplicates)
+  const nameCounts = students.reduce((acc, s) => {
+    const normalized = s.studentName.trim().toLowerCase();
+    acc[normalized] = (acc[normalized] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+  const isDuplicate = (name: string) => nameCounts[name.trim().toLowerCase()] > 1;
+  const duplicateCount = Object.values(nameCounts).filter(c => c > 1).length;
+
   return (
     <div className="space-y-6">
       <PlanUsageBar resource="students" label="Student Slots" />
@@ -342,6 +351,13 @@ export default function Students() {
         </DialogContent>
       </Dialog>
 
+      {duplicateCount > 0 && (
+        <div className="flex items-center gap-2.5 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+          <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+          <span><strong>{duplicateCount}</strong> student name{duplicateCount > 1 ? "s appear" : " appears"} more than once — review for duplicates.</span>
+        </div>
+      )}
+
       <Card className="border-border/50 shadow-sm">
         <CardHeader className="pb-4 border-b border-border/50">
           <div className="relative w-full md:max-w-sm">
@@ -370,7 +386,16 @@ export default function Students() {
                 ) : filteredStudents.map(student => (
                   <TableRow key={student.id}>
                     <TableCell className="font-mono font-semibold text-sm">{student.studentCode}</TableCell>
-                    <TableCell className="font-medium">{student.studentName}</TableCell>
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-1.5">
+                        {student.studentName}
+                        {isDuplicate(student.studentName) && (
+                          <span title="Possible duplicate name" className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold border border-amber-200">
+                            <AlertTriangle className="h-2.5 w-2.5" />dup
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
                     <TableCell><SessionBadge session={student.lesson1Session} /></TableCell>
                     <TableCell><SessionBadge session={student.lesson2Session} /></TableCell>
                     <TableCell><SessionBadge session={student.lesson3Session} /></TableCell>

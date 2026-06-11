@@ -10,6 +10,7 @@ import {
   ChevronRight, GripVertical, BookOpen, Wand2, ArrowLeft,
   CheckCircle2, Loader2, FileText, AlignLeft,
 } from "lucide-react";
+import AssessmentQualityChecker from "@/components/assessment-quality-checker";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
@@ -365,7 +366,7 @@ export default function AssessmentBuilder({ params }: { params: { id: string } }
           <div className="flex-1 flex gap-4 overflow-hidden">
             {/* Questions list */}
             <div className="flex-1 flex flex-col overflow-hidden">
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-3 flex-wrap">
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowBankDrawer(!showBankDrawer)}>
                   <BookOpen className="w-3 h-3" />{showBankDrawer ? "Close" : "Question Bank"}
                 </Button>
@@ -375,6 +376,13 @@ export default function AssessmentBuilder({ params }: { params: { id: string } }
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1" onClick={() => setShowAiModal(true)}>
                   <Wand2 className="w-3 h-3" />AI Generate
                 </Button>
+                <div className="ml-auto w-56">
+                  <AssessmentQualityChecker
+                    questions={questions}
+                    timeLimitMinutes={assessment?.time_limit_minutes}
+                    status={assessment?.status}
+                  />
+                </div>
               </div>
 
               <div className="flex-1 overflow-y-auto space-y-2">

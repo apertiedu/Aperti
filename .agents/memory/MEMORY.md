@@ -6,3 +6,4 @@
 - [Aperti DB runtime gaps](aperti-db-runtime-gaps.md) — aperti_courses missing at runtime; students has no status column; phase14-public and courses.ts fixes
 - [Aperti Phase 26 stability](aperti-phase26.md) — session table, launch blockers, problem_reports schema fix, sessionExpired modal, error logging, QA script
 - [Aperti Phase 27 refinement](aperti-phase27.md) — all Phase 27 UX polish features; key components, backend endpoints, and UX patterns
+- [Aperti Phase 29 features](aperti-phase29.md) — all Phase 29 Intelligence, Efficiency & Educational Excellence features; components, patterns, and page integrations

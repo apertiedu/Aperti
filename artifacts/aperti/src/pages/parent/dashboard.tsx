@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import ParentSnapshot from "@/components/parent-snapshot";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -181,9 +182,14 @@ export default function ParentDashboard() {
 
       {child && (
         <>
-          {/* Top stat row */}
+          {/* Mobile compact snapshot (hidden on desktop) */}
+          <div className="md:hidden">
+            <ParentSnapshot child={child} />
+          </div>
+
+          {/* Top stat row (desktop) */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
-            className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon={CheckCircle2} label="Attendance" value={`${child.attendanceRate}%`} sub="This term" color="#0D9488" />
             <StatCard icon={BarChart3} label="Avg Grade" value={child.avgGrade ? `${child.avgGrade}%` : "—"} sub={child.avgGrade ? getGradeLabel(child.avgGrade) : "No data"} color="#6366f1" />
             <StatCard icon={BookOpen} label="Upcoming Tasks" value={child.upcomingDeadlines.length} sub="Due this week" color="#f59e0b" />

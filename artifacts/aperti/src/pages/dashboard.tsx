@@ -18,6 +18,7 @@ import ActionableInsights from "@/components/actionable-insights";
 import TrustStatusBar from "@/components/trust-status-bar";
 import TeacherDailyFocus from "@/components/teacher-daily-focus";
 import PlanStatusStrip from "@/components/plan-status-strip";
+import StudentPerformanceInsights from "@/components/student-performance-insights";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -348,6 +349,11 @@ export default function Dashboard() {
           </Card>
         </motion.div>
       </div>
+
+      {/* ── Student Performance Insights ── */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 }}>
+        <StudentPerformanceInsights />
+      </motion.div>
 
       {/* ── Upcoming Exams + At-Risk Students ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">

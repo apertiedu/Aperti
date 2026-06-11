@@ -14,6 +14,8 @@ type FlashcardWithProgress = {
   id: number; front: string; back: string; deck_name: string; topic: string | null;
   difficulty: string; ease_factor: string; interval_days: number; reps: number;
   next_review_at: string | null; last_quality: number | null;
+  image_url?: string | null; back_image_url?: string | null;
+  exam_style?: boolean; hint?: string | null;
 };
 
 type Stats = { total: number; mastered: number; due: number; streakDays: number };
@@ -152,9 +154,35 @@ export default function MyFlashcards() {
                 {flipped ? "A" : "Q"}
               </div>
             </div>
+            {/* Image support */}
+            {!flipped && currentCard.image_url && (
+              <img
+                src={currentCard.image_url}
+                alt="Card image"
+                className="mt-3 rounded-xl w-full max-h-40 object-contain border border-border/40"
+                onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            )}
+            {flipped && currentCard.back_image_url && (
+              <img
+                src={currentCard.back_image_url}
+                alt="Answer image"
+                className="mt-3 rounded-xl w-full max-h-40 object-contain border border-border/40"
+                onError={e => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            )}
             <p className={`text-lg font-semibold leading-relaxed mt-4 ${flipped ? "text-violet-900 dark:text-violet-200" : "text-foreground"}`}>
               {flipped ? currentCard.back : currentCard.front}
             </p>
+            {/* Exam-style hint */}
+            {currentCard.exam_style && !flipped && (
+              <div className="mt-3 flex items-center gap-1.5 text-[10px] text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-1.5 rounded-lg w-fit">
+                <span className="font-bold uppercase tracking-wide">Exam Style</span>
+              </div>
+            )}
+            {!flipped && currentCard.hint && (
+              <p className="text-xs text-muted-foreground/60 mt-2 italic">Hint: {currentCard.hint}</p>
+            )}
             {!flipped && <p className="text-xs text-muted-foreground mt-6">Tap to reveal answer</p>}
           </motion.button>
         </AnimatePresence>
