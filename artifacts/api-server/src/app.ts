@@ -163,6 +163,11 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads"), {
 // ── Prometheus metrics endpoint ───────────────────────────────────────────────
 app.use("/metrics", metricsRouter);
 
+// ── Root /api health ping (used by Replit deployment healthcheck) ─────────────
+app.get("/api", (_req, res) => {
+  res.json({ status: "ok", service: "aperti-api", version: process.env.COMMIT_HASH || "dev" });
+});
+
 // ── Public health check ───────────────────────────────────────────────────────
 app.get("/api/health", async (_req, res) => {
   const start = Date.now();
@@ -262,6 +267,39 @@ app.use("/api/flashcards/v3", flashcardV3Router);
 app.use("/api/revision", revisionPlanRouter);
 app.use("/api/questions/extract", questionExtractionRouter);
 
+// ── Production: serve built React frontend + SPA fallback ─────────────────────
+if (isProduction) {
+  const frontendDist = path.resolve(process.cwd(), "artifacts/aperti/dist/public");
+  app.use(express.static(frontendDist, { maxAge: "1h", etag: true }));
+  // SPA fallback — all non-API routes get index.html
+  app.get("*", (req, res, next) => {
+    const url = req.path;
+    if (
+      url.startsWith("/api") ||
+      url.startsWith("/auth") ||
+      url.startsWith("/dashboard") ||
+      url.startsWith("/attendance") ||
+      url.startsWith("/lessons") ||
+      url.startsWith("/subscriptions") ||
+      url.startsWith("/students") ||
+      url.startsWith("/homework") ||
+      url.startsWith("/question-bank") ||
+      url.startsWith("/flashcards") ||
+      url.startsWith("/mentor") ||
+      url.startsWith("/revisit") ||
+      url.startsWith("/exams") ||
+      url.startsWith("/upload") ||
+      url.startsWith("/courses") ||
+      url.startsWith("/parent") ||
+      url.startsWith("/socket.io") ||
+      url.startsWith("/metrics") ||
+      url.startsWith("/uploads")
+    ) {
+      return next();
+    }
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
