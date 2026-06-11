@@ -16,6 +16,8 @@ import { Link } from "wouter";
 import { motion } from "framer-motion";
 import ActionableInsights from "@/components/actionable-insights";
 import TrustStatusBar from "@/components/trust-status-bar";
+import TeacherDailyFocus from "@/components/teacher-daily-focus";
+import PlanStatusStrip from "@/components/plan-status-strip";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -139,6 +141,14 @@ export default function Dashboard() {
           </motion.div>
         )}
       </motion.div>
+
+      {/* ── Plan status strip (shows only when near limit or expiry) ── */}
+      <PlanStatusStrip />
+
+      {/* ── Teacher Daily Focus (teachers only) ── */}
+      {(user?.role === "teacher" || user?.role === "assistant") && (
+        <TeacherDailyFocus />
+      )}
 
       {/* ── Quick actions ── */}
       <motion.div variants={stagger} initial="hidden" animate="show" className="grid grid-cols-2 sm:grid-cols-4 gap-3">

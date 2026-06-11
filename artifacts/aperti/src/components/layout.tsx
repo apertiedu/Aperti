@@ -218,13 +218,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {(!isMobile && collapsed) ? (
           <span className="font-bold text-sm tracking-tight text-foreground">A<span className="text-primary">.</span></span>
         ) : (
-          <div className="flex items-center gap-2 overflow-hidden">
-            <div className="min-w-0">
-              <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">
-                Aperti<span className="text-primary">.</span>
-              </h1>
-              <p className="text-[10px] text-muted-foreground mt-0.5">Educational OS</p>
-            </div>
+          <div className="overflow-hidden">
+            <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">
+              Aperti<span className="text-primary">.</span>
+            </h1>
+            <p className="text-[10px] text-muted-foreground mt-0.5">Educational OS</p>
           </div>
         )}
         {!isMobile && (

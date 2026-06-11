@@ -7,8 +7,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import {
   Calendar, Clock, BookOpen, Zap, Target, AlertTriangle,
-  Layers, FileText, ChevronRight, Flame,
+  Layers, FileText, ChevronRight, Flame, Brain,
 } from "lucide-react";
+import RevisionModesSelector from "@/components/revision-modes-selector";
 
 const tok = () => localStorage.getItem("aperti_token") || "";
 
@@ -137,6 +138,7 @@ function WeeklyCalendar({ items }: { items: PlanItem[] }) {
 
 export default function Revisit() {
   const [planType, setPlanType] = useState<"daily" | "weekly" | "sprint">("daily");
+  const [revisionTopic, setRevisionTopic] = useState<{ name: string; subject: string } | null>(null);
 
   const { data, isLoading } = useQuery<Plan>({
     queryKey: ["revisit", "plan", planType],
@@ -227,6 +229,77 @@ export default function Revisit() {
           </div>
         </div>
       )}
+
+      {/* ── AI Revision Modes ── */}
+      <div className="mb-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center">
+            <Brain className="w-4 h-4 text-teal-600" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">AI Revision Modes</p>
+            <p className="text-[11px] text-gray-400">Choose how you want to revise any topic</p>
+          </div>
+        </div>
+        {!revisionTopic ? (
+          <div className="space-y-2">
+            <p className="text-xs text-gray-500 mb-2">Select a topic from your plan below, or enter one manually:</p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="e.g. Photosynthesis, Quadratic equations…"
+                className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-teal-400 transition-colors bg-gray-50"
+                onKeyDown={e => {
+                  if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
+                    setRevisionTopic({ name: (e.target as HTMLInputElement).value.trim(), subject: "General" });
+                  }
+                }}
+              />
+              <button
+                className="text-xs px-3 py-2 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+                onClick={(e) => {
+                  const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                  if (input?.value.trim()) setRevisionTopic({ name: input.value.trim(), subject: "General" });
+                }}
+              >
+                Revise
+              </button>
+            </div>
+            {data?.plan && data.plan.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {data.plan.slice(0, 5).map((item) => (
+                  <button
+                    key={item.date}
+                    onClick={() => setRevisionTopic({ name: item.topic, subject: "Subject" })}
+                    className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 border border-teal-100 hover:bg-teal-100 transition-colors font-medium"
+                  >
+                    {item.topic}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-bold text-gray-900">{revisionTopic.name}</p>
+                <p className="text-[11px] text-gray-400">{revisionTopic.subject}</p>
+              </div>
+              <button
+                onClick={() => setRevisionTopic(null)}
+                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                ← Change topic
+              </button>
+            </div>
+            <RevisionModesSelector
+              topicName={revisionTopic.name}
+              subjectName={revisionTopic.subject}
+            />
+          </div>
+        )}
+      </div>
 
       {/* Plan content */}
       {isLoading ? (

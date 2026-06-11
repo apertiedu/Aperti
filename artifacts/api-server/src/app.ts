@@ -71,6 +71,13 @@ import { startFounderAlertsWorker } from "./routes/founder-alerts-worker";
 // Phase 21 — Experience, Delight, Conversion & Product Excellence
 import { revisionPlanRouter } from "./routes/revision-plan";
 import { questionExtractionRouter } from "./routes/question-extraction";
+// Phase 29 — Intelligence, Efficiency & Educational Excellence
+import { teacherFocusRouter } from "./routes/teacher-focus";
+import { studentMomentumRouter } from "./routes/student-momentum";
+import { courseHealthRouter } from "./routes/course-health";
+import { feedbackRouter } from "./routes/feedback";
+import { revisionModesRouter } from "./routes/revision-modes";
+import { ensurePerformanceIndexes } from "./routes/db-indexes";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -267,6 +274,12 @@ app.use("/api/flashcards/v3", flashcardV3Router);
 app.use("/api/revision", revisionPlanRouter);
 app.use("/api/questions/extract", questionExtractionRouter);
 
+app.use("/api/teacher", teacherFocusRouter);
+app.use("/api/student", studentMomentumRouter);
+app.use("/api/course-health", courseHealthRouter);
+app.use("/api/feedback", feedbackRouter);
+app.use("/api/revision-modes", revisionModesRouter);
+
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
   const frontendDist = path.resolve(process.cwd(), "artifacts/aperti/dist/public");
@@ -301,10 +314,28 @@ if (isProduction) {
   });
 }
 
+// ── Ensure all API/auth routes always return JSON (never HTML) ────────────────
+app.use((req: Request, res: Response, next: NextFunction) => {
+  const isApiRoute = req.path.startsWith("/api") || req.path.startsWith("/auth") ||
+    req.path.startsWith("/dashboard") || req.path.startsWith("/attendance") ||
+    req.path.startsWith("/students") || req.path.startsWith("/courses") ||
+    req.path.startsWith("/exams") || req.path.startsWith("/homework") ||
+    req.path.startsWith("/flashcards") || req.path.startsWith("/mentor") ||
+    req.path.startsWith("/parent") || req.path.startsWith("/subscriptions");
+  if (isApiRoute && !res.headersSent) {
+    res.status(404).json({ error: "Route not found" });
+  } else {
+    next();
+  }
+});
+
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   logger.error({ err }, "Unhandled error");
-  res.status(err.status ?? 500).json({ error: err.message ?? "Internal server error" });
+  if (!res.headersSent) {
+    res.setHeader("Content-Type", "application/json");
+    res.status(err.status ?? 500).json({ error: err.message ?? "Internal server error" });
+  }
 });
 
 // ── Seed default admin & start scheduler ─────────────────────────────────────
@@ -324,5 +355,8 @@ async function seedDefaultAdmin() {
 seedDefaultAdmin();
 startBackupScheduler();
 startFounderAlertsWorker();
+
+// Phase 29 — ensure DB performance indexes exist at startup
+ensurePerformanceIndexes().catch(err => logger.warn({ err }, "[startup] Could not ensure indexes"));
 
 export default app;

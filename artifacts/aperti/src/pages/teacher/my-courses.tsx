@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import CourseHealthBadge from "@/components/course-health-badge";
 import {
   Plus, BookOpen, Users, CheckCircle2, XCircle, Edit3, Trash2,
   Eye, EyeOff, Clock, Search, GraduationCap, TrendingUp, Globe,
@@ -698,6 +699,7 @@ export default function MyCourses() {
                                 {c.is_published ? "Published" : "Draft"}
                               </Badge>
                               <QualityScoreBadge courseId={c.id} />
+                              <CourseHealthBadge courseId={c.id} showLabel />
                             </div>
                             <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-400">
                               {c.subject && <span className="font-medium text-gray-600">{c.subject}</span>}

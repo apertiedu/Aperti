@@ -81,10 +81,20 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
   const abortRef = useRef<AbortController | null>(null);
   const uAbortRef = useRef<AbortController | null>(null);
 
-  const routes = ALL_ROUTES.filter(r =>
-    user && (r.roles as string[]).includes(user.role) &&
-    r.name.toLowerCase().includes(query.toLowerCase())
-  );
+  const routes = ALL_ROUTES.filter(r => {
+    if (!user || !(r.roles as string[]).includes(user.role)) return false;
+    if (!query) return true;
+    const q = query.toLowerCase();
+    const name = r.name.toLowerCase();
+    // Exact include match
+    if (name.includes(q)) return true;
+    // Fuzzy: every char of query appears in order in the name
+    let qi = 0;
+    for (let ni = 0; ni < name.length && qi < q.length; ni++) {
+      if (name[ni] === q[qi]) qi++;
+    }
+    return qi === q.length;
+  });
 
   const isSemantic = query.length >= 3 && SEMANTIC_TRIGGER.test(query);
   const isUniversal = query.length >= 2 && !isSemantic;

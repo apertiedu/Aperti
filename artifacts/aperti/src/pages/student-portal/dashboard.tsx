@@ -2,10 +2,12 @@ import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink, Zap, AlertTriangle } from "lucide-react";
+import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink, Zap, AlertTriangle, Trophy } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
+import MomentumScore from "@/components/momentum-score";
+import WhatNextCard from "@/components/what-next-card";
 
 type PortalData = {
   student: any;
@@ -119,6 +121,12 @@ export default function StudentDashboard() {
 
   return (
     <div className="space-y-6 pb-6">
+      {/* ── Intelligence Row: Momentum + What's Next ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <MomentumScore />
+        <WhatNextCard />
+      </div>
+
       {/* ── Your Focus Today ── */}
       {focusItems.length > 0 && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
