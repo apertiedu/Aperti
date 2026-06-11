@@ -7,3 +7,4 @@
 - [Aperti Phase 26 stability](aperti-phase26.md) — session table, launch blockers, problem_reports schema fix, sessionExpired modal, error logging, QA script
 - [Aperti Phase 27 refinement](aperti-phase27.md) — all Phase 27 UX polish features; key components, backend endpoints, and UX patterns
 - [Aperti Phase 29 features](aperti-phase29.md) — all Phase 29 Intelligence, Efficiency & Educational Excellence features; components, patterns, and page integrations
+- [Aperti Phase 30 production](aperti-phase30.md) — all Phase 30 features: Error Intelligence, Content Validation, Resource Mapping, Learning Efficiency, self-marking, route test script

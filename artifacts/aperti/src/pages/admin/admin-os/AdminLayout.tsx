@@ -10,7 +10,7 @@ import {
   Rocket, Package, TestTube, Map, Layout, Quote, HelpCircle,
   Calendar, Palette, Megaphone, TrendingUp, PieChart, Globe, Star,
   Bug, FlaskConical, History, ClipboardList,
-  Crown, DollarSign, Bell, Tag, Award, ShieldAlert,
+  Crown, DollarSign, Bell, Tag, Award, ShieldAlert, Network,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -94,6 +94,12 @@ const NAV = [
   { label: "Launch Blockers",     icon: ShieldAlert, href: "/admin/os/launch-blockers" },
   { label: "Launch Certification",icon: Rocket,      href: "/admin/os/launch-certification" },
   { label: "Releases",            icon: Tag,         href: "/admin/os/releases" },
+
+  { label: "— Phase 30 Intelligence", header: true },
+  { label: "Error Intelligence",   icon: ShieldAlert, href: "/admin/os/error-intelligence" },
+  { label: "Learning Efficiency",  icon: TrendingUp,  href: "/admin/os/learning-efficiency" },
+  { label: "Content Validation",   icon: ShieldCheck, href: "/admin/os/ai-content-validation" },
+  { label: "Resource Relationships", icon: Network,   href: "/admin/os/resource-relationships" },
 ] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

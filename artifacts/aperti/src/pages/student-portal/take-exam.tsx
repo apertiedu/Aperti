@@ -8,12 +8,75 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Timer, AlertTriangle, Flag, ArrowLeft, ArrowRight, CheckCircle2, BookOpen, Star, Bookmark } from "lucide-react";
+import { Timer, AlertTriangle, Flag, ArrowLeft, ArrowRight, CheckCircle2, BookOpen, Star, Bookmark, Type, Hash, Lightbulb } from "lucide-react";
 import { useLocation } from "wouter";
 import { MathRenderer } from "@/components/math-renderer";
 
 const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
+
+// ── Theory Answer Editor ──────────────────────────────────────────────────────
+function TheoryAnswerEditor({ value, onChange, marks }: { value: string; onChange: (v: string) => void; marks: number }) {
+  const words = value.trim() ? value.trim().split(/\s+/).length : 0;
+  const chars = value.length;
+  // Target: ~25-35 words per mark for concise answers
+  const targetWords = Math.max(marks * 30, 40);
+  const pct = Math.min((words / targetWords) * 100, 100);
+  const quality =
+    words === 0 ? "empty"
+    : words < targetWords * 0.25 ? "too-short"
+    : words < targetWords * 0.6 ? "developing"
+    : words < targetWords * 1.1 ? "good"
+    : "detailed";
+  const qualityConfig = {
+    empty:     { label: "Not started",  bar: "bg-gray-200",   text: "text-gray-400" },
+    "too-short": { label: "Too brief",  bar: "bg-red-400",    text: "text-red-500" },
+    developing:{ label: "Developing",  bar: "bg-amber-400",  text: "text-amber-600" },
+    good:      { label: "Good length", bar: "bg-teal-500",   text: "text-teal-600" },
+    detailed:  { label: "Detailed",    bar: "bg-green-500",  text: "text-green-600" },
+  };
+  const qc = qualityConfig[quality];
+  const rows = Math.max(6, Math.ceil(marks * 2.5));
+
+  return (
+    <div className="space-y-2">
+      {/* Writing hints */}
+      <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/30 rounded-lg px-3 py-1.5">
+        <Lightbulb className="h-3 w-3 text-amber-500 shrink-0" />
+        <span>
+          {marks === 1 && "1 mark — give one clear, specific point."}
+          {marks === 2 && "2 marks — state two distinct points or one explained point."}
+          {marks >= 3 && marks <= 4 && `${marks} marks — aim for ${marks} developed points with supporting evidence.`}
+          {marks >= 5 && marks <= 6 && `${marks} marks — structure your answer: state → explain → example for each point.`}
+          {marks > 6 && `${marks} marks — write a structured response with introduction, ${marks - 2} developed points, and a conclusion.`}
+        </span>
+      </div>
+      <Textarea
+        rows={rows}
+        placeholder={`Write your answer here… (target ~${targetWords} words for ${marks} mark${marks !== 1 ? "s" : ""})`}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="text-sm resize-y leading-relaxed"
+      />
+      {/* Word count bar */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+          <div className={`h-full rounded-full transition-all duration-300 ${qc.bar}`} style={{ width: `${pct}%` }} />
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className={`text-[10px] font-semibold ${qc.text}`}>{qc.label}</span>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+            <Type className="h-2.5 w-2.5" />{words}w
+          </span>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+            <Hash className="h-2.5 w-2.5" />{chars}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+// ─────────────────────────────────────────────────────────────────────────────
 
 type ConfidenceLevel = "low" | "medium" | "high" | null;
 
@@ -324,12 +387,10 @@ export default function TakeExam() {
                       })}
                     </div>
                   ) : (
-                    <Textarea
-                      rows={7}
-                      placeholder="Type your answer here…"
+                    <TheoryAnswerEditor
                       value={answers[current?.id] || ""}
-                      onChange={(e) => current && handleAnswerChange(current.id, e.target.value)}
-                      className="text-base resize-none font-mono"
+                      onChange={(v) => current && handleAnswerChange(current.id, v)}
+                      marks={current?.marks ?? 1}
                     />
                   )}
 

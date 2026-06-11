@@ -61,6 +61,11 @@ import LaunchCommandPage from "./LaunchCommandPage";
 import ProblemReportsPage from "./ProblemReportsPage";
 import LaunchBlockersPage from "./LaunchBlockersPage";
 import LaunchCertificationPage from "./LaunchCertificationPage";
+// Phase 30 — Error Intelligence & Learning Efficiency
+import ErrorIntelligencePage from "./ErrorIntelligencePage";
+import LearningEfficiencyPage from "./LearningEfficiencyPage";
+import AiContentValidationPage from "./AiContentValidationPage";
+import ResourceRelationshipPage from "./ResourceRelationshipPage";
 
 export default function AdminOS() {
   return (
@@ -150,6 +155,12 @@ export default function AdminOS() {
         <Route path="/admin/os/problem-reports" component={ProblemReportsPage} />
         <Route path="/admin/os/launch-blockers" component={LaunchBlockersPage} />
         <Route path="/admin/os/launch-certification" component={LaunchCertificationPage} />
+
+        {/* Phase 30 — Error Intelligence & Production Readiness */}
+        <Route path="/admin/os/error-intelligence" component={ErrorIntelligencePage} />
+        <Route path="/admin/os/learning-efficiency" component={LearningEfficiencyPage} />
+        <Route path="/admin/os/ai-content-validation" component={AiContentValidationPage} />
+        <Route path="/admin/os/resource-relationships" component={ResourceRelationshipPage} />
 
         <Route component={Dashboard} />
       </Switch>

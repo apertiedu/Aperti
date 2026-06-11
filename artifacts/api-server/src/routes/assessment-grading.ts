@@ -640,6 +640,92 @@ assessmentGradingRouter.put("/appeals/:id/resolve", ...teacherOrAdmin, async (re
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 
+// ── Student Self-Marking (Practice Mode) ─────────────────────────────────────
+// POST /grading/self-mark
+// Students can request instant AI feedback on a written answer (practice only)
+assessmentGradingRouter.post("/grading/self-mark", authenticate,
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const { questionText, studentAnswer, modelAnswer, maxMarks, subject } = req.body as {
+        questionText: string;
+        studentAnswer: string;
+        modelAnswer?: string;
+        maxMarks: number;
+        subject?: string;
+      };
+
+      if (!questionText || !studentAnswer) {
+        return res.status(400).json({ error: "questionText and studentAnswer are required" });
+      }
+      if (!studentAnswer.trim() || studentAnswer.trim().split(/\s+/).length < 3) {
+        return res.status(400).json({ error: "Answer is too short to mark" });
+      }
+
+      const maxM = Math.max(1, Math.min(parseInt(String(maxMarks)) || 1, 25));
+
+      const prompt = `You are an expert ${subject ?? "exam"} marker. Grade this student's answer.
+${modelAnswer ? `Model Answer: ${modelAnswer}\n` : ""}Max Marks: ${maxM}
+
+Respond ONLY with valid JSON in this exact format:
+{
+  "marks": <number between 0 and ${maxM}>,
+  "percentage": <number 0-100>,
+  "grade": "<A*|A|B|C|D|E|U>",
+  "feedback": "<2-3 sentence overall feedback>",
+  "strengths": ["<strength 1>", "<strength 2>"],
+  "improvements": ["<improvement 1>", "<improvement 2>"],
+  "missingPoints": ["<missing key point 1>"],
+  "examTip": "<one actionable exam technique tip>"
+}`;
+
+      const aiResponse = await openaiChat({
+        systemPrompt: prompt,
+        userMessage: `Question: ${questionText}\n\nStudent Answer: ${studentAnswer}`,
+        maxTokens: 500,
+      });
+
+      if (!aiResponse) {
+        // Graceful fallback without AI
+        const wordCount = studentAnswer.trim().split(/\s+/).length;
+        const estimatedMarks = Math.round(Math.min(maxM, (wordCount / (maxM * 30)) * maxM));
+        return res.json({
+          marks: estimatedMarks,
+          percentage: Math.round((estimatedMarks / maxM) * 100),
+          grade: igcseGrade(Math.round((estimatedMarks / maxM) * 100)),
+          feedback: "AI marking is not available right now. Your teacher will review this answer.",
+          strengths: ["Answer submitted"],
+          improvements: ["Review with your teacher"],
+          missingPoints: [],
+          examTip: "Practice writing structured answers with clear key points.",
+          aiAvailable: false,
+        });
+      }
+
+      try {
+        const parsed = JSON.parse(aiResponse.trim());
+        const marks = Math.min(Math.max(0, parseFloat(parsed.marks) || 0), maxM);
+        const percentage = Math.round((marks / maxM) * 100);
+        return res.json({
+          marks,
+          maxMarks: maxM,
+          percentage,
+          grade: parsed.grade ?? igcseGrade(percentage),
+          feedback: parsed.feedback ?? "",
+          strengths: Array.isArray(parsed.strengths) ? parsed.strengths : [],
+          improvements: Array.isArray(parsed.improvements) ? parsed.improvements : [],
+          missingPoints: Array.isArray(parsed.missingPoints) ? parsed.missingPoints : [],
+          examTip: parsed.examTip ?? "",
+          aiAvailable: true,
+        });
+      } catch {
+        return res.status(500).json({ error: "Failed to parse AI response. Please try again." });
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
+
 // ── Shared helpers ────────────────────────────────────────────────────────────
 function igcseGrade(pct: number): string {
   if (pct >= 90) return "A*";

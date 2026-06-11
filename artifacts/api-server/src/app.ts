@@ -78,6 +78,10 @@ import { courseHealthRouter } from "./routes/course-health";
 import { feedbackRouter } from "./routes/feedback";
 import { revisionModesRouter } from "./routes/revision-modes";
 import { ensurePerformanceIndexes } from "./routes/db-indexes";
+// Phase 30 — Deployment Stability, Error Intelligence & Production Readiness
+import { errorIntelligenceRouter } from "./routes/admin-error-intelligence";
+import { learningEfficiencyRouter } from "./routes/admin-learning-efficiency";
+import { adminContentValidationRouter } from "./routes/admin-content-validation";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -295,6 +299,10 @@ app.use("/api/student", studentMomentumRouter);
 app.use("/api/course-health", courseHealthRouter);
 app.use("/api/feedback", feedbackRouter);
 app.use("/api/revision-modes", revisionModesRouter);
+// Phase 30
+app.use("/api/admin/error-intelligence", errorIntelligenceRouter);
+app.use("/api/admin/learning-efficiency", learningEfficiencyRouter);
+app.use("/api/admin/content-validation", adminContentValidationRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
