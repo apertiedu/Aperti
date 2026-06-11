@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { fetchJSON } from "@/lib/api";
 import { Clock, CheckCircle, XCircle, Loader, Play, RefreshCw, ListTodo, Zap } from "lucide-react";
+import { postJSON } from "@/lib/api";
 
 function StatCard({ label, value, icon: Icon, color }: any) {
   return (
@@ -38,7 +39,7 @@ export default function QueuePage() {
   });
 
   const testMutation = useMutation({
-    mutationFn: () => fetchJSON("/api/admin/queue/test", { method: "POST" }),
+    mutationFn: () => postJSON("/api/admin/queue/test", {}),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-queue-stats"] }); qc.invalidateQueries({ queryKey: ["admin-queue-jobs"] }); },
   });
 

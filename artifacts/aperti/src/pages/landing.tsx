@@ -649,9 +649,9 @@ function ComparisonSection({ teal }: { teal: string }) {
                   transition={{ delay: 0.2 + i * 0.04 }}
                   className={`border-b border-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}>
                   <td className="py-3 px-4 text-sm text-gray-700">{row.feature}</td>
-                  <Cell val={row.aperti} />
-                  <Cell val={row.paper} />
-                  <Cell val={row.sheet} />
+                  <Cell val={row.aperti as boolean | "partial"} />
+                  <Cell val={row.paper as boolean | "partial"} />
+                  <Cell val={row.sheet as boolean | "partial"} />
                 </motion.tr>
               ))}
             </tbody>

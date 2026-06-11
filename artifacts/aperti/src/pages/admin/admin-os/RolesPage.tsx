@@ -486,9 +486,9 @@ export default function RolesPage() {
             <div className="space-y-2">
               {sortedRoles.map((role: any) => (
                 <RoleCard key={role.id} role={role}
-                  onEdit={r => { setEditing(r); setShowCreate(false); setViewingPerms(null); }}
+                  onEdit={(r: any) => { setEditing(r); setShowCreate(false); setViewingPerms(null); }}
                   onDelete={(id: number) => { if (window.confirm("Delete this role?")) deleteMut.mutate(id); }}
-                  onViewPerms={r => setViewingPerms(r)}
+                  onViewPerms={(r: any) => setViewingPerms(r)}
                 />
               ))}
             </div>

@@ -106,12 +106,12 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
     setForm(prev => ({ ...prev, [k]: v }));
 
   const paymentLabel = PAYMENT_MODELS.find(p => p.value === form.paymentModel)?.label ?? "";
-  const priceHint = {
+  const priceHint = ({
     monthly: "EGP per month",
     per_lesson: "EGP per lesson",
     full_course: "EGP total (one-time)",
     installments: "EGP per instalment (×2)",
-  }[form.paymentModel] ?? "EGP";
+  } as Record<string, string>)[form.paymentModel] ?? "EGP";
 
   const mutation = useMutation({
     mutationFn: async () => {

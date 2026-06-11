@@ -34,7 +34,7 @@ async function fetchJSON(url: string) {
 type Phase = "intro" | "quiz" | "results";
 
 export default function MicroAssessmentPage() {
-  const [, location] = useLocation();
+  const [location] = useLocation();
   const params = new URLSearchParams(location.split("?")[1] ?? "");
   const topicParam = params.get("topic") ?? "";
 

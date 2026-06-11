@@ -101,7 +101,7 @@ export default function UsersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users", search, role, status, page],
     queryFn: () => fetchJSON(`/api/admin/users?search=${search}&role=${role}&status=${status}&page=${page}&limit=20`),
-    keepPreviousData: true,
+    placeholderData: (prev: any) => prev,
   });
 
   const { data: stats } = useQuery({

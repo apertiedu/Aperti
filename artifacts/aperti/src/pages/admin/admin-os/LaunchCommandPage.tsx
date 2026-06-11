@@ -115,7 +115,7 @@ export default function LaunchCommandPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {Object.entries(grouped).map(([category, catItems]) => {
+          {Object.entries(grouped).map(([category, catItems]: [string, any[]]) => {
             const catPassed = catItems.filter(i => i.status === "pass").length;
             const isOpen = expanded.has(category);
             return (

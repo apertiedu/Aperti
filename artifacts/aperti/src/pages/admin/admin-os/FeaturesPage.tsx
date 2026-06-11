@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Plus, Zap, Toggle } from "lucide-react";
+import { Plus, Zap } from "lucide-react";
 import { fetchJSON, postJSON, putJSON } from "@/lib/api";
 import { toast } from "sonner";
 

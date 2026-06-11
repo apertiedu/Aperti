@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { fetchJSON } from "@/lib/api";
 import { Database, CheckCircle, XCircle, Clock, Play, RefreshCw, HardDrive } from "lucide-react";
+import { postJSON } from "@/lib/api";
 
 const STATUS_STYLES: Record<string, { badge: string; icon: any }> = {
   success: { badge: "bg-green-100 text-green-700", icon: CheckCircle },
@@ -19,7 +20,7 @@ export default function BackupsPage() {
   });
 
   const runMutation = useMutation({
-    mutationFn: () => fetchJSON("/api/admin/health/run-backup", { method: "POST" }),
+    mutationFn: () => postJSON("/api/admin/health/run-backup", {}),
     onSuccess: () => { setTimeout(() => qc.invalidateQueries({ queryKey: ["admin-backup-logs"] }), 3000); },
   });
 

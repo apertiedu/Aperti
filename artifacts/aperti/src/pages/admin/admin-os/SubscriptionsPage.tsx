@@ -25,7 +25,7 @@ export default function SubscriptionsPage() {
   const { data: subsData } = useQuery({
     queryKey: ["admin-subs", page],
     queryFn: () => fetchJSON(`/api/admin/subscriptions?page=${page}&limit=20`),
-    keepPreviousData: true,
+    placeholderData: (prev: any) => prev,
   });
 
   const { data: stats } = useQuery({ queryKey: ["admin-sub-stats"], queryFn: () => fetchJSON("/api/admin/subscriptions/stats/overview") });

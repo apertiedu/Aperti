@@ -49,7 +49,7 @@ function ResourceCard({ resource, isAdmin, onApprove }: { resource: any; isAdmin
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className="font-semibold text-gray-800 text-sm leading-tight">{resource.title}</h3>
             {resource.approval_status === "approved" && (
-              <Shield size={14} className="text-green-500 shrink-0 mt-0.5" title="Approved" />
+              <Shield size={14} className="text-green-500 shrink-0 mt-0.5" aria-label="Approved" />
             )}
           </div>
           {resource.description && <p className="text-xs text-gray-500 line-clamp-2 mb-3">{resource.description}</p>}

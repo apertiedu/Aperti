@@ -12,7 +12,7 @@ import {
 import {
   Brain, Target, Clock, CheckCircle, XCircle, BarChart3, Zap,
   ChevronRight, RefreshCw, Star, TrendingUp, BookOpen, Play,
-  Timer, Award,
+  Timer, Award, Eye,
 } from "lucide-react";
 
 const API = "/api";

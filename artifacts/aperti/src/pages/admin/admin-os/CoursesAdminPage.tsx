@@ -19,7 +19,7 @@ export default function CoursesAdminPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-courses", search, page],
     queryFn: () => fetchJSON(`/api/admin/courses?search=${search}&page=${page}&limit=20`),
-    keepPreviousData: true,
+    placeholderData: (prev: any) => prev,
   });
 
   const toggleMutation = useMutation({

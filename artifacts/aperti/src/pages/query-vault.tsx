@@ -119,7 +119,7 @@ export default function QueryVault() {
             <h3 className="text-base font-semibold text-foreground mb-1">Your question bank is empty</h3>
             <p className="text-sm text-muted-foreground max-w-xs mb-5">Build a library of questions to reuse across assessments and homework tasks.</p>
             <button
-              onClick={() => setShowCreate(true)}
+              onClick={() => setDialogOpen(true)}
               className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-white"
               style={{ background: "#0D9488" }}
             >

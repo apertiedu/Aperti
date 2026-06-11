@@ -272,7 +272,7 @@ if (isProduction) {
   const frontendDist = path.resolve(process.cwd(), "artifacts/aperti/dist/public");
   app.use(express.static(frontendDist, { maxAge: "1h", etag: true }));
   // SPA fallback — all non-API routes get index.html
-  app.get("*", (req, res, next) => {
+  app.get("/{*path}", (req, res, next) => {
     const url = req.path;
     if (
       url.startsWith("/api") ||

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -38,7 +38,7 @@ const EMPTY_FORM = {
   session: "", duration_weeks: "12", language: "English", visibility: "draft",
 };
 
-const VIS_BADGES: Record<string, JSX.Element> = {
+const VIS_BADGES: Record<string, React.ReactElement> = {
   draft: <Badge variant="secondary" className="text-xs">Draft</Badge>,
   private: <Badge variant="outline" className="text-xs"><Lock className="h-3 w-3 mr-1" />Private</Badge>,
   public: <Badge className="text-xs"><Globe className="h-3 w-3 mr-1" />Public</Badge>,

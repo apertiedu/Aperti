@@ -165,7 +165,7 @@ export default function LearningAnalyticsPage() {
             <CardContent className="px-4 pb-4 space-y-2">
               {isLoading ? <Skeleton className="h-32 rounded-xl" /> : masteryDist.length === 0 ? (
                 <p className="text-sm text-muted-foreground py-4 text-center">No mastery data yet</p>
-              ) : masteryDist.map(({ state, count, color }) => {
+              ) : masteryDist.map(({ state, count, color }: { state: string; count: number; color: string }) => {
                 const total = (data?.mastery ?? []).length;
                 const pct = total > 0 ? Math.round((count / total) * 100) : 0;
                 return (

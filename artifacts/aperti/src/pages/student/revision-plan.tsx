@@ -320,7 +320,7 @@ export default function RevisionPlanPage() {
                                 >
                                   {isTaskDone
                                     ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
-                                    : <Icon className="h-4 w-4 shrink-0 mt-0.5" style={{ color: TASK_COLORS[t.type] }} />
+                                    : <span style={{ color: TASK_COLORS[t.type] }}><Icon className="h-4 w-4 shrink-0 mt-0.5" /></span>
                                   }
                                   <div className="flex-1 min-w-0">
                                     <p className={`text-xs font-semibold text-gray-900 ${isTaskDone ? "line-through" : ""}`}>

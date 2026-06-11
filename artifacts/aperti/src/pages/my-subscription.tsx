@@ -94,7 +94,7 @@ export default function MySubscriptionPage() {
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1"><TrendingUp className="w-3 h-3" /> Usage</p>
                 {Object.entries(limits).map(([resource, limit]) => {
                   const current = usage[resource] ?? 0;
-                  const pct = limit > 0 ? Math.min((current / (limit as number)) * 100, 100) : 0;
+                  const pct = (limit as number) > 0 ? Math.min((current / (limit as number)) * 100, 100) : 0;
                   const isOver = current >= (limit as number);
                   return (
                     <div key={resource}>
