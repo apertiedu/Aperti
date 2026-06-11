@@ -33,14 +33,63 @@ const TOKEN_EXPIRY = "7d";
 
 export const authRouter = Router();
 
-// ── Login rate limiter: 10 attempts per minute per IP ─────────────────────────
+// ── Login rate limiter: 5 failed attempts per 10 minutes per IP ───────────────
+// skipSuccessfulRequests=true means only 4xx/5xx responses count toward the limit
 const loginLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 10,
+  windowMs: 10 * 60 * 1000,
+  max: 5,
+  skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many login attempts — please wait a minute" },
+  message: { error: "Too many failed login attempts. Please try again in 10 minutes.", rateLimited: true },
 });
+
+// ── Per-IP brute-force tracker → email admin when threshold is hit ────────────
+const ipFailTimes = new Map<string, number[]>();
+const alertCooldown = new Map<string, number>();
+const ALERT_THRESHOLD = 5;
+const ALERT_WINDOW_MS = 10 * 60 * 1000;
+
+async function checkAndMaybeAlert(ip: string): Promise<void> {
+  const now = Date.now();
+  const recent = (ipFailTimes.get(ip) || []).filter(t => now - t < ALERT_WINDOW_MS);
+  recent.push(now);
+  ipFailTimes.set(ip, recent);
+  if (recent.length < ALERT_THRESHOLD) return;
+  const lastAlert = alertCooldown.get(ip) || 0;
+  if (now - lastAlert < ALERT_WINDOW_MS) return; // already alerted this window
+  alertCooldown.set(ip, now);
+  writeAudit({ action: "security_alert", resource: "auth", details: { ip, count: recent.length, window: "10min" }, ipAddress: ip, severity: "critical" });
+  try {
+    const { pool: p } = await import("@workspace/db");
+    const { rows } = await p.query(`SELECT email, display_name FROM accounts WHERE role='admin' AND status='active' AND email IS NOT NULL LIMIT 1`);
+    if (!rows.length) return;
+    const admin = rows[0] as any;
+    const { sendEmail } = await import("../lib/email");
+    await sendEmail({
+      to: admin.email,
+      subject: "⚠️ Aperti Security Alert — Brute-force login detected",
+      html: `
+        <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;color:#1e293b">
+          <h1 style="font-size:22px;font-weight:800;margin:0 0 4px">Aperti<span style="color:#dc2626">.</span></h1>
+          <p style="color:#64748b;font-size:13px;margin:0 0 28px">Security Notification</p>
+          <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:20px 24px;margin:0 0 24px">
+            <p style="font-size:15px;font-weight:700;color:#dc2626;margin:0 0 8px">🚨 Brute-force attempt detected</p>
+            <p style="font-size:14px;margin:0 0 12px;color:#374151">
+              <strong>${recent.length} failed login attempts</strong> from the same IP address have been recorded within the last 10 minutes.
+            </p>
+            <table style="font-size:13px;width:100%;border-collapse:collapse">
+              <tr><td style="color:#6b7280;padding:3px 0">IP Address</td><td style="font-weight:600;color:#111827">${ip}</td></tr>
+              <tr><td style="color:#6b7280;padding:3px 0">Attempt count</td><td style="font-weight:600;color:#dc2626">${recent.length} in 10 min</td></tr>
+              <tr><td style="color:#6b7280;padding:3px 0">Detected at</td><td style="font-weight:600;color:#111827">${new Date().toUTCString()}</td></tr>
+            </table>
+          </div>
+          <p style="font-size:13px;color:#6b7280">Further attempts from this IP have been blocked for the next 10 minutes. Review the audit log in your admin panel for details.</p>
+          <p style="font-size:12px;color:#94a3b8;margin-top:24px">Aperti Security System · This is an automated alert</p>
+        </div>`,
+    });
+  } catch { /* email not configured — alert is in audit log */ }
+}
 
 async function recordLoginHistory(
   accountId: number | null,
@@ -75,16 +124,42 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
       [identifier]
     );
     const account = acctRows[0] as any;
+
+    // Suspended accounts get a clear, specific error — not a generic 401
+    if (account && account.status === "suspended") {
+      await recordLoginHistory(account.id, identifier, req, false, "Account suspended");
+      writeAudit({ accountId: account.id, action: "login_failed", resource: "auth", details: { reason: "Account suspended" }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "warning" });
+      checkAndMaybeAlert(req.ip || "unknown").catch(() => {});
+      return res.status(403).json({ error: "Your account has been suspended. Please contact your administrator.", suspended: true });
+    }
+
     if (!account || account.status !== "active") {
       await recordLoginHistory(null, identifier, req, false, "Account not found or inactive");
       writeAudit({ action: "login_failed", resource: "auth", details: { identifier, reason: "Account not found or inactive" }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "warning" });
+      checkAndMaybeAlert(req.ip || "unknown").catch(() => {});
       return res.status(401).json({ error: "Invalid credentials" });
     }
     const valid = await bcrypt.compare(password, account.password_hash);
     if (!valid) {
       await recordLoginHistory(account.id, identifier, req, false, "Wrong password");
       writeAudit({ accountId: account.id, action: "login_failed", resource: "auth", details: { reason: "Wrong password" }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "warning" });
+      checkAndMaybeAlert(req.ip || "unknown").catch(() => {});
       return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // ── Device session limit: max 2 concurrent devices per account ────────────
+    if (deviceId) {
+      const existing = await db
+        .select({ deviceId: deviceSessionsTable.deviceId })
+        .from(deviceSessionsTable)
+        .where(eq(deviceSessionsTable.accountId, account.id));
+      const alreadyRegistered = existing.some((s) => s.deviceId === deviceId);
+      if (!alreadyRegistered && existing.length >= 2) {
+        return res.status(403).json({
+          error: "You're already signed in on 2 devices. Please sign out from another device first.",
+          deviceLimitReached: true,
+        });
+      }
     }
 
     // Update last login

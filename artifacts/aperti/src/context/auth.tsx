@@ -57,11 +57,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!res.ok) {
       const msg =
         res.status === 401 ? (data.error || "Incorrect username or password") :
-        res.status === 403 ? "Your account has been suspended. Contact support." :
-        res.status === 429 ? "Too many attempts — please wait a moment and try again." :
+        res.status === 403 ? (data.error || "Access denied.") :
+        res.status === 429 ? "Too many failed login attempts. Please wait 10 minutes and try again." :
         res.status >= 500 ? "Server error — please try again in a moment." :
         data.error || "Login failed";
-      throw new Error(msg);
+      const err: any = new Error(msg);
+      err.suspended = data.suspended === true;
+      err.deviceLimitReached = data.deviceLimitReached === true;
+      err.rateLimited = data.rateLimited === true || res.status === 429;
+      throw err;
     }
     const loggedInUser = data.user as unknown as User;
     localStorage.setItem("aperti_token", data.token);
