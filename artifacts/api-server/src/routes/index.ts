@@ -103,6 +103,7 @@ import { i18nRouter } from "./i18n";
 import { userExportRouter } from "./user-export";
 import { contentCraftRouter } from "./content-craft";
 import { problemReportsRouter } from "./problem-reports";
+import { phase25Router } from "./phase25";
 
 const router: IRouter = Router();
 
@@ -230,6 +231,9 @@ router.use("/content-craft", contentCraftRouter);
 
 // Phase 24 — Production Hardening
 router.use(problemReportsRouter);
+
+// Phase 25 — Product Excellence
+router.use(phase25Router);
 
 export default router;
 

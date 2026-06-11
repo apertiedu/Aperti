@@ -16,8 +16,9 @@ import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CommandPalette, { useCommandPalette } from "@/components/command-palette";
+import { useRecentPages } from "@/hooks/use-recent-pages";
 import NotificationBell from "@/components/notification-bell";
 import ChangePasswordModal from "@/components/change-password-modal";
 import { useTheme } from "@/context/theme";
@@ -52,6 +53,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
   const { dark, toggleDark } = useTheme();
   const { startTour } = useTour();
+  const { recent, push } = useRecentPages();
 
   const isAdmin = user?.role === "admin";
   const isAssistant = user?.role === "assistant";
@@ -201,6 +203,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         (item.href !== "/" && location.startsWith(item.href)),
     )?.name || (isAdmin ? "Command Center" : "CoreHub");
 
+  useEffect(() => {
+    if (currentPage && location !== "/" && !location.startsWith("/admin/os")) {
+      push(location, currentPage);
+    }
+  }, [location, currentPage]);
+
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
     <>
       {/* Logo */}
@@ -250,6 +258,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto mt-2 px-2 py-1 space-y-3">
+        {/* Recent pages */}
+        {(isMobile || !collapsed) && recent.length > 0 && (
+          <div className="space-y-0.5">
+            <p className="px-2 text-[9px] font-bold tracking-widest text-muted-foreground/60 uppercase mb-1">Recent</p>
+            {recent.slice(0, 3).map((p) => (
+              <Link
+                key={p.href}
+                href={p.href}
+                onClick={() => isMobile && setMobileOpen(false)}
+                className="group flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-all duration-150 min-h-[32px]"
+              >
+                <RefreshCw className="w-3 h-3 shrink-0 opacity-50 group-hover:text-primary" />
+                <span className="truncate">{p.label}</span>
+              </Link>
+            ))}
+          </div>
+        )}
         {filteredGroups.map((group, gi) => (
           <div key={gi} className="space-y-0.5">
             {(isMobile || !collapsed) && (

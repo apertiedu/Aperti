@@ -5,12 +5,11 @@ import { useLocation } from "wouter";
 import {
   Users, TrendingUp, BookOpen, DollarSign, AlertCircle,
   Layers, Activity, Zap, ArrowUpRight, ArrowDownRight,
-  BarChart3, ShieldCheck, Gauge,
+  BarChart3, ShieldCheck, Gauge, Heart, Puzzle, Headphones,
+  Target, RefreshCw,
 } from "lucide-react";
-
 import {
-  BarChart, Bar, XAxis, YAxis,
-  Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts";
 
 function QualityGauge({ score }: { score: number }) {
@@ -28,6 +27,21 @@ function QualityGauge({ score }: { score: number }) {
       <p className="text-2xl font-black -mt-2" style={{ color }}>{score}</p>
       <p className="text-xs font-medium" style={{ color }}>{label}</p>
     </div>
+  );
+}
+
+function ScoreRing({ score, color }: { score: number; color: string }) {
+  const r = 20;
+  const circ = 2 * Math.PI * r;
+  const dash = (score / 100) * circ;
+  return (
+    <svg width="52" height="52" viewBox="0 0 52 52">
+      <circle cx="26" cy="26" r={r} fill="none" stroke="#e5e7eb" strokeWidth="5" />
+      <circle cx="26" cy="26" r={r} fill="none" stroke={color} strokeWidth="5"
+        strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
+        transform="rotate(-90 26 26)" />
+      <text x="26" y="30" textAnchor="middle" fontSize="11" fontWeight="700" fill={color}>{score}</text>
+    </svg>
   );
 }
 
@@ -70,8 +84,35 @@ function StatCard({
   );
 }
 
+const SCORE_META: Record<string, { icon: any; color: string; ring: string }> = {
+  growth:           { icon: TrendingUp,  color: "text-teal-600",   ring: "#0D9488" },
+  happiness:        { icon: Heart,       color: "text-rose-600",   ring: "#e11d48" },
+  adoption:         { icon: Puzzle,      color: "text-blue-600",   ring: "#2563eb" },
+  supportBurden:    { icon: Headphones,  color: "text-purple-600", ring: "#9333ea" },
+  revenueEfficiency:{ icon: Target,      color: "text-amber-600",  ring: "#d97706" },
+};
+
+function ScoreCard({ id, data }: { id: string; data: any }) {
+  const meta = SCORE_META[id] ?? { icon: Activity, color: "text-gray-600", ring: "#6b7280" };
+  const Icon = meta.icon;
+  const score = data?.score ?? 0;
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
+      className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-4"
+    >
+      <ScoreRing score={score} color={meta.ring} />
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-gray-800 truncate">{data?.label}</p>
+        <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{data?.sub}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function FounderControlPage() {
   const [, nav] = useLocation();
+
   const { data: ov, isLoading } = useQuery({
     queryKey: ["founder-overview"],
     queryFn: () => fetchJSON("/api/founder/overview"),
@@ -85,10 +126,20 @@ export default function FounderControlPage() {
     queryFn: () => fetchJSON("/api/founder/alerts"),
     refetchInterval: 30000,
   });
-
   const { data: qualityScore } = useQuery({
     queryKey: ["founder-quality-score"],
     queryFn: () => fetchJSON("/api/admin/quality/score"),
+    retry: false,
+  });
+  const { data: scores, isLoading: scoresLoading, refetch: refetchScores } = useQuery({
+    queryKey: ["founder-scores"],
+    queryFn: () => fetchJSON("/api/founder/scores"),
+    retry: false,
+  });
+  const { data: health } = useQuery({
+    queryKey: ["system-health"],
+    queryFn: () => fetchJSON("/api/admin/system-health"),
+    refetchInterval: 60000,
     retry: false,
   });
 
@@ -99,6 +150,9 @@ export default function FounderControlPage() {
   const revenue = ov?.revenue ?? {};
   const readiness = ov?.readiness;
   const platformScore = qualityScore?.score ?? null;
+  const scoreData = scores?.scores ?? {};
+  const healthStatus = health?.status ?? null;
+  const healthColor = healthStatus === "healthy" ? "text-green-600" : healthStatus === "degraded" ? "text-amber-600" : healthStatus === "critical" ? "text-red-600" : "text-gray-400";
 
   return (
     <div className="space-y-6">
@@ -108,15 +162,23 @@ export default function FounderControlPage() {
           <h1 className="text-2xl font-bold text-gray-900">Founder Control Center</h1>
           <p className="text-sm text-gray-500 mt-0.5">Full platform overview — real-time operational data</p>
         </div>
-        {unread > 0 && (
-          <button
-            onClick={() => nav("/admin/os/founder-alerts")}
-            className="flex items-center gap-2 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-sm font-medium border border-rose-100 hover:bg-rose-100 transition-colors"
-          >
-            <AlertCircle className="w-4 h-4" />
-            {unread} unread alert{unread !== 1 ? "s" : ""}
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {healthStatus && (
+            <span className={`text-xs font-medium flex items-center gap-1 ${healthColor}`}>
+              <span className={`w-2 h-2 rounded-full ${healthStatus === "healthy" ? "bg-green-500" : healthStatus === "degraded" ? "bg-amber-500" : "bg-red-500"}`} />
+              System {healthStatus}
+            </span>
+          )}
+          {unread > 0 && (
+            <button
+              onClick={() => nav("/admin/os/founder-alerts")}
+              className="flex items-center gap-2 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-lg text-sm font-medium border border-rose-100 hover:bg-rose-100 transition-colors"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {unread} unread alert{unread !== 1 ? "s" : ""}
+            </button>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
@@ -146,7 +208,7 @@ export default function FounderControlPage() {
                 onClick={() => nav("/admin/os/founder-revenue")} />
               <StatCard label="YTD Revenue" value={`EGP ${parseFloat(revenue.ytd ?? 0).toLocaleString()}`} icon={DollarSign} color="amber"
                 onClick={() => nav("/admin/os/founder-revenue")} />
-              <StatCard label="Active Subs" value={content.activeSubs ?? 0} icon={Layers} color="blue"
+              <StatCard label="Active Subs" value={content.activeSubs ?? revenue.activeSubs ?? 0} icon={Layers} color="blue"
                 onClick={() => nav("/admin/os/founder-growth")} />
               <StatCard label="Open Tickets" value={ov?.support?.openTickets ?? 0} icon={AlertCircle} color="rose" />
             </div>
@@ -161,6 +223,34 @@ export default function FounderControlPage() {
               <StatCard label="Assessments" value={content.assessments ?? 0} icon={Activity} color="blue" />
               <StatCard label="Readiness" value={`${readiness ?? "—"}%`} icon={ShieldCheck} color="green" />
             </div>
+          </div>
+
+          {/* Health Scores */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Platform Health Scores</h2>
+              <button
+                onClick={() => refetchScores()}
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 transition-colors"
+              >
+                <RefreshCw className="w-3 h-3" /> Refresh
+              </button>
+            </div>
+            {scoresLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 h-20 animate-pulse" />
+                ))}
+              </div>
+            ) : Object.keys(scoreData).length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                {Object.entries(scoreData).map(([key, val]) => (
+                  <ScoreCard key={key} id={key} data={val} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-gray-400">Score data unavailable</p>
+            )}
           </div>
 
           {/* Platform Quality Score */}
@@ -201,10 +291,28 @@ export default function FounderControlPage() {
               </div>
             </div>
           )}
+
+          {/* System Health Checks */}
+          {health?.checks && (
+            <div>
+              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">System Health</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {health.checks.map((c: any) => (
+                  <div key={c.name} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center gap-3">
+                    <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${c.status === "pass" ? "bg-green-500" : c.status === "warn" ? "bg-amber-400" : "bg-red-500"}`} />
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium text-gray-800">{c.name}</p>
+                      <p className="text-xs text-gray-400">{c.value} <span className="text-gray-300">/ target {c.target}</span></p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
 
-      {/* Revenue trend */}
+      {/* Revenue trend + quick links */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <div className="flex items-center justify-between mb-4">

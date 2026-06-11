@@ -95,7 +95,7 @@ export default function MyCourses() {
       ) : !enrollments?.length ? (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
           <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-200" />
-          <h3 className="font-bold text-gray-700 mb-2">No courses yet</h3>
+          <h3 className="font-bold text-gray-700 mb-2">You haven't enrolled in any courses yet</h3>
           <p className="text-sm text-gray-400 mb-5">Browse the course marketplace and request enrollment.</p>
           <Link href="/courses">
             <Button className="rounded-xl" style={{ background: TEAL }}>Browse Courses</Button>

@@ -175,10 +175,13 @@ export default function Courses() {
             {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : !courses?.length ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24">
-            <BookOpen className="h-14 w-14 mx-auto mb-4 text-gray-200" />
-            <h3 className="text-lg font-bold text-gray-700 mb-2">No courses found</h3>
-            <p className="text-sm text-gray-400">Try adjusting your search or filters.</p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24 max-w-sm mx-auto">
+            <div className="w-20 h-20 rounded-2xl bg-teal-50 flex items-center justify-center mx-auto mb-5">
+              <BookOpen className="h-10 w-10 text-teal-300" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">No courses available yet</h3>
+            <p className="text-sm text-gray-400 mb-1">Courses published by your teachers will appear here.</p>
+            <p className="text-xs text-gray-300">Try adjusting your subject filter or check back soon.</p>
           </motion.div>
         ) : (
           <>
