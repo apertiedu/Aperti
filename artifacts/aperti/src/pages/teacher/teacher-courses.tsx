@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,48 @@ async function apiFetch(url: string, opts?: RequestInit) {
   });
   if (!res.ok) throw new Error("Failed");
   return res.json();
+}
+
+const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  A: { bg: "#dcfce7", text: "#16a34a", border: "#86efac" },
+  B: { bg: "#ccfbf1", text: "#0d9488", border: "#5eead4" },
+  C: { bg: "#fef3c7", text: "#d97706", border: "#fcd34d" },
+  D: { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
+};
+
+function QualityScoreBadge({ courseId }: { courseId: number }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["quality-score", courseId],
+    queryFn: () =>
+      fetch(`/api/teacher/courses/${courseId}/quality-score`, {
+        headers: { Authorization: `Bearer ${tok()}` },
+      }).then(r => r.ok ? r.json() : null),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  if (isLoading) return <span className="inline-block h-5 w-6 rounded-full bg-muted animate-pulse" />;
+  if (!data?.grade) return null;
+
+  const s = GRADE_STYLES[data.grade] ?? GRADE_STYLES.D;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          className="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full text-[10px] font-black shrink-0 cursor-default border"
+          style={{ background: s.bg, color: s.text, borderColor: s.border }}
+        >
+          {data.grade}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs max-w-[160px]">
+        <p className="font-bold mb-0.5">Quality: {data.label} ({data.qualityScore}%)</p>
+        <p>Attendance {data.breakdown?.attendanceRate ?? "—"}%</p>
+        <p>Exam avg {data.breakdown?.avgExamScore ?? "—"}%</p>
+        <p>{data.breakdown?.enrolledStudents ?? 0} enrolled</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 const BOARDS = ["CAIE", "Edexcel", "IB", "AQA", "OCR", "WJEC", "Other"];
@@ -296,7 +339,10 @@ export default function TeacherCourses() {
                       <CardTitle className="text-sm truncate">{course.name}</CardTitle>
                       <CardDescription className="text-xs">{course.board} · {course.level}</CardDescription>
                     </div>
-                    {VIS_BADGES[course.visibility ?? "draft"]}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <QualityScoreBadge courseId={course.id} />
+                      {VIS_BADGES[course.visibility ?? "draft"]}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>

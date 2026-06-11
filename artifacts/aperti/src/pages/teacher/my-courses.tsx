@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   Plus, BookOpen, Users, CheckCircle2, XCircle, Edit3, Trash2,
   Eye, EyeOff, Clock, Search, GraduationCap, TrendingUp, Globe,
@@ -31,6 +32,50 @@ import { useToast } from "@/hooks/use-toast";
 const TEAL = "#00796B";
 const TEAL_LIGHT = "#E0F2F1";
 const tok = () => localStorage.getItem("aperti_token") || "";
+
+const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
+  A: { bg: "#dcfce7", text: "#16a34a", border: "#86efac" },
+  B: { bg: "#E0F2F1", text: "#00796B", border: "#5eead4" },
+  C: { bg: "#fef3c7", text: "#d97706", border: "#fcd34d" },
+  D: { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
+};
+
+function QualityScoreBadge({ courseId }: { courseId: number }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["quality-score", courseId],
+    queryFn: () =>
+      fetch(`/api/teacher/courses/${courseId}/quality-score`, {
+        headers: { Authorization: `Bearer ${tok()}` },
+      }).then(r => r.ok ? r.json() : null),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  if (isLoading) {
+    return <span className="inline-block h-5 w-7 rounded-full bg-gray-100 animate-pulse" />;
+  }
+  if (!data?.grade) return null;
+
+  const s = GRADE_STYLES[data.grade] ?? GRADE_STYLES.D;
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          className="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full text-[10px] font-black shrink-0 cursor-default border"
+          style={{ background: s.bg, color: s.text, borderColor: s.border }}
+        >
+          {data.grade}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs max-w-[160px]">
+        <p className="font-bold mb-0.5">Quality: {data.label} ({data.qualityScore}%)</p>
+        <p>Attendance {data.breakdown?.attendanceRate ?? "—"}%</p>
+        <p>Exam avg {data.breakdown?.avgExamScore ?? "—"}%</p>
+        <p>{data.breakdown?.enrolledStudents ?? 0} enrolled</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {
     ...opts,
@@ -652,6 +697,7 @@ export default function MyCourses() {
                               >
                                 {c.is_published ? "Published" : "Draft"}
                               </Badge>
+                              <QualityScoreBadge courseId={c.id} />
                             </div>
                             <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-400">
                               {c.subject && <span className="font-medium text-gray-600">{c.subject}</span>}
