@@ -16,6 +16,8 @@ API_PORT = "3001"
 VAPID_PUBLIC_KEY = "BEj0LpGapT4H_yn2Cg2lIVhF-3Jee-0Vfm3s0T--SON1-SXywOmFB2y7ZulQinIZ20qcbbBV_JYa5vBn6PFGwQQ"
 VAPID_SUBJECT = "mailto:admin@aperti.app"
 JWT_SECRET = "e2ac09efb4f0e7123b629c69af235642cf12927a34f8e6624e8a13f5307151ffdf6efae06247fb6d6c578f66c3ec0196"
+OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1"
+OPENAI_MODEL = "meta/llama-3.3-70b-instruct"
 
 [userenv.development]
 
