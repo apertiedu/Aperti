@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import { authenticate, AuthRequest } from "../middleware/auth";
+import { dispatchAlert } from "../lib/alert-dispatch";
 
 export const problemReportsRouter = Router();
 
@@ -58,6 +59,18 @@ problemReportsRouter.post("/problem-reports", authenticate as any, async (req: A
         throw err;
       }
     });
+    // Fire alert dispatch (non-blocking)
+    dispatchAlert({
+      type: "problem_report",
+      message: `New problem report: ${(category || "Other")} — "${description.trim().slice(0, 120)}"`,
+      severity: "warning",
+      meta: {
+        "Category": (category || "Other"),
+        "Page": (pageUrl || "unknown"),
+        "Reported by": req.userId ? `User #${req.userId}` : "Anonymous",
+      },
+    }).catch(() => {});
+
     res.json({ ok: true });
   } catch (err) {
     console.error("Problem report error:", err);

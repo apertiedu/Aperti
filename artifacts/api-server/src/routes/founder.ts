@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
+import { dispatchAlert, invalidateConfigCache } from "../lib/alert-dispatch";
 
 export const founderRouter = Router();
 founderRouter.use(authenticate as any);
@@ -420,6 +421,79 @@ founderRouter.put("/alerts/read-all", async (_req: AuthRequest, res: Response) =
   }
 });
 
+/* ── Alert Notification Config ───────────────────────────────────────────── */
+founderRouter.get("/alert-config", async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, email_enabled, email_to, smtp_host, smtp_port, smtp_user,
+              CASE WHEN smtp_pass IS NOT NULL AND smtp_pass != '' THEN '••••••••' ELSE '' END AS smtp_pass_hint,
+              smtp_from, webhook_enabled, webhook_url, updated_at
+       FROM founder_alert_config ORDER BY id LIMIT 1`
+    );
+    res.json(rows[0] ?? {});
+  } catch (err: any) {
+    if (err.code === "42P01") return res.json({});
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.put("/alert-config", async (req: AuthRequest, res: Response) => {
+  try {
+    const {
+      email_enabled, email_to, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_from,
+      webhook_enabled, webhook_url,
+    } = req.body;
+    // Only update smtp_pass if explicitly provided (not the placeholder)
+    const passSql = (smtp_pass && smtp_pass !== "••••••••")
+      ? ", smtp_pass = $11"
+      : "";
+    const passParams: any[] = (smtp_pass && smtp_pass !== "••••••••") ? [smtp_pass] : [];
+    await pool.query(
+      `UPDATE founder_alert_config SET
+         email_enabled   = $1,
+         email_to        = $2,
+         smtp_host       = $3,
+         smtp_port       = $4,
+         smtp_user       = $5,
+         smtp_from       = $6,
+         webhook_enabled = $7,
+         webhook_url     = $8,
+         updated_at      = NOW()
+         ${passSql}
+       WHERE id = 1`,
+      [
+        email_enabled ?? false,
+        email_to || null,
+        smtp_host || null,
+        parseInt(smtp_port) || 587,
+        smtp_user || null,
+        smtp_from || null,
+        webhook_enabled ?? false,
+        webhook_url || null,
+        ...passParams,
+      ]
+    );
+    invalidateConfigCache();
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.post("/alert-config/test", async (_req: AuthRequest, res: Response) => {
+  try {
+    await dispatchAlert({
+      type: "test_alert",
+      message: "This is a test alert from Aperti Founder OS — your notifications are configured correctly.",
+      severity: "info",
+      meta: { "Sent at": new Date().toLocaleString(), "Source": "Manual test" },
+    });
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── Launch Blockers ──────────────────────────────────────────────────────── */
 founderRouter.get("/launch-blockers", async (_req: AuthRequest, res: Response) => {
   try {
@@ -445,7 +519,24 @@ founderRouter.post("/launch-blockers", async (req: AuthRequest, res: Response) =
        VALUES ($1, $2, $3, $4, $5, 'open', NOW(), NOW()) RETURNING *`,
       [title.trim(), description?.trim() || null, severity, category, assignee || null]
     );
-    res.json(rows[0]);
+    const blocker = rows[0];
+
+    // Fire alert dispatch for critical blockers (non-blocking)
+    if (severity === "critical") {
+      dispatchAlert({
+        type: "launch_blocker_critical",
+        message: `Critical launch blocker created: "${title.trim()}"`,
+        severity: "critical",
+        meta: {
+          "Title": title.trim(),
+          "Category": category,
+          "Assignee": assignee || "Unassigned",
+          "Description": (description || "").slice(0, 200),
+        },
+      }).catch(() => {});
+    }
+
+    res.json(blocker);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

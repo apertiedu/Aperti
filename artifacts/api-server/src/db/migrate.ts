@@ -1110,4 +1110,20 @@ const PHASE20_MIGRATIONS: string[] = [
   `ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS typography_prefs jsonb NOT NULL DEFAULT '{}'`,
   `ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS favicon_url text`,
   `ALTER TABLE branding_settings ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT NOW()`,
+
+  /* ── Founder Alert Config ───────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS founder_alert_config (
+    id            SERIAL PRIMARY KEY,
+    email_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    email_to      VARCHAR(300),
+    smtp_host     VARCHAR(200),
+    smtp_port     INT NOT NULL DEFAULT 587,
+    smtp_user     VARCHAR(200),
+    smtp_pass     TEXT,
+    smtp_from     VARCHAR(200),
+    webhook_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    webhook_url   TEXT,
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO founder_alert_config (id) SELECT 1 WHERE NOT EXISTS (SELECT 1 FROM founder_alert_config WHERE id=1)`,
 ];
