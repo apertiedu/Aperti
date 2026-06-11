@@ -174,3 +174,25 @@ dashboardRouter.get("/admin/live-stats", authenticate, async (req: AuthRequest, 
     res.status(500).json({ error: err.message });
   }
 });
+
+/* ── Subscription / trust status for current teacher ─────────────────── */
+dashboardRouter.get("/subscription-status", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const teacherId = req.userId!;
+    const { pool } = await import("@workspace/db");
+    const { rows } = await pool.query(`
+      SELECT s.status, s.end_date, sp.name AS plan_name, sp.limits
+      FROM subscriptions s
+      JOIN subscription_plans sp ON sp.id = s.plan_id
+      WHERE s.account_id = $1 AND s.status IN ('active','trial')
+      ORDER BY s.created_at DESC LIMIT 1
+    `, [teacherId]);
+    if (!rows.length) return res.json({ plan: null });
+    const sub = rows[0];
+    const daysLeft = sub.end_date
+      ? Math.max(0, Math.ceil((new Date(sub.end_date).getTime() - Date.now()) / 86400000))
+      : null;
+    const limits = typeof sub.limits === "string" ? JSON.parse(sub.limits) : (sub.limits ?? {});
+    res.json({ plan: sub.plan_name, status: sub.status, daysLeft, studentLimit: limits?.students ?? null });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});

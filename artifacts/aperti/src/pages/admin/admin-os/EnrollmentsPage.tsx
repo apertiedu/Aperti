@@ -71,7 +71,11 @@ export default function EnrollmentsPage() {
 
   const approveMut = useMutation({
     mutationFn: (id: number) => putJSON(`/api/admin/governance/enrollments/${id}`, { status: "approved" }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["gov-enrollments"] }); toast.success("Enrollment approved"); },
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: ["gov-enrollments"] });
+      const enr = enrollments.find((e: any) => e.id === id);
+      toast.success(enr ? `✓ ${enr.student_name || "Student"} enrolled in ${enr.course_name || "course"}` : "Enrollment approved");
+    },
   });
 
   const rejectMut = useMutation({

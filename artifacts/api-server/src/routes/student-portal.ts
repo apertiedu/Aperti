@@ -436,4 +436,91 @@ router.get("/portal/practice-questions", requireStudentAccess, async (req, res):
   res.json(rows);
 });
 
+/* ── SUCCESS CENTER ──────────────────────────────────────────────────────────── */
+router.get("/portal/success", requireStudentAccess, async (req, res): Promise<void> => {
+  const studentId: number = (req as any).studentId;
+  const teacherId: number = (req as any).teacherAccountId;
+
+  try {
+    const [weakTopicsR, upcomingTasksR, revisionR, mistakesR, overallR] = await Promise.allSettled([
+
+      /* Weak topics from misconceptions */
+      pool.query(`
+        SELECT DISTINCT m.pattern AS topic, m.description, m.severity,
+          s.name AS subject_name, s.id AS subject_id
+        FROM misconceptions m
+        JOIN student_exam_attempts sea ON sea.id = m.attempt_id
+        JOIN exams e ON e.id = sea.exam_id
+        JOIN subjects s ON s.id = e.subject_id
+        WHERE sea.student_id = $1 AND m.resolved = false
+        ORDER BY CASE m.severity WHEN 'high' THEN 1 WHEN 'medium' THEN 2 ELSE 3 END
+        LIMIT 8
+      `, [studentId]).catch(() => ({ rows: [] })),
+
+      /* Upcoming homework / exam tasks */
+      pool.query(`
+        (SELECT h.id, h.title, h.due_date AS "dueDate", s.name AS "subjectName", 'homework' AS type
+         FROM homework h
+         JOIN sessions sess ON sess.id = h.session_id
+         JOIN subjects s ON s.id = sess.subject_id
+         JOIN student_session_links ssl ON ssl.session_id = sess.id AND ssl.student_id = $1
+         WHERE h.due_date >= CURRENT_DATE
+         ORDER BY h.due_date ASC LIMIT 5)
+        UNION ALL
+        (SELECT e.id, e.name AS title, e.exam_date::text AS "dueDate", s.name AS "subjectName", 'exam' AS type
+         FROM exams e
+         JOIN subjects s ON s.id = e.subject_id
+         WHERE s.teacher_account_id = $2 AND e.exam_date >= CURRENT_DATE
+         ORDER BY e.exam_date ASC LIMIT 3)
+        ORDER BY "dueDate" ASC LIMIT 8
+      `, [studentId, teacherId]).catch(() => ({ rows: [] })),
+
+      /* Recommended revision notes */
+      pool.query(`
+        SELECT rn.id, rn.title, s.name AS "subjectName",
+          '/revision/' || rn.id AS href
+        FROM revision_notes rn
+        JOIN subjects s ON s.id = rn.subject_id
+        WHERE s.teacher_account_id = $1 AND rn.published = true
+        ORDER BY rn.updated_at DESC LIMIT 6
+      `, [teacherId]).catch(() => ({ rows: [] })),
+
+      /* Recent wrong answers */
+      pool.query(`
+        SELECT DISTINCT ON (qa.question_id)
+          qa.question_id, q.question_text AS "questionText",
+          q.topic, s.name AS "subjectName", e.name AS "examName"
+        FROM question_answers qa
+        JOIN student_exam_attempts sea ON sea.id = qa.attempt_id
+        JOIN questions q ON q.id = qa.question_id
+        LEFT JOIN exams e ON e.id = sea.exam_id
+        LEFT JOIN subjects s ON s.id = e.subject_id
+        WHERE sea.student_id = $1 AND qa.marks_awarded < qa.marks_available * 0.5
+        ORDER BY qa.question_id, sea.submitted_at DESC
+        LIMIT 4
+      `, [studentId]).catch(() => ({ rows: [] })),
+
+      /* Overall progress */
+      pool.query(`
+        SELECT
+          COUNT(DISTINCT sea.id) AS total_attempts,
+          ROUND(AVG(sea.score_percentage)::numeric, 1) AS avg_score,
+          COUNT(DISTINCT CASE WHEN sea.score_percentage >= 60 THEN sea.id END) AS passing_exams
+        FROM student_exam_attempts sea
+        WHERE sea.student_id = $1
+      `, [studentId]).catch(() => ({ rows: [{}] })),
+    ]);
+
+    res.json({
+      weakTopics:          weakTopicsR.status === "fulfilled" ? weakTopicsR.value.rows : [],
+      upcomingTasks:       upcomingTasksR.status === "fulfilled" ? upcomingTasksR.value.rows : [],
+      recommendedRevision: revisionR.status === "fulfilled" ? revisionR.value.rows : [],
+      recentMistakes:      mistakesR.status === "fulfilled" ? mistakesR.value.rows : [],
+      overallProgress:     overallR.status === "fulfilled" ? overallR.value.rows[0] : null,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

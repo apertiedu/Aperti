@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import {
   Plus, BookOpen, Eye, CheckCircle, Clock, FileText, Users,
-  Pencil, Trash2, Calendar, AlignLeft, Upload, CheckSquare,
+  Pencil, Trash2, Calendar, AlignLeft, Upload, CheckSquare, Lightbulb,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -332,6 +332,27 @@ export default function SubmitFlow() {
               </div>
             </div>
           </div>
+          {/* ── Content quality hints ── */}
+          {form.title && (() => {
+            const hints: string[] = [];
+            if (!form.rubric_id) hints.push("Attach a rubric so students know how they'll be graded.");
+            if (!form.instructions.trim()) hints.push("Add clear step-by-step instructions to reduce confusion.");
+            if (!form.due_date) hints.push("Set a due date so students can plan their workload.");
+            if (parseInt(form.estimated_mins) < 10) hints.push("Estimated time seems low — double-check so students can plan.");
+            if (hints.length === 0) return null;
+            return (
+              <div className="flex flex-col gap-1.5 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <Lightbulb className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  <p className="text-xs font-bold text-amber-700">Quality tips</p>
+                </div>
+                {hints.map((h, i) => (
+                  <p key={i} className="text-xs text-amber-700 leading-snug pl-5">· {h}</p>
+                ))}
+              </div>
+            );
+          })()}
+
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleSave} disabled={!form.title || saveMutation.isPending}>

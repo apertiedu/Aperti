@@ -14,6 +14,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { useAuth } from "@/context/auth";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import ActionableInsights from "@/components/actionable-insights";
+import TrustStatusBar from "@/components/trust-status-bar";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -117,6 +119,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 pb-8">
 
+      {/* ── Trust Status Bar ── */}
+      <TrustStatusBar />
+
       {/* ── Hero greeting ── */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex items-start justify-between gap-4 flex-wrap">
         <div>
@@ -173,6 +178,16 @@ export default function Dashboard() {
           ))
         )}
       </motion.div>
+
+      {/* ── Actionable Insights ── */}
+      {!loading.summary && !loading.risk && !loading.exams && (
+        <ActionableInsights
+          summary={summary}
+          atRisk={atRisk}
+          upcomingExams={upcomingExams}
+          todaySessions={todaySessions}
+        />
+      )}
 
       {/* ── Today's Schedule ── */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>

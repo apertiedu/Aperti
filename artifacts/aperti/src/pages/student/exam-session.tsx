@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
@@ -109,6 +109,40 @@ export default function StudentExamSession({ params }: { params: { id: string } 
     onError: () => toast({ title: "Failed to start exam", variant: "destructive" }),
   });
 
+  /* ── Canvas confetti ── */
+  const confettiRef = useRef<HTMLCanvasElement | null>(null);
+  const fireConfetti = useCallback(() => {
+    if (!confettiRef.current) return;
+    const canvas = confettiRef.current;
+    const ctx = canvas.getContext("2d")!;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const COLORS = ["#0D9488","#14B8A6","#F59E0B","#8B5CF6","#EF4444","#3B82F6","#10B981"];
+    const particles = Array.from({ length: 100 }, () => ({
+      x: canvas.width / 2 + (Math.random() - 0.5) * 300,
+      y: canvas.height * 0.4,
+      vx: (Math.random() - 0.5) * 12,
+      vy: -Math.random() * 14 - 4,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      r: Math.random() * 5 + 2, alpha: 1, rot: Math.random() * Math.PI * 2, rSpeed: (Math.random() - 0.5) * 0.15,
+    }));
+    let raf = 0;
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let live = 0;
+      for (const p of particles) {
+        p.vy += 0.45; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.rot += p.rSpeed; p.alpha -= 0.012;
+        if (p.alpha <= 0) continue;
+        live++;
+        ctx.save(); ctx.globalAlpha = p.alpha; ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.color; ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); ctx.restore();
+      }
+      if (live > 0) raf = requestAnimationFrame(draw); else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    };
+    draw();
+    setTimeout(() => cancelAnimationFrame(raf), 4000);
+  }, []);
+
   const submitMut = useMutation({
     mutationFn: async () => {
       const answersArr = Object.entries(answers).map(([qId, text]) => ({ question_id: parseInt(qId), answer_text: text }));
@@ -123,7 +157,7 @@ export default function StudentExamSession({ params }: { params: { id: string } 
       }).catch(() => {});
       return res.json();
     },
-    onSuccess: () => setPhase("submitted"),
+    onSuccess: () => { setPhase("submitted"); setTimeout(fireConfetti, 200); },
     onError: () => toast({ title: "Submission failed", variant: "destructive" }),
   });
 
@@ -293,23 +327,26 @@ export default function StudentExamSession({ params }: { params: { id: string } 
   // SUBMITTED
   if (phase === "submitted") {
     return (
-      <div className="max-w-md mx-auto mt-20 text-center space-y-6">
-        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
+      <div className="max-w-md mx-auto mt-20 text-center space-y-6 relative">
+        {/* Confetti canvas */}
+        <canvas ref={confettiRef} className="fixed inset-0 pointer-events-none z-50" style={{ width: "100vw", height: "100vh" }} />
+        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200, damping: 14 }}
           className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto">
           <CheckCircle2 className="w-10 h-10 text-emerald-500" />
         </motion.div>
-        <div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
           <h2 className="text-2xl font-bold">Submitted!</h2>
           <p className="text-muted-foreground mt-2">Your exam has been submitted. Results will be available once your teacher marks your work.</p>
-        </div>
-        <div className="flex gap-3 justify-center">
+        </motion.div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}
+          className="flex gap-3 justify-center">
           <Link href={`/student/exams/${assessmentId}/results`}>
             <Button variant="outline">View Results</Button>
           </Link>
           <Link href="/exam-room">
             <Button>Back to Exams</Button>
           </Link>
-        </div>
+        </motion.div>
       </div>
     );
   }

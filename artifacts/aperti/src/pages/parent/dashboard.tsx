@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Users, CheckCircle2, BookOpen, TrendingUp, Clock, AlertTriangle,
   MessageSquare, Calendar, FileText, ChevronRight, Trophy,
-  BarChart3, Star, Flame, Bell
+  BarChart3, Star, Flame, Bell, Zap, Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -189,6 +189,43 @@ export default function ParentDashboard() {
             <StatCard icon={BookOpen} label="Upcoming Tasks" value={child.upcomingDeadlines.length} sub="Due this week" color="#f59e0b" />
             <StatCard icon={Flame} label="Streak" value={child.ascend?.streak ?? 0} sub={`Level ${child.ascend?.level ?? 1} · ${child.ascend?.rank ?? "Bronze"}`} color="#ef4444" />
           </motion.div>
+
+          {/* ── What's Important ── */}
+          {(() => {
+            const insights: Array<{ icon: any; bg: string; color: string; text: string; href: string }> = [];
+            if (child.interventionAlerts.length > 0)
+              insights.push({ icon: AlertTriangle, bg: "bg-red-50 border-red-100", color: "text-red-600", text: `${child.interventionAlerts.length} alert${child.interventionAlerts.length > 1 ? "s" : ""} need your attention`, href: "/parent/interventions" });
+            if (child.attendanceRate < 80)
+              insights.push({ icon: Clock, bg: "bg-amber-50 border-amber-100", color: "text-amber-600", text: `Attendance is ${child.attendanceRate}% — speak to the teacher`, href: "/parent/attendance" });
+            if (child.avgGrade && child.avgGrade < 60)
+              insights.push({ icon: TrendingUp, bg: "bg-purple-50 border-purple-100", color: "text-purple-600", text: `Average grade ${child.avgGrade}% — consider extra support`, href: "/parent/grades" });
+            if (child.upcomingDeadlines.length > 0 && insights.length < 3)
+              insights.push({ icon: BookOpen, bg: "bg-blue-50 border-blue-100", color: "text-blue-600", text: `${child.upcomingDeadlines.length} assignment${child.upcomingDeadlines.length > 1 ? "s" : ""} due this week`, href: "/parent/assignments" });
+            if (insights.length === 0)
+              insights.push({ icon: Sparkles, bg: "bg-emerald-50 border-emerald-100", color: "text-emerald-600", text: `${child.name?.split(" ")[0] || "Your child"} is on track — great job!`, href: "/parent/reports" });
+            return (
+              <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 }}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Zap className="w-3.5 h-3.5 text-teal-600" />
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">What's Important</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {insights.map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <Link key={i} href={item.href}>
+                        <div className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer hover:shadow-sm transition-all ${item.bg} group`}>
+                          <Icon className={`w-4 h-4 shrink-0 ${item.color}`} />
+                          <p className={`text-xs font-semibold leading-tight flex-1 ${item.color}`}>{item.text}</p>
+                          <ChevronRight className={`w-3.5 h-3.5 shrink-0 ${item.color} opacity-50 group-hover:opacity-100`} />
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            );
+          })()}
 
           {/* Main grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">

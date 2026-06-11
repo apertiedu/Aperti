@@ -23,6 +23,7 @@ const primaryNav = [
 
 const allNav = [
   { href: "/", label: "StudyStream", icon: Home, desc: "Your dashboard" },
+  { href: "/success", label: "Success Center", icon: Target, desc: "Focus — weak topics & tasks" },
   { href: "/my-homework", label: "Homework", icon: BookOpen, desc: "SubmitFlow" },
   { href: "/my-timetable", label: "Timetable", icon: CalendarCheck, desc: "PlanGrid" },
   { href: "/my-attendance", label: "Attendance", icon: CalendarCheck, desc: "CheckIn" },

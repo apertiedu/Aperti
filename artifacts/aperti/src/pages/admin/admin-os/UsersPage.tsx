@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
-import { Search, Plus, Download, Upload, Shield, UserX, UserCheck, Eye, Key, LogOut, MoreHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search, Plus, Download, Shield, UserX, UserCheck, Eye, Key, LogOut, MoreHorizontal, ChevronLeft, ChevronRight, CheckSquare, Square, X as XIcon, AlertTriangle } from "lucide-react";
 import { fetchJSON, postJSON, putJSON } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -96,6 +96,7 @@ export default function UsersPage() {
   const [selected, setSelected] = useState<any>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newUser, setNewUser] = useState({ username: "", password: "", displayName: "", email: "", role: "teacher" });
+  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
   const qc = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -153,6 +154,37 @@ export default function UsersPage() {
   const users: any[] = (data as any)?.users || [];
   const total: number = (data as any)?.total || 0;
   const totalPages = Math.ceil(total / 20);
+  const allPageIds = users.map(u => u.id);
+  const allChecked = allPageIds.length > 0 && allPageIds.every(id => checkedIds.has(id));
+  const someChecked = !allChecked && allPageIds.some(id => checkedIds.has(id));
+
+  const toggleAll = () => {
+    if (allChecked) setCheckedIds(prev => { const n = new Set(prev); allPageIds.forEach(id => n.delete(id)); return n; });
+    else setCheckedIds(prev => new Set([...prev, ...allPageIds]));
+  };
+  const toggleOne = (id: number) =>
+    setCheckedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+
+  const bulkMutate = useMutation({
+    mutationFn: async ({ action, ids }: { action: string; ids: number[] }) => {
+      if (action === "export") {
+        const params = ids.map(id => `ids=${id}`).join("&");
+        window.open(`/api/admin/users/export/csv?${params}`, "_blank");
+        return;
+      }
+      await Promise.all(ids.map(id =>
+        action === "suspend" ? putJSON(`/api/admin/users/${id}/suspend`, {}) :
+        action === "restore" ? putJSON(`/api/admin/users/${id}/restore`, {}) : null
+      ));
+    },
+    onSuccess: (_, { action }) => {
+      qc.invalidateQueries({ queryKey: ["admin-users"] });
+      qc.invalidateQueries({ queryKey: ["admin-user-stats"] });
+      toast.success(`Bulk ${action} applied to ${checkedIds.size} user(s)`);
+      setCheckedIds(new Set());
+    },
+    onError: () => toast.error("Bulk action failed"),
+  });
 
   return (
     <div className="space-y-5">
@@ -163,13 +195,46 @@ export default function UsersPage() {
         </div>
         <div className="flex gap-2">
           <a href="/api/admin/users/export/csv" className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">
-            <Download className="w-4 h-4" /> Export
+            <Download className="w-4 h-4" /> Export All
           </a>
           <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
             <Plus className="w-4 h-4" /> Add User
           </button>
         </div>
       </div>
+
+      {/* Bulk action bar */}
+      <AnimatePresence>
+        {checkedIds.size > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="flex items-center gap-3 px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl"
+          >
+            <CheckSquare className="w-4 h-4 text-teal-600 shrink-0" />
+            <span className="text-sm font-semibold text-teal-700">{checkedIds.size} user{checkedIds.size > 1 ? "s" : ""} selected</span>
+            <div className="flex gap-2 ml-2 flex-wrap">
+              <button onClick={() => bulkMutate.mutate({ action: "suspend", ids: [...checkedIds] })} disabled={bulkMutate.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50">
+                <UserX className="w-3.5 h-3.5" /> Suspend
+              </button>
+              <button onClick={() => bulkMutate.mutate({ action: "restore", ids: [...checkedIds] })} disabled={bulkMutate.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-green-50 text-green-600 border border-green-200 rounded-lg hover:bg-green-100 transition-colors disabled:opacity-50">
+                <UserCheck className="w-3.5 h-3.5" /> Restore
+              </button>
+              <button onClick={() => bulkMutate.mutate({ action: "export", ids: [...checkedIds] })} disabled={bulkMutate.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-gray-50 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50">
+                <Download className="w-3.5 h-3.5" /> Export
+              </button>
+            </div>
+            <button onClick={() => setCheckedIds(new Set())} className="ml-auto p-1.5 hover:bg-teal-100 rounded-lg transition-colors text-teal-500">
+              <XIcon className="w-3.5 h-3.5" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Stats */}
       {stats && (
@@ -212,6 +277,11 @@ export default function UsersPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-gray-50">
+                <th className="px-4 py-3 w-8">
+                  <button onClick={toggleAll} className="text-gray-400 hover:text-gray-600 transition-colors">
+                    {allChecked ? <CheckSquare className="w-4 h-4 text-teal-600" /> : someChecked ? <AlertTriangle className="w-4 h-4 text-amber-400" /> : <Square className="w-4 h-4" />}
+                  </button>
+                </th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">User</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">Role</th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
@@ -223,11 +293,16 @@ export default function UsersPage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading…</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-gray-400">Loading…</td></tr>
               ) : users.length === 0 ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">No users found</td></tr>
+                <tr><td colSpan={8} className="text-center py-12 text-gray-400">No users found</td></tr>
               ) : users.map((u: any) => (
-                <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${checkedIds.has(u.id) ? "bg-teal-50/50" : ""}`}>
+                  <td className="px-4 py-3">
+                    <button onClick={() => toggleOne(u.id)} className="text-gray-300 hover:text-teal-500 transition-colors">
+                      {checkedIds.has(u.id) ? <CheckSquare className="w-4 h-4 text-teal-600" /> : <Square className="w-4 h-4" />}
+                    </button>
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold flex-shrink-0">

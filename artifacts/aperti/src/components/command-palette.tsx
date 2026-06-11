@@ -52,9 +52,24 @@ interface CommandPaletteProps {
   onOpenChange: (open: boolean) => void;
 }
 
+const RECENT_KEY = "aperti_recent_searches";
+const MAX_RECENT = 5;
+
+function getRecentSearches(): string[] {
+  try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; }
+}
+function addRecentSearch(q: string) {
+  const prev = getRecentSearches().filter(s => s !== q);
+  localStorage.setItem(RECENT_KEY, JSON.stringify([q, ...prev].slice(0, MAX_RECENT)));
+}
+function clearRecentSearches() {
+  localStorage.removeItem(RECENT_KEY);
+}
+
 export default function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState(0);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [, navigate] = useLocation();
   const { user } = useAuth();
 
@@ -140,7 +155,8 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
 
   const totalSemanticCount = Object.values(semanticResults).reduce((s, a) => s + a.length, 0);
 
-  const handleSelect = useCallback((href: string) => {
+  const handleSelect = useCallback((href: string, searchQuery?: string) => {
+    if (searchQuery) addRecentSearch(searchQuery);
     navigate(href);
     onOpenChange(false);
     setQuery("");
@@ -148,7 +164,9 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
   }, [navigate, onOpenChange]);
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
+      setRecentSearches(getRecentSearches());
+    } else {
       setQuery("");
       setSelected(0);
       setSemanticResults({});
@@ -282,8 +300,31 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
             </div>
           )}
 
+          {/* Recently searched — shown only when query is empty */}
+          {!query && recentSearches.length > 0 && (
+            <div className="px-2 pb-2">
+              <div className="flex items-center justify-between px-3 pt-1 pb-1">
+                <p className="text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase">Recent Searches</p>
+                <button
+                  onClick={() => { clearRecentSearches(); setRecentSearches([]); }}
+                  className="text-[10px] text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                >Clear</button>
+              </div>
+              {recentSearches.map((s, i) => (
+                <button
+                  key={i}
+                  className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted text-sm text-left transition-colors text-muted-foreground"
+                  onClick={() => setQuery(s)}
+                >
+                  <Search className="h-3.5 w-3.5 shrink-0 opacity-50" />
+                  <span className="flex-1 truncate">{s}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Empty states */}
-          {routes.length === 0 && !semanticLoading && totalSemanticCount === 0 && (
+          {routes.length === 0 && !semanticLoading && totalSemanticCount === 0 && query && (
             <p className="text-sm text-muted-foreground text-center py-8">
               {isSemantic ? "No results found. Try a different query." : "No pages match."}
             </p>

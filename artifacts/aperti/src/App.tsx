@@ -96,6 +96,8 @@ import DiscoverFeed from "@/pages/student/discover-feed";
 import Revisit from "@/pages/student/revisit";
 import FocusCoach from "@/pages/student/focus-coach";
 import FocusZone from "@/pages/student/focus-zone";
+import SuccessCenter from "@/pages/student/success-center";
+import WhatsNewModal from "@/components/whats-new-modal";
 import TrialVault from "@/pages/student/trial-vault";
 import PeakRankings from "@/pages/student/peak-rankings";
 import PeerReview from "@/pages/student/peer-review";
@@ -404,6 +406,7 @@ function StudentRouter() {
         <Route path="/student/transcript" component={StudentTranscript} />
         <Route path="/student/appeals" component={StudentAppeals} />
         <Route path="/student/exam-readiness" component={ExamReadiness} />
+        <Route path="/success" component={SuccessCenter} />
         {/* Phase 8 — Learning Experience */}
         <Route path="/learning-path" component={LearningPathPage} />
         <Route path="/recommendations" component={RecommendationHub} />
@@ -747,6 +750,7 @@ export default function App() {
                 </a>
                 <AppContent />
                 <SessionExpiryGate />
+                <WhatsNewModal />
               </ErrorBoundary>
             </TourProvider>
           </AuthProvider>

@@ -2,7 +2,7 @@ import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink } from "lucide-react";
+import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink, Zap, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
@@ -106,8 +106,43 @@ export default function StudentDashboard() {
   const days = ["M", "T", "W", "T", "F", "S", "S"];
   const currentDayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
+  const overdueCount = data?.upcomingHomework?.filter((hw: any) => hw.dueDate && hw.dueDate < new Date().toISOString().split("T")[0]).length ?? 0;
+  const focusItems: Array<{ icon: any; color: string; bg: string; text: string; href: string }> = [];
+  if (overdueCount > 0)
+    focusItems.push({ icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50 border-red-100", text: `${overdueCount} overdue task${overdueCount > 1 ? "s" : ""} — submit now`, href: "/my-homework" });
+  if (todaySessions.length > 0)
+    focusItems.push({ icon: Clock, color: "text-teal-600", bg: "bg-teal-50 border-teal-100", text: `${todaySessions.length} session${todaySessions.length > 1 ? "s" : ""} today — stay on track`, href: "/my-timetable" });
+  if (rate < 80)
+    focusItems.push({ icon: CheckSquare, color: "text-amber-600", bg: "bg-amber-50 border-amber-100", text: `Attendance at ${rate}% — aim for 90% this term`, href: "/my-attendance" });
+  if (focusItems.length === 0)
+    focusItems.push({ icon: Sparkles, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100", text: "You're all caught up — great work today!", href: "/success" });
+
   return (
     <div className="space-y-6 pb-6">
+      {/* ── Your Focus Today ── */}
+      {focusItems.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}>
+          <div className="flex items-center gap-2 mb-2">
+            <Zap className="w-3.5 h-3.5 text-primary" />
+            <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/70">Your Focus Today</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            {focusItems.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
+                  <a href={item.href} className={`flex items-center gap-3 p-3 rounded-xl border ${item.bg} hover:shadow-sm transition-all cursor-pointer group`}>
+                    <Icon className={`w-4 h-4 shrink-0 ${item.color}`} />
+                    <p className={`text-xs font-semibold leading-tight ${item.color}`}>{item.text}</p>
+                    <ChevronRight className={`w-3.5 h-3.5 ml-auto shrink-0 ${item.color} opacity-60 group-hover:opacity-100`} />
+                  </a>
+                </motion.div>
+              );
+            })}
+          </div>
+        </motion.div>
+      )}
+
       {/* Streak Banner if active */}
       <AnimatePresence>
         {streak > 0 && (

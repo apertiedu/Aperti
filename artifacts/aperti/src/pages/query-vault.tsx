@@ -141,11 +141,17 @@ export default function QueryVault() {
                           <img src={q.imageUrl} alt="Question diagram" className="max-h-32 rounded-lg border object-contain" />
                         </div>
                       )}
-                      <div className="flex gap-2 mt-2 flex-wrap">
+                      <div className="flex gap-2 mt-2 flex-wrap items-center">
                         {q.topic && <Badge variant="secondary">{q.topic}</Badge>}
                         <Badge variant="outline">{q.difficulty}</Badge>
                         <Badge variant="outline">{q.maxMarks} marks</Badge>
-                        <span className="text-xs text-muted-foreground">Used {q.timesUsed}x</span>
+                        {q.timesUsed === 0 ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-100">Never used</span>
+                        ) : q.timesUsed >= 5 ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100">★ Popular · {q.timesUsed}x</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Used {q.timesUsed}x</span>
+                        )}
                         {q.imageUrl && <Badge variant="outline" className="gap-1"><ImageIcon className="h-3 w-3" />Diagram</Badge>}
                       </div>
                     </div>
