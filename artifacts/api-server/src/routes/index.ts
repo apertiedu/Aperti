@@ -102,6 +102,7 @@ import { adminLaunchAuditRouter } from "./admin-launch-audit";
 import { i18nRouter } from "./i18n";
 import { userExportRouter } from "./user-export";
 import { contentCraftRouter } from "./content-craft";
+import { problemReportsRouter } from "./problem-reports";
 
 const router: IRouter = Router();
 
@@ -226,6 +227,9 @@ router.use("/admin/launch-audit", adminLaunchAuditRouter);
 router.use(i18nRouter);
 router.use(userExportRouter);
 router.use("/content-craft", contentCraftRouter);
+
+// Phase 24 — Production Hardening
+router.use(problemReportsRouter);
 
 export default router;
 

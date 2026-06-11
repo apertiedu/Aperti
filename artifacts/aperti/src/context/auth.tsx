@@ -29,7 +29,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!token) { setLoading(false); return; }
     fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(res => res.json())
+      .then(async res => {
+        const text = await res.text();
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        try { return JSON.parse(text); } catch { throw new Error("Non-JSON response from /me"); }
+      })
       .then(data => {
         if (data.user) setUser(data.user);
         else { localStorage.removeItem("aperti_token"); setToken(null); }

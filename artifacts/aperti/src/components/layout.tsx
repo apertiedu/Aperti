@@ -211,9 +211,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="font-bold text-sm tracking-tight text-foreground">A<span className="text-primary">.</span></span>
         ) : (
           <div className="flex items-center gap-2 overflow-hidden">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <GraduationCap className="w-4 h-4 text-primary" />
-            </div>
             <div className="min-w-0">
               <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">
                 Aperti<span className="text-primary">.</span>
@@ -321,6 +318,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </Button>
               }
             />
+            <Link href="/account/sessions">
+              <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground text-[11px] h-7">
+                <Shield className="w-3 h-3" />
+                Active Sessions
+              </Button>
+            </Link>
             <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground text-[11px] h-7" onClick={startTour}>
               <Sparkles className="w-3 h-3" />
               Replay Tour

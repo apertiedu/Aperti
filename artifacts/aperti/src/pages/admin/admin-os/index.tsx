@@ -58,6 +58,7 @@ import AiCostsPage from "./AiCostsPage";
 import NotificationRulesPage from "./NotificationRulesPage";
 import FounderAlertsPage from "./FounderAlertsPage";
 import LaunchCommandPage from "./LaunchCommandPage";
+import ProblemReportsPage from "./ProblemReportsPage";
 
 export default function AdminOS() {
   return (
@@ -142,6 +143,9 @@ export default function AdminOS() {
         <Route path="/admin/os/founder-alerts" component={FounderAlertsPage} />
         <Route path="/admin/os/launch-command" component={LaunchCommandPage} />
         <Route path="/admin/os/releases" component={ReleaseNotesAdminPage} />
+
+        {/* Phase 24 — Production Hardening */}
+        <Route path="/admin/os/problem-reports" component={ProblemReportsPage} />
 
         <Route component={Dashboard} />
       </Switch>

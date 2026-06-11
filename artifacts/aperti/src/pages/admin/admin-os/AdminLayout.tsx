@@ -72,6 +72,7 @@ const NAV = [
   { label: "Audit Logs", icon: FileText, href: "/admin/os/audit" },
   { label: "Security", icon: Lock, href: "/admin/os/security" },
   { label: "Support Tickets", icon: TicketCheck, href: "/admin/os/tickets" },
+  { label: "Problem Reports", icon: AlertTriangle, href: "/admin/os/problem-reports" },
   { label: "Knowledge Base", icon: Library, href: "/admin/os/kb" },
   { label: "Compliance", icon: Scale, href: "/admin/os/compliance" },
   { label: "Backups", icon: Database, href: "/admin/os/backups" },

@@ -541,3 +541,75 @@ authRouter.get("/login-history", async (req: Request, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+// GET /auth/devices — list all active device sessions for the current user
+authRouter.get("/devices", authenticate as any, async (req: AuthRequest, res: Response) => {
+  try {
+    const currentDeviceId = req.headers["x-device-id"] as string | undefined;
+    const sessions = await db
+      .select()
+      .from(deviceSessionsTable)
+      .where(eq(deviceSessionsTable.accountId, req.userId!));
+    const result = sessions.map(s => ({
+      id: s.id,
+      deviceId: s.deviceId,
+      ip: s.ip,
+      userAgent: s.userAgent,
+      lastActiveAt: s.lastActiveAt,
+      createdAt: s.createdAt,
+      isCurrent: currentDeviceId ? s.deviceId === currentDeviceId : false,
+    }));
+    res.json(result);
+  } catch (err) {
+    console.error("Devices list error:", err);
+    res.status(500).json({ error: "Failed to fetch device sessions" });
+  }
+});
+
+// DELETE /auth/devices/:deviceId — revoke a specific device session
+authRouter.delete("/devices/:deviceId", authenticate as any, async (req: AuthRequest, res: Response) => {
+  try {
+    const { deviceId } = req.params;
+    await db.delete(deviceSessionsTable).where(
+      eq(deviceSessionsTable.deviceId, deviceId as string)
+    );
+    writeAudit({
+      accountId: req.userId,
+      action: "device_session_revoked",
+      resource: "auth",
+      details: { deviceId },
+      ipAddress: req.ip,
+      severity: "info",
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to revoke session" });
+  }
+});
+
+// DELETE /auth/devices — revoke ALL device sessions except current
+authRouter.delete("/devices", authenticate as any, async (req: AuthRequest, res: Response) => {
+  try {
+    const currentDeviceId = req.body?.currentDeviceId as string | undefined;
+    if (currentDeviceId) {
+      const { ne } = await import("drizzle-orm");
+      await db.delete(deviceSessionsTable).where(
+        ne(deviceSessionsTable.deviceId, currentDeviceId)
+      );
+    } else {
+      await db.delete(deviceSessionsTable).where(
+        eq(deviceSessionsTable.accountId, req.userId!)
+      );
+    }
+    writeAudit({
+      accountId: req.userId,
+      action: "all_devices_revoked",
+      resource: "auth",
+      ipAddress: req.ip,
+      severity: "warning",
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to revoke sessions" });
+  }
+});

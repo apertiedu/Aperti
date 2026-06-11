@@ -119,6 +119,9 @@ import Register from "@/pages/register";
 import Onboarding from "@/pages/onboarding";
 import Settings from "@/pages/settings";
 import Profile from "@/pages/profile";
+import AccessDenied from "@/pages/access-denied";
+import SessionsPage from "@/pages/account/sessions";
+import ReportProblemModal from "@/components/report-problem-modal";
 
 // Marketplace & registration
 import Courses from "@/pages/courses";
@@ -272,16 +275,11 @@ function useRoleGuard(role: "student" | "teacher" | "parent") {
 
     if (isBlocked && location !== lastBlocked.current) {
       lastBlocked.current = location;
-      navigate("/");
-      toast({
-        title: "Access denied",
-        description: "You don't have permission to access that page.",
-        variant: "destructive",
-      });
+      navigate("/access-denied");
       // Fire-and-forget: record the access attempt in the audit log
       const t = localStorage.getItem("aperti_token");
       if (t) {
-        fetch("/auth/audit-event", {
+        fetch("/api/auth/audit-event", {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
           body: JSON.stringify({ action: "access_denied", resource: location, details: { role } }),
@@ -357,6 +355,8 @@ function StudentRouter() {
   return (
     <StudentLayout>
       <Switch>
+        <Route path="/access-denied" component={AccessDenied} />
+        <Route path="/account/sessions" component={SessionsPage} />
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/settings" component={Settings} />
         <Route path="/profile/:id" component={Profile} />
@@ -559,6 +559,8 @@ function AdminRouter() {
   return (
     <Layout>
       <Switch>
+        <Route path="/access-denied" component={AccessDenied} />
+        <Route path="/account/sessions" component={SessionsPage} />
         <Route path="/" component={AdminCommand} />
         <Route path="/corehub" component={CoreHub} />
         {TEACHER_ROUTES}
@@ -574,6 +576,8 @@ function TeacherRouter() {
   return (
     <Layout>
       <Switch>
+        <Route path="/access-denied" component={AccessDenied} />
+        <Route path="/account/sessions" component={SessionsPage} />
         <Route path="/" component={CoreHub} />
         {TEACHER_ROUTES}
         <Route component={NotFound} />
@@ -587,6 +591,8 @@ function ParentRouter() {
   return (
     <ParentLayout>
       <Switch>
+        <Route path="/access-denied" component={AccessDenied} />
+        <Route path="/account/sessions" component={SessionsPage} />
         {/* Dashboard */}
         <Route path="/" component={GuardianHub} />
 
@@ -714,6 +720,7 @@ function AppContent() {
       <div style={roleOverride ? { paddingTop: 36 } : undefined}>
         {router}
       </div>
+      <ReportProblemModal />
     </WouterRouter>
   );
 }

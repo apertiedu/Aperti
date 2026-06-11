@@ -569,3 +569,92 @@ commerceRouter.post("/practice/submit", authenticate, async (req: AuthRequest, r
 
   res.json({ score, correct, total: answers.length, feedback, mode });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ADMIN — SUBSCRIPTIONS (alias endpoints used by SubscriptionsPage admin UI)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// GET /api/admin/subscriptions/stats/overview
+commerceRouter.get("/admin/subscriptions/stats/overview", authenticate, requireRole("admin"), async (_req, res: Response) => {
+  const { rows } = await pool.query(`
+    SELECT
+      COUNT(*) FILTER (WHERE status = 'active')   AS active,
+      COUNT(*) FILTER (WHERE status = 'trial')    AS trial,
+      COUNT(*) FILTER (WHERE status = 'expired' OR status = 'cancelled') AS expired,
+      COUNT(*) AS total
+    FROM subscriptions
+  `);
+  res.json(rows[0] ?? { active: 0, trial: 0, expired: 0, total: 0 });
+});
+
+// GET /api/admin/subscriptions/plans
+commerceRouter.get("/admin/subscriptions/plans", authenticate, requireRole("admin"), async (_req, res: Response) => {
+  const { rows } = await pool.query(
+    `SELECT id, name, type, price_egp AS "priceEgp", features, limits, student_limit AS "studentLimit",
+            visibility, sort_order AS "sortOrder", discount_pct AS "discountPct",
+            is_active AS "isActive", badge, display_order AS "displayOrder"
+     FROM subscription_plans ORDER BY sort_order, price_egp`
+  );
+  res.json(rows);
+});
+
+// POST /api/admin/subscriptions/plans
+commerceRouter.post("/admin/subscriptions/plans", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  const { name, type, priceEgp, features, limits, studentLimit } = req.body;
+  if (!name || priceEgp === undefined) { res.status(400).json({ error: "name and priceEgp required" }); return; }
+  const featureArr = Array.isArray(features) ? features : (typeof features === "string" ? features.split(",").map((s: string) => s.trim()).filter(Boolean) : []);
+  const { rows } = await pool.query(
+    `INSERT INTO subscription_plans (name, type, price_egp, features, limits, student_limit, visibility, sort_order, discount_pct)
+     VALUES ($1, $2, $3, $4, $5, $6, true, 0, 0) RETURNING *`,
+    [name, type ?? "teacher", String(priceEgp), JSON.stringify(featureArr), JSON.stringify(limits ?? {}), studentLimit || null]
+  );
+  res.status(201).json(rows[0]);
+});
+
+// PUT /api/admin/subscriptions/plans/:id
+commerceRouter.put("/admin/subscriptions/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id);
+  const { name, type, priceEgp, features, limits, studentLimit } = req.body;
+  const featureArr = Array.isArray(features) ? features : (typeof features === "string" ? features.split(",").map((s: string) => s.trim()).filter(Boolean) : undefined);
+  const { rows } = await pool.query(
+    `UPDATE subscription_plans SET
+       name          = COALESCE($1, name),
+       type          = COALESCE($2, type),
+       price_egp     = COALESCE($3, price_egp),
+       features      = COALESCE($4, features),
+       limits        = COALESCE($5, limits),
+       student_limit = COALESCE($6, student_limit)
+     WHERE id = $7 RETURNING *`,
+    [name || null, type || null, priceEgp ? String(priceEgp) : null,
+     featureArr ? JSON.stringify(featureArr) : null,
+     limits ? JSON.stringify(limits) : null,
+     studentLimit || null, id]
+  );
+  res.json(rows[0] ?? { success: true });
+});
+
+// DELETE /api/admin/subscriptions/plans/:id
+commerceRouter.delete("/admin/subscriptions/plans/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  await pool.query(`UPDATE subscription_plans SET visibility = false, is_active = false WHERE id = $1`, [req.params.id]);
+  res.json({ success: true });
+});
+
+// GET /api/admin/subscriptions?page=N&limit=N
+commerceRouter.get("/admin/subscriptions", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  const page  = Math.max(1, parseInt(String(req.query.page  ?? "1")));
+  const limit = Math.min(100, parseInt(String(req.query.limit ?? "20")));
+  const offset = (page - 1) * limit;
+
+  const { rows } = await pool.query(
+    `SELECT s.*, a.username, a.display_name AS "displayName", a.email,
+            sp.name AS "planName", sp.price_egp AS "planPrice"
+     FROM subscriptions s
+     JOIN accounts a  ON a.id  = s.account_id
+     JOIN subscription_plans sp ON sp.id = s.plan_id
+     ORDER BY s.created_at DESC
+     LIMIT $1 OFFSET $2`,
+    [limit, offset]
+  );
+  const countRes = await pool.query(`SELECT COUNT(*) FROM subscriptions`);
+  res.json({ subscriptions: rows, total: parseInt(countRes.rows[0].count) });
+});
