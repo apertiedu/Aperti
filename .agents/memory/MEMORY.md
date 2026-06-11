@@ -4,3 +4,4 @@
 - [Aperti Phase 21 features](aperti-phase21.md) — all Phase 21 features built; key patterns for slash commands, confetti, and landing sections
 - [Aperti Phase 22 UX system](aperti-phase22.md) — all Phase 22 UX infrastructure: tokens, skeletons, empty states, auto-save, error boundaries, sidebar persist
 - [Aperti DB runtime gaps](aperti-db-runtime-gaps.md) — aperti_courses missing at runtime; students has no status column; phase14-public and courses.ts fixes
+- [Aperti Phase 26 stability](aperti-phase26.md) — session table, launch blockers, problem_reports schema fix, sessionExpired modal, error logging, QA script

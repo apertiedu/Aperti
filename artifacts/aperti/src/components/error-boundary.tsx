@@ -8,6 +8,24 @@ const TEAL = "#0D9488";
 interface Props { children: ReactNode; fallback?: ReactNode; }
 interface State { hasError: boolean; error: Error | null; errorInfo: string; }
 
+function logErrorToBackend(error: Error, componentStack: string) {
+  try {
+    const token = localStorage.getItem("aperti_token") || "";
+    fetch("/api/founder/frontend-errors", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({
+        message: error.message,
+        stack: error.stack,
+        componentStack,
+        route: window.location.pathname,
+        browserInfo: navigator.userAgent.slice(0, 300),
+      }),
+    }).catch(() => {});
+  } catch {
+  }
+}
+
 export default class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false, error: null, errorInfo: "" };
 
@@ -16,8 +34,10 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    this.setState({ errorInfo: info.componentStack?.slice(0, 300) ?? "" });
+    const componentStack = info.componentStack?.slice(0, 800) ?? "";
+    this.setState({ errorInfo: componentStack });
     console.error("[ErrorBoundary]", error, info);
+    logErrorToBackend(error, componentStack);
   }
 
   reset = () => this.setState({ hasError: false, error: null, errorInfo: "" });

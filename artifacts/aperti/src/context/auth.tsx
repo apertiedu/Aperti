@@ -13,6 +13,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  sessionExpired: boolean;
+  clearSessionExpired: () => void;
   login: (username: string, password: string) => Promise<User>;
   logout: () => void;
   token: string | null;
@@ -25,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(localStorage.getItem("aperti_token"));
   const [loading, setLoading] = useState(true);
+  const [sessionExpired, setSessionExpired] = useState(false);
 
   useEffect(() => {
     if (!token) { setLoading(false); return; }
@@ -35,10 +38,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try { return JSON.parse(text); } catch { throw new Error("Non-JSON response from /me"); }
       })
       .then(data => {
-        if (data.user) setUser(data.user);
+        if (data?.user) setUser(data.user);
         else { localStorage.removeItem("aperti_token"); setToken(null); }
       })
-      .catch(() => { localStorage.removeItem("aperti_token"); setToken(null); })
+      .catch((err: Error) => {
+        const was401 = err.message.startsWith("HTTP 401");
+        localStorage.removeItem("aperti_token");
+        setToken(null);
+        if (was401 && user !== null) {
+          setSessionExpired(true);
+        }
+      })
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -54,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Cannot reach the server — check your connection and try again.");
     }
     const text = await res.text();
-    let data: Record<string, string> = {};
+    let data: Record<string, any> = {};
     try { data = JSON.parse(text); } catch {
       if (!res.ok) throw new Error(`Server error (${res.status}) — please try again.`);
     }
@@ -71,10 +81,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       err.rateLimited = data.rateLimited === true || res.status === 429;
       throw err;
     }
-    const loggedInUser = data.user as unknown as User;
+    const loggedInUser = data.user as User;
     localStorage.setItem("aperti_token", data.token);
     setToken(data.token);
     setUser(loggedInUser);
+    setSessionExpired(false);
     return loggedInUser;
   };
 
@@ -90,12 +101,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("aperti_token");
     setToken(null);
     setUser(null);
+    setSessionExpired(false);
   };
 
   const clearMustChangePassword = () =>
     setUser(prev => prev ? { ...prev, mustChangePassword: false } : prev);
 
-  return <AuthContext.Provider value={{ user, loading, login, logout, token, clearMustChangePassword }}>{children}</AuthContext.Provider>;
+  const clearSessionExpired = () => setSessionExpired(false);
+
+  return (
+    <AuthContext.Provider value={{ user, loading, sessionExpired, clearSessionExpired, login, logout, token, clearMustChangePassword }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => useContext(AuthContext);

@@ -59,6 +59,7 @@ import NotificationRulesPage from "./NotificationRulesPage";
 import FounderAlertsPage from "./FounderAlertsPage";
 import LaunchCommandPage from "./LaunchCommandPage";
 import ProblemReportsPage from "./ProblemReportsPage";
+import LaunchBlockersPage from "./LaunchBlockersPage";
 
 export default function AdminOS() {
   return (
@@ -146,6 +147,7 @@ export default function AdminOS() {
 
         {/* Phase 24 — Production Hardening */}
         <Route path="/admin/os/problem-reports" component={ProblemReportsPage} />
+        <Route path="/admin/os/launch-blockers" component={LaunchBlockersPage} />
 
         <Route component={Dashboard} />
       </Switch>

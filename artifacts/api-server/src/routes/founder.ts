@@ -419,3 +419,84 @@ founderRouter.put("/alerts/read-all", async (_req: AuthRequest, res: Response) =
     res.status(500).json({ error: err.message });
   }
 });
+
+/* ── Launch Blockers ──────────────────────────────────────────────────────── */
+founderRouter.get("/launch-blockers", async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM launch_blockers ORDER BY
+        CASE severity WHEN 'critical' THEN 0 WHEN 'major' THEN 1 ELSE 2 END,
+        CASE status WHEN 'open' THEN 0 WHEN 'in_progress' THEN 1 ELSE 2 END,
+        created_at DESC`
+    );
+    res.json(rows);
+  } catch (err: any) {
+    if (err.code === "42P01") return res.json([]);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.post("/launch-blockers", async (req: AuthRequest, res: Response) => {
+  try {
+    const { title, description, severity = "major", category = "general", assignee } = req.body;
+    if (!title?.trim()) return res.status(400).json({ error: "Title required" });
+    const { rows } = await pool.query(
+      `INSERT INTO launch_blockers (title, description, severity, category, assignee, status, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, 'open', NOW(), NOW()) RETURNING *`,
+      [title.trim(), description?.trim() || null, severity, category, assignee || null]
+    );
+    res.json(rows[0]);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.patch("/launch-blockers/:id", async (req: AuthRequest, res: Response) => {
+  try {
+    const id = parseInt(req.params.id as string, 10);
+    const { status, description, assignee } = req.body;
+    const resolvedAt = status === "resolved" ? "NOW()" : "resolved_at";
+    await pool.query(
+      `UPDATE launch_blockers SET
+         status = COALESCE($1, status),
+         description = COALESCE($2, description),
+         assignee = COALESCE($3, assignee),
+         resolved_at = ${resolvedAt},
+         updated_at = NOW()
+       WHERE id = $4`,
+      [status || null, description !== undefined ? description : null, assignee !== undefined ? assignee : null, id]
+    );
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.delete("/launch-blockers/:id", async (req: AuthRequest, res: Response) => {
+  try {
+    await pool.query(`DELETE FROM launch_blockers WHERE id = $1`, [req.params.id]);
+    res.json({ ok: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── Frontend Error Log ───────────────────────────────────────────────────── */
+founderRouter.post("/frontend-errors", async (req: AuthRequest, res: Response) => {
+  try {
+    const { message, stack, componentStack, route, browserInfo } = req.body;
+    await pool.query(
+      `INSERT INTO frontend_error_logs (user_id, user_role, error_message, error_stack, component_stack, route, browser_info, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+      [req.userId ?? null, req.role ?? null,
+       (message || "unknown error").slice(0, 1000),
+       (stack || "").slice(0, 5000),
+       (componentStack || "").slice(0, 5000),
+       (route || "").slice(0, 500),
+       (browserInfo || "").slice(0, 500)]
+    ).catch(() => {});
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: true });
+  }
+});

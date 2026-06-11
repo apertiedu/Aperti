@@ -10,7 +10,7 @@ import {
   Rocket, Package, TestTube, Map, Layout, Quote, HelpCircle,
   Calendar, Palette, Megaphone, TrendingUp, PieChart, Globe, Star,
   Bug, FlaskConical, History, ClipboardList,
-  Crown, DollarSign, Bell, Tag, Award,
+  Crown, DollarSign, Bell, Tag, Award, ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -91,6 +91,7 @@ const NAV = [
   { label: "Notification Rules",  icon: Bell,        href: "/admin/os/notification-rules" },
   { label: "Founder Alerts",      icon: AlertTriangle, href: "/admin/os/founder-alerts" },
   { label: "Launch Command",      icon: Rocket,      href: "/admin/os/launch-command" },
+  { label: "Launch Blockers",     icon: ShieldAlert, href: "/admin/os/launch-blockers" },
   { label: "Releases",            icon: Tag,         href: "/admin/os/releases" },
 ] as const;
 
@@ -108,10 +109,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     >
       {/* Logo */}
       <div className={cn("flex items-center gap-3 px-4 py-5 border-b border-gray-100", collapsed && !mobile && "justify-center px-2")}>
-        <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center flex-shrink-0">
-          <LayoutDashboard className="w-4 h-4 text-white" />
-        </div>
-        {(!collapsed || mobile) && (
+        {collapsed && !mobile ? (
+          <span className="font-bold text-sm text-gray-900">A<span className="text-teal-600">.</span></span>
+        ) : (
           <div>
             <p className="font-bold text-gray-900 text-sm">Admin OS</p>
             <p className="text-[10px] text-gray-400">Platform Control</p>

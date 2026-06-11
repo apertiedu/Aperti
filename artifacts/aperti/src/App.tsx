@@ -122,6 +122,7 @@ import Profile from "@/pages/profile";
 import AccessDenied from "@/pages/access-denied";
 import SessionsPage from "@/pages/account/sessions";
 import ReportProblemModal from "@/components/report-problem-modal";
+import SessionExpiryModal from "@/components/session-expiry-modal";
 
 // Marketplace & registration
 import Courses from "@/pages/courses";
@@ -668,6 +669,11 @@ function PublicRouter() {
   );
 }
 
+function SessionExpiryGate() {
+  const { sessionExpired, clearSessionExpired } = useAuth();
+  return <SessionExpiryModal open={sessionExpired} onDismiss={clearSessionExpired} />;
+}
+
 function AppContent() {
   const { user, loading } = useAuth();
 
@@ -740,6 +746,7 @@ export default function App() {
                   Skip to main content
                 </a>
                 <AppContent />
+                <SessionExpiryGate />
               </ErrorBoundary>
             </TourProvider>
           </AuthProvider>
