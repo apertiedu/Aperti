@@ -4,15 +4,17 @@ import { Search, Download, ChevronLeft, ChevronRight, AlertTriangle, Info, Shiel
 import { fetchJSON } from "@/lib/api";
 
 const ACTION_COLORS: Record<string, string> = {
-  create:      "bg-green-100 text-green-700",
-  update:      "bg-blue-100 text-blue-700",
-  delete:      "bg-red-100 text-red-700",
-  login:       "bg-teal-100 text-teal-700",
-  logout:      "bg-gray-100 text-gray-600",
-  impersonate: "bg-orange-100 text-orange-700",
-  verify:      "bg-purple-100 text-purple-700",
-  export:      "bg-indigo-100 text-indigo-700",
-  role_change: "bg-pink-100 text-pink-700",
+  create:        "bg-green-100 text-green-700",
+  update:        "bg-blue-100 text-blue-700",
+  delete:        "bg-red-100 text-red-700",
+  login:         "bg-teal-100 text-teal-700",
+  login_failed:  "bg-orange-100 text-orange-700",
+  logout:        "bg-gray-100 text-gray-600",
+  access_denied: "bg-red-100 text-red-700",
+  impersonate:   "bg-orange-100 text-orange-700",
+  verify:        "bg-purple-100 text-purple-700",
+  export:        "bg-indigo-100 text-indigo-700",
+  role_change:   "bg-pink-100 text-pink-700",
 };
 
 const SEVERITY_STYLES: Record<string, { badge: string; icon: any }> = {
@@ -40,12 +42,14 @@ export default function AuditPage() {
   const [severity, setSeverity]   = useState("");
   const [page, setPage]           = useState(1);
 
+  const [action, setAction] = useState("");
+
   const { data, isLoading } = useQuery({
-    queryKey: ["audit-logs", search, from, to, severity, page],
+    queryKey: ["audit-logs", search, from, to, severity, action, page],
     queryFn: () =>
-      fetchJSON(`/api/admin/audit-logs?search=${encodeURIComponent(search)}&from=${from}&to=${to}&severity=${severity}&page=${page}&limit=50`),
-    keepPreviousData: true,
-  } as any);
+      fetchJSON(`/api/admin/audit-logs?search=${encodeURIComponent(search)}&from=${from}&to=${to}&severity=${severity}&action=${encodeURIComponent(action)}&page=${page}&limit=50`),
+    placeholderData: (prev: unknown) => prev,
+  });
 
   const { data: stats } = useQuery({
     queryKey: ["audit-stats"],
@@ -111,6 +115,22 @@ export default function AuditPage() {
             className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white"
           />
         </div>
+        <select
+          value={action}
+          onChange={(e) => { setAction(e.target.value); setPage(1); }}
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white text-gray-700"
+        >
+          <option value="">All actions</option>
+          <option value="login">login</option>
+          <option value="login_failed">login_failed</option>
+          <option value="logout">logout</option>
+          <option value="access_denied">access_denied</option>
+          <option value="create">create</option>
+          <option value="update">update</option>
+          <option value="delete">delete</option>
+          <option value="role_change">role_change</option>
+          <option value="export">export</option>
+        </select>
         <select
           value={severity}
           onChange={(e) => { setSeverity(e.target.value); setPage(1); }}

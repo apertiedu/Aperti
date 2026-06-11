@@ -278,6 +278,15 @@ function useRoleGuard(role: "student" | "teacher" | "parent") {
         description: "You don't have permission to access that page.",
         variant: "destructive",
       });
+      // Fire-and-forget: record the access attempt in the audit log
+      const t = localStorage.getItem("aperti_token");
+      if (t) {
+        fetch("/auth/audit-event", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+          body: JSON.stringify({ action: "access_denied", resource: location, details: { role } }),
+        }).catch(() => {});
+      }
     } else if (!isBlocked) {
       lastBlocked.current = null;
     }

@@ -16,11 +16,12 @@ const SEVERITY_COLORS: Record<string, string> = {
 
 adminAuditRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const { search, from, to, severity, page = "1", limit = "100" } = req.query as Record<string, string>;
+    const { search, from, to, severity, action, page = "1", limit = "100" } = req.query as Record<string, string>;
     const offset = (parseInt(page) - 1) * parseInt(limit);
 
     const conditions: any[] = [];
     if (search) conditions.push(ilike(auditLogsTable.action, `%${search}%`));
+    if (action) conditions.push(sql`${auditLogsTable.action} = ${action}`);
     if (from) conditions.push(gte(auditLogsTable.createdAt, new Date(from)));
     if (to) conditions.push(lte(auditLogsTable.createdAt, new Date(to)));
     if (severity) conditions.push(sql`${auditLogsTable.severity} = ${severity}`);

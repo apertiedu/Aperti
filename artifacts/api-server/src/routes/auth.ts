@@ -4,7 +4,29 @@ import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { eq } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { accountsTable, deviceSessionsTable } from "@workspace/db";
+import { accountsTable, deviceSessionsTable, auditLogsTable } from "@workspace/db";
+import { authenticate, AuthRequest } from "../middleware/auth";
+
+// Fire-and-forget audit log helper — never throws
+function writeAudit(entry: {
+  accountId?: number | null;
+  action: string;
+  resource: string;
+  details?: Record<string, unknown>;
+  ipAddress?: string;
+  userAgent?: string;
+  severity?: "info" | "warning" | "error" | "critical";
+}) {
+  db.insert(auditLogsTable).values({
+    accountId: entry.accountId ?? null,
+    action: entry.action,
+    resource: entry.resource,
+    details: entry.details ?? null,
+    ipAddress: entry.ipAddress ?? null,
+    userAgent: entry.userAgent ?? null,
+    severity: entry.severity ?? "info",
+  }).catch(() => {});
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret-change-in-prod";
 const TOKEN_EXPIRY = "7d";
@@ -55,11 +77,13 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
     const account = acctRows[0] as any;
     if (!account || account.status !== "active") {
       await recordLoginHistory(null, identifier, req, false, "Account not found or inactive");
+      writeAudit({ action: "login_failed", resource: "auth", details: { identifier, reason: "Account not found or inactive" }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "warning" });
       return res.status(401).json({ error: "Invalid credentials" });
     }
     const valid = await bcrypt.compare(password, account.password_hash);
     if (!valid) {
       await recordLoginHistory(account.id, identifier, req, false, "Wrong password");
+      writeAudit({ accountId: account.id, action: "login_failed", resource: "auth", details: { reason: "Wrong password" }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "warning" });
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
@@ -78,6 +102,7 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
         lastActiveAt: new Date(),
       }).onConflictDoNothing();
     }
+    writeAudit({ accountId: account.id, action: "login", resource: "auth", details: { role: account.role }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
     res.json({
       token,
       user: {
@@ -161,10 +186,40 @@ authRouter.post("/logout", async (req: Request, res: Response) => {
     if (deviceId) {
       await db.delete(deviceSessionsTable).where(eq(deviceSessionsTable.deviceId, deviceId));
     }
+    // Decode token (best-effort) to record who logged out
+    const header = req.headers.authorization;
+    if (header?.startsWith("Bearer ")) {
+      try {
+        const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
+        writeAudit({ accountId: payload.id, action: "logout", resource: "auth", ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
+      } catch { /* token already expired — still allow logout */ }
+    }
   } catch {
     // ignore logout errors
   }
   res.json({ success: true });
+});
+
+// POST /auth/audit-event — any authenticated user can report a client-side security event
+authRouter.post("/audit-event", authenticate as any, async (req: AuthRequest, res: Response) => {
+  try {
+    const { action, resource, details } = req.body;
+    if (!action || !resource) { res.status(400).json({ error: "action and resource are required" }); return; }
+    const allowed = ["access_denied", "logout"];
+    if (!allowed.includes(action)) { res.status(400).json({ error: "Unknown audit action" }); return; }
+    writeAudit({
+      accountId: req.userId,
+      action,
+      resource: String(resource).slice(0, 200),
+      details: details ?? null,
+      ipAddress: req.ip,
+      userAgent: req.headers["user-agent"] as string,
+      severity: action === "access_denied" ? "warning" : "info",
+    });
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: true }); // never surface errors for audit writes
+  }
 });
 
 // GET /auth/stats — public platform statistics
