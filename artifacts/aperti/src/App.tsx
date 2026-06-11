@@ -13,8 +13,9 @@ import Login from "@/pages/login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import LowBandwidthBanner from "@/components/LowBandwidthBanner";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
+import { useToast } from "@/hooks/use-toast";
 
 // Public & Legal
 import Landing from "@/pages/landing";
@@ -232,6 +233,58 @@ const queryClient = new QueryClient({
   },
 });
 
+// ─── Role-based access control ───────────────────────────────────────────────
+
+const ADMIN_PREFIXES = ["/admin"];
+
+const TEACHER_ONLY_PREFIXES = [
+  "/plan-grid", "/checkin", "/submit-flow", "/grade-flow", "/scheme-craft",
+  "/query-vault", "/cardstack", "/syllabuilder", "/kudos-engine", "/pulse",
+  "/content-craft", "/lab-builder", "/marker-mind", "/insight-stream",
+  "/risk-report", "/timetable", "/helpdesk", "/insight-exams", "/scan-scribe",
+  "/error-trace", "/tutorcraft", "/teacher-courses", "/teacher/",
+  "/automation", "/assessment-hub", "/gradebook-plus", "/certifications",
+  "/student-approvals", "/corehub",
+];
+
+function pathBlocked(path: string, prefixes: string[]): boolean {
+  return prefixes.some(
+    (p) => path === p || path.startsWith(p + "/") || path.startsWith(p + "?"),
+  );
+}
+
+function useRoleGuard(role: "student" | "teacher" | "parent") {
+  const [location, navigate] = useLocation();
+  const { toast } = useToast();
+  const lastBlocked = useRef<string | null>(null);
+
+  useEffect(() => {
+    const blockedAdmin = pathBlocked(location, ADMIN_PREFIXES);
+    const blockedTeacher = pathBlocked(location, TEACHER_ONLY_PREFIXES);
+
+    const isBlocked =
+      role === "student" || role === "parent"
+        ? blockedAdmin || blockedTeacher
+        : role === "teacher"
+          ? blockedAdmin
+          : false;
+
+    if (isBlocked && location !== lastBlocked.current) {
+      lastBlocked.current = location;
+      navigate("/");
+      toast({
+        title: "Access denied",
+        description: "You don't have permission to access that page.",
+        variant: "destructive",
+      });
+    } else if (!isBlocked) {
+      lastBlocked.current = null;
+    }
+  }, [location]); // eslint-disable-line react-hooks/exhaustive-deps
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const ROLE_OVERRIDE_KEY = "aperti_role_override";
 
 export function getRoleOverride(): string | null {
@@ -290,6 +343,7 @@ function RoleOverrideBanner({ originalRole }: { originalRole: string }) {
 }
 
 function StudentRouter() {
+  useRoleGuard("student");
   return (
     <StudentLayout>
       <Switch>
@@ -506,6 +560,7 @@ function AdminRouter() {
 }
 
 function TeacherRouter() {
+  useRoleGuard("teacher");
   return (
     <Layout>
       <Switch>
@@ -518,6 +573,7 @@ function TeacherRouter() {
 }
 
 function ParentRouter() {
+  useRoleGuard("parent");
   return (
     <ParentLayout>
       <Switch>
