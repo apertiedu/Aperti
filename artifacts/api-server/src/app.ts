@@ -175,13 +175,29 @@ app.get("/api", (_req, res) => {
   res.json({ status: "ok", service: "aperti-api", version: process.env.COMMIT_HASH || "dev" });
 });
 
+// ── Root /health for Railway & other deployment platforms ─────────────────────
+app.get("/health", async (_req, res) => {
+  const start = Date.now();
+  let dbOk = false;
+  try { await pool.query("SELECT 1"); dbOk = true; } catch {}
+  const status = dbOk ? "healthy" : "degraded";
+  res.status(dbOk ? 200 : 503).json({
+    status,
+    db: dbOk ? "connected" : "error",
+    uptime: Math.round(process.uptime()),
+    latencyMs: Date.now() - start,
+    version: process.env.COMMIT_HASH || "dev",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // ── Public health check ───────────────────────────────────────────────────────
 app.get("/api/health", async (_req, res) => {
   const start = Date.now();
   let dbOk = false;
   try { await pool.query("SELECT 1"); dbOk = true; } catch {}
   res.json({
-    status: "ok",
+    status: "healthy",
     db: dbOk ? "connected" : "error",
     redis: "memory",
     uptime: Math.round(process.uptime()),

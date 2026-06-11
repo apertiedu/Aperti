@@ -3,7 +3,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/auth";
-import { TourProvider } from "@/components/onboarding-tour";
 import { ThemeProvider } from "@/context/theme";
 import ErrorBoundary from "@/components/error-boundary";
 import NotFound from "@/pages/not-found";
@@ -97,7 +96,6 @@ import Revisit from "@/pages/student/revisit";
 import FocusCoach from "@/pages/student/focus-coach";
 import FocusZone from "@/pages/student/focus-zone";
 import SuccessCenter from "@/pages/student/success-center";
-import WhatsNewModal from "@/components/whats-new-modal";
 import TrialVault from "@/pages/student/trial-vault";
 import PeakRankings from "@/pages/student/peak-rankings";
 import PeerReview from "@/pages/student/peer-review";
@@ -740,8 +738,7 @@ export default function App() {
       <ThemeProvider>
         <TooltipProvider>
           <AuthProvider>
-            <TourProvider>
-              <ErrorBoundary>
+            <ErrorBoundary>
                 <a
                   href="#main-content"
                   className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-background focus:border focus:border-primary focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
@@ -750,9 +747,7 @@ export default function App() {
                 </a>
                 <AppContent />
                 <SessionExpiryGate />
-                <WhatsNewModal />
               </ErrorBoundary>
-            </TourProvider>
           </AuthProvider>
           <Toaster />
           <LowBandwidthBanner />

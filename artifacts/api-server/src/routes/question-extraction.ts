@@ -1,6 +1,9 @@
 import { Router, Response, Request } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
+import multer from "multer";
+
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 export const questionExtractionRouter = Router();
 
@@ -29,6 +32,7 @@ interface ExtractedQuestion {
   commandWord: string;
   paperType: string;
   diagramHint: string;
+  markScheme?: string;
   status: "pending" | "approved" | "rejected";
   isDuplicate: boolean;
   duplicateOf?: number;
@@ -68,6 +72,61 @@ questionExtractionRouter.post("/", async (req: AuthRequest, res: Response) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+/* POST /api/questions/extract/upload — PDF upload extraction */
+questionExtractionRouter.post("/upload",
+  upload.fields([{ name: "questionPdf", maxCount: 1 }, { name: "markSchemePdf", maxCount: 1 }]),
+  async (req: AuthRequest, res: Response) => {
+    try {
+      const files = req.files as Record<string, Express.Multer.File[]> | undefined;
+      const questionFile = files?.["questionPdf"]?.[0];
+      const markSchemeFile = files?.["markSchemePdf"]?.[0];
+
+      if (!questionFile) return res.status(400).json({ error: "Question paper PDF is required" });
+
+      const { subject, paperType } = req.body;
+
+      // Extract text from PDF
+      let questionText = "";
+      let markSchemeText = "";
+      try {
+        const pdfParse = (await import("pdf-parse")).default;
+        const qData = await pdfParse(questionFile.buffer);
+        questionText = qData.text;
+        if (markSchemeFile) {
+          const msData = await pdfParse(markSchemeFile.buffer);
+          markSchemeText = msData.text;
+        }
+      } catch {
+        questionText = questionFile.buffer.toString("utf8", 0, Math.min(questionFile.buffer.length, 10000));
+      }
+
+      if (!questionText || questionText.trim().length < 20) {
+        return res.status(400).json({ error: "Could not extract text from PDF. Please ensure it is a text-based PDF." });
+      }
+
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const job: ExtractionJob = {
+        id: jobId,
+        status: "pending",
+        createdBy: req.userId!,
+        source: "pdf_upload",
+        totalExtracted: 0,
+        approved: 0,
+        rejected: 0,
+        questions: [],
+        createdAt: new Date().toISOString(),
+      };
+      jobs.set(jobId, job);
+
+      extractQuestionsAsync(jobId, questionText, subject, paperType, req.userId!, markSchemeText).catch(console.error);
+
+      res.status(202).json({ jobId, status: "pending", message: "PDF extraction started" });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  }
+);
 
 /* GET /api/questions/extract/:jobId — job status */
 questionExtractionRouter.get("/:jobId", async (req: AuthRequest, res: Response) => {
@@ -124,7 +183,8 @@ questionExtractionRouter.get("/", async (req: AuthRequest, res: Response) => {
 
 /* ── Async extraction logic ──────────────────────────────────────────── */
 async function extractQuestionsAsync(
-  jobId: string, text: string, subject: string, paperType: string, userId: number
+  jobId: string, text: string, subject: string, paperType: string, userId: number,
+  markSchemeText?: string
 ) {
   const job = jobs.get(jobId)!;
   job.status = "processing";
@@ -133,9 +193,12 @@ async function extractQuestionsAsync(
     let extracted: ExtractedQuestion[] = [];
 
     if (process.env.OPENAI_API_KEY) {
-      extracted = await extractWithAI(text, subject, paperType);
+      extracted = await extractWithAI(text, subject, paperType, markSchemeText);
     } else {
       extracted = extractWithRules(text, subject, paperType);
+      if (markSchemeText) {
+        extracted = matchMarkSchemeFallback(extracted, markSchemeText);
+      }
     }
 
     // Duplicate detection
@@ -164,7 +227,35 @@ async function extractQuestionsAsync(
   }
 }
 
-async function extractWithAI(text: string, subject: string, paperType: string): Promise<ExtractedQuestion[]> {
+function matchMarkSchemeFallback(questions: ExtractedQuestion[], markSchemeText: string): ExtractedQuestion[] {
+  const lines = markSchemeText.split("\n").filter(l => l.trim().length > 10);
+  const qPattern = /^(\d+)\s*[\.\)]/;
+  const msMap: Record<string, string[]> = {};
+  let currentQ = "";
+  for (const line of lines) {
+    const m = line.match(qPattern);
+    if (m) {
+      currentQ = m[1];
+      msMap[currentQ] = msMap[currentQ] ?? [];
+    } else if (currentQ) {
+      msMap[currentQ] = [...(msMap[currentQ] ?? []), line.trim()];
+    }
+  }
+  return questions.map((q, i) => {
+    const num = String(i + 1);
+    const msLines = msMap[num];
+    if (msLines && msLines.length > 0) {
+      return { ...q, markScheme: msLines.slice(0, 8).join("\n") };
+    }
+    return q;
+  });
+}
+
+async function extractWithAI(text: string, subject: string, paperType: string, markSchemeText?: string): Promise<ExtractedQuestion[]> {
+  const msSection = markSchemeText
+    ? `\n\nMark Scheme text (link answers to questions by number):\n"""\n${markSchemeText.substring(0, 2000)}\n"""`
+    : "";
+
   const prompt = `You are an expert exam paper parser. Extract individual questions from this exam paper text.
 
 Paper text:
@@ -173,7 +264,7 @@ ${text.substring(0, 3000)}
 """
 
 Subject: ${subject || "Unknown"}
-Paper type: ${paperType || "Unknown"}
+Paper type: ${paperType || "Unknown"}${msSection}
 
 Return a JSON array of question objects:
 [{
@@ -186,7 +277,8 @@ Return a JSON array of question objects:
   "difficulty": "easy|medium|hard",
   "commandWord": "Calculate|Explain|Describe|Define|Evaluate|Compare|Sketch",
   "paperType": "${paperType || "structured"}",
-  "diagramHint": "Brief note if a diagram is referenced, or empty string"
+  "diagramHint": "Brief note if a diagram is referenced, or empty string",
+  "markScheme": "Corresponding mark scheme answer, or empty string if not available"
 }]
 
 Extract 5-15 questions. Be thorough. Return ONLY the JSON array, no other text.`;

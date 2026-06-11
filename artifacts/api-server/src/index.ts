@@ -18,12 +18,24 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 async function main() {
+  // ── Environment validation ─────────────────────────────────────────────────
+  const requiredEnv = ["DATABASE_URL", "PORT"];
+  const missingEnv = requiredEnv.filter(k => !process.env[k]);
+  if (missingEnv.length > 0) {
+    console.error(`[startup] FATAL: Missing required environment variables: ${missingEnv.join(", ")}`);
+    process.exit(1);
+  }
+  logger.info("Environment validated");
+
   // Run migrations first — must complete before anything else
   try {
     await runMigrations();
+    logger.info("Database connected");
   } catch (err) {
     logger.error({ err }, "Migration error — continuing");
   }
+
+  logger.info("Storage ready");
 
   // Import app AFTER migrations so seedDefaultAdmin runs against a ready DB
   const { default: app } = await import("./app");
@@ -49,7 +61,7 @@ async function main() {
       logger.error({ err }, "Error listening on port");
       process.exit(1);
     }
-    logger.info({ port }, "Server listening");
+    logger.info({ port }, `Server started on port ${port}`);
   });
 }
 

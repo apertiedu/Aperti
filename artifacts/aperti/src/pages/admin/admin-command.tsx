@@ -5,7 +5,8 @@ import {
   Calculator, Activity, DollarSign, Shield, LifeBuoy, FileText,
   Settings, Users, Globe, ChevronRight, Bell, RefreshCw,
   BarChart3, Terminal, Wifi, CreditCard, Clock, Brain, ShieldCheck,
-  LayoutDashboard, Bug, Flame,
+  LayoutDashboard, Bug, Flame, Database, Server, CheckCircle2, XCircle,
+  AlertTriangle, Cpu, HardDrive,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -153,6 +154,93 @@ const modules = [
   { to: "/admin/os/qa/readiness",      label: "QualityOS ✦ New",          desc: "Bug tracker, test runs & launch readiness", icon: Bug, highlight2: true },
 ];
 
+function DeploymentDebugPanel() {
+  const { data, isLoading, refetch, isFetching } = useQuery({
+    queryKey: ["deployment-health"],
+    queryFn: async () => {
+      const res = await fetch("/api/health");
+      if (!res.ok) throw new Error("Health check failed");
+      return res.json();
+    },
+    refetchInterval: 60_000,
+    retry: 1,
+  });
+
+  const checks = [
+    {
+      label: "Database",
+      icon: Database,
+      ok: data?.db === "connected",
+      value: data?.db ?? (isLoading ? "checking…" : "unknown"),
+    },
+    {
+      label: "API Server",
+      icon: Server,
+      ok: !!data,
+      value: data ? `up ${Math.floor((data.uptime ?? 0) / 60)}m` : (isLoading ? "checking…" : "unreachable"),
+    },
+    {
+      label: "Latency",
+      icon: Cpu,
+      ok: (data?.latencyMs ?? 999) < 200,
+      value: data?.latencyMs != null ? `${data.latencyMs}ms` : "—",
+    },
+    {
+      label: "Version",
+      icon: HardDrive,
+      ok: true,
+      value: data?.version ?? "—",
+    },
+  ];
+
+  return (
+    <Card className="border-0 shadow-sm bg-white mb-6">
+      <CardContent className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-teal-50 flex items-center justify-center">
+              <Server className="h-4 w-4 text-teal-600" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">Deployment Status</h2>
+              <p className="text-xs text-gray-400">Live health check · auto-refreshes every 60s</p>
+            </div>
+          </div>
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            title="Refresh"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+          </button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {checks.map(({ label, icon: Icon, ok, value }) => (
+            <div key={label} className={`rounded-xl p-3 border ${ok ? "bg-green-50/60 border-green-100" : "bg-red-50/60 border-red-100"}`}>
+              <div className="flex items-center gap-1.5 mb-1.5">
+                <Icon className={`h-3.5 w-3.5 ${ok ? "text-green-600" : "text-red-500"}`} />
+                {ok
+                  ? <CheckCircle2 className="h-3 w-3 text-green-500" />
+                  : <XCircle className="h-3 w-3 text-red-500" />
+                }
+              </div>
+              <p className="text-[11px] font-bold text-gray-700 truncate">{value}</p>
+              <p className="text-[10px] text-gray-400 mt-0.5">{label}</p>
+            </div>
+          ))}
+        </div>
+        {data?.status === "degraded" && (
+          <div className="mt-3 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+            <AlertTriangle className="h-4 w-4 text-amber-500 shrink-0" />
+            Platform running in degraded mode — database may be unreachable
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function LiveStatsBadge({ count, label }: { count: number | string; label: string }) {
   return (
     <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
@@ -281,6 +369,15 @@ export default function AdminCommand() {
           </p>
         </motion.div>
       )}
+
+      {/* Deployment debug panel */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25 }}
+      >
+        <DeploymentDebugPanel />
+      </motion.div>
 
       {/* Activity heatmap */}
       <motion.div

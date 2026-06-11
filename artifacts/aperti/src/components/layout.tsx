@@ -8,7 +8,7 @@ import {
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart, Package,
   RefreshCw, Settings, MessageSquare,
   LogOut, ChevronLeft, ChevronRight, Search, KeyRound,
-  Sun, Moon, Sparkles, ShoppingBag, UserCheck, Link2, Bot,
+  Sun, Moon, ShoppingBag, UserCheck, Link2, Bot,
   GraduationCap, TableProperties, Medal, Scale, Archive,
   Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X,
 } from "lucide-react";
@@ -23,7 +23,6 @@ import NotificationBell from "@/components/notification-bell";
 import ChangePasswordModal from "@/components/change-password-modal";
 import { useTheme } from "@/context/theme";
 import { motion, AnimatePresence } from "framer-motion";
-import { useTour } from "@/components/onboarding-tour";
 import MobileBottomNav from "@/components/mobile-bottom-nav";
 
 interface NavItem {
@@ -52,7 +51,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
   const { dark, toggleDark } = useTheme();
-  const { startTour } = useTour();
   const { recent, push } = useRecentPages();
 
   const isAdmin = user?.role === "admin";
@@ -347,10 +345,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Active Sessions
               </Button>
             </Link>
-            <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground text-[11px] h-7" onClick={startTour}>
-              <Sparkles className="w-3 h-3" />
-              Replay Tour
-            </Button>
             <Button
               variant="ghost" size="sm"
               className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[11px] h-7"

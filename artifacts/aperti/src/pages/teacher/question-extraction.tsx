@@ -1,11 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Upload, FileText, CheckCircle2, XCircle, Clock, Loader2,
-  AlertCircle, BookOpen, ChevronDown, ChevronUp, Badge as BadgeIcon,
-  Zap, BarChart3, Copy, Check, Brain,
+  AlertCircle, BookOpen, ChevronDown, ChevronUp, Copy, Check, Brain,
+  Zap, BarChart3, FileUp, Paperclip, X, Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +24,7 @@ interface ExtractedQuestion {
   commandWord: string;
   paperType: string;
   diagramHint: string;
+  markScheme?: string;
   status: "pending" | "approved" | "rejected";
   isDuplicate: boolean;
   duplicateOf?: number;
@@ -38,6 +39,7 @@ interface ExtractionJob {
   error?: string;
   createdAt: string;
   completedAt?: string;
+  source?: string;
 }
 
 const DIFF_COLORS: Record<string, string> = {
@@ -79,25 +81,29 @@ function QuestionCard({
     >
       <div className="p-4">
         <div className="flex items-start gap-3">
-          <input
-            type="checkbox"
-            checked={selected}
-            onChange={onToggle}
-            disabled={q.status !== "pending"}
-            className="mt-1 rounded accent-teal-600"
-          />
+          {q.status === "pending" && (
+            <input type="checkbox" checked={selected} onChange={onToggle}
+              className="mt-0.5 shrink-0 w-4 h-4 rounded accent-teal-600 cursor-pointer" />
+          )}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-2">
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${DIFF_COLORS[q.difficulty]}15`, color: DIFF_COLORS[q.difficulty] }}>
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              {q.marks != null && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">{q.marks}m</span>
+              )}
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: `${DIFF_COLORS[q.difficulty]}18`, color: DIFF_COLORS[q.difficulty] }}>
                 {q.difficulty}
               </span>
-              <span className="text-[10px] font-semibold text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full">{q.commandWord}</span>
-              <span className="text-[10px] text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full">{q.topic}</span>
-              {q.marks && <span className="text-[10px] font-bold text-gray-600">[{q.marks} marks]</span>}
+              {q.commandWord && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-50 text-violet-600">{q.commandWord}</span>
+              )}
+              {q.topic && (
+                <span className="text-[10px] font-semibold text-muted-foreground">{q.topic}</span>
+              )}
               {q.isDuplicate && (
-                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <AlertCircle className="h-2.5 w-2.5" />Possible duplicate
-                </span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600">⚠ Possible duplicate</span>
+              )}
+              {q.diagramHint && (
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600" title={q.diagramHint}>📐 diagram</span>
               )}
               {q.status !== "pending" && (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${q.status === "approved" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
@@ -113,8 +119,13 @@ function QuestionCard({
                 ))}
               </div>
             )}
-            {q.diagramHint && (
-              <p className="text-[10px] text-muted-foreground mt-1 italic">📐 {q.diagramHint}</p>
+            {q.markScheme && expanded && (
+              <div className="mt-3 p-3 bg-emerald-50 border border-emerald-100 rounded-lg">
+                <p className="text-[10px] font-bold text-emerald-700 mb-1 flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> Mark Scheme
+                </p>
+                <p className="text-xs text-emerald-800 whitespace-pre-line">{q.markScheme}</p>
+              </div>
             )}
           </div>
           <div className="flex items-center gap-1 shrink-0">
@@ -143,23 +154,95 @@ function QuestionCard({
   );
 }
 
+type InputMode = "text" | "pdf";
+
+function FileDropZone({ label, accept, file, onFile, onClear }: {
+  label: string;
+  accept: string;
+  file: File | null;
+  onFile: (f: File) => void;
+  onClear: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const f = e.dataTransfer.files[0];
+    if (f) onFile(f);
+  }, [onFile]);
+
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+
+  if (file) {
+    return (
+      <div className="flex items-center gap-3 px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl">
+        <FileText className="h-4 w-4 text-teal-600 shrink-0" />
+        <span className="text-sm font-medium text-teal-800 flex-1 truncate">{file.name}</span>
+        <span className="text-xs text-teal-600">{(file.size / 1024).toFixed(0)} KB</span>
+        <button onClick={onClear} className="p-1 rounded-md hover:bg-teal-100 text-teal-600">
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      onClick={() => inputRef.current?.click()}
+      className="border-2 border-dashed border-gray-200 hover:border-teal-400 rounded-xl p-4 text-center cursor-pointer transition-colors group"
+    >
+      <FileUp className="h-6 w-6 mx-auto text-gray-300 group-hover:text-teal-500 transition-colors mb-1.5" />
+      <p className="text-xs font-semibold text-gray-500 group-hover:text-teal-700">{label}</p>
+      <p className="text-[10px] text-gray-400 mt-0.5">Drag & drop or click · PDF, max 10MB</p>
+      <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={e => {
+        const f = e.target.files?.[0];
+        if (f) onFile(f);
+        e.target.value = "";
+      }} />
+    </div>
+  );
+}
+
 export default function QuestionExtractionPage() {
   const { toast } = useToast();
+  const [mode, setMode] = useState<InputMode>("text");
   const [text, setText] = useState("");
   const [subject, setSubject] = useState("");
   const [paperType, setPaperType] = useState("structured");
   const [jobId, setJobId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [questionPdf, setQuestionPdf] = useState<File | null>(null);
+  const [markSchemePdf, setMarkSchemePdf] = useState<File | null>(null);
 
   const startExtraction = useMutation({
     mutationFn: async () => {
-      const res = await apiFetch("/api/questions/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, subject, paperType }),
-      });
-      if (!res.ok) throw new Error("Failed to start extraction");
-      return res.json();
+      if (mode === "pdf") {
+        if (!questionPdf) throw new Error("Please upload a question paper PDF");
+        const form = new FormData();
+        form.append("questionPdf", questionPdf);
+        if (markSchemePdf) form.append("markSchemePdf", markSchemePdf);
+        form.append("subject", subject);
+        form.append("paperType", paperType);
+        const res = await apiFetch("/api/questions/extract/upload", {
+          method: "POST",
+          body: form,
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ error: "Upload failed" }));
+          throw new Error(err.error || "Upload failed");
+        }
+        return res.json();
+      } else {
+        const res = await apiFetch("/api/questions/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text, subject, paperType }),
+        });
+        if (!res.ok) throw new Error("Failed to start extraction");
+        return res.json();
+      }
     },
     onSuccess: (data) => {
       setJobId(data.jobId);
@@ -168,7 +251,7 @@ export default function QuestionExtractionPage() {
     onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
-  const { data: job, isLoading: jobLoading } = useQuery<ExtractionJob>({
+  const { data: job } = useQuery<ExtractionJob>({
     queryKey: ["extraction-job", jobId],
     queryFn: async () => {
       const res = await apiFetch(`/api/questions/extract/${jobId}`);
@@ -203,10 +286,12 @@ export default function QuestionExtractionPage() {
     setSelectedIds(s => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   };
 
+  const canExtract = mode === "pdf" ? !!questionPdf : text.trim().length >= 20;
   const questions = job?.questions ?? [];
   const pending = questions.filter(q => q.status === "pending");
   const approved = questions.filter(q => q.status === "approved").length;
   const rejected = questions.filter(q => q.status === "rejected").length;
+  const withMarkScheme = questions.filter(q => q.markScheme).length;
 
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
@@ -214,16 +299,32 @@ export default function QuestionExtractionPage() {
       <div>
         <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
           <Brain className="h-6 w-6" style={{ color: TEAL }} />
-          AI Question Extraction
+          AI Question Extraction 2.0
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Paste exam paper text and let AI extract structured questions for your Question Bank.
+          Extract questions from exam papers and mark schemes — by text paste or PDF upload.
         </p>
       </div>
 
       {!jobId ? (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+            {/* Mode tabs */}
+            <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
+              {(["text", "pdf"] as InputMode[]).map(m => (
+                <button
+                  key={m}
+                  onClick={() => setMode(m)}
+                  className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                    mode === m ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {m === "text" ? <><FileText className="h-3.5 w-3.5" />Paste Text</> : <><Paperclip className="h-3.5 w-3.5" />Upload PDF</>}
+                </button>
+              ))}
+            </div>
+
+            {/* Subject + Paper Type */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1.5">Subject</label>
@@ -242,22 +343,63 @@ export default function QuestionExtractionPage() {
                 </select>
               </div>
             </div>
-            <div>
-              <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
-                Paste Exam Paper Text
-              </label>
-              <textarea
-                value={text}
-                onChange={e => setText(e.target.value)}
-                rows={10}
-                placeholder="Paste the full exam paper text here. AI will identify and extract individual questions, mark allocations, command words, and topics automatically…"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20 resize-y font-mono"
-              />
-              <p className="text-[10px] text-muted-foreground mt-1">{text.length} characters</p>
-            </div>
+
+            {/* Input area */}
+            <AnimatePresence mode="wait">
+              {mode === "text" ? (
+                <motion.div key="text" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <label className="text-xs font-semibold text-muted-foreground block mb-1.5">
+                    Paste Exam Paper Text
+                  </label>
+                  <textarea
+                    value={text}
+                    onChange={e => setText(e.target.value)}
+                    rows={10}
+                    placeholder="Paste the full exam paper text here. AI will identify and extract individual questions, mark allocations, command words, and topics automatically…"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20 resize-y font-mono"
+                  />
+                  <p className="text-[10px] text-muted-foreground mt-1">{text.length} characters</p>
+                </motion.div>
+              ) : (
+                <motion.div key="pdf" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1.5 flex items-center gap-1">
+                      <FileText className="h-3.5 w-3.5 text-teal-600" /> Question Paper PDF <span className="text-red-500">*</span>
+                    </label>
+                    <FileDropZone
+                      label="Upload question paper PDF"
+                      accept=".pdf,application/pdf"
+                      file={questionPdf}
+                      onFile={setQuestionPdf}
+                      onClear={() => setQuestionPdf(null)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-muted-foreground block mb-1.5 flex items-center gap-1">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Mark Scheme PDF
+                      <span className="ml-1 text-[10px] font-normal text-muted-foreground">(optional — AI will link answers to questions)</span>
+                    </label>
+                    <FileDropZone
+                      label="Upload mark scheme PDF (optional)"
+                      accept=".pdf,application/pdf"
+                      file={markSchemePdf}
+                      onFile={setMarkSchemePdf}
+                      onClear={() => setMarkSchemePdf(null)}
+                    />
+                  </div>
+                  {markSchemePdf && (
+                    <div className="flex items-center gap-2 p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-xs text-emerald-700">
+                      <Wand2 className="h-3.5 w-3.5 shrink-0" />
+                      AI will automatically match mark scheme answers to extracted questions
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <Button
               onClick={() => startExtraction.mutate()}
-              disabled={text.trim().length < 20 || startExtraction.isPending}
+              disabled={!canExtract || startExtraction.isPending}
               className="gap-2 text-white"
               style={{ background: TEAL }}
             >
@@ -295,16 +437,18 @@ export default function QuestionExtractionPage() {
                      "Extraction failed"}
                   </p>
                   {job?.status === "done" && (
-                    <p className="text-xs text-muted-foreground">{approved} approved · {rejected} rejected · {pending.length} pending</p>
+                    <p className="text-xs text-muted-foreground">
+                      {approved} approved · {rejected} rejected · {pending.length} pending
+                      {withMarkScheme > 0 && ` · ${withMarkScheme} with mark scheme`}
+                    </p>
                   )}
+                  {job?.error && <p className="text-xs text-red-600 mt-0.5">{job.error}</p>}
                 </div>
               </div>
-              <div className="flex gap-2">
-                <button onClick={() => { setJobId(null); setText(""); }}
-                  className="text-xs text-muted-foreground hover:text-gray-800 transition-colors">
-                  ← New extraction
-                </button>
-              </div>
+              <button onClick={() => { setJobId(null); setText(""); setQuestionPdf(null); setMarkSchemePdf(null); }}
+                className="text-xs text-muted-foreground hover:text-gray-800 transition-colors">
+                ← New extraction
+              </button>
             </div>
           </div>
 
