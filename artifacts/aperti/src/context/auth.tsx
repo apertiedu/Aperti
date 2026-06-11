@@ -7,6 +7,7 @@ interface User {
   username: string;
   displayName: string;
   role: "admin" | "teacher" | "assistant" | "student" | "parent";
+  mustChangePassword?: boolean;
 }
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<User>;
   logout: () => void;
   token: string | null;
+  clearMustChangePassword: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>(null!);
@@ -82,7 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  return <AuthContext.Provider value={{ user, loading, login, logout, token }}>{children}</AuthContext.Provider>;
+  const clearMustChangePassword = () =>
+    setUser(prev => prev ? { ...prev, mustChangePassword: false } : prev);
+
+  return <AuthContext.Provider value={{ user, loading, login, logout, token, clearMustChangePassword }}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);

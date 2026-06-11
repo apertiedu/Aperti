@@ -20,7 +20,7 @@ router.post("/auth/change-password", authenticate, async (req: AuthRequest, res)
   if (!valid) { res.status(400).json({ message: "Current password is incorrect" }); return; }
 
   const newHash = await bcrypt.hash(newPassword, 10);
-  await db.update(accountsTable).set({ passwordHash: newHash }).where(eq(accountsTable.id, accountId));
+  await db.update(accountsTable).set({ passwordHash: newHash, mustChangePassword: false }).where(eq(accountsTable.id, accountId));
   res.json({ message: "Password changed successfully" });
 });
 
@@ -29,7 +29,8 @@ router.post("/accounts/:id/reset-password", authenticate, requireRole("admin"), 
   const { newPassword } = req.body;
   if (!newPassword || newPassword.length < 6) { res.status(400).json({ message: "Password must be at least 6 characters" }); return; }
 
-  const [updated] = await db.update(accountsTable).set({ passwordHash: await bcrypt.hash(newPassword, 10) })
+  const [updated] = await db.update(accountsTable)
+    .set({ passwordHash: await bcrypt.hash(newPassword, 10), mustChangePassword: true })
     .where(eq(accountsTable.id, id)).returning({ id: accountsTable.id });
   if (!updated) { res.status(404).json({ message: "Account not found" }); return; }
   res.json({ message: "Password reset successfully" });

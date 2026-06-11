@@ -7,6 +7,7 @@ import { TourProvider } from "@/components/onboarding-tour";
 import { ThemeProvider } from "@/context/theme";
 import ErrorBoundary from "@/components/error-boundary";
 import NotFound from "@/pages/not-found";
+import ForceChangePassword from "@/pages/force-change-password";
 import Layout from "@/components/layout";
 import StudentLayout from "@/components/student-layout";
 import Login from "@/pages/login";
@@ -670,6 +671,14 @@ function AppContent() {
     return (
       <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <PublicRouter />
+      </WouterRouter>
+    );
+  }
+
+  if (user.mustChangePassword) {
+    return (
+      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <ForceChangePassword />
       </WouterRouter>
     );
   }

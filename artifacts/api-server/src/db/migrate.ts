@@ -321,6 +321,7 @@ const PHASE10_MIGRATIONS: string[] = [
   /* MFA columns on accounts */
   `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS mfa_enabled boolean NOT NULL DEFAULT false`,
   `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS mfa_secret text`,
+  `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS must_change_password boolean NOT NULL DEFAULT false`,
 
   /* Login history table */
   `CREATE TABLE IF NOT EXISTS login_history (

@@ -22,6 +22,7 @@ export const accountsTable = pgTable("accounts", {
   country: text("country"),
   firstName: text("first_name"),
   lastName: text("last_name"),
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
 });
 
 export const deviceSessionsTable = pgTable("device_sessions", {

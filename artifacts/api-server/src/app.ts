@@ -313,8 +313,8 @@ async function seedDefaultAdmin() {
     const existing = await db.select().from(accountsTable);
     if (existing.length === 0) {
       const passwordHash = await bcrypt.hash("admin123", 10);
-      await db.insert(accountsTable).values({ username: "admin", passwordHash, displayName: "Admin", role: "admin", status: "active" });
-      logger.info("Default admin created: admin / admin123");
+      await db.insert(accountsTable).values({ username: "admin", passwordHash, displayName: "Admin", role: "admin", status: "active", mustChangePassword: true });
+      logger.info("Default admin created: admin / admin123 (must change password on first login)");
     }
   } catch (err) {
     logger.error({ err }, "Failed to seed admin account");

@@ -87,6 +87,7 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
         email: account.email,
         role: account.role,
         mfaEnabled: account.mfa_enabled ?? false,
+        mustChangePassword: account.must_change_password ?? false,
       },
     });
   } catch (err) {
@@ -129,7 +130,7 @@ authRouter.get("/me", async (req: Request, res: Response) => {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
     const { pool: dbPool } = await import("@workspace/db");
     const { rows } = await dbPool.query(
-      `SELECT id, username, display_name, email, role, avatar_url, bio, phone, country, first_name, last_name, status, mfa_enabled FROM accounts WHERE id=$1`,
+      `SELECT id, username, display_name, email, role, avatar_url, bio, phone, country, first_name, last_name, status, mfa_enabled, must_change_password FROM accounts WHERE id=$1`,
       [payload.id]
     );
     if (!rows.length) return res.status(401).json({ error: "User not found" });
@@ -145,6 +146,7 @@ authRouter.get("/me", async (req: Request, res: Response) => {
         bio: acct.bio,
         country: acct.country,
         mfaEnabled: acct.mfa_enabled ?? false,
+        mustChangePassword: acct.must_change_password ?? false,
       },
     });
   } catch {
