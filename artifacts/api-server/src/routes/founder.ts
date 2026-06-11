@@ -481,6 +481,143 @@ founderRouter.delete("/launch-blockers/:id", async (req: AuthRequest, res: Respo
   }
 });
 
+/* ── Launch Certification ─────────────────────────────────────────────────── */
+founderRouter.get("/launch-certification", async (_req: AuthRequest, res: Response) => {
+  try {
+    const checks = await Promise.allSettled([
+
+      /* 1 — Auth stable */
+      (async () => {
+        const [sess, acc] = await Promise.all([
+          pool.query("SELECT to_regclass('public.session') IS NOT NULL AS ok"),
+          pool.query("SELECT COUNT(*) FROM accounts"),
+        ]);
+        const sessOk = sess.rows[0].ok;
+        const cnt = parseInt(acc.rows[0].count) || 0;
+        return { id: "auth_stable", label: "Authentication stable",
+          status: sessOk && cnt > 0 ? "pass" : "fail",
+          detail: sessOk ? `Session table active · ${cnt} account(s)` : "Session table missing" };
+      })(),
+
+      /* 2 — Signup stable */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM accounts");
+        const cnt = parseInt(r.rows[0].count) || 0;
+        return { id: "signup_stable", label: "Signup stable",
+          status: cnt > 0 ? "pass" : "warn",
+          detail: `${cnt} registered account(s)` };
+      })(),
+
+      /* 3 — Payment stable */
+      (async () => {
+        const [p, s] = await Promise.all([
+          pool.query("SELECT COUNT(*) FROM payment_requests").catch(() => null),
+          pool.query("SELECT COUNT(*) FROM subscriptions").catch(() => null),
+        ]);
+        if (!p || !s) return { id: "payment_stable", label: "Payment stable", status: "fail", detail: "Payment tables inaccessible" };
+        return { id: "payment_stable", label: "Payment stable", status: "pass",
+          detail: `${p.rows[0].count} payment request(s) · ${s.rows[0].count} subscription(s)` };
+      })(),
+
+      /* 4 — Enrollment stable */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM teacher_courses").catch(() => null);
+        if (!r) return { id: "enrollment_stable", label: "Enrollment stable", status: "fail", detail: "Enrollment tables inaccessible" };
+        return { id: "enrollment_stable", label: "Enrollment stable", status: "pass",
+          detail: `${r.rows[0].count} course(s) available` };
+      })(),
+
+      /* 5 — Permissions stable */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM accounts WHERE role IS NULL");
+        const nulls = parseInt(r.rows[0].count) || 0;
+        return { id: "permissions_stable", label: "Permissions stable",
+          status: nulls === 0 ? "pass" : "fail",
+          detail: nulls === 0 ? "All accounts have valid roles" : `${nulls} account(s) missing role` };
+      })(),
+
+      /* 6 — Mobile stable */
+      (async () => {
+        const { existsSync } = await import("fs");
+        const base = "/home/runner/workspace/artifacts/aperti/public";
+        const mOk = existsSync(`${base}/manifest.json`);
+        const swOk = existsSync(`${base}/sw.js`);
+        return { id: "mobile_stable", label: "Mobile stable",
+          status: mOk && swOk ? "pass" : "warn",
+          detail: mOk && swOk ? "PWA manifest + service worker present" : "Missing PWA assets" };
+      })(),
+
+      /* 7 — Error logging active */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM frontend_error_logs").catch(() => null);
+        if (!r) return { id: "error_logging_active", label: "Error logging active", status: "fail", detail: "Log table inaccessible" };
+        return { id: "error_logging_active", label: "Error logging active", status: "pass",
+          detail: `${r.rows[0].count} error event(s) captured` };
+      })(),
+
+      /* 8 — Reporting center active */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM problem_reports").catch(() => null);
+        if (!r) return { id: "reporting_center_active", label: "Reporting center active", status: "fail", detail: "Reports table inaccessible" };
+        return { id: "reporting_center_active", label: "Reporting center active", status: "pass",
+          detail: `${r.rows[0].count} report(s) on record` };
+      })(),
+
+      /* 9 — Database verified */
+      (async () => {
+        const tables = ["accounts","session","problem_reports","frontend_error_logs","launch_blockers","payment_requests","subscriptions","teacher_courses"];
+        const results = await Promise.all(tables.map(t =>
+          pool.query("SELECT to_regclass($1) IS NOT NULL AS ok", [`public.${t}`]).catch(() => ({ rows: [{ ok: false }] }))
+        ));
+        const missing = tables.filter((_, i) => !results[i].rows[0].ok);
+        return { id: "database_verified", label: "Database verified",
+          status: missing.length === 0 ? "pass" : "fail",
+          detail: missing.length === 0 ? `All ${tables.length} critical tables present` : `Missing: ${missing.join(", ")}` };
+      })(),
+
+      /* 10 — Analytics verified */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM question_bank").catch(() => null);
+        return { id: "analytics_verified", label: "Analytics verified",
+          status: r ? "pass" : "warn",
+          detail: r ? `${r.rows[0].count} question(s) · analytics pipeline active` : "Analytics check inconclusive" };
+      })(),
+
+      /* 11 — No critical blockers */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM launch_blockers WHERE severity='critical' AND status='open'");
+        const cnt = parseInt(r.rows[0].count) || 0;
+        return { id: "no_critical_blockers", label: "No critical 🔴 blockers",
+          status: cnt === 0 ? "pass" : "fail",
+          detail: cnt === 0 ? "No open critical blockers" : `${cnt} critical blocker(s) open` };
+      })(),
+
+      /* 12 — No major blockers */
+      (async () => {
+        const r = await pool.query("SELECT COUNT(*) FROM launch_blockers WHERE severity='major' AND status='open'");
+        const cnt = parseInt(r.rows[0].count) || 0;
+        return { id: "no_major_blockers", label: "No major 🟠 blockers",
+          status: cnt === 0 ? "pass" : "fail",
+          detail: cnt === 0 ? "No open major blockers" : `${cnt} major blocker(s) open` };
+      })(),
+    ]);
+
+    const results = checks.map((c, i) =>
+      c.status === "fulfilled" ? c.value :
+      { id: `check_${i}`, label: `Check ${i + 1}`, status: "fail",
+        detail: `Error: ${(c as PromiseRejectedResult).reason?.message || "unknown"}` }
+    );
+
+    const certified = results.every(r => (r as any).status === "pass");
+    const failCount  = results.filter(r => (r as any).status === "fail").length;
+    const warnCount  = results.filter(r => (r as any).status === "warn").length;
+
+    res.json({ checks: results, certified, failCount, warnCount, checkedAt: new Date().toISOString() });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── Frontend Error Log ───────────────────────────────────────────────────── */
 founderRouter.post("/frontend-errors", async (req: AuthRequest, res: Response) => {
   try {

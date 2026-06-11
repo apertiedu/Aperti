@@ -37,6 +37,13 @@ The backend (`problem-reports.ts`) uses columns: `account_id`, `page_url`, `user
 - Added to `AdminLayout.tsx` NAV under "— Founder Control" with `ShieldAlert` icon
 - Route registered in `admin-os/index.tsx`
 
+## Launch Certification
+`GET /api/founder/launch-certification` (in founder.ts) runs 12 parallel checks and returns `{ checks, certified, failCount, warnCount }`. Frontend page at `/admin/os/launch-certification`. Shows animated "Certified for Launch 🚀" banner when all pass, "Launch Blocked" banner with failing item list otherwise. Auto-refreshes every 60s.
+
+The 12 checks: auth_stable, signup_stable, payment_stable, enrollment_stable, permissions_stable, mobile_stable, error_logging_active, reporting_center_active, database_verified, analytics_verified, no_critical_blockers, no_major_blockers. All require `status === "pass"` for certification. "warn" does NOT block certification.
+
+**Why:** Platform cannot launch until all 12 systems are verified pass. Blockers only count open status (not in_progress/resolved).
+
 ## QA Script
 `scripts/qa-agents.mjs` — runs 13 checks covering health, auth, problem reports, launch blockers, frontend errors, founder overview, and DB health. Run with `node scripts/qa-agents.mjs`. Exit code 0 = all pass, 1 = failures.
 

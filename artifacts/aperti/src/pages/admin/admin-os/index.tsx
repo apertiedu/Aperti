@@ -60,6 +60,7 @@ import FounderAlertsPage from "./FounderAlertsPage";
 import LaunchCommandPage from "./LaunchCommandPage";
 import ProblemReportsPage from "./ProblemReportsPage";
 import LaunchBlockersPage from "./LaunchBlockersPage";
+import LaunchCertificationPage from "./LaunchCertificationPage";
 
 export default function AdminOS() {
   return (
@@ -148,6 +149,7 @@ export default function AdminOS() {
         {/* Phase 24 — Production Hardening */}
         <Route path="/admin/os/problem-reports" component={ProblemReportsPage} />
         <Route path="/admin/os/launch-blockers" component={LaunchBlockersPage} />
+        <Route path="/admin/os/launch-certification" component={LaunchCertificationPage} />
 
         <Route component={Dashboard} />
       </Switch>

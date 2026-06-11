@@ -92,6 +92,7 @@ const NAV = [
   { label: "Founder Alerts",      icon: AlertTriangle, href: "/admin/os/founder-alerts" },
   { label: "Launch Command",      icon: Rocket,      href: "/admin/os/launch-command" },
   { label: "Launch Blockers",     icon: ShieldAlert, href: "/admin/os/launch-blockers" },
+  { label: "Launch Certification",icon: Rocket,      href: "/admin/os/launch-certification" },
   { label: "Releases",            icon: Tag,         href: "/admin/os/releases" },
 ] as const;
 
