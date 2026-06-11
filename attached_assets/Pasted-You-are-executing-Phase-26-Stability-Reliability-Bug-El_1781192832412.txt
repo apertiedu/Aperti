@@ -1,0 +1,236 @@
+You are executing **Phase 26 – Stability, Reliability, Bug Elimination & Production Readiness** for Aperti.  
+All previous phases (1–25) are complete, but the platform must now become **utterly dependable**.  
+This phase adds **zero new user‑facing features**. Instead, you will audit, fix, harden, and validate every critical system so that a teacher can trust Aperti with their business, students, content, and payments.
+
+**Before any work, fix these two immediate issues:**  
+1. **Remove the icon next to "Aperti" in the sidebar** – delete the icon element, keep only the text.  
+2. **Fix the sign‑in "unexpected token" error** – ensure the login fetch correctly handles non‑JSON responses, and the backend `/api/auth/login` always returns valid JSON.
+
+---
+
+## 🔴 LAUNCH BLOCKER SEVERITY SYSTEM
+
+Implement a severity system for every issue found:
+
+- **Critical 🔴** – Must be fixed before launch (login broken, payment broken, data leak, permission bypass).  
+- **Major 🟠** – Fix before public launch (analytics incorrect, mobile issue, enrollment bug).  
+- **Minor 🟢** – Can wait until next update (animation glitch, small UI inconsistency, typo).
+
+Add a **Launch Blocker Dashboard** in the Founder Control Center (`/admin/founder/blockers`) that lists all active blockers with severity, status, and assignee. No launch until zero critical and zero major blockers remain.
+
+---
+
+## 1. AUTHENTICATION REBUILD
+
+- Audit every auth flow: signup, login, logout, password reset, session restore, role loading, permission loading.  
+- **Never allow `user.role` without null‑checking.** Use optional chaining (`user?.role`) everywhere.  
+- Add a **loading gate** component that shows a skeleton until user + role + permissions + subscription are fully loaded. No dashboard access before all checks pass.  
+- If session expires, show a friendly modal: “Your session has expired. Please log in again.” – never a crash or white screen.
+
+---
+
+## 2. ROLE SYSTEM VALIDATION
+
+- Ensure every account in the database has a non‑null `role` column.  
+- Run a migration to backfill any missing roles. Add a database constraint.  
+- Verify that role‑based routing (teacher/student/parent/admin) is strictly enforced.
+
+---
+
+## 3. ROUTE AUDIT
+
+- Test every route: `/login`, `/signup`, `/pricing`, `/dashboard`, `/teacher/*`, `/student/*`, `/parent/*`, `/assistant/*`, `/admin/*`, `/founder/*`.  
+- Ensure no 404s, 500s, infinite loading, permission errors, or broken redirects.  
+- Any missing route gets a proper “Not Found” page.
+
+---
+
+## 4. SIGNUP REBUILD
+
+- Teacher signup: verify plan selection, account creation, payment initiation, pending approval, activation.  
+- Student signup: verify course enrollment, subscription, dashboard access.  
+- Parent signup: verify pairing code, child linking, dashboard access.  
+- Every step must work end‑to‑end without errors.
+
+---
+
+## 5. SESSION MANAGEMENT
+
+- Track: device, browser, IP, last activity per session.  
+- Enforce max 2 active devices (configurable by admin).  
+- Users can view their sessions and “Logout Other Devices”.  
+- Admin can force‑logout any session.
+
+---
+
+## 6. DATABASE INTEGRITY AUDIT
+
+- Check for: duplicate users, orphan courses, invalid enrollments, unlinked payments, inconsistent subscription states.  
+- Run cleanup queries and add preventive constraints.
+
+---
+
+## 7. API AUDIT
+
+- Test every endpoint for: authentication, authorization, input validation, error handling, rate limiting.  
+- Example endpoints: `POST /auth/login`, `POST /signup`, `POST /enrollment`, `POST /payment`, `GET /analytics`.  
+- Every endpoint must return valid JSON and handle edge cases gracefully.
+
+---
+
+## 8. ERROR HANDLING SYSTEM
+
+- Implement a **global Error Boundary** that catches all React render errors and displays a professional recovery screen (no stack traces).  
+- Add a `handleApiError` utility that translates HTTP errors into user‑friendly messages (already partially built; complete it).  
+- All unexpected frontend errors must be logged to the backend (new `frontend_error_logs` table or via the existing audit log).
+
+---
+
+## 9. GLOBAL LOGGING
+
+- Log: user ID, role, page/API route, error message, timestamp, browser/device info.  
+- Store in separate tables: `error_logs`, `security_logs`, `audit_logs`.  
+- Admin can view and filter these logs.
+
+---
+
+## 10. PROBLEM REPORTING CENTER
+
+- Add a persistent “Report Problem” button (floating or in the help menu) on every page.  
+- Opens a modal: description, category, priority, optional screenshot, automatically attaches route/role/device/logs.  
+- Stores in a `problem_reports` table and notifies admin.
+
+---
+
+## 11. PAYMENT VERIFICATION AUDIT
+
+- Test the full InstaPay flow: upload screenshot → enter transaction code → pending review → admin approves → subscription activated.  
+- Test reject and re‑upload scenarios.  
+- Ensure payment status is always reflected accurately in the user’s subscription panel.
+
+---
+
+## 12. SUBSCRIPTION ENGINE VALIDATION
+
+- Test: plan selection, expiration, renewal, upgrade, downgrade, cancellation.  
+- Verify that plan limits are enforced immediately upon change.  
+- No subscription loopholes (e.g., access after cancellation).
+
+---
+
+## 13. ENROLLMENT ENGINE VALIDATION
+
+- Test: student joins course, requests access, enrolls in multiple courses, leaves course, renews.  
+- Test teacher approval/rejection workflows.  
+- Ensure no student can access a course without proper enrollment.
+
+---
+
+## 14. CONTENT ACCESS VALIDATION
+
+- Verify students only see authorized courses, lessons, assessments, and recordings.  
+- Test cross‑course data leakage scenarios (student A should never see student B’s data or another teacher’s content).
+
+---
+
+## 15. ASSISTANT PERMISSION AUDIT
+
+- Verify assistants can only access resources, courses, and features explicitly granted by their teacher.  
+- Test permission changes taking effect immediately.
+
+---
+
+## 16. SECURITY HARDENING
+
+- Implement rate limiting on login (5 attempts/min per IP).  
+- Add CORS restrictions, Helmet.js security headers.  
+- Prevent session hijacking (HTTP‑only cookies, token rotation).  
+- Sanitize all user inputs (XSS prevention).
+
+---
+
+## 17. PERFORMANCE TESTING
+
+- Target: landing page <2s, dashboard <2s, search <300ms, assessment loading <2s.  
+- Use Lighthouse or a simple custom timing script to measure.  
+- Log performance violations and display in admin health dashboard.
+
+---
+
+## 18. MOBILE TESTING
+
+- Test on real mobile viewports (iPhone, Android, tablet, landscape, portrait).  
+- Fix any overflow, broken layouts, hidden buttons, or touch‑target issues.
+
+---
+
+## 19. FEATURE VALIDATION MATRIX
+
+- Create a table (admin view) listing every feature with columns: exists, works, connected, permissions correct, analytics working, mobile working.  
+- Any feature failing any check must be fixed or marked as “Coming Soon” and hidden from public.
+
+---
+
+## 20. FOUNDER MONITORING CENTER
+
+- Add real‑time widgets: error count (24h), failed logins, failed payments, broken routes, user reports, API health, database health.  
+- This is the single screen the founder checks daily to know platform health.
+
+---
+
+## 21. DEPLOYMENT INVESTIGATION (REPLIT)
+
+- Verify environment variables: `DATABASE_URL`, `JWT_SECRET`, `SESSION_SECRET`, `OPENAI_API_KEY` (if used) are set in Replit’s secrets.  
+- Ensure cookies have correct `Secure`, `SameSite`, `Domain` settings.  
+- Confirm production database is reachable.  
+- Test session persistence after server restart.  
+- Ensure the build output has no “Unexpected token” or “Hydration error” messages.
+
+---
+
+## 22. AUTOMATED QA AGENTS
+
+- Create a simple Node.js script (`scripts/qa‑agents.js`) that simulates login for each role (Teacher, Student, Parent, Assistant, Admin, Founder) and tests critical paths (view dashboard, create course, submit assignment, etc.).  
+- Generates a report of bugs, UX issues, permission problems, and recommendations.  
+- Run this script; file any issues found as launch blockers.
+
+---
+
+## 23. LAUNCH CERTIFICATION
+
+- The **Launch Readiness Dashboard** must show a green checklist:
+  - ✅ Authentication stable  
+  - ✅ Signup stable  
+  - ✅ Payment stable  
+  - ✅ Enrollment stable  
+  - ✅ Permissions stable  
+  - ✅ Mobile stable  
+  - ✅ Error logging active  
+  - ✅ Reporting center active  
+  - ✅ Database verified  
+  - ✅ Analytics verified  
+  - ✅ No critical 🔴 blockers  
+  - ✅ No major 🟠 blockers  
+- Aperti cannot launch until every item is green.
+
+---
+
+## IMPLEMENTATION ORDER
+
+1. Fix sidebar icon and sign‑in error.  
+2. Build the Launch Blocker Dashboard and severity system.  
+3. Audit and harden the auth flow (loading gate, null checks, session expiry).  
+4. Role system and route audit.  
+5. Signup rebuild and session management.  
+6. Database integrity and API audit.  
+7. Error handling system and global logging.  
+8. Problem reporting center.  
+9. Payment, subscription, and enrollment validation.  
+10. Content access and assistant permission checks.  
+11. Security hardening and performance testing.  
+12. Mobile testing and feature validation matrix.  
+13. Founder monitoring center.  
+14. Deployment investigation (Replit) and automated QA agents.  
+15. Final launch certification – ensure zero critical/major blockers.
+
+**Do not stop until Aperti is production‑ready, with every critical system validated and every launch blocker resolved.**

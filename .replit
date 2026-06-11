@@ -13,10 +13,11 @@ channel = "stable-25_05"
 PORT = "5000"
 BASE_PATH = "/"
 API_PORT = "3001"
-VAPID_PUBLIC_KEY = "BEj0LpGapT4H_yn2Cg2lIVhF-3Jee-0Vfm3s0T--SON1-SXywOmFB2y7ZulQinIZ20qcbbBV_JYa5vBn6PFGwQQ"
+VAPID_PUBLIC_KEY = "BGM-42Vz7uBZB3D7uK3EQfLiXXzJgcwqVPLqTMSACCAczZFu0f6zJUd6AIlVmFtAM3fAzFyIhrIjG1E-rOsH5ZY"
 VAPID_SUBJECT = "mailto:admin@aperti.app"
 OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1"
 OPENAI_MODEL = "meta/llama-3.3-70b-instruct"
+VAPID_PRIVATE_KEY = "EtzMzN4tKCN5Shh9NzIVTaisHKQ0KhNMjVtIBqhj7VQ"
 
 [userenv.development]
 
