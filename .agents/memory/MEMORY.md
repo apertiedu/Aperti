@@ -8,3 +8,4 @@
 - [Aperti Phase 27 refinement](aperti-phase27.md) — all Phase 27 UX polish features; key components, backend endpoints, and UX patterns
 - [Aperti Phase 29 features](aperti-phase29.md) — all Phase 29 Intelligence, Efficiency & Educational Excellence features; components, patterns, and page integrations
 - [Aperti Phase 30 production](aperti-phase30.md) — all Phase 30 features: Error Intelligence, Content Validation, Resource Mapping, Learning Efficiency, self-marking, route test script
+- [Aperti Phase 31 stabilization](aperti-phase31.md) — DB schema push fix (tsx path), JWT_SECRET/OPENAI_API_KEY env setup, duplicate route removal, login rate limiter JSON handler

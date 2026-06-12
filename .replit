@@ -18,6 +18,8 @@ VAPID_SUBJECT = "mailto:admin@aperti.app"
 OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1"
 OPENAI_MODEL = "meta/llama-3.3-70b-instruct"
 VAPID_PRIVATE_KEY = "EtzMzN4tKCN5Shh9NzIVTaisHKQ0KhNMjVtIBqhj7VQ"
+JWT_SECRET = "f9312299c318b9198fa80e4ad65b99e35e22477c08745d776f9ca4e3a7272cfb7d606aa8a5df08cb43c515e6825b6d27cc116536bf32821662a06550b69d7b57"
+OPENAI_API_KEY = "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"
 
 [userenv.development]
 

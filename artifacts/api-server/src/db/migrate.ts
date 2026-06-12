@@ -966,6 +966,9 @@ const PHASE19_MIGRATIONS: string[] = [
 ];
 
 export async function runMigrations(): Promise<void> {
+  // Base schema (accounts, students, subjects, etc.) is created by push-schema.ts
+  // at startup — see index.ts. This function applies Phase 2+ additive migrations.
+
   for (const sql of MIGRATIONS) {
     try {
       await pool.query(sql);

@@ -1,5 +1,7 @@
 import { createServer } from "http";
 import { Server as SocketServer } from "socket.io";
+import { execSync } from "child_process";
+import path from "path";
 import { logger } from "./lib/logger";
 import { runMigrations } from "./db/migrate";
 
@@ -25,7 +27,29 @@ async function main() {
     console.error(`[startup] FATAL: Missing required environment variables: ${missingEnv.join(", ")}`);
     process.exit(1);
   }
+  // Warn about optional-but-important variables
+  const warnEnv = ["JWT_SECRET", "SESSION_SECRET", "OPENAI_API_KEY"];
+  const missingWarn = warnEnv.filter(k => !process.env[k]);
+  if (missingWarn.length > 0) {
+    console.warn(`[startup] WARN: Missing recommended environment variables: ${missingWarn.join(", ")} — some features may be limited`);
+  }
   logger.info("Environment validated");
+
+  // ── Step 0: Push base Drizzle schema (creates accounts, students, etc.) ──────
+  const wsRoot = path.resolve(process.cwd(), "../..");
+  // tsx is installed in lib/db's local node_modules since it's a devDependency there
+  const tsxBin = path.join(wsRoot, "lib/db/node_modules/.bin/tsx");
+  const pushScript = path.join(wsRoot, "lib/db/push-schema.ts");
+  try {
+    execSync(`"${tsxBin}" "${pushScript}"`, {
+      cwd: wsRoot,
+      stdio: "inherit",
+      env: process.env,
+    });
+    console.log("[startup] Base schema pushed successfully");
+  } catch (err: any) {
+    console.warn("[startup] push-schema warning (non-fatal):", err?.message || err);
+  }
 
   // Run migrations first — must complete before anything else
   try {

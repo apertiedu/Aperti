@@ -41,7 +41,10 @@ const loginLimiter = rateLimit({
   skipSuccessfulRequests: true,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many failed login attempts. Please try again in 10 minutes.", rateLimited: true },
+  handler: (_req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.status(429).json({ error: "Too many failed login attempts. Please try again in 10 minutes.", rateLimited: true });
+  },
 });
 
 // ── Per-IP brute-force tracker → email admin when threshold is hit ────────────
