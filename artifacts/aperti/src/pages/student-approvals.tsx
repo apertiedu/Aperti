@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const tok = () => localStorage.getItem("aperti_token") || "";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });

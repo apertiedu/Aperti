@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { Mail, AlertCircle, CheckCircle2 } from "lucide-react";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

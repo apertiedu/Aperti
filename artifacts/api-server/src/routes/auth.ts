@@ -115,6 +115,7 @@ async function recordLoginHistory(
 
 // POST /auth/login
 authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
   try {
     const { username, password, deviceId, ip, userAgent } = req.body;
     if (!username || !password) {

@@ -155,13 +155,13 @@ export default function Settings() {
   const notifKey = (key: string) => settingsMap[key] !== "false";
 
   if (pageLoading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-7">
           <h1 className="text-2xl font-bold text-gray-900">Settings</h1>

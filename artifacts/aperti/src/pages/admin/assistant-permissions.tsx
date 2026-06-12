@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, User, ChevronDown, ChevronUp, Check, AlertCircle, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, opts?: RequestInit) {
@@ -115,11 +115,11 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
                       onClick={() => togglePerm(perm)}
                       className={`flex items-start gap-2.5 p-3 rounded-xl border transition-all text-left ${
                         enabled
-                          ? "border-[#00796B] bg-[#00796B]/5"
+                          ? "border-[#0D9488] bg-[#0D9488]/5"
                           : "border-gray-200 hover:border-gray-300 bg-white"
                       }`}>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                        enabled ? "bg-[#00796B] border-[#00796B]" : "border-gray-300"
+                        enabled ? "bg-[#0D9488] border-[#0D9488]" : "border-gray-300"
                       }`}>
                         {enabled && <Check className="h-3 w-3 text-white" />}
                       </div>
@@ -135,7 +135,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                   <button onClick={() => { setLocalPerms(allPerms); setDirty(true); }}
-                    className="text-xs text-[#00796B] font-semibold hover:underline">Grant all</button>
+                    className="text-xs text-[#0D9488] font-semibold hover:underline">Grant all</button>
                   <span className="text-gray-300">·</span>
                   <button onClick={() => { setLocalPerms([]); setDirty(true); }}
                     className="text-xs text-red-400 font-semibold hover:underline">Revoke all</button>

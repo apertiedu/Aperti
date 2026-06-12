@@ -74,7 +74,7 @@ interface ScannedEntry {
 }
 
 const STATUS_STYLE: Record<MarkStatus, { bg: string; text: string; icon: React.FC<{ className?: string }> }> = {
-  Present: { bg: "bg-[#00796B]/10", text: "text-[#00796B]", icon: CheckCircle2 },
+  Present: { bg: "bg-[#0D9488]/10", text: "text-[#0D9488]", icon: CheckCircle2 },
   Late: { bg: "bg-amber-100", text: "text-amber-700", icon: Clock },
   Absent: { bg: "bg-red-100", text: "text-red-600", icon: XCircle },
 };
@@ -232,8 +232,8 @@ export default function CheckIn() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-[#00796B]/10 flex items-center justify-center">
-            <QrCode className="h-5 w-5 text-[#00796B]" />
+          <div className="h-10 w-10 rounded-xl bg-[#0D9488]/10 flex items-center justify-center">
+            <QrCode className="h-5 w-5 text-[#0D9488]" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">CheckIn</h1>
@@ -284,7 +284,7 @@ export default function CheckIn() {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-3 gap-3 mb-5">
           {[
             { icon: Users, label: "Total", value: lessonStudents.length, cls: "text-gray-500 bg-gray-100" },
-            { icon: UserCheck, label: "Marked Present", value: presentCount, cls: "text-[#00796B] bg-[#00796B]/10" },
+            { icon: UserCheck, label: "Marked Present", value: presentCount, cls: "text-[#0D9488] bg-[#0D9488]/10" },
             { icon: UserX, label: "Not Marked", value: unMarked.length, cls: "text-red-500 bg-red-50" },
           ].map(s => (
             <Card key={s.label} className="border-0 shadow-sm">
@@ -311,7 +311,7 @@ export default function CheckIn() {
             <CardHeader className="pb-3 border-b bg-white">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Camera className="h-4 w-4 text-[#00796B]" />
+                  <Camera className="h-4 w-4 text-[#0D9488]" />
                   QR Scanner
                 </CardTitle>
                 <Button
@@ -345,7 +345,7 @@ export default function CheckIn() {
                       <p className="text-sm text-gray-400">Camera is off</p>
                       <Button
                         onClick={startScanner}
-                        className="bg-[#00796B] hover:bg-[#00695C] text-white gap-2"
+                        className="bg-[#0D9488] hover:bg-[#0B7B70] text-white gap-2"
                       >
                         <Camera className="h-4 w-4" /> Start Camera
                       </Button>
@@ -355,9 +355,9 @@ export default function CheckIn() {
                     <>
                       <motion.p
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                        className="flex items-center gap-2 text-xs text-[#00796B] justify-center"
+                        className="flex items-center gap-2 text-xs text-[#0D9488] justify-center"
                       >
-                        <span className="h-2 w-2 rounded-full bg-[#00796B] animate-pulse" />
+                        <span className="h-2 w-2 rounded-full bg-[#0D9488] animate-pulse" />
                         Live — point QR at the green box
                       </motion.p>
                       <Button
@@ -376,8 +376,8 @@ export default function CheckIn() {
                   onSubmit={e => { e.preventDefault(); if (manualCode.trim()) { handleCode(manualCode.trim()); setManualCode(""); } }}
                   className="space-y-3"
                 >
-                  <div className="rounded-xl border-2 border-dashed border-[#00796B]/25 bg-[#00796B]/5 p-6 text-center space-y-3">
-                    <KeyboardIcon className="h-8 w-8 text-[#00796B]/30 mx-auto" />
+                  <div className="rounded-xl border-2 border-dashed border-[#0D9488]/25 bg-[#0D9488]/5 p-6 text-center space-y-3">
+                    <KeyboardIcon className="h-8 w-8 text-[#0D9488]/30 mx-auto" />
                     <p className="text-xs text-gray-500">Enter the student code printed on their QR card</p>
                     <div className="flex gap-2">
                       <Input
@@ -387,7 +387,7 @@ export default function CheckIn() {
                         className="text-center font-mono bg-white"
                         autoFocus
                       />
-                      <Button type="submit" className="bg-[#00796B] hover:bg-[#00695C] text-white">
+                      <Button type="submit" className="bg-[#0D9488] hover:bg-[#0B7B70] text-white">
                         Mark
                       </Button>
                     </div>
@@ -454,12 +454,12 @@ export default function CheckIn() {
               <Card className="border-0 shadow-sm">
                 <CardHeader className="pb-3 border-b">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-[#00796B]" />
+                    <CheckCircle2 className="h-4 w-4 text-[#0D9488]" />
                     <CardTitle className="text-sm font-semibold">
                       Marked ({records.length})
                     </CardTitle>
                     {rate > 0 && (
-                      <Badge className="ml-auto bg-[#00796B]/10 text-[#00796B] border-0 text-xs font-medium">
+                      <Badge className="ml-auto bg-[#0D9488]/10 text-[#0D9488] border-0 text-xs font-medium">
                         {rate}% present
                       </Badge>
                     )}
@@ -587,7 +587,7 @@ export default function CheckIn() {
                             <p className="text-xs text-gray-400 font-mono">{r.studentCode}</p>
                           </div>
                           {done ? (
-                            <Badge className="bg-[#00796B]/10 text-[#00796B] border-0 text-xs gap-1">
+                            <Badge className="bg-[#0D9488]/10 text-[#0D9488] border-0 text-xs gap-1">
                               <CheckCircle2 className="h-3 w-3" /> Sent
                             </Badge>
                           ) : (

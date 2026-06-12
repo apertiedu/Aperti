@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
 
 interface Course {

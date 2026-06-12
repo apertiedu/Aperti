@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const tok = () => localStorage.getItem("aperti_token") || "";
 
 interface Enrollment {
@@ -17,7 +17,7 @@ interface Enrollment {
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
   pending:  { label: "Pending Approval", icon: Hourglass,     color: "#757575", bg: "#F5F5F5" },
-  approved: { label: "Enrolled",         icon: CheckCircle2,  color: "#00796B", bg: "#E0F2F1" },
+  approved: { label: "Enrolled",         icon: CheckCircle2,  color: "#0D9488", bg: "#E0F2F1" },
   rejected: { label: "Rejected",         icon: XCircle,       color: "#B71C1C", bg: "#FFEBEE" },
 };
 

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 
 interface ExtractedQuestion {
   id: string;

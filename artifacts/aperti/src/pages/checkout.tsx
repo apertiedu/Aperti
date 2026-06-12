@@ -5,7 +5,7 @@ import { CheckCircle2, Tag, ArrowRight, Loader2, Upload, AlertCircle, Lock, Chev
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/api";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 
 const STUDENT_PLANS = [
   { id: "free",     name: "Free",      price: 0,   color: "#757575", features: ["Past paper access", "AI Mentor (5/day)", "Basic flashcards", "Public course library"] },
@@ -258,12 +258,12 @@ export default function CheckoutPage() {
                     value={instaPayCode}
                     onChange={e => setInstaPayCode(e.target.value)}
                     placeholder="e.g. TXN-2024-XXXXXXXX"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-[#00796B] transition-all mb-3"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-[#0D9488] transition-all mb-3"
                   />
 
                   <label className="block text-xs font-bold text-gray-700 mb-1.5">Upload Screenshot (optional)</label>
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-[#00796B]/40 transition-colors group">
-                    <Upload className="h-5 w-5 text-gray-300 group-hover:text-[#00796B] transition-colors mb-1" />
+                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-[#0D9488]/40 transition-colors group">
+                    <Upload className="h-5 w-5 text-gray-300 group-hover:text-[#0D9488] transition-colors mb-1" />
                     <span className="text-xs text-gray-400">{screenshot ? screenshot.name : "PNG or JPG, max 5MB"}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={e => setScreenshot(e.target.files?.[0] ?? null)} />
                   </label>

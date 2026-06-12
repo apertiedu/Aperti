@@ -30,13 +30,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E0F2F1";
 const tok = () => localStorage.getItem("aperti_token") || "";
 
 const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   A: { bg: "#dcfce7", text: "#16a34a", border: "#86efac" },
-  B: { bg: "#E0F2F1", text: "#00796B", border: "#5eead4" },
+  B: { bg: "#E0F2F1", text: "#0D9488", border: "#5eead4" },
   C: { bg: "#fef3c7", text: "#d97706", border: "#fcd34d" },
   D: { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
 };
@@ -246,7 +246,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
                 key={dt}
                 type="button"
                 onClick={() => f("deliveryType", dt)}
-                className={`flex-1 text-xs font-semibold transition-colors ${form.deliveryType === dt ? "bg-[#00796B] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+                className={`flex-1 text-xs font-semibold transition-colors ${form.deliveryType === dt ? "bg-[#0D9488] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
               >
                 {dt}
               </button>
@@ -264,7 +264,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
               key={pm.value}
               type="button"
               onClick={() => f("paymentModel", pm.value)}
-              className={`text-xs text-left px-3 py-2 rounded-xl border transition-all font-medium ${form.paymentModel === pm.value ? "border-[#00796B] bg-[#E0F2F1] text-[#00796B]" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
+              className={`text-xs text-left px-3 py-2 rounded-xl border transition-all font-medium ${form.paymentModel === pm.value ? "border-[#0D9488] bg-[#E0F2F1] text-[#0D9488]" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
             >
               {pm.label}
             </button>
@@ -306,7 +306,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
           <button
             type="button"
             onClick={() => f("recordingsIncluded", !form.recordingsIncluded)}
-            className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.recordingsIncluded ? "bg-[#00796B]" : "bg-gray-200"}`}
+            className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.recordingsIncluded ? "bg-[#0D9488]" : "bg-gray-200"}`}
           >
             <span
               className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform"
@@ -351,7 +351,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
         <button
           type="button"
           onClick={() => f("isPublished", !form.isPublished)}
-          className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.isPublished ? "bg-[#00796B]" : "bg-gray-200"}`}
+          className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.isPublished ? "bg-[#0D9488]" : "bg-gray-200"}`}
         >
           <span
             className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform"
@@ -430,7 +430,7 @@ function EnrollmentRow({ e, onAction }: {
               <Badge
                 className={`text-[10px] rounded-full px-2 ${
                   e.status === "approved"
-                    ? "bg-[#E0F2F1] text-[#00796B]"
+                    ? "bg-[#E0F2F1] text-[#0D9488]"
                     : "bg-red-50 text-red-600"
                 }`}
                 variant="outline"
@@ -691,7 +691,7 @@ export default function MyCourses() {
                               <Badge
                                 className={`text-[10px] px-2 rounded-full shrink-0 ${
                                   c.is_published
-                                    ? "bg-[#E0F2F1] text-[#00796B]"
+                                    ? "bg-[#E0F2F1] text-[#0D9488]"
                                     : "bg-gray-100 text-gray-500"
                                 }`}
                                 variant="outline"
@@ -709,7 +709,7 @@ export default function MyCourses() {
                             <div className="flex items-center gap-3 mt-1.5 text-xs">
                               <button
                                 onClick={() => setStudentsFor(c)}
-                                className="flex items-center gap-1 text-gray-500 hover:text-[#00796B] transition-colors"
+                                className="flex items-center gap-1 text-gray-500 hover:text-[#0D9488] transition-colors"
                               >
                                 <Users className="h-3 w-3" />
                                 <span className="font-semibold">{c.approved_count}</span> enrolled

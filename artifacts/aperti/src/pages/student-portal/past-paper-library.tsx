@@ -30,10 +30,10 @@ const SUBJECT_META: Record<string, SubjectMeta> = {
   "Computer Science": { primary: "#4527A0", light: "#EEEBF9", icon: Cpu },
   CS:                 { primary: "#4527A0", light: "#EEEBF9", icon: Cpu },
   Arabic:             { primary: "#AD1457", light: "#FDEEF4", icon: Languages },
-  Science:            { primary: "#00796B", light: "#E0F2F1", icon: FlaskConical },
+  Science:            { primary: "#0D9488", light: "#E0F2F1", icon: FlaskConical },
 };
 const subjectMeta = (s: string): SubjectMeta =>
-  SUBJECT_META[s] ?? { primary: "#00796B", light: "#E0F2F1", icon: FileText };
+  SUBJECT_META[s] ?? { primary: "#0D9488", light: "#E0F2F1", icon: FileText };
 
 /* ── Session badge colours ── */
 const SESSION_STYLE: Record<string, { bg: string; text: string; dot: string }> = {
@@ -242,7 +242,7 @@ export default function PastPaperLibrary() {
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="relative overflow-hidden px-4 sm:px-6 pt-8 pb-10"
         style={{
-          background: "linear-gradient(135deg, #004D40 0%, #00796B 50%, #009688 100%)",
+          background: "linear-gradient(135deg, #004D40 0%, #0D9488 50%, #009688 100%)",
         }}
       >
         {/* Background decorative circles */}
@@ -331,7 +331,7 @@ export default function PastPaperLibrary() {
             onChange={e => setSearchInput(e.target.value)}
             placeholder="Search past papers…"
             className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm bg-gray-50 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all"
-            style={{ "--tw-ring-color": "#00796B" } as React.CSSProperties}
+            style={{ "--tw-ring-color": "#0D9488" } as React.CSSProperties}
           />
           <AnimatePresence>
             {searchInput && (
@@ -356,7 +356,7 @@ export default function PastPaperLibrary() {
               onClick={() => setFilterSubject("")}
               className="px-3 py-1 rounded-full text-xs font-bold transition-all"
               style={{
-                background: !filterSubject ? "#00796B" : "#F5F5F5",
+                background: !filterSubject ? "#0D9488" : "#F5F5F5",
                 color: !filterSubject ? "white" : "#616161",
               }}
             >
@@ -445,7 +445,7 @@ export default function PastPaperLibrary() {
             {hasFilters && (
               <button onClick={clearFilters}
                 className="mt-5 px-5 py-2 rounded-xl text-sm font-semibold text-white"
-                style={{ background: "#00796B" }}>
+                style={{ background: "#0D9488" }}>
                 Clear all filters
               </button>
             )}

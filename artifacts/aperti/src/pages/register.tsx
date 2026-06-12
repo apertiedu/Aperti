@@ -4,7 +4,7 @@ import { Link, useLocation } from "wouter";
 import { Eye, EyeOff, Check, ArrowLeft, ArrowRight, Globe, User, GraduationCap, Users } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const TEAL_MID = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
 

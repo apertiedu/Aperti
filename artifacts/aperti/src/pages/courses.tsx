@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 
 const SUBJECTS = ["All Subjects","Physics","Math","Chemistry","Biology","English","Computer Science","Economics","History","Geography"];
 
@@ -27,9 +27,9 @@ interface Course {
 }
 
 const SUBJECT_COLORS: Record<string, string> = {
-  Physics: "#00796B", Math: "#00796B", Chemistry: "#00796B",
-  Biology: "#00796B", English: "#00796B", "Computer Science": "#00796B",
-  Economics: "#00796B", History: "#00796B", Geography: "#00796B",
+  Physics: "#0D9488", Math: "#0D9488", Chemistry: "#0D9488",
+  Biology: "#0D9488", English: "#0D9488", "Computer Science": "#0D9488",
+  Economics: "#0D9488", History: "#0D9488", Geography: "#0D9488",
 };
 
 function CourseCard({ course, index }: { course: Course; index: number }) {

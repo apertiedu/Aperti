@@ -8,7 +8,7 @@ import {
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart, Package,
   RefreshCw, Settings, MessageSquare,
   LogOut, ChevronLeft, ChevronRight, Search, KeyRound,
-  Sun, Moon, ShoppingBag, UserCheck, Link2, Bot,
+  Sun, Moon, ShoppingBag, UserCheck, Link2, Bot, Sparkles,
   GraduationCap, TableProperties, Medal, Scale, Archive,
   Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X,
 } from "lucide-react";
@@ -72,7 +72,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       label: "Teaching",
       items: [
         { name: "Assessments", href: "/teacher/assessments", icon: GraduationCap, roles: ["admin","teacher"] },
-        { name: "Assessment Hub", href: "/assessment-hub", icon: GraduationCap, roles: ["admin","teacher"] },
         { name: "SubmitFlow", href: "/submit-flow", icon: ClipboardList, roles: ["admin","teacher"] },
         { name: "GradeFlow", href: "/grade-flow", icon: CheckSquare2, roles: ["admin","teacher","assistant"] },
         { name: "SchemeCraft", href: "/scheme-craft", icon: FileText, roles: ["admin","teacher"] },

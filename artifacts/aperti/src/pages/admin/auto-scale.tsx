@@ -87,7 +87,7 @@ export default function AutoScale() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <Card key={i}><CardContent className="p-4 h-24 bg-gray-50 animate-pulse rounded-lg" /></Card>
+            <Card key={i}><CardContent className="p-4 h-24 bg-muted/40 animate-pulse rounded-lg" /></Card>
           ))}
         </div>
       ) : (

@@ -9,7 +9,7 @@ import {
   Rocket, Map, FileText, Activity, Check, Minus, Building2,
 } from "lucide-react";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
 
 /* ─────────────────────────── CMS types ─────────────────────────── */
@@ -186,7 +186,7 @@ const SUBJECT_PALETTE: Record<string, string> = {
   Chemistry: "#6A1B9A", Biology: "#00838F", English: "#C62828",
   History: "#4E342E", Geography: "#006064", Economics: "#E65100",
   "Computer Science": "#4527A0", CS: "#4527A0", Arabic: "#AD1457",
-  Science: "#00796B",
+  Science: "#0D9488",
 };
 const subjectColor = (s?: string | null) => SUBJECT_PALETTE[s ?? ""] ?? TEAL;
 
@@ -794,11 +794,11 @@ const DASHBOARD_SLIDES = [
   {
     role: "Teacher",
     label: "For Teachers",
-    color: "#00796B",
+    color: "#0D9488",
     badge: "CoreHub",
     title: "Your class at a glance",
     widgets: [
-      { title: "Active Students", value: "34", sub: "2 need attention", icon: Users, color: "#00796B", bg: "#E6F4F1" },
+      { title: "Active Students", value: "34", sub: "2 need attention", icon: Users, color: "#0D9488", bg: "#E6F4F1" },
       { title: "Avg. Score", value: "78%", sub: "↑ 6% this week", icon: BarChart3, color: "#7C3AED", bg: "#F3F0FF" },
       { title: "Homework Rate", value: "91%", sub: "29/32 submitted", icon: CheckCircle2, color: "#059669", bg: "#D1FAE5" },
     ],
@@ -811,7 +811,7 @@ const DASHBOARD_SLIDES = [
     badge: "StudyStream",
     title: "Your study session",
     widgets: [
-      { title: "Today's Tasks", value: "4", sub: "2 completed", icon: CheckCircle2, color: "#00796B", bg: "#E6F4F1" },
+      { title: "Today's Tasks", value: "4", sub: "2 completed", icon: CheckCircle2, color: "#0D9488", bg: "#E6F4F1" },
       { title: "Streak", value: "12 days", sub: "Keep it up!", icon: Zap, color: "#DC2626", bg: "#FEF2F2" },
       { title: "Next Exam", value: "6 days", sub: "Physics Paper 2", icon: Target, color: "#D97706", bg: "#FEF3C7" },
     ],
@@ -837,7 +837,7 @@ const DASHBOARD_SLIDES = [
     badge: "CommandCenter",
     title: "Centre operations",
     widgets: [
-      { title: "Total Students", value: "248", sub: "↑ 12 this month", icon: Users, color: "#00796B", bg: "#E6F4F1" },
+      { title: "Total Students", value: "248", sub: "↑ 12 this month", icon: Users, color: "#0D9488", bg: "#E6F4F1" },
       { title: "Revenue", value: "EGP 42K", sub: "On track for target", icon: BarChart3, color: "#DC2626", bg: "#FEF2F2" },
       { title: "AI Usage", value: "3.2K", sub: "queries this week", icon: Brain, color: "#7C3AED", bg: "#F3F0FF" },
     ],
@@ -1007,7 +1007,7 @@ const DEMO_STEPS = [
   {
     role: "Teacher",
     icon: GraduationCap,
-    color: "#00796B",
+    color: "#0D9488",
     step: "Create an assessment",
     desc: "Choose your question bank, set a time limit, and publish. Students receive it instantly.",
     visual: { title: "New Assessment", items: ["Topic: Forces & Motion", "Questions: 12 (auto-selected)", "Time limit: 45 min", "Due: Tomorrow 5 PM"] },

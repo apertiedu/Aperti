@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
 
 interface Teacher {

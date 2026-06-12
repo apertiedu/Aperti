@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
 
 const tok = () => localStorage.getItem("aperti_token") || "";

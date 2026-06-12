@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Settings, Eye, Save, RotateCcw, Plus, Trash2, GripVertical, Check, X, ExternalLink, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, opts?: RequestInit) {
@@ -53,7 +53,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
 function TextField({ label, value, onChange, multiline = false }: {
   label: string; value: string; onChange: (v: string) => void; multiline?: boolean;
 }) {
-  const cls = "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00796B]/30 focus:border-[#00796B] transition-all";
+  const cls = "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition-all";
   return (
     <div>
       <label className="block text-xs font-semibold text-gray-600 mb-1.5">{label}</label>
@@ -236,7 +236,7 @@ export default function LandingEditor() {
                     badges[i] = e.target.value;
                     setField("trust_badges", badges);
                   }}
-                  className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#00796B] transition-all"
+                  className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#0D9488] transition-all"
                 />
                 <button
                   onClick={() => {
@@ -250,7 +250,7 @@ export default function LandingEditor() {
             ))}
             <button
               onClick={() => setField("trust_badges", [...(merged.trust_badges ?? []), "New badge"])}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-dashed border-gray-300 text-gray-400 hover:border-[#00796B] hover:text-[#00796B] transition-all w-full justify-center">
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-dashed border-gray-300 text-gray-400 hover:border-[#0D9488] hover:text-[#0D9488] transition-all w-full justify-center">
               <Plus className="h-3.5 w-3.5" /> Add Badge
             </button>
           </div>
@@ -269,7 +269,7 @@ export default function LandingEditor() {
                     setField("features", features);
                   }}
                   placeholder="Feature title"
-                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#00796B] transition-all"
+                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#0D9488] transition-all"
                 />
                 <input
                   value={feat.desc}
@@ -279,7 +279,7 @@ export default function LandingEditor() {
                     setField("features", features);
                   }}
                   placeholder="Description"
-                  className="col-span-2 border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#00796B] transition-all"
+                  className="col-span-2 border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#0D9488] transition-all"
                 />
               </div>
             ))}
@@ -296,7 +296,7 @@ export default function LandingEditor() {
                   <span className="text-sm text-gray-700 font-medium">{label}</span>
                   <button
                     onClick={() => setField(key as keyof Settings, !val as any)}
-                    className={`relative w-10 h-6 rounded-full transition-all ${val ? "bg-[#00796B]" : "bg-gray-200"}`}>
+                    className={`relative w-10 h-6 rounded-full transition-all ${val ? "bg-[#0D9488]" : "bg-gray-200"}`}>
                     <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${val ? "left-5" : "left-1"}`} />
                   </button>
                 </div>
@@ -333,7 +333,7 @@ export default function LandingEditor() {
                 Support Email <span className="text-gray-400 font-normal">(shown on landing page &amp; contact page)</span>
               </label>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-[#00796B]/30 focus-within:border-[#00796B] transition-all">
+                <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-[#0D9488]/30 focus-within:border-[#0D9488] transition-all">
                   <Mail className="h-3.5 w-3.5 text-gray-400 shrink-0" />
                   <input
                     type="email"
@@ -364,7 +364,7 @@ export default function LandingEditor() {
         {/* Color note */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-sm text-amber-700">
           <strong>Note:</strong> Color palette changes (custom branding) are available in the Enterprise plan.
-          The platform uses teal <code className="bg-amber-100 px-1 rounded">#00796B</code> as the primary accent throughout.
+          The platform uses teal <code className="bg-amber-100 px-1 rounded">#0D9488</code> as the primary accent throughout.
         </div>
       </div>
     </div>

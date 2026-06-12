@@ -28,13 +28,13 @@ export default function Profile() {
   });
 
   if (isLoading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-background flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
     </div>
   );
 
   if (isError || !profile) return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-3">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
       <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl">🔍</div>
       <p className="font-semibold text-gray-700">Profile not found</p>
       <p className="text-gray-400 text-sm">This account may not exist or is not public.</p>
@@ -46,7 +46,7 @@ export default function Profile() {
   const initials = (profile.display_name || "?").split(" ").slice(0,2).map((n: string) => n[0]).join("").toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen bg-background py-10" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="max-w-lg mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
           className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">

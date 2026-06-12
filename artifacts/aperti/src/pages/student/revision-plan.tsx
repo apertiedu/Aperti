@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 
 interface RevisionTask {
   type: "flashcards" | "questions" | "revision" | "simulation";
@@ -43,7 +43,7 @@ const TASK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 const TASK_COLORS: Record<string, string> = {
   flashcards: "#7C3AED",
   questions: "#DC2626",
-  revision: "#00796B",
+  revision: "#0D9488",
   simulation: "#D97706",
 };
 

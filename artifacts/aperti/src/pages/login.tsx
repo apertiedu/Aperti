@@ -6,7 +6,7 @@ import { useAuth } from "@/context/auth";
 import { useLocation, Link } from "wouter";
 import { Eye, EyeOff, AlertCircle, ShieldCheck, RefreshCw, ArrowRight, Ban, Smartphone, Clock } from "lucide-react";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
 
 function generateCaptcha() {

@@ -9,13 +9,13 @@ import {
   Tag, Eye, EyeOff, Box, Maximize2,
 } from "lucide-react";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 const π = Math.PI;
 const sq = (x: number) => x * x;
 const fmt = (n: number, dp = 2) => +n.toFixed(dp);
 
 const PALETTE = [
-  "#00796B","#1976D2","#7B1FA2","#E53935","#F9A825",
+  "#0D9488","#1976D2","#7B1FA2","#E53935","#F9A825",
   "#388E3C","#FF6F00","#0288D1","#37474F","#AD1457",
   "#4527A0","#C62828","#2E7D32","#BF360C","#006064",
 ];
@@ -608,7 +608,7 @@ export default function Geometrix() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 showLabels ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
-              style={showLabels ? { background: "#00796B" } : {}}>
+              style={showLabels ? { background: "#0D9488" } : {}}>
               {showLabels ? <EyeOff className="h-3.5 w-3.5" /> : <Tag className="h-3.5 w-3.5" />}
               Vertices
             </button>
@@ -724,7 +724,7 @@ export default function Geometrix() {
                 <input type="range" min={d.min} max={d.max} step={d.step}
                   value={activeDims[d.id] ?? d.def}
                   onChange={e => setDim(d.id, parseFloat(e.target.value))}
-                  className="w-20 accent-[#00796B]" />
+                  className="w-20 accent-[#0D9488]" />
                 <span className="text-xs tabular-nums text-gray-400 w-7">{fmt(activeDims[d.id] ?? d.def, 1)}</span>
               </div>
             ))}
@@ -781,7 +781,7 @@ export default function Geometrix() {
                 </div>
                 <div className="rounded-xl border border-gray-100 p-3">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-1">Volume</p>
-                  <p className="text-2xl font-black" style={{ color: "#00796B" }}>{volVal}</p>
+                  <p className="text-2xl font-black" style={{ color: "#0D9488" }}>{volVal}</p>
                   <p className="text-[9px] text-gray-400">units³</p>
                   {showFormulas && (
                     <p className="text-[10px] text-gray-400 mt-2 font-mono border-t border-gray-50 pt-2 leading-relaxed">

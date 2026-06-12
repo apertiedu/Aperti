@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Link, useLocation } from "wouter";
 import { Eye, EyeOff, AlertCircle, CheckCircle2, KeyRound } from "lucide-react";
 
-const TEAL = "#00796B";
+const TEAL = "#0D9488";
 
 export default function ResetPassword() {
   const [location] = useLocation();

@@ -42,7 +42,7 @@ export default function StatusPublicPage() {
   const StatusIcon = meta.icon;
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
