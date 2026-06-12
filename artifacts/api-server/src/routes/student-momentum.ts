@@ -9,7 +9,7 @@ studentMomentumRouter.use(authenticate);
 // GET /api/student/momentum — Learning Momentum Score 0-100
 studentMomentumRouter.get("/momentum", async (req: AuthRequest, res: Response) => {
   try {
-    const accountId = req.user!.id;
+    const accountId = req.userId;
 
     // Find student record
     const { rows: studentRows } = await pool.query(
@@ -120,7 +120,7 @@ studentMomentumRouter.get("/momentum", async (req: AuthRequest, res: Response) =
 // GET /api/student/what-next — "What to do next" recommendations
 studentMomentumRouter.get("/what-next", async (req: AuthRequest, res: Response) => {
   try {
-    const accountId = req.user!.id;
+    const accountId = req.userId;
 
     const { rows: studentRows } = await pool.query(
       `SELECT id, course_id FROM students WHERE account_id = $1 LIMIT 1`,

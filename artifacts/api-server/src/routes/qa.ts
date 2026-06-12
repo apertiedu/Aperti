@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { db, pool } from "@workspace/db";
 import {
   bugsTable, testCasesTable, testRunsTable, qualityScoresTable, launchChecklistTable,
@@ -8,7 +8,15 @@ import { eq, desc, and, sql, count, inArray } from "drizzle-orm";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
 export const qaRouter = Router();
-qaRouter.use(authenticate, requireRole("admin", "super_admin"));
+
+// Only apply admin auth to /admin/* paths — prevents this router from acting
+// as a catch-all that blocks non-admin users from later-mounted routers.
+qaRouter.use((req: Request, res: Response, next: NextFunction) => {
+  if (!req.path.startsWith("/admin/")) { next("router"); return; }
+  (authenticate as any)(req, res, () => {
+    (requireRole("admin", "super_admin") as any)(req, res, next);
+  });
+});
 
 // ─── BUG TRACKER ────────────────────────────────────────────────────────────
 

@@ -13,7 +13,6 @@ courseHealthRouter.get("/:courseId", async (req: AuthRequest, res: Response) => 
     const courseId = parseInt(req.params.courseId);
     if (isNaN(courseId)) return res.status(400).json({ error: "Invalid course ID" });
 
-    // Attendance rate last 30 days
     const { rows: attRows } = await pool.query(`
       SELECT ROUND(100.0 * SUM(CASE WHEN att.status='present' THEN 1 ELSE 0 END) / NULLIF(COUNT(*),0)) AS rate
       FROM attendance att
@@ -23,7 +22,6 @@ courseHealthRouter.get("/:courseId", async (req: AuthRequest, res: Response) => 
         AND s.date >= NOW() - INTERVAL '30 days'
     `, [courseId]).catch(() => ({ rows: [{ rate: null }] }));
 
-    // Average exam score
     const { rows: examRows } = await pool.query(`
       SELECT ROUND(AVG(sm.score / NULLIF(sm.max_score, 0) * 100)) AS avg_pct
       FROM student_marks sm
@@ -32,7 +30,6 @@ courseHealthRouter.get("/:courseId", async (req: AuthRequest, res: Response) => 
         AND sm.created_at >= NOW() - INTERVAL '60 days'
     `, [courseId]).catch(() => ({ rows: [{ avg_pct: null }] }));
 
-    // Homework completion rate
     const { rows: hwRows } = await pool.query(`
       SELECT
         COUNT(h.id)::int AS total_assigned,
@@ -44,7 +41,6 @@ courseHealthRouter.get("/:courseId", async (req: AuthRequest, res: Response) => 
         AND h.due_date >= NOW() - INTERVAL '30 days'
     `, [courseId]).catch(() => ({ rows: [{ total_assigned: 0, total_submitted: 0 }] }));
 
-    // Student count
     const { rows: studentRows } = await pool.query(`
       SELECT COUNT(*)::int AS count FROM students WHERE course_id = $1 AND status = 'active'
     `, [courseId]).catch(() => ({ rows: [{ count: 0 }] }));
@@ -56,7 +52,6 @@ courseHealthRouter.get("/:courseId", async (req: AuthRequest, res: Response) => 
     const hwRate = hwTotal > 0 ? (hwSubmitted / hwTotal) * 100 : 0;
     const studentCount = Number(studentRows[0]?.count || 0);
 
-    // Calculate health score (0-100)
     let healthScore = 0;
     let dataPoints = 0;
     if (attRows[0]?.rate !== null) { healthScore += (attendanceRate / 100) * 40; dataPoints++; }
@@ -105,6 +100,93 @@ courseHealthRouter.get("/:courseId", async (req: AuthRequest, res: Response) => 
   }
 });
 
+// GET /api/course-health/:courseId/coverage — syllabus coverage report
+courseHealthRouter.get("/:courseId/coverage", async (req: AuthRequest, res: Response) => {
+  try {
+    const courseId = parseInt(req.params.courseId);
+    if (isNaN(courseId)) return res.status(400).json({ error: "Invalid course ID" });
+
+    const { rows: subjects } = await pool.query(`
+      SELECT id, name FROM subjects WHERE course_id = $1 ORDER BY name
+    `, [courseId]).catch(() => ({ rows: [] }));
+
+    if (subjects.length === 0) {
+      return res.json({ courseId, totalSubjects: 0, coverage: [], summary: { withAssessments: 0, withNotes: 0, withQuestions: 0, withHomework: 0, coveragePct: 0 } });
+    }
+
+    const subjectIds = subjects.map((s: any) => s.id);
+
+    const [assessmentRows, notesRows, questionsRows, homeworkRows] = await Promise.all([
+      pool.query(`
+        SELECT DISTINCT e.subject_id
+        FROM exams e
+        WHERE e.subject_id = ANY($1)
+      `, [subjectIds]).catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT DISTINCT rn.source_id::int AS subject_id
+        FROM revision_notes rn
+        WHERE rn.source_type = 'subject' AND rn.source_id::int = ANY($1)
+      `, [subjectIds]).catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT DISTINCT qb.subject_id
+        FROM question_bank qb
+        WHERE qb.subject_id = ANY($1)
+      `, [subjectIds]).catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT DISTINCT h.subject_id
+        FROM homework h
+        WHERE h.subject_id = ANY($1)
+      `, [subjectIds]).catch(() => ({ rows: [] })),
+    ]);
+
+    const withAssessments = new Set(assessmentRows.rows.map((r: any) => r.subject_id));
+    const withNotes = new Set(notesRows.rows.map((r: any) => r.subject_id));
+    const withQuestions = new Set(questionsRows.rows.map((r: any) => r.subject_id));
+    const withHomework = new Set(homeworkRows.rows.map((r: any) => r.subject_id));
+
+    const coverage = subjects.map((s: any) => ({
+      subjectId: s.id,
+      name: s.name,
+      hasAssessments: withAssessments.has(s.id),
+      hasRevisionNotes: withNotes.has(s.id),
+      hasQuestions: withQuestions.has(s.id),
+      hasHomework: withHomework.has(s.id),
+      score: [withAssessments.has(s.id), withNotes.has(s.id), withQuestions.has(s.id), withHomework.has(s.id)].filter(Boolean).length,
+    }));
+
+    const fullyCovedCount = coverage.filter((c: any) => c.score >= 2).length;
+    const coveragePct = subjects.length > 0 ? Math.round((fullyCovedCount / subjects.length) * 100) : 0;
+
+    const gaps = coverage
+      .filter((c: any) => c.score < 2)
+      .map((c: any) => {
+        const missing = [];
+        if (!c.hasAssessments) missing.push("assessments");
+        if (!c.hasRevisionNotes) missing.push("revision notes");
+        if (!c.hasQuestions) missing.push("question bank");
+        if (!c.hasHomework) missing.push("homework");
+        return `${c.name}: missing ${missing.join(", ")}`;
+      });
+
+    res.json({
+      courseId,
+      totalSubjects: subjects.length,
+      coverage,
+      gaps,
+      summary: {
+        withAssessments: withAssessments.size,
+        withRevisionNotes: withNotes.size,
+        withQuestions: withQuestions.size,
+        withHomework: withHomework.size,
+        coveragePct,
+      },
+    });
+  } catch (err) {
+    console.error("course-coverage error:", err);
+    res.status(500).json({ error: "Failed to calculate course coverage" });
+  }
+});
+
 // GET /api/course-health — all courses for the teacher
 courseHealthRouter.get("/", async (req: AuthRequest, res: Response) => {
   try {
@@ -118,13 +200,12 @@ courseHealthRouter.get("/", async (req: AuthRequest, res: Response) => {
       courses.map(async (c: any) => {
         const r = await pool.query(`
           SELECT
-            ROUND(100.0 * SUM(CASE WHEN att.status='present' THEN 1 ELSE 0 END) / NULLIF(COUNT(*),0)) AS att_rate,
-            NULL::numeric AS exam_avg
+            ROUND(100.0 * SUM(CASE WHEN att.status='present' THEN 1 ELSE 0 END) / NULLIF(COUNT(*),0)) AS att_rate
           FROM attendance att
           JOIN sessions s ON s.id = att.session_id
           JOIN subjects sub ON sub.id = s.subject_id
           WHERE sub.course_id = $1 AND s.date >= NOW() - INTERVAL '30 days'
-        `, [c.id]).catch(() => ({ rows: [{ att_rate: null, exam_avg: null }] }));
+        `, [c.id]).catch(() => ({ rows: [{ att_rate: null }] }));
         const attRate = Number(r.rows[0]?.att_rate || 0);
         const score = attRate > 0 ? Math.round(attRate) : null;
         return {

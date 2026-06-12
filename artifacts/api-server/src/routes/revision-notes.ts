@@ -1,5 +1,5 @@
 import { Router, Response } from "express";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { openaiChat } from "../lib/ai-config";
 
@@ -8,12 +8,34 @@ export const revisionNotesRouter = Router();
 // GET /api/revision-notes — list user's notes
 revisionNotesRouter.get("/revision-notes", authenticate, async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
-  const { source_type } = req.query as Record<string, string>;
+  const { source_type, ai_only, pending_review } = req.query as Record<string, string>;
   let query = `SELECT * FROM revision_notes WHERE user_id = $1`;
   const params: unknown[] = [userId];
   if (source_type) { query += ` AND source_type = $2`; params.push(source_type); }
+  if (ai_only === "true") { query += ` AND ai_generated = true`; }
+  if (pending_review === "true") { query += ` AND ai_generated = true AND teacher_reviewed = false`; }
   query += ` ORDER BY updated_at DESC`;
   const { rows } = await pool.query(query, params);
+  res.json(rows);
+});
+
+// GET /api/revision-notes/pending-review — AI notes awaiting teacher review
+revisionNotesRouter.get("/revision-notes/pending-review", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const userId = req.userId!;
+  const { rows } = await pool.query(
+    `SELECT rn.*, ac.display_name AS author_name
+     FROM revision_notes rn
+     LEFT JOIN accounts ac ON ac.id = rn.user_id
+     WHERE rn.ai_generated = true AND rn.teacher_reviewed = false
+       AND (rn.user_id = $1 OR EXISTS (
+         SELECT 1 FROM students s
+         JOIN subjects sub ON sub.id = rn.source_id::int
+         WHERE s.account_id = rn.user_id AND sub.teacher_account_id = $1
+       ))
+     ORDER BY rn.created_at DESC
+     LIMIT 50`,
+    [userId]
+  ).catch(() => ({ rows: [] }));
   res.json(rows);
 });
 
@@ -32,9 +54,10 @@ revisionNotesRouter.get("/revision-notes/:id", authenticate, async (req: AuthReq
 revisionNotesRouter.post("/revision-notes", authenticate, async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   const { title, content, source_type, source_id } = req.body;
+  if (!title && !content) return res.status(400).json({ error: "title or content is required" });
   const { rows } = await pool.query(
-    `INSERT INTO revision_notes (user_id, title, content, source_type, source_id, ai_generated)
-     VALUES ($1, $2, $3, $4, $5, false) RETURNING *`,
+    `INSERT INTO revision_notes (user_id, title, content, source_type, source_id, ai_generated, teacher_reviewed)
+     VALUES ($1, $2, $3, $4, $5, false, true) RETURNING *`,
     [userId, title || "Untitled Note", content || "", source_type || null, source_id || null],
   );
   res.status(201).json(rows[0]);
@@ -51,6 +74,23 @@ revisionNotesRouter.put("/revision-notes/:id", authenticate, async (req: AuthReq
   );
   if (!rows[0]) { res.status(404).json({ error: "Not found" }); return; }
   res.json(rows[0]);
+});
+
+// PATCH /api/revision-notes/:id/approve — teacher marks AI note as reviewed
+revisionNotesRouter.patch("/revision-notes/:id/approve", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const { rows } = await pool.query(
+    `UPDATE revision_notes SET teacher_reviewed = true, updated_at = NOW()
+     WHERE id = $1 RETURNING id, title, teacher_reviewed`,
+    [req.params.id]
+  );
+  if (!rows[0]) return res.status(404).json({ error: "Not found" });
+  res.json({ success: true, note: rows[0] });
+});
+
+// PATCH /api/revision-notes/:id/reject — teacher deletes/rejects AI note
+revisionNotesRouter.patch("/revision-notes/:id/reject", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  await pool.query(`DELETE FROM revision_notes WHERE id = $1 AND ai_generated = true`, [req.params.id]);
+  res.json({ success: true });
 });
 
 // DELETE /api/revision-notes/:id — delete note
@@ -105,9 +145,9 @@ revisionNotesRouter.post("/revision-notes/generate", authenticate, async (req: A
   ].join("").trim();
 
   const { rows } = await pool.query(
-    `INSERT INTO revision_notes (user_id, title, content, source_type, source_id, ai_generated)
-     VALUES ($1, $2, $3, $4, $5, true) RETURNING *`,
+    `INSERT INTO revision_notes (user_id, title, content, source_type, source_id, ai_generated, teacher_reviewed)
+     VALUES ($1, $2, $3, $4, $5, true, false) RETURNING *`,
     [userId, title, noteContent, source_type || null, source_id || null],
   );
-  res.status(201).json(rows[0]);
+  res.status(201).json({ ...rows[0], pendingReview: true });
 });

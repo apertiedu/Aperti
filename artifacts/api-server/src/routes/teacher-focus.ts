@@ -5,12 +5,12 @@ import { pool } from "@workspace/db";
 export const teacherFocusRouter = Router();
 
 teacherFocusRouter.use(authenticate);
-teacherFocusRouter.use(requireRole(["teacher", "admin", "assistant"]));
+teacherFocusRouter.use(requireRole("teacher", "admin", "assistant"));
 
 // GET /api/teacher/daily-focus — Teacher's personalised daily action list
 teacherFocusRouter.get("/daily-focus", async (req: AuthRequest, res: Response) => {
   try {
-    const accountId = req.user!.id;
+    const accountId = req.userId;
     const today = new Date();
     const dayOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][today.getDay()];
 
@@ -129,7 +129,7 @@ teacherFocusRouter.get("/daily-focus", async (req: AuthRequest, res: Response) =
 // GET /api/teacher/weekly-summary
 teacherFocusRouter.get("/weekly-summary", async (req: AuthRequest, res: Response) => {
   try {
-    const accountId = req.user!.id;
+    const accountId = req.userId;
 
     const { rows: perfRows } = await pool.query(`
       SELECT

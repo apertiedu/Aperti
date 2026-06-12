@@ -6,7 +6,7 @@ import CourseHealthBadge from "@/components/course-health-badge";
 import {
   Plus, BookOpen, Users, CheckCircle2, XCircle, Edit3, Trash2,
   Eye, EyeOff, Clock, Search, GraduationCap, TrendingUp, Globe,
-  ImageIcon, ChevronRight, AlertTriangle,
+  ImageIcon, ChevronRight, AlertTriangle, BarChart2,
 } from "lucide-react";
 import UpgradeModal from "@/components/upgrade-modal";
 import PlanUsageBar from "@/components/plan-usage-bar";
@@ -40,6 +40,48 @@ const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }>
   C: { bg: "#fef3c7", text: "#d97706", border: "#fcd34d" },
   D: { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
 };
+
+function CourseCoverageBadge({ courseId }: { courseId: number }) {
+  const { data, isLoading } = useQuery({
+    queryKey: ["course-coverage", courseId],
+    queryFn: () =>
+      fetch(`/api/course-health/${courseId}/coverage`, {
+        headers: { Authorization: `Bearer ${tok()}` },
+      }).then(r => r.ok ? r.json() : null),
+    staleTime: 10 * 60 * 1000,
+    retry: false,
+  });
+
+  if (isLoading) return <span className="inline-block h-4 w-10 rounded bg-gray-100 animate-pulse" />;
+  if (!data || data.totalSubjects === 0) return null;
+
+  const pct = data.summary?.coveragePct ?? 0;
+  const color = pct >= 80 ? "#16a34a" : pct >= 50 ? "#d97706" : "#dc2626";
+  const bg = pct >= 80 ? "#dcfce7" : pct >= 50 ? "#fef3c7" : "#fee2e2";
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          className="inline-flex items-center gap-1 h-5 px-1.5 rounded-full text-[10px] font-bold shrink-0 cursor-default border"
+          style={{ background: bg, color, borderColor: color + "55" }}
+        >
+          <BarChart2 className="h-2.5 w-2.5" />
+          {pct}%
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs max-w-[200px]">
+        <p className="font-bold mb-1">Syllabus Coverage ({pct}%)</p>
+        <p>{data.summary?.withAssessments ?? 0}/{data.totalSubjects} subjects have assessments</p>
+        <p>{data.summary?.withRevisionNotes ?? 0}/{data.totalSubjects} have revision notes</p>
+        <p>{data.summary?.withQuestions ?? 0}/{data.totalSubjects} have question bank entries</p>
+        {data.gaps?.length > 0 && (
+          <p className="mt-1 text-orange-600 text-[10px]">{data.gaps.length} gap{data.gaps.length > 1 ? "s" : ""} detected</p>
+        )}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 function QualityScoreBadge({ courseId }: { courseId: number }) {
   const { data, isLoading } = useQuery({
@@ -700,6 +742,7 @@ export default function MyCourses() {
                               </Badge>
                               <QualityScoreBadge courseId={c.id} />
                               <CourseHealthBadge courseId={c.id} showLabel />
+                              <CourseCoverageBadge courseId={c.id} />
                             </div>
                             <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-400">
                               {c.subject && <span className="font-medium text-gray-600">{c.subject}</span>}

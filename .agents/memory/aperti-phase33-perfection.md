@@ -59,3 +59,37 @@ Added to PHASE33_MIGRATIONS:
 - Pages with full-page loading should use skeleton screens not spinners
 - Key components: `SkeletonPage`, `SkeletonDashboardGrid`, `SkeletonChart`, `SkeletonTable` from `@/components/skeleton-layouts`
 - Spinner (Loader2/animate-spin) is acceptable only for inline actions (buttons, mutations)
+
+## Course coverage endpoint
+- `GET /api/course-health/:courseId/coverage` — per-subject syllabus coverage report
+- Returns: totalSubjects, coverage[] per subject (hasAssessments/hasNotes/hasQuestions/hasHomework), gaps[], summary with coveragePct
+- `CourseCoverageBadge` component in my-courses.tsx shows pct badge with tooltip on each course card
+**Why:** Teaches detect content gaps by subject without a separate curriculum/units table.
+
+## AI content review gate (revision notes)
+- `revision_notes.teacher_reviewed` column (bool) — false for AI-generated, true for manual or reviewed
+- New endpoints: `PATCH /api/revision-notes/:id/approve`, `PATCH /api/revision-notes/:id/reject`
+- `GET /api/revision-notes/pending-review` lists AI notes awaiting teacher review
+- AI-generated notes created with teacher_reviewed=false; manual notes with teacher_reviewed=true
+**Why:** Teachers must be able to review and approve/reject AI-generated content before students see it.
+
+## Question bank (question-bank.ts)
+- POST/PUT now accept: commandWord, paper, sessionName, variant, board, qualification, sourceYear, questionType
+- Zod validation on POST (createQuestionSchema) — rejects missing subjectId or short questionText
+- `GET /question-bank/duplicate-check?text=...` — returns similar questions above 0.5 SIMILARITY threshold
+**Why:** Multi-tagging uses existing DB columns (command_word, paper, board, etc.) that were already in migrate.ts but not wired to the route.
+
+## Password reset security
+- `forgotPasswordLimiter`: 5 requests per 15 min per IP on `/auth/forgot-password`
+- Login limiter already existed (10/10min); forgot-password was previously unprotected
+**Why:** Unrated forgot-password allows email flooding; added same rateLimit pattern as loginLimiter.
+
+## Device login log
+- `device_login_log` table created in Phase 33 migrations: account_id, device, browser, ip, user_agent, created_at
+- Every successful login writes to this table (async, non-blocking .catch)
+**Why:** Provides per-login history separate from session tracking; enables "new device" notifications.
+
+## .env.example
+- Removed NVIDIA API reference; now shows standard OpenAI key with Replit integration note
+- SMTP config added as commented-out optional block
+**How to apply:** Never add provider-specific API base URLs to .env.example without commenting them out.

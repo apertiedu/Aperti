@@ -182,6 +182,17 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
       }).onConflictDoNothing();
     }
     writeAudit({ accountId: account.id, action: "login", resource: "auth", details: { role: account.role }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
+    dbPool.query(
+      `INSERT INTO device_login_log (account_id, device, browser, ip, user_agent)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        account.id,
+        userAgent ? userAgent.substring(0, 120) : (req.headers["user-agent"] || "").substring(0, 120),
+        null,
+        ip || req.ip,
+        (req.headers["user-agent"] || "").substring(0, 255),
+      ]
+    ).catch(() => {});
     res.json({
       token,
       user: {
@@ -432,8 +443,18 @@ authRouter.post("/register", async (req: Request, res: Response) => {
   }
 });
 
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req: Request, res: Response) => {
+    res.status(429).json({ error: "Too many reset requests. Please try again in 15 minutes." });
+  },
+});
+
 // POST /auth/forgot-password
-authRouter.post("/forgot-password", async (req: Request, res: Response) => {
+authRouter.post("/forgot-password", forgotPasswordLimiter, async (req: Request, res: Response) => {
   const { email } = req.body;
   if (!email?.trim()) return res.status(400).json({ error: "Email is required" });
   const SAFE = { message: "If an account with that email exists, a password reset link has been sent." };

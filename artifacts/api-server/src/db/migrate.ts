@@ -1056,6 +1056,26 @@ const PHASE33_MIGRATIONS: string[] = [
      ('ai_question_extract', true, 100, 'AI-powered question extraction'),
      ('smart_flashcards', true, 100, 'SM-2 spaced repetition for flashcards')
    ON CONFLICT (key) DO NOTHING`,
+
+  /* ── Phase 33 — AI content review gate ──────────────────────────────── */
+  `ALTER TABLE revision_notes ADD COLUMN IF NOT EXISTS teacher_reviewed boolean NOT NULL DEFAULT true`,
+  `UPDATE revision_notes SET teacher_reviewed = false WHERE ai_generated = true AND teacher_reviewed = true`,
+
+  /* ── Phase 33 — Question bank full-text GIN index ────────────────────── */
+  `CREATE INDEX IF NOT EXISTS idx_qbank_question_trgm ON question_bank USING gin (question_text gin_trgm_ops)`,
+
+  /* ── Phase 33 — Device login notification log ────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS device_login_log (
+    id         serial PRIMARY KEY,
+    account_id integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    device     text,
+    browser    text,
+    ip         text,
+    user_agent text,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_device_login_log_account ON device_login_log(account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_device_login_log_created ON device_login_log(created_at DESC)`,
 ];
 
 export async function runMigrations(): Promise<void> {
@@ -1142,13 +1162,21 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE_FIXES_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
     [`phase20-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-Fixes migrations applied");
 }
 
 const PHASE21_MIGRATIONS: string[] = [
@@ -1230,4 +1258,70 @@ const PHASE20_MIGRATIONS: string[] = [
     updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
   )`,
   `INSERT INTO founder_alert_config (id) SELECT 1 WHERE NOT EXISTS (SELECT 1 FROM founder_alert_config WHERE id=1)`,
+];
+
+/* ── Phase Fixes — missing tables & columns discovered during QA ──────────── */
+const PHASE_FIXES_MIGRATIONS: string[] = [
+  /* pairing_code on accounts — parent router uses this column */
+  `ALTER TABLE accounts ADD COLUMN IF NOT EXISTS pairing_code text`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_accounts_pairing_code ON accounts(pairing_code) WHERE pairing_code IS NOT NULL`,
+
+  /* feature_registry — referenced by release_notes, roadmap_items, launch-cms */
+  `CREATE TABLE IF NOT EXISTS feature_registry (
+    id                 serial PRIMARY KEY,
+    name               text NOT NULL UNIQUE,
+    description        text,
+    category           text,
+    owner              text,
+    status             text NOT NULL DEFAULT 'planned' CHECK (status IN ('planned','in_progress','beta','scheduled','released','archived')),
+    release_date       date,
+    visibility_rules   jsonb NOT NULL DEFAULT '{}',
+    documentation_url  text,
+    dependencies       jsonb NOT NULL DEFAULT '[]',
+    version            text,
+    created_at         timestamptz NOT NULL DEFAULT NOW(),
+    updated_at         timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_feature_registry_status ON feature_registry(status)`,
+
+  /* conversion_events — used by launch-cms waitlist flow */
+  `CREATE TABLE IF NOT EXISTS conversion_events (
+    id          serial PRIMARY KEY,
+    visitor_id  text NOT NULL,
+    event_type  text NOT NULL,
+    metadata    jsonb NOT NULL DEFAULT '{}',
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_conversion_events_visitor ON conversion_events(visitor_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_conversion_events_type    ON conversion_events(event_type)`,
+
+  /* retry release_notes (may have failed when feature_registry didn't exist) */
+  `CREATE TABLE IF NOT EXISTS release_notes (
+    id           serial PRIMARY KEY,
+    title        text NOT NULL,
+    summary      text,
+    content      text,
+    type         text NOT NULL DEFAULT 'minor' CHECK (type IN ('major','minor','patch','security','deprecation')),
+    feature_id   integer REFERENCES feature_registry(id) ON DELETE SET NULL,
+    version      text,
+    status       text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft','scheduled','published')),
+    scheduled_at timestamptz,
+    published_at timestamptz,
+    created_at   timestamptz NOT NULL DEFAULT NOW(),
+    updated_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+
+  /* retry roadmap_items (may have failed when feature_registry didn't exist) */
+  `CREATE TABLE IF NOT EXISTS roadmap_items (
+    id           serial PRIMARY KEY,
+    title        text NOT NULL,
+    description  text,
+    category     text,
+    status       text NOT NULL DEFAULT 'planned' CHECK (status IN ('planned','in_progress','beta','released','cancelled')),
+    target_date  date,
+    feature_id   integer REFERENCES feature_registry(id) ON DELETE SET NULL,
+    "order"      integer NOT NULL DEFAULT 0,
+    created_at   timestamptz NOT NULL DEFAULT NOW(),
+    updated_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
 ];
