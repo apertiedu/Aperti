@@ -70,6 +70,11 @@ import ResourceRelationshipPage from "./ResourceRelationshipPage";
 import RouteHealthPage from "./RouteHealthPage";
 import LaunchDashboardPage from "./LaunchDashboardPage";
 import PlatformConfigPage from "./PlatformConfigPage";
+// Phase 32 Intelligence — Stability, Slow Queries, Friction, Weekly Audit
+import StabilityScorePage from "./StabilityScorePage";
+import SlowQueriesPage from "./SlowQueriesPage";
+import FrictionAnalyticsPage from "./FrictionAnalyticsPage";
+import WeeklyAuditPage from "./WeeklyAuditPage";
 
 export default function AdminOS() {
   return (
@@ -170,6 +175,12 @@ export default function AdminOS() {
         <Route path="/admin/os/route-health" component={RouteHealthPage} />
         <Route path="/admin/os/launch-dashboard" component={LaunchDashboardPage} />
         <Route path="/admin/os/platform-config" component={PlatformConfigPage} />
+
+        {/* Phase 32 Intelligence — Stability, Slow Queries, Friction, Weekly Audit */}
+        <Route path="/admin/os/stability-score" component={StabilityScorePage} />
+        <Route path="/admin/os/slow-queries" component={SlowQueriesPage} />
+        <Route path="/admin/os/friction-analytics" component={FrictionAnalyticsPage} />
+        <Route path="/admin/os/weekly-audit" component={WeeklyAuditPage} />
 
         <Route component={Dashboard} />
       </Switch>

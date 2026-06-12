@@ -4,35 +4,30 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Shield, AlertTriangle, Eye, Clock, CheckCircle2, Info, ScanFace, Cpu } from "lucide-react";
+import { Shield, AlertTriangle, Eye, Clock, CheckCircle2, ScanFace, Info, ShieldOff } from "lucide-react";
 
 const tok = () => localStorage.getItem("aperti_token") || "";
 
-const MOCK_FLAGGED = [
-  { id: 1, student: "Ahmed S.", exam: "Physics Mock", violations: 3, type: "Tab switch", status: "flagged", time: "09:14 AM" },
-  { id: 2, student: "Mona K.", exam: "Math Final", violations: 1, type: "Tab switch", status: "reviewed", time: "10:42 AM" },
-  { id: 3, student: "Omar T.", exam: "Chemistry Mid", violations: 2, type: "Paste attempt", status: "flagged", time: "11:05 AM" },
-];
-
 const ACTIVE_MEASURES = [
-  { label: "Tab-switch detection", description: "Students are flagged each time they leave the exam tab", active: true },
-  { label: "Copy/paste blocking", description: "All copy and paste events are blocked during active exams", active: true },
-  { label: "Timer auto-submit", description: "Exam is auto-submitted when time expires", active: true },
-  { label: "Violation logging", description: "All integrity events are logged and attached to the submission", active: true },
+  { label: "Tab-switch detection", description: "Students are flagged each time they leave the exam tab" },
+  { label: "Copy/paste blocking", description: "All copy and paste events are blocked during active exams" },
+  { label: "Timer auto-submit", description: "Exam is auto-submitted when time expires" },
+  { label: "Violation logging", description: "All integrity events are logged and attached to the submission" },
 ];
 
 export default function ShieldCore() {
-  const { data: flagged } = useQuery({
+  const { data: flagged, isLoading } = useQuery<any[]>({
     queryKey: ["shield-violations"],
     queryFn: async () => {
-      try {
-        const res = await fetch("/api/shield/violations", { headers: { Authorization: `Bearer ${tok()}` } });
-        if (!res.ok) return MOCK_FLAGGED;
-        return res.json();
-      } catch { return MOCK_FLAGGED; }
+      const res = await fetch("/api/shield/violations", { headers: { Authorization: `Bearer ${tok()}` } });
+      if (!res.ok) throw new Error("Failed");
+      const json = await res.json();
+      return Array.isArray(json) ? json : (json.violations ?? []);
     },
-    placeholderData: MOCK_FLAGGED,
+    retry: false,
   });
+
+  const violations: any[] = flagged ?? [];
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] p-6">
@@ -43,7 +38,7 @@ export default function ShieldCore() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">ShieldCore</h1>
-            <p className="text-sm text-gray-500">Exam integrity & anti-cheat monitoring</p>
+            <p className="text-sm text-gray-500">Exam integrity &amp; anti-cheat monitoring</p>
           </div>
         </div>
       </motion.div>
@@ -95,50 +90,63 @@ export default function ShieldCore() {
             <CardTitle className="text-base">Integrity Violation Log</CardTitle>
             <div className="flex items-center gap-1.5 text-xs text-gray-400">
               <Info className="h-3.5 w-3.5" />
-              Sample data — live reporting active during exams
+              Live data · updates during active exams
             </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Exam</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Count</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(flagged || MOCK_FLAGGED).map((f: typeof MOCK_FLAGGED[0]) => (
-                <TableRow key={f.id}>
-                  <TableCell className="font-medium">{f.student}</TableCell>
-                  <TableCell className="text-sm text-gray-600">{f.exam}</TableCell>
-                  <TableCell className="text-xs text-gray-500">{f.type || "Tab switch"}</TableCell>
-                  <TableCell>
-                    <Badge variant={f.violations >= 3 ? "destructive" : "secondary"} className="gap-1">
-                      <AlertTriangle className="h-3 w-3" />{f.violations}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs text-gray-400">{f.time || "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant={f.status === "flagged" ? "destructive" : "outline"}
-                      className={f.status === "reviewed" ? "text-gray-600" : ""}>
-                      {f.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
-                      <Eye className="h-3.5 w-3.5 mr-1" /> Review
-                    </Button>
-                  </TableCell>
+          {isLoading ? (
+            <div className="p-8 text-center">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-sm text-gray-400">Loading violations…</p>
+            </div>
+          ) : violations.length === 0 ? (
+            <div className="p-10 text-center">
+              <ShieldOff className="h-10 w-10 text-gray-200 mx-auto mb-3" />
+              <p className="text-sm font-medium text-gray-500">No violations recorded yet</p>
+              <p className="text-xs text-gray-400 mt-1">Violations will appear here when students trigger integrity events during exams.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Student</TableHead>
+                  <TableHead>Exam</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Count</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {violations.map((f: any) => (
+                  <TableRow key={f.id}>
+                    <TableCell className="font-medium">{f.student || f.student_name || "—"}</TableCell>
+                    <TableCell className="text-sm text-gray-600">{f.exam || f.exam_title || "—"}</TableCell>
+                    <TableCell className="text-xs text-gray-500">{f.type || f.violation_type || "Tab switch"}</TableCell>
+                    <TableCell>
+                      <Badge variant={f.violations >= 3 ? "destructive" : "secondary"} className="gap-1">
+                        <AlertTriangle className="h-3 w-3" />{f.violations ?? f.count ?? 1}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-gray-400">{f.time || (f.created_at ? new Date(f.created_at).toLocaleTimeString() : "—")}</TableCell>
+                    <TableCell>
+                      <Badge variant={f.status === "flagged" ? "destructive" : "outline"}
+                        className={f.status === "reviewed" ? "text-gray-600" : ""}>
+                        {f.status || "flagged"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+                        <Eye className="h-3.5 w-3.5 mr-1" /> Review
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
     </div>

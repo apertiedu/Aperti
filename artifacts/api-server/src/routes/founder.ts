@@ -728,3 +728,220 @@ founderRouter.post("/frontend-errors", async (req: AuthRequest, res: Response) =
     res.json({ ok: true });
   }
 });
+
+/* ── System Metrics (real OS data) ──────────────────────────────────────── */
+founderRouter.get("/system-metrics", async (_req: AuthRequest, res: Response) => {
+  try {
+    const os = await import("os");
+    const fs = await import("fs");
+
+    // Memory
+    const totalMem = os.totalmem();
+    const freeMem  = os.freemem();
+    const usedMem  = totalMem - freeMem;
+    const memPct   = Math.round((usedMem / totalMem) * 100);
+
+    // CPU (read /proc/stat for delta — simplistic but real)
+    let cpuPct = 0;
+    try {
+      const stat = fs.readFileSync("/proc/stat", "utf8");
+      const line = stat.split("\n")[0].replace("cpu  ", "").trim().split(" ").map(Number);
+      const idle1 = line[3] + line[4];
+      const total1 = line.reduce((a: number, b: number) => a + b, 0);
+      await new Promise(r => setTimeout(r, 100));
+      const stat2 = fs.readFileSync("/proc/stat", "utf8");
+      const line2 = stat2.split("\n")[0].replace("cpu  ", "").trim().split(" ").map(Number);
+      const idle2 = line2[3] + line2[4];
+      const total2 = line2.reduce((a: number, b: number) => a + b, 0);
+      cpuPct = Math.round(((1 - (idle2 - idle1) / (total2 - total1)) * 100));
+    } catch { cpuPct = 0; }
+
+    // Disk usage via du approximation
+    let diskPct = 0;
+    try {
+      const { execSync } = await import("child_process");
+      const out = execSync("df / --output=pcent 2>/dev/null | tail -1").toString().trim().replace("%", "");
+      diskPct = parseInt(out) || 0;
+    } catch { diskPct = 0; }
+
+    // Uptime
+    const uptimeSeconds = os.uptime();
+    const uptimeHours   = Math.floor(uptimeSeconds / 3600);
+
+    // DB connection health
+    const { rows: dbHealth } = await pool.query("SELECT 1 AS ok").catch(() => ({ rows: [{ ok: 0 }] }));
+    const dbOk = dbHealth[0]?.ok === 1;
+
+    // Active DB connections
+    const { rows: dbConns } = await pool.query(
+      "SELECT COUNT(*) FROM pg_stat_activity WHERE state='active'"
+    ).catch(() => ({ rows: [{ count: 0 }] }));
+
+    res.json({
+      cpu: { pct: cpuPct },
+      memory: { pct: memPct, usedMB: Math.round(usedMem / 1024 / 1024), totalMB: Math.round(totalMem / 1024 / 1024) },
+      disk: { pct: diskPct },
+      uptime: { seconds: uptimeSeconds, hours: uptimeHours },
+      database: { ok: dbOk, activeConnections: parseInt(dbConns[0]?.count as string) || 0 },
+      loadAvg: os.loadavg(),
+      ts: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── Stability Score ─────────────────────────────────────────────────────── */
+founderRouter.get("/stability-score", async (_req: AuthRequest, res: Response) => {
+  try {
+    // Last 7 days of scores
+    const { rows: history } = await pool.query(`
+      SELECT score, error_rate, uptime_pct, avg_latency_ms, error_count, request_count, notes, scored_at
+      FROM stability_scores ORDER BY scored_at DESC LIMIT 7
+    `).catch(() => ({ rows: [] }));
+
+    // Compute today's score live
+    const [errorsRes, reqRes, latencyRes] = await Promise.allSettled([
+      pool.query("SELECT COUNT(*) FROM frontend_error_logs WHERE created_at >= NOW()-INTERVAL '24h'"),
+      pool.query("SELECT COUNT(*) FROM frontend_error_logs WHERE created_at >= NOW()-INTERVAL '24h'"),
+      pool.query("SELECT COALESCE(AVG(duration_ms),0) AS avg FROM slow_query_log WHERE created_at >= NOW()-INTERVAL '24h'"),
+    ]);
+
+    const errorCount = errorsRes.status === "fulfilled" ? (parseInt(errorsRes.value.rows[0].count) || 0) : 0;
+    const avgLatency = latencyRes.status === "fulfilled" ? (Math.round(parseFloat(latencyRes.value.rows[0].avg) || 0)) : 0;
+
+    // Score formula: start at 100, deduct for errors and slow queries
+    const errorDeduction = Math.min(40, errorCount * 2);
+    const latencyDeduction = avgLatency > 1000 ? 20 : avgLatency > 500 ? 10 : 0;
+    const todayScore = Math.max(0, 100 - errorDeduction - latencyDeduction);
+
+    // Upsert today's score
+    await pool.query(`
+      INSERT INTO stability_scores (score, error_rate, uptime_pct, avg_latency_ms, error_count, scored_at)
+      VALUES ($1, $2, 100, $3, $4, CURRENT_DATE)
+      ON CONFLICT (scored_at) DO UPDATE SET score=$1, error_rate=$2, avg_latency_ms=$3, error_count=$4
+    `, [todayScore, errorCount, avgLatency, errorCount]).catch(() => {});
+
+    const trend = history.length >= 2
+      ? (history[0].score > history[1].score ? "up" : history[0].score < history[1].score ? "down" : "stable")
+      : "stable";
+
+    res.json({ today: todayScore, trend, history, avgLatency, errorCount });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── Slow Query Log ──────────────────────────────────────────────────────── */
+founderRouter.get("/slow-queries", async (req: AuthRequest, res: Response) => {
+  try {
+    const limit = Math.min(parseInt((req.query as any).limit as string) || 50, 200);
+    const { rows } = await pool.query(
+      `SELECT id, query_preview, duration_ms, route, method, created_at
+       FROM slow_query_log ORDER BY created_at DESC LIMIT $1`, [limit]
+    );
+    const { rows: stats } = await pool.query(`
+      SELECT
+        COUNT(*) AS total,
+        ROUND(AVG(duration_ms)) AS avg_ms,
+        MAX(duration_ms) AS max_ms,
+        COUNT(*) FILTER (WHERE duration_ms > 2000) AS critical_count
+      FROM slow_query_log WHERE created_at >= NOW()-INTERVAL '24h'
+    `);
+    res.json({ queries: rows, stats: stats[0] });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── User Friction Analytics ─────────────────────────────────────────────── */
+founderRouter.post("/friction-event", async (req: AuthRequest, res: Response) => {
+  try {
+    const { event_type, step, route, metadata } = req.body;
+    await pool.query(
+      `INSERT INTO user_friction_events (user_id, user_role, event_type, step, route, metadata, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+      [req.userId ?? null, req.role ?? null, event_type || "drop_off", step || "unknown", route || "", JSON.stringify(metadata || {})]
+    );
+    res.json({ ok: true });
+  } catch { res.json({ ok: true }); }
+});
+
+founderRouter.get("/friction-analytics", async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows: byStep } = await pool.query(`
+      SELECT step, route, COUNT(*) AS count,
+             COUNT(*) FILTER (WHERE event_type='drop_off') AS drop_offs,
+             COUNT(*) FILTER (WHERE event_type='error') AS errors
+      FROM user_friction_events
+      WHERE created_at >= NOW()-INTERVAL '30d'
+      GROUP BY step, route ORDER BY count DESC LIMIT 20
+    `);
+
+    const { rows: byDay } = await pool.query(`
+      SELECT TO_CHAR(DATE_TRUNC('day', created_at),'Mon DD') AS day,
+             COUNT(*) AS events
+      FROM user_friction_events WHERE created_at >= NOW()-INTERVAL '14d'
+      GROUP BY 1 ORDER BY MIN(created_at) ASC
+    `);
+
+    const { rows: topDrops } = await pool.query(`
+      SELECT step, COUNT(*) AS drop_offs
+      FROM user_friction_events WHERE event_type='drop_off'
+        AND created_at >= NOW()-INTERVAL '30d'
+      GROUP BY step ORDER BY drop_offs DESC LIMIT 5
+    `);
+
+    res.json({ byStep, byDay, topDrops, total: byStep.reduce((s: number, r: any) => s + parseInt(r.count), 0) });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── Weekly Audit ────────────────────────────────────────────────────────── */
+founderRouter.get("/weekly-audit", async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(
+      "SELECT * FROM weekly_audit_reports ORDER BY week_start DESC LIMIT 8"
+    );
+    res.json({ reports: rows });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.post("/weekly-audit/generate", async (_req: AuthRequest, res: Response) => {
+  try {
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // Sunday
+    weekStart.setHours(0, 0, 0, 0);
+
+    const [errorsRes, routeRes, slowRes, frictionRes, usersRes] = await Promise.allSettled([
+      pool.query("SELECT COUNT(*) FROM frontend_error_logs WHERE created_at >= $1", [weekStart]),
+      pool.query("SELECT COUNT(*) FROM slow_query_log WHERE created_at >= $1", [weekStart]),
+      pool.query("SELECT ROUND(AVG(duration_ms)) AS avg FROM slow_query_log WHERE created_at >= $1", [weekStart]),
+      pool.query("SELECT COUNT(*) FROM user_friction_events WHERE created_at >= $1", [weekStart]),
+      pool.query("SELECT COUNT(*) FROM accounts WHERE created_at >= $1", [weekStart]),
+    ]);
+
+    const report = {
+      weekStart: weekStart.toISOString().split("T")[0],
+      newErrors: errorsRes.status === "fulfilled" ? parseInt(errorsRes.value.rows[0].count) : 0,
+      slowQueries: routeRes.status === "fulfilled" ? parseInt(routeRes.value.rows[0].count) : 0,
+      avgQueryMs: slowRes.status === "fulfilled" ? (parseInt(slowRes.value.rows[0].avg) || 0) : 0,
+      frictionEvents: frictionRes.status === "fulfilled" ? parseInt(frictionRes.value.rows[0].count) : 0,
+      newUsers: usersRes.status === "fulfilled" ? parseInt(usersRes.value.rows[0].count) : 0,
+      generatedAt: new Date().toISOString(),
+    };
+
+    await pool.query(`
+      INSERT INTO weekly_audit_reports (week_start, report_data)
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+    `, [weekStart.toISOString().split("T")[0], JSON.stringify(report)]);
+
+    res.json({ ok: true, report });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});

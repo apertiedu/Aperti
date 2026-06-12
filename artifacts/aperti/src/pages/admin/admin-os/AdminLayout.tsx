@@ -11,6 +11,7 @@ import {
   Calendar, Palette, Megaphone, TrendingUp, PieChart, Globe, Star,
   Bug, FlaskConical, History, ClipboardList,
   Crown, DollarSign, Bell, Tag, Award, ShieldAlert, Network,
+  Clock, TrendingDown, CalendarCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +106,12 @@ const NAV = [
   { label: "Launch Dashboard",     icon: Rocket,      href: "/admin/os/launch-dashboard" },
   { label: "Route Health",         icon: Activity,    href: "/admin/os/route-health" },
   { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
+
+  { label: "— Phase 32 Intelligence", header: true },
+  { label: "Stability Score",      icon: Activity,    href: "/admin/os/stability-score" },
+  { label: "Slow Queries",         icon: Clock,       href: "/admin/os/slow-queries" },
+  { label: "Friction Analytics",   icon: TrendingDown,href: "/admin/os/friction-analytics" },
+  { label: "Weekly Audit",         icon: CalendarCheck,href:"/admin/os/weekly-audit" },
 ] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

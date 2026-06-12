@@ -54,16 +54,8 @@ export default function ClassForge() {
   const sessionList: any[] = Array.isArray(sessions) ? sessions : [];
   const studentList: any[] = Array.isArray(students) ? students : (students as any)?.students ?? [];
 
-  /* Fallback engagement data when real session data is absent */
-  const records: any[] = data?.records ?? studentList.slice(0, 8).map((s: any, i: number) => ({
-    studentId: s.id,
-    studentName: s.student_name,
-    handRaises: Math.floor(Math.random() * 5),
-    chatMessages: Math.floor(Math.random() * 12),
-    pollResponses: Math.floor(Math.random() * 3),
-    attentionPercentage: 50 + Math.floor(Math.random() * 45),
-    participationScore: 40 + Math.floor(Math.random() * 55),
-  }));
+  /* Use real session data only — no synthetic fallback values */
+  const records: any[] = data?.records ?? [];
 
   const avgAttention = records.length > 0
     ? Math.round(records.reduce((s, r) => s + r.attentionPercentage, 0) / records.length)

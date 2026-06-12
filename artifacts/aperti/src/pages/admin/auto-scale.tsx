@@ -1,86 +1,150 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Activity, Cpu, HardDrive, AlertTriangle } from "lucide-react";
+import { Activity, Cpu, HardDrive, Database, Clock, RefreshCw, Wifi, AlertTriangle } from "lucide-react";
+
+const tok = () => localStorage.getItem("aperti_token") || "";
+
+function MetricCard({ icon: Icon, label, value, unit, color, warn }: {
+  icon: any; label: string; value: number | string; unit?: string; color: string; warn?: boolean;
+}) {
+  const pct = typeof value === "number" ? value : null;
+  return (
+    <Card className="card-hover">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className={`h-9 w-9 rounded-lg flex items-center justify-center ${warn ? "bg-amber-50" : "bg-primary/8"}`}>
+            <Icon className={`h-5 w-5 ${warn ? "text-amber-500" : color}`} />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-xl font-bold tabular-nums">{value}{unit}</p>
+          </div>
+        </div>
+        {pct !== null && (
+          <Progress
+            value={Math.min(100, pct)}
+            className="h-1.5"
+          />
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function AutoScale() {
-  const [cpuUsage, setCpuUsage] = useState(42);
-  const [ramUsage, setRamUsage] = useState(68);
-  const [diskUsage, setDiskUsage] = useState(55);
-  const [activeUsers, setActiveUsers] = useState(87);
-  const [recommendation, setRecommendation] = useState("");
+  const { data, isLoading, isFetching, refetch, dataUpdatedAt } = useQuery({
+    queryKey: ["system-metrics"],
+    queryFn: () =>
+      fetch("/api/founder/system-metrics", { headers: { Authorization: `Bearer ${tok()}` } })
+        .then(r => r.json()),
+    refetchInterval: 8000,
+    staleTime: 4000,
+  });
 
-  // Simulate fetching metrics (in production, call Spaceship API)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCpuUsage(Math.floor(Math.random() * 30) + 30);
-      setRamUsage(Math.floor(Math.random() * 20) + 60);
-      setActiveUsers(Math.floor(Math.random() * 50) + 70);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, []);
+  const cpu       = data?.cpu?.pct ?? 0;
+  const memPct    = data?.memory?.pct ?? 0;
+  const usedMB    = data?.memory?.usedMB ?? 0;
+  const totalMB   = data?.memory?.totalMB ?? 0;
+  const diskPct   = data?.disk?.pct ?? 0;
+  const uptimeH   = data?.uptime?.hours ?? 0;
+  const dbOk      = data?.database?.ok ?? false;
+  const dbConns   = data?.database?.activeConnections ?? 0;
+  const loadAvg   = data?.loadAvg?.[0] ?? 0;
+  const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : "—";
 
-  const analyzeScaling = () => {
-    if (cpuUsage > 75 || ramUsage > 85) {
-      setRecommendation("High load detected. Consider upgrading to a larger Spaceship VPS plan (e.g., Star VPS 6).");
-    } else if (activeUsers > 150) {
-      setRecommendation("User count growing. Add a load balancer and a second application node soon.");
-    } else {
-      setRecommendation("System healthy. Current resources are sufficient.");
-    }
-  };
+  const cpuWarn   = cpu > 75;
+  const memWarn   = memPct > 85;
+  const diskWarn  = diskPct > 80;
+
+  const recommendation =
+    cpuWarn ? "High CPU detected. Consider reviewing background jobs or scaling up resources." :
+    memWarn ? "Memory pressure is high. Check for memory leaks or increase available RAM." :
+    diskWarn ? "Disk is getting full. Archive old data or expand storage." :
+    "System is healthy. Resources are within normal operating ranges.";
 
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-        <h1 className="text-3xl font-bold flex items-center gap-2"><Activity className="h-7 w-7 text-primary" /> AutoScale<span className="text-primary"></span></h1>
-        <p className="text-muted-foreground">Monitor and scale your infrastructure intelligently.</p>
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h1 className="text-2xl font-bold flex items-center gap-2">
+              <Activity className="h-6 w-6 text-primary" /> Infrastructure Monitor
+            </h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Live system metrics · Updated at {lastUpdated}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? "animate-spin" : ""}`} />
+            {isFetching ? "Refreshing…" : "Refresh"}
+          </Button>
+        </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="card-hover">
-          <CardContent className="p-4 flex items-center gap-4">
-            <Cpu className="h-8 w-8 text-primary" />
-            <div><p className="text-2xl font-bold">{cpuUsage}%</p><p className="text-sm text-muted-foreground">CPU Usage</p></div>
-          </CardContent>
-        </Card>
-        <Card className="card-hover">
-          <CardContent className="p-4 flex items-center gap-4">
-            <HardDrive className="h-8 w-8 text-primary" />
-            <div><p className="text-2xl font-bold">{ramUsage}%</p><p className="text-sm text-muted-foreground">RAM Usage</p></div>
-          </CardContent>
-        </Card>
-        <Card className="card-hover">
-          <CardContent className="p-4 flex items-center gap-4">
-            <HardDrive className="h-8 w-8 text-primary" />
-            <div><p className="text-2xl font-bold">{diskUsage}%</p><p className="text-sm text-muted-foreground">Disk</p></div>
-          </CardContent>
-        </Card>
-        <Card className="card-hover">
-          <CardContent className="p-4 flex items-center gap-4">
-            <Activity className="h-8 w-8 text-primary" />
-            <div><p className="text-2xl font-bold">{activeUsers}</p><p className="text-sm text-muted-foreground">Active Users</p></div>
-          </CardContent>
-        </Card>
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <Card key={i}><CardContent className="p-4 h-24 bg-gray-50 animate-pulse rounded-lg" /></Card>
+          ))}
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <MetricCard icon={Cpu}      label="CPU Usage"   value={cpu}     unit="%" color="text-blue-600"    warn={cpuWarn} />
+            <MetricCard icon={HardDrive}label="Memory"      value={memPct}  unit="%" color="text-purple-600"  warn={memWarn} />
+            <MetricCard icon={HardDrive}label="Disk"        value={diskPct} unit="%" color="text-orange-600"  warn={diskWarn} />
+            <MetricCard icon={Activity} label="Load Avg"    value={loadAvg.toFixed(2)} color="text-teal-600" />
+          </div>
 
-      <Card className="card-hover max-w-2xl">
-        <CardHeader><CardTitle>Scaling Advisor</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <Progress value={cpuUsage} className="h-2" />
-          <Progress value={ramUsage} className="h-2" />
-          <Button onClick={analyzeScaling}>Analyze Now</Button>
-          {recommendation && (
-            <div className="p-3 bg-muted rounded-lg flex items-start gap-2">
-              <AlertTriangle className="h-5 w-5 text-orange-500 mt-0.5" />
-              <p className="text-sm">{recommendation}</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <Card>
+              <CardContent className="p-4 flex items-center gap-3">
+                <Database className={`h-8 w-8 ${dbOk ? "text-emerald-500" : "text-red-500"}`} />
+                <div>
+                  <p className="font-semibold text-sm">{dbOk ? "Database Connected" : "Database Unreachable"}</p>
+                  <p className="text-xs text-muted-foreground">{dbConns} active connection{dbConns !== 1 ? "s" : ""}</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 flex items-center gap-3">
+                <Clock className="h-8 w-8 text-sky-500" />
+                <div>
+                  <p className="font-semibold text-sm">Server Uptime</p>
+                  <p className="text-xs text-muted-foreground">{uptimeH}h {Math.floor(((data?.uptime?.seconds ?? 0) % 3600) / 60)}m</p>
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 flex items-center gap-3">
+                <Wifi className="h-8 w-8 text-teal-500" />
+                <div>
+                  <p className="font-semibold text-sm">Memory Usage</p>
+                  <p className="text-xs text-muted-foreground">{usedMB} MB / {totalMB} MB</p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Card className="max-w-2xl">
+            <CardHeader><CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className={`h-4 w-4 ${cpuWarn || memWarn || diskWarn ? "text-amber-500" : "text-emerald-500"}`} />
+              Scaling Advisor
+            </CardTitle></CardHeader>
+            <CardContent>
+              <p className={`text-sm ${cpuWarn || memWarn || diskWarn ? "text-amber-700" : "text-emerald-700"} bg-opacity-10 rounded-lg p-3 ${cpuWarn || memWarn || diskWarn ? "bg-amber-50" : "bg-emerald-50"}`}>
+                {recommendation}
+              </p>
+              <p className="text-xs text-muted-foreground mt-3">
+                Metrics refresh every 8 seconds from live OS data. No mock values.
+              </p>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

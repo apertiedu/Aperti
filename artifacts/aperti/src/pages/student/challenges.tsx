@@ -169,7 +169,7 @@ export default function ChallengesPage() {
                             <Target className="h-3 w-3" /> Join
                           </Button>
                           <Button size="sm" className="h-7 gap-1 text-xs flex-1"
-                            onClick={() => submitMutation.mutate({ id: challenge.id, score: Math.round(70 + Math.random() * 30) })}>
+                            onClick={() => submitMutation.mutate({ id: challenge.id, score: 100 })}>
                             <CheckCircle2 className="h-3 w-3" /> Submit
                           </Button>
                           <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs"
