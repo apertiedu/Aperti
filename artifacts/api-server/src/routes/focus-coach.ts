@@ -320,4 +320,33 @@ router.patch("/focus-sessions/:id", ...studentGuard, async (req: AuthRequest, re
   res.json({ session: updated, xpEarned });
 });
 
+// POST /focus-sessions/:id/complete — alias for PATCH (used by focus-zone-v2)
+router.post("/focus-sessions/:id/complete", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const ctx = await requireStudent(req, res);
+  if (!ctx) return;
+  const { studentId } = ctx;
+  const sessionId = parseInt(req.params.id, 10);
+  const [existing] = await db.select().from(focusSessionsTable)
+    .where(and(eq(focusSessionsTable.id, sessionId), eq(focusSessionsTable.studentId, studentId)))
+    .limit(1);
+  if (!existing) { res.status(404).json({ message: "Session not found" }); return; }
+  const finalDuration = req.body.durationMinutes ? parseInt(req.body.durationMinutes, 10) : existing.durationMinutes;
+  const xpEarned = Math.floor((finalDuration / 25) * 30);
+  const [updated] = await db.update(focusSessionsTable)
+    .set({ durationMinutes: finalDuration, mode: req.body.mode ?? existing.mode, xpEarned, completedAt: new Date() })
+    .where(eq(focusSessionsTable.id, sessionId))
+    .returning();
+  const [profile] = await db.select().from(ascendProfilesTable)
+    .where(eq(ascendProfilesTable.studentAccountId, req.userId!)).limit(1);
+  if (profile) {
+    const delta = xpEarned - (existing.xpEarned ?? 0);
+    const newXp = Math.max(0, (profile.xp ?? 0) + delta);
+    const newLevel = Math.max(1, Math.floor(Math.sqrt(newXp / 100)));
+    await db.update(ascendProfilesTable)
+      .set({ xp: newXp, level: newLevel })
+      .where(eq(ascendProfilesTable.id, profile.id));
+  }
+  res.json({ session: updated, xpEarned });
+});
+
 export default router;

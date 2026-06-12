@@ -1391,4 +1391,8 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
 
   /* past_papers — title column used by resource routes */
   `ALTER TABLE past_papers ADD COLUMN IF NOT EXISTS title text`,
+
+  /* past_papers — mark_scheme_url and examiner_report_url queried by past-papers route */
+  `ALTER TABLE past_papers ADD COLUMN IF NOT EXISTS mark_scheme_url text`,
+  `ALTER TABLE past_papers ADD COLUMN IF NOT EXISTS examiner_report_url text`,
 ];

@@ -125,7 +125,7 @@ router.use(analyticsRouter);
 router.use(notificationsRouter);
 router.use("/question-bank", questionBankRouter);
 router.use(studentProfileRouter);
-router.use(homeworkRouter);
+router.use("/homework", homeworkRouter);
 router.use(resourcesRouter);
 router.use(studentPortalRouter);
 router.use(reportsRouter);
@@ -175,7 +175,6 @@ router.use(focusCoachRouter);
 router.use(echoProfileRouter);
 router.use(peakRankingsRouter);
 router.use(studyGroupsRouter);
-router.use(studentMessagesThreadedRouter);
 router.use(studentCalendarRouter);
 router.use(snapgradeRouter);
 router.use(trialVaultRouter);
@@ -191,11 +190,12 @@ router.use("/grading", gradingRouter);
 router.use("/coremind", coremindAnalyticsRouter);
 router.use(parentAiRouter);
 router.use("/parent", parentRouter);
-router.use(parentDashboardRouter);
-router.use(parentPhase4Router);
 
 // Phase 7 — Communication, Collaboration & Community Ecosystem
+// commThreadsRouter must come BEFORE studentMessagesThreadedRouter to avoid
+// the student-only guard shadowing teacher/admin access to /messages/threads
 router.use(commThreadsRouter);
+router.use(studentMessagesThreadedRouter);
 router.use(commRoomsRouter);
 router.use(commSupportRouter);
 

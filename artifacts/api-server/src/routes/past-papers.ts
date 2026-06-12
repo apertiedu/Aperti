@@ -9,8 +9,9 @@ pastPapersRouter.get("/", async (req: Request, res: Response) => {
   try {
     const { subject, year, session, search } = req.query as Record<string, string>;
     let q = `SELECT id, board, subject, year, session, variant, paper_number,
-                    title, file_url, mark_scheme_url, examiner_report_url, created_at
-             FROM past_papers WHERE is_public = 'true'`;
+                    COALESCE(title, '') AS title,
+                    file_url, mark_scheme_url, examiner_report_url, created_at
+             FROM past_papers WHERE is_public::text = 'true' OR is_public IS TRUE`;
     const params: any[] = [];
     if (subject) { params.push(subject); q += ` AND LOWER(subject) = LOWER($${params.length})`; }
     if (year)    { params.push(parseInt(year)); q += ` AND year = $${params.length}`; }
@@ -38,7 +39,7 @@ pastPapersRouter.get("/", async (req: Request, res: Response) => {
 pastPapersRouter.get("/subjects", async (_req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(
-      `SELECT DISTINCT subject FROM past_papers WHERE is_public='true' ORDER BY subject ASC`
+      `SELECT DISTINCT subject FROM past_papers WHERE (is_public::text = 'true' OR is_public IS TRUE) ORDER BY subject ASC`
     );
     res.json(rows.map((r: any) => r.subject));
   } catch (err: any) {

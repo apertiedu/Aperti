@@ -81,7 +81,10 @@ commThreadsRouter.get("/messages/threads", authenticate, async (req: AuthRequest
           WHERE tp2.thread_id = t.id AND tp2.user_id != $1) AS participants
        FROM message_threads_ext t
        JOIN thread_participants tp ON tp.thread_id = t.id AND tp.user_id = $1
-       ORDER BY COALESCE(last_at, t.created_at) DESC`,
+       ORDER BY COALESCE(
+         (SELECT tm3.created_at FROM thread_messages tm3 WHERE tm3.thread_id = t.id ORDER BY tm3.created_at DESC LIMIT 1),
+         t.created_at
+       ) DESC`,
       [uid],
     );
     res.json(rows);
