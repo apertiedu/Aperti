@@ -29,6 +29,8 @@ interface ExtractedQuestion {
   topic: string;
   subject: string;
   difficulty: "easy" | "medium" | "hard";
+  cognitiveLevel: "recall" | "understanding" | "application" | "analysis" | "evaluation";
+  examStyle: "mcq" | "structured" | "extended" | "practical" | "calculation" | "theory";
   commandWord: string;
   paperType: string;
   diagramHint: string;
@@ -155,11 +157,16 @@ questionExtractionRouter.put("/:jobId/approve", async (req: AuthRequest, res: Re
     if (action === "approve") {
       try {
         await pool.query(
-          `INSERT INTO question_bank (topic, subject, difficulty, paper_type, command_word, marks, text, created_by, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,NOW())
+          `INSERT INTO question_bank
+             (topic, subject, difficulty, cognitive_level, exam_style, paper_type, command_word, marks, text, created_by, created_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NOW())
            ON CONFLICT DO NOTHING`,
-          [q.topic, q.subject, q.difficulty, q.paperType || paperTypeFallback(job.source),
-           q.commandWord, q.marks, q.text, job.createdBy]
+          [
+            q.topic, q.subject, q.difficulty,
+            q.cognitiveLevel || null, q.examStyle || null,
+            q.paperType || paperTypeFallback(job.source),
+            q.commandWord, q.marks, q.text, job.createdBy,
+          ]
         );
         saved++;
       } catch { /* non-critical */ }
@@ -275,11 +282,16 @@ Return a JSON array of question objects:
   "topic": "Topic name (e.g. Forces, Algebra)",
   "subject": "${subject || "Unknown"}",
   "difficulty": "easy|medium|hard",
-  "commandWord": "Calculate|Explain|Describe|Define|Evaluate|Compare|Sketch",
+  "cognitiveLevel": "recall|understanding|application|analysis|evaluation",
+  "examStyle": "mcq|structured|extended|practical|calculation|theory",
+  "commandWord": "Calculate|Explain|Describe|Define|Evaluate|Compare|Sketch|State|Suggest|Analyse",
   "paperType": "${paperType || "structured"}",
   "diagramHint": "Brief note if a diagram is referenced, or empty string",
   "markScheme": "Corresponding mark scheme answer, or empty string if not available"
 }]
+
+Cognitive level guide: recall=State/Define/List, understanding=Describe/Explain, application=Calculate/Solve/Use, analysis=Analyse/Compare/Deduce, evaluation=Evaluate/Justify/Assess.
+Exam style guide: mcq=multiple choice, structured=short answer with parts, extended=long essay/report, practical=experiment/lab, calculation=purely numerical, theory=written explanation.
 
 Extract 5-15 questions. Be thorough. Return ONLY the JSON array, no other text.`;
 
@@ -306,6 +318,8 @@ Extract 5-15 questions. Be thorough. Return ONLY the JSON array, no other text.`
   return parsed.map((q: any, i: number) => ({
     ...q,
     id: q.id || `q${i + 1}`,
+    cognitiveLevel: q.cognitiveLevel || inferCognitiveLevel(q.commandWord || ""),
+    examStyle: q.examStyle || inferExamStyle(q.paperType || "", q.marks),
     status: "pending" as const,
     isDuplicate: false,
   }));
@@ -325,15 +339,19 @@ function extractWithRules(text: string, subject: string, paperType: string): Ext
     if (match) {
       if (current?.text) questions.push(current as ExtractedQuestion);
       idx++;
+      const cw = extractCommandWord(match[2]);
+      const mk = extractMarks(line);
       current = {
         id: `q${idx}`,
         text: match[2],
-        marks: extractMarks(line),
+        marks: mk,
         subparts: [],
         topic: guessTopicFromText(match[2]),
         subject: subject || "General",
         difficulty: "medium",
-        commandWord: extractCommandWord(match[2]),
+        cognitiveLevel: inferCognitiveLevel(cw),
+        examStyle: inferExamStyle(paperType || "", mk),
+        commandWord: cw,
         paperType: paperType || "structured",
         diagramHint: "",
         status: "pending",
@@ -390,5 +408,24 @@ function guessTopicFromText(text: string): string {
 }
 function paperTypeFallback(source: string): string {
   if (source.includes("mcq") || source.includes("multiple")) return "mcq";
+  return "structured";
+}
+
+function inferCognitiveLevel(commandWord: string): ExtractedQuestion["cognitiveLevel"] {
+  const cw = commandWord.toLowerCase();
+  if (["state","define","list","name","identify"].some(w => cw.includes(w)))     return "recall";
+  if (["describe","explain","outline","summarise"].some(w => cw.includes(w)))    return "understanding";
+  if (["calculate","solve","determine","use","apply"].some(w => cw.includes(w))) return "application";
+  if (["analyse","compare","deduce","distinguish","interpret"].some(w => cw.includes(w))) return "analysis";
+  if (["evaluate","justify","assess","discuss","suggest"].some(w => cw.includes(w))) return "evaluation";
+  return "understanding";
+}
+
+function inferExamStyle(paperType: string, marks: number | null): ExtractedQuestion["examStyle"] {
+  const pt = (paperType || "").toLowerCase();
+  if (pt.includes("mcq") || pt.includes("multiple")) return "mcq";
+  if (pt.includes("practical") || pt.includes("lab"))  return "practical";
+  if (marks !== null && marks >= 1 && marks <= 2)       return "structured";
+  if (marks !== null && marks >= 6)                     return "extended";
   return "structured";
 }

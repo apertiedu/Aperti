@@ -8,8 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BarChart3, BookOpen, FileText, Brain, TrendingUp, Users, Clock,
-  CheckCircle, AlertCircle, Zap, Target, Star, RefreshCw,
+  CheckCircle, AlertCircle, Zap, Target, Star, RefreshCw, Sparkles, ChevronRight,
 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 
 const API = "/api";
 const token = () => localStorage.getItem("aperti_token");
@@ -56,6 +57,19 @@ function DifficultyBar({ label, value, total, color }: { label: string; value: n
 
 export default function ContentAnalytics() {
   const [activeTab, setActiveTab] = useState("overview");
+  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [interventions, setInterventions] = useState<string[]>([]);
+
+  const interventionMutation = useMutation({
+    mutationFn: () =>
+      fetchJSON("/teacher/interventions/suggest", {
+        method: "POST",
+        body: JSON.stringify({ classId: selectedClass || undefined }),
+      }),
+    onSuccess: (data) => {
+      setInterventions(data.suggestions ?? []);
+    },
+  });
 
   const { data: dashboard, isLoading: dashLoading } = useQuery({
     queryKey: ["analytics-dashboard"],
@@ -112,6 +126,7 @@ export default function ContentAnalytics() {
                 <TabsTrigger value="questions">Questions</TabsTrigger>
                 <TabsTrigger value="lessons">Lessons</TabsTrigger>
                 <TabsTrigger value="top-content">Top Content</TabsTrigger>
+                <TabsTrigger value="interventions" className="gap-1.5"><Sparkles size={12} /> AI Interventions</TabsTrigger>
               </TabsList>
 
               <TabsContent value="overview" className="mt-4 space-y-4">
@@ -263,6 +278,60 @@ export default function ContentAnalytics() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              <TabsContent value="interventions" className="mt-4">
+                <Card className="bg-white border-0 shadow-sm">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-base flex items-center gap-2"><Sparkles size={16} className="text-teal-500" /> AI Intervention Suggestions</CardTitle>
+                        <p className="text-xs text-gray-500 mt-1">AI-generated actionable teaching strategies based on class performance data.</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => interventionMutation.mutate()}
+                        disabled={interventionMutation.isPending}
+                      >
+                        <Sparkles size={13} />
+                        {interventionMutation.isPending ? "Generating…" : interventions.length > 0 ? "Refresh" : "Generate"}
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {interventionMutation.isPending ? (
+                      <div className="space-y-3">
+                        {[1, 2, 3].map(i => (
+                          <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />
+                        ))}
+                      </div>
+                    ) : interventions.length > 0 ? (
+                      <div className="space-y-3">
+                        {interventions.map((suggestion, i) => (
+                          <motion.div
+                            key={i}
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.08 }}
+                            className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-teal-50 to-white border border-teal-100"
+                          >
+                            <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                              {i + 1}
+                            </div>
+                            <p className="text-sm text-gray-700 leading-relaxed flex-1">{suggestion}</p>
+                            <ChevronRight size={14} className="text-teal-300 shrink-0 mt-1" />
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 text-gray-400">
+                        <Brain size={40} className="mx-auto mb-3 opacity-30" />
+                        <p className="text-sm font-medium">No suggestions yet</p>
+                        <p className="text-xs mt-1">Click "Generate" to get AI-powered intervention strategies for your classes.</p>
                       </div>
                     )}
                   </CardContent>

@@ -3,6 +3,7 @@ import { db, pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { flashcardDecksTable, flashcardItemsTable, flashcardProgressTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
+import { openaiChat } from "../lib/ai-config";
 
 export const flashcardsRouter = Router();
 
@@ -217,6 +218,83 @@ flashcardsRouter.post("/track", authenticate, async (req: AuthRequest, res: Resp
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// POST /flashcards/decks/:id/generate — AI generate cards from text
+flashcardsRouter.post("/decks/:id/generate", authenticate, requireRole("teacher", "admin", "assistant"), async (req: AuthRequest, res: Response) => {
+  const deckId = parseInt(req.params.id);
+  const teacherId = req.userId!;
+  const { text, topic, count = 8 } = req.body;
+
+  if (!text?.trim() || text.trim().length < 20) {
+    return res.status(400).json({ error: "text must be at least 20 characters" });
+  }
+  if (count < 1 || count > 30) {
+    return res.status(400).json({ error: "count must be between 1 and 30" });
+  }
+
+  const deck = await db.query.flashcardDecks.findFirst({
+    where: (d, { eq, and }) => and(eq(d.id, deckId), eq(d.teacherAccountId, teacherId)),
+  });
+  if (!deck) return res.status(404).json({ error: "Deck not found" });
+
+  const prompt = `You are an expert educator. Generate ${count} high-quality flashcards from the following study material.
+${topic ? `Topic: ${topic}` : ""}
+
+Study material:
+"""
+${text.substring(0, 3000)}
+"""
+
+Return a JSON array of flashcard objects:
+[{
+  "front": "Question or concept prompt (concise, testable)",
+  "back": "Complete answer with key facts, formulas, or definitions",
+  "difficulty": "easy|medium|hard"
+}]
+
+Rules:
+- Mix recall, understanding, and application questions
+- Include definitions, formulas, key dates/facts, and worked examples where relevant
+- Avoid duplicates — each card must test a distinct concept
+- Keep fronts as questions or prompts, not statements
+- Return ONLY the JSON array, no other text`;
+
+  const aiRaw = await openaiChat({
+    systemPrompt: "You are a precise educational content generator. Return only valid JSON.",
+    userMessage: prompt,
+    maxTokens: 1500,
+  });
+
+  if (!aiRaw) {
+    return res.status(503).json({ error: "AI unavailable — check OPENAI_API_KEY" });
+  }
+
+  const match = (aiRaw ?? "").match(/\[[\s\S]+\]/);
+  if (!match) return res.status(422).json({ error: "AI did not return valid card data" });
+
+  let cards: { front: string; back: string; difficulty: string }[] = [];
+  try {
+    cards = JSON.parse(match[0]);
+  } catch {
+    return res.status(422).json({ error: "Failed to parse AI response" });
+  }
+
+  const inserted: any[] = [];
+  for (const card of cards.slice(0, count)) {
+    if (!card.front?.trim() || !card.back?.trim()) continue;
+    try {
+      const [row] = await db.insert(flashcardItemsTable).values({
+        deckId,
+        front: card.front.trim(),
+        back: card.back.trim(),
+        difficulty: ["easy", "medium", "hard", "expert"].includes(card.difficulty) ? card.difficulty : "medium",
+      }).returning();
+      inserted.push(row);
+    } catch { /* skip invalid */ }
+  }
+
+  res.status(201).json({ generated: inserted.length, cards: inserted });
 });
 
 // GET /flashcards/student/decks — decks available to student

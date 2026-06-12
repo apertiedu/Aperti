@@ -5,7 +5,7 @@ import { authenticate, AuthRequest } from "../middleware/auth";
 export const errorTraceRouter = Router();
 
 // GET /error-trace/student/:studentId — analyze mistake patterns
-errorTraceRouter.get("/student/:studentId", authenticate, async (req: AuthRequest, res: Response) => {
+errorTraceRouter.get("/error-trace/student/:studentId", authenticate, async (req: AuthRequest, res: Response) => {
   const studentId = parseInt(req.params.studentId);
 
   // Fetch all mistakes from echo memory

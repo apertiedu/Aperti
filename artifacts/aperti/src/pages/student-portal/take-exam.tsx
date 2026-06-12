@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Timer, AlertTriangle, Flag, ArrowLeft, ArrowRight, CheckCircle2, BookOpen, Star, Bookmark, Type, Hash, Lightbulb } from "lucide-react";
+import { Timer, AlertTriangle, Flag, ArrowLeft, ArrowRight, CheckCircle2, BookOpen, Star, Bookmark, Type, Hash, Lightbulb, EyeOff, Copy, ClipboardX, ShieldAlert } from "lucide-react";
 import { useLocation } from "wouter";
 import { MathRenderer } from "@/components/math-renderer";
 
@@ -19,7 +19,6 @@ const token = () => localStorage.getItem("aperti_token");
 function TheoryAnswerEditor({ value, onChange, marks }: { value: string; onChange: (v: string) => void; marks: number }) {
   const words = value.trim() ? value.trim().split(/\s+/).length : 0;
   const chars = value.length;
-  // Target: ~25-35 words per mark for concise answers
   const targetWords = Math.max(marks * 30, 40);
   const pct = Math.min((words / targetWords) * 100, 100);
   const quality =
@@ -40,7 +39,6 @@ function TheoryAnswerEditor({ value, onChange, marks }: { value: string; onChang
 
   return (
     <div className="space-y-2">
-      {/* Writing hints */}
       <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground bg-muted/30 rounded-lg px-3 py-1.5">
         <Lightbulb className="h-3 w-3 text-amber-500 shrink-0" />
         <span>
@@ -58,7 +56,6 @@ function TheoryAnswerEditor({ value, onChange, marks }: { value: string; onChang
         onChange={(e) => onChange(e.target.value)}
         className="text-sm resize-y leading-relaxed"
       />
-      {/* Word count bar */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
           <div className={`h-full rounded-full transition-all duration-300 ${qc.bar}`} style={{ width: `${pct}%` }} />
@@ -95,10 +92,18 @@ export default function TakeExam() {
   const [confidence, setConfidence] = useState<Record<number, ConfidenceLevel>>({});
   const [timeLeft, setTimeLeft] = useState(0);
   const [violations, setViolations] = useState(0);
+  const [pasteAttempts, setPasteAttempts] = useState(0);
+  const [copyAttempts, setCopyAttempts] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [showConfirmSubmit, setShowConfirmSubmit] = useState(false);
   const [showNavigator, setShowNavigator] = useState(false);
+  const [showViolationModal, setShowViolationModal] = useState(false);
+  const [violationModalType, setViolationModalType] = useState<"tab" | "paste" | "copy">("tab");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const questionStartTimeRef = useRef<Record<number, number>>({});
+  const answerTimesRef = useRef<Record<number, number>>({});
+  const pendingViolationsRef = useRef<{ tab?: boolean; paste?: boolean; copy?: boolean }>({});
+  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["exam", "take", examId],
@@ -116,33 +121,91 @@ export default function TakeExam() {
     }
   }, [data?.exam?.timeLimitMinutes]);
 
-  const submitMutation = useMutation({
-    mutationFn: (answersArray: any[]) =>
-      fetch(`${API}/exams/student/${examId}/submit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
-        body: JSON.stringify({ answers: answersArray }),
-      }),
-    onSuccess: () => setSubmitted(true),
-  });
+  // ── Track question start time ─────────────────────────────────────────────
+  useEffect(() => {
+    questionStartTimeRef.current[currentQuestion] = Date.now();
+  }, [currentQuestion]);
 
+  // ── Heartbeat — send violations to backend every 30s ─────────────────────
+  useEffect(() => {
+    heartbeatRef.current = setInterval(async () => {
+      const pending = pendingViolationsRef.current;
+      if (!Object.values(pending).some(Boolean)) return;
+      pendingViolationsRef.current = {};
+      try {
+        const sessionToken = sessionStorage.getItem(`exam_session_${examId}`);
+        if (!sessionToken) return;
+        await fetch(`${API}/exam-session/heartbeat`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+          body: JSON.stringify({
+            session_token: sessionToken,
+            tab_switch: pending.tab ?? false,
+            focus_loss: pending.tab ?? false,
+            paste_attempt: pending.paste ?? false,
+            copy_attempt: pending.copy ?? false,
+          }),
+        });
+      } catch { /* non-critical */ }
+    }, 30_000);
+    return () => clearInterval(heartbeatRef.current!);
+  }, [examId]);
+
+  // ── Tab-switch / visibility detection ────────────────────────────────────
   useEffect(() => {
     const handleVisibility = () => {
-      if (document.hidden && !submitted) setViolations((v) => v + 1);
+      if (document.hidden && !submitted) {
+        setViolations((v) => v + 1);
+        setViolationModalType("tab");
+        setShowViolationModal(true);
+        pendingViolationsRef.current.tab = true;
+      }
     };
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
   }, [submitted]);
 
+  // ── Copy/paste blocking & counting ───────────────────────────────────────
   useEffect(() => {
-    const blockCopy = (e: ClipboardEvent) => e.preventDefault();
+    const blockCopy = (e: ClipboardEvent) => {
+      e.preventDefault();
+      setCopyAttempts((n) => n + 1);
+      setViolationModalType("copy");
+      setShowViolationModal(true);
+      pendingViolationsRef.current.copy = true;
+    };
+    const blockPaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      setPasteAttempts((n) => n + 1);
+      setViolationModalType("paste");
+      setShowViolationModal(true);
+      pendingViolationsRef.current.paste = true;
+    };
     document.addEventListener("copy", blockCopy);
-    document.addEventListener("paste", blockCopy);
+    document.addEventListener("paste", blockPaste);
     return () => {
       document.removeEventListener("copy", blockCopy);
-      document.removeEventListener("paste", blockCopy);
+      document.removeEventListener("paste", blockPaste);
     };
   }, []);
+
+  const submitMutation = useMutation({
+    mutationFn: (answersArray: any[]) =>
+      fetch(`${API}/exams/student/${examId}/submit`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        body: JSON.stringify({
+          answers: answersArray,
+          integrityData: {
+            violations,
+            pasteAttempts,
+            copyAttempts,
+            answerTimes: answerTimesRef.current,
+          },
+        }),
+      }),
+    onSuccess: () => setSubmitted(true),
+  });
 
   useEffect(() => {
     if (timeLeft <= 0) return;
@@ -184,8 +247,22 @@ export default function TakeExam() {
     }));
   };
 
+  const navigateQuestion = useCallback((idx: number) => {
+    const now = Date.now();
+    const startTime = questionStartTimeRef.current[currentQuestion];
+    if (startTime) {
+      answerTimesRef.current[currentQuestion] = (answerTimesRef.current[currentQuestion] ?? 0) + (now - startTime);
+    }
+    setCurrentQuestion(idx);
+  }, [currentQuestion]);
+
   const handleSubmit = () => {
     if (submitted) return;
+    const now = Date.now();
+    const startTime = questionStartTimeRef.current[currentQuestion];
+    if (startTime) {
+      answerTimesRef.current[currentQuestion] = (answerTimesRef.current[currentQuestion] ?? 0) + (now - startTime);
+    }
     const answersArray = Object.entries(answers).map(([qId, text]) => ({
       questionId: parseInt(qId),
       answerText: text,
@@ -246,6 +323,7 @@ export default function TakeExam() {
   const isMCQ = (q: any) => q?.type === "mcq" || (q?.options && q.options.length > 0);
   const answeredCount = Object.keys(answers).length;
   const unansweredCount = questions.length - answeredCount;
+  const totalViolations = violations + pasteAttempts + copyAttempts;
 
   function getQuestionStatus(q: any, i: number) {
     const hasAnswer = !!answers[q?.id];
@@ -264,6 +342,24 @@ export default function TakeExam() {
     unanswered: "bg-muted text-muted-foreground",
   };
 
+  const violationModalConfig = {
+    tab: {
+      icon: <EyeOff className="h-10 w-10 text-amber-500" />,
+      title: "Tab switch detected",
+      description: "You left the exam window. This has been logged. Repeated violations may be flagged for your teacher.",
+    },
+    paste: {
+      icon: <ClipboardX className="h-10 w-10 text-red-500" />,
+      title: "Paste blocked",
+      description: "Pasting content during an exam is not allowed. This attempt has been recorded.",
+    },
+    copy: {
+      icon: <Copy className="h-10 w-10 text-amber-500" />,
+      title: "Copy blocked",
+      description: "Copying content during an exam is not allowed. This attempt has been recorded.",
+    },
+  };
+
   return (
     <div className="min-h-screen bg-background page-transition">
       {/* Header */}
@@ -273,10 +369,14 @@ export default function TakeExam() {
           <p className="text-xs text-muted-foreground">{currentQuestion + 1} / {questions.length} · {answeredCount} answered · {unansweredCount} remaining</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {violations > 0 && (
+          {totalViolations > 0 && (
             <Alert variant="destructive" className="py-1 px-2 hidden sm:flex items-center gap-1">
-              <AlertTriangle className="h-3.5 w-3.5" />
-              <AlertDescription className="text-xs">{violations} warning{violations !== 1 ? "s" : ""}</AlertDescription>
+              <ShieldAlert className="h-3.5 w-3.5" />
+              <AlertDescription className="text-xs">
+                {violations > 0 && `${violations} tab switch${violations !== 1 ? "es" : ""}`}
+                {pasteAttempts > 0 && `${violations > 0 ? " · " : ""}${pasteAttempts} paste${pasteAttempts !== 1 ? "s" : ""}`}
+                {copyAttempts > 0 && `${(violations > 0 || pasteAttempts > 0) ? " · " : ""}${copyAttempts} copy${copyAttempts !== 1 ? "s" : ""}`}
+              </AlertDescription>
             </Alert>
           )}
           <Badge className={`text-sm font-bold tabular-nums ${timeLeft < 60 ? "bg-destructive animate-pulse" : timeLeft < 300 ? "bg-amber-500" : "bg-primary"}`}>
@@ -309,7 +409,7 @@ export default function TakeExam() {
                 return (
                   <button
                     key={i}
-                    onClick={() => { setCurrentQuestion(i); setShowNavigator(false); }}
+                    onClick={() => { navigateQuestion(i); setShowNavigator(false); }}
                     className={`w-8 h-8 rounded-lg text-[11px] font-bold transition-all ${statusColors[status]}`}
                   >
                     {i + 1}
@@ -327,7 +427,6 @@ export default function TakeExam() {
       </AnimatePresence>
 
       <div className="flex gap-0 lg:gap-6 max-w-5xl mx-auto px-4 pb-28 lg:pb-8 pt-4 lg:pt-6">
-        {/* Main question area */}
         <div className="flex-1 space-y-4 min-w-0">
           <AnimatePresence mode="wait">
             <motion.div
@@ -424,14 +523,14 @@ export default function TakeExam() {
 
           {/* Desktop nav */}
           <div className="hidden lg:flex justify-between items-center">
-            <Button variant="outline" disabled={currentQuestion === 0} onClick={() => setCurrentQuestion(q => q - 1)}>
+            <Button variant="outline" disabled={currentQuestion === 0} onClick={() => navigateQuestion(currentQuestion - 1)}>
               <ArrowLeft className="h-4 w-4 mr-1" /> Previous
             </Button>
             <Button variant="ghost" size="sm" onClick={() => setShowConfirmSubmit(true)} className="text-muted-foreground">
               <Flag className="h-4 w-4 mr-1.5" /> Finish Exam
             </Button>
             {currentQuestion < questions.length - 1 ? (
-              <Button onClick={() => setCurrentQuestion(q => q + 1)}>
+              <Button onClick={() => navigateQuestion(currentQuestion + 1)}>
                 Next <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             ) : (
@@ -453,7 +552,7 @@ export default function TakeExam() {
                   return (
                     <button
                       key={i}
-                      onClick={() => setCurrentQuestion(i)}
+                      onClick={() => navigateQuestion(i)}
                       className={`w-full aspect-square rounded-md text-[10px] font-bold transition-all ${statusColors[status]}`}
                     >
                       {i + 1}
@@ -467,6 +566,16 @@ export default function TakeExam() {
                 <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-400 shrink-0" />Flagged ({flagged.size})</div>
               </div>
             </div>
+            {totalViolations > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs space-y-1">
+                <p className="font-semibold text-amber-800 flex items-center gap-1.5">
+                  <ShieldAlert className="h-3.5 w-3.5" /> Integrity Log
+                </p>
+                {violations > 0 && <p className="text-amber-700">{violations} tab switch{violations !== 1 ? "es" : ""}</p>}
+                {pasteAttempts > 0 && <p className="text-amber-700">{pasteAttempts} paste attempt{pasteAttempts !== 1 ? "s" : ""}</p>}
+                {copyAttempts > 0 && <p className="text-amber-700">{copyAttempts} copy attempt{copyAttempts !== 1 ? "s" : ""}</p>}
+              </div>
+            )}
             <Button variant="outline" size="sm" className="w-full text-xs gap-1.5 text-destructive border-destructive/40 hover:bg-destructive/5" onClick={() => setShowConfirmSubmit(true)}>
               <Flag className="h-3.5 w-3.5" /> Submit Exam
             </Button>
@@ -477,11 +586,11 @@ export default function TakeExam() {
       {/* Mobile fixed bottom nav */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-t border-border/60 p-3 safe-area-inset-bottom">
         <div className="flex gap-2 max-w-lg mx-auto">
-          <Button variant="outline" disabled={currentQuestion === 0} onClick={() => setCurrentQuestion(q => q - 1)} className="flex-1 h-11 rounded-xl text-sm font-semibold">
+          <Button variant="outline" disabled={currentQuestion === 0} onClick={() => navigateQuestion(currentQuestion - 1)} className="flex-1 h-11 rounded-xl text-sm font-semibold">
             <ArrowLeft className="h-4 w-4 mr-1" /> Prev
           </Button>
           {currentQuestion < questions.length - 1 ? (
-            <Button onClick={() => setCurrentQuestion(q => q + 1)} className="flex-1 h-11 rounded-xl text-sm font-semibold">
+            <Button onClick={() => navigateQuestion(currentQuestion + 1)} className="flex-1 h-11 rounded-xl text-sm font-semibold">
               Next <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
           ) : (
@@ -525,6 +634,36 @@ export default function TakeExam() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowConfirmSubmit(false)}>Keep reviewing</Button>
                 <Button className="flex-1 bg-primary" onClick={handleSubmit} disabled={submitMutation.isPending}>
                   {submitMutation.isPending ? "Submitting…" : "Submit"}
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Violation warning modal */}
+      <AnimatePresence>
+        {showViolationModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-background rounded-2xl shadow-2xl p-6 max-w-sm w-full border border-amber-200"
+            >
+              <div className="flex flex-col items-center text-center gap-3">
+                {violationModalConfig[violationModalType].icon}
+                <div>
+                  <h3 className="text-base font-bold">{violationModalConfig[violationModalType].title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1">{violationModalConfig[violationModalType].description}</p>
+                </div>
+                <Button className="w-full mt-1" onClick={() => setShowViolationModal(false)}>
+                  Continue Exam
                 </Button>
               </div>
             </motion.div>

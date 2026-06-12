@@ -190,7 +190,7 @@ courseHealthRouter.get("/:courseId/coverage", async (req: AuthRequest, res: Resp
 // GET /api/course-health — all courses for the teacher
 courseHealthRouter.get("/", async (req: AuthRequest, res: Response) => {
   try {
-    const accountId = req.user!.id;
+    const accountId = req.userId;
     const { rows: courses } = await pool.query(
       `SELECT id FROM aperti_courses WHERE teacher_id = $1 AND status = 'active' LIMIT 20`,
       [accountId]

@@ -40,7 +40,7 @@ ensureTables().catch(console.error);
 router.get("/settings", authenticate, async (req: any, res) => {
   try {
     const rows = await db.execute(
-      sql`SELECT * FROM absence_notify_settings WHERE account_id = ${req.user.id}`
+      sql`SELECT * FROM absence_notify_settings WHERE account_id = ${req.userId}`
     );
     if (rows.rows.length === 0) {
       return res.json({
@@ -67,7 +67,7 @@ router.put("/settings", authenticate, async (req: any, res) => {
     const { senderName, messageTemplate, whatsappEnabled } = req.body;
     await db.execute(sql`
       INSERT INTO absence_notify_settings (account_id, sender_name, message_template, whatsapp_enabled, updated_at)
-      VALUES (${req.user.id}, ${senderName}, ${messageTemplate}, ${whatsappEnabled}, NOW())
+      VALUES (${req.userId}, ${senderName}, ${messageTemplate}, ${whatsappEnabled}, NOW())
       ON CONFLICT (account_id) DO UPDATE
         SET sender_name = ${senderName},
             message_template = ${messageTemplate},
@@ -100,7 +100,7 @@ router.post("/send", authenticate, async (req: any, res) => {
 
     // Load message template
     const settingsRows = await db.execute(
-      sql`SELECT message_template FROM absence_notify_settings WHERE account_id = ${req.user.id}`
+      sql`SELECT message_template FROM absence_notify_settings WHERE account_id = ${req.userId}`
     );
     const template = settingsRows.rows.length > 0
       ? (settingsRows.rows[0] as any).message_template
@@ -117,7 +117,7 @@ router.post("/send", authenticate, async (req: any, res) => {
       INSERT INTO absence_notify_log
         (account_id, student_name, parent_phone, status, lesson_name, date, message, channel)
       VALUES
-        (${req.user.id}, ${studentName}, ${parentPhone}, ${status}, ${lessonName}, ${date}, ${message}, 'whatsapp')
+        (${req.userId}, ${studentName}, ${parentPhone}, ${status}, ${lessonName}, ${date}, ${message}, 'whatsapp')
     `);
 
     const cleanPhone = parentPhone.replace(/\D/g, "");
@@ -149,7 +149,7 @@ router.get("/log", authenticate, async (req: any, res) => {
   try {
     const rows = await db.execute(sql`
       SELECT * FROM absence_notify_log
-      WHERE account_id = ${req.user.id}
+      WHERE account_id = ${req.userId}
       ORDER BY sent_at DESC
       LIMIT 100
     `);

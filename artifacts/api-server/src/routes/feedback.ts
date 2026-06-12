@@ -32,7 +32,7 @@ feedbackRouter.post("/", authenticate, async (req: AuthRequest, res: Response) =
     await pool.query(
       `INSERT INTO user_feedback (account_id, feature, rating, comment, context)
        VALUES ($1, $2, $3, $4, $5)`,
-      [req.user?.id || null, feature, parseInt(rating), comment || null, context ? JSON.stringify(context) : null]
+      [req.userId || null, feature, parseInt(rating), comment || null, context ? JSON.stringify(context) : null]
     );
     res.json({ success: true });
   } catch (err) {

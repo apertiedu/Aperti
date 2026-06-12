@@ -87,6 +87,8 @@ import { adminRouteHealthRouter } from "./routes/admin-route-health";
 import { adminLaunchDashboardRouter } from "./routes/admin-launch-dashboard";
 // Phase 33 — Platform Perfection
 import { adminDbHealthRouter } from "./routes/admin-db-health";
+// Phase 34 — AI Accuracy, Anti-Cheat V2, Assessment Intelligence
+import { teacherInterventionsRouter } from "./routes/teacher-interventions";
 import { adminAnalyticsExtendedRouter } from "./routes/admin-analytics-extended";
 // Phase 33 — Error System & Performance
 import { errorsLogRouter } from "./routes/errors-log";
@@ -341,6 +343,7 @@ app.use("/api/revision", revisionPlanRouter);
 app.use("/api/questions/extract", questionExtractionRouter);
 
 app.use("/api/teacher", teacherFocusRouter);
+app.use("/api/teacher/interventions", teacherInterventionsRouter);
 app.use("/api/student", studentMomentumRouter);
 app.use("/api/course-health", courseHealthRouter);
 app.use("/api/feedback", feedbackRouter);

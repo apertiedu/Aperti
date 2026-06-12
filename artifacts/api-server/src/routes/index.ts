@@ -78,6 +78,9 @@ import { misconceptionsRouter } from "./misconceptions";
 import { gradingRouter } from "./grading";
 import { coremindAnalyticsRouter } from "./coremind-analytics";
 import { parentAiRouter } from "./parent-ai";
+import { parentRouter } from "./parent";
+import { parentDashboardRouter } from "./parent-dashboard";
+import { parentPhase4Router } from "./parent-phase4";
 import { assessmentHubRouter } from "./assessment-hub";
 import { examSessionRouter } from "./exam-session";
 import { assessmentGradingRouter } from "./assessment-grading";
@@ -187,6 +190,9 @@ router.use(misconceptionsRouter);
 router.use("/grading", gradingRouter);
 router.use("/coremind", coremindAnalyticsRouter);
 router.use(parentAiRouter);
+router.use("/parent", parentRouter);
+router.use(parentDashboardRouter);
+router.use(parentPhase4Router);
 
 // Phase 7 — Communication, Collaboration & Community Ecosystem
 router.use(commThreadsRouter);

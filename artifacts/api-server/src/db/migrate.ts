@@ -1078,6 +1078,44 @@ const PHASE33_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_device_login_log_created ON device_login_log(created_at DESC)`,
 ];
 
+/* ── Phase 34 — AI Accuracy, Anti-Cheat V2, Assessment Intelligence ─────── */
+const PHASE34_MIGRATIONS: string[] = [
+  /* Question bank: cognitive classification */
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS cognitive_level text
+     CHECK (cognitive_level IN ('recall','understanding','application','analysis','evaluation'))`,
+  `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS exam_style text
+     CHECK (exam_style IN ('mcq','structured','extended','practical','calculation','theory'))`,
+  `CREATE INDEX IF NOT EXISTS idx_qbank_cognitive   ON question_bank(cognitive_level)`,
+  `CREATE INDEX IF NOT EXISTS idx_qbank_exam_style  ON question_bank(exam_style)`,
+
+  /* Anti-cheat V2: copy/paste counters + risk score + per-question timing */
+  `ALTER TABLE exam_sessions ADD COLUMN IF NOT EXISTS paste_attempts integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE exam_sessions ADD COLUMN IF NOT EXISTS copy_attempts  integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE exam_sessions ADD COLUMN IF NOT EXISTS risk_score     integer NOT NULL DEFAULT 0
+     CHECK (risk_score BETWEEN 0 AND 100)`,
+  `ALTER TABLE exam_sessions ADD COLUMN IF NOT EXISTS answer_time_ms jsonb   NOT NULL DEFAULT '{}'`,
+  `CREATE INDEX IF NOT EXISTS idx_exam_sessions_risk ON exam_sessions(risk_score DESC)`,
+
+  /* AI grade confidence log */
+  `CREATE TABLE IF NOT EXISTS ai_grade_log (
+    id                 serial PRIMARY KEY,
+    submission_id      integer,
+    homework_id        integer,
+    student_account_id integer REFERENCES accounts(id) ON DELETE CASCADE,
+    marks_awarded      numeric(5,2),
+    max_marks          numeric(5,2),
+    confidence         numeric(4,3),
+    confidence_level   text CHECK (confidence_level IN ('high','medium','low')),
+    requires_review    boolean NOT NULL DEFAULT false,
+    reviewed           boolean NOT NULL DEFAULT false,
+    reviewed_by        integer REFERENCES accounts(id) ON DELETE SET NULL,
+    reviewed_at        timestamptz,
+    created_at         timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_grade_log_review  ON ai_grade_log(requires_review) WHERE requires_review = true`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_grade_log_student ON ai_grade_log(student_account_id)`,
+];
+
 export async function runMigrations(): Promise<void> {
   // Base schema (accounts, students, subjects, etc.) is created by push-schema.ts
   // at startup — see index.ts. This function applies Phase 2+ additive migrations.
@@ -1170,13 +1208,21 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE34_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
-    [`phase20-${new Date().toISOString().split("T")[0]}`],
+    [`phase34-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-Fixes migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-34 + Phase-Fixes migrations applied");
 }
 
 const PHASE21_MIGRATIONS: string[] = [
@@ -1324,4 +1370,25 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
     created_at   timestamptz NOT NULL DEFAULT NOW(),
     updated_at   timestamptz NOT NULL DEFAULT NOW()
   )`,
+
+  /* branding_settings — ALTERs exist above but table may not have been created */
+  `CREATE TABLE IF NOT EXISTS branding_settings (
+    id                 serial PRIMARY KEY,
+    account_id         integer NOT NULL UNIQUE,
+    school_name        text NOT NULL DEFAULT 'My School',
+    primary_color      text NOT NULL DEFAULT '#0D9488',
+    secondary_color    text NOT NULL DEFAULT '#134E4A',
+    logo_url           text,
+    favicon_url        text,
+    seasonal_theme     jsonb NOT NULL DEFAULT '{}',
+    typography_prefs   jsonb NOT NULL DEFAULT '{}',
+    updated_at         timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_branding_settings_account ON branding_settings(account_id)`,
+
+  /* subscription_plans — discount_pct column used by billing routes */
+  `ALTER TABLE subscription_plans ADD COLUMN IF NOT EXISTS discount_pct numeric NOT NULL DEFAULT 0`,
+
+  /* past_papers — title column used by resource routes */
+  `ALTER TABLE past_papers ADD COLUMN IF NOT EXISTS title text`,
 ];

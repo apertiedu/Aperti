@@ -59,23 +59,44 @@ examSessionRouter.post("/start", async (req: AuthRequest, res: Response) => {
 // ── POST /exam-session/heartbeat ───────────────────────────────────────────────
 examSessionRouter.post("/heartbeat", async (req: AuthRequest, res: Response) => {
   try {
-    const { session_token, tab_switch = false, focus_loss = false } = req.body;
+    const {
+      session_token,
+      tab_switch = false,
+      focus_loss = false,
+      paste_attempt = false,
+      copy_attempt = false,
+    } = req.body;
     if (!session_token) return res.status(400).json({ error: "session_token required" });
 
     const { rows } = await pool.query(
       `UPDATE exam_sessions
-       SET last_heartbeat = NOW(),
-           tab_switches = tab_switches + $2,
-           focus_losses = focus_losses + $3
+       SET last_heartbeat  = NOW(),
+           tab_switches    = tab_switches    + $2,
+           focus_losses    = focus_losses    + $3,
+           paste_attempts  = COALESCE(paste_attempts, 0) + $4,
+           copy_attempts   = COALESCE(copy_attempts,  0) + $5
        WHERE session_token = $1 AND is_valid = TRUE
-       RETURNING id, is_valid, tab_switches, focus_losses, started_at`,
-      [session_token, tab_switch ? 1 : 0, focus_loss ? 1 : 0]
+       RETURNING id, is_valid, tab_switches, focus_losses, paste_attempts, copy_attempts, started_at`,
+      [session_token, tab_switch ? 1 : 0, focus_loss ? 1 : 0, paste_attempt ? 1 : 0, copy_attempt ? 1 : 0]
     );
 
     if (!rows.length) return res.status(404).json({ error: "Session not found or expired" });
 
     const session = rows[0];
-    const flagged = session.tab_switches > 5 || session.focus_losses > 10;
+
+    // Risk score: weighted formula (0–100)
+    const riskScore = Math.min(100, Math.round(
+      (session.tab_switches   * 8) +
+      (session.focus_losses   * 4) +
+      (session.paste_attempts * 12) +
+      (session.copy_attempts  * 3)
+    ));
+    await pool.query(
+      `UPDATE exam_sessions SET risk_score = $1 WHERE session_token = $2`,
+      [riskScore, session_token]
+    ).catch(() => {});
+
+    const flagged = riskScore >= 40 || session.tab_switches > 5 || session.focus_losses > 10 || session.paste_attempts > 2;
 
     if (flagged) {
       await pool.query(
@@ -87,7 +108,15 @@ examSessionRouter.post("/heartbeat", async (req: AuthRequest, res: Response) => 
       ).catch(() => {});
     }
 
-    res.json({ ok: true, tab_switches: session.tab_switches, focus_losses: session.focus_losses, flagged });
+    res.json({
+      ok: true,
+      tab_switches:   session.tab_switches,
+      focus_losses:   session.focus_losses,
+      paste_attempts: session.paste_attempts,
+      copy_attempts:  session.copy_attempts,
+      risk_score:     riskScore,
+      flagged,
+    });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
 

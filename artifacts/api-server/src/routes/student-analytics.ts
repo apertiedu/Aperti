@@ -33,7 +33,7 @@ router.get("/student/analytics", ...studentGuard, async (req: AuthRequest, res: 
       .innerJoin(examQuestionsTable, eq(studentMarksTable.questionId, examQuestionsTable.id))
       .innerJoin(examsTable, eq(studentMarksTable.examId, examsTable.id))
       .where(eq(studentMarksTable.studentId, studentId))
-      .groupBy(examsTable.id, examsTable.examDate)
+      .groupBy(examsTable.id, examsTable.examDate, studentMarksTable.examId)
       .orderBy(examsTable.examDate),
 
     db.select({ status: attendanceTable.status, count: sql<number>`count(*)::int` })

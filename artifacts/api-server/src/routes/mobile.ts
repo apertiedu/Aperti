@@ -11,7 +11,7 @@ import {
 } from "../lib/push";
 
 const adminOnly = (req: AuthRequest, res: Response, next: () => void) => {
-  if (req.user?.role !== "admin") return res.status(403).json({ error: "Forbidden" });
+  if (req.role !== "admin") return res.status(403).json({ error: "Forbidden" });
   next();
 };
 
@@ -28,7 +28,7 @@ mobileRouter.post("/push/subscribe", authenticate, async (req: AuthRequest, res)
   if (!endpoint || !keys?.auth || !keys?.p256dh) {
     return res.status(400).json({ error: "Invalid subscription object" });
   }
-  await saveSubscription(req.user!.id, endpoint, keys.auth, keys.p256dh);
+  await saveSubscription(req.userId!, endpoint, keys.auth, keys.p256dh);
   res.json({ ok: true });
 });
 
@@ -36,7 +36,7 @@ mobileRouter.post("/push/subscribe", authenticate, async (req: AuthRequest, res)
 mobileRouter.post("/push/unsubscribe", authenticate, async (req: AuthRequest, res) => {
   const { endpoint } = req.body || {};
   if (!endpoint) return res.status(400).json({ error: "endpoint required" });
-  await removeSubscription(req.user!.id, endpoint);
+  await removeSubscription(req.userId!, endpoint);
   res.json({ ok: true });
 });
 
@@ -95,19 +95,19 @@ mobileRouter.post("/offline/sync", authenticate, async (req: AuthRequest, res) =
           `INSERT INTO student_answers (student_id, question_id, answer, submitted_at)
            VALUES ($1, $2, $3, NOW())
            ON CONFLICT (student_id, question_id) DO UPDATE SET answer=$3, submitted_at=NOW()`,
-          [req.user!.id, payload.questionId, payload.answer]
+          [req.userId!, payload.questionId, payload.answer]
         ).catch(() => {});
       } else if (action === "update_note" && payload?.noteId && payload?.content !== undefined) {
         await pool.query(
           `UPDATE revision_notes SET content=$1, updated_at=NOW() WHERE id=$2 AND user_id=$3`,
-          [payload.content, payload.noteId, req.user!.id]
+          [payload.content, payload.noteId, req.userId!]
         ).catch(() => {});
       }
 
       if (queueId) {
         await pool.query(
           `UPDATE offline_sync_queue SET status='synced' WHERE id=$1 AND user_id=$2`,
-          [queueId, req.user!.id]
+          [queueId, req.userId!]
         ).catch(() => {});
       }
       results.push({ action, status: "synced" });
@@ -122,14 +122,14 @@ mobileRouter.get("/offline/pending", authenticate, async (req: AuthRequest, res)
   const { rows } = await pool.query(
     `SELECT id, action, payload, created_at FROM offline_sync_queue
      WHERE user_id=$1 AND status='pending' ORDER BY created_at ASC`,
-    [req.user!.id]
+    [req.userId!]
   );
   res.json(rows);
 });
 
 // ─── Mobile Dashboards ────────────────────────────────────────────────────────
 mobileRouter.get("/mobile/student-home", authenticate, async (req: AuthRequest, res) => {
-  const uid = req.user!.id;
+  const uid = req.userId!;
 
   const [hw, upcoming, notifs, goals] = await Promise.all([
     pool.query(
@@ -167,7 +167,7 @@ mobileRouter.get("/mobile/student-home", authenticate, async (req: AuthRequest, 
 });
 
 mobileRouter.get("/mobile/teacher-home", authenticate, async (req: AuthRequest, res) => {
-  const uid = req.user!.id;
+  const uid = req.userId!;
 
   const [lessons, pending, attendance] = await Promise.all([
     pool.query(
@@ -203,7 +203,7 @@ mobileRouter.get("/mobile/teacher-home", authenticate, async (req: AuthRequest, 
 });
 
 mobileRouter.get("/mobile/parent-home", authenticate, async (req: AuthRequest, res) => {
-  const uid = req.user!.id;
+  const uid = req.userId!;
 
   const children = await pool.query(
     `SELECT a.id, a.display_name, a.username

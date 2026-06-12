@@ -58,7 +58,7 @@ analyticsRouter.get("/class-overview", authenticate, async (req: AuthRequest, re
 });
 
 // GET /analytics/student/:studentId — individual student report
-analyticsRouter.get("/student/:studentId", authenticate, async (req: AuthRequest, res: Response) => {
+analyticsRouter.get("/analytics/student/:studentId", authenticate, async (req: AuthRequest, res: Response) => {
   const studentId = parseInt(req.params.studentId);
 
   const memory = await db.query.echoMemory.findFirst({ where: (m, { eq }) => eq(m.studentId, studentId) });

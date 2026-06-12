@@ -39,7 +39,7 @@ router.get("/echo/profile", ...studentGuard, async (req: AuthRequest, res: Respo
       .innerJoin(examsTable, eq(studentMarksTable.examId, examsTable.id))
       .leftJoin(subjectsTable, eq(examsTable.subjectId, subjectsTable.id))
       .where(eq(studentMarksTable.studentId, studentId))
-      .groupBy(examsTable.id, examsTable.name, examsTable.examDate, examsTable.subjectId, subjectsTable.name)
+      .groupBy(examsTable.id, examsTable.name, examsTable.examDate, examsTable.subjectId, subjectsTable.name, studentMarksTable.examId)
       .orderBy(desc(examsTable.examDate))
       .limit(20),
 

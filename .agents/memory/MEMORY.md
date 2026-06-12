@@ -12,3 +12,4 @@
 - [Aperti Phase 32 Zero-Defect](aperti-phase32.md) — 100% route health (32/32 pass); missing tables, route mount fixes, sign-in "unexpected token" fix, change-password path fix
 - [Aperti Phase 33 features](aperti-phase33.md) — Phase 33 features + P33-T1 fixes: teal #0D9488 migration, naming audit, login JSON safety, page backgrounds
 - [Aperti Phase 33 perfection](aperti-phase33-perfection.md) — Phase 33 Platform Perfection: search/flashcard/analytics upgrades, pg_trgm extension, SM-2 confidence, retention analytics
+- [Aperti Phase 34 features](aperti-phase34.md) — Anti-Cheat V2 (risk score 0–100, paste/copy tracking), GradeFlow AI confidence badge, flashcard AI generation, teacher interventions panel, ShieldCore V2
