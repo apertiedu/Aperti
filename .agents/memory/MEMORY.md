@@ -10,3 +10,4 @@
 - [Aperti Phase 30 production](aperti-phase30.md) — all Phase 30 features: Error Intelligence, Content Validation, Resource Mapping, Learning Efficiency, self-marking, route test script
 - [Aperti Phase 31 stabilization](aperti-phase31.md) — DB schema push fix (tsx path), JWT_SECRET/OPENAI_API_KEY env setup, duplicate route removal, login rate limiter JSON handler
 - [Aperti Phase 32 Zero-Defect](aperti-phase32.md) — 100% route health (32/32 pass); missing tables, route mount fixes, sign-in "unexpected token" fix, change-password path fix
+- [Aperti Phase 33 Platform Perfection](aperti-phase33.md) — error capture (main.tsx+window), DB health page, analytics deep dive, skeleton screens, landing trust signals, docs/

@@ -76,6 +76,9 @@ import SlowQueriesPage from "./SlowQueriesPage";
 import FrictionAnalyticsPage from "./FrictionAnalyticsPage";
 import WeeklyAuditPage from "./WeeklyAuditPage";
 import NoMockDataPage from "./NoMockDataPage";
+// Phase 33 — Platform Perfection
+import DBHealthPage from "./DBHealthPage";
+import AnalyticsExtendedPage from "./AnalyticsExtendedPage";
 
 export default function AdminOS() {
   return (
@@ -183,6 +186,10 @@ export default function AdminOS() {
         <Route path="/admin/os/friction-analytics" component={FrictionAnalyticsPage} />
         <Route path="/admin/os/weekly-audit" component={WeeklyAuditPage} />
         <Route path="/admin/os/no-mock-data" component={NoMockDataPage} />
+
+        {/* Phase 33 — Platform Perfection */}
+        <Route path="/admin/os/db-health" component={DBHealthPage} />
+        <Route path="/admin/os/analytics-extended" component={AnalyticsExtendedPage} />
 
         <Route component={Dashboard} />
       </Switch>

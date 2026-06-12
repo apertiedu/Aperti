@@ -1278,7 +1278,7 @@ export default function Landing() {
                 <span style={{ color: teal }}>{headlineAccent}</span>
               </h1>
               <p className="text-lg text-gray-500 leading-relaxed mb-9 max-w-xl">{subheadline}</p>
-              <div className="flex flex-wrap gap-3 mb-10">
+              <div className="flex flex-wrap gap-3 mb-8">
                 <a href="#courses-preview">
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white shadow-lg"
@@ -1293,6 +1293,22 @@ export default function Landing() {
                   </motion.button>
                 </Link>
               </div>
+              {/* Trust signals */}
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+                className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                {[
+                  { icon: Shield,       label: "No lock-in"          },
+                  { icon: Zap,          label: "Up in minutes"        },
+                  { icon: CheckCircle2, label: "IGCSE & IB ready"     },
+                  { icon: Star,         label: "AI-powered grading"   },
+                ].map(({ icon: Icon, label }) => (
+                  <span key={label} className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: teal }} />
+                    {label}
+                  </span>
+                ))}
+              </motion.div>
             </motion.div>
             <motion.div style={{ y: heroY }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.22,1,0.36,1] }}

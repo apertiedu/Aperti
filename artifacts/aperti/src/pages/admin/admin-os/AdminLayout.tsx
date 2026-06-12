@@ -107,11 +107,13 @@ const NAV = [
   { label: "Route Health",         icon: Activity,    href: "/admin/os/route-health" },
   { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
 
-  { label: "— Phase 32 Intelligence", header: true },
+  { label: "— Intelligence & Health", header: true },
+  { label: "Analytics Deep Dive",  icon: BarChart3,   href: "/admin/os/analytics-extended" },
   { label: "Stability Score",      icon: Activity,    href: "/admin/os/stability-score" },
   { label: "Slow Queries",         icon: Clock,       href: "/admin/os/slow-queries" },
   { label: "Friction Analytics",   icon: TrendingDown,href: "/admin/os/friction-analytics" },
   { label: "Weekly Audit",         icon: CalendarCheck,href:"/admin/os/weekly-audit" },
+  { label: "Database Health",      icon: Database,    href: "/admin/os/db-health" },
   { label: "No Mock Data Audit",   icon: ShieldCheck, href: "/admin/os/no-mock-data" },
 ] as const;
 

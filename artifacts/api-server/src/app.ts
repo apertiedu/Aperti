@@ -85,6 +85,9 @@ import { adminContentValidationRouter } from "./routes/admin-content-validation"
 // Phase 32 — Zero-Defect Initiative
 import { adminRouteHealthRouter } from "./routes/admin-route-health";
 import { adminLaunchDashboardRouter } from "./routes/admin-launch-dashboard";
+// Phase 33 — Platform Perfection
+import { adminDbHealthRouter } from "./routes/admin-db-health";
+import { adminAnalyticsExtendedRouter } from "./routes/admin-analytics-extended";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -287,6 +290,9 @@ app.use("/api", userExportRouter);
 // Phase 32 — Zero-Defect Initiative
 app.use("/api/admin/route-health", adminRouteHealthRouter);
 app.use("/api/admin/launch-dashboard", adminLaunchDashboardRouter);
+// Phase 33 — Platform Perfection
+app.use("/api/admin/db-health", adminDbHealthRouter);
+app.use("/api/admin/analytics/extended", adminAnalyticsExtendedRouter);
 
 // Phase 19 — Founder Control Center & Operational Layer
 app.use("/api/founder", founderRouter);
@@ -359,12 +365,28 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-// ── Global error handler ──────────────────────────────────────────────────────
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-  logger.error({ err }, "Unhandled error");
+// ── Global error handler — never leaks stack traces to clients ───────────────
+app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
+  const status = typeof err.status === "number" ? err.status : (typeof err.statusCode === "number" ? err.statusCode : 500);
+  logger.error({ err, method: req.method, url: req.url, status }, "Unhandled error");
+
+  // Log to frontend_error_logs for founder visibility
+  pool.query(
+    `INSERT INTO frontend_error_logs (user_id, user_role, error_message, error_stack, component_stack, route, browser_info, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
+    [null, "server", err.message ?? "unknown", err.stack?.slice(0, 2000) ?? "", "", req.path, `${req.method} ${req.path}`],
+  ).catch(() => {});
+
   if (!res.headersSent) {
     res.setHeader("Content-Type", "application/json");
-    res.status(err.status ?? 500).json({ error: err.message ?? "Internal server error" });
+    // Never send stack traces or internal details to clients in production
+    const isProd = process.env.NODE_ENV === "production";
+    res.status(status).json({
+      error: status >= 500
+        ? "Something went wrong. Our team has been notified."
+        : (err.message ?? "Request failed"),
+      ...(isProd ? {} : { _detail: err.message }),
+    });
   }
 });
 
