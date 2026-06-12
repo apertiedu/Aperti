@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { db, pool } from "@workspace/db";
-import { accountsTable, subscriptionsTable, subscriptionPlansTable } from "@workspace/db";
-import { eq, desc, sql, gte } from "drizzle-orm";
+import { accountsTable, subscriptionsTable } from "@workspace/db";
+import { eq, sql } from "drizzle-orm";
 import { requireRole } from "../middleware/auth";
 
 export const adminAnalyticsRouter = Router();
@@ -28,7 +28,7 @@ adminAnalyticsRouter.get("/users", async (_req, res) => {
       totalActive: totalActive[0].c,
       growthChart: growth.rows,
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch user analytics" });
   }
 });
@@ -37,12 +37,12 @@ adminAnalyticsRouter.get("/users", async (_req, res) => {
 adminAnalyticsRouter.get("/courses", async (_req, res) => {
   try {
     const result = await pool.query(`
-      SELECT 
-        (SELECT count(*) FROM teacher_courses) as total_courses,
-        (SELECT count(*) FROM teacher_courses WHERE visibility='published') as published,
-        (SELECT count(*) FROM teacher_courses WHERE visibility='draft') as drafts,
-        (SELECT count(*) FROM lessons) as total_lessons,
-        (SELECT count(*) FROM homework) as total_homework
+      SELECT
+        (SELECT count(*) FROM teacher_courses) AS total_courses,
+        (SELECT count(*) FROM teacher_courses WHERE visibility='published') AS published,
+        (SELECT count(*) FROM teacher_courses WHERE visibility='draft') AS drafts,
+        (SELECT count(*) FROM lessons) AS total_lessons,
+        (SELECT count(*) FROM homework) AS total_homework
     `);
     const enrollmentGrowth = await pool.query(`
       SELECT date_trunc('month', created_at)::text as month, count(*)::int as enrollments
@@ -52,7 +52,7 @@ adminAnalyticsRouter.get("/courses", async (_req, res) => {
       ORDER BY month
     `).catch(() => ({ rows: [] }));
     res.json({ ...result.rows[0], enrollmentGrowth: enrollmentGrowth.rows });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch course analytics" });
   }
 });
@@ -74,7 +74,7 @@ adminAnalyticsRouter.get("/ai", async (_req, res) => {
       ORDER BY month
     `).catch(() => ({ rows: [] }));
     res.json({ ...result.rows[0], aiGrowth: aiGrowth.rows });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch AI analytics" });
   }
 });
@@ -94,7 +94,94 @@ adminAnalyticsRouter.get("/dashboard", async (_req, res) => {
       openTickets: tickets.rows[0].c,
       monthlyRevenue: parseFloat(revenue.rows[0].total),
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to fetch dashboard data" });
+  }
+});
+
+/* ── Retention Analytics (Phase 33) ─────────────────────────────────────── */
+adminAnalyticsRouter.get("/retention", async (_req, res) => {
+  try {
+    // Monthly cohort retention: track students who signed up in each month
+    // and whether they were still active (had an interaction) N months later
+    const retention = await pool.query(`
+      WITH cohort AS (
+        SELECT
+          to_char(date_trunc('month', created_at), 'YYYY-MM') AS cohort_month,
+          id AS student_id
+        FROM accounts
+        WHERE role = 'student' AND created_at >= now() - interval '6 months'
+      ),
+      activity AS (
+        SELECT DISTINCT
+          account_id,
+          to_char(date_trunc('month', created_at), 'YYYY-MM') AS active_month
+        FROM audit_logs
+        WHERE created_at >= now() - interval '6 months'
+      )
+      SELECT
+        c.cohort_month,
+        COUNT(DISTINCT c.student_id)::int AS cohort_size,
+        COUNT(DISTINCT CASE WHEN a.account_id IS NOT NULL THEN c.student_id END)::int AS retained
+      FROM cohort c
+      LEFT JOIN activity a ON a.account_id = c.student_id AND a.active_month >= c.cohort_month
+      GROUP BY c.cohort_month
+      ORDER BY c.cohort_month DESC
+      LIMIT 6
+    `).catch(() => ({ rows: [] }));
+
+    // Simple 30/60/90 day retention rates
+    const simpleRetention = await pool.query(`
+      SELECT
+        COUNT(DISTINCT a.id)::int AS total_users,
+        COUNT(DISTINCT CASE WHEN a.last_active_at >= now() - interval '30 days' THEN a.id END)::int AS retained_30d,
+        COUNT(DISTINCT CASE WHEN a.last_active_at >= now() - interval '60 days' THEN a.id END)::int AS retained_60d,
+        COUNT(DISTINCT CASE WHEN a.last_active_at >= now() - interval '90 days' THEN a.id END)::int AS retained_90d
+      FROM accounts a
+      WHERE a.role = 'student'
+        AND a.created_at <= now() - interval '30 days'
+        AND a.status = 'active'
+    `).catch(() => ({ rows: [{ total_users: 0, retained_30d: 0, retained_60d: 0, retained_90d: 0 }] }));
+
+    const sr = simpleRetention.rows[0] ?? {};
+    const total = sr.total_users || 0;
+
+    res.json({
+      cohortRetention: retention.rows,
+      retention30d: total > 0 ? Math.round((sr.retained_30d / total) * 100) : null,
+      retention60d: total > 0 ? Math.round((sr.retained_60d / total) * 100) : null,
+      retention90d: total > 0 ? Math.round((sr.retained_90d / total) * 100) : null,
+      totalStudents: total,
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: "Failed to fetch retention analytics" });
+  }
+});
+
+/* ── Engagement funnel (Phase 33) ────────────────────────────────────────── */
+adminAnalyticsRouter.get("/engagement", async (_req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        (SELECT count(*)::int FROM accounts WHERE role='student' AND status='active') AS total_students,
+        (SELECT count(DISTINCT student_id)::int FROM flashcard_progress WHERE created_at >= now() - interval '30 days') AS used_flashcards,
+        (SELECT count(DISTINCT student_account_id)::int FROM exam_submissions WHERE submitted_at >= now() - interval '30 days') AS took_assessment,
+        (SELECT count(DISTINCT student_id)::int FROM ai_interactions WHERE created_at >= now() - interval '30 days') AS used_ai_tutor
+    `).catch(() => ({ rows: [{ total_students: 0, used_flashcards: 0, took_assessment: 0, used_ai_tutor: 0 }] }));
+
+    const r = result.rows[0];
+    const total = r.total_students || 1;
+
+    res.json({
+      totalStudents: r.total_students,
+      funnelSteps: [
+        { step: "Active Students", count: r.total_students, pct: 100 },
+        { step: "Used Flashcards", count: r.used_flashcards, pct: Math.round((r.used_flashcards / total) * 100) },
+        { step: "Took Assessment", count: r.took_assessment, pct: Math.round((r.took_assessment / total) * 100) },
+        { step: "Used AI Tutor", count: r.used_ai_tutor, pct: Math.round((r.used_ai_tutor / total) * 100) },
+      ],
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: "Failed to fetch engagement analytics" });
   }
 });

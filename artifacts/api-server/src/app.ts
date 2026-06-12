@@ -193,14 +193,24 @@ app.get("/api", (_req, res) => {
 app.get("/health", async (_req, res) => {
   const start = Date.now();
   let dbOk = false;
-  try { await pool.query("SELECT 1"); dbOk = true; } catch {}
-  const status = dbOk ? "healthy" : "degraded";
+  let dbLatencyMs = 0;
+  try {
+    const t0 = Date.now();
+    await pool.query("SELECT 1");
+    dbLatencyMs = Date.now() - t0;
+    dbOk = true;
+  } catch {}
+  const memUsed = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+  const status = dbOk ? (dbLatencyMs > 800 ? "degraded" : "healthy") : "critical";
   res.status(dbOk ? 200 : 503).json({
     status,
     db: dbOk ? "connected" : "error",
+    dbLatencyMs,
     uptime: Math.round(process.uptime()),
     latencyMs: Date.now() - start,
+    memoryMb: memUsed,
     version: process.env.COMMIT_HASH || "dev",
+    env: process.env.NODE_ENV || "development",
     timestamp: new Date().toISOString(),
   });
 });
@@ -209,14 +219,31 @@ app.get("/health", async (_req, res) => {
 app.get("/api/health", async (_req, res) => {
   const start = Date.now();
   let dbOk = false;
-  try { await pool.query("SELECT 1"); dbOk = true; } catch {}
+  let dbLatencyMs = 0;
+  let tableCount = 0;
+  try {
+    const t0 = Date.now();
+    await pool.query("SELECT 1");
+    dbLatencyMs = Date.now() - t0;
+    dbOk = true;
+    const tc = await pool.query(
+      `SELECT count(*)::int AS cnt FROM pg_stat_user_tables`
+    ).catch(() => ({ rows: [{ cnt: 0 }] }));
+    tableCount = tc.rows[0]?.cnt ?? 0;
+  } catch {}
+  const memUsed = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
+  const status = dbOk ? (dbLatencyMs > 800 ? "degraded" : "healthy") : "critical";
   res.json({
-    status: "healthy",
+    status,
     db: dbOk ? "connected" : "error",
-    redis: "memory",
+    dbLatencyMs,
+    dbTables: tableCount,
+    session: "memory",
     uptime: Math.round(process.uptime()),
     latencyMs: Date.now() - start,
+    memoryMb: memUsed,
     version: process.env.COMMIT_HASH || "dev",
+    env: process.env.NODE_ENV || "development",
     timestamp: new Date().toISOString(),
   });
 });

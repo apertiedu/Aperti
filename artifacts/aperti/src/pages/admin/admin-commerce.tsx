@@ -691,5 +691,11 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 function LoadingSpin() {
-  return <div className="flex justify-center py-16"><div className="w-7 h-7 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" /></div>;
+  return (
+    <div className="space-y-4 p-4">
+      {[1, 2, 3].map(i => (
+        <div key={i} className="h-20 rounded-xl bg-gray-100 animate-pulse" />
+      ))}
+    </div>
+  );
 }

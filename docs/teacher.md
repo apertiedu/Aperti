@@ -19,27 +19,42 @@ Set marking scheme, time limit, and publish to your enrolled students.
 
 ### 4. Question Bank
 QueryVault → My Questions → New Question.
-Tag by topic, difficulty, and syllabus code. Use Question Extract to scan PDFs.
+Tag by topic, difficulty, and syllabus code. Use **Question Extract** to scan PDFs and auto-import questions using AI.
 
 ### 5. Grading
 GradeFlow → select submission → mark questions → submit marks.
 MarkerMind AI can pre-mark structured answers for your review.
 
-### 6. Flashcards for Students
-CardStack → New Deck → add cards → assign to a student group.
-Students see the deck in their study stream.
+### 6. Flashcards for Students (CardStack™)
+CardStack → New Deck → add cards (front/back pairs) → set visibility.
+Students study decks in **Study Mode**: flip each card, then rate confidence as **Easy / Okay / Hard**.
+The SM-2 spaced repetition algorithm schedules each card based on confidence ratings — hard cards reappear sooner.
 
-### 7. Courses
-Courses → New Course → add units and topics → publish when ready.
-Students enroll via the course catalog.
+### 7. Syllabus Builder
+Syllabuilder → create a syllabus map linked to a Cambridge/IB code.
+Attach questions from the Question Bank to each syllabus point for aligned coverage.
 
-## FAQs
+### 8. Search
+Use the top search bar for universal search across all platform content.
+Supports:
+- Natural language queries: "show weak mechanics topics"
+- Syllabus codes: "0625" → finds Physics resources
+- Question text search across the Question Bank
 
-**Q: A student isn't appearing in my class.**
-A: Check CoreHub → Students → ensure they're enrolled in your subject.
+### 9. Revision Notes
+ContentCraft → New Revision Note → select subject → write in rich text or import from a doc.
+Students can access notes from their Study Stream.
 
-**Q: How do students access past papers?**
-A: Assessment Hub → Past Papers tab — papers you upload appear there for enrolled students.
+### 10. Analytics
+Pulse → view student performance trends, top struggling topics, and individual student analytics.
+InsightStream → attendance and homework completion dashboards.
 
-**Q: AI content isn't publishing.**
-A: AI-generated content requires your review. Check AI Review Queue in the sidebar.
+## Role Permissions
+- **Teacher**: full access to teaching, content, and insights tools.
+- **Assistant**: read-only on marks/grades; can create content but not delete.
+- **Admin**: all teacher permissions plus platform-level management.
+
+## Tips
+- Use the **Assessment Hub** for both formative and summative assessments.
+- Tag questions with difficulty (Easy/Medium/Hard) for better analytics.
+- Export gradebooks as CSV from the Gradebook+ page.

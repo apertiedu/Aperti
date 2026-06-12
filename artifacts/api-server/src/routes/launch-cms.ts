@@ -866,25 +866,26 @@ router.post("/analytics/conversion", async (req, res) => {
 router.get("/admin/analytics/conversion", ...adminOnly, async (req, res) => {
   try {
     const { days = "30" } = req.query as Record<string, string>;
+    const safeDays = Math.min(Math.max(parseInt(days) || 30, 1), 365);
     const [funnel, trend, topEvents] = await Promise.all([
       pool.query(`
         SELECT event_type, COUNT(*) AS count
         FROM conversion_events
-        WHERE created_at > NOW() - INTERVAL '${parseInt(days)} days'
+        WHERE created_at > NOW() - ($1 || ' days')::interval
         GROUP BY event_type ORDER BY count DESC
-      `),
+      `, [safeDays]).catch(() => ({ rows: [] })),
       pool.query(`
         SELECT DATE_TRUNC('day', created_at)::DATE AS date, COUNT(*) AS events
         FROM conversion_events
-        WHERE created_at > NOW() - INTERVAL '${parseInt(days)} days'
+        WHERE created_at > NOW() - ($1 || ' days')::interval
         GROUP BY 1 ORDER BY 1
-      `),
+      `, [safeDays]).catch(() => ({ rows: [] })),
       pool.query(`
         SELECT event_type, COUNT(*) AS count
         FROM conversion_events
         WHERE created_at > NOW() - INTERVAL '7 days'
         GROUP BY event_type ORDER BY count DESC LIMIT 5
-      `),
+      `).catch(() => ({ rows: [] })),
     ]);
     res.json({ funnel: funnel.rows, trend: trend.rows, top_events: topEvents.rows });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
@@ -895,9 +896,9 @@ router.get("/admin/analytics/feature-adoption", ...adminOnly, async (req, res) =
   try {
     const { rows } = await pool.query(`
       SELECT fr.id, fr.name, fr.status, fr.category,
-        (SELECT COUNT(*) FROM feature_waitlist fw WHERE fw.feature_id=fr.id) AS waitlist_count,
-        (SELECT COUNT(*) FROM beta_testers bt WHERE bt.feature_id=fr.id AND bt.active=true) AS beta_testers,
-        (SELECT COUNT(*) FROM early_access_program ea WHERE ea.feature_id=fr.id AND ea.revoked_at IS NULL) AS early_access_users,
+        COALESCE((SELECT COUNT(*) FROM feature_waitlist fw WHERE fw.feature_id=fr.id), 0) AS waitlist_count,
+        COALESCE((SELECT COUNT(*) FROM beta_testers bt WHERE bt.feature_id=fr.id AND bt.active=true), 0) AS beta_testers,
+        COALESCE((SELECT COUNT(*) FROM early_access_program ea WHERE ea.feature_id=fr.id AND ea.revoked_at IS NULL), 0) AS early_access_users,
         fam.activation_rate, fam.retention, fam.satisfaction_score
       FROM feature_registry fr
       LEFT JOIN LATERAL (
@@ -905,7 +906,7 @@ router.get("/admin/analytics/feature-adoption", ...adminOnly, async (req, res) =
       ) fam ON true
       WHERE fr.status NOT IN ('draft','archived')
       ORDER BY fr.status, fr.name
-    `);
+    `).catch(() => ({ rows: [] }));
     res.json(rows);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });

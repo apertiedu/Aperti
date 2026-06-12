@@ -5,7 +5,7 @@ import { pool } from "@workspace/db";
 export const courseHealthRouter = Router();
 
 courseHealthRouter.use(authenticate);
-courseHealthRouter.use(requireRole(["teacher", "admin", "assistant"]));
+courseHealthRouter.use(requireRole("teacher", "admin", "assistant"));
 
 // GET /api/course-health/:courseId — health score for a specific course
 courseHealthRouter.get("/:courseId", async (req: AuthRequest, res: Response) => {

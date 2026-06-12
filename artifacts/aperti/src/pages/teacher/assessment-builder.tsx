@@ -153,7 +153,16 @@ export default function AssessmentBuilder({ params }: { params: { id: string } }
     onError: () => toast({ title: "AI generation failed", variant: "destructive" }),
   });
 
-  if (isLoading) return <div className="flex items-center justify-center h-64"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
+  if (isLoading) return (
+    <div className="space-y-4 p-6">
+      <div className="h-7 w-48 rounded-lg bg-gray-100 animate-pulse" />
+      <div className="h-4 w-72 rounded bg-gray-100 animate-pulse" />
+      <div className="grid grid-cols-3 gap-4 mt-4">
+        {[1,2,3].map(i => <div key={i} className="h-24 rounded-xl bg-gray-100 animate-pulse" />)}
+      </div>
+      <div className="h-64 rounded-xl bg-gray-100 animate-pulse mt-4" />
+    </div>
+  );
 
   return (
     <div className="flex flex-col h-[calc(100vh-80px)]">

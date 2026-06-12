@@ -1010,6 +1010,52 @@ const PHASE33_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_flashcards_teacher        ON flashcards(teacher_account_id)`,
   `CREATE INDEX IF NOT EXISTS idx_audit_logs_account        ON audit_logs(account_id)`,
   `CREATE INDEX IF NOT EXISTS idx_api_metrics_duration      ON api_metrics(duration_ms DESC)`,
+
+  /* ── Phase 33 — Fuzzy search extension ──────────────────────────────── */
+  `CREATE EXTENSION IF NOT EXISTS pg_trgm`,
+  `CREATE INDEX IF NOT EXISTS idx_accounts_display_trgm    ON accounts USING gin (display_name gin_trgm_ops)`,
+  `CREATE INDEX IF NOT EXISTS idx_courses_title_trgm        ON aperti_courses USING gin (title gin_trgm_ops)`,
+  `CREATE INDEX IF NOT EXISTS idx_subjects_name_trgm        ON subjects USING gin (name gin_trgm_ops)`,
+  `CREATE INDEX IF NOT EXISTS idx_qbank_topic_trgm          ON question_bank USING gin (topic gin_trgm_ops)`,
+  `CREATE INDEX IF NOT EXISTS idx_rev_notes_title_trgm      ON revision_notes USING gin (title gin_trgm_ops)`,
+
+  /* ── Phase 33 — Syllabus code column ────────────────────────────────── */
+  `ALTER TABLE subjects ADD COLUMN IF NOT EXISTS syllabus_code text`,
+  `CREATE INDEX IF NOT EXISTS idx_subjects_syllabus_code ON subjects(syllabus_code)`,
+
+  /* ── Phase 33 — Flashcard progress improvements ─────────────────────── */
+  `ALTER TABLE flashcard_progress ADD COLUMN IF NOT EXISTS last_confidence text CHECK (last_confidence IN ('easy','okay','hard'))`,
+
+  /* ── Phase 33 — Search logs improvements ────────────────────────────── */
+  `ALTER TABLE search_logs ADD COLUMN IF NOT EXISTS intent text`,
+  `ALTER TABLE search_logs ADD COLUMN IF NOT EXISTS syllabus_code text`,
+
+  /* ── Phase 33 — Retention analytics snapshot table ─────────────────── */
+  `CREATE TABLE IF NOT EXISTS retention_snapshots (
+    id         serial PRIMARY KEY,
+    cohort_month text NOT NULL,
+    month_n    integer NOT NULL,
+    retained   integer NOT NULL DEFAULT 0,
+    churned    integer NOT NULL DEFAULT 0,
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    UNIQUE (cohort_month, month_n)
+  )`,
+
+  /* ── Phase 33 — Platform-level feature flags ────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS platform_feature_flags (
+    id         serial PRIMARY KEY,
+    key        text NOT NULL UNIQUE,
+    enabled    boolean NOT NULL DEFAULT false,
+    rollout_pct integer NOT NULL DEFAULT 0 CHECK (rollout_pct BETWEEN 0 AND 100),
+    description text,
+    updated_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO platform_feature_flags (key, enabled, rollout_pct, description)
+   VALUES
+     ('pg_trgm_search', true, 100, 'Fuzzy search using pg_trgm similarity'),
+     ('ai_question_extract', true, 100, 'AI-powered question extraction'),
+     ('smart_flashcards', true, 100, 'SM-2 spaced repetition for flashcards')
+   ON CONFLICT (key) DO NOTHING`,
 ];
 
 export async function runMigrations(): Promise<void> {

@@ -21,8 +21,10 @@ Sign in at `/login` with your admin credentials. You'll land on the Admin OS das
 
 ### 4. Analytics
 - **Overview**: Admin OS → Analytics → Dashboard tab
-- **Deep dive**: Admin OS → Analytics Deep Dive (user growth, revenue, retention, errors)
-- **Performance**: Admin OS → Slow Queries / Performance
+- **User growth**: Analytics → Users tab — growth chart, role breakdown
+- **Course data**: Analytics → Courses tab — enrollment growth
+- **AI usage**: Analytics → AI tab — monthly interaction trend
+- **Retention**: Analytics → Retention tab — 30/60/90-day retention rates and engagement funnel
 
 ### 5. Error Monitoring
 - **Frontend errors**: Admin OS → Error Intelligence
@@ -30,17 +32,36 @@ Sign in at `/login` with your admin credentials. You'll land on the Admin OS das
 - **Launch certification**: Admin OS → Launch Certification
 
 ### 6. Platform Health
-- **Database**: Admin OS → Database Health (size, slow queries, VACUUM)
-- **Route health**: Admin OS → Route Health
-- **System uptime**: `/health` endpoint (always-on, no auth)
+- **System health**: Founder Control Center → System Health section
+- **DB health**: Admin OS → DB Health — table sizes, slow queries, connection counts
+- **Health API**: `GET /api/health` — returns db latency, memory, uptime, table count
 
-## FAQs
+### 7. Search System
+- All searches use ILIKE matching with pg_trgm fuzzy similarity when the extension is enabled
+- Syllabus codes (0625, 9709, etc.) are mapped to subject names for richer results
+- Question text content is included in search
 
-**Q: A teacher can't log in.**
-A: Check Admin OS → Users → find the account → ensure Status is Active.
+### 8. Founder Insight Center
+Path: `/admin/os/founder`
+Shows real-time: active users, revenue MTD/YTD, open tickets, content counts, platform quality score, launch certification readiness, and health checks.
 
-**Q: The platform feels slow.**
-A: Check Admin OS → Performance → top 10 slowest endpoints. Then Admin OS → DB Health → run VACUUM ANALYZE.
+Quick links to: Revenue Deep Dive, Growth Analytics, Content Quality, AI Costs, Founder Alerts, Launch Command.
 
-**Q: How do I add a new plan?**
-A: Admin OS → Plans → New Plan. Set `is_recommended: true` to highlight it on the pricing page.
+### 9. Performance Monitoring
+Admin OS → DB Health → Slow Queries section shows the top 10 slowest endpoints in the last 24 hours.
+All API requests are timed — routes over 500ms are flagged.
+
+### 10. Feature Flags
+Table `platform_feature_flags` controls graduated feature rollout by percentage.
+Currently active: pg_trgm_search, ai_question_extract, smart_flashcards.
+
+## Security & Compliance
+- **Audit logs**: every admin action is logged in `audit_logs` with IP and user ID
+- **ShieldCore**: Admin OS → ShieldCore for access control and security settings
+- **Password resets**: Admin OS → Users → Reset Password for any account
+- **Session security**: sessions expire after inactivity; JWT tokens expire after 24h
+
+## Tips
+- Use **WorldPilot** for a bird's eye view of all organizations on the platform.
+- **QuickSwitch** lets you impersonate another user for debugging (admin only, fully audited).
+- The **Founder Control Center** at `/admin/os/founder` is your single source of truth for platform health.

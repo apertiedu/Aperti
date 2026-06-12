@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@bull-board/api": "^7.2.1",
+    "zod": "catalog:",
     "@bull-board/express": "^7.2.1",
     "@types/compression": "^1.8.1",
     "@types/jsonwebtoken": "^9.0.10",

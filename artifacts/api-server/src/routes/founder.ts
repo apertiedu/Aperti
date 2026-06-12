@@ -1071,7 +1071,10 @@ founderRouter.post("/friction-event", async (req: AuthRequest, res: Response) =>
       [req.userId ?? null, req.role ?? null, event_type || "drop_off", step || "unknown", route || "", JSON.stringify(metadata || {})]
     );
     res.json({ ok: true });
-  } catch { res.json({ ok: true }); }
+  } catch (err) {
+    console.error("[founder] POST /friction-event error:", err);
+    res.status(500).json({ error: "Failed to record event" });
+  }
 });
 
 founderRouter.get("/friction-analytics", async (_req: AuthRequest, res: Response) => {

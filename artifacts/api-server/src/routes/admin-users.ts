@@ -205,7 +205,8 @@ adminUsersRouter.post("/:id/impersonate", async (req: Request, res: Response) =>
     const [target] = await db.select().from(accountsTable).where(eq(accountsTable.id, targetId));
     if (!target) return res.status(404).json({ error: "User not found" });
     const jwt = await import("jsonwebtoken");
-    const secret = process.env["JWT_SECRET"] || "aperti-dev-secret-change-in-prod";
+    const secret = process.env["JWT_SECRET"];
+    if (!secret) return res.status(500).json({ error: "JWT_SECRET is not configured" });
     const token = jwt.default.sign(
       { id: target.id, role: target.role, impersonatedBy: (req as any).userId },
       secret,
