@@ -91,6 +91,7 @@ const NAV = [
   { label: "AI Cost Management",  icon: Zap,         href: "/admin/os/ai-costs" },
   { label: "Notification Rules",  icon: Bell,        href: "/admin/os/notification-rules" },
   { label: "Founder Alerts",      icon: AlertTriangle, href: "/admin/os/founder-alerts" },
+  { label: "Error Logs",          icon: Bug,         href: "/admin/os/error-logs" },
   { label: "Launch Command",      icon: Rocket,      href: "/admin/os/launch-command" },
   { label: "Launch Blockers",     icon: ShieldAlert, href: "/admin/os/launch-blockers" },
   { label: "Launch Certification",icon: Rocket,      href: "/admin/os/launch-certification" },

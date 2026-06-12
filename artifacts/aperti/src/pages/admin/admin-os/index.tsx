@@ -79,6 +79,7 @@ import NoMockDataPage from "./NoMockDataPage";
 // Phase 33 — Platform Perfection
 import DBHealthPage from "./DBHealthPage";
 import AnalyticsExtendedPage from "./AnalyticsExtendedPage";
+import ErrorLogsPage from "./ErrorLogsPage";
 
 export default function AdminOS() {
   return (
@@ -190,6 +191,7 @@ export default function AdminOS() {
         {/* Phase 33 — Platform Perfection */}
         <Route path="/admin/os/db-health" component={DBHealthPage} />
         <Route path="/admin/os/analytics-extended" component={AnalyticsExtendedPage} />
+        <Route path="/admin/os/error-logs" component={ErrorLogsPage} />
 
         <Route component={Dashboard} />
       </Switch>

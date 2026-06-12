@@ -10,18 +10,27 @@ interface State { hasError: boolean; error: Error | null; errorInfo: string; }
 
 function logErrorToBackend(error: Error, componentStack: string) {
   try {
-    const token = localStorage.getItem("aperti_token") || "";
-    fetch("/api/founder/frontend-errors", {
+    const payload = {
+      message: error.message,
+      stack: error.stack,
+      componentStack,
+      route: window.location.pathname,
+      browserInfo: navigator.userAgent.slice(0, 300),
+      source: "ErrorBoundary",
+    };
+    fetch("/api/errors/log", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        message: error.message,
-        stack: error.stack,
-        componentStack,
-        route: window.location.pathname,
-        browserInfo: navigator.userAgent.slice(0, 300),
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     }).catch(() => {});
+    const token = localStorage.getItem("aperti_token") || "";
+    if (token) {
+      fetch("/api/founder/frontend-errors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify(payload),
+      }).catch(() => {});
+    }
   } catch {
   }
 }

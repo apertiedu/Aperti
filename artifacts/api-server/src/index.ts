@@ -89,6 +89,29 @@ async function main() {
   });
 }
 
+// ── Process-level error capture ───────────────────────────────────────────────
+process.on("uncaughtException", (err) => {
+  console.error("[process] uncaughtException:", err.message, err.stack);
+  // Attempt DB log — pool may not be ready, so wrap safely
+  import("@workspace/db").then(({ pool }) => {
+    pool.query(
+      `INSERT INTO error_logs (level, message, stack, route, device, created_at) VALUES ($1,$2,$3,$4,$5,NOW())`,
+      ["error", (err.message || "uncaughtException").slice(0, 1000), (err.stack || "").slice(0, 5000), "process", "node"],
+    ).catch(() => {});
+  }).catch(() => {});
+});
+
+process.on("unhandledRejection", (reason) => {
+  const err = reason instanceof Error ? reason : new Error(String(reason));
+  console.error("[process] unhandledRejection:", err.message);
+  import("@workspace/db").then(({ pool }) => {
+    pool.query(
+      `INSERT INTO error_logs (level, message, stack, route, device, created_at) VALUES ($1,$2,$3,$4,$5,NOW())`,
+      ["error", (err.message || "unhandledRejection").slice(0, 1000), (err.stack || "").slice(0, 5000), "process", "node"],
+    ).catch(() => {});
+  }).catch(() => {});
+});
+
 main().catch(err => {
   console.error("Fatal startup error:", err);
   process.exit(1);

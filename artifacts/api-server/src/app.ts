@@ -88,6 +88,9 @@ import { adminLaunchDashboardRouter } from "./routes/admin-launch-dashboard";
 // Phase 33 — Platform Perfection
 import { adminDbHealthRouter } from "./routes/admin-db-health";
 import { adminAnalyticsExtendedRouter } from "./routes/admin-analytics-extended";
+// Phase 33 — Error System & Performance
+import { errorsLogRouter } from "./routes/errors-log";
+import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -167,6 +170,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
       "INSERT INTO api_metrics (method, endpoint, status_code, duration_ms, recorded_at) VALUES ($1,$2,$3,$4,NOW())",
       [req.method, endpoint.substring(0, 200), res.statusCode, duration],
     ).catch(() => {});
+    recordRequest(req.method, endpoint.substring(0, 200), duration);
   });
   next();
 });
@@ -235,6 +239,9 @@ app.use("/api", releasesRouter);
 
 // Phase 12 — Launch CMS & Growth (must be BEFORE main router for public /api/landing, /api/roadmap, /api/release-notes, /api/features/public, /api/branding)
 app.use("/api", launchCmsRouter);
+
+// Phase 33 — Error capture (public, rate-limited) — MUST be before main router
+app.use("/api/errors", errorsLogRouter);
 
 // ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);
@@ -370,7 +377,14 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   const status = typeof err.status === "number" ? err.status : (typeof err.statusCode === "number" ? err.statusCode : 500);
   logger.error({ err, method: req.method, url: req.url, status }, "Unhandled error");
 
-  // Log to frontend_error_logs for founder visibility
+  // Log to error_logs (Phase 33)
+  pool.query(
+    `INSERT INTO error_logs (level, message, stack, route, device, created_at)
+     VALUES ($1,$2,$3,$4,$5,NOW())`,
+    ["error", (err.message ?? "unknown").slice(0, 1000), (err.stack ?? "").slice(0, 5000), req.path, `${req.method} ${req.path}`],
+  ).catch(() => {});
+
+  // Also log to legacy frontend_error_logs for backward compat
   pool.query(
     `INSERT INTO frontend_error_logs (user_id, user_role, error_message, error_stack, component_stack, route, browser_info, created_at)
      VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())`,
@@ -379,11 +393,10 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
 
   if (!res.headersSent) {
     res.setHeader("Content-Type", "application/json");
-    // Never send stack traces or internal details to clients in production
     const isProd = process.env.NODE_ENV === "production";
     res.status(status).json({
       error: status >= 500
-        ? "Something went wrong. Our team has been notified."
+        ? "Something went wrong. We've logged the issue."
         : (err.message ?? "Request failed"),
       ...(isProd ? {} : { _detail: err.message }),
     });
@@ -407,6 +420,7 @@ async function seedDefaultAdmin() {
 seedDefaultAdmin();
 startBackupScheduler();
 startFounderAlertsWorker();
+startPerfFlushInterval();
 
 // Phase 29 — ensure DB performance indexes exist at startup
 ensurePerformanceIndexes().catch(err => logger.warn({ err }, "[startup] Could not ensure indexes"));

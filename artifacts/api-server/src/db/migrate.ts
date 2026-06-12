@@ -965,6 +965,53 @@ const PHASE19_MIGRATIONS: string[] = [
   `ALTER TABLE question_bank ADD COLUMN IF NOT EXISTS moderated_at   timestamptz`,
 ];
 
+/* ── Phase 33 — Error System, Validation & Performance ──────────────────── */
+const PHASE33_MIGRATIONS: string[] = [
+  `CREATE TABLE IF NOT EXISTS error_logs (
+    id         serial PRIMARY KEY,
+    level      text NOT NULL DEFAULT 'error' CHECK (level IN ('error','warn','info')),
+    message    text NOT NULL,
+    stack      text,
+    route      text,
+    user_id    integer REFERENCES accounts(id) ON DELETE SET NULL,
+    role       text,
+    device     text,
+    browser    text,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_error_logs_level      ON error_logs(level)`,
+  `CREATE INDEX IF NOT EXISTS idx_error_logs_created_at ON error_logs(created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_error_logs_user_id    ON error_logs(user_id)`,
+
+  `CREATE TABLE IF NOT EXISTS route_perf_log (
+    route        text NOT NULL,
+    method       text NOT NULL,
+    hit_count    integer NOT NULL DEFAULT 0,
+    avg_ms       integer NOT NULL DEFAULT 0,
+    p95_ms       integer NOT NULL DEFAULT 0,
+    max_ms       integer NOT NULL DEFAULT 0,
+    last_slow_at timestamptz,
+    recorded_at  timestamptz NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (route, method)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_route_perf_p95 ON route_perf_log(p95_ms DESC)`,
+
+  /* ── Additional FK / filter indexes ─────────────────────────────────── */
+  `CREATE INDEX IF NOT EXISTS idx_exam_submissions_student  ON exam_submissions(student_account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_exam_submissions_exam     ON exam_submissions(exam_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_exam_submissions_created  ON exam_submissions(submitted_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_course_enrollments_course ON course_enrollments(course_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_course_enrollments_student ON course_enrollments(student_account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_user        ON subscriptions(user_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_status      ON subscriptions(status)`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_plan        ON subscriptions(plan_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_homework_teacher          ON homework(teacher_account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_homework_created          ON homework(created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_flashcards_teacher        ON flashcards(teacher_account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_audit_logs_account        ON audit_logs(account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_api_metrics_duration      ON api_metrics(duration_ms DESC)`,
+];
+
 export async function runMigrations(): Promise<void> {
   // Base schema (accounts, students, subjects, etc.) is created by push-schema.ts
   // at startup — see index.ts. This function applies Phase 2+ additive migrations.
@@ -1034,6 +1081,14 @@ export async function runMigrations(): Promise<void> {
   }
 
   for (const sql of PHASE21_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
+  for (const sql of PHASE33_MIGRATIONS) {
     try {
       await pool.query(sql);
     } catch {

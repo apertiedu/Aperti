@@ -3,6 +3,26 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, accountsTable } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+import { validateBody } from "../middleware/validate-body";
+import { z } from "zod";
+
+const VALID_ROLES = ["admin", "teacher", "assistant", "student", "parent", "super_admin"] as const;
+
+const createAccountSchema = z.object({
+  username:        z.string().min(2, "Username must be at least 2 characters").max(80),
+  password:        z.string().min(6, "Password must be at least 6 characters"),
+  displayName:     z.string().max(100).optional(),
+  role:            z.enum(VALID_ROLES).default("assistant"),
+  teacherAccountId: z.number().int().positive().nullable().optional(),
+});
+
+const patchAccountSchema = z.object({
+  displayName:      z.string().max(100).optional(),
+  role:             z.enum(VALID_ROLES).optional(),
+  status:           z.enum(["active", "suspended"]).optional(),
+  password:         z.string().min(6).optional(),
+  teacherAccountId: z.number().int().positive().nullable().optional(),
+}).refine(body => Object.keys(body).length > 0, { message: "Nothing to update" });
 
 const router: IRouter = Router();
 
@@ -21,10 +41,8 @@ router.get("/accounts", ...adminOnly, async (req: AuthRequest, res): Promise<voi
   res.json(accounts);
 });
 
-router.post("/accounts", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
+router.post("/accounts", ...adminOnly, validateBody(createAccountSchema), async (req: AuthRequest, res): Promise<void> => {
   const { username, password, displayName, role, teacherAccountId } = req.body;
-  if (!username || !password) { res.status(400).json({ message: "Username and password are required" }); return; }
-  if (!["admin", "teacher", "assistant"].includes(role || "assistant")) { res.status(400).json({ message: "Invalid role" }); return; }
 
   try {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -43,7 +61,7 @@ router.post("/accounts", ...adminOnly, async (req: AuthRequest, res): Promise<vo
   }
 });
 
-router.patch("/accounts/:id", ...adminOnly, async (req: AuthRequest, res): Promise<void> => {
+router.patch("/accounts/:id", ...adminOnly, validateBody(patchAccountSchema), async (req: AuthRequest, res): Promise<void> => {
   const id = parseInt(req.params.id, 10);
   if (isNaN(id)) { res.status(400).json({ message: "Invalid ID" }); return; }
 

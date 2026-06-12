@@ -1,6 +1,6 @@
 ---
 name: Aperti Phase 33 — Platform Perfection & UI Consistency
-description: Phase 33 features + P33-T1 critical fixes: teal token migration, naming unification, login safety, page backgrounds
+description: Phase 33 features + P33-T1 fixes (teal, naming, login) + P33-T2 Error System, Zod validation, perf tracker
 ---
 
 ## What was built in Phase 33
@@ -15,77 +15,79 @@ description: Phase 33 features + P33-T1 critical fixes: teal token migration, na
   - `GET /api/admin/db-health` — DB size, table stats (top 20), slow queries from `api_metrics`, connection pool stats
   - `POST /api/admin/db-health/vacuum` — runs VACUUM ANALYZE
 - Frontend page: `artifacts/aperti/src/pages/admin/admin-os/DBHealthPage.tsx`
-- Nav: "Database Health" added to AdminLayout under "— Intelligence & Health" section
-- Route: `/admin/os/db-health` in index.tsx
 
 ### Analytics Deep Dive (T005)
 - Backend: `artifacts/api-server/src/routes/admin-analytics-extended.ts`
-  - Endpoints: `/active-users` (DAU/WAU/MAU), `/revenue-growth`, `/retention`, `/error-trends`, `/enrollment-trends`, `/user-growth`
-  - All mount at `/api/admin/analytics/extended/`
 - Frontend page: `artifacts/aperti/src/pages/admin/admin-os/AnalyticsExtendedPage.tsx`
-- Nav: "Analytics Deep Dive" added to AdminLayout
-- Route: `/admin/os/analytics-extended` in index.tsx
+- Route: `/admin/os/analytics-extended`
 
 ### Skeleton Screens (T007)
 - `artifacts/aperti/src/components/skeleton-layouts.tsx`
-- Exports: `SkeletonCard`, `SkeletonStatCard`, `SkeletonTable`, `SkeletonChart`, `SkeletonForm`, `SkeletonDashboardGrid`, `SkeletonPage`
-- Used in DBHealthPage, AnalyticsExtendedPage
 
 ### Landing Page (T006)
-- Added trust signals row below hero CTAs: "No lock-in", "Up in minutes", "IGCSE & IB ready", "AI-powered grading"
+- Added trust signals row below hero CTAs
 
 ### Documentation (T009)
-- `README.md` rewritten: Phases 1–33, full module table, key endpoints, security, monitoring
-- `docs/admin.md`, `docs/teacher.md`, `docs/student.md`, `docs/parent.md`, `docs/founder.md` created
+- `README.md` rewritten; `docs/admin.md`, `docs/teacher.md`, `docs/student.md`, `docs/parent.md`, `docs/founder.md` created
 
 ## P33-T1 Critical Fixes & UI Consistency
 
 ### Canonical teal token — MIGRATED
-- **Old (dead)**: `#00796B` — was scattered across 30+ page files
+- **Old (dead)**: `#00796B`
 - **New (canonical)**: `#0D9488` — Liquid Flow 2.0
-- CSS variable (light): `--primary: 175 84% 32%`
-- CSS variable (dark): `--primary: 175 84% 42%`
-- Accent mirrors primary: `--accent: 175 84% 32%`
-
-**Why:** The codebase had a split — components used #0D9488, pages used #00796B. All page TEAL constants and inline hex values were migrated in P33-T1.
-
-**How to apply:** Use `text-primary`, `bg-primary`, `border-primary` Tailwind tokens. For inline styles, use `#0D9488`. Never use `#00796B`.
-
-### Intentional old-teal exclusions (leave as-is)
-- `forge-field.tsx` — circuit simulation wire/battery functional colors
-- `student-portal/labs/geometric.tsx` — Three.js 3D material color
-- `pulse.tsx` — grade color scale (A* = teal is semantically meaningful)
-- `subpilot-settings.tsx` — minor discount highlight
+- CSS: `--primary: 175 84% 32%` (light), `--primary: 175 84% 42%` (dark)
+- **How to apply:** Use `text-primary`, `bg-primary`, `border-primary` Tailwind tokens. For inline styles, use `#0D9488`. Never use `#00796B`.
 
 ### Naming conventions locked in
-- **Nav label**: "Assessments" → `/teacher/assessments` (canonical)
-- "Assessment Hub" removed from sidebar nav (page at `/assessment-hub` still exists)
-- "CoreHub" = teacher dashboard product name (intentional, keep)
-- "CoreMind" = AI mentor brand name (intentional, keep)
-
-### Sparkles import in layout.tsx
-`Sparkles` is used for: Question Extract, GuardianPulse, Coming Soon nav items.
-Always include `Sparkles` in the lucide-react import block in `layout.tsx`.
+- "Assessments" → `/teacher/assessments` (canonical); "CoreHub" and "CoreMind" = intentional brand names
 
 ### Login JSON safety
-- `auth.ts` POST /login: `res.setHeader("Content-Type", "application/json")` is the FIRST line inside the handler — before `try {}`
-- Rate limiter handler also sets Content-Type explicitly
-- `auth.tsx` frontend: wraps `JSON.parse(text)` in try/catch, shows user-friendly strings for 401/403/429/5xx
+- `auth.ts` POST /login: `res.setHeader("Content-Type", "application/json")` is the FIRST line inside the handler
 
-### Page background tokens
-- Authenticated pages inside Layout: use `bg-background` (CSS token)
-- Public standalone pages: use `min-h-screen bg-background` (not `bg-gray-50`)
-- Skeleton loaders: use `bg-muted/40 animate-pulse` (dark-mode safe), NOT `bg-gray-50 animate-pulse`
+## P33-T2 — Error System, Validation & Performance
+
+### New DB tables (PHASE33_MIGRATIONS in `artifacts/api-server/src/db/migrate.ts`)
+- `error_logs` — level, message, stack, route, user_id, role, device, browser, created_at
+- `route_perf_log` — route+method primary key (UPSERT), hit_count, avg_ms, p95_ms, max_ms, last_slow_at
+
+### Public Error Endpoint — CRITICAL: registration order matters
+- `POST /api/errors/log` — no auth, rate-limited 30/min; in `artifacts/api-server/src/routes/errors-log.ts`
+- **MUST be registered BEFORE `app.use("/api", router)` in app.ts** — the main router intercepts all `/api/*` and applies authenticate, blocking public endpoints if registered after
+- Current position: after launchCmsRouter, before main router (line ~247 in app.ts)
+- `logErrorToDb()` helper exported for use anywhere in backend
+
+### Performance Tracker
+- `artifacts/api-server/src/lib/perf-tracker.ts` — in-memory ring buffer, flushes to `route_perf_log` every 5 min
+- `recordRequest(method, path, durationMs)` — called from perf middleware in app.ts on `res.on("finish")`
+- `startPerfFlushInterval()` — called at bottom of app.ts after seedDefaultAdmin
+
+### Zod Validation Middleware
+- `artifacts/api-server/src/middleware/validate-body.ts` — `validateBody(schema)` returns 422 `{ error, fields }` on failure
+- **Zod is symlinked**: `artifacts/api-server/node_modules/zod` → `lib/api-zod/node_modules/zod`; import as `from "zod"` directly
+- Applied to: accounts.ts (POST+PATCH), admin-users.ts (POST+PUT+reset-password), courses.ts (POST)
+- Pattern: define schema at top of route file, add `validateBody(schema)` as middleware before async handler
+
+### Founder Endpoints Added
+- `GET /api/founder/error-logs` — last 500 rows from error_logs
+- `GET /api/founder/performance` — historical from route_perf_log + live from api_metrics (last 1h)
+
+### Frontend Error Capture (updated)
+- `error-boundary.tsx` + `main.tsx`: POST to `/api/errors/log` (public) first, then optionally to `/api/founder/frontend-errors` if token present
+- `process.on` handlers in index.ts use `import("@workspace/db")` dynamic ESM import (NOT require — ESM module)
+
+### Admin UI Added
+- `ErrorLogsPage.tsx` at `/admin/os/error-logs` — sortable/filterable table
+- Nav item: "Error Logs" with Bug icon under Founder Control section in AdminLayout.tsx
+- PerformancePage.tsx: added "Top Slowest Endpoints (p95)" section from `GET /api/founder/performance`
 
 ## Key patterns
 
 ### Route registration pattern (app.ts)
 All new routes registered in two places: imports at top AND `app.use()` calls in the middle section.
+Public routes MUST come before `app.use("/api", router)`.
 
 ### Admin nav pattern (AdminLayout.tsx)
 New nav items go in the `NAV` array. Use `{ label: "— Section Header", header: true }` for separators.
 
 ### Vite proxy
 `/api` is in `BARE_OK` — all `/api/*` routes proxy to backend automatically.
-
-**Why:** The proxy rewrites non-BARE_OK paths to `/api/<path>`, so adding `/api` to BARE_OK ensures `/api/admin/db-health` isn't double-prefixed to `/api/api/admin/db-health`.

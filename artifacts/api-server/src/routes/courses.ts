@@ -2,6 +2,22 @@ import { Router, Response } from "express";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enforce-limit";
+import { validateBody } from "../middleware/validate-body";
+import { z } from "zod";
+
+const createCourseSchema = z.object({
+  title:              z.string().min(1, "Title is required").max(200),
+  description:        z.string().max(5000).optional(),
+  subject:            z.string().max(100).optional(),
+  priceEgp:           z.number().nonnegative().nullable().optional(),
+  thumbnailUrl:       z.string().url().nullable().optional().or(z.literal("")),
+  durationWeeks:      z.number().int().min(1).max(104).optional(),
+  isPublished:        z.boolean().optional(),
+  deliveryType:       z.enum(["Online","Offline","Hybrid"]).optional(),
+  paymentModel:       z.enum(["monthly","one-time","subscription","free"]).optional(),
+  recordingsIncluded: z.boolean().optional(),
+  materialsFeeEgp:    z.number().nonnegative().nullable().optional(),
+});
 
 export const coursesRouter = Router();
 
@@ -117,11 +133,10 @@ coursesRouter.get("/:id", async (req, res: Response) => {
 
 // ── TEACHER CRUD ──────────────────────────────────────────────────────────────
 
-coursesRouter.post("/", authenticate, requireRole("teacher","admin"), enforceLimit("courses"), async (req: AuthRequest, res: Response) => {
+coursesRouter.post("/", authenticate, requireRole("teacher","admin"), enforceLimit("courses"), validateBody(createCourseSchema), async (req: AuthRequest, res: Response) => {
   try {
     const { title, description, subject, priceEgp, thumbnailUrl, durationWeeks, isPublished,
       deliveryType, paymentModel, recordingsIncluded, materialsFeeEgp } = req.body;
-    if (!title) return res.status(400).json({ error: "Title is required" });
     const { rows } = await pool.query(
       `INSERT INTO aperti_courses
          (title,description,subject,price_egp,thumbnail_url,duration_weeks,is_published,teacher_account_id,created_at,

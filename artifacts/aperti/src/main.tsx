@@ -6,15 +6,20 @@ import ErrorBoundary from "@/components/error-boundary";
 // ── Global unhandled error capture ───────────────────────────────────────────
 function reportToBackend(payload: Record<string, unknown>) {
   try {
-    const token = localStorage.getItem("aperti_token") || "";
-    fetch("/api/founder/frontend-errors", {
+    const body = JSON.stringify({ ...payload, ts: new Date().toISOString() });
+    fetch("/api/errors/log", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      body: JSON.stringify({ ...payload, ts: new Date().toISOString() }),
+      headers: { "Content-Type": "application/json" },
+      body,
     }).catch(() => {});
+    const token = localStorage.getItem("aperti_token") || "";
+    if (token) {
+      fetch("/api/founder/frontend-errors", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body,
+      }).catch(() => {});
+    }
   } catch {}
 }
 

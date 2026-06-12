@@ -1152,3 +1152,52 @@ founderRouter.post("/weekly-audit/generate", async (_req: AuthRequest, res: Resp
     res.status(500).json({ error: err.message });
   }
 });
+
+/* ── Error Logs ───────────────────────────────────────────────────────────── */
+founderRouter.get("/error-logs", async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT id, level, message, stack, route, user_id, role, device, browser, created_at
+      FROM error_logs
+      ORDER BY created_at DESC
+      LIMIT 500
+    `).catch(() => ({ rows: [] }));
+    res.json({ logs: rows, total: rows.length });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── Performance — top slowest routes ───────────────────────────────────── */
+founderRouter.get("/performance", async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT route, method, hit_count, avg_ms, p95_ms, max_ms, last_slow_at, recorded_at
+      FROM route_perf_log
+      ORDER BY p95_ms DESC
+      LIMIT 10
+    `).catch(() => ({ rows: [] }));
+
+    const liveRows = await pool.query(`
+      SELECT endpoint AS route, method,
+             COUNT(*) AS hit_count,
+             ROUND(AVG(duration_ms)) AS avg_ms,
+             ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms)) AS p95_ms,
+             MAX(duration_ms) AS max_ms,
+             MAX(CASE WHEN duration_ms > 500 THEN recorded_at END) AS last_slow_at
+      FROM api_metrics
+      WHERE recorded_at > NOW() - INTERVAL '1 hour'
+      GROUP BY endpoint, method
+      ORDER BY p95_ms DESC
+      LIMIT 10
+    `).catch(() => ({ rows: [] }));
+
+    res.json({
+      historical: rows,
+      live: liveRows.rows,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});

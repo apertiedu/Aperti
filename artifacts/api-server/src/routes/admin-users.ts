@@ -4,6 +4,36 @@ import { accountsTable, deviceSessionsTable } from "@workspace/db";
 import { eq, ilike, or, and, desc, sql } from "drizzle-orm";
 import { requireRole } from "../middleware/auth";
 import bcrypt from "bcryptjs";
+import { validateBody } from "../middleware/validate-body";
+import { z } from "zod";
+
+const createUserSchema = z.object({
+  username:    z.string().min(2).max(80),
+  password:    z.string().min(6, "Password must be at least 6 characters"),
+  displayName: z.string().max(100).optional(),
+  email:       z.string().email().optional().or(z.literal("")),
+  role:        z.enum(["admin","teacher","assistant","student","parent","super_admin"]).default("teacher"),
+  status:      z.enum(["active","suspended"]).default("active"),
+  phone:       z.string().max(30).optional(),
+  country:     z.string().max(60).optional(),
+});
+
+const updateUserSchema = z.object({
+  displayName: z.string().max(100).optional(),
+  email:       z.string().email().optional().or(z.literal("")),
+  role:        z.enum(["admin","teacher","assistant","student","parent","super_admin"]).optional(),
+  status:      z.enum(["active","suspended"]).optional(),
+  phone:       z.string().max(30).optional(),
+  country:     z.string().max(60).optional(),
+  bio:         z.string().max(2000).optional(),
+  avatarUrl:   z.string().url().optional().or(z.literal("")),
+  firstName:   z.string().max(60).optional(),
+  lastName:    z.string().max(60).optional(),
+});
+
+const resetPasswordSchema = z.object({
+  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+});
 
 export const adminUsersRouter = Router();
 adminUsersRouter.use(requireRole("admin", "super_admin"));
@@ -103,10 +133,9 @@ adminUsersRouter.get("/:id", async (req: Request, res: Response) => {
 });
 
 /* ── Create User ─────────────────────────────────────────────────────────── */
-adminUsersRouter.post("/", async (req: Request, res: Response) => {
+adminUsersRouter.post("/", validateBody(createUserSchema), async (req: Request, res: Response) => {
   try {
     const { username, password, displayName, email, role, status = "active", phone, country } = req.body;
-    if (!username || !password) return res.status(400).json({ error: "Username and password required" });
     const passwordHash = await bcrypt.hash(password, 10);
     const [user] = await db.insert(accountsTable).values({ username, passwordHash, displayName: displayName || username, email, role: role || "teacher", status, phone, country }).returning();
     res.status(201).json(user);
@@ -117,7 +146,7 @@ adminUsersRouter.post("/", async (req: Request, res: Response) => {
 });
 
 /* ── Update User ─────────────────────────────────────────────────────────── */
-adminUsersRouter.put("/:id", async (req: Request, res: Response) => {
+adminUsersRouter.put("/:id", validateBody(updateUserSchema), async (req: Request, res: Response) => {
   try {
     const { displayName, email, role, status, phone, country, bio, avatarUrl, firstName, lastName } = req.body;
     const [user] = await db.update(accountsTable).set({ displayName, email, role, status, phone, country, bio, avatarUrl, firstName, lastName }).where(eq(accountsTable.id, parseInt(req.params.id))).returning();
@@ -148,10 +177,9 @@ adminUsersRouter.put("/:id/restore", async (req: Request, res: Response) => {
 });
 
 /* ── Reset Password ──────────────────────────────────────────────────────── */
-adminUsersRouter.post("/:id/reset-password", async (req: Request, res: Response) => {
+adminUsersRouter.post("/:id/reset-password", validateBody(resetPasswordSchema), async (req: Request, res: Response) => {
   try {
     const { newPassword } = req.body;
-    if (!newPassword) return res.status(400).json({ error: "New password required" });
     const passwordHash = await bcrypt.hash(newPassword, 10);
     await db.update(accountsTable).set({ passwordHash }).where(eq(accountsTable.id, parseInt(req.params.id)));
     res.json({ success: true });

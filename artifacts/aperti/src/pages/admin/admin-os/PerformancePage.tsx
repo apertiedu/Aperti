@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { fetchJSON } from "@/lib/api";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Zap, AlertTriangle, Clock, Activity, Database, RefreshCw } from "lucide-react";
+import { Zap, AlertTriangle, Clock, Activity, Database, RefreshCw, TrendingUp } from "lucide-react";
 
 function MetricCard({ label, value, unit, icon: Icon, status = "ok" }: any) {
   const c = status === "ok" ? "border-green-100 bg-green-50" : status === "warning" ? "border-yellow-100 bg-yellow-50" : "border-red-100 bg-red-50";
@@ -31,8 +31,15 @@ export default function PerformancePage() {
     refetchInterval: 60000,
   });
 
+  const { data: founderPerf } = useQuery({
+    queryKey: ["founder-performance"],
+    queryFn: () => fetchJSON("/api/founder/performance"),
+    refetchInterval: 60000,
+  });
+
   const d = data as any;
   const h = healthSummary as any;
+  const fp = founderPerf as any;
   const summary = d?.summary ?? {};
   const endpoints = d?.endpoints ?? [];
   const timeline = d?.timeline ?? [];
@@ -161,6 +168,51 @@ export default function PerformancePage() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Top Slowest Routes — live from api_metrics + historical */}
+          {(fp?.live?.length > 0 || fp?.historical?.length > 0) && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h2 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-orange-500" /> Top 10 Slowest Endpoints (p95)
+                </h2>
+                <p className="text-xs text-gray-400 mt-0.5">Routes flagged as slow (&gt;500ms)</p>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+                    <tr>
+                      {["Route", "Method", "Hits", "Avg (ms)", "P95 (ms)", "Max (ms)", "Last Slow"].map(col => (
+                        <th key={col} className="px-4 py-3 text-left font-medium">{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {(fp?.live?.length > 0 ? fp.live : fp?.historical ?? []).map((r: any, i: number) => {
+                      const p95 = parseInt(r.p95_ms);
+                      return (
+                        <tr key={i} className="hover:bg-gray-50">
+                          <td className="px-4 py-3 font-mono text-xs text-gray-700 max-w-xs truncate">{r.route}</td>
+                          <td className="px-4 py-3"><span className="px-2 py-0.5 bg-gray-100 rounded text-xs font-mono">{r.method}</span></td>
+                          <td className="px-4 py-3 text-gray-600">{parseInt(r.hit_count).toLocaleString()}</td>
+                          <td className="px-4 py-3 text-gray-600">{r.avg_ms}</td>
+                          <td className="px-4 py-3">
+                            <span className={`font-semibold ${p95 > 1000 ? "text-red-600" : p95 > 500 ? "text-orange-500" : "text-green-600"}`}>
+                              {r.p95_ms}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">{r.max_ms}</td>
+                          <td className="px-4 py-3 text-xs text-gray-400">
+                            {r.last_slow_at ? new Date(r.last_slow_at).toLocaleTimeString() : "—"}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
