@@ -6,7 +6,7 @@ import {
   Users, TrendingUp, BookOpen, DollarSign, AlertCircle,
   Layers, Activity, Zap, ArrowUpRight, ArrowDownRight,
   BarChart3, ShieldCheck, Gauge, Heart, Puzzle, Headphones,
-  Target, RefreshCw,
+  Target, RefreshCw, Rocket, CheckCircle2, XCircle, AlertTriangle,
 } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -107,6 +107,74 @@ function ScoreCard({ id, data }: { id: string; data: any }) {
         <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{data?.sub}</p>
       </div>
     </motion.div>
+  );
+}
+
+function LaunchCertBadge() {
+  const [, nav] = useLocation();
+  const { data } = useQuery<any>({
+    queryKey: ["launch-certification"],
+    queryFn: () => fetchJSON("/api/founder/launch-certification"),
+    refetchInterval: 120000,
+    staleTime: 60000,
+    retry: false,
+  });
+  if (!data) return null;
+  const { certified, failCount, warnCount, checks = [] } = data;
+  const passCount = (checks as any[]).filter((c: any) => c.status === "pass").length;
+  const total = checks.length;
+
+  return (
+    <motion.button
+      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+      onClick={() => nav("/admin/os/launch-certification")}
+      className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all hover:shadow-md ${
+        certified
+          ? "border-green-200 bg-gradient-to-r from-green-50 to-emerald-50"
+          : failCount > 0
+          ? "border-red-200 bg-red-50"
+          : "border-amber-200 bg-amber-50"
+      }`}
+    >
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
+        certified ? "bg-green-100" : failCount > 0 ? "bg-red-100" : "bg-amber-100"
+      }`}>
+        <Rocket className={`w-5 h-5 ${certified ? "text-green-600" : failCount > 0 ? "text-red-500" : "text-amber-600"}`} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-bold text-gray-900">Launch Certification</p>
+        <p className={`text-xs font-medium mt-0.5 ${certified ? "text-green-700" : failCount > 0 ? "text-red-600" : "text-amber-700"}`}>
+          {certified
+            ? `All ${total} checks passed — ready to launch 🚀`
+            : failCount > 0
+            ? `${failCount} critical blocker${failCount !== 1 ? "s" : ""} 🔴 — launch blocked`
+            : `${warnCount} warning${warnCount !== 1 ? "s" : ""} 🟠 — review before launch`}
+        </p>
+      </div>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex flex-col items-end gap-0.5">
+          <div className="flex items-center gap-1">
+            {certified ? (
+              <CheckCircle2 className="w-4 h-4 text-green-500" />
+            ) : failCount > 0 ? (
+              <XCircle className="w-4 h-4 text-red-500" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-amber-500" />
+            )}
+            <span className={`text-sm font-black ${certified ? "text-green-700" : failCount > 0 ? "text-red-600" : "text-amber-600"}`}>
+              {passCount}/{total}
+            </span>
+          </div>
+          <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${certified ? "bg-green-500" : failCount > 0 ? "bg-red-500" : "bg-amber-400"}`}
+              style={{ width: `${total > 0 ? (passCount / total) * 100 : 0}%` }}
+            />
+          </div>
+        </div>
+        <ArrowUpRight className="w-4 h-4 text-gray-400" />
+      </div>
+    </motion.button>
   );
 }
 
@@ -311,6 +379,12 @@ export default function FounderControlPage() {
           )}
         </>
       )}
+
+      {/* Launch Certification Status */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Launch Readiness</h2>
+        <LaunchCertBadge />
+      </div>
 
       {/* Revenue trend + quick links */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

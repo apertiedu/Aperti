@@ -4,8 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Rocket, CheckCircle2, XCircle, AlertTriangle, RefreshCw,
   ShieldCheck, Lock, UserPlus, CreditCard, BookOpen,
-  Shield, Smartphone, Radio, MessageSquareWarning, Database,
-  BarChart3, Flag, TrendingUp, Loader2, ExternalLink,
+  Shield, Smartphone, Database, BarChart3, Flag, Loader2,
+  ExternalLink, KeyRound, Monitor, GraduationCap, ClipboardCheck,
+  FileSearch,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -14,18 +15,18 @@ const api = (path: string) =>
   fetch(path, { headers: { Authorization: `Bearer ${tok()}` } }).then(r => r.json());
 
 const CHECK_META: Record<string, { icon: any; link?: string; color: string }> = {
-  auth_stable:            { icon: Lock,                  link: "/admin/os/security",     color: "text-blue-600"   },
-  signup_stable:          { icon: UserPlus,               link: "/admin/os/users",        color: "text-purple-600" },
-  payment_stable:         { icon: CreditCard,             link: "/admin/os/payments",     color: "text-emerald-600"},
-  enrollment_stable:      { icon: BookOpen,               link: "/admin/os/enrollments",  color: "text-orange-600" },
-  permissions_stable:     { icon: Shield,                 link: "/admin/os/roles",        color: "text-red-600"    },
-  mobile_stable:          { icon: Smartphone,             color: "text-pink-600"          },
-  error_logging_active:   { icon: Radio,                  link: "/admin/os/qa/bugs",      color: "text-cyan-600"   },
-  reporting_center_active:{ icon: MessageSquareWarning,   link: "/admin/os/problem-reports", color: "text-amber-600"},
-  database_verified:      { icon: Database,               link: "/admin/os/integrity",    color: "text-teal-600"   },
-  analytics_verified:     { icon: BarChart3,              link: "/admin/os/analytics",    color: "text-indigo-600" },
-  no_critical_blockers:   { icon: Flag,                   link: "/admin/os/launch-blockers", color: "text-red-600" },
-  no_major_blockers:      { icon: TrendingUp,             link: "/admin/os/launch-blockers", color: "text-orange-600"},
+  auth_passes:              { icon: Lock,           link: "/admin/os/security",        color: "text-blue-600"   },
+  registration_passes:      { icon: UserPlus,        link: "/admin/os/users",           color: "text-purple-600" },
+  password_reset_passes:    { icon: KeyRound,         link: "/admin/os/security",        color: "text-indigo-600" },
+  device_management_works:  { icon: Monitor,          link: "/admin/os/user-access",     color: "text-cyan-600"   },
+  enrollment_flows_tested:  { icon: GraduationCap,    link: "/admin/os/enrollments",     color: "text-orange-600" },
+  assessments_graded:       { icon: ClipboardCheck,   link: "/admin/os/analytics",       color: "text-amber-600"  },
+  question_extraction_valid:{ icon: FileSearch,        link: "/admin/os/content-quality", color: "text-teal-600"   },
+  payments_verified:        { icon: CreditCard,        link: "/admin/os/payments",        color: "text-emerald-600"},
+  mobile_approved:          { icon: Smartphone,        color: "text-pink-600"             },
+  analytics_real_data:      { icon: BarChart3,         link: "/admin/os/analytics",       color: "text-violet-600" },
+  security_review_passed:   { icon: Shield,            link: "/admin/os/security",        color: "text-red-600"    },
+  database_integrity:       { icon: Database,          link: "/admin/os/integrity",       color: "text-slate-600"  },
 };
 
 function CheckItem({ check, index }: { check: any; index: number }) {
@@ -94,6 +95,21 @@ export default function LaunchCertificationPage() {
     refetch();
   };
 
+  const REQUIRED_12 = [
+    "Authentication passes",
+    "Registration passes",
+    "Password reset passes",
+    "Device management works",
+    "Enrollment flows tested",
+    "Assessments graded correctly",
+    "Question extraction produces valid output",
+    "Payments verified end-to-end",
+    "Mobile experience approved",
+    "Analytics delivering real data",
+    "Security review passed",
+    "Database integrity confirmed",
+  ];
+
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       {/* Header */}
@@ -113,6 +129,32 @@ export default function LaunchCertificationPage() {
           <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
           {isFetching ? "Checking…" : "Re-run Checks"}
         </button>
+      </div>
+
+      {/* Required 12 checklist legend */}
+      <div className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+        <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Required Gate Criteria</p>
+        <div className="grid sm:grid-cols-2 gap-1.5">
+          {REQUIRED_12.map((item, i) => {
+            const check = checks.find(c => c.label === item || c.label.toLowerCase().includes(item.split(" ").slice(0, 2).join(" ").toLowerCase()));
+            const passed = check?.status === "pass";
+            const failed = check?.status === "fail";
+            return (
+              <div key={i} className="flex items-center gap-2 text-xs">
+                {passed ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-green-500 flex-shrink-0" />
+                ) : failed ? (
+                  <XCircle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+                ) : (
+                  <div className="w-3.5 h-3.5 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                )}
+                <span className={passed ? "text-green-700 font-medium" : failed ? "text-red-700 font-medium" : "text-gray-500"}>
+                  {item}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main certification banner */}
@@ -206,22 +248,40 @@ export default function LaunchCertificationPage() {
                 <XCircle className="w-7 h-7 text-red-500" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-red-800">Launch Blocked</h2>
+                <h2 className="text-xl font-bold text-red-800">Launch Blocked 🔴</h2>
                 <p className="text-sm text-red-600 mt-0.5">
                   {failCount} check{failCount !== 1 ? "s" : ""} failing.{" "}
                   {warnCount > 0 && `${warnCount} warning${warnCount !== 1 ? "s" : ""}. `}
-                  Resolve all red items before launching.
+                  Every red item is a critical blocker — resolve before launch.
                 </p>
               </div>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {checks.filter(c => c.status === "fail").map(c => (
-                <span key={c.id} className="flex items-center gap-1.5 text-xs font-medium bg-red-100 text-red-700 px-2.5 py-1 rounded-full">
-                  <XCircle className="w-3 h-3" />
-                  {c.label}
-                </span>
-              ))}
-            </div>
+            {checks.filter(c => c.status === "fail").length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold text-red-700 mb-2">Critical Blockers 🔴</p>
+                <div className="flex flex-wrap gap-2">
+                  {checks.filter(c => c.status === "fail").map(c => (
+                    <span key={c.id} className="flex items-center gap-1.5 text-xs font-medium bg-red-100 text-red-700 px-2.5 py-1 rounded-full">
+                      <XCircle className="w-3 h-3" />
+                      {c.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {checks.filter(c => c.status === "warn").length > 0 && (
+              <div className="mt-3">
+                <p className="text-xs font-semibold text-amber-700 mb-2">Warnings 🟠</p>
+                <div className="flex flex-wrap gap-2">
+                  {checks.filter(c => c.status === "warn").map(c => (
+                    <span key={c.id} className="flex items-center gap-1.5 text-xs font-medium bg-amber-100 text-amber-700 px-2.5 py-1 rounded-full">
+                      <AlertTriangle className="w-3 h-3" />
+                      {c.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -254,7 +314,7 @@ export default function LaunchCertificationPage() {
       {/* Checklist grid */}
       {!isLoading && checks.length > 0 && (
         <div className="space-y-2.5">
-          <p className="text-xs font-bold uppercase tracking-wide text-gray-400 px-1">System Checks</p>
+          <p className="text-xs font-bold uppercase tracking-wide text-gray-400 px-1">System Checks — Live from Database</p>
           <div className="grid sm:grid-cols-2 gap-2.5">
             {checks.map((check: any, i: number) => (
               <CheckItem key={check.id} check={check} index={i} />
@@ -263,10 +323,17 @@ export default function LaunchCertificationPage() {
         </div>
       )}
 
+      {!isLoading && checks.length === 0 && (
+        <div className="text-center py-12 text-gray-400">
+          <Rocket className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">No check data yet. Click Re-run to start.</p>
+        </div>
+      )}
+
       {/* Footer note */}
       {!isLoading && (
         <div className="text-center text-xs text-gray-400 pb-2">
-          Checks auto-refresh every 60 seconds · {lastRun ? `Last run: ${lastRun}` : "Click Re-run to start"}
+          All checks query live database · Auto-refresh every 60s · {lastRun ? `Last run: ${lastRun}` : "Click Re-run to start"}
         </div>
       )}
     </div>

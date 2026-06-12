@@ -75,6 +75,7 @@ import StabilityScorePage from "./StabilityScorePage";
 import SlowQueriesPage from "./SlowQueriesPage";
 import FrictionAnalyticsPage from "./FrictionAnalyticsPage";
 import WeeklyAuditPage from "./WeeklyAuditPage";
+import NoMockDataPage from "./NoMockDataPage";
 
 export default function AdminOS() {
   return (
@@ -181,6 +182,7 @@ export default function AdminOS() {
         <Route path="/admin/os/slow-queries" component={SlowQueriesPage} />
         <Route path="/admin/os/friction-analytics" component={FrictionAnalyticsPage} />
         <Route path="/admin/os/weekly-audit" component={WeeklyAuditPage} />
+        <Route path="/admin/os/no-mock-data" component={NoMockDataPage} />
 
         <Route component={Dashboard} />
       </Switch>

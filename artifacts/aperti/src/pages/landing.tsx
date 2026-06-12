@@ -847,6 +847,8 @@ const DASHBOARD_SLIDES = [
 
 function LiveDashboardPreview() {
   const [active, setActive] = useState(0);
+  // NOTE: Values shown below are illustrative demo previews — not real user data.
+  // Live platform stats (student count, teacher count, etc.) are fetched from /api/landing/stats.
   const prefersReduced = typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   useEffect(() => {
@@ -925,6 +927,13 @@ function LiveDashboardPreview() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Demo label */}
+      <div className="absolute -bottom-6 left-0 right-0 flex justify-center">
+        <span className="text-[9px] text-gray-400 bg-white/80 border border-gray-200 rounded-full px-2 py-0.5">
+          Illustrative preview · Live data shown on your actual dashboard
+        </span>
       </div>
 
       {/* Glow */}

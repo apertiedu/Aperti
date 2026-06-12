@@ -112,6 +112,7 @@ const NAV = [
   { label: "Slow Queries",         icon: Clock,       href: "/admin/os/slow-queries" },
   { label: "Friction Analytics",   icon: TrendingDown,href: "/admin/os/friction-analytics" },
   { label: "Weekly Audit",         icon: CalendarCheck,href:"/admin/os/weekly-audit" },
+  { label: "No Mock Data Audit",   icon: ShieldCheck, href: "/admin/os/no-mock-data" },
 ] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
