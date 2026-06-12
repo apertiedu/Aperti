@@ -82,6 +82,9 @@ import { ensurePerformanceIndexes } from "./routes/db-indexes";
 import { errorIntelligenceRouter } from "./routes/admin-error-intelligence";
 import { learningEfficiencyRouter } from "./routes/admin-learning-efficiency";
 import { adminContentValidationRouter } from "./routes/admin-content-validation";
+// Phase 32 — Zero-Defect Initiative
+import { adminRouteHealthRouter } from "./routes/admin-route-health";
+import { adminLaunchDashboardRouter } from "./routes/admin-launch-dashboard";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -280,6 +283,10 @@ app.use("/api/admin/ai-usage", adminAiUsageRouter);
 app.use("/api/admin/docs", adminDocsRouter);
 app.use("/api/admin/launch-audit", adminLaunchAuditRouter);
 app.use("/api", userExportRouter);
+
+// Phase 32 — Zero-Defect Initiative
+app.use("/api/admin/route-health", adminRouteHealthRouter);
+app.use("/api/admin/launch-dashboard", adminLaunchDashboardRouter);
 
 // Phase 19 — Founder Control Center & Operational Layer
 app.use("/api/founder", founderRouter);

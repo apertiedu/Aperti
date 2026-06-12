@@ -100,6 +100,11 @@ const NAV = [
   { label: "Learning Efficiency",  icon: TrendingUp,  href: "/admin/os/learning-efficiency" },
   { label: "Content Validation",   icon: ShieldCheck, href: "/admin/os/ai-content-validation" },
   { label: "Resource Relationships", icon: Network,   href: "/admin/os/resource-relationships" },
+
+  { label: "— Phase 32 Zero-Defect", header: true },
+  { label: "Launch Dashboard",     icon: Rocket,      href: "/admin/os/launch-dashboard" },
+  { label: "Route Health",         icon: Activity,    href: "/admin/os/route-health" },
+  { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
 ] as const;
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

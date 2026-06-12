@@ -98,14 +98,25 @@ messagesRouter.get("/messages/contacts", authenticate, async (req: AuthRequest, 
 /* ── Announcements list ────────────────────────────────────────────────── */
 messagesRouter.get("/announcements", authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { rows } = await pool.query(
-      `SELECT a.*, s.name AS subject_name
-         FROM announcements a
-         LEFT JOIN subjects s ON a.subject_id = s.id
-        WHERE a.teacher_account_id=$1
-        ORDER BY a.created_at DESC`,
-      [req.userId!],
-    );
+    const uid = req.userId!;
+    const role = req.role;
+    let query: string;
+    if (role === "teacher" || role === "admin" || role === "assistant") {
+      query = `SELECT a.*, acc.display_name AS sender_name,
+        EXISTS(SELECT 1 FROM announcement_reads ar WHERE ar.announcement_id = a.id AND ar.user_id = $1) AS is_read
+        FROM announcements a
+        JOIN accounts acc ON acc.id = a.sender_id
+        WHERE a.sender_id = $1
+        ORDER BY a.created_at DESC`;
+    } else {
+      query = `SELECT a.*, acc.display_name AS sender_name,
+        EXISTS(SELECT 1 FROM announcement_reads ar WHERE ar.announcement_id = a.id AND ar.user_id = $1) AS is_read
+        FROM announcements a
+        JOIN accounts acc ON acc.id = a.sender_id
+        WHERE a.status = 'delivered'
+        ORDER BY a.created_at DESC`;
+    }
+    const { rows } = await pool.query(query, [uid]);
     res.json(rows);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
@@ -113,11 +124,11 @@ messagesRouter.get("/announcements", authenticate, async (req: AuthRequest, res:
 /* ── Create announcement ───────────────────────────────────────────────── */
 messagesRouter.post("/announcements", authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    const { title, body, audience, subject_id } = req.body;
+    const { title, body, audience_type, audience_ids, scheduled_at } = req.body;
     const { rows } = await pool.query(
-      `INSERT INTO announcements (teacher_account_id, title, body, audience, subject_id, sent_at)
-       VALUES ($1,$2,$3,$4,$5, NOW()) RETURNING *`,
-      [req.userId!, title, body, audience || "all", subject_id || null],
+      `INSERT INTO announcements (sender_id, title, body, audience_type, audience_ids, status, created_at)
+       VALUES ($1,$2,$3,$4,$5, 'delivered', NOW()) RETURNING *`,
+      [req.userId!, title, body, audience_type || "all", audience_ids || null],
     );
     res.status(201).json(rows[0]);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
@@ -126,7 +137,7 @@ messagesRouter.post("/announcements", authenticate, async (req: AuthRequest, res
 /* ── Delete announcement ───────────────────────────────────────────────── */
 messagesRouter.delete("/announcements/:id", authenticate, async (req: AuthRequest, res: Response) => {
   try {
-    await pool.query("DELETE FROM announcements WHERE id=$1 AND teacher_account_id=$2", [req.params.id, req.userId!]);
+    await pool.query("DELETE FROM announcements WHERE id=$1 AND sender_id=$2", [req.params.id, req.userId!]);
     res.json({ success: true });
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });

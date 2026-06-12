@@ -45,3 +45,27 @@ adminFeaturesRouter.delete("/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to archive flag" });
   }
 });
+
+// PATCH by key — toggle a feature flag by key/name (used by PlatformConfigPage quick toggles)
+adminFeaturesRouter.patch("/:key", async (req: Request, res: Response) => {
+  try {
+    const { enabled } = req.body;
+    const key = req.params.key;
+    // Try by ID first (numeric), then by name
+    if (/^\d+$/.test(key)) {
+      const [flag] = await db.update(featureFlagsTable).set({ enabled, updatedAt: new Date() }).where(eq(featureFlagsTable.id, parseInt(key))).returning();
+      return res.json(flag || { error: "Not found" });
+    }
+    // Upsert by name — create if not exists
+    const existing = await db.select().from(featureFlagsTable).where(eq(featureFlagsTable.name, key));
+    if (existing.length > 0) {
+      const [flag] = await db.update(featureFlagsTable).set({ enabled, updatedAt: new Date() }).where(eq(featureFlagsTable.name, key)).returning();
+      return res.json(flag);
+    } else {
+      const [flag] = await db.insert(featureFlagsTable).values({ name: key, enabled: enabled ?? false, status: "enabled" }).returning();
+      return res.status(201).json(flag);
+    }
+  } catch (err) {
+    res.status(500).json({ error: "Failed to toggle feature flag" });
+  }
+});

@@ -66,6 +66,10 @@ import ErrorIntelligencePage from "./ErrorIntelligencePage";
 import LearningEfficiencyPage from "./LearningEfficiencyPage";
 import AiContentValidationPage from "./AiContentValidationPage";
 import ResourceRelationshipPage from "./ResourceRelationshipPage";
+// Phase 32 — Zero-Defect Initiative
+import RouteHealthPage from "./RouteHealthPage";
+import LaunchDashboardPage from "./LaunchDashboardPage";
+import PlatformConfigPage from "./PlatformConfigPage";
 
 export default function AdminOS() {
   return (
@@ -161,6 +165,11 @@ export default function AdminOS() {
         <Route path="/admin/os/learning-efficiency" component={LearningEfficiencyPage} />
         <Route path="/admin/os/ai-content-validation" component={AiContentValidationPage} />
         <Route path="/admin/os/resource-relationships" component={ResourceRelationshipPage} />
+
+        {/* Phase 32 — Zero-Defect Initiative */}
+        <Route path="/admin/os/route-health" component={RouteHealthPage} />
+        <Route path="/admin/os/launch-dashboard" component={LaunchDashboardPage} />
+        <Route path="/admin/os/platform-config" component={PlatformConfigPage} />
 
         <Route component={Dashboard} />
       </Switch>

@@ -46,14 +46,16 @@ export default function ForceChangePassword() {
     }
     setLoading(true);
     try {
-      const res = await fetch("/auth/change-password", {
+      const res = await fetch("/api/auth/change-password", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: Record<string, any> = {};
+      try { data = JSON.parse(text); } catch { /* non-JSON response */ }
       if (!res.ok) {
-        toast({ title: "Failed", description: data.message || "Could not change password.", variant: "destructive" });
+        toast({ title: "Failed", description: data.message || data.error || "Could not change password.", variant: "destructive" });
         return;
       }
       toast({ title: "Password updated", description: "You're all set — welcome to Aperti!" });

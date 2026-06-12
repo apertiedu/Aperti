@@ -223,16 +223,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <p className="text-[10px] text-muted-foreground mt-0.5">Educational OS</p>
           </div>
         )}
-        {!isMobile && (
-          <button
-            onClick={() => setCollapsed(!collapsed)}
-            className="text-muted-foreground hover:text-foreground transition-colors shrink-0 p-0.5 rounded"
-          >
-            {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
-          </button>
-        )}
         {isMobile && (
-          <button onClick={() => setMobileOpen(false)} className="text-muted-foreground hover:text-foreground p-1 rounded">
+          <button onClick={() => setMobileOpen(false)} className="text-muted-foreground hover:text-foreground p-1 rounded" aria-label="Close menu">
             <X className="w-4 h-4" />
           </button>
         )}
@@ -365,6 +357,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         )}
       </div>
+      {/* Sidebar collapse toggle — desktop only */}
+      {!isMobile && (
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="flex items-center justify-center w-full py-2.5 border-t border-sidebar-border text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors shrink-0"
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
+        </button>
+      )}
     </>
   );
 
