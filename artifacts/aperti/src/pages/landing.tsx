@@ -429,6 +429,48 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
   );
 }
 
+/* ─────────────────────────── Marquee Strip ─────────────────────────── */
+const MARQUEE_ITEMS = [
+  "AI Grading", "Live Classes", "Parent Portal", "IGCSE Ready",
+  "Smart Analytics", "Auto Feedback", "Attendance Tracking", "Exam Preparation",
+  "AI Mentor 24/7", "Question Bank", "GradeBook+", "Progress Reports",
+];
+
+function MarqueeStrip() {
+  const prefersReduced = useReducedMotion();
+  const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+  return (
+    <div className="relative overflow-hidden py-3" style={{ background: "#F9FAFB", borderTop: "1px solid #F0F0F0", borderBottom: "1px solid #F0F0F0" }}>
+      <div className="absolute inset-y-0 left-0 w-24 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(to right, #F9FAFB, transparent)" }} />
+      <div className="absolute inset-y-0 right-0 w-24 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(to left, #F9FAFB, transparent)" }} />
+      {prefersReduced ? (
+        <div className="flex flex-wrap gap-4 justify-center px-8">
+          {MARQUEE_ITEMS.map((item, i) => (
+            <span key={i} className="text-xs font-semibold text-gray-400 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: TEAL }} />{item}
+            </span>
+          ))}
+        </div>
+      ) : (
+        <motion.div
+          className="flex items-center gap-10 whitespace-nowrap"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+          style={{ width: "max-content" }}>
+          {doubled.map((item, i) => (
+            <span key={i} className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400">
+              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: TEAL }} />
+              {item}
+            </span>
+          ))}
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
 /* ─────────────────────────── Pricing ─────────────────────────── */
 const TEACHER_COLORS = [TEAL, "#00897B", "#00695C", "#004D40"];
 const STUDENT_COLORS = ["#0277BD", "#0288D1", "#01579B"];
@@ -1382,19 +1424,19 @@ export default function Landing() {
               </h1>
               <p className="text-lg text-gray-500 leading-relaxed mb-9 max-w-xl">{subheadline}</p>
               <div className="flex flex-wrap gap-3 mb-8">
-                <a href="#courses-preview">
+                <Link href="/register">
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white shadow-lg"
                     style={{ background: teal, boxShadow: `0 8px 24px ${teal}30` }}>
-                    {ctaPrimary} <ArrowRight className="h-4 w-4" />
-                  </motion.button>
-                </a>
-                <Link href="/register">
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-gray-700 border border-gray-200 bg-white hover:border-gray-300 transition-colors">
-                    {ctaSecondary}
+                    Get Started Free <ArrowRight className="h-4 w-4" />
                   </motion.button>
                 </Link>
+                <a href="#how-it-works">
+                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-gray-700 border border-gray-200 bg-white hover:border-gray-300 transition-colors">
+                    See How It Works
+                  </motion.button>
+                </a>
               </div>
               {/* Trust signals */}
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -1422,8 +1464,11 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── MARQUEE STRIP ── */}
+      <MarqueeStrip />
+
       {/* ── HOW IT WORKS ── */}
-      <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+      <section id="how-it-works" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
@@ -1467,43 +1512,6 @@ export default function Landing() {
                   Get started today <ArrowRight className="h-4 w-4" />
                 </motion.button>
               </a>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── INTERACTIVE DEMO ── */}
-      <InteractiveDemo teal={teal} />
-
-      {/* ── COURSE PREVIEW ── */}
-      <section id="courses-preview" className="py-24 px-5 bg-white">
-        <div className="max-w-7xl mx-auto">
-          <Reveal>
-            <div className="flex items-end justify-between mb-12">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-4"
-                  style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
-                  <BookOpen className="h-3 w-3" />Course Marketplace
-                </span>
-                <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">Featured Courses</h2>
-                <p className="text-gray-500 mt-2">Expert-led courses with live sessions, AI mentoring, and structured assessments.</p>
-              </div>
-              <Link href="/courses">
-                <button className="hidden sm:flex items-center gap-1.5 text-sm font-semibold hover:opacity-80 transition-opacity" style={{ color: teal }}>
-                  View All <ChevronRight className="h-4 w-4" />
-                </button>
-              </Link>
-            </div>
-          </Reveal>
-          <FeaturedCoursesSection />
-          <Reveal delay={0.3}>
-            <div className="text-center mt-8">
-              <Link href="/courses">
-                <button className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm border-2 transition-all hover:bg-gray-50"
-                  style={{ borderColor: teal, color: teal }}>
-                  Browse All Courses <ArrowRight className="h-4 w-4" />
-                </button>
-              </Link>
             </div>
           </Reveal>
         </div>
@@ -1568,9 +1576,6 @@ export default function Landing() {
         pricingAccent={pricingAccent}
         contactEmail={contactEmail}
       />
-
-      {/* ── GET STARTED IN 3 STEPS ── */}
-      <GetStartedSteps teal={teal} />
 
       {/* ── COMPARISON TABLE ── */}
       <ComparisonSection teal={teal} />
