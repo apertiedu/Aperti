@@ -7,3 +7,4 @@
 - [Aperti Phase 37 TypeScript fixes](aperti-phase37.md) — queryFn pattern: apiFetch returns Response; must add .then(r=>r.json()) and type useQuery<T> explicitly or TypeScript errors cascade. Icon types need style prop included.
 - [Aperti Phase 39 motion system](aperti-phase39.md) — shared motion lib at src/lib/motion.ts; useCountUp hook; attention-pulse CSS class; Progress component uses 600ms cubic-bezier transition; data-quality has Repair All Fixable button.
 - [Aperti B4-B12 stabilization](aperti-b4-b12.md) — route registry, ApiError class, logError util, test runner, repair-all endpoint, marquee strip all implemented.
+- [Aperti Phase 42 components](aperti-phase42.md) — AppButton, AppCard, AppModal, AppTable, AppErrorState, feature-registry.ts, FeatureRegistryPage all created; breadcrumb enhanced; skeleton variants added; CSS design polish applied.

@@ -149,6 +149,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Enrollment Timeline",     href: "/enrollment-timeline",        icon: History,     roles: ["admin", "teacher"] },
         { name: "System Debug",            href: "/admin/debug",                icon: Terminal,    roles: ["admin"] },
         { name: "Test Runner",             href: "/admin/test-runner",          icon: Activity,    roles: ["admin"] },
+        { name: "Feature Registry",        href: "/admin/feature-registry",     icon: Layers,      roles: ["admin"] },
       ],
     },
     {
@@ -211,6 +212,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         location === item.href ||
         (item.href !== "/" && location.startsWith(item.href)),
     )?.name || (isAdmin ? "Command Center" : "CoreHub");
+
+  const breadcrumbGroup =
+    navGroups.find((g) =>
+      g.items.some(
+        (item) =>
+          location === item.href ||
+          (item.href !== "/" && location.startsWith(item.href)),
+      ),
+    )?.label ?? null;
 
   useEffect(() => {
     if (currentPage && location !== "/" && !location.startsWith("/admin/os")) {
@@ -414,10 +424,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground/50 text-xs hidden sm:inline">Aperti</span>
-              <span className="text-muted-foreground/50 text-xs hidden sm:inline">/</span>
-              <span className="text-foreground text-sm font-medium">{currentPage}</span>
+            <div className="flex items-center gap-1.5 text-xs min-w-0">
+              <span className="text-muted-foreground/50 font-medium hidden sm:inline shrink-0">Aperti</span>
+              {breadcrumbGroup && (
+                <>
+                  <span className="text-muted-foreground/30 hidden sm:inline">/</span>
+                  <span className="text-muted-foreground/60 hidden md:inline shrink-0">{breadcrumbGroup}</span>
+                </>
+              )}
+              <span className="text-muted-foreground/30 hidden sm:inline">/</span>
+              <span className="text-foreground font-semibold text-sm truncate">{currentPage}</span>
             </div>
           </div>
           <div className="flex items-center gap-2">

@@ -127,3 +127,61 @@ export function SkeletonPage({ className }: { className?: string }) {
     </div>
   );
 }
+
+export function SkeletonList({ count = 4, className }: { count?: number; className?: string }) {
+  return (
+    <div className={cn("space-y-3", className)}>
+      {Array.from({ length: count }).map((_, i) => (
+        <div
+          key={i}
+          className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4"
+        >
+          <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-2 min-w-0">
+            <Skeleton className="h-4 w-1/3 rounded" />
+            <Skeleton className="h-3 w-1/2 rounded" />
+          </div>
+          <Skeleton className="h-6 w-16 rounded-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function SkeletonProfile({ className }: { className?: string }) {
+  return (
+    <div className={cn("bg-white rounded-xl border border-gray-100 shadow-sm p-6", className)}>
+      <div className="flex items-center gap-5 mb-6">
+        <Skeleton className="h-16 w-16 rounded-full flex-shrink-0" />
+        <div className="space-y-2">
+          <Skeleton className="h-5 w-36 rounded" />
+          <Skeleton className="h-3 w-24 rounded" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="space-y-1.5">
+            <Skeleton className="h-3 w-20 rounded" />
+            <Skeleton className="h-9 w-full rounded-xl" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function SkeletonAnalytics({ className }: { className?: string }) {
+  return (
+    <div className={cn("space-y-5", className)}>
+      <div className="grid grid-cols-3 gap-4">
+        {[1, 2, 3].map((i) => <SkeletonStatCard key={i} />)}
+      </div>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+        <Skeleton className="h-4 w-36 rounded mb-4" />
+        <Skeleton className="h-52 w-full rounded-lg" />
+      </div>
+      <SkeletonTable rows={4} cols={5} />
+    </div>
+  );
+}

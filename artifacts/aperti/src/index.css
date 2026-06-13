@@ -485,3 +485,103 @@ table tbody tr {
   pointer-events: none;
 }
 .card-shine:hover::after { transform: translateX(100%); }
+
+/* ── Phase 42: Design Polish ─────────────────────────────────────────────── */
+
+/* Touch targets — all interactive elements ≥ 44×44px on mobile */
+@media (pointer: coarse) {
+  button, [role="button"], a, input[type="checkbox"], input[type="radio"],
+  select, [role="switch"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Exception: small inline elements */
+  .touch-compact {
+    min-height: unset;
+    min-width: unset;
+  }
+}
+
+/* Fade-in content utility (150ms — Phase 42 requirement) */
+@keyframes contentFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.content-fade-in {
+  animation: contentFadeIn 0.15s ease-out forwards;
+}
+.content-fade-in-slow {
+  animation: contentFadeIn 0.2s ease-out forwards;
+}
+
+/* Standardized focus ring — consistent across all components */
+:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Responsive table → list card on small screens */
+@media (max-width: 640px) {
+  .responsive-table thead { display: none; }
+  .responsive-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid hsl(var(--border) / 0.4);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    padding: 12px;
+    background: hsl(var(--card));
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+  .responsive-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-size: 0.8125rem;
+    border: none;
+  }
+  .responsive-table tbody td[data-label]::before {
+    content: attr(data-label);
+    font-weight: 600;
+    font-size: 0.7rem;
+    color: hsl(var(--muted-foreground));
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 8px;
+  }
+}
+
+/* Unified shadow levels */
+.shadow-level-1 { box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); }
+.shadow-level-2 { box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04); }
+.shadow-level-3 { box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06); }
+
+/* Aperti breadcrumb separator */
+.breadcrumb-sep {
+  color: hsl(var(--muted-foreground) / 0.35);
+  user-select: none;
+}
+
+/* Consistent exit animation (ease-out) */
+@keyframes contentFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-4px); }
+}
+.content-fade-out {
+  animation: contentFadeOut 0.15s ease-out forwards;
+}
+
+/* Horizontal scroll prevention */
+body, #root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* AppButton min tap target */
+.app-btn-touch {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
