@@ -6,3 +6,4 @@
 - [Aperti Phase 36 features](aperti-phase36.md) — Emergency tools, platform health score, recently visited, 404 page, CSS hero, core-hub smart context, admin health bars, CSS micro-interactions
 - [Aperti Phase 37 TypeScript fixes](aperti-phase37.md) — queryFn pattern: apiFetch returns Response; must add .then(r=>r.json()) and type useQuery<T> explicitly or TypeScript errors cascade. Icon types need style prop included.
 - [Aperti Phase 39 motion system](aperti-phase39.md) — shared motion lib at src/lib/motion.ts; useCountUp hook; attention-pulse CSS class; Progress component uses 600ms cubic-bezier transition; data-quality has Repair All Fixable button.
+- [Aperti B4-B12 stabilization](aperti-b4-b12.md) — route registry, ApiError class, logError util, test runner, repair-all endpoint, marquee strip all implemented.

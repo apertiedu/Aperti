@@ -61,6 +61,7 @@ import FeatureStatusPage from "@/pages/admin/feature-status";
 import DataQualityPage from "@/pages/admin/data-quality";
 import SessionSlotsAdminPage from "@/pages/admin/session-slots";
 import AdminDebugPage from "@/pages/admin/debug";
+import TestRunner from "@/pages/admin/test-runner";
 // Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
 import SubpilotSettings from "@/pages/admin/subpilot-settings";
@@ -580,6 +581,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/data-quality" component={DataQualityPage} />
     <Route path="/admin/session-slots" component={SessionSlotsAdminPage} />
     <Route path="/admin/debug" component={AdminDebugPage} />
+    <Route path="/admin/test-runner" component={TestRunner} />
     {/* Phase 36 — /admin/launch shortcut */}
     <Route path="/admin/launch" component={AdminOS} />
   </>

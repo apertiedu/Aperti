@@ -255,3 +255,48 @@ adminDataQualityRouter.post("/fix", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+adminDataQualityRouter.post("/repair-all", async (_req, res) => {
+  const fixable = ["missing_student_code", "duplicate_attendance", "orphaned_enrollments", "attendance_no_session"];
+  const results: Array<{ issueId: string; fixed: number; error?: string }> = [];
+
+  for (const issueId of fixable) {
+    try {
+      let fixed = 0;
+      if (issueId === "missing_student_code") {
+        const rows = await pool.query(`SELECT id FROM students WHERE student_code IS NULL OR student_code = '' ORDER BY id`);
+        for (const row of rows.rows) {
+          const code = `STU${String(row.id).padStart(5, "0")}`;
+          await pool.query(`UPDATE students SET student_code = $1 WHERE id = $2`, [code, row.id]);
+          fixed++;
+        }
+      } else if (issueId === "duplicate_attendance") {
+        const result = await pool.query(`
+          DELETE FROM attendance WHERE id NOT IN (
+            SELECT MIN(id) FROM attendance GROUP BY student_id, lesson_id, date
+          )
+        `);
+        fixed = result.rowCount ?? 0;
+      } else if (issueId === "orphaned_enrollments") {
+        const result = await pool.query(`
+          UPDATE students SET account_id = NULL
+          WHERE account_id IS NOT NULL
+          AND NOT EXISTS (SELECT 1 FROM accounts a WHERE a.id = students.account_id)
+        `);
+        fixed = result.rowCount ?? 0;
+      } else if (issueId === "attendance_no_session") {
+        const result = await pool.query(`
+          DELETE FROM attendance
+          WHERE NOT EXISTS (SELECT 1 FROM lessons l WHERE l.id = attendance.lesson_id)
+        `);
+        fixed = result.rowCount ?? 0;
+      }
+      results.push({ issueId, fixed });
+    } catch (err: any) {
+      results.push({ issueId, fixed: 0, error: err.message });
+    }
+  }
+
+  const totalFixed = results.reduce((sum, r) => sum + r.fixed, 0);
+  res.json({ totalFixed, results });
+});

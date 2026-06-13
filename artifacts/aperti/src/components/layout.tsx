@@ -10,8 +10,9 @@ import {
   LogOut, ChevronLeft, ChevronRight, Search, KeyRound,
   Sun, Moon, ShoppingBag, UserCheck, Link2, Bot, Sparkles,
   GraduationCap, TableProperties, Medal, Scale, Archive,
-  Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X,
+  Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X, Activity,
 } from "lucide-react";
+import { assertRouteValid } from "@/lib/route-registry";
 import { useAuth } from "@/context/auth";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -147,6 +148,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Attendance Audit",        href: "/attendance-audit",           icon: Shield,      roles: ["admin", "teacher"] },
         { name: "Enrollment Timeline",     href: "/enrollment-timeline",        icon: History,     roles: ["admin", "teacher"] },
         { name: "System Debug",            href: "/admin/debug",                icon: Terminal,    roles: ["admin"] },
+        { name: "Test Runner",             href: "/admin/test-runner",          icon: Activity,    roles: ["admin"] },
       ],
     },
     {
@@ -174,7 +176,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const filteredGroups = navGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => !user || item.roles.includes(user.role)),
+      items: group.items.filter((item) => {
+        if (!user || !item.roles.includes(user.role)) return false;
+        assertRouteValid(item.href, item.name);
+        return true;
+      }),
     }))
     .filter((group) => group.items.length > 0);
 
