@@ -1,15 +1,4 @@
-- [Aperti DB tables](aperti-db-tables.md) — many tables are created by push-schema.ts at startup; several extras required manual SQL creation
-- [Aperti missing tables](aperti-missing-tables.md) — full list of tables created manually outside the schema push
-- [Aperti route structure](aperti-route-structure.md) — how app.ts mounts routes at bare paths AND /api, and the proxy BARE_OK list
-- [Aperti Phase 21 features](aperti-phase21.md) — all Phase 21 features built; key patterns for slash commands, confetti, and landing sections
-- [Aperti Phase 22 UX system](aperti-phase22.md) — all Phase 22 UX infrastructure: tokens, skeletons, empty states, auto-save, error boundaries, sidebar persist
-- [Aperti DB runtime gaps](aperti-db-runtime-gaps.md) — aperti_courses missing at runtime; students has no status column; phase14-public and courses.ts fixes
-- [Aperti Phase 26 stability](aperti-phase26.md) — session table, launch blockers, problem_reports schema fix, sessionExpired modal, error logging, QA script
-- [Aperti Phase 27 refinement](aperti-phase27.md) — all Phase 27 UX polish features; key components, backend endpoints, and UX patterns
-- [Aperti Phase 29 features](aperti-phase29.md) — all Phase 29 Intelligence, Efficiency & Educational Excellence features; components, patterns, and page integrations
-- [Aperti Phase 30 production](aperti-phase30.md) — all Phase 30 features: Error Intelligence, Content Validation, Resource Mapping, Learning Efficiency, self-marking, route test script
-- [Aperti Phase 31 stabilization](aperti-phase31.md) — DB schema push fix (tsx path), JWT_SECRET/OPENAI_API_KEY env setup, duplicate route removal, login rate limiter JSON handler
-- [Aperti Phase 32 Zero-Defect](aperti-phase32.md) — 100% route health (32/32 pass); missing tables, route mount fixes, sign-in "unexpected token" fix, change-password path fix
-- [Aperti Phase 33 features](aperti-phase33.md) — Phase 33 features + P33-T1 fixes: teal #0D9488 migration, naming audit, login JSON safety, page backgrounds
-- [Aperti Phase 33 perfection](aperti-phase33-perfection.md) — Phase 33 Platform Perfection: search/flashcard/analytics upgrades, pg_trgm extension, SM-2 confidence, retention analytics
-- [Aperti Phase 34 features](aperti-phase34.md) — Anti-Cheat V2 (risk score 0–100, paste/copy tracking), GradeFlow AI confidence badge, flashcard AI generation, teacher interventions panel, ShieldCore V2
+- [Phase 34 implementation](phase34.md) — session slots, QR center, data quality, route health, feature status all implemented and live.
+- [Sidebar logo pattern](sidebar-logo.md) — logo section uses text-only "Aperti." — no icon. The "Educational OS" subtitle was removed in Phase 34 to simplify the logo.
+- [DB migration pattern](db-migration.md) — use `psql "$DATABASE_URL" -c "..."` for migrations; node -e with `pg` doesn't work from workspace root (no pg module there).
+- [Session slots schema](session-slots-schema.md) — new `session_slots` table added, exported from lib/db/src/schema/index.ts, FK to lessons(id).

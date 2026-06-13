@@ -55,6 +55,11 @@ import ErrorTrace from "@/pages/error-trace";
 import TutorCraft from "@/pages/tutorcraft";
 import Messages from "@/pages/messages";
 
+// Admin — Phase 34
+import RouteHealthPage from "@/pages/admin/route-health";
+import FeatureStatusPage from "@/pages/admin/feature-status";
+import DataQualityPage from "@/pages/admin/data-quality";
+import SessionSlotsAdminPage from "@/pages/admin/session-slots";
 // Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
 import SubpilotSettings from "@/pages/admin/subpilot-settings";
@@ -88,6 +93,7 @@ import Ascend from "@/pages/student/ascend";
 import SimVerse from "@/pages/student/simverse";
 import TakeExam from "@/pages/student/take-exam";
 import SkillBadge from "@/pages/student/skill-badge";
+import MyQRPage from "@/pages/student/my-qr";
 import LearnPath from "@/pages/student/learn-path";
 import RevisionPlanPage from "@/pages/student/revision-plan";
 import QuestionExtractionPage from "@/pages/teacher/question-extraction";
@@ -438,6 +444,8 @@ function StudentRouter() {
         {/* Phase 17 — Mobile */}
         <Route path="/mobile/home" component={StudentMobileHome} />
         <Route path="/flashcards/swipe" component={FlashcardSwipe} />
+        {/* Phase 34 — Student QR Center */}
+        <Route path="/my-qr" component={MyQRPage} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -554,6 +562,11 @@ const ADMIN_ROUTES = (
     {/* Phase 17 — Mobile Admin */}
     <Route path="/admin/push" component={AdminPushPage} />
     <Route path="/mobile/home" component={AdminMobileHome} />
+    {/* Phase 34 — Data Quality, Route Health, Feature Status, Session Slots */}
+    <Route path="/admin/route-health" component={RouteHealthPage} />
+    <Route path="/admin/feature-status" component={FeatureStatusPage} />
+    <Route path="/admin/data-quality" component={DataQualityPage} />
+    <Route path="/admin/session-slots" component={SessionSlotsAdminPage} />
   </>
 );
 

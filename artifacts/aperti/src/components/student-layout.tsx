@@ -56,6 +56,7 @@ const allNav = [
   { href: "/support", label: "Support", icon: Ticket, desc: "Help & tickets" },
   { href: "/notifications", label: "Notifications", icon: Bell, desc: "Notification settings" },
   { href: "/exam-vault", label: "ExamVault", icon: Lock, desc: "Secure offline exams" },
+  { href: "/my-qr", label: "My QR Code", icon: GraduationCap, desc: "Attendance QR & ID card" },
   { href: "/exam-room", label: "Exam Room", icon: GraduationCap, desc: "Take your exams" },
   { href: "/student/exam-readiness", label: "Exam Readiness", icon: Target, desc: "AI readiness dashboard" },
   { href: "/student/transcript", label: "Transcript", icon: FileText, desc: "Academic record" },

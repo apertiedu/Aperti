@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CalendarCheck, Clock, CheckCircle, AlertCircle, Zap, Target,
   TrendingUp, Flame, ArrowRight, Brain, FlaskConical, Layers, Trophy,
-  Sparkles, Star, Calendar, BarChart3, Route, Shield,
+  Sparkles, Star, Calendar, BarChart3, Route, Shield, QrCode,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/auth";
@@ -451,6 +451,24 @@ export default function StudyStream() {
                 </div>
               </CardContent>
             </Card>
+          </motion.div>
+
+          {/* QR Center quick access */}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.22 }}>
+            <Link href="/my-qr">
+              <Card className="shadow-sm cursor-pointer hover:border-primary/40 hover:shadow-md transition-all group">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                    <QrCode className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-foreground">My QR Code</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">Show to teacher for attendance</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+                </CardContent>
+              </Card>
+            </Link>
           </motion.div>
 
           {/* Active Goals preview */}

@@ -141,6 +141,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Plans & Pricing",          href: "/admin/plans",                icon: Package,     roles: ["admin"] },
         { name: "Commerce Admin",          href: "/admin/commerce",             icon: DollarSign,  roles: ["admin"] },
         { name: "Executive Dashboard",    href: "/admin/executive",            icon: TrendingUp,  roles: ["admin"] },
+        { name: "Route Health",            href: "/admin/route-health",         icon: Shield,      roles: ["admin"] },
+        { name: "Feature Status",          href: "/admin/feature-status",       icon: Sparkles,    roles: ["admin"] },
+        { name: "Data Quality",            href: "/admin/data-quality",         icon: BarChart3,   roles: ["admin"] },
+        { name: "Session Slots",           href: "/admin/session-slots",        icon: CalendarDays,roles: ["admin", "teacher"] },
       ],
     },
     {
@@ -219,7 +223,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">
               Aperti<span className="text-primary">.</span>
             </h1>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Educational OS</p>
           </div>
         )}
         {isMobile && (

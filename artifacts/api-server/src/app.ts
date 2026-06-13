@@ -91,6 +91,9 @@ import { adminDbHealthRouter } from "./routes/admin-db-health";
 import { teacherInterventionsRouter } from "./routes/teacher-interventions";
 import { shieldRouter } from "./routes/shield";
 import { adminAnalyticsExtendedRouter } from "./routes/admin-analytics-extended";
+// Phase 34 — Data Quality & Session Slots
+import { adminDataQualityRouter } from "./routes/admin-data-quality";
+import { sessionSlotsRouter } from "./routes/session-slots";
 // Phase 33 — Error System & Performance
 import { errorsLogRouter } from "./routes/errors-log";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
@@ -354,6 +357,9 @@ app.use("/api/revision-modes", revisionModesRouter);
 app.use("/api/admin/error-intelligence", errorIntelligenceRouter);
 app.use("/api/admin/learning-efficiency", learningEfficiencyRouter);
 app.use("/api/admin/content-validation", adminContentValidationRouter);
+// Phase 34 — Data Quality & Session Slots
+app.use("/api/admin/data-quality", adminDataQualityRouter);
+app.use("/api/session-slots", sessionSlotsRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
