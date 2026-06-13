@@ -94,6 +94,9 @@ import { adminAnalyticsExtendedRouter } from "./routes/admin-analytics-extended"
 // Phase 34 — Data Quality & Session Slots
 import { adminDataQualityRouter } from "./routes/admin-data-quality";
 import { sessionSlotsRouter } from "./routes/session-slots";
+import { attendanceAuditRouter } from "./routes/attendance-audit";
+import { enrollmentTimelineRouter } from "./routes/enrollment-timeline";
+import { notificationsInboxRouter } from "./routes/notifications-inbox";
 // Phase 33 — Error System & Performance
 import { errorsLogRouter } from "./routes/errors-log";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
@@ -360,6 +363,9 @@ app.use("/api/admin/content-validation", adminContentValidationRouter);
 // Phase 34 — Data Quality & Session Slots
 app.use("/api/admin/data-quality", adminDataQualityRouter);
 app.use("/api/session-slots", sessionSlotsRouter);
+app.use("/api/attendance-audit", attendanceAuditRouter);
+app.use("/api/enrollment-timeline", enrollmentTimelineRouter);
+app.use("/api/notifications/inbox", notificationsInboxRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {

@@ -1,34 +1,30 @@
 import { motion } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   BookOpen, CalendarCheck, Users, TrendingUp, Clock, Bell,
   ChevronRight, Zap, Sparkles, MessageSquare, FileText,
-  Video, AlertTriangle, CheckCircle2, PlusCircle, BarChart2,
-  ClipboardList, Brain, Rocket,
+  Video, AlertTriangle, CheckCircle2, BarChart2,
+  ClipboardList, Brain, Rocket, Settings2, Search, X,
+  GraduationCap, QrCode,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/auth";
 import { useQuery } from "@tanstack/react-query";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, BarChart, Bar,
+  ResponsiveContainer,
 } from "recharts";
-
-const API = "/api";
-const tok = () => localStorage.getItem("aperti_token");
-
-async function apiFetch(url: string) {
-  const res = await fetch(`${API}${url}`, { headers: { Authorization: `Bearer ${tok()}` } });
-  if (!res.ok) throw new Error("Failed");
-  return res.json();
-}
+import { apiFetch } from "@/lib/api";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -39,6 +35,35 @@ function getGreeting() {
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
+
+const WIDGET_IDS = ["stats", "quick_start", "schedule", "attendance_trend", "grading_queue", "insights", "quick_actions"] as const;
+type WidgetId = typeof WIDGET_IDS[number];
+const WIDGET_LABELS: Record<WidgetId, string> = {
+  stats: "Stats Row",
+  quick_start: "Quick Start Guide",
+  schedule: "Today's Schedule",
+  attendance_trend: "Attendance Trend",
+  grading_queue: "Grading Queue",
+  insights: "Smart Insights",
+  quick_actions: "Quick Actions",
+};
+const WIDGET_KEY = "aperti_corehub_widgets";
+
+function loadWidgets(): Record<WidgetId, boolean> {
+  try {
+    const stored = JSON.parse(localStorage.getItem(WIDGET_KEY) || "{}");
+    const defaults: Record<WidgetId, boolean> = {
+      stats: true, quick_start: true, schedule: true,
+      attendance_trend: true, grading_queue: true, insights: true, quick_actions: true,
+    };
+    return { ...defaults, ...stored };
+  } catch {
+    return { stats: true, quick_start: true, schedule: true, attendance_trend: true, grading_queue: true, insights: true, quick_actions: true };
+  }
+}
+function saveWidgets(v: Record<WidgetId, boolean>) {
+  try { localStorage.setItem(WIDGET_KEY, JSON.stringify(v)); } catch {}
+}
 
 function StatsCard({ label, value, icon, sub, loading }: any) {
   if (loading) return (
@@ -78,30 +103,140 @@ function InsightCard({ type, text }: { type: "warning" | "success" | "info"; tex
   );
 }
 
+type Student = { id: number; name: string; student_code: string; qr_code?: string };
+
+function QuickStudentLookup() {
+  const [, navigate] = useLocation();
+  const [q, setQ] = useState("");
+  const [open, setOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { data: results = [], isLoading } = useQuery<Student[]>({
+    queryKey: ["student-quick-lookup", q],
+    queryFn: () => apiFetch(`/api/students?search=${encodeURIComponent(q)}&limit=6`),
+    enabled: q.length >= 2,
+    staleTime: 10000,
+  });
+
+  useEffect(() => {
+    if (q.length >= 2) setOpen(true);
+    else setOpen(false);
+  }, [q]);
+
+  const pick = (s: Student) => {
+    navigate(`/students/${s.id}`);
+    setQ(""); setOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        <Input
+          ref={inputRef}
+          value={q}
+          onChange={e => setQ(e.target.value)}
+          onFocus={() => q.length >= 2 && setOpen(true)}
+          placeholder="Quick lookup: name, code, or QR ID…"
+          className="pl-9 pr-8 h-9 text-sm bg-muted/50 border-0 focus-visible:ring-1 focus-visible:ring-primary"
+        />
+        {q && (
+          <button onClick={() => { setQ(""); setOpen(false); inputRef.current?.focus(); }}
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      {open && q.length >= 2 && (
+        <div className="absolute z-50 top-10 left-0 right-0 bg-background border border-border rounded-xl shadow-lg overflow-hidden">
+          {isLoading ? (
+            <div className="p-3 text-xs text-muted-foreground text-center">Searching…</div>
+          ) : results.length === 0 ? (
+            <div className="p-3 text-xs text-muted-foreground text-center">No students found for "{q}"</div>
+          ) : (
+            results.map(s => (
+              <button key={s.id} onClick={() => pick(s)}
+                className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/60 transition-colors text-left">
+                <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <GraduationCap className="h-3.5 w-3.5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{s.name}</p>
+                  <p className="text-xs text-muted-foreground">{s.student_code}</p>
+                </div>
+                <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+              </button>
+            ))
+          )}
+          <Link href="/students">
+            <div className="flex items-center justify-center gap-1.5 py-2 border-t border-border text-xs text-primary hover:bg-primary/5 transition-colors">
+              <Users className="h-3 w-3" /> View all students
+            </div>
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function WidgetTogglePanel({ visible, onToggle, onClose }: {
+  visible: Record<WidgetId, boolean>;
+  onToggle: (id: WidgetId) => void;
+  onClose: () => void;
+}) {
+  return (
+    <div className="absolute right-0 top-10 z-50 bg-background border border-border rounded-xl shadow-lg p-4 w-64">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-semibold text-foreground">Customize Widgets</p>
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+          <X className="h-4 w-4" />
+        </button>
+      </div>
+      <div className="space-y-2.5">
+        {WIDGET_IDS.map(id => (
+          <div key={id} className="flex items-center justify-between">
+            <Label htmlFor={`widget-${id}`} className="text-sm cursor-pointer">{WIDGET_LABELS[id]}</Label>
+            <Switch id={`widget-${id}`} checked={visible[id]} onCheckedChange={() => onToggle(id)} />
+          </div>
+        ))}
+      </div>
+      <p className="text-[10px] text-muted-foreground mt-3">Changes are saved automatically.</p>
+    </div>
+  );
+}
+
 export default function CoreHub() {
   const { user } = useAuth();
   const displayName = user?.displayName ?? "Teacher";
+  const [widgetVisible, setWidgetVisible] = useState<Record<WidgetId, boolean>>(loadWidgets);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const show = (id: WidgetId) => widgetVisible[id] !== false;
+
+  const toggleWidget = (id: WidgetId) => {
+    setWidgetVisible(prev => {
+      const updated = { ...prev, [id]: !prev[id] };
+      saveWidgets(updated);
+      return updated;
+    });
+  };
 
   const { data: summary, isLoading: sumLoading } = useQuery({
     queryKey: ["dashboard", "summary"],
     queryFn: () => apiFetch("/dashboard/summary"),
   });
-
   const { data: extended } = useQuery({
     queryKey: ["dashboard", "extended"],
     queryFn: () => apiFetch("/dashboard/extended-summary"),
   });
-
   const { data: todayClasses, isLoading: todayLoading } = useQuery({
     queryKey: ["dashboard", "today-classes"],
     queryFn: () => apiFetch("/dashboard/today-classes"),
   });
-
   const { data: queue, isLoading: queueLoading } = useQuery({
     queryKey: ["dashboard", "assignment-queue"],
     queryFn: () => apiFetch("/dashboard/assignment-queue"),
   });
-
   const { data: trend } = useQuery({
     queryKey: ["dashboard", "attendance-trend"],
     queryFn: () => apiFetch("/dashboard/attendance-trend"),
@@ -116,7 +251,6 @@ export default function CoreHub() {
       }))
     : [];
 
-  /* Smart insights (rule-based) */
   const insights: Array<{ type: "warning" | "success" | "info"; text: string }> = [];
   const pendingCount = extended?.pendingGrading ?? 0;
   const attendanceRate = summary?.attendanceRate ?? 0;
@@ -140,6 +274,7 @@ export default function CoreHub() {
     { label: "TutorCraft AI", icon: <Sparkles className="h-4 w-4" />, href: "/tutorcraft" },
     { label: "Messages", icon: <MessageSquare className="h-4 w-4" />, href: "/messages" },
     { label: "Analytics", icon: <BarChart2 className="h-4 w-4" />, href: "/pulse" },
+    { label: "Student QR", icon: <QrCode className="h-4 w-4" />, href: "/students" },
   ];
 
   const isNewUser = !sumLoading && (summary?.lessonsToday ?? 0) === 0 && (summary?.studentsPresent ?? 0) === 0 && (summary?.studentsTotal ?? 0) === 0;
@@ -154,7 +289,7 @@ export default function CoreHub() {
   return (
     <div className="min-h-screen bg-background p-6 page-transition">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-8">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">
             {getGreeting()}, <span className="text-primary">{displayName}</span>
@@ -164,7 +299,7 @@ export default function CoreHub() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link href="/messages">
+          <Link href="/notifications">
             <Button variant="outline" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               {(extended?.unreadMessages ?? 0) > 0 && (
@@ -174,6 +309,18 @@ export default function CoreHub() {
               )}
             </Button>
           </Link>
+          <div className="relative">
+            <Button variant="outline" size="icon" onClick={() => setSettingsOpen(s => !s)}>
+              <Settings2 className="h-4 w-4" />
+            </Button>
+            {settingsOpen && (
+              <WidgetTogglePanel
+                visible={widgetVisible}
+                onToggle={toggleWidget}
+                onClose={() => setSettingsOpen(false)}
+              />
+            )}
+          </div>
           <Link href="/tutorcraft">
             <Button size="sm" className="gap-2">
               <Sparkles className="h-4 w-4" /> TutorCraft AI
@@ -182,8 +329,13 @@ export default function CoreHub() {
         </div>
       </motion.div>
 
-      {/* Quick Start — shown for brand-new workspaces */}
-      {isNewUser && (
+      {/* Quick Student Lookup */}
+      <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6 max-w-md">
+        <QuickStudentLookup />
+      </motion.div>
+
+      {/* Quick Start */}
+      {show("quick_start") && isNewUser && (
         <motion.div
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
           className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 p-5"
@@ -217,163 +369,178 @@ export default function CoreHub() {
       )}
 
       {/* Stats row */}
-      <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatsCard loading={sumLoading} label="Today's Classes" value={summary?.lessonsToday ?? 0} icon={<BookOpen className="h-5 w-5 text-primary" />} />
-        <StatsCard loading={sumLoading} label="Students Present" value={`${summary?.studentsPresent ?? 0}`} icon={<Users className="h-5 w-5 text-primary" />} sub={summary?.attendanceRate != null ? `${summary.attendanceRate}% rate` : undefined} />
-        <StatsCard loading={false} label="Pending Grading" value={pendingCount} icon={<Clock className="h-5 w-5 text-amber-500" />} />
-        <StatsCard loading={false} label="Question Bank" value={extended?.questionBankCount ?? "—"} icon={<FileText className="h-5 w-5 text-primary" />} />
-      </motion.div>
+      {show("stats") && (
+        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <StatsCard loading={sumLoading} label="Today's Classes" value={summary?.lessonsToday ?? 0} icon={<BookOpen className="h-5 w-5 text-primary" />} />
+          <StatsCard loading={sumLoading} label="Students Present" value={`${summary?.studentsPresent ?? 0}`} icon={<Users className="h-5 w-5 text-primary" />} sub={summary?.attendanceRate != null ? `${summary.attendanceRate}% rate` : undefined} />
+          <StatsCard loading={false} label="Pending Grading" value={pendingCount} icon={<Clock className="h-5 w-5 text-amber-500" />} />
+          <StatsCard loading={false} label="Question Bank" value={extended?.questionBankCount ?? "—"} icon={<FileText className="h-5 w-5 text-primary" />} />
+        </motion.div>
+      )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
         {/* Today's Schedule */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="xl:col-span-1">
-          <Card className="h-full">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Today's Schedule</CardTitle>
-                <Link href="/plan-grid">
-                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                    View all <ChevronRight className="h-3 w-3" />
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {todayLoading ? (
-                [1, 2, 3].map(i => <Skeleton key={i} className="h-14 rounded-lg" />)
-              ) : classes.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No classes today</p>
-              ) : (
-                classes.map((c: any) => (
-                  <div key={c.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                    <div className="w-1 h-10 rounded-full bg-primary shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{c.subject_name ?? `Lesson ${c.lesson_number}`}</p>
-                      <p className="text-xs text-muted-foreground">{c.start_time}{c.end_time ? ` – ${c.end_time}` : ""} · {c.type ?? "Class"}</p>
+        {show("schedule") && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="xl:col-span-1">
+            <Card className="h-full">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Today's Schedule</CardTitle>
+                  <Link href="/plan-grid">
+                    <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                      View all <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {todayLoading ? (
+                  [1, 2, 3].map(i => <Skeleton key={i} className="h-14 rounded-lg" />)
+                ) : classes.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-6">No classes today</p>
+                ) : (
+                  classes.map((c: any) => (
+                    <div key={c.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                      <div className="w-1 h-10 rounded-full bg-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{c.subject_name ?? `Lesson ${c.lesson_number}`}</p>
+                        <p className="text-xs text-muted-foreground">{c.start_time}{c.end_time ? ` – ${c.end_time}` : ""} · {c.type ?? "Class"}</p>
+                      </div>
+                      {c.online_link && (
+                        <a href={c.online_link} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm" className="h-7 text-xs shrink-0">
+                            <Video className="h-3 w-3 mr-1" /> Join
+                          </Button>
+                        </a>
+                      )}
                     </div>
-                    {c.online_link && (
-                      <a href={c.online_link} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline" size="sm" className="h-7 text-xs shrink-0">
-                          <Video className="h-3 w-3 mr-1" /> Join
-                        </Button>
-                      </a>
-                    )}
-                  </div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Attendance Trend Chart */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="xl:col-span-2">
-          <Card className="h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">7-Day Attendance Trend</CardTitle>
-              <CardDescription className="text-xs">Daily attendance rate across your classes</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {trendData.length === 0 ? (
-                <div className="h-44 flex items-center justify-center text-muted-foreground text-sm">
-                  No attendance data in the last 7 days
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height={176}>
-                  <LineChart data={trendData}>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis dataKey="date" tick={{ fontSize: 11 }} />
-                    <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
-                    <Tooltip formatter={(v: any) => [`${v}%`, "Attendance"]} />
-                    <Line type="monotone" dataKey="rate" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+        {show("attendance_trend") && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            className={show("schedule") ? "xl:col-span-2" : "xl:col-span-3"}>
+            <Card className="h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">7-Day Attendance Trend</CardTitle>
+                <CardDescription className="text-xs">Daily attendance rate across your classes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {trendData.length === 0 ? (
+                  <div className="h-44 flex items-center justify-center text-muted-foreground text-sm">
+                    No attendance data in the last 7 days
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={176}>
+                    <LineChart data={trendData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                      <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
+                      <Tooltip formatter={(v: any) => [`${v}%`, "Attendance"]} />
+                      <Line type="monotone" dataKey="rate" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
-        {/* Assignment Queue */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="xl:col-span-2">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Grading Queue</CardTitle>
-                <Link href="/grade-flow">
-                  <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
-                    Open GradeFlow <ChevronRight className="h-3 w-3" />
-                  </Button>
-                </Link>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {queueLoading ? (
-                [1, 2, 3].map(i => <Skeleton key={i} className="h-12 rounded-lg mb-2" />)
-              ) : submissions.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground text-sm">
-                  <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-emerald-500 opacity-60" />
-                  All caught up — no pending submissions!
+        {/* Grading Queue */}
+        {show("grading_queue") && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            className={show("insights") ? "xl:col-span-2" : "xl:col-span-3"}>
+            <Card>
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Grading Queue</CardTitle>
+                  <Link href="/grade-flow">
+                    <Button variant="ghost" size="sm" className="h-7 text-xs gap-1">
+                      Open GradeFlow <ChevronRight className="h-3 w-3" />
+                    </Button>
+                  </Link>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  {submissions.map((s: any) => (
-                    <div key={s.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
-                      <Avatar className="h-8 w-8 shrink-0">
-                        <AvatarFallback className="text-xs">{s.student_name?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{s.homework_title}</p>
-                        <p className="text-xs text-muted-foreground">{s.student_name} · {s.submitted_at ? new Date(s.submitted_at).toLocaleDateString() : "Just now"}</p>
+              </CardHeader>
+              <CardContent>
+                {queueLoading ? (
+                  [1, 2, 3].map(i => <Skeleton key={i} className="h-12 rounded-lg mb-2" />)
+                ) : submissions.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground text-sm">
+                    <CheckCircle2 className="h-8 w-8 mx-auto mb-2 text-emerald-500 opacity-60" />
+                    All caught up — no pending submissions!
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {submissions.map((s: any) => (
+                      <div key={s.id} className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-muted/50 transition-colors">
+                        <Avatar className="h-8 w-8 shrink-0">
+                          <AvatarFallback className="text-xs">{s.student_name?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{s.homework_title}</p>
+                          <p className="text-xs text-muted-foreground">{s.student_name} · {s.submitted_at ? new Date(s.submitted_at).toLocaleDateString() : "Just now"}</p>
+                        </div>
+                        <Badge variant="outline" className="text-xs shrink-0">Pending</Badge>
                       </div>
-                      <Badge variant="outline" className="text-xs shrink-0">Pending</Badge>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Smart Insights */}
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
-          <Card className="h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base flex items-center gap-2">
-                <Zap className="h-4 w-4 text-primary" /> Smart Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              {insights.length === 0 ? (
-                <p className="text-sm text-muted-foreground">All looks good today!</p>
-              ) : (
-                insights.map((ins, i) => <InsightCard key={i} {...ins} />)
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+        {show("insights") && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}
+            className={show("grading_queue") ? "" : "xl:col-span-3"}>
+            <Card className="h-full">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-primary" /> Smart Insights
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {insights.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">All looks good today!</p>
+                ) : (
+                  insights.map((ins, i) => <InsightCard key={i} {...ins} />)
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
       </div>
 
       {/* Quick Actions */}
-      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
-              {quickActions.map(({ label, icon, href }) => (
-                <Link key={href} href={href}>
-                  <Button variant="outline" className="w-full h-auto flex-col gap-1.5 py-3 text-xs" size="sm">
-                    <span className="text-primary">{icon}</span>
-                    <span className="leading-tight text-center">{label}</span>
-                  </Button>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+      {show("quick_actions") && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+                {quickActions.map(({ label, icon, href }) => (
+                  <Link key={href + label} href={href}>
+                    <Button variant="outline" className="w-full h-auto flex-col gap-1.5 py-3 text-xs" size="sm">
+                      <span className="text-primary">{icon}</span>
+                      <span className="leading-tight text-center">{label}</span>
+                    </Button>
+                  </Link>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 }

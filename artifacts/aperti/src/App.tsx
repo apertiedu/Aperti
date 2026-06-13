@@ -151,6 +151,8 @@ import StudyRooms from "@/pages/study-rooms";
 import CollaborateRoom from "@/pages/collaborate";
 import SupportTickets from "@/pages/support-tickets";
 import NotificationCenter from "@/pages/notification-center";
+import AttendanceAuditPage from "@/pages/attendance-audit";
+import EnrollmentTimelinePage from "@/pages/enrollment-timeline";
 import AdminModeration from "@/pages/admin/moderation";
 import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 
@@ -427,6 +429,8 @@ function StudentRouter() {
         <Route path="/collaborate/:roomId" component={CollaborateRoom} />
         <Route path="/support" component={SupportTickets} />
         <Route path="/notifications" component={NotificationCenter} />
+        <Route path="/attendance-audit" component={AttendanceAuditPage} />
+        <Route path="/enrollment-timeline" component={EnrollmentTimelinePage} />
         {/* Phase 15 — Educational Content Ecosystem */}
         <Route path="/practice" component={PracticeCenter} />
         <Route path="/submit/handwritten" component={HandwrittenSubmit} />
@@ -508,6 +512,8 @@ const TEACHER_ROUTES = (
     <Route path="/collaborate/:roomId" component={CollaborateRoom} />
     <Route path="/support" component={SupportTickets} />
     <Route path="/notifications" component={NotificationCenter} />
+    <Route path="/attendance-audit" component={AttendanceAuditPage} />
+    <Route path="/enrollment-timeline" component={EnrollmentTimelinePage} />
     {/* Phase 15 — Educational Content Ecosystem */}
     <Route path="/teacher/contentcraft" component={ContentCraftStudio} />
     <Route path="/teacher/contentcraft/:pageId" component={ContentCraftStudio} />

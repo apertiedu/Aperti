@@ -1,6 +1,6 @@
 import { useLocation, Link } from "wouter";
 import {
-  LayoutDashboard, QrCode, CalendarDays, ClipboardList, CheckSquare2,
+  LayoutDashboard, QrCode, CalendarDays, ClipboardList, CheckSquare2, History,
   FileText, Users2,
   BookMarked, Layers, Wand2, Palette, FlaskConical, Brain, ScanLine,
   BarChart3, TrendingUp, ClipboardCheck,
@@ -145,6 +145,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Feature Status",          href: "/admin/feature-status",       icon: Sparkles,    roles: ["admin"] },
         { name: "Data Quality",            href: "/admin/data-quality",         icon: BarChart3,   roles: ["admin"] },
         { name: "Session Slots",           href: "/admin/session-slots",        icon: CalendarDays,roles: ["admin", "teacher"] },
+        { name: "Attendance Audit",        href: "/attendance-audit",           icon: Shield,      roles: ["admin", "teacher"] },
+        { name: "Enrollment Timeline",     href: "/enrollment-timeline",        icon: History,     roles: ["admin", "teacher"] },
       ],
     },
     {

@@ -1039,6 +1039,62 @@ founderRouter.get("/stability-score", async (_req: AuthRequest, res: Response) =
   }
 });
 
+/* ── Platform Stability Metrics ─────────────────────────────────────────── */
+founderRouter.get("/platform-stability-metrics", async (_req: AuthRequest, res: Response) => {
+  try {
+    const [bugsRes, errorsRes, dupAttendRes, conflictsRes] = await Promise.allSettled([
+      pool.query(`SELECT COUNT(*) FROM qa_bugs WHERE status IN ('open','in_progress') AND severity='critical'`).catch(() => ({ rows: [{ count: 0 }] })),
+      pool.query(`SELECT COUNT(*) FROM frontend_error_logs WHERE created_at >= NOW()-INTERVAL '24h'`).catch(() => ({ rows: [{ count: 0 }] })),
+      pool.query(`
+        SELECT COUNT(*) FROM (
+          SELECT student_id, lesson_id, date, COUNT(*) as cnt
+          FROM attendance
+          GROUP BY student_id, lesson_id, date
+          HAVING COUNT(*) > 1
+        ) dups
+      `).catch(() => ({ rows: [{ count: 0 }] })),
+      pool.query(`SELECT COUNT(*) FROM session_slots WHERE is_active = true`).catch(() => ({ rows: [{ count: 0 }] })),
+    ]);
+
+    const criticalBugs       = bugsRes.status === "fulfilled"       ? parseInt((bugsRes.value as any).rows[0]?.count ?? 0)       : 0;
+    const unhandledErrors     = errorsRes.status === "fulfilled"     ? parseInt((errorsRes.value as any).rows[0]?.count ?? 0)     : 0;
+    const duplicateAttendance = dupAttendRes.status === "fulfilled"  ? parseInt((dupAttendRes.value as any).rows[0]?.count ?? 0)  : 0;
+    const activeSlots         = conflictsRes.status === "fulfilled"  ? parseInt((conflictsRes.value as any).rows[0]?.count ?? 0) : 0;
+
+    // Timetable conflicts: simple heuristic (slots same day+time same room)
+    const { rows: slotRows } = await pool.query(`SELECT day_of_week, start_time, room_or_link, COUNT(*) as cnt FROM session_slots WHERE is_active=true AND room_or_link IS NOT NULL AND mode != 'online' GROUP BY day_of_week, start_time, room_or_link HAVING COUNT(*) > 1`).catch(() => ({ rows: [] }));
+    const timetableConflicts = slotRows.length;
+
+    // Broken routes: 404 count from error logs (24h)
+    const { rows: notFoundRows } = await pool.query(`SELECT COUNT(*) FROM frontend_error_logs WHERE message ILIKE '%404%' AND created_at >= NOW()-INTERVAL '24h'`).catch(() => ({ rows: [{ count: 0 }] }));
+    const brokenRoutes = parseInt((notFoundRows[0] as any)?.count ?? 0);
+
+    // Permission leaks: 403 errors
+    const { rows: permRows } = await pool.query(`SELECT COUNT(*) FROM frontend_error_logs WHERE message ILIKE '%403%' OR message ILIKE '%forbidden%' OR message ILIKE '%unauthorized%' AND created_at >= NOW()-INTERVAL '24h'`).catch(() => ({ rows: [{ count: 0 }] }));
+    const permissionLeaks = parseInt((permRows[0] as any)?.count ?? 0);
+
+    // Stability score: start at 100, deduct for each issue category
+    const score = Math.max(0, Math.min(100,
+      100
+      - criticalBugs * 10
+      - Math.min(brokenRoutes * 5, 20)
+      - Math.min(permissionLeaks * 15, 30)
+      - Math.min(duplicateAttendance * 3, 15)
+      - Math.min(timetableConflicts * 3, 15)
+      - Math.min(unhandledErrors * 2, 20)
+    ));
+
+    res.json({
+      criticalBugs, brokenRoutes, permissionLeaks,
+      duplicateAttendance, timetableConflicts, unhandledErrors,
+      score, activeSlots,
+      checkedAt: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── Slow Query Log ──────────────────────────────────────────────────────── */
 founderRouter.get("/slow-queries", async (req: AuthRequest, res: Response) => {
   try {

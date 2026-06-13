@@ -110,6 +110,98 @@ function ScoreCard({ id, data }: { id: string; data: any }) {
   );
 }
 
+function StabilityMetricCard({ label, value, target, icon: Icon, ok }: {
+  label: string; value: number; target: number; icon: any; ok: boolean;
+}) {
+  return (
+    <div className={`bg-white rounded-xl border p-4 shadow-sm flex items-center gap-3 ${ok ? "border-green-200" : "border-red-200 bg-red-50/30"}`}>
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${ok ? "bg-green-50 text-green-600" : "bg-red-50 text-red-600"}`}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs text-gray-500 truncate">{label}</p>
+        <div className="flex items-baseline gap-1">
+          <p className={`text-xl font-bold tabular-nums ${ok ? "text-green-700" : "text-red-600"}`}>{value}</p>
+          <span className="text-xs text-gray-400">/ target {target}</span>
+        </div>
+      </div>
+      <span className={`text-lg ${ok ? "text-green-500" : "text-red-500"}`}>{ok ? "✓" : "!"}</span>
+    </div>
+  );
+}
+
+function PlatformStabilitySection() {
+  const { data, isLoading, isFetching, refetch } = useQuery({
+    queryKey: ["platform-stability-metrics"],
+    queryFn: () => fetchJSON("/api/founder/platform-stability-metrics"),
+    refetchInterval: 120000,
+    staleTime: 60000,
+    retry: false,
+  });
+
+  const score: number = data?.score ?? 100;
+  const metrics = [
+    { label: "Critical Bugs",         value: data?.criticalBugs ?? 0,         target: 0, icon: XCircle,      ok: (data?.criticalBugs ?? 0) === 0 },
+    { label: "Broken Routes",         value: data?.brokenRoutes ?? 0,         target: 0, icon: AlertTriangle, ok: (data?.brokenRoutes ?? 0) === 0 },
+    { label: "Permission Leaks",      value: data?.permissionLeaks ?? 0,      target: 0, icon: ShieldCheck,   ok: (data?.permissionLeaks ?? 0) === 0 },
+    { label: "Duplicate Attendance",  value: data?.duplicateAttendance ?? 0,  target: 0, icon: Users,         ok: (data?.duplicateAttendance ?? 0) === 0 },
+    { label: "Timetable Conflicts",   value: data?.timetableConflicts ?? 0,   target: 0, icon: Layers,        ok: (data?.timetableConflicts ?? 0) === 0 },
+    { label: "Unhandled Errors (24h)",value: data?.unhandledErrors ?? 0,      target: 0, icon: Zap,           ok: (data?.unhandledErrors ?? 0) === 0 },
+  ];
+  const allGreen = metrics.every(m => m.ok);
+  const scoreColor = score >= 90 ? "#22c55e" : score >= 70 ? "#f59e0b" : "#ef4444";
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Platform Stability Goal</h2>
+        <button onClick={() => refetch()} disabled={isFetching}
+          className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 transition-colors">
+          <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} /> Refresh
+        </button>
+      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border h-24 animate-pulse" />
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {/* Score banner */}
+          <div className={`rounded-xl border p-4 flex items-center gap-4 ${allGreen ? "bg-green-50 border-green-200" : "bg-amber-50 border-amber-200"}`}>
+            <div className="relative w-14 h-14 shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 56 56">
+                <circle cx="28" cy="28" r="22" fill="none" stroke="#e5e7eb" strokeWidth="6" />
+                <circle cx="28" cy="28" r="22" fill="none" stroke={scoreColor} strokeWidth="6"
+                  strokeDasharray={`${(score / 100) * 138.2} 138.2`} strokeLinecap="round" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-sm font-black tabular-nums" style={{ color: scoreColor }}>{score}</span>
+              </div>
+            </div>
+            <div>
+              <p className="text-lg font-bold" style={{ color: scoreColor }}>
+                {score >= 90 ? "Platform Stable" : score >= 70 ? "Needs Attention" : "Critical Issues"}
+              </p>
+              <p className="text-xs text-gray-500">Platform Stability Score · updated {data?.checkedAt ? new Date(data.checkedAt).toLocaleTimeString() : "now"}</p>
+            </div>
+            {allGreen && (
+              <div className="ml-auto flex items-center gap-2 text-green-700 font-semibold text-sm">
+                <CheckCircle2 className="w-5 h-5" /> All targets met
+              </div>
+            )}
+          </div>
+          {/* Metrics grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {metrics.map(m => <StabilityMetricCard key={m.label} {...m} />)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LaunchCertBadge() {
   const [, nav] = useLocation();
   const { data } = useQuery<any>({
@@ -379,6 +471,9 @@ export default function FounderControlPage() {
           )}
         </>
       )}
+
+      {/* Platform Stability Goal Dashboard */}
+      <PlatformStabilitySection />
 
       {/* Launch Certification Status */}
       <div>

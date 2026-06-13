@@ -41,3 +41,23 @@ description: Anti-Cheat V2, GradeFlow AI confidence, flashcard AI generation, te
 
 **Why:** Phase 34 was entirely refinement — no new modules. All existing routes/patterns reused.
 **How to apply:** requireRole uses spread args only: `requireRole("teacher", "admin")`. AI calls use `openaiChat` from `../lib/ai-config`.
+
+## Phase 34 Items 18–20 (Polish, Stability, Enhancements)
+
+**Ctrl+K OmniBar** — already worked via `command-palette.tsx` + `useCommandPalette()` hook; no changes needed.
+
+**Quick Student Lookup** — `QuickStudentLookup` component in `core-hub.tsx`; fires on ≥2 chars via `/api/students?search=...&limit=6`; navigate-on-click.
+
+**Customizable CoreHub Widgets** — gear icon opens `WidgetTogglePanel`; 7 widgets toggled via Switch; state persisted in `localStorage` key `aperti_corehub_widgets`.
+
+**Notification Center** — rewrote `/pages/notification-center.tsx` as aggregated inbox; backend `notifications-inbox.ts` at `/api/notifications/inbox`; aggregates messages/submissions/alerts/tickets/enrollment.
+
+**Platform Stability Dashboard** — `PlatformStabilitySection` + `StabilityMetricCard` in `FounderControlPage.tsx`; endpoint `GET /api/founder/platform-stability-metrics`; 6 live counters + circular score ring; inserted before Launch Readiness section.
+
+**Attendance Audit Trail** — table `attendance_audit` (manual psql); routes `attendance-audit.ts` at `/api/attendance-audit`; page `/attendance-audit`.
+
+**Enrollment Timeline** — table `enrollment_timeline` (manual psql); routes `enrollment-timeline.ts` at `/api/enrollment-timeline`; page `/enrollment-timeline`.
+
+**Course Codes** — `course_code TEXT UNIQUE` added to `subjects` table; exported in db schema.
+
+**Nav additions** — `History` icon added to layout.tsx imports; nav items wired for both new pages. App.tsx routes added in the first router block (lines ~518–519).
