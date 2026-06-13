@@ -79,12 +79,20 @@ const STATUS_STYLE: Record<MarkStatus, { bg: string; text: string; icon: React.F
   Absent: { bg: "bg-red-100", text: "text-red-600", icon: XCircle },
 };
 
+interface ScanFlash {
+  name: string;
+  code: string;
+  status: MarkStatus;
+}
+
 export default function CheckIn() {
   const { toast } = useToast();
   const qc = useQueryClient();
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const lastCode = useRef("");
   const lastTime = useRef(0);
+  const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [scanFlash, setScanFlash] = useState<ScanFlash | null>(null);
 
   const today = new Date().toISOString().split("T")[0];
   const [date, setDate] = useState(today);
@@ -130,7 +138,9 @@ export default function CheckIn() {
         at: new Date(),
       };
       setRecent(prev => [entry, ...prev.filter(e => e.studentId !== data.student.id)].slice(0, 20));
-      toast({ title: `${data.student.name} — ${vars.status}`, description: data.student.code, duration: 2000 });
+      setScanFlash({ name: data.student.name, code: data.student.code, status: vars.status });
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+      flashTimer.current = setTimeout(() => setScanFlash(null), 2400);
       qc.invalidateQueries({ queryKey: ["attendance"] });
     },
     onError: (err: Error) => {
@@ -176,7 +186,10 @@ export default function CheckIn() {
     setScanning(false);
   }, []);
 
-  useEffect(() => () => { scannerRef.current?.stop().catch(() => {}); }, []);
+  useEffect(() => () => {
+    scannerRef.current?.stop().catch(() => {});
+    if (flashTimer.current) clearTimeout(flashTimer.current);
+  }, []);
 
   // students in selected lesson
   const lessonStudents = lessonId
@@ -229,6 +242,54 @@ export default function CheckIn() {
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] p-4 md:p-6">
+      {/* Scan success flash overlay */}
+      <AnimatePresence>
+        {scanFlash && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <motion.div
+              className="bg-white rounded-2xl shadow-2xl border border-gray-100 px-8 py-7 flex flex-col items-center gap-3 mx-4"
+              style={{ maxWidth: 300 }}
+              initial={{ scale: 0.82, y: 16 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.94, y: 8, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 420, damping: 28 }}
+            >
+              <motion.div
+                initial={{ scale: 0.6 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 22, delay: 0.04 }}
+                className={cn(
+                  "h-16 w-16 rounded-full flex items-center justify-center",
+                  STATUS_STYLE[scanFlash.status].bg
+                )}
+              >
+                {(() => {
+                  const I = STATUS_STYLE[scanFlash.status].icon;
+                  return <I className={cn("h-8 w-8", STATUS_STYLE[scanFlash.status].text)} />;
+                })()}
+              </motion.div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-gray-900">{scanFlash.name}</p>
+                <p className="text-xs font-mono text-gray-400 mt-0.5">{scanFlash.code}</p>
+              </div>
+              <span className={cn(
+                "px-3 py-1 rounded-full text-sm font-semibold border-0",
+                STATUS_STYLE[scanFlash.status].bg,
+                STATUS_STYLE[scanFlash.status].text
+              )}>
+                {scanFlash.status}
+              </span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="flex items-center gap-3">

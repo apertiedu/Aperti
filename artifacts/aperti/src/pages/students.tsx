@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/api";
 import { useState, useCallback, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "qrcode";
 import JSZip from "jszip";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -52,9 +53,19 @@ function QRModal({ student }: { student: StudentRecord }) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
+  const initials = student.studentName
+    .split(" ")
+    .map(n => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   const handleOpen = async (v: boolean) => {
     setOpen(v);
-    if (v && !dataUrl) { const url = await generateQRDataUrl(student.studentCode); setDataUrl(url); }
+    if (v && !dataUrl) {
+      const url = await generateQRDataUrl(student.studentCode);
+      setDataUrl(url);
+    }
   };
 
   const handleDownload = () => {
@@ -68,22 +79,85 @@ function QRModal({ student }: { student: StudentRecord }) {
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="View QR code">
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="View student ID card">
           <QrCode className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-xs">
-        <DialogHeader><DialogTitle>QR Code — {student.studentCode}</DialogTitle></DialogHeader>
-        <div className="flex flex-col items-center gap-4 pt-2">
-          <div className="bg-white p-4 rounded-xl border shadow-sm">
-            {dataUrl ? <img src={dataUrl} alt={`QR for ${student.studentCode}`} className="w-48 h-48" /> : <div className="w-48 h-48 bg-muted animate-pulse rounded" />}
-          </div>
-          <div className="text-center">
-            <p className="font-semibold">{student.studentName}</p>
-            <p className="text-sm text-muted-foreground font-mono">{student.studentCode}</p>
-          </div>
-          <Button onClick={handleDownload} className="w-full gap-2" disabled={!dataUrl}><Download className="h-4 w-4" />Download PNG</Button>
-        </div>
+      <DialogContent className="max-w-xs p-0 overflow-hidden border-0 shadow-2xl">
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, y: 24, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 12, scale: 0.98 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="relative bg-gradient-to-br from-[#0D9488] to-[#0F766E] px-6 pt-6 pb-8 text-white overflow-hidden">
+                <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/5" />
+                <div className="absolute -bottom-8 -left-4 h-20 w-20 rounded-full bg-white/5" />
+                <div className="relative">
+                  <p className="text-xs font-semibold tracking-[0.2em] uppercase text-white/60 mb-4">Aperti · Student ID</p>
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.08, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 border border-white/30"
+                  >
+                    <span className="text-xl font-bold text-white">{initials}</span>
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.14 }}
+                  >
+                    <p className="text-lg font-bold leading-tight">{student.studentName}</p>
+                    <p className="text-xs font-mono text-white/70 mt-0.5 tracking-wider">{student.studentCode}</p>
+                  </motion.div>
+                </div>
+              </div>
+
+              <div className="bg-white p-6 flex flex-col items-center gap-4">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.18, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  className="bg-white rounded-2xl p-3 shadow-lg border border-gray-100"
+                >
+                  {dataUrl ? (
+                    <img src={dataUrl} alt={`QR for ${student.studentCode}`} className="w-44 h-44" />
+                  ) : (
+                    <div className="w-44 h-44 bg-gray-100 animate-pulse rounded-xl" />
+                  )}
+                </motion.div>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.28 }}
+                  className="text-xs text-center text-muted-foreground"
+                >
+                  Scan to mark attendance
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.32 }}
+                  className="w-full"
+                >
+                  <Button
+                    onClick={handleDownload}
+                    className="w-full gap-2 bg-[#0D9488] hover:bg-[#0B7B70] text-white"
+                    disabled={!dataUrl}
+                  >
+                    <Download className="h-4 w-4" />
+                    Download ID Card
+                  </Button>
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </DialogContent>
     </Dialog>
   );

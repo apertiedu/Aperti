@@ -65,6 +65,12 @@ All protected by `requireRole("admin","super_admin")` + full audit logging to au
 - Auto-hides when empty; "Clear" button to wipe history
 - Key: `aperti_recent_pages` — do NOT change to `aperti_recently_used` (different key)
 
+### Phase 36 Additional Suggestions (fully implemented)
+- **Animated Student ID Cards**: QRModal in `students.tsx` replaced with premium ID card design — teal gradient header with initials avatar, staggered framer-motion slide-in, large QR code, "Aperti · Student ID" branding, download button
+- **Attendance Success Animation**: `checkin.tsx` — `scanFlash` state + `flashTimer` ref; `mark.onSuccess` sets flash for 2400ms; spring-animated centered overlay (fixed, pointer-events-none) shows student name, code, status icon; auto-dismisses; timer cleaned up on unmount
+- **Smart Dashboard Welcome**: Already implemented in `core-hub.tsx` — `greeting()` returns Good morning/afternoon/evening; context line shows classes today, pending grades, attendance %, unread messages as smart pills
+- **Founder Debug Center**: New `DebugCenterPage.tsx` at `/admin/os/debug-center` — aggregates error intelligence summary, DB health, platform health score, memory usage; route registered in `admin-os/index.tsx`; deep-dive links to route-health, error-intelligence, db-health, stability-score, slow-queries
+
 ### Key constraint
 - WebGL (Three.js / R3F) cannot be used in Replit dev environment — GPU context creation fails at WebGLRenderer constructor level, which is called inside useLayoutEffect (not React render), so errors bypass ErrorBoundary and show Vite overlay.
 

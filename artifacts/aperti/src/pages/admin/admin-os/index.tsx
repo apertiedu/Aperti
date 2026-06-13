@@ -83,6 +83,7 @@ import ErrorLogsPage from "./ErrorLogsPage";
 // Phase 36 — Emergency Tools & Health Score
 import FounderEmergencyPage from "./FounderEmergencyPage";
 import PlatformHealthScorePage from "./PlatformHealthScorePage";
+import DebugCenterPage from "./DebugCenterPage";
 
 export default function AdminOS() {
   return (
@@ -156,6 +157,9 @@ export default function AdminOS() {
         {/* Phase 18 — Enterprise Readiness & Governance */}
         <Route path="/admin/os/ai-usage" component={AiUsagePage} />
         <Route path="/admin/os/launch-audit" component={LaunchAuditPage} />
+
+        {/* Phase 36 — Debug Center */}
+        <Route path="/admin/os/debug-center" component={DebugCenterPage} />
 
         {/* Phase 19 — Founder Control Center & Operational Layer */}
         <Route path="/admin/os/founder" component={FounderControlPage} />
