@@ -383,7 +383,18 @@ app.use("/api/notifications/inbox", notificationsInboxRouter);
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
   const frontendDist = path.resolve(process.cwd(), "artifacts/aperti/dist/public");
-  app.use(express.static(frontendDist, { maxAge: "1h", etag: true }));
+  app.use(express.static(frontendDist, {
+    maxAge: "1y",
+    immutable: true,
+    etag: false,
+    setHeaders(res, filePath) {
+      if (filePath.endsWith(".html")) {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+      }
+    },
+  }));
   // SPA fallback — all non-API routes get index.html
   app.get("/{*path}", (req, res, next) => {
     const url = req.path;

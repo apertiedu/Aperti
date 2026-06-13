@@ -202,4 +202,55 @@ See `docs/` for role guides:
 
 ---
 
-*Built on Replit. Phase 33 — Platform Perfection, Scalability & Real-World Readiness.*
+*Built on Replit. Phase 46 complete — Production Lock.*
+
+---
+
+## Rollback Strategy
+
+### Roll Back a Deployment
+
+**1. Identify the target commit:**
+```bash
+git log --oneline -20
+```
+
+**2. Revert code (safe, non-destructive):**
+```bash
+git revert HEAD              # new commit reversing the last change
+git revert <commit-sha>      # revert a specific commit
+```
+
+**3. Roll back a database migration:**
+
+All migrations are idempotent. To undo:
+1. Back up first: `pg_dump "$DATABASE_URL" > backup-$(date +%Y%m%d).sql`
+2. Connect: `psql "$DATABASE_URL"`
+3. Manually drop the affected columns/tables
+4. Comment out or remove the migration block in `artifacts/api-server/src/db/migrate.ts`
+5. Redeploy — schema push will reflect the reverted state
+
+**4. Emergency manual backup:**
+```bash
+pg_dump "$DATABASE_URL" > emergency-backup.sql
+```
+Or via UI: Admin OS → Backups → Trigger Manual Backup
+
+**5. Zero-downtime health check:**
+The platform health-checks `/api/health` before promoting a new deployment.
+A deployment is rolled back automatically if the endpoint does not return HTTP 200 within 30s.
+
+---
+
+## Deliverable Documents
+
+| File | Contents |
+|---|---|
+| `SECURITY.md` | Auth model, threats mitigated, OWASP coverage |
+| `PERFORMANCE.md` | DB indexes, caching strategy, query optimization |
+| `LAUNCH_READINESS.md` | 95/100 score, blockers list, launch criteria |
+| `ROLE_MATRIX.md` | Role security guarantee, RBAC coverage |
+| `DB_INTEGRITY.md` | Data integrity certificate, FK coverage |
+| `ZERO_ERROR_REPORT.md` | Zero-error architecture, silent failure inventory |
+| `UX_CONTINUITY.md` | Loading/empty/error states, motion system audit |
+| `SELF_HEALING.md` | Self-healing design, retry strategy, error boundaries |

@@ -251,9 +251,14 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
-      retryDelay: 1000,
+      retryDelay: 600,
       refetchOnWindowFocus: false,
       staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      refetchOnMount: "always",
+    },
+    mutations: {
+      retry: 0,
     },
   },
 });
