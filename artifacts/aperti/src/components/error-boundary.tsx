@@ -1,6 +1,6 @@
 import { Component, ReactNode } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
+import { RefreshCw, Home, Bug, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TEAL = "#0D9488";
@@ -31,8 +31,7 @@ function logErrorToBackend(error: Error, componentStack: string) {
         body: JSON.stringify(payload),
       }).catch(() => {});
     }
-  } catch {
-  }
+  } catch {}
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
@@ -45,7 +44,6 @@ export default class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     const componentStack = info.componentStack?.slice(0, 800) ?? "";
     this.setState({ errorInfo: componentStack });
-    console.error("[ErrorBoundary]", error, info);
     logErrorToBackend(error, componentStack);
   }
 
@@ -64,40 +62,32 @@ export default class ErrorBoundary extends Component<Props, State> {
     if (this.props.fallback) return this.props.fallback;
 
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white flex items-center justify-center p-6">
         <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          initial={{ opacity: 0, y: 16, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-md w-full bg-card border border-border rounded-2xl shadow-lg p-8 text-center"
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-sm w-full bg-white border border-slate-100 rounded-2xl shadow-md p-8 text-center"
         >
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.15, type: "spring", stiffness: 260, damping: 20 }}
-            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
-            style={{ background: "#FEF2F2" }}
+            initial={{ scale: 0.6, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1, type: "spring", stiffness: 260, damping: 22 }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ background: "linear-gradient(135deg, #f0fdfa, #e6fffa)" }}
           >
-            <AlertTriangle className="w-8 h-8 text-red-500" />
+            <Wifi className="w-7 h-7" style={{ color: TEAL }} />
           </motion.div>
 
-          <h2 className="text-xl font-bold text-foreground mb-2">Something went wrong</h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            An unexpected error occurred. Your work has been preserved — try refreshing or returning to the dashboard.
+          <h2 className="text-lg font-bold text-slate-800 mb-1">We hit a small snag</h2>
+          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+            Something didn't load correctly. Your work is safe — please try again.
           </p>
 
-          {this.state.error?.message && (
-            <div className="mb-5 p-3 rounded-lg bg-muted text-left">
-              <p className="text-xs font-mono text-muted-foreground break-all">
-                {this.state.error.message}
-              </p>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-3 justify-center">
+          <div className="flex flex-col gap-2">
             <Button
               onClick={this.reset}
-              className="gap-2 font-medium"
+              className="w-full gap-2 font-medium"
               style={{ background: TEAL, color: "white" }}
             >
               <RefreshCw className="w-4 h-4" />
@@ -105,20 +95,20 @@ export default class ErrorBoundary extends Component<Props, State> {
             </Button>
             <Button
               variant="outline"
-              className="gap-2"
+              className="w-full gap-2"
               onClick={() => { this.reset(); window.location.href = "/"; }}
             >
               <Home className="w-4 h-4" />
-              Go home
+              Go to dashboard
             </Button>
             <Button
               variant="ghost"
-              className="gap-2 text-muted-foreground"
+              className="w-full gap-2 text-slate-400 text-xs"
               onClick={this.report}
               disabled={this.state.reported}
             >
-              <Bug className="w-4 h-4" />
-              {this.state.reported ? "Reported" : "Report issue"}
+              <Bug className="w-3.5 h-3.5" />
+              {this.state.reported ? "Problem reported — thank you" : "Report this problem"}
             </Button>
           </div>
         </motion.div>

@@ -136,6 +136,10 @@ export default function MyHomework() {
 
   const handleSubmit = async (hwId: number, isDraft: boolean) => {
     setSubmitting(hwId);
+    const prevStatus = homework.find(h => h.id === hwId)?.submissionStatus ?? null;
+    setHomework(prev => prev.map(h =>
+      h.id === hwId ? { ...h, submissionStatus: isDraft ? "draft" : "submitted" } : h
+    ));
     try {
       const attachList = attachments[hwId] || [];
       const contentPayload = JSON.stringify({
@@ -147,10 +151,17 @@ export default function MyHomework() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: contentPayload, isDraft }),
       });
-      if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.message || "Submit failed"); }
-      toast({ title: isDraft ? "Draft saved" : "Homework submitted! ✅" });
+      if (!res.ok) {
+        setHomework(prev => prev.map(h => h.id === hwId ? { ...h, submissionStatus: prevStatus } : h));
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.message || "Submit failed");
+      }
+      toast({ title: isDraft ? "Draft saved" : "Homework submitted!" });
       load();
-    } catch (e: any) { toast({ title: "Error", description: e.message, variant: "destructive" }); }
+    } catch (e: any) {
+      setHomework(prev => prev.map(h => h.id === hwId ? { ...h, submissionStatus: prevStatus } : h));
+      toast({ title: "We hit a small snag", description: e.message, variant: "destructive" });
+    }
     finally { setSubmitting(null); }
   };
 

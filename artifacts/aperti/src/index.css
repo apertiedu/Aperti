@@ -448,6 +448,22 @@ table tbody tr {
   transition: background 0.12s ease;
 }
 
+/* ── GPU layer promotion for animated cards ──────────────────────────────── */
+.card-hover {
+  will-change: transform;
+}
+.motion-card {
+  will-change: transform, opacity;
+}
+
+/* ── Prevent scroll-position reset on list updates ───────────────────────── */
+.overflow-anchor-none {
+  overflow-anchor: none;
+}
+[data-stable-list] {
+  overflow-anchor: auto;
+}
+
 /* ── Smooth stat number transition ───────────────────────────────────────── */
 .stat-number {
   font-variant-numeric: tabular-nums;

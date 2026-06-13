@@ -100,16 +100,27 @@ export default function GradeFlow() {
         method: "POST",
         body: JSON.stringify({ marksAwarded, teacherFeedback: tf }),
       }),
+    onMutate: async ({ subId }: any) => {
+      await queryClient.cancelQueries({ queryKey: ["submissions", selectedHwId] });
+      const prev = queryClient.getQueryData<any[]>(["submissions", selectedHwId]);
+      queryClient.setQueryData<any[]>(["submissions", selectedHwId], old =>
+        (old ?? []).map(s => s.id === subId ? { ...s, status: "graded", marks_awarded: totalAwarded } : s)
+      );
+      return { prev };
+    },
+    onError: (_err, _vars, ctx: any) => {
+      if (ctx?.prev) queryClient.setQueryData(["submissions", selectedHwId], ctx.prev);
+      toast({ title: "Grading failed", description: "Could not save grade. Please try again.", variant: "destructive" });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["submissions", selectedHwId] });
       queryClient.invalidateQueries({ queryKey: ["dashboard", "assignment-queue"] });
-      toast({ title: "Graded!", description: `${current.student_name ?? "Student"} graded successfully.` });
+      toast({ title: "Graded!", description: `${current?.student_name ?? "Student"} graded successfully.` });
       setMarks({});
       setFeedback("");
       setAiConfidence(null);
       setAiMisconceptions([]);
-      if (currentIdx < pending.length - 2) setCurrentIdx(i => i);
-      else if (currentIdx > 0) setCurrentIdx(i => i - 1);
+      if (currentIdx > 0) setCurrentIdx(i => i - 1);
     },
   });
 

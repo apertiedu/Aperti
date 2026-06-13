@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { db, studentsTable } from "@workspace/db";
+import { db, pool, studentsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 export const tutorcraftRouter = Router();
@@ -133,8 +133,36 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
       { role: "user", content: message },
     ];
 
-    const reply = await openaiChat(messages);
-    res.json({ reply });
+    const startTime = Date.now();
+    let reply = "";
+    let success = false;
+    let failureReason: string | undefined;
+
+    try {
+      reply = await openaiChat(messages);
+      success = true;
+    } catch (aiErr: any) {
+      failureReason = aiErr?.message ?? "Unknown AI error";
+      reply = await ruleBasedChatWithQuestions(message, req.userId!).catch(() =>
+        "TutorCraft is temporarily unavailable. Please try again shortly."
+      );
+    }
+
+    const latencyMs = Date.now() - startTime;
+
+    pool.query(
+      `INSERT INTO ai_interactions (user_id, module, action, input_summary, output_summary, tokens_used, confidence, accepted, created_at)
+       VALUES ($1,'tutorcraft','chat',$2,$3,0,0.9,true,NOW())`,
+      [req.userId, message.slice(0, 300), reply.slice(0, 300)]
+    ).catch(() => {});
+
+    pool.query(
+      `INSERT INTO ai_logs (account_id, type, input_summary, response_summary, latency_ms, success, failure_reason, created_at)
+       VALUES ($1,'tutorcraft_chat',$2,$3,$4,$5,$6,NOW()) ON CONFLICT DO NOTHING`,
+      [req.userId, message.slice(0, 300), reply.slice(0, 300), latencyMs, success, failureReason ?? null]
+    ).catch(() => {});
+
+    res.json({ reply, fallback: !success });
   } catch (e: any) {
     if (!process.env.OPENAI_API_KEY) {
       const reply = await ruleBasedChatWithQuestions(req.body.message ?? "", req.userId!).catch(() =>
