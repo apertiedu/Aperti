@@ -113,7 +113,7 @@ function QuickStudentLookup() {
 
   const { data: results = [], isLoading } = useQuery<Student[]>({
     queryKey: ["student-quick-lookup", q],
-    queryFn: () => apiFetch(`/api/students?search=${encodeURIComponent(q)}&limit=6`),
+    queryFn: () => apiFetch(`/api/students?search=${encodeURIComponent(q)}&limit=6`).then(r => r.json()),
     enabled: q.length >= 2,
     staleTime: 10000,
   });
@@ -221,25 +221,25 @@ export default function CoreHub() {
     });
   };
 
-  const { data: summary, isLoading: sumLoading } = useQuery({
+  const { data: summary, isLoading: sumLoading } = useQuery<any>({
     queryKey: ["dashboard", "summary"],
-    queryFn: () => apiFetch("/dashboard/summary"),
+    queryFn: () => apiFetch("/dashboard/summary").then(r => r.json()),
   });
-  const { data: extended } = useQuery({
+  const { data: extended } = useQuery<any>({
     queryKey: ["dashboard", "extended"],
-    queryFn: () => apiFetch("/dashboard/extended-summary"),
+    queryFn: () => apiFetch("/dashboard/extended-summary").then(r => r.json()),
   });
-  const { data: todayClasses, isLoading: todayLoading } = useQuery({
+  const { data: todayClasses, isLoading: todayLoading } = useQuery<any>({
     queryKey: ["dashboard", "today-classes"],
-    queryFn: () => apiFetch("/dashboard/today-classes"),
+    queryFn: () => apiFetch("/dashboard/today-classes").then(r => r.json()),
   });
-  const { data: queue, isLoading: queueLoading } = useQuery({
+  const { data: queue, isLoading: queueLoading } = useQuery<any>({
     queryKey: ["dashboard", "assignment-queue"],
-    queryFn: () => apiFetch("/dashboard/assignment-queue"),
+    queryFn: () => apiFetch("/dashboard/assignment-queue").then(r => r.json()),
   });
-  const { data: trend } = useQuery({
+  const { data: trend } = useQuery<any>({
     queryKey: ["dashboard", "attendance-trend"],
-    queryFn: () => apiFetch("/dashboard/attendance-trend"),
+    queryFn: () => apiFetch("/dashboard/attendance-trend").then(r => r.json()),
   });
 
   const classes: any[] = Array.isArray(todayClasses) ? todayClasses : [];

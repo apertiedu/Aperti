@@ -17,7 +17,7 @@ type Invoice = {
   createdAt: string;
 };
 
-const STATUS_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
+const STATUS_CONFIG: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; bg: string; label: string }> = {
   pending: { icon: Clock, color: "text-amber-600", bg: "bg-amber-50 border-amber-100", label: "Pending Payment" },
   paid: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100", label: "Paid" },
   overdue: { icon: AlertCircle, color: "text-red-600", bg: "bg-red-50 border-red-100", label: "Overdue" },

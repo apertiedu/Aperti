@@ -2,7 +2,7 @@ import { apiFetch } from "@/lib/api";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink, Zap, AlertTriangle, Trophy } from "lucide-react";
+import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink, Zap, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
@@ -392,7 +392,6 @@ export default function StudentDashboard() {
   );
 }
 
-// Fallback icon since Trophy isn't imported from lucide-react above
 function Trophy(props: any) {
   return <Award {...props} />;
 }

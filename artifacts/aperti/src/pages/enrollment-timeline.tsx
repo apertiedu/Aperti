@@ -48,9 +48,9 @@ export default function EnrollmentTimelinePage() {
   const [studentId, setStudentId] = useState("");
   const pageSize = 30;
 
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data, isLoading, refetch, isFetching } = useQuery<any>({
     queryKey: ["enrollment-timeline", page, studentId],
-    queryFn: () => apiFetch(`/api/enrollment-timeline?limit=${pageSize}&offset=${page * pageSize}${studentId ? `&studentId=${studentId}` : ""}`),
+    queryFn: () => apiFetch(`/api/enrollment-timeline?limit=${pageSize}&offset=${page * pageSize}${studentId ? `&studentId=${studentId}` : ""}`).then(r => r.json()),
     staleTime: 30000,
   });
 

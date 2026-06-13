@@ -242,7 +242,12 @@ import Subjects from "@/pages/subjects";
 
 const queryClient = new QueryClient({
   defaultOptions: {
-    queries: { retry: false, refetchOnWindowFocus: false },
+    queries: {
+      retry: 1,
+      retryDelay: 1000,
+      refetchOnWindowFocus: false,
+      staleTime: 30_000,
+    },
   },
 });
 

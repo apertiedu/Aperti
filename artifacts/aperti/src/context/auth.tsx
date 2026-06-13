@@ -65,8 +65,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const text = await res.text();
     let data: Record<string, any> = {};
-    try { data = JSON.parse(text); } catch {
-      if (!res.ok) throw new Error(`Server error (${res.status}) — please try again.`);
+    try {
+      if (!text.trim()) throw new SyntaxError("empty");
+      if (text.trimStart()[0] !== "{" && text.trimStart()[0] !== "[") {
+        throw new SyntaxError("not-json");
+      }
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(
+        res.ok
+          ? "Unexpected server response — please try again."
+          : `Server error (${res.status}) — please try again.`
+      );
     }
     if (!res.ok) {
       const msg =

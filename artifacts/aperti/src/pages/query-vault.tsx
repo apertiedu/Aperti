@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import UpgradeModal from "@/components/upgrade-modal";
 import PlanUsageBar from "@/components/plan-usage-bar";
+import { InlineError } from "@/components/inline-error";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -54,7 +55,7 @@ export default function QueryVault() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [upgradeMsg, setUpgradeMsg] = useState<string | undefined>(undefined);
 
-  const { data: questions, isLoading } = useQuery<Question[]>({
+  const { data: questions, isLoading, isError, refetch } = useQuery<Question[]>({
     queryKey: ["question-bank", search, difficultyFilter],
     queryFn: () => fetchJSON(`/question-bank?search=${search}&difficulty=${difficultyFilter === "all" ? "" : difficultyFilter}`),
   });
@@ -108,7 +109,9 @@ export default function QueryVault() {
       </div>
 
       {/* Questions List */}
-      {isLoading ? (
+      {isError ? (
+        <InlineError message="Could not load question bank. Please try again." onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="space-y-3">{Array.from({length:5}).map((_,i)=><Skeleton key={i} className="h-20 w-full rounded-xl"/>)}</div>
       ) : questions?.length === 0 ? (
         <div className="rounded-xl border border-border bg-card">

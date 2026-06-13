@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import { AuthContext } from "@/context/auth";
+import { useAuth } from "@/context/auth";
 
 export interface ResolvedUser {
   id: number;
@@ -19,17 +18,16 @@ export function useResolvedUser(): {
   isStudent: boolean;
   isParent: boolean;
 } {
-  const ctx = useContext(AuthContext);
-  const user = (ctx?.user ?? null) as ResolvedUser | null;
-  const isLoading = ctx?.isLoading ?? true;
+  const { user, loading } = useAuth();
+  const resolvedUser = (user ?? null) as ResolvedUser | null;
 
   return {
-    user,
-    isLoading,
-    isAuthenticated: !!user,
-    isAdmin: user?.role === "admin",
-    isTeacher: user?.role === "teacher",
-    isStudent: user?.role === "student",
-    isParent: user?.role === "parent",
+    user: resolvedUser,
+    isLoading: loading,
+    isAuthenticated: !!resolvedUser,
+    isAdmin: resolvedUser?.role === "admin",
+    isTeacher: resolvedUser?.role === "teacher",
+    isStudent: resolvedUser?.role === "student",
+    isParent: resolvedUser?.role === "parent",
   };
 }

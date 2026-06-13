@@ -376,7 +376,7 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
 const TEACHER_COLORS = [TEAL, "#00897B", "#00695C", "#004D40"];
 const STUDENT_COLORS = ["#0277BD", "#0288D1", "#01579B"];
 
-const PLAN_ICONS: Record<string, React.ElementType> = {
+const PLAN_ICONS: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   starter: Zap, essential: Star, pro: Target, elite: Shield,
   basic: BookOpen, learner: Brain, scholar: GraduationCap,
 };

@@ -43,7 +43,7 @@ export default function RouteHealthPage() {
 
   const { data, isLoading, isFetching } = useQuery<HealthReport>({
     queryKey: ["admin", "route-health", runKey],
-    queryFn: () => apiFetch("/api/admin/route-health"),
+    queryFn: () => apiFetch("/api/admin/route-health").then(r => r.json()),
     staleTime: 0,
     refetchOnMount: true,
   });

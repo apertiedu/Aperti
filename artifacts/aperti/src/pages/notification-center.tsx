@@ -62,7 +62,7 @@ export default function NotificationCenter() {
 
   const { data, isLoading, isFetching, refetch } = useQuery<InboxData>({
     queryKey: ["notifications-inbox"],
-    queryFn: () => apiFetch("/api/notifications/inbox"),
+    queryFn: () => apiFetch("/api/notifications/inbox").then(r => r.json()),
     staleTime: 30000,
     refetchInterval: 60000,
   });

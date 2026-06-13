@@ -33,11 +33,12 @@ function CheckItem({ check, index }: { check: any; index: number }) {
   const meta = CHECK_META[check.id] || { icon: ShieldCheck, color: "text-gray-600" };
   const Icon = meta.icon;
 
-  const statusConfig = {
+  const statusMap: Record<string, { icon: any; color: string; bg: string; border: string; label: string }> = {
     pass: { icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50", border: "border-green-100", label: "Pass" },
     fail: { icon: XCircle,      color: "text-red-500",   bg: "bg-red-50",   border: "border-red-100",   label: "Fail" },
     warn: { icon: AlertTriangle,color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100", label: "Warn" },
-  }[check.status] || { icon: Loader2, color: "text-gray-400", bg: "bg-gray-50", border: "border-gray-100", label: "…" };
+  };
+  const statusConfig = statusMap[check.status as string] || { icon: Loader2, color: "text-gray-400", bg: "bg-gray-50", border: "border-gray-100", label: "…" };
 
   const StatusIcon = statusConfig.icon;
 

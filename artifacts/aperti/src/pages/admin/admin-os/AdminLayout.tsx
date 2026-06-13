@@ -109,6 +109,7 @@ const NAV = [
   { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
 
   { label: "— Intelligence & Health", header: true },
+  { label: "Debug Center",         icon: Bug,         href: "/admin/os/debug-center" },
   { label: "Analytics Deep Dive",  icon: BarChart3,   href: "/admin/os/analytics-extended" },
   { label: "Stability Score",      icon: Activity,    href: "/admin/os/stability-score" },
   { label: "Slow Queries",         icon: Clock,       href: "/admin/os/slow-queries" },

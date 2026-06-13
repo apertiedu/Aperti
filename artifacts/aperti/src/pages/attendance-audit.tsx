@@ -52,15 +52,15 @@ export default function AttendanceAuditPage() {
   const [page, setPage] = useState(0);
   const pageSize = 25;
 
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data, isLoading, refetch, isFetching } = useQuery<any>({
     queryKey: ["attendance-audit", page, filterAction, filterMethod],
-    queryFn: () => apiFetch(`/api/attendance-audit?limit=${pageSize}&offset=${page * pageSize}`),
+    queryFn: () => apiFetch(`/api/attendance-audit?limit=${pageSize}&offset=${page * pageSize}`).then(r => r.json()),
     staleTime: 30000,
   });
 
-  const { data: summary } = useQuery({
+  const { data: summary } = useQuery<any>({
     queryKey: ["attendance-audit-summary"],
-    queryFn: () => apiFetch("/api/attendance-audit/summary"),
+    queryFn: () => apiFetch("/api/attendance-audit/summary").then(r => r.json()),
     staleTime: 60000,
   });
 

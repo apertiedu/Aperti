@@ -9,6 +9,7 @@ import {
   ArrowUpDown, ExternalLink,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { InlineError } from "@/components/inline-error";
 
 const IGCSE_COLOR: Record<string, string> = {
   "A*": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -61,10 +62,11 @@ export default function TeacherGradebook() {
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [filterType, setFilterType] = useState("all");
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["gradebook-export-data"],
     queryFn: async () => {
       const res = await apiFetch("/api/gradebook/export");
+      if (!res.ok) throw new Error(`Failed to load gradebook (${res.status})`);
       return (await res.json()).entries as GradebookEntry[];
     },
   });
@@ -112,6 +114,15 @@ export default function TeacherGradebook() {
   const classAvg = studentRows.length > 0
     ? Math.round(studentRows.reduce((s, r) => s + r.avg, 0) / studentRows.length)
     : 0;
+
+  if (isError) {
+    return (
+      <InlineError
+        message="Could not load gradebook data. Check your connection or try again."
+        onRetry={() => refetch()}
+      />
+    );
+  }
 
   return (
     <div className="space-y-5">

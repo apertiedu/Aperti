@@ -76,7 +76,7 @@ export default function FeatureStatusPage() {
 
   const { data: flags, isLoading, refetch } = useQuery<FeatureFlag[]>({
     queryKey: ["admin", "features"],
-    queryFn: () => apiFetch("/api/admin/features"),
+    queryFn: () => apiFetch("/api/admin/features").then(r => r.json()),
   });
 
   const toggle = useMutation({

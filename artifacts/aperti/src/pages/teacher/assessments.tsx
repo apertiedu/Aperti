@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
+import { InlineError } from "@/components/inline-error";
 
 const TYPES = [
   { id: "quiz",         label: "Quiz",          icon: Zap,          desc: "Short formative check", color: "border-amber-200 bg-amber-50 text-amber-700" },
@@ -297,10 +298,11 @@ export default function TeacherAssessments() {
   const [filterType, setFilterType] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["assessments"],
     queryFn: async () => {
       const res = await apiFetch("/api/assessments");
+      if (!res.ok) throw new Error(`Failed to load assessments (${res.status})`);
       return (await res.json()).assessments ?? [];
     },
   });
@@ -390,7 +392,9 @@ export default function TeacherAssessments() {
       </div>
 
       {/* List */}
-      {isLoading ? (
+      {isError ? (
+        <InlineError message="Could not load assessments. Please try again." onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="space-y-2">{[1,2,3,4].map(i => <div key={i} className="h-20 bg-muted/40 rounded-xl animate-pulse" />)}</div>
       ) : assessments.length === 0 ? (
         <div className="text-center py-16 border border-dashed border-border rounded-2xl">

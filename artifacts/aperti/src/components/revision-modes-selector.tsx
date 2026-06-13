@@ -15,7 +15,7 @@ interface RevisionModesSelectorProps {
   onGenerated?: (mode: RevisionMode, content: any) => void;
 }
 
-const MODES: { id: RevisionMode; label: string; icon: React.ComponentType<{ className?: string }>; desc: string; time: string; color: string; bg: string }[] = [
+const MODES: { id: RevisionMode; label: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; desc: string; time: string; color: string; bg: string }[] = [
   {
     id: "quick",
     label: "Quick Revision",

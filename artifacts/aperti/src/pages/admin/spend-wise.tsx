@@ -23,9 +23,9 @@ export default function SpendWise() {
     const t = r.interaction_type || "other";
     acc[t] = (acc[t] || 0) + parseInt(r.calls || 0);
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
 
-  const totalCalls = Object.values(byType).reduce((s: number, v: number) => s + v, 0);
+  const totalCalls: number = (Object.values(byType) as number[]).reduce((s, v) => s + v, 0);
 
   return (
     <div className="min-h-screen bg-background p-6 page-transition">

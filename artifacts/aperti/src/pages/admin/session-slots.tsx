@@ -136,17 +136,17 @@ export default function SessionSlotsAdminPage() {
 
   const { data: lessons = [], isLoading: lessonsLoading } = useQuery<Lesson[]>({
     queryKey: ["lessons", "all"],
-    queryFn: () => apiFetch("/api/lessons"),
+    queryFn: () => apiFetch("/api/lessons").then(r => r.json()),
   });
 
   const { data: slots = [], isLoading: slotsLoading } = useQuery<SessionSlot[]>({
     queryKey: ["session-slots"],
-    queryFn: () => apiFetch("/api/session-slots"),
+    queryFn: () => apiFetch("/api/session-slots").then(r => r.json()),
   });
 
   const { data: conflicts } = useQuery<ConflictResult>({
     queryKey: ["session-slots", "conflicts"],
-    queryFn: () => apiFetch("/api/session-slots/conflicts"),
+    queryFn: () => apiFetch("/api/session-slots/conflicts").then(r => r.json()),
     enabled: showConflicts,
   });
 

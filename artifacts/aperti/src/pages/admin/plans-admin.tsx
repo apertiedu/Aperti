@@ -29,7 +29,7 @@ const BLANK: Partial<Plan> & { featuresText: string } = {
   sort_order: 0, display_order: 0, badge: "", student_limit: null, discount_pct: 0,
 };
 
-const PLAN_ICONS: Record<string, React.ElementType> = {
+const PLAN_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   free: Zap, starter: Zap, essential: Star, plus: Star,
   pro: Crown, elite: Crown,
 };
@@ -49,7 +49,7 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: () => void; la
   );
 }
 
-function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: React.ElementType; color: string }) {
+function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: React.ComponentType<{ className?: string }>; color: string }) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>

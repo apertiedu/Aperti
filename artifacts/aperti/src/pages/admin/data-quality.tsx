@@ -58,11 +58,12 @@ function ScoreGauge({ score }: { score: number }) {
 
 async function fetchDataQuality(): Promise<QualityReport> {
   const res = await apiFetch("/api/admin/data-quality");
-  return res;
+  return res.json();
 }
 
 async function runFix(issueId: string): Promise<{ fixed: number }> {
-  return apiFetch("/api/admin/data-quality/fix", { method: "POST", body: JSON.stringify({ issueId }) });
+  const res = await apiFetch("/api/admin/data-quality/fix", { method: "POST", body: JSON.stringify({ issueId }) });
+  return res.json();
 }
 
 export default function DataQualityPage() {

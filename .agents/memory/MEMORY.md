@@ -4,3 +4,4 @@
 - [Session slots schema](session-slots-schema.md) — new `session_slots` table added, exported from lib/db/src/schema/index.ts, FK to lessons(id).
 - [Aperti Phase 35 features](aperti-phase35.md) — DAU/WAU/MAU endpoint, command palette navigation + TYPE_ICONS, maxLength on all password inputs, focus-visible CSS, CORS ALLOWED_ORIGINS, extractErrorMessage in api.ts
 - [Aperti Phase 36 features](aperti-phase36.md) — Emergency tools, platform health score, recently visited, 404 page, CSS hero, core-hub smart context, admin health bars, CSS micro-interactions
+- [Aperti Phase 37 TypeScript fixes](aperti-phase37.md) — queryFn pattern: apiFetch returns Response; must add .then(r=>r.json()) and type useQuery<T> explicitly or TypeScript errors cascade. Icon types need style prop included.

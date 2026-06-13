@@ -8,7 +8,7 @@ import {
 
 interface Action {
   label: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   href?: string;
   onClick?: () => void;
   primary?: boolean;
@@ -26,7 +26,7 @@ interface SmartEmptyStateProps {
 }
 
 const PRESETS: Record<string, {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   title: string;
   description: string;
   actions: Action[];

@@ -33,7 +33,7 @@ type Invoice = {
 type Student = { id: number; studentName: string; studentCode: string };
 type Stats = { pending: number; paid: number; overdue: number; cancelled: number; pendingAmount: number; paidAmount: number };
 
-const STATUS_STYLE: Record<string, { badge: string; icon: React.ElementType; label: string }> = {
+const STATUS_STYLE: Record<string, { badge: string; icon: React.ComponentType<{ className?: string }>; label: string }> = {
   pending: { badge: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock, label: "Pending" },
   paid: { badge: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2, label: "Paid" },
   overdue: { badge: "bg-red-100 text-red-700 border-red-200", icon: AlertCircle, label: "Overdue" },

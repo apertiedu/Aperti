@@ -23,6 +23,7 @@ export default function WhatsNewModal() {
       const t = setTimeout(() => setOpen(true), 1200);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, []);
 
   const dismiss = () => {

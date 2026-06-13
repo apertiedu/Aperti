@@ -1,12 +1,12 @@
 import { Component, ReactNode } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const TEAL = "#0D9488";
 
 interface Props { children: ReactNode; fallback?: ReactNode; }
-interface State { hasError: boolean; error: Error | null; errorInfo: string; }
+interface State { hasError: boolean; error: Error | null; errorInfo: string; reported: boolean; }
 
 function logErrorToBackend(error: Error, componentStack: string) {
   try {
@@ -36,7 +36,7 @@ function logErrorToBackend(error: Error, componentStack: string) {
 }
 
 export default class ErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false, error: null, errorInfo: "" };
+  state: State = { hasError: false, error: null, errorInfo: "", reported: false };
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
@@ -49,7 +49,15 @@ export default class ErrorBoundary extends Component<Props, State> {
     logErrorToBackend(error, componentStack);
   }
 
-  reset = () => this.setState({ hasError: false, error: null, errorInfo: "" });
+  reset = () => this.setState({ hasError: false, error: null, errorInfo: "", reported: false });
+
+  report = () => {
+    this.setState({ reported: true });
+    logErrorToBackend(
+      this.state.error ?? new Error("User-reported error"),
+      this.state.errorInfo
+    );
+  };
 
   render() {
     if (!this.state.hasError) return this.props.children;
@@ -86,7 +94,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             </div>
           )}
 
-          <div className="flex gap-3 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center">
             <Button
               onClick={this.reset}
               className="gap-2 font-medium"
@@ -102,6 +110,15 @@ export default class ErrorBoundary extends Component<Props, State> {
             >
               <Home className="w-4 h-4" />
               Go home
+            </Button>
+            <Button
+              variant="ghost"
+              className="gap-2 text-muted-foreground"
+              onClick={this.report}
+              disabled={this.state.reported}
+            >
+              <Bug className="w-4 h-4" />
+              {this.state.reported ? "Reported" : "Report issue"}
             </Button>
           </div>
         </motion.div>

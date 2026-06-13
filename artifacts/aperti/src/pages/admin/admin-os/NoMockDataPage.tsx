@@ -7,11 +7,12 @@ import {
 } from "lucide-react";
 
 function AuditItem({ check, index }: { check: any; index: number }) {
-  const cfg = {
+  const statusMap: Record<string, { icon: any; color: string; bg: string; border: string; label: string }> = {
     pass: { icon: CheckCircle2, color: "text-green-500", bg: "bg-green-50", border: "border-green-100", label: "Real Data" },
     fail: { icon: XCircle,      color: "text-red-500",   bg: "bg-red-50",   border: "border-red-100",   label: "Issue"     },
     warn: { icon: AlertTriangle,color: "text-amber-500", bg: "bg-amber-50", border: "border-amber-100", label: "Warning"   },
-  }[check.status] || { icon: Loader2, color: "text-gray-400", bg: "bg-gray-50", border: "border-gray-100", label: "…" };
+  };
+  const cfg = statusMap[check.status as string] || { icon: Loader2, color: "text-gray-400", bg: "bg-gray-50", border: "border-gray-100", label: "…" };
   const Icon = cfg.icon;
   const sourceColors: Record<string, string> = {
     database: "bg-teal-50 text-teal-700",

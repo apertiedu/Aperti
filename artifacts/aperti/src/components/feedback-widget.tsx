@@ -43,6 +43,7 @@ export default function FeedbackWidget({ feature, trigger = "auto", delayMs = 30
       const t = setTimeout(() => setVisible(true), delayMs);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [feature, trigger, delayMs]);
 
   const handleDismiss = () => {

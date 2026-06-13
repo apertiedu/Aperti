@@ -33,7 +33,7 @@ export default function MyQRPage() {
 
   const { data: summary, isLoading } = useQuery<StudentSummary>({
     queryKey: ["student", "home-summary"],
-    queryFn: () => apiFetch("/api/student/home-summary"),
+    queryFn: () => apiFetch("/api/student/home-summary").then(r => r.json()),
     staleTime: 60_000,
   });
 
