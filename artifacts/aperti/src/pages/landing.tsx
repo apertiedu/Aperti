@@ -1525,7 +1525,12 @@ export default function Landing() {
               <p className="text-gray-500 max-w-lg mx-auto">Built for modern educators who demand the best from every tool they use.</p>
             </div>
           </Reveal>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${
+            displayFeatures.length <= 3 ? "lg:grid-cols-3" :
+            displayFeatures.length === 4 ? "lg:grid-cols-4" :
+            displayFeatures.length === 5 ? "lg:grid-cols-5" :
+            "lg:grid-cols-3"
+          }`}>
             {displayFeatures.map((f, i) => {
               const Icon = getIcon(f.icon);
               return (
