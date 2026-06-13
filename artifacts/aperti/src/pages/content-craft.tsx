@@ -17,6 +17,7 @@ import {
   Palette, Eye, EyeOff, Code, List, ListOrdered, Link2,
   Sigma, Check,
 } from "lucide-react";
+import { SaveIndicator } from "@/components/save-indicator";
 import { MathHtml, smartTextToHtml } from "@/components/math-renderer";
 
 const API = "/api";
@@ -379,13 +380,17 @@ function FullScreenEditor({
           {previewAll ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
           {previewAll ? "Edit" : "Preview"}
         </button>
+        <SaveIndicator
+          status={mutation.isPending ? "saving" : saved ? "saved" : "idle"}
+          className="mr-1 hidden sm:inline-flex"
+        />
         <Button
           onClick={() => mutation.mutate({ title, description, sections })}
           disabled={mutation.isPending}
-          className={`h-9 text-white gap-2 shrink-0 transition-colors ${saved ? "bg-emerald-500 hover:bg-emerald-500" : "bg-primary hover:bg-primary/90"}`}
+          className="h-9 text-white gap-2 shrink-0 bg-primary hover:bg-primary/90"
         >
-          {saved ? <Check className="h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
-          {mutation.isPending ? "Saving…" : saved ? "Saved!" : "Save  ⌘S"}
+          {mutation.isPending ? <Sigma className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+          {mutation.isPending ? "Saving…" : "Save  ⌘S"}
         </Button>
       </div>
 

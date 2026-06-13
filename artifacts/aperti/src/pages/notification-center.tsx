@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Bell, MessageSquare, ClipboardList, AlertTriangle,
-  Ticket, UserPlus, RefreshCw, CheckCheck, Search, Filter,
+  Ticket, UserPlus, RefreshCw, CheckCheck, Search,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -53,6 +53,21 @@ function formatRelative(ts: string) {
   } catch { return ""; }
 }
 
+function getDateGroup(ts: string): string {
+  try {
+    const now = new Date();
+    const d = new Date(ts);
+    const diffDays = Math.floor((now.setHours(0,0,0,0) - new Date(d).setHours(0,0,0,0)) / 86400000);
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays <= 6) return "This week";
+    if (diffDays <= 29) return "This month";
+    return "Older";
+  } catch { return "Older"; }
+}
+
+const GROUP_ORDER = ["Today", "Yesterday", "This week", "This month", "Older"];
+
 export default function NotificationCenter() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -90,9 +105,17 @@ export default function NotificationCenter() {
     ...Object.entries(TYPE_META).map(([key, m]) => ({ key, label: m.label, count: counts[key] ?? 0 })).filter(t => t.count > 0),
   ];
 
+  const grouped = filtered.reduce<Record<string, NotifItem[]>>((acc, item) => {
+    const g = getDateGroup(item.created_at);
+    if (!acc[g]) acc[g] = [];
+    acc[g].push(item);
+    return acc;
+  }, {});
+
+  const groupKeys = GROUP_ORDER.filter(k => grouped[k]?.length);
+
   return (
     <div className="p-6 max-w-3xl mx-auto space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
@@ -146,7 +169,7 @@ export default function NotificationCenter() {
         <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search notifications…" className="pl-9 h-9 text-sm" />
       </div>
 
-      {/* Items */}
+      {/* Items grouped by date */}
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
@@ -163,52 +186,60 @@ export default function NotificationCenter() {
         </Card>
       ) : (
         <AnimatePresence initial={false}>
-          <div className="space-y-2">
-            {filtered.map(item => {
-              const meta = TYPE_META[item.type] ?? { icon: Bell, color: "text-gray-600 bg-gray-50", label: item.category };
-              const Icon = meta.icon;
-              const isUnread = !item.is_read && !read.has(item.id);
-              const href = TYPE_HREFS[item.type] ?? "/";
-              return (
-                <motion.div
-                  key={item.id}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  onClick={() => markRead(item.id)}
-                >
-                  <a href={href}>
-                    <Card className={`shadow-sm cursor-pointer hover:border-primary/30 transition-all ${isUnread ? "border-primary/20 bg-primary/[0.02]" : ""}`}>
-                      <CardContent className="p-3 flex items-start gap-3">
-                        <div className={`p-2 rounded-lg shrink-0 ${meta.color}`}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <p className={`text-sm ${isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/80"} leading-snug`}>
-                              {item.title}
-                            </p>
-                            <div className="flex items-center gap-1.5 shrink-0">
-                              {isUnread && <span className="w-2 h-2 rounded-full bg-primary shrink-0" />}
-                              <span className="text-[11px] text-muted-foreground whitespace-nowrap">{formatRelative(item.created_at)}</span>
-                            </div>
-                          </div>
-                          {item.subtitle && (
-                            <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.subtitle}</p>
-                          )}
-                          <Badge variant="outline" className="mt-1 text-[10px] h-4 px-1">{meta.label}</Badge>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </a>
-                </motion.div>
-              );
-            })}
+          <div className="space-y-6">
+            {groupKeys.map(groupLabel => (
+              <div key={groupLabel}>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 px-1">
+                  {groupLabel}
+                </p>
+                <div className="space-y-2">
+                  {grouped[groupLabel].map(item => {
+                    const meta = TYPE_META[item.type] ?? { icon: Bell, color: "text-gray-600 bg-gray-50", label: item.category };
+                    const Icon = meta.icon;
+                    const isUnread = !item.is_read && !read.has(item.id);
+                    const href = TYPE_HREFS[item.type] ?? "/";
+                    return (
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        onClick={() => markRead(item.id)}
+                      >
+                        <a href={href}>
+                          <Card className={`shadow-sm cursor-pointer hover:border-primary/30 transition-all ${isUnread ? "border-primary/20 bg-primary/[0.02]" : ""}`}>
+                            <CardContent className="p-3 flex items-start gap-3">
+                              <div className={`p-2 rounded-lg shrink-0 ${meta.color}`}>
+                                <Icon className="h-4 w-4" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className={`text-sm ${isUnread ? "font-semibold text-foreground" : "font-medium text-foreground/80"} leading-snug`}>
+                                    {item.title}
+                                  </p>
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    {isUnread && <span className="w-2 h-2 rounded-full bg-primary shrink-0" />}
+                                    <span className="text-[11px] text-muted-foreground whitespace-nowrap">{formatRelative(item.created_at)}</span>
+                                  </div>
+                                </div>
+                                {item.subtitle && (
+                                  <p className="text-xs text-muted-foreground mt-0.5 truncate">{item.subtitle}</p>
+                                )}
+                                <Badge variant="outline" className="mt-1 text-[10px] h-4 px-1">{meta.label}</Badge>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </a>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         </AnimatePresence>
       )}
 
-      {/* Empty state for new users */}
       {!isLoading && total === 0 && (
         <Card className="shadow-sm border-dashed">
           <CardContent className="p-6 text-center text-muted-foreground text-sm">

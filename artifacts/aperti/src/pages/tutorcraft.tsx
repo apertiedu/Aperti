@@ -60,8 +60,17 @@ export default function TutorCraft() {
         body: JSON.stringify({ message: content, history }),
       });
       setMessages(prev => [...prev, { role: "assistant", content: reply }]);
-    } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "Sorry, I couldn't get a response. Please check your connection and try again." }]);
+    } catch (err: any) {
+      const isTimeout = err?.message?.includes("timeout") || err?.message?.includes("network");
+      setMessages(prev => [
+        ...prev,
+        {
+          role: "assistant",
+          content: isTimeout
+            ? "The request timed out. Please check your connection and try again."
+            : "AI is temporarily unavailable. Your question has been noted — please try again in a moment.",
+        },
+      ]);
     } finally {
       setLoading(false);
     }

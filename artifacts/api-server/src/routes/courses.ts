@@ -208,3 +208,30 @@ coursesRouter.put("/enrollments/:id", authenticate, requireRole("teacher","admin
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
+
+// PATCH /:id/archive — soft-archive a course (teacher or admin)
+coursesRouter.patch("/:id/archive", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    await pool.query(
+      `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS is_archived boolean NOT NULL DEFAULT false`
+    ).catch(() => {});
+    const { rowCount } = await pool.query(
+      `UPDATE aperti_courses SET is_archived=true, is_published=false WHERE id=$1 AND teacher_account_id=$2`,
+      [parseInt(req.params.id as string), req.userId]
+    );
+    if (!rowCount) return res.status(404).json({ error: "Course not found or unauthorized" });
+    res.json({ success: true, message: "Course archived" });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// PATCH /:id/unarchive — restore an archived course
+coursesRouter.patch("/:id/unarchive", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    const { rowCount } = await pool.query(
+      `UPDATE aperti_courses SET is_archived=false WHERE id=$1 AND teacher_account_id=$2`,
+      [parseInt(req.params.id as string), req.userId]
+    );
+    if (!rowCount) return res.status(404).json({ error: "Course not found or unauthorized" });
+    res.json({ success: true, message: "Course restored" });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});

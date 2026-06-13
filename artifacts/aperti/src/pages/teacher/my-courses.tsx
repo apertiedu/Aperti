@@ -6,7 +6,7 @@ import CourseHealthBadge from "@/components/course-health-badge";
 import {
   Plus, BookOpen, Users, CheckCircle2, XCircle, Edit3, Trash2,
   Eye, EyeOff, Clock, Search, GraduationCap, TrendingUp, Globe,
-  ImageIcon, ChevronRight, AlertTriangle, BarChart2,
+  ImageIcon, ChevronRight, AlertTriangle, BarChart2, Archive, ArchiveRestore,
 } from "lucide-react";
 import UpgradeModal from "@/components/upgrade-modal";
 import PlanUsageBar from "@/components/plan-usage-bar";
@@ -137,6 +137,7 @@ interface Course {
   price_egp: string | null;
   thumbnail_url: string | null;
   is_published: boolean;
+  is_archived: boolean;
   duration_weeks: number;
   enrolled_count: number;
   pending_count: string;
@@ -494,6 +495,7 @@ export default function MyCourses() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Course | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Course | null>(null);
+  const [archiveTarget, setArchiveTarget] = useState<Course | null>(null);
   const [studentsFor, setStudentsFor] = useState<Course | null>(null);
   const [search, setSearch] = useState("");
   const [tab, setTab] = useState("courses");
@@ -542,6 +544,17 @@ export default function MyCourses() {
       qc.invalidateQueries({ queryKey: ["teacher-courses"] });
       toast({ title: c.is_published ? "Course unpublished" : "Course published" });
     },
+  });
+
+  const archiveMutation = useMutation({
+    mutationFn: ({ id, restore }: { id: number; restore?: boolean }) =>
+      authFetch(`/courses/${id}/${restore ? "unarchive" : "archive"}`, { method: "PATCH" }),
+    onSuccess: (_, { restore }) => {
+      qc.invalidateQueries({ queryKey: ["teacher-courses"] });
+      toast({ title: restore ? "Course restored" : "Course archived", description: restore ? "The course is now active again." : "The course has been archived and hidden from students." });
+      setArchiveTarget(null);
+    },
+    onError: () => toast({ title: "Action failed", variant: "destructive" }),
   });
 
   const enrollMutation = useMutation({
@@ -792,14 +805,49 @@ export default function MyCourses() {
                             >
                               <Edit3 className="h-3.5 w-3.5" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 text-gray-400 hover:text-red-500 rounded-lg"
-                              onClick={() => setDeleteTarget(c)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
+                            {c.is_archived ? (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg"
+                                    onClick={() => archiveMutation.mutate({ id: c.id, restore: true })}
+                                    disabled={archiveMutation.isPending}
+                                  >
+                                    <ArchiveRestore className="h-3.5 w-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">Restore course</TooltipContent>
+                              </Tooltip>
+                            ) : (
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg"
+                                    onClick={() => setArchiveTarget(c)}
+                                  >
+                                    <Archive className="h-3.5 w-3.5" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">Archive course</TooltipContent>
+                              </Tooltip>
+                            )}
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-gray-400 hover:text-red-500 rounded-lg"
+                                  onClick={() => setDeleteTarget(c)}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent side="top" className="text-xs">Delete course</TooltipContent>
+                            </Tooltip>
                           </div>
                         </div>
                       </CardContent>
@@ -869,6 +917,27 @@ export default function MyCourses() {
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
             >
               Delete Course
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* ── Archive confirm ── */}
+      <AlertDialog open={!!archiveTarget} onOpenChange={v => !v && setArchiveTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Archive "{archiveTarget?.title}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The course will be hidden from students and unpublished. You can restore it at any time. No data is deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+              onClick={() => archiveTarget && archiveMutation.mutate({ id: archiveTarget.id })}
+            >
+              Archive Course
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

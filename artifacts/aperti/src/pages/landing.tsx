@@ -561,6 +561,17 @@ const FALLBACK_STUDENT_PLANS: CMSPlan[] = [
   { id: 7, name: "Scholar", type: "student", price_egp: 599, max_students: null, badge: null, is_highlighted: false, features: ["All Learner features","SnapGrade AI grading","Study groups","Parent progress reports","Priority AI responses"] },
 ];
 
+const FALLBACK_FAQS: CMSFAQ[] = [
+  { id: 1, question: "How does attendance work?", answer: "Teachers generate a QR code for each session. Students scan it with their phone to mark themselves present. Teachers can also mark attendance manually. All records are stored and visible in the analytics dashboard.", category: "attendance", order: 1 },
+  { id: 2, question: "Can students join multiple courses?", answer: "Yes. Each student can be enrolled in as many courses as they need. Teachers approve enrollment requests. Students can belong to different teachers' courses simultaneously.", category: "courses", order: 2 },
+  { id: 3, question: "How are payments approved?", answer: "Students submit an InstaPay reference code as proof of payment. Admins review and approve or reject it. Once approved, the subscription becomes active automatically.", category: "billing", order: 3 },
+  { id: 4, question: "Is internet required to use Aperti?", answer: "Most features require an internet connection. However, students can download flashcard decks and revision notes for offline study. Attendance scanning requires the teacher to be online.", category: "access", order: 4 },
+  { id: 5, question: "Can teachers manage multiple schools or groups?", answer: "Yes. Teachers can create separate courses for different schools, centers, or private groups. Each course has its own enrollment, attendance, and grade tracking.", category: "teachers", order: 5 },
+  { id: 6, question: "How does AI grading work?", answer: "Teachers submit scanned answer sheets or typed student responses. The AI scores answers, identifies errors, and provides written feedback — all in seconds. Teachers review and can override any AI decision.", category: "ai", order: 6 },
+  { id: 7, question: "Can parents see their child's progress?", answer: "Yes. Parents link their account to their child's account and get a dedicated dashboard showing attendance, grades, homework completion, and teacher messages.", category: "parents", order: 7 },
+  { id: 8, question: "Is Aperti aligned with the IGCSE curriculum?", answer: "Aperti's question bank, flashcard system, and exam practice vault are all structured around IGCSE syllabuses. Teachers can tag content by subject code and topic.", category: "curriculum", order: 8 },
+];
+
 /* ─────────────────────────── Testimonials ─────────────────────────── */
 interface VerifiedTestimonial extends CMSTestimonial { is_verified?: boolean; }
 
@@ -1368,7 +1379,7 @@ export default function Landing() {
 
   const sections = cms?.sections ?? [];
   const testimonials = cms?.testimonials ?? [];
-  const faqs = cms?.faqs ?? [];
+  const faqs = (cms?.faqs?.length ? cms.faqs : FALLBACK_FAQS) as CMSFAQ[];
   const allPlans: CMSPlan[] = cms?.plans ?? [];
   const teacherPlans: CMSPlan[] = useMemo(() => {
     const t = allPlans.filter(p => !p.type || p.type === "teacher");

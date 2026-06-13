@@ -79,6 +79,7 @@ import AutoScale from "@/pages/admin/auto-scale";
 import SpendWise from "@/pages/admin/spend-wise";
 import AdminCommand from "@/pages/admin/admin-command";
 import EnrollmentAudit from "@/pages/admin/enrollment-audit";
+import PlatformHealth from "@/pages/admin/platform-health";
 import WorldPilot from "@/pages/admin/world-pilot";
 import GuardianPulseAdmin from "@/pages/admin/guardian-pulse-admin";
 import TeacherVerification from "@/pages/admin/teacher-verification";
@@ -586,6 +587,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/data-quality" component={DataQualityPage} />
     <Route path="/admin/session-slots" component={SessionSlotsAdminPage} />
     <Route path="/admin/enrollment-audit" component={EnrollmentAudit} />
+    <Route path="/admin/health" component={PlatformHealth} />
     <Route path="/admin/debug" component={AdminDebugPage} />
     <Route path="/admin/test-runner" component={TestRunner} />
     <Route path="/admin/feature-registry" component={FeatureRegistryPage} />

@@ -156,6 +156,7 @@ const modules = [
   { to: "/admin/os/qa/readiness",      label: "QualityOS ✦ New",          desc: "Bug tracker, test runs & launch readiness", icon: Bug, highlight2: true },
   { to: "/admin/enrollment-audit",     label: "Enrollment Audit",          desc: "Fix orphaned & duplicate enrollments",       icon: ShieldCheck },
   { to: "/admin/route-health",         label: "Route Health",              desc: "Verify all platform routes & permissions",   icon: Activity },
+  { to: "/admin/health",              label: "Platform Health ✦ New",     desc: "Real-time errors, slow endpoints & DB health",  icon: Activity, highlight2: true },
 ];
 
 function DeploymentDebugPanel() {
