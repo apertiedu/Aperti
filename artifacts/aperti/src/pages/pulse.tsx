@@ -96,7 +96,7 @@ export default function Pulse() {
       </motion.div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 stagger-list">
         <StatCard loading={ovLoading} label="Total Students" value={studentList.length} icon={<Users className="h-5 w-5" />} />
         <StatCard loading={false} label="Avg Attendance" value={`${avgAtt}%`} icon={<CheckCircle className="h-5 w-5" />} sub={avgAtt >= 85 ? "On track" : avgAtt >= 70 ? "Monitor" : "Action needed"} />
         <StatCard loading={false} label="Assignments Set" value={hwArr.length} icon={<BookOpen className="h-5 w-5" />} />

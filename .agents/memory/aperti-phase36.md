@@ -1,6 +1,6 @@
 ---
 name: Aperti Phase 36 features
-description: Phase 36 — User Journey Certification, Emergency Tools, Platform Health Score, Recently Used Items
+description: Phase 36 — User Journey Certification, Emergency Tools, Platform Health Score, Recently Used Items, Immersive UI/UX Polish
 ---
 
 ## Phase 36 Deliverables
@@ -25,6 +25,34 @@ All protected by `requireRole("admin","super_admin")` + full audit logging to au
 ### Frontend — New Pages
 - FounderEmergencyPage.tsx at /admin/os/emergency — 4 tools + repair + audit trail
 - PlatformHealthScorePage.tsx at /admin/os/platform-health — arc gauge + 4 ring charts
+- not-found.tsx — orbit rings (Framer Motion rotate), floating dots, 404 WebkitTextStroke, search bar → /search?q=, quick links
+
+### Frontend — Landing Page (Phase 36 continuation)
+- CSS-only geometric hero (`landing-3d-hero.tsx`): 12 floating shapes (octagon, torus, box, hexagon wireframes) on dot-grid SVG background
+- WebGL/Three.js abandoned — `BindToCurrentSequence failed` error in Replit sandbox (no GPU); useLayoutEffect in R3F bypasses React error boundaries
+- `landing-3d-hero-webgl.tsx` exists but is NOT imported anywhere (kept for reference only)
+- Hero import is now direct (not lazy/Suspense) since CSS component is synchronous
+
+### Frontend — Core Hub Teacher Dashboard (Phase 36 continuation)
+- Smart context line under date: shows classes today, pending grades, attendance %, unread messages
+- Notification bell badge gets `badge-urgent` CSS pulse animation when unread > 0
+- Stats row gets `stagger-list` class for sequential entry animation
+- Smart Insights card gets `stagger-list` on insight items
+- Quick action buttons upgraded: icon in teal rounded-lg bg, text below, border hover with teal tint
+
+### Frontend — Admin Pages (Phase 36 continuation)
+- `feature-status.tsx`: Feature Adoption Rate progress bar (enabled / total non-archived × 100%)
+- `route-health.tsx`: Overall Route Health Score progress bar (green ≥90%, amber ≥70%, red <70%)
+- `route-health.tsx`: Export CSV button — downloads all route audit data as CSV file
+
+### Frontend — CSS Micro-interactions (index.css) (Phase 36 continuation)
+- `.badge-urgent`: pulsing opacity animation for urgent notification badges
+- `.stagger-list`: sequential nth-child entry animation (uses pageIn keyframes)
+- `.progress-fill`: animated width fill from 0% on mount
+- `.card-shine`: diagonal shimmer sweep on hover via ::after pseudo-element
+- `.stat-number`: tabular-nums + color transition
+- `input[type="checkbox"]:checked`, `input[type="radio"]:checked`: teal accent-color
+- `table tbody tr`: smooth background transition on hover
 
 ### Frontend — Route Changes
 - /admin/launch → LaunchCertificationPage (added to AdminOS switch)
@@ -37,16 +65,8 @@ All protected by `requireRole("admin","super_admin")` + full audit logging to au
 - Auto-hides when empty; "Clear" button to wipe history
 - Key: `aperti_recent_pages` — do NOT change to `aperti_recently_used` (different key)
 
-### Frontend — useRecentlyUsed Hook (created but not used in CoreHub)
-- Created src/hooks/use-recently-used.ts with track()/clear() + storage event listener
-- Key: `aperti_recently_used` (DIFFERENT from the Layout's `aperti_recent_pages`)
-- Used when you want to explicitly track entity views (e.g. course viewed)
-
-### User Journey Audit — All Complete
-- Teacher: /register → /subscribe/:planId → /admin/teacher-verification → /my-courses → /students → /attendance → /teacher/assessments → /grade-flow
-- Student: /student-register → /subscribe/:planId → /my-attendance → /submit-flow → /student-portal
-- Parent: /register → /parent/link-student → /parent/guardian-link → GuardianHub → /parent/attendance → /parent/billing
-- Admin: /admin/os/* (40+ routes all verified)
+### Key constraint
+- WebGL (Three.js / R3F) cannot be used in Replit dev environment — GPU context creation fails at WebGLRenderer constructor level, which is called inside useLayoutEffect (not React render), so errors bypass ErrorBoundary and show Vite overlay.
 
 ### Pattern: JWT Import in founder.ts
 - `import jwt from "jsonwebtoken"` added at top of founder.ts

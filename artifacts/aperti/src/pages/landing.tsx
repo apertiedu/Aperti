@@ -8,6 +8,7 @@ import {
   Shield, Zap, Target, Star, Globe, Quote, ChevronDown, ExternalLink,
   Rocket, Map, FileText, Activity, Check, Minus, Building2,
 } from "lucide-react";
+import { Landing3DHeroCanvas } from "@/components/landing-3d-hero";
 
 const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
@@ -1263,6 +1264,7 @@ export default function Landing() {
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: teal }} />
           <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: teal }} />
+          <Landing3DHeroCanvas />
         </div>
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -1427,8 +1429,8 @@ export default function Landing() {
               const Icon = getIcon(f.icon);
               return (
                 <Reveal key={i} delay={i * 0.08}>
-                  <motion.div whileHover={{ y: -8, boxShadow: "0 20px 40px rgba(0,0,0,0.08)", transition: { duration: 0.2 } }}
-                    className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full">
+                  <motion.div whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(13,148,136,0.09)", transition: { duration: 0.2 } }}
+                    className="card-shine bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full">
                     <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ background: `${teal}12` }}>
                       <Icon className="h-5 w-5" style={{ color: teal }} />
                     </div>

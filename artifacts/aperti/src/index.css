@@ -250,11 +250,43 @@
 /* ── Liquid Flow Micro-interactions ── */
 
 /* Button press depth */
-button:active { transform: translateY(1px); }
+button:active:not(:disabled) { transform: translateY(1px); }
 
 /* Card hover lift */
-.card-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.card-hover:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+.card-hover {
+  transition: transform 0.22s cubic-bezier(0.22,1,0.36,1), box-shadow 0.22s cubic-bezier(0.22,1,0.36,1);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(13,148,136,0.10), 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Teal primary button glow on hover */
+[data-variant="primary"]:hover,
+button.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(13,148,136,0.30);
+}
+
+/* Link underline animate */
+.link-animate {
+  background-image: linear-gradient(#0D9488, #0D9488);
+  background-size: 0 1.5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size 0.25s ease;
+}
+.link-animate:hover { background-size: 100% 1.5px; }
+
+/* Nav item active indicator */
+.nav-active-dot::after {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  margin: 2px auto 0;
+}
 
 /* Input glow on focus */
 input:focus, textarea:focus {
@@ -357,3 +389,59 @@ textarea:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* ── Badge pulse for urgent states ────────────────────────────────────────── */
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.badge-urgent { animation: badgePulse 1.8s ease-in-out infinite; }
+
+/* ── Stagger list animation ────────────────────────────────────────────────── */
+.stagger-list > * {
+  animation: pageIn 0.22s ease-out backwards;
+}
+.stagger-list > *:nth-child(1)  { animation-delay: 0.04s; }
+.stagger-list > *:nth-child(2)  { animation-delay: 0.08s; }
+.stagger-list > *:nth-child(3)  { animation-delay: 0.12s; }
+.stagger-list > *:nth-child(4)  { animation-delay: 0.16s; }
+.stagger-list > *:nth-child(5)  { animation-delay: 0.20s; }
+.stagger-list > *:nth-child(6)  { animation-delay: 0.24s; }
+.stagger-list > *:nth-child(n+7){ animation-delay: 0.28s; }
+
+/* ── Progress bar animated fill ─────────────────────────────────────────────── */
+@keyframes fillBar {
+  from { width: 0%; }
+}
+.progress-fill { animation: fillBar 0.8s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Teal checkbox accent ────────────────────────────────────────────────── */
+input[type="checkbox"]:checked { accent-color: #0D9488; }
+input[type="radio"]:checked    { accent-color: #0D9488; }
+
+/* ── Table row hover lift ────────────────────────────────────────────────── */
+table tbody tr {
+  transition: background 0.12s ease;
+}
+
+/* ── Smooth stat number transition ───────────────────────────────────────── */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+/* ── Card shine on hover ─────────────────────────────────────────────────── */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+.card-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0) 40%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 60%);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+  pointer-events: none;
+}
+.card-shine:hover::after { transform: translateX(100%); }

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle, XCircle, AlertCircle, RefreshCw, Shield, Clock, Activity } from "lucide-react";
+import { CheckCircle, XCircle, AlertCircle, RefreshCw, Shield, Clock, Activity, Download } from "lucide-react";
 import { useState } from "react";
 import { apiFetch } from "@/lib/api";
 
@@ -62,11 +62,51 @@ export default function RouteHealthPage() {
           <h1 className="text-2xl font-bold text-foreground">Route Health</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Audit all API endpoints — availability, auth protection & latency</p>
         </div>
-        <Button onClick={() => setRunKey(k => k + 1)} disabled={isLoading || isFetching} className="gap-2">
-          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-          {isFetching ? "Scanning…" : "Run Scan"}
-        </Button>
+        <div className="flex items-center gap-2">
+          {data && (
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+              const csv = [
+                ["Method","Path","Category","Status","HTTP","Auth","Latency(ms)","Note"].join(","),
+                ...data.routes.map(r => [r.method, r.path, r.category, r.status, r.httpCode ?? "", r.isProtected ? (r.protectionOk ? "OK" : "BREACH") : "Public", r.latencyMs ?? "", `"${r.note}"`].join(","))
+              ].join("\n");
+              const a = document.createElement("a");
+              a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+              a.download = `route-health-${new Date().toISOString().slice(0,10)}.csv`;
+              a.click();
+            }}>
+              <Download className="h-4 w-4" /> Export CSV
+            </Button>
+          )}
+          <Button onClick={() => setRunKey(k => k + 1)} disabled={isLoading || isFetching} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+            {isFetching ? "Scanning…" : "Run Scan"}
+          </Button>
+        </div>
       </div>
+
+      {/* Health score bar */}
+      {data && (
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-foreground">Overall Route Health Score</span>
+            <span className={`text-sm font-bold ${data.summary.passed / data.summary.total >= 0.9 ? "text-emerald-600" : data.summary.passed / data.summary.total >= 0.7 ? "text-amber-600" : "text-red-600"}`}>
+              {Math.round((data.summary.passed / data.summary.total) * 100)}%
+            </span>
+          </div>
+          <div className="h-2.5 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className={`h-2.5 rounded-full transition-all duration-700 ${data.summary.passed / data.summary.total >= 0.9 ? "bg-emerald-500" : data.summary.passed / data.summary.total >= 0.7 ? "bg-amber-500" : "bg-red-500"}`}
+              style={{ width: `${Math.round((data.summary.passed / data.summary.total) * 100)}%` }}
+            />
+          </div>
+          <div className="flex items-center gap-4 mt-1.5">
+            <span className="text-xs text-muted-foreground">{data.summary.passed} passed</span>
+            {data.summary.failed > 0 && <span className="text-xs text-red-600">{data.summary.failed} failed</span>}
+            {data.summary.warned > 0 && <span className="text-xs text-amber-600">{data.summary.warned} warned</span>}
+            {data.summary.protectionViolations > 0 && <span className="text-xs text-red-600 font-semibold">{data.summary.protectionViolations} auth breach{data.summary.protectionViolations > 1 ? "es" : ""}</span>}
+          </div>
+        </div>
+      )}
 
       {/* Summary cards */}
       {isLoading || isFetching ? (

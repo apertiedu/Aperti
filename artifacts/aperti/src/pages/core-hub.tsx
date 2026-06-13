@@ -291,19 +291,47 @@ export default function CoreHub() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl font-bold">
             {getGreeting()}, <span className="text-primary">{displayName}</span>
           </h1>
           <p className="text-muted-foreground text-sm mt-0.5">
             {new Date().toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" })}
           </p>
+          {!sumLoading && (
+            <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-1.5">
+              {classes.length > 0 && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <BookOpen className="h-3 w-3 text-primary" />
+                  {classes.length} class{classes.length !== 1 ? "es" : ""} today
+                </span>
+              )}
+              {pendingCount > 0 && (
+                <span className="text-xs text-amber-600 font-medium flex items-center gap-1.5">
+                  <Clock className="h-3 w-3" />
+                  {pendingCount} pending grade{pendingCount !== 1 ? "s" : ""}
+                </span>
+              )}
+              {(summary?.attendanceRate ?? 0) > 0 && (
+                <span className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <TrendingUp className="h-3 w-3 text-emerald-500" />
+                  {summary.attendanceRate}% attendance
+                </span>
+              )}
+              {(extended?.unreadMessages ?? 0) > 0 && (
+                <span className="text-xs text-blue-600 font-medium flex items-center gap-1.5">
+                  <MessageSquare className="h-3 w-3" />
+                  {extended.unreadMessages} unread
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Link href="/notifications">
             <Button variant="outline" size="icon" className="relative">
               <Bell className="h-5 w-5" />
               {(extended?.unreadMessages ?? 0) > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white">
+                <span className="badge-urgent absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] text-white">
                   {extended.unreadMessages}
                 </span>
               )}
@@ -370,7 +398,7 @@ export default function CoreHub() {
 
       {/* Stats row */}
       {show("stats") && (
-        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-list">
           <StatsCard loading={sumLoading} label="Today's Classes" value={summary?.lessonsToday ?? 0} icon={<BookOpen className="h-5 w-5 text-primary" />} />
           <StatsCard loading={sumLoading} label="Students Present" value={`${summary?.studentsPresent ?? 0}`} icon={<Users className="h-5 w-5 text-primary" />} sub={summary?.attendanceRate != null ? `${summary.attendanceRate}% rate` : undefined} />
           <StatsCard loading={false} label="Pending Grading" value={pendingCount} icon={<Clock className="h-5 w-5 text-amber-500" />} />
@@ -511,7 +539,9 @@ export default function CoreHub() {
                 {insights.length === 0 ? (
                   <p className="text-sm text-muted-foreground">All looks good today!</p>
                 ) : (
-                  insights.map((ins, i) => <InsightCard key={i} {...ins} />)
+                  <div className="stagger-list space-y-2">
+                    {insights.map((ins, i) => <InsightCard key={i} {...ins} />)}
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -530,10 +560,12 @@ export default function CoreHub() {
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
                 {quickActions.map(({ label, icon, href }) => (
                   <Link key={href + label} href={href}>
-                    <Button variant="outline" className="w-full h-auto flex-col gap-1.5 py-3 text-xs" size="sm">
-                      <span className="text-primary">{icon}</span>
-                      <span className="leading-tight text-center">{label}</span>
-                    </Button>
+                    <div className="group flex flex-col items-center gap-2 py-4 px-2 rounded-xl border border-border hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer select-none active:scale-95">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                        <span className="text-primary">{icon}</span>
+                      </div>
+                      <span className="text-xs font-medium text-foreground text-center leading-tight">{label}</span>
+                    </div>
                   </Link>
                 ))}
               </div>

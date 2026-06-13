@@ -109,6 +109,29 @@ export default function FeatureStatusPage() {
         </div>
       </div>
 
+      {/* Health score bar */}
+      {!isLoading && flags && flags.length > 0 && (
+        <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-foreground">Feature Adoption Rate</span>
+            <span className="text-sm font-bold text-primary">
+              {flags.filter(f => f.status !== "archived").length > 0
+                ? Math.round((enabled.length / flags.filter(f => f.status !== "archived").length) * 100)
+                : 0}%
+            </span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className="h-2 rounded-full bg-primary transition-all duration-700"
+              style={{ width: `${flags.filter(f => f.status !== "archived").length > 0 ? Math.round((enabled.length / flags.filter(f => f.status !== "archived").length) * 100) : 0}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1.5">
+            {enabled.length} of {flags.filter(f => f.status !== "archived").length} flags currently active
+          </p>
+        </div>
+      )}
+
       {/* Summary */}
       <div className="grid grid-cols-3 gap-3">
         {[
