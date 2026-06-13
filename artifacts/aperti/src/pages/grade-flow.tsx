@@ -158,6 +158,9 @@ export default function GradeFlow() {
       if (data.misconceptions?.length) {
         setAiMisconceptions(data.misconceptions);
       }
+    } catch {
+      toast({ title: "AI feedback unavailable", description: "Write teacher feedback manually below.", variant: "destructive" });
+      setFeedback(prev => prev || "");
     } finally {
       setAiLoading(false);
     }

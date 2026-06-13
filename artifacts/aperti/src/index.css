@@ -585,3 +585,11 @@ body, #root {
   align-items: center;
   justify-content: center;
 }
+
+/* Mobile safe-area bottom padding for fixed navbars */
+.safe-area-inset-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}

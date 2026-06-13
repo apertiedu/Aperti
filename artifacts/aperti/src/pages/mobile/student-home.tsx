@@ -55,7 +55,7 @@ export default function StudentMobileHome() {
         </div>
         <div className="relative">
           <Link href="/notifications">
-            <button className="w-11 h-11 rounded-full bg-muted/60 flex items-center justify-center">
+            <button className="w-11 h-11 rounded-full bg-muted/60 flex items-center justify-center min-h-[44px] min-w-[44px]">
               <Bell className="w-5 h-5 text-muted-foreground" />
             </button>
           </Link>

@@ -10,11 +10,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Switch } from "@/components/ui/switch";
 import {
   CalendarDays, Plus, Pencil, Trash2, Clock, MapPin, Wifi,
-  AlertTriangle, CheckCircle, RefreshCw
+  AlertTriangle, CheckCircle, RefreshCw, ShieldAlert
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -30,13 +30,26 @@ type ConflictResult = {
   conflicts: Array<{ slot1: SessionSlot; slot2: SessionSlot; reason: string }>;
 };
 
+function timeToMins(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + (m || 0);
+}
+function overlaps(a: { startTime: string; endTime?: string | null }, b: { startTime: string; endTime?: string | null }): boolean {
+  const aS = timeToMins(a.startTime), bS = timeToMins(b.startTime);
+  const aE = a.endTime ? timeToMins(a.endTime) : aS + 60;
+  const bE = b.endTime ? timeToMins(b.endTime) : bS + 60;
+  return aS < bE && bS < aE;
+}
+
 function SlotForm({
-  lessons, initial, onSave, onClose,
+  lessons, initial, onSave, onClose, existingSlots = [], excludeId,
 }: {
   lessons: Lesson[];
   initial?: Partial<SessionSlot>;
   onSave: (data: Partial<SessionSlot>) => void;
   onClose: () => void;
+  existingSlots?: SessionSlot[];
+  excludeId?: number;
 }) {
   const [form, setForm] = useState({
     lessonId: initial?.lessonId ? String(initial.lessonId) : "",
@@ -51,6 +64,28 @@ function SlotForm({
   });
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  const conflictWarnings = useMemo(() => {
+    if (!form.startTime || !form.dayOfWeek) return [];
+    const proposed = { startTime: form.startTime, endTime: form.endTime || null };
+    const lessonId = parseInt(form.lessonId) || 0;
+    const warnings: string[] = [];
+
+    existingSlots
+      .filter(s => s.isActive && s.id !== excludeId)
+      .forEach(s => {
+        if (s.dayOfWeek !== form.dayOfWeek) return;
+        if (!overlaps(proposed, s)) return;
+
+        if (s.lessonId === lessonId) {
+          warnings.push(`Overlaps with "${s.slotLabel}" (same lesson, ${s.dayOfWeek} ${s.startTime})`);
+        } else if (form.roomOrLink && s.roomOrLink === form.roomOrLink && form.mode !== "online" && s.mode !== "online") {
+          warnings.push(`Room conflict: "${s.roomOrLink}" is already used on ${s.dayOfWeek} at ${s.startTime} by another lesson`);
+        }
+      });
+
+    return warnings;
+  }, [form.dayOfWeek, form.startTime, form.endTime, form.lessonId, form.roomOrLink, form.mode, existingSlots, excludeId]);
 
   const handleSave = () => {
     if (!form.lessonId || !form.slotLabel || !form.dayOfWeek || !form.startTime) return;
@@ -69,6 +104,17 @@ function SlotForm({
 
   return (
     <div className="space-y-4 pt-2">
+      {conflictWarnings.length > 0 && (
+        <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200">
+          <ShieldAlert className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
+          <div>
+            <p className="text-xs font-semibold text-amber-800 mb-1">Scheduling conflict detected</p>
+            {conflictWarnings.map((w, i) => (
+              <p key={i} className="text-xs text-amber-700">{w}</p>
+            ))}
+          </div>
+        </div>
+      )}
       <div><Label>Lesson <span className="text-destructive">*</span></Label>
         <Select value={form.lessonId} onValueChange={v => set("lessonId", v)}>
           <SelectTrigger className="mt-1"><SelectValue placeholder="Select lesson…" /></SelectTrigger>
@@ -120,7 +166,14 @@ function SlotForm({
         </div>
       </div>
       <div className="flex gap-2 pt-2">
-        <Button className="flex-1" onClick={handleSave} disabled={!form.lessonId || !form.slotLabel}>Save Slot</Button>
+        <Button
+          className="flex-1"
+          onClick={handleSave}
+          disabled={!form.lessonId || !form.slotLabel}
+          variant={conflictWarnings.length > 0 ? "outline" : "default"}
+        >
+          {conflictWarnings.length > 0 ? "Save Anyway (conflicts exist)" : "Save Slot"}
+        </Button>
         <Button variant="outline" onClick={onClose}>Cancel</Button>
       </div>
     </div>
@@ -205,7 +258,7 @@ export default function SessionSlotsAdminPage() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader><DialogTitle>Create Session Slot</DialogTitle></DialogHeader>
-              <SlotForm lessons={lessons} onSave={d => create.mutate(d)} onClose={() => setCreateOpen(false)} />
+              <SlotForm lessons={lessons} existingSlots={slots} onSave={d => create.mutate(d)} onClose={() => setCreateOpen(false)} />
             </DialogContent>
           </Dialog>
         </div>
@@ -326,6 +379,8 @@ export default function SessionSlotsAdminPage() {
             <SlotForm
               lessons={lessons}
               initial={editSlot}
+              existingSlots={slots}
+              excludeId={editSlot.id}
               onSave={d => update.mutate({ id: editSlot.id, data: d })}
               onClose={() => setEditSlot(null)}
             />

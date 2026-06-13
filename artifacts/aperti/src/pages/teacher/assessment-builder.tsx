@@ -150,7 +150,11 @@ export default function AssessmentBuilder({ params }: { params: { id: string } }
       setShowAiModal(false);
       toast({ title: `${generated.length} AI questions added` });
     },
-    onError: () => toast({ title: "AI generation failed", variant: "destructive" }),
+    onError: () => {
+      setShowAiModal(false);
+      setShowCustomModal(true);
+      toast({ title: "AI generation failed", description: "Add the question manually instead.", variant: "destructive" });
+    },
   });
 
   if (isLoading) return (
