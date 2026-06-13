@@ -1,0 +1,229 @@
+APERTI PHASE 40–41 COMBINED — LANDING PAGE REBUILD, VISUAL RHYTHM & FULL SYSTEM STABILIZATION
+For Replit Agent – Restore clarity, trust, and absolute reliability across the entire platform
+
+```
+You are executing a combined **Phase 40 & 41 – Landing Page Rebuild, Visual Rhythm System, Full Repository Stabilization & Error Elimination** for Aperti.  
+The platform has a deep feature set, but the public landing page is visually cluttered and confusing, while the underlying codebase suffers from inconsistent routing, undefined role crashes, deployment mismatches, and broken links. Your mission is to fix both the user‑facing clarity and the internal architecture in one sweep.
+
+**Before any other work, permanently resolve these two persistent issues (if still present):**  
+1. **Remove the icon next to “Aperti” in the sidebar** – keep only the word “Aperti”.  
+2. **Fix the sign‑in “unexpected token” error** – ensure the login page handles non‑JSON responses gracefully, and `/api/auth/login` always returns valid JSON.
+
+---
+
+## 🔴 CRITICAL RULES – READ CAREFULLY
+
+- **Do not add entirely new feature modules.** Only restructure, fix, and polish what already exists.  
+- **Never break any existing working functionality.** Every change must be surgical and thoroughly tested.  
+- **Follow Liquid Flow 2.0** (Inter font, teal `#0D9488`, white cards, rounded‑xl, shadow‑sm, fast but purposeful Framer Motion) for all UI work.  
+- **Eliminate all fake data, placeholder content, dead routes, and console errors.**  
+- **Test across all roles (Admin, Teacher, Assistant, Student, Parent) on desktop and mobile after every major change.**
+
+**Target state after this phase:**  
+- ✅ Landing page: clear, structured, trustworthy, fast, visually balanced, zero errors  
+- ✅ 0 broken routes (realistically near‑zero)  
+- ✅ 0 undefined role crashes  
+- ✅ 0 silent backend failures  
+- ✅ 100% API consistency  
+- ✅ Clean deployment on Replit / Railway / any standard Node.js host
+
+---
+
+# PART A – LANDING PAGE RESCUE (Phase 40)
+
+## A1. FIX LANDING PAGE STRUCTURE (CRITICAL)
+
+The landing page must follow this **strict order**:
+
+1. **Hero Section**  
+   - One clear value proposition (headline + subheadline).  
+   - One primary CTA button (e.g., “Get Started” or “Request Early Access”).  
+   - Remove all competing CTAs, redundant text, and visual clutter.
+
+2. **Horizontal Marquee Strip (NEW – between Hero and How It Works)**  
+   - Content loop: “AI Grading”, “Live Classes”, “Parent Portal”, “IGCSE Ready”, “Smart Analytics”, “Auto Feedback”, “Attendance Tracking”, “Exam Preparation”.  
+   - Visual style: thin strip, soft background blur, slow continuous horizontal scroll, slight opacity fade on edges.  
+   - **Purpose:** creates rhythmic motion, passively reinforces product value, adds “alive” feeling without distraction.  
+   - **Rules:** no clicking required, no interaction, pure passive visual reinforcement.
+
+3. **How It Works Section**  
+   - Rebuild to be extremely clear: short visual steps (icon + minimal text).  
+   - Example flow: Create Course → Add Students → Teach / Assign Work → Track Progress.  
+   - No clutter, no lengthy descriptions.
+
+4. **Features Section** (keep existing but simplify)  
+5. **Social Proof / Trust Section** (real statistics only, no fake numbers)  
+6. **Pricing Section** (clean comparison, no hidden information)  
+7. **FAQ Section**  
+8. **Footer**
+
+## A2. FULL LANDING PAGE BUG SWEEP
+
+- Scan the entire landing page for:
+  - **Layout issues:** overflow on mobile, misaligned grids, broken flex layouts, z‑index conflicts.
+  - **Functional issues:** dead buttons, broken CTAs, non‑working scroll links, missing navigation anchors.
+  - **Data issues:** remove ALL fake statistics, replace undefined values with real data or hide the element, add API fallback data where necessary.
+- Fix every discovered issue.
+
+## A3. VISUAL HIERARCHY FIX
+
+- Enforce: one primary accent colour (teal), one CTA per section, no competing buttons, clear spacing between sections.
+- Remove over‑descriptive text, repeated feature blocks, and confusing technical wording.
+
+## A4. MOTION SIMPLIFICATION (IMPORTANT)
+
+- **Do not overload the landing page with heavy animations.** Apply a controlled motion system:
+  - Hero: light 3D (already partially built) – keep but ensure it’s performant.
+  - Marquee: slow continuous motion.
+  - All other sections: only subtle fade‑in / slide‑up on scroll (Framer Motion `useInView`), no overlapping or competing animations.
+- **Performance protection:** disable 3D and heavy motion on low‑end devices (detect via `navigator.hardwareConcurrency` or frame rate).
+
+## A5. PERFORMANCE RECOVERY
+
+- Lazy‑load all below‑the‑fold images and the 3D hero component.
+- Compress all hero images / illustrations.
+- Remove unnecessary re‑renders on scroll.
+- Target: landing page First Contentful Paint < 1.5s, Time to Interactive < 3s.
+
+## A6. TRUST & CLARITY FIX
+
+- The landing page must answer within 5 seconds: *What is this? Who is it for? Why should I care?*  
+- Remove all marketing fluff, unverified claims, and fake social proof.
+
+## A7. ERROR DETECTION ON LANDING PAGE
+
+- Implement a small client‑side error tracker for the landing page only: if any component crashes or an API call fails, replace it with a graceful fallback (e.g., a static “Why Aperti?” message) without breaking the rest of the page.
+
+## A8. CTA OPTIMIZATION
+
+- Keep only **1–2 CTAs** total: a primary “Get Started” and a secondary “View Demo” (or “Explore Features”). Remove all other redundant buttons.
+
+## A9. MOBILE‑FIRST FIX
+
+- Ensure hero fits on a 375px screen without cropping, marquee scrolls smoothly, and all buttons are tappable (min 44×44px touch targets). No horizontal scroll bugs.
+
+## A10. DESIGN CONSISTENCY LOCK
+
+- Match landing page typography, spacing, button shapes, card designs, and shadows to the global Liquid Flow design tokens. No isolated custom styles.
+
+---
+
+# PART B – REPOSITORY & SYSTEM STABILIZATION (Phase 41)
+
+## B1. ROUTE STABILITY FIX (MOST CRITICAL)
+
+- **Create a single route registry** (a TypeScript object or JSON file) that lists every frontend route and its corresponding backend endpoint(s).  
+- At startup (backend), verify that all registered backend routes are actually mounted. If a route is missing, log a clear warning and create a placeholder that returns a standard JSON error with `success: false`.  
+- Every frontend navigation button/link must check against this registry. If a route doesn’t exist, the button must be **disabled** with a tooltip, never lead to a blank page.  
+- Enhance the 404 handler: detect the user’s role, suggest a relevant safe page, and provide a search bar. Never show a generic “Not Found” without guidance.
+
+## B2. ROLE ENGINE FIX (ELIMINATE UNDEFINED ROLE CRASHES)
+
+- Build a **central role resolver** (`resolveRole(user)` → `"admin" | "teacher" | "assistant" | "student" | "parent" | "guest"`).  
+- **Rules:**  
+  - Never trust the frontend role alone. Always validate the role from the backend (JWT token or session).  
+  - If the role is undefined or invalid → treat as `"guest"` and redirect to login with a clear message.  
+  - Log any invalid role attempts to the audit log.  
+- Apply the resolver in a global React context and in a backend middleware. Every protected component/page must use this resolved role, not a raw `user.role` property.
+
+## B3. 404 ELIMINATION SYSTEM
+
+- Implement a startup **route‑checker** that scans all backend route registrations and compares them with the frontend API call map. Output a report to the admin debug panel.  
+- For any unregistered frontend call, automatically create a fallback API endpoint that returns a standard error `{ success: false, error: "endpoint not yet available" }` and log the missing route.  
+- In production, replace all broken frontend links with either a working route or a “Coming Soon” / “Feature Unavailable” fallback UI.
+
+## B4. DEPLOYMENT COMPATIBILITY FIX
+
+- Ensure the application can be deployed on **Replit, Railway, Render, or a basic VPS** without code changes.  
+- Use a single `PORT` environment variable. In production, the backend serves the built frontend as static files. In development, the Vite dev server proxies API requests.  
+- Validate all required environment variables at startup (`DATABASE_URL`, `JWT_SECRET`, `OPENAI_API_KEY`, `APP_URL`, etc.) and exit with a clear error message if any are missing.  
+- Add a `/health` endpoint that returns `{ status: "ok", db: "connected", uptime }`.
+
+## B5. UI ROUTE SAFETY LAYER
+
+- Every button and link in the application must be wrapped with a safety check: `if (!routeExists(target)) { showFallbackUI() }`.  
+- Build a small utility `isRouteValid(path)` that consults the route registry.  
+- Apply this utility to the sidebar, all dashboards, and any navigation components.
+
+## B6. DATA INTEGRITY FIX
+
+- Run a database audit to ensure:  
+  - Every student belongs to a valid account.  
+  - Every enrollment links a valid student and a valid course.  
+  - Every course belongs to a valid teacher.  
+  - Every session slot links to a valid course and teacher.  
+  - Every attendance record links to a valid session and student.  
+- Provide an admin “Repair Orphans” button that removes or fixes broken relationships (with confirmation).  
+- Add foreign key constraints / cascading deletes where missing and safe.
+
+## B7. ERROR HANDLING OVERHAUL
+
+- Replace all empty `.catch(() => {})` blocks with proper error logging and fallback responses.  
+- Create a global `logError(error, context)` function that stores errors in the `error_logs` table with user ID, route, and timestamp.  
+- Wrap the entire frontend in an error boundary that renders the friendly recovery screen and logs the error automatically.
+
+## B8. API CONSISTENCY LOCK
+
+- Standardise **every** API response to:
+  ```json
+  { "success": true, "data": {}, "error": null }
+  { "success": false, "data": null, "error": { "code": "ERR_...", "message": "..." } }
+```
+
+· Audit all existing routes and refactor any non‑conforming responses.
+· The frontend API utility (fetchJSON) must expect this format and throw a standard error on success: false.
+
+B9. FRONTEND STABILITY FIX
+
+· Apply a universal rule: no component may assume data exists. Every data access must be guarded with if (!data) return <LoadingSkeleton /> or a similar fallback.
+· Fix all known cases of Cannot read properties of undefined by adding optional chaining and null‑safe defaults.
+· Eliminate loading loops by ensuring TanStack Query’s staleTime and retry are configured globally (e.g., retry: 1, staleTime: 30_000).
+
+B10. PERFORMANCE STABILIZATION
+
+· Remove redundant re‑renders by memoizing heavy components (React.memo, useMemo).
+· Reduce animation load by respecting prefers-reduced-motion and disabling heavy animations on low‑end devices.
+· Lazy‑load all route‑based components (already partially done with dynamic imports; ensure it’s consistent).
+
+B11. SYSTEM‑WIDE TEST MODE
+
+· Create a simple “Test Runner” page (/admin/test-runner) that simulates:
+  · Admin login → dashboard → user management.
+  · Teacher login → create course → add students → take attendance → grade → view analytics.
+  · Student login → enroll → attend → submit → revise.
+  · Parent login → pair → view child progress.
+· This runner executes real API calls using test accounts (seeded via a script) and logs any failures. It does not replace manual testing but provides a quick health check.
+
+B12. FINAL VERIFICATION CHECKLIST
+
+Before completing this phase, verify the following:
+
+· ✅ Landing page renders cleanly on mobile, tablet, and desktop; marquee scrolls smoothly; no console errors on the page.
+· ✅ Sign‑in works with valid credentials; invalid credentials show a clear error; no “unexpected token” or role crash.
+· ✅ All sidebar links lead to valid pages; no 404s within the app.
+· ✅ Role switching (QuickSwitch) works and correctly restricts access.
+· ✅ AI features (The Mentor, question generation) respond or fallback gracefully.
+· ✅ Deploying to a fresh environment works by following the updated .env.example and README.md.
+
+---
+
+IMPLEMENTATION ORDER
+
+1. Fix sidebar icon and sign‑in error.
+2. Landing page restructure: hero, marquee strip, how‑it‑works rebuild.
+3. Landing page bug sweep, mobile fixes, CTA optimisation.
+4. Motion simplification and performance recovery on landing.
+5. Design consistency lock across the public site.
+6. Backend route registry and startup validation.
+7. Role resolver implementation (frontend + backend).
+8. 404 elimination, route safety layer, and data integrity audit.
+9. Error handling overhaul and API consistency enforcement.
+10. Frontend stability fixes (null guards, loading states).
+11. Performance stabilization (memoization, lazy loading).
+12. Deployment compatibility (env vars, health endpoint, single origin).
+13. Build test mode and run full role simulations.
+14. Final verification against the checklist.
+
+Start now. Deliver a landing page that inspires trust and a codebase that is rock‑solid, consistent, and ready for production.
+
+```
