@@ -1,5 +1,5 @@
 import { useState, useRef, FormEvent, useEffect, useMemo } from "react";
-import { motion, useInView, AnimatePresence, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useInView, AnimatePresence, useScroll, useTransform, useReducedMotion, useMotionValue, useSpring } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -62,6 +62,63 @@ function Reveal({ children, delay = 0, y = 28 }: { children: React.ReactNode; de
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}>
       {children}
+    </motion.div>
+  );
+}
+
+/* ─────────────────────────── 3D Tilt Feature Card ─────────────────────────── */
+function Feature3DTiltCard({ teal, Icon, title, description, index }: {
+  teal: string;
+  Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  title: string;
+  description: string;
+  index: number;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 200, damping: 28 });
+  const springY = useSpring(y, { stiffness: 200, damping: 28 });
+  const rotateX = useTransform(springY, [-60, 60], [7, -7]);
+  const rotateY = useTransform(springX, [-60, 60], [-7, 7]);
+  const glowOpacity = useMotionValue(0);
+  const glowSpring = useSpring(glowOpacity, { stiffness: 200, damping: 25 });
+
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    x.set(e.clientX - rect.left - rect.width / 2);
+    y.set(e.clientY - rect.top - rect.height / 2);
+    glowOpacity.set(1);
+  };
+  const handleLeave = () => {
+    x.set(0);
+    y.set(0);
+    glowOpacity.set(0);
+  };
+
+  const ICON_BGS = [`${teal}12`, "#7C3AED14", "#0891B214", "#DC262614", "#D9770614", "#05966914"];
+
+  return (
+    <motion.div
+      ref={cardRef}
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
+      style={{ rotateX, rotateY, transformPerspective: 900 }}
+      className="relative card-shine bg-white rounded-2xl border border-gray-100 shadow-sm h-full overflow-hidden cursor-default">
+      <motion.div
+        className="absolute inset-0 rounded-2xl pointer-events-none"
+        style={{
+          opacity: glowSpring,
+          background: `radial-gradient(circle at 50% 0%, ${teal}10 0%, transparent 70%)`,
+        }} />
+      <div className="p-6 h-full flex flex-col relative z-10">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+          style={{ background: ICON_BGS[index % ICON_BGS.length] }}>
+          <Icon className="h-5 w-5" style={{ color: teal }} />
+        </div>
+        <h3 className="font-bold text-gray-900 mb-2 text-sm">{title}</h3>
+        <p className="text-xs text-gray-500 leading-relaxed">{description}</p>
+      </div>
     </motion.div>
   );
 }
@@ -944,65 +1001,6 @@ function LiveDashboardPreview() {
   );
 }
 
-/* ─────────────────────────── SMART CALCULATOR ─────────────────────────── */
-function SmartCalculator({ teal }: { teal: string }) {
-  const [students, setStudents] = useState(30);
-  const [months, setMonths] = useState(12);
-  const perStudentPerMonth = 45;
-  const total = students * months * perStudentPerMonth;
-  const savings = Math.round(total * 0.4);
-  const hoursPerMonth = Math.round(students * 0.8);
-
-  return (
-    <Reveal>
-      <div className="max-w-2xl mx-auto mt-12 bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
-        <div className="flex items-center gap-2 mb-1">
-          <Zap className="h-4 w-4" style={{ color: teal }} />
-          <span className="text-sm font-bold text-gray-900">ROI Calculator</span>
-        </div>
-        <p className="text-xs text-gray-500 mb-6">See exactly what Aperti costs — and what you get back.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-          <div>
-            <label className="text-xs font-semibold text-gray-600 flex justify-between mb-2">
-              Students <span style={{ color: teal }}>{students}</span>
-            </label>
-            <input type="range" min={5} max={300} step={5} value={students}
-              onChange={e => setStudents(Number(e.target.value))}
-              className="w-full accent-teal-600 cursor-pointer" />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>5</span><span>300</span></div>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-gray-600 flex justify-between mb-2">
-              Months <span style={{ color: teal }}>{months}</span>
-            </label>
-            <input type="range" min={1} max={24} step={1} value={months}
-              onChange={e => setMonths(Number(e.target.value))}
-              className="w-full accent-teal-600 cursor-pointer" />
-            <div className="flex justify-between text-[10px] text-gray-400 mt-1"><span>1</span><span>24</span></div>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "Total investment", value: `EGP ${total.toLocaleString()}`, sub: `EGP ${perStudentPerMonth}/student/mo`, color: teal },
-            { label: "Admin hours saved", value: `${hoursPerMonth * months}h`, sub: `~${hoursPerMonth}h/month`, color: "#7C3AED" },
-            { label: "Est. extra revenue", value: `EGP ${savings.toLocaleString()}`, sub: "from retention & upsell", color: "#059669" },
-          ].map((item, i) => (
-            <motion.div key={i} layout className="rounded-xl p-3 text-center" style={{ background: `${item.color}08` }}>
-              <p className="text-base font-black" style={{ color: item.color }}>{item.value}</p>
-              <p className="text-[9px] font-semibold text-gray-700 mt-0.5">{item.label}</p>
-              <p className="text-[8px] text-gray-400">{item.sub}</p>
-            </motion.div>
-          ))}
-        </div>
-        <p className="text-[10px] text-gray-400 text-center mt-4">
-          Estimates based on average tutor centre data. Actual results may vary.{" "}
-          <a href="#apply" className="underline" style={{ color: teal }}>Contact us for a custom quote →</a>
-        </p>
-      </div>
-    </Reveal>
-  );
-}
-
 /* ─────────────────────────── INTERACTIVE DEMO ─────────────────────────── */
 const DEMO_STEPS = [
   {
@@ -1132,6 +1130,110 @@ function InteractiveDemo({ teal }: { teal: string }) {
   );
 }
 
+/* ─────────────────────────── Pricing Visual ─────────────────────────── */
+const PRICING_STATS = [
+  { value: "5×", label: "Faster grading", color: "#0D9488", icon: Zap },
+  { value: "40%", label: "More retention", color: "#7C3AED", icon: Target },
+  { value: "24/7", label: "AI mentor", color: "#0891B2", icon: Brain },
+  { value: "0", label: "Setup fees", color: "#059669", icon: Shield },
+];
+
+function PricingVisual({ teal }: { teal: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-60px" });
+
+  return (
+    <div ref={ref} className="mt-12 overflow-hidden rounded-2xl relative" style={{
+      background: "linear-gradient(135deg, #0D9488 0%, #0F766E 40%, #0C4A6E 100%)",
+      minHeight: 200,
+    }}>
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} style={{
+            position: "absolute",
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.1)",
+            width: 80 + i * 70,
+            height: 80 + i * 70,
+            top: "50%", left: i % 2 === 0 ? "-5%" : "auto",
+            right: i % 2 !== 0 ? "-5%" : "auto",
+            transform: "translateY(-50%)",
+            animation: `glowRing ${8 + i * 1.5}s ease-in-out ${i * 0.5}s infinite`,
+          }} />
+        ))}
+        <svg className="absolute inset-0 w-full h-full opacity-10">
+          <defs>
+            <pattern id="p-dots" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
+              <circle cx="1" cy="1" r="1" fill="white" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#p-dots)" />
+        </svg>
+        <style>{`
+          @keyframes glowRing { 0%,100%{opacity:0.08} 50%{opacity:0.18} }
+          @keyframes statFloat { 0%,100%{transform:translateY(0px)} 50%{transform:translateY(-5px)} }
+        `}</style>
+      </div>
+
+      <div className="relative px-8 py-10">
+        <div className="text-center mb-8">
+          <motion.h3
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="text-2xl md:text-3xl font-extrabold text-white mb-2 tracking-tight">
+            Everything you need.<br />
+            <span className="text-white/70">From day one.</span>
+          </motion.h3>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="text-white/60 text-sm max-w-md mx-auto">
+            Every plan includes the full Aperti platform — not a trimmed-down version.
+          </motion.p>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {PRICING_STATS.map((s, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              animate={inView ? { opacity: 1, scale: 1, y: 0 } : {}}
+              transition={{ duration: 0.5, delay: 0.15 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              className="rounded-xl p-5 text-center backdrop-blur-sm"
+              style={{
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                animation: `statFloat ${4 + i * 0.6}s ease-in-out ${i * 0.4}s infinite`,
+              }}>
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center mx-auto mb-3"
+                style={{ background: "rgba(255,255,255,0.15)" }}>
+                <s.icon className="h-4 w-4 text-white" />
+              </div>
+              <p className="text-2xl font-black text-white mb-0.5">{s.value}</p>
+              <p className="text-[11px] text-white/60 font-medium">{s.label}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.55 }}
+          className="flex flex-wrap items-center justify-center gap-4 mt-8">
+          {["No lock-in contract", "InstaPay accepted", "Free onboarding call", "Cancel any time"].map((badge, i) => (
+            <span key={i} className="flex items-center gap-1.5 text-xs text-white/70">
+              <CheckCircle2 className="h-3.5 w-3.5 text-white/50" />
+              {badge}
+            </span>
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────── Pricing Section ─────────────────────────── */
 function PricingSection({ teal, teacherPlans, studentPlans, pricingHeadline, pricingAccent, contactEmail }: {
   teal: string; teacherPlans: CMSPlan[]; studentPlans: CMSPlan[];
@@ -1189,7 +1291,7 @@ function PricingSection({ teal, teacherPlans, studentPlans, pricingHeadline, pri
           </motion.div>
         </AnimatePresence>
 
-        {tab === "teacher" && <SmartCalculator teal={teal} />}
+        {tab === "teacher" && <PricingVisual teal={teal} />}
 
         <Reveal delay={0.4}>
           <p className="text-center text-sm text-gray-400 mt-8">
@@ -1429,14 +1531,7 @@ export default function Landing() {
               const Icon = getIcon(f.icon);
               return (
                 <Reveal key={i} delay={i * 0.08}>
-                  <motion.div whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(13,148,136,0.09)", transition: { duration: 0.2 } }}
-                    className="card-shine bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style={{ background: `${teal}12` }}>
-                      <Icon className="h-5 w-5" style={{ color: teal }} />
-                    </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-sm">{f.title}</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed">{f.description}</p>
-                  </motion.div>
+                  <Feature3DTiltCard teal={teal} Icon={Icon} title={f.title} description={f.description} index={i} />
                 </Reveal>
               );
             })}
