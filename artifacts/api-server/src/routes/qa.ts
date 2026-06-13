@@ -391,7 +391,7 @@ qaRouter.post("/admin/tests/run-sanity", async (req: AuthRequest, res: Response)
       }).catch(() => null);
       if (loginResp?.ok) {
         const data = await loginResp.json().catch(() => null);
-        adminToken = data?.token ?? null;
+        adminToken = (data as any)?.token ?? null;
       }
     }
 

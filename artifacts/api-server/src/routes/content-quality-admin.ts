@@ -117,8 +117,8 @@ aiCostsRouter.get("/costs", async (_req: AuthRequest, res: Response) => {
       GROUP BY 1, 2 ORDER BY 1 DESC, calls DESC`
     ).catch(() => ({ rows: [] }));
 
-    const totalTokens = rows.reduce((s: number, r: any) => s + parseInt(r.tokens || 0), 0);
-    const totalCost   = rows.reduce((s: number, r: any) => s + parseFloat(r.cost_usd || 0), 0);
+    const totalTokens = (rows as any[]).reduce((s: number, r: any) => s + parseInt(r.tokens || 0), 0);
+    const totalCost   = (rows as any[]).reduce((s: number, r: any) => s + parseFloat(r.cost_usd || 0), 0);
 
     res.json({ breakdown: rows, totals: { tokens: totalTokens, costUSD: totalCost.toFixed(4) } });
   } catch (err: any) {

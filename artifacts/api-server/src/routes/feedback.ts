@@ -42,7 +42,7 @@ feedbackRouter.post("/", authenticate, async (req: AuthRequest, res: Response) =
 });
 
 // GET /api/feedback/summary — admin summary of all feedback
-feedbackRouter.get("/summary", authenticate, requireRole(["admin"]), async (req: Request, res: Response) => {
+feedbackRouter.get("/summary", authenticate, requireRole("admin"), async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(`
       SELECT
@@ -64,7 +64,7 @@ feedbackRouter.get("/summary", authenticate, requireRole(["admin"]), async (req:
 });
 
 // GET /api/feedback/feature/:feature — all feedback for a feature
-feedbackRouter.get("/feature/:feature", authenticate, requireRole(["admin"]), async (req: Request, res: Response) => {
+feedbackRouter.get("/feature/:feature", authenticate, requireRole("admin"), async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(
       `SELECT f.*, a.display_name, a.role

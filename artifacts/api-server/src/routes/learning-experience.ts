@@ -191,7 +191,7 @@ learningExperienceRouter.get("/content/next", ...studentGuard, async (req: AuthR
         student.teacherAccountId ? eq(examsTable.teacherAccountId, student.teacherAccountId) : sql`1=1`,
         gte(examsTable.examDate, new Date().toISOString().split("T")[0])
       )).limit(3),
-    db.select().from(flashcardDecksTable).where(eq(flashcardDecksTable.createdByAccountId, student.accountId)).limit(5),
+    db.select().from(flashcardDecksTable).where(eq(flashcardDecksTable.teacherAccountId, student.accountId)).limit(5),
   ]);
 
   const weakTopics = (echo?.weakTopics as string[]) ?? [];
@@ -217,7 +217,7 @@ learningExperienceRouter.get("/content/next", ...studentGuard, async (req: AuthR
 
   for (const deck of decks.slice(0, 2)) {
     items.push({
-      type: "flashcard", resourceId: String(deck.id), title: deck.name,
+      type: "flashcard", resourceId: String(deck.id), title: deck.title,
       reason: "Spaced repetition — cards are due for review",
       priority: 2, estimatedMinutes: 10,
     });
@@ -608,7 +608,7 @@ learningExperienceRouter.patch("/focus-sessions/:id/complete", ...studentGuard, 
   const xpEarned = Math.floor((finalDuration / 25) * 30 * (productivityScore / 100));
 
   const [updated] = await db.update(focusSessionsTable)
-    .set({ durationMinutes: finalDuration, xpEarned, completedAt: new Date(), distractionsCount, productivityScore })
+    .set({ durationMinutes: finalDuration, xpEarned, completedAt: new Date() })
     .where(eq(focusSessionsTable.id, sessionId)).returning();
 
   const [profile] = await db.select().from(ascendProfilesTable).where(eq(ascendProfilesTable.studentAccountId, student.accountId)).limit(1);
@@ -647,7 +647,7 @@ learningExperienceRouter.get("/focus-analytics", ...studentGuard, async (req: Au
     byDay[day] = byDay[day] ?? { minutes: 0, sessions: 0, productivity: 0 };
     byDay[day].minutes += s.durationMinutes ?? 0;
     byDay[day].sessions++;
-    byDay[day].productivity = Math.round(((byDay[day].productivity * (byDay[day].sessions - 1)) + (s.productivityScore ?? 70)) / byDay[day].sessions);
+    byDay[day].productivity = Math.round(((byDay[day].productivity * (byDay[day].sessions - 1)) + ((s as any).productivityScore ?? 70)) / byDay[day].sessions);
     byHour[hour] = (byHour[hour] ?? 0) + 1;
   }
 
@@ -789,7 +789,7 @@ learningExperienceRouter.get("/analytics/learning", ...studentGuard, async (req:
       .where(and(eq(focusSessionsTable.studentId, student.id), gte(focusSessionsTable.startedAt, thirtyDaysAgo))),
     db.select().from(microAssessmentsTable)
       .where(and(eq(microAssessmentsTable.studentId, student.id), sql`completed_at IS NOT NULL`)).limit(20),
-    db.select({ grade: studentMarksTable.marksObtained, totalMarks: studentMarksTable.totalMarks })
+    db.select({ grade: studentMarksTable.marksScored })
       .from(studentMarksTable).where(eq(studentMarksTable.studentId, student.id)).limit(20),
     db.select({ status: attendanceTable.status })
       .from(attendanceTable).where(eq(attendanceTable.studentId, student.id)).limit(100),

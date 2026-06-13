@@ -35,8 +35,8 @@ helpdeskRouter.get("/admin/all", authenticate, requireRole("admin"), async (req:
 
 // ADMIN: PUT /helpdesk/admin/:id — update ticket status / reply
 helpdeskRouter.put("/admin/:id", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
-  const id = parseInt(req.params.id);
-  const { status, response } = req.body;
-  await db.update(helpdeskTicketsTable).set({ status, response }).where(eq(helpdeskTicketsTable.id, id));
+  const id = parseInt(req.params.id, 10);
+  const { status } = req.body;
+  await db.update(helpdeskTicketsTable).set({ status }).where(eq(helpdeskTicketsTable.id, id));
   res.json({ success: true });
 });

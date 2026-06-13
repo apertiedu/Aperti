@@ -53,15 +53,15 @@ performanceRouter.get("/metrics", async (_req, res) => {
       `).catch(() => ({ rows: [] })),
     ]);
 
-    const totalRequests = dailyStats.rows.reduce((s: number, r: any) => s + parseInt(r.requests), 0);
-    const totalErrors = dailyStats.rows.reduce((s: number, r: any) => s + parseInt(r.errors), 0);
+    const totalRequests = (dailyStats.rows as any[]).reduce((s: number, r: any) => s + parseInt(r.requests), 0);
+    const totalErrors = (dailyStats.rows as any[]).reduce((s: number, r: any) => s + parseInt(r.errors), 0);
 
     res.json({
       summary: {
         totalRequests,
         errorRate: totalRequests > 0 ? Math.round((totalErrors / totalRequests) * 100 * 10) / 10 : 0,
         avgResponseMs: endpoints.rows.length > 0
-          ? Math.round(endpoints.rows.reduce((s: number, r: any) => s + parseFloat(r.avg_ms), 0) / endpoints.rows.length)
+          ? Math.round((endpoints.rows as any[]).reduce((s: number, r: any) => s + parseFloat(r.avg_ms), 0) / endpoints.rows.length)
           : 0,
       },
       endpoints: endpoints.rows,

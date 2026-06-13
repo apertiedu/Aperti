@@ -66,8 +66,19 @@ const memCache = {
   },
 };
 
-type RedisCacheType = typeof memCache;
-let _redis: RedisCacheType = memCache;
+interface CacheStore {
+  type: "memory" | "redis";
+  isConnected: boolean;
+  hits: number;
+  misses: number;
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, mode?: string, ttlSeconds?: number): Promise<void>;
+  del(key: string): Promise<void>;
+  exists(key: string): Promise<boolean>;
+  flush(): Promise<void>;
+  getStats(): { type: "memory" | "redis"; hits: number; misses: number; hitRate: number; size: number };
+}
+let _redis: CacheStore = memCache;
 
 if (process.env.REDIS_URL) {
   (async () => {
@@ -137,7 +148,7 @@ if (process.env.REDIS_URL) {
   })();
 }
 
-export const redis = new Proxy({} as RedisCacheType, {
+export const redis = new Proxy({} as CacheStore, {
   get(_target, prop) {
     return (typeof (_redis as any)[prop] === "function")
       ? (...args: any[]) => (_redis as any)[prop](...args)

@@ -1,39 +1,40 @@
-// This would be a scheduled job (cron) that runs every Friday
-// For now, we create the route that generates the email content
-
 import { Router, Response } from "express";
-import { db } from "@workspace/db";
-import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+import { pool } from "@workspace/db";
+import { authenticate, AuthRequest } from "../middleware/auth";
 
 export const guardianPulseRouter = Router();
 
-// GET /guardian-pulse/preview/:parentId — preview the weekly email content
 guardianPulseRouter.get("/preview/:parentId", authenticate, async (req: AuthRequest, res: Response) => {
-  const parentId = parseInt(req.params.parentId);
+  const parentId = parseInt(req.params.parentId, 10);
 
-  // Fetch children linked to this parent
-  const links = await db.query.guardianLinks.findMany({
-    where: (l, { eq }) => eq(l.parentAccountId, parentId),
-  });
+  const { rows: links } = await pool.query(
+    `SELECT gl.student_id, gl.parent_account_id FROM guardian_links gl WHERE gl.parent_account_id = $1`,
+    [parentId]
+  );
 
-  const childrenData = await Promise.all(links.map(async (link) => {
-    const student = await db.query.students.findFirst({ where: (s, { eq }) => eq(s.id, link.studentId) });
-    const memory = await db.query.echoMemory.findFirst({ where: (m, { eq }) => eq(m.studentId, link.studentId) });
-    const attendance = await db.query.attendance.findMany({
-      where: (a, { eq, and }) => and(eq(a.studentId, link.studentId)),
-      limit: 7,
-    });
+  const childrenData = await Promise.all(links.map(async (link: any) => {
+    const { rows: [student] } = await pool.query(
+      `SELECT student_name FROM students WHERE id = $1 LIMIT 1`,
+      [link.student_id]
+    );
+    const { rows: [memory] } = await pool.query(
+      `SELECT weak_topics FROM echo_memory WHERE student_id = $1 LIMIT 1`,
+      [link.student_id]
+    );
+    const { rows: attendance } = await pool.query(
+      `SELECT status FROM attendance WHERE student_id = $1 ORDER BY date DESC LIMIT 7`,
+      [link.student_id]
+    );
 
     return {
-      name: student?.studentName || "Unknown",
-      weakTopics: memory?.weakTopics || [],
-      attendanceThisWeek: attendance.filter(a => a.status === "Present").length,
+      name: student?.student_name || "Unknown",
+      weakTopics: (memory?.weak_topics as string[]) || [],
+      attendanceThisWeek: attendance.filter((a: any) => a.status === "Present").length,
       totalSessionsThisWeek: attendance.length,
     };
   }));
 
-  // Build a mock email body
-  const emailBody = childrenData.map(child => `
+  const emailBody = childrenData.map((child: any) => `
     <div style="margin-bottom:20px;">
       <h3>${child.name}</h3>
       <p>Attendance: ${child.attendanceThisWeek}/${child.totalSessionsThisWeek} sessions</p>

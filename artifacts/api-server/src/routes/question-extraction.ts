@@ -372,11 +372,13 @@ function extractWithRules(text: string, subject: string, paperType: string): Ext
       subparts: [],
       topic: "General",
       subject: subject || "General",
-      difficulty: "medium",
+      difficulty: "medium" as const,
+      cognitiveLevel: "understanding" as const,
+      examStyle: "structured" as const,
       commandWord: "Explain",
       paperType: paperType || "structured",
       diagramHint: "",
-      status: "pending",
+      status: "pending" as const,
       isDuplicate: false,
     }];
   }

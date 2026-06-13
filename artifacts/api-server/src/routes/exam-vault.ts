@@ -28,7 +28,7 @@ function deriveExamKey(studentId: number, examId: number): Buffer {
   const ikm = Buffer.from(masterKey.slice(0, 32));
   const salt = crypto.randomBytes(0); // deterministic derivation
   const info = Buffer.from(`exam:${examId}:student:${studentId}`);
-  return crypto.hkdfSync("sha256", ikm, salt, info, 32);
+  return Buffer.from(crypto.hkdfSync("sha256", ikm, salt, info, 32));
 }
 
 function encryptPayload(data: string, studentId: number, examId: number): { encrypted: string; iv: string } {

@@ -1384,11 +1384,11 @@ founderRouter.post("/emergency/impersonate", async (req: AuthRequest, res: Respo
     if (!rows.length) return res.status(404).json({ error: "User not found" }) as any;
     const target = rows[0];
     const token = jwt.sign(
-      { id: target.id, role: target.role, impersonated_by: req.user?.id },
+      { id: target.id, role: target.role, impersonated_by: req.userId },
       JWT_SECRET_EMERGENCY,
       { expiresIn: "1h" }
     );
-    await logEmergencyAction(req.user?.id, `founder:impersonate:${target.username}`, targetUserId);
+    await logEmergencyAction(req.userId, `founder:impersonate:${target.username}`, targetUserId);
     res.json({ token, username: target.username, role: target.role, expiresIn: "1h" });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1409,7 +1409,7 @@ founderRouter.post("/emergency/force-logout", async (req: AuthRequest, res: Resp
     ]);
     const devCount  = devDel.status === "fulfilled"  ? (devDel.value.rowCount ?? 0)  : 0;
     const sessCount = sessDel.status === "fulfilled" ? (sessDel.value.rowCount ?? 0) : 0;
-    await logEmergencyAction(req.user?.id, `founder:force-logout:${acc.rows[0].username}`, targetUserId);
+    await logEmergencyAction(req.userId, `founder:force-logout:${acc.rows[0].username}`, targetUserId);
     res.json({ success: true, deviceSessionsRevoked: devCount, sessionsRevoked: sessCount, username: acc.rows[0].username });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1423,7 +1423,7 @@ founderRouter.post("/emergency/reset-device-limit", async (req: AuthRequest, res
     const acc = await pool.query("SELECT username FROM accounts WHERE id = $1", [targetUserId]);
     if (!acc.rows.length) return res.status(404).json({ error: "User not found" }) as any;
     const del = await pool.query("DELETE FROM device_sessions WHERE account_id = $1 RETURNING id", [targetUserId]);
-    await logEmergencyAction(req.user?.id, `founder:reset-device-limit:${acc.rows[0].username}`, targetUserId);
+    await logEmergencyAction(req.userId, `founder:reset-device-limit:${acc.rows[0].username}`, targetUserId);
     res.json({ success: true, devicesCleared: del.rowCount ?? 0, username: acc.rows[0].username });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1442,7 +1442,7 @@ founderRouter.post("/emergency/unlock-account", async (req: AuthRequest, res: Re
     ).catch(async () => {
       await pool.query(`UPDATE accounts SET status = 'active' WHERE id = $1 AND status = 'locked'`, [targetUserId]);
     });
-    await logEmergencyAction(req.user?.id, `founder:unlock-account:${acc.rows[0].username}`, targetUserId);
+    await logEmergencyAction(req.userId, `founder:unlock-account:${acc.rows[0].username}`, targetUserId);
     res.json({ success: true, username: acc.rows[0].username, previousStatus: acc.rows[0].status });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
@@ -1480,7 +1480,7 @@ founderRouter.post("/emergency/repair-enrollments", async (req: AuthRequest, res
     `).catch(() => ({ rowCount: 0 }));
     results.expiredPasswordTokensRemoved = expiredTokens.rowCount ?? 0;
 
-    await logEmergencyAction(req.user?.id, "founder:repair-enrollments", "system");
+    await logEmergencyAction(req.userId, "founder:repair-enrollments", "system");
     res.json({ success: true, ...results, repairedAt: new Date().toISOString() });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
