@@ -111,3 +111,34 @@ settingsRouter.get("/sessions", authenticate, async (req: AuthRequest, res: Resp
     res.json(rows);
   } catch (err: any) { res.status(500).json({ error: err.message }); }
 });
+
+// DELETE /settings/sessions/:id — revoke a specific session
+settingsRouter.delete("/sessions/:id", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const sessionId = parseInt(req.params.id as string, 10);
+    await pool.query(
+      `DELETE FROM device_sessions WHERE id=$1 AND account_id=$2`,
+      [sessionId, req.userId]
+    );
+    res.json({ success: true });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});
+
+// DELETE /settings/sessions — revoke all sessions except current
+settingsRouter.delete("/sessions", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const currentDeviceId = req.headers["x-device-id"] as string | undefined;
+    if (currentDeviceId) {
+      await pool.query(
+        `DELETE FROM device_sessions WHERE account_id=$1 AND device_id != $2`,
+        [req.userId, currentDeviceId]
+      );
+    } else {
+      await pool.query(
+        `DELETE FROM device_sessions WHERE account_id=$1`,
+        [req.userId]
+      );
+    }
+    res.json({ success: true });
+  } catch (err: any) { res.status(500).json({ error: err.message }); }
+});

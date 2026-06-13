@@ -13,6 +13,8 @@ import Login from "@/pages/login";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
 import LowBandwidthBanner from "@/components/LowBandwidthBanner";
+import { OfflineDetector } from "@/components/offline-detector";
+import ServerError from "@/pages/server-error";
 import { useEffect, useRef } from "react";
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 import { useToast } from "@/hooks/use-toast";
@@ -76,6 +78,7 @@ import BudgetSense from "@/pages/admin/budget-sense";
 import AutoScale from "@/pages/admin/auto-scale";
 import SpendWise from "@/pages/admin/spend-wise";
 import AdminCommand from "@/pages/admin/admin-command";
+import EnrollmentAudit from "@/pages/admin/enrollment-audit";
 import WorldPilot from "@/pages/admin/world-pilot";
 import GuardianPulseAdmin from "@/pages/admin/guardian-pulse-admin";
 import TeacherVerification from "@/pages/admin/teacher-verification";
@@ -458,6 +461,7 @@ function StudentRouter() {
         <Route path="/flashcards/swipe" component={FlashcardSwipe} />
         {/* Phase 34 — Student QR Center */}
         <Route path="/my-qr" component={MyQRPage} />
+        <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
     </StudentLayout>
@@ -581,6 +585,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/feature-status" component={FeatureStatusPage} />
     <Route path="/admin/data-quality" component={DataQualityPage} />
     <Route path="/admin/session-slots" component={SessionSlotsAdminPage} />
+    <Route path="/admin/enrollment-audit" component={EnrollmentAudit} />
     <Route path="/admin/debug" component={AdminDebugPage} />
     <Route path="/admin/test-runner" component={TestRunner} />
     <Route path="/admin/feature-registry" component={FeatureRegistryPage} />
@@ -599,6 +604,7 @@ function AdminRouter() {
         <Route path="/corehub" component={CoreHub} />
         {TEACHER_ROUTES}
         {ADMIN_ROUTES}
+        <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -614,6 +620,7 @@ function TeacherRouter() {
         <Route path="/account/sessions" component={SessionsPage} />
         <Route path="/" component={CoreHub} />
         {TEACHER_ROUTES}
+        <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
@@ -667,7 +674,7 @@ function ParentRouter() {
         <Route path="/courses/:id" component={CourseDetail} />
         {/* Phase 17 — Mobile */}
         <Route path="/mobile/home" component={ParentMobileHome} />
-
+        <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
     </ParentLayout>
@@ -697,6 +704,7 @@ function PublicRouter() {
       <Route path="/roadmap" component={RoadmapPublic} />
       <Route path="/release-notes" component={ReleaseNotesPublic} />
       <Route path="/status" component={StatusPublic} />
+      <Route path="/500" component={ServerError} />
       <Route component={Landing} />
     </Switch>
   );
@@ -783,6 +791,7 @@ export default function App() {
           </AuthProvider>
           <Toaster />
           <LowBandwidthBanner />
+          <OfflineDetector />
           <PWAInstallBanner />
           <KeyboardShortcutsHelp />
         </TooltipProvider>

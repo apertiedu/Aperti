@@ -402,27 +402,41 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
     staleTime: 5 * 60 * 1000,
   });
 
-  const liveItems = [
-    { value: stats?.students ?? 0, suffix: (stats?.students ?? 0) > 0 ? "+" : "", label: "Active students" },
-    { value: stats?.teachers ?? 0, suffix: "", label: "Educators on the platform" },
-    { value: stats?.courses ?? 0, suffix: "", label: "Published courses" },
-    { value: stats?.assessments_completed ?? 0, suffix: (stats?.assessments_completed ?? 0) > 0 ? "+" : "", label: "Assessments submitted" },
+  const hasRealData = (stats?.students ?? 0) > 0 || (stats?.teachers ?? 0) > 0;
+
+  const HONEST_STATEMENTS = [
+    { label: "IGCSE-ready curriculum tools", isText: true },
+    { label: "Built for Egyptian educators", isText: true },
+    { label: "AI-powered learning for every student", isText: true },
+    { label: "Trusted by teachers across Egypt", isText: true },
   ];
 
-  const displayItems = cmsStats.length >= 4
-    ? cmsStats.slice(0, 4).map((s, i) => {
-        const live = liveItems[i];
-        const numMatch = s.value.match(/[\d,]+/);
-        const numVal = numMatch ? parseInt(numMatch[0].replace(/,/g, ""), 10) : live.value;
-        const hasPlus = s.value.includes("+");
-        return { value: typeof numVal === "number" && numVal > live.value ? numVal : live.value, suffix: hasPlus || live.suffix ? "+" : "", label: s.label };
-      })
-    : liveItems;
+  const liveItems = [
+    { value: stats?.students ?? 0, suffix: "+", label: "Active students" },
+    { value: stats?.teachers ?? 0, suffix: "", label: "Educators on the platform" },
+    { value: stats?.courses ?? 0, suffix: "", label: "Published courses" },
+    { value: stats?.assessments_completed ?? 0, suffix: "+", label: "Assessments submitted" },
+  ];
 
   return (
     <div className="py-16 px-5 border-y border-gray-100" style={{ background: "#F9FAFB" }}>
       <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-        {displayItems.map((s, i) => <StatItem key={i} value={s.value} suffix={s.suffix} label={s.label} delay={i * 0.08} />)}
+        {hasRealData
+          ? liveItems.map((s, i) => (
+              <StatItem key={i} value={s.value} suffix={s.suffix} label={s.label} delay={i * 0.08} />
+            ))
+          : HONEST_STATEMENTS.map((s, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.08 }}
+                className="flex flex-col items-center text-center gap-1"
+              >
+                <div className="text-sm font-semibold text-gray-700 leading-snug">{s.label}</div>
+              </motion.div>
+            ))
+        }
       </div>
     </div>
   );
@@ -1372,9 +1386,9 @@ export default function Landing() {
   const pricingS = getSection(sections, "pricing");
   const contactS = getSection(sections, "contact");
 
-  const headline       = (hero.headline as string)         ?? "Where every mind";
-  const headlineAccent = (hero.headline_accent as string)  ?? "finds its rhythm.";
-  const subheadline    = (hero.subheadline as string)      ?? "The intelligent operating system that unifies teaching, learning, and assessment in one breathtakingly simple platform.";
+  const headline       = (hero.headline as string)         ?? "The platform IGCSE tutors";
+  const headlineAccent = (hero.headline_accent as string)  ?? "trust to run their class.";
+  const subheadline    = (hero.subheadline as string)      ?? "Attendance, grading, AI feedback, parent updates, and student analytics — all in one place. Built for Egyptian IGCSE educators.";
   const badgeText      = (hero.badge_text as string)       ?? "Educational Operating System";
   const ctaPrimary     = (hero.cta_primary_text as string) ?? "Explore Courses";
   const ctaSecondary   = (hero.cta_secondary_text as string) ?? "Create Free Account";

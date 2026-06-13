@@ -197,3 +197,24 @@ aiGatewayRouter.get("/status", async (req: AuthRequest, res: Response) => {
     },
   });
 });
+
+// POST /ai/log-error — client-side AI feature error logging
+aiGatewayRouter.post("/log-error", async (req: AuthRequest, res: Response) => {
+  try {
+    const { feature, error: errorMsg, stack } = req.body;
+    await pool.query(
+      `INSERT INTO ai_logs (account_id, type, input_summary, response_summary, latency_ms, success, failure_reason, created_at)
+       VALUES ($1, 'client_error', $2, NULL, 0, false, $3, NOW())
+       ON CONFLICT DO NOTHING`,
+      [req.userId ?? null, (feature ?? "unknown").slice(0, 100), (errorMsg ?? "").slice(0, 500)]
+    ).catch(() => {});
+    await pool.query(
+      `INSERT INTO error_logs (level, message, stack, route, device, created_at)
+       VALUES ('error', $1, $2, 'client_ai_error', $3, NOW())`,
+      [`[AI:${feature ?? "unknown"}] ${(errorMsg ?? "").slice(0, 400)}`, (stack ?? "").slice(0, 2000), req.headers["user-agent"]?.slice(0, 200) ?? ""]
+    ).catch(() => {});
+    res.json({ ok: true });
+  } catch {
+    res.json({ ok: false });
+  }
+});

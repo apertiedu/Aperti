@@ -185,3 +185,122 @@ adminAnalyticsRouter.get("/engagement", async (_req, res) => {
     res.status(500).json({ error: "Failed to fetch engagement analytics" });
   }
 });
+
+/* ── Live Counters ───────────────────────────────────────────────────────── */
+adminAnalyticsRouter.get("/live-counts", async (_req, res) => {
+  try {
+    const { pool } = await import("@workspace/db");
+    const [counts, errors, aiToday] = await Promise.all([
+      pool.query(`
+        SELECT
+          COUNT(*) FILTER (WHERE role='teacher' AND status='active')::int AS active_teachers,
+          COUNT(*) FILTER (WHERE role='student' AND status='active')::int AS active_students,
+          COUNT(*) FILTER (WHERE role='parent' AND status='active')::int AS active_parents
+        FROM accounts
+      `).catch(() => ({ rows: [{ active_teachers: 0, active_students: 0, active_parents: 0 }] })),
+      pool.query(`
+        SELECT
+          COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '24 hours')::int AS errors_24h,
+          COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '1 hour')::int AS errors_1h
+        FROM error_logs
+      `).catch(() => ({ rows: [{ errors_24h: 0, errors_1h: 0 }] })),
+      pool.query(`
+        SELECT
+          COUNT(*) FILTER (WHERE created_at >= NOW() - INTERVAL '24 hours')::int AS calls_today,
+          COALESCE(SUM(tokens_used) FILTER (WHERE created_at >= NOW() - INTERVAL '24 hours'), 0)::int AS tokens_today,
+          COUNT(*) FILTER (WHERE date_trunc('month',created_at) = date_trunc('month',NOW()))::int AS calls_month
+        FROM ai_interactions
+      `).catch(() => ({ rows: [{ calls_today: 0, tokens_today: 0, calls_month: 0 }] })),
+    ]);
+
+    const pending = await pool.query(`
+      SELECT
+        COUNT(*) FILTER (WHERE status='pending_approval')::int AS pending_payments,
+        COUNT(*) FILTER (WHERE status='pending')::int AS pending_enrollments
+      FROM subscriptions
+    `).catch(() => ({ rows: [{ pending_payments: 0, pending_enrollments: 0 }] }));
+
+    const errorsTop = await pool.query(`
+      SELECT message, COUNT(*)::int AS count
+      FROM error_logs
+      WHERE created_at >= NOW() - INTERVAL '24 hours'
+        AND message IS NOT NULL AND message != ''
+      GROUP BY message
+      ORDER BY count DESC
+      LIMIT 10
+    `).catch(() => ({ rows: [] }));
+
+    res.json({
+      activeTeachers: counts.rows[0].active_teachers,
+      activeStudents: counts.rows[0].active_students,
+      activeParents: counts.rows[0].active_parents,
+      pendingPayments: pending.rows[0].pending_payments,
+      pendingEnrollments: pending.rows[0].pending_enrollments,
+      aiCallsToday: aiToday.rows[0].calls_today,
+      aiTokensToday: aiToday.rows[0].tokens_today,
+      aiCallsMonth: aiToday.rows[0].calls_month,
+      errors24h: errors.rows[0].errors_24h,
+      errors1h: errors.rows[0].errors_1h,
+      topErrors: errorsTop.rows,
+      lastUpdated: new Date().toISOString(),
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to fetch live counts" });
+  }
+});
+
+/* ── Enrollment Audit ────────────────────────────────────────────────────── */
+adminAnalyticsRouter.get("/enrollment-audit", async (_req, res) => {
+  try {
+    const { pool } = await import("@workspace/db");
+    const [orphans, dupes, inactive] = await Promise.all([
+      pool.query(`
+        SELECT s.id, a.display_name, s.status
+        FROM subscriptions s
+        LEFT JOIN teacher_courses tc ON tc.id = s.course_id
+        JOIN accounts a ON a.id = s.student_account_id
+        WHERE tc.id IS NULL
+        LIMIT 50
+      `).catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT student_account_id, course_id, COUNT(*)::int AS count
+        FROM subscriptions
+        GROUP BY student_account_id, course_id
+        HAVING COUNT(*) > 1
+        LIMIT 50
+      `).catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT COUNT(*)::int AS count
+        FROM subscriptions
+        WHERE status IN ('cancelled','expired','rejected')
+          AND updated_at < NOW() - INTERVAL '90 days'
+      `).catch(() => ({ rows: [{ count: 0 }] })),
+    ]);
+    res.json({
+      orphanedEnrollments: orphans.rows,
+      duplicateEnrollments: dupes.rows,
+      oldInactiveCount: inactive.rows[0].count,
+      hasIssues: orphans.rows.length > 0 || dupes.rows.length > 0,
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to audit enrollments" });
+  }
+});
+
+adminAnalyticsRouter.post("/enrollment-repair", async (_req, res) => {
+  try {
+    const { pool } = await import("@workspace/db");
+    const removed = await pool.query(`
+      DELETE FROM subscriptions
+      WHERE id IN (
+        SELECT s.id FROM subscriptions s
+        LEFT JOIN teacher_courses tc ON tc.id = s.course_id
+        WHERE tc.id IS NULL
+      )
+      RETURNING id
+    `).catch(() => ({ rows: [] }));
+    res.json({ repaired: removed.rows.length, message: `Removed ${removed.rows.length} orphaned enrollments` });
+  } catch {
+    res.status(500).json({ error: "Failed to repair enrollments" });
+  }
+});

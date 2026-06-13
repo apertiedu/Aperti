@@ -1,13 +1,15 @@
 import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 import {
   Calculator, Activity, DollarSign, Shield, LifeBuoy, FileText,
   Settings, Users, Globe, ChevronRight, Bell, RefreshCw,
   BarChart3, Terminal, Wifi, CreditCard, Clock, Brain, ShieldCheck,
   LayoutDashboard, Bug, Flame, Database, Server, CheckCircle2, XCircle,
-  AlertTriangle, Cpu, HardDrive,
+  AlertTriangle, Cpu, HardDrive, UserCheck, GraduationCap, HeartHandshake,
+  Zap, AlertCircle,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 
 const tok = () => localStorage.getItem("aperti_token") || "";
@@ -152,6 +154,8 @@ const modules = [
   { to: "/admin/ai-analytics",         label: "AI Analytics",             desc: "Monitor AI usage, costs & impact",    icon: Brain },
   { to: "/admin/ai-safety",            label: "AI Safety",                desc: "Review AI outputs & misconceptions",  icon: ShieldCheck },
   { to: "/admin/os/qa/readiness",      label: "QualityOS ✦ New",          desc: "Bug tracker, test runs & launch readiness", icon: Bug, highlight2: true },
+  { to: "/admin/enrollment-audit",     label: "Enrollment Audit",          desc: "Fix orphaned & duplicate enrollments",       icon: ShieldCheck },
+  { to: "/admin/route-health",         label: "Route Health",              desc: "Verify all platform routes & permissions",   icon: Activity },
 ];
 
 function DeploymentDebugPanel() {
@@ -274,15 +278,32 @@ export default function AdminCommand() {
     refetchInterval: 30_000,
   });
 
+  const { data: liveCounts, refetch: refetchCounts } = useQuery({
+    queryKey: ["admin-live-counts"],
+    queryFn: async () => {
+      const res = await fetch("/api/admin/analytics/live-counts", {
+        headers: { Authorization: `Bearer ${tok()}` },
+      });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    retry: false,
+    refetchInterval: 60_000,
+  });
+
   const lastUpdated = liveStats?.lastUpdated
     ? new Date(liveStats.lastUpdated).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })
     : null;
 
   const highlights = [
-    { label: "Total Students", value: liveStats?.totalStudents ?? stats?.totalStudents ?? "—", icon: Users, color: "#0D9488" },
-    { label: "Active Live Sessions", value: liveStats?.activeLiveSessions ?? "—", icon: Wifi, color: "#0D9488", live: true },
+    { label: "Active Teachers", value: liveCounts?.activeTeachers ?? liveStats?.totalTeachers ?? "—", icon: UserCheck, color: "#0D9488" },
+    { label: "Active Students", value: liveCounts?.activeStudents ?? liveStats?.totalStudents ?? "—", icon: GraduationCap, color: "#0D9488" },
+    { label: "Active Parents", value: liveCounts?.activeParents ?? "—", icon: HeartHandshake, color: "#0D9488" },
+    { label: "Pending Payments", value: liveCounts?.pendingPayments ?? liveStats?.pendingInstapay ?? "—", icon: CreditCard, color: (liveCounts?.pendingPayments ?? 0) > 0 ? "#D32F2F" : "#757575" },
+    { label: "Pending Enrolments", value: liveCounts?.pendingEnrollments ?? "—", icon: Users, color: (liveCounts?.pendingEnrollments ?? 0) > 0 ? "#F59E0B" : "#757575" },
+    { label: "AI Calls Today", value: liveCounts?.aiCallsToday ?? "—", icon: Zap, color: "#8B5CF6" },
+    { label: "Errors (24 h)", value: liveCounts?.errors24h ?? "—", icon: AlertCircle, color: (liveCounts?.errors24h ?? 0) > 0 ? "#EF4444" : "#757575" },
     { label: "Today's Attendance", value: liveStats?.attendanceRate != null ? `${liveStats.attendanceRate}%` : "—", icon: BarChart3, color: "#0D9488" },
-    { label: "Pending InstaPay", value: liveStats?.pendingInstapay ?? "—", icon: CreditCard, color: liveStats?.pendingInstapay > 0 ? "#D32F2F" : "#757575" },
   ];
 
   return (
@@ -367,6 +388,64 @@ export default function AdminCommand() {
           <p className="text-sm text-blue-800 font-medium">
             {liveStats.activeLiveSessions} active session{liveStats.activeLiveSessions !== 1 ? "s" : ""} in progress
           </p>
+        </motion.div>
+      )}
+
+      {/* Error Monitoring Panel */}
+      {liveCounts && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.22 }}
+          className="mb-8"
+        >
+          <Card className="border-0 shadow-sm bg-white">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-red-50 flex items-center justify-center">
+                    <Bug className="h-4 w-4 text-red-500" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold text-gray-900">Error Monitor</h2>
+                    <p className="text-xs text-gray-400">
+                      {liveCounts.errors24h} error{liveCounts.errors24h !== 1 ? "s" : ""} in last 24h · {liveCounts.errors1h} in last hour
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button onClick={() => refetchCounts()} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </button>
+                  <Link href="/admin/debug">
+                    <span className="text-xs text-teal-600 hover:underline cursor-pointer">Full debug panel →</span>
+                  </Link>
+                </div>
+              </div>
+              {liveCounts.errors24h === 0 ? (
+                <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-100 rounded-xl text-sm text-green-800">
+                  <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                  No errors in the last 24 hours — platform is healthy.
+                </div>
+              ) : liveCounts.topErrors?.length > 0 ? (
+                <div className="space-y-2">
+                  {liveCounts.topErrors.slice(0, 5).map((e: any, i: number) => (
+                    <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-100 bg-gray-50/60 group">
+                      <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                        <AlertTriangle className="h-3 w-3 text-red-500" />
+                      </div>
+                      <p className="text-xs text-gray-700 flex-1 truncate font-mono">{e.message}</p>
+                      <Badge className="bg-red-100 text-red-700 border-red-200 text-[10px] shrink-0">×{e.count}</Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-gray-400 py-2">
+                  {liveCounts.errors24h} error{liveCounts.errors24h !== 1 ? "s" : ""} logged — check the debug panel for details.
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </motion.div>
       )}
 

@@ -38,6 +38,22 @@ subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res
     .where(eq(subscriptionPlansTable.id, planId)).limit(1);
   if (!plans[0]) return res.status(400).json({ error: "Invalid plan" });
 
+  // Duplicate InstaPay reference code check
+  if (paymentMethod === "instapay" && instapayCode) {
+    const trimmedCode = String(instapayCode).trim();
+    if (!trimmedCode) return res.status(400).json({ error: "InstaPay reference code is required" });
+    const existing = await db.select({ id: subscriptionsTable.id })
+      .from(subscriptionsTable)
+      .where(eq(subscriptionsTable.instaPayCode, trimmedCode))
+      .limit(1).catch(() => []);
+    if (existing.length > 0) {
+      return res.status(409).json({
+        error: "This InstaPay reference code has already been used. Please check your code or contact support.",
+        code: "DUPLICATE_INSTAPAY"
+      });
+    }
+  }
+
   const status = paymentMethod === "stripe" ? "active" : "pending_review";
   const [subscription] = await db.insert(subscriptionsTable).values({
     accountId,
@@ -45,7 +61,7 @@ subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res
     status,
     startDate: new Date(),
     endDate: null,
-    instaPayCode: paymentMethod === "instapay" ? instapayCode : null,
+    instaPayCode: paymentMethod === "instapay" ? String(instapayCode || "").trim() : null,
     paymentStatus: paymentMethod === "stripe" ? "paid" : "pending",
   }).returning();
 

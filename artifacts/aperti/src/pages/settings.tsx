@@ -306,21 +306,63 @@ export default function Settings() {
               {tab === "devices" && (
                 <motion.div key="devices" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
                   className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                  <h2 className="text-base font-semibold text-gray-900 mb-1">Active sessions</h2>
+                  <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-base font-semibold text-gray-900">Active sessions</h2>
+                    {sessions.length > 1 && (
+                      <button
+                        className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+                        onClick={async () => {
+                          if (!confirm("Sign out all other devices?")) return;
+                          const res = await apiFetch("/api/settings/sessions", { method: "DELETE" });
+                          if (res.ok) {
+                            apiFetch("/api/settings/sessions").then(r => r.json()).then(setSessions).catch(() => setSessions([]));
+                          }
+                        }}
+                      >
+                        Sign out all other devices
+                      </button>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500 mb-4">Devices currently logged in to your account.</p>
                   {sessions.length === 0 ? (
                     <div className="text-center py-10 text-gray-400 text-sm">No active device sessions found.</div>
                   ) : (
                     <div className="space-y-3">
-                      {sessions.map(s => (
-                        <div key={s.id} className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
-                          <Monitor className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{s.user_agent || "Unknown device"}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">IP: {s.ip || "Unknown"} · Last active: {new Date(s.last_active_at).toLocaleString()}</p>
+                      {sessions.map((s, idx) => {
+                        const ua = s.user_agent || "";
+                        const isMobile = /Mobile|Android|iPhone|iPad/i.test(ua);
+                        const browser = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)/)?.[1] ?? "Browser";
+                        const os = ua.match(/(Windows|Mac|Linux|Android|iOS)/i)?.[1] ?? "Unknown OS";
+                        const label = `${browser} on ${os}${isMobile ? " (Mobile)" : ""}`;
+                        return (
+                          <div key={s.id} className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl">
+                            <Monitor className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-gray-900 truncate">{label}</p>
+                                {idx === 0 && (
+                                  <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "#0D948812", color: "#0D9488" }}>Current</span>
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {s.ip ? `IP: ${s.ip} · ` : ""}
+                                Last active: {new Date(s.last_active_at).toLocaleString()}
+                              </p>
+                            </div>
+                            {idx !== 0 && (
+                              <button
+                                className="shrink-0 text-xs text-red-400 hover:text-red-600 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-red-50"
+                                onClick={async () => {
+                                  const res = await apiFetch(`/api/settings/sessions/${s.id}`, { method: "DELETE" });
+                                  if (res.ok) setSessions(prev => prev.filter(x => x.id !== s.id));
+                                }}
+                              >
+                                Revoke
+                              </button>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </motion.div>
