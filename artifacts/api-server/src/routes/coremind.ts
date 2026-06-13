@@ -82,7 +82,7 @@ Prerequisites: ${prerequisiteTopics.join(", ") || "none"}.
 Scaffold from easy → medium → hard.
 Respond as JSON: { "title": "...", "sections": [{ "difficulty": "easy|medium|hard", "tasks": ["..."] }] }`;
 
-      const res2 = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res2 = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,6 +1,12 @@
+const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
+const OPENAI_KEY = process.env.OPENAI_API_KEY;
+const USE_NVIDIA = !!NVIDIA_KEY;
+
 export const AI_CONFIG = {
   provider: "openai" as const,
-  model: process.env.OPENAI_MODEL || "gpt-4o-mini",
+  model: USE_NVIDIA
+    ? (process.env.NVIDIA_MODEL || "openai/gpt-oss-20b")
+    : (process.env.OPENAI_MODEL || "gpt-4o-mini"),
   maxTokens: {
     default: 1000,
     feedback: 200,
@@ -8,7 +14,10 @@ export const AI_CONFIG = {
     summary: 800,
     syllabus: 2000,
   },
-  baseUrl: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+  baseUrl: USE_NVIDIA
+    ? "https://integrate.api.nvidia.com/v1"
+    : (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"),
+  apiKey: NVIDIA_KEY || OPENAI_KEY || null,
 };
 
 const LANG_NAMES: Record<string, string> = {
@@ -69,15 +78,14 @@ export async function openaiChat(opts: {
   maxTokens?: number;
   language?: string;
 }): Promise<string | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
+  if (!AI_CONFIG.apiKey) return null;
 
   const system = withLanguage(opts.systemPrompt, opts.language);
 
   try {
     const res = await fetch(`${AI_CONFIG.baseUrl}/chat/completions`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${AI_CONFIG.apiKey}` },
       body: JSON.stringify({
         model: AI_CONFIG.model,
         max_tokens: opts.maxTokens ?? AI_CONFIG.maxTokens.default,

@@ -124,7 +124,7 @@ Return JSON: { "enhanced": [{"id":N,"front":"...","back":"...","tag":"..."}], "d
     let duplicates: any[] = [];
 
     try {
-      const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+      const aiRes = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${OPENAI_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({

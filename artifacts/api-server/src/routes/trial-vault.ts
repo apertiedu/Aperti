@@ -124,7 +124,7 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
       const hintsPrompt = `You are a study coach. Give 1 concise study tip (≤30 words) for each of these topics: ${topicsToAugment}. Respond as JSON array: [{"topic":"...","hint":"..."}]`;
 
       const [augRes, hintsRes] = await Promise.all([
-        fetch("https://api.openai.com/v1/chat/completions", {
+        fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
           body: JSON.stringify({
@@ -133,7 +133,7 @@ router.post("/trial-vault/generate", ...studentGuard, async (req: AuthRequest, r
             max_tokens: 800, temperature: 0.7,
           }),
         }),
-        fetch("https://api.openai.com/v1/chat/completions", {
+        fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${openaiKey}` },
           body: JSON.stringify({

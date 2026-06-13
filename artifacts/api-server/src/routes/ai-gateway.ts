@@ -94,7 +94,7 @@ aiGatewayRouter.post("/generate", async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ error: "input must be a string under 8000 characters" });
   }
 
-  const apiKeyPresent = !!(process.env.OPENAI_API_KEY || process.env.NVIDIA_API_KEY);
+  const apiKeyPresent = !!AI_CONFIG.apiKey;
   const startTime = Date.now();
 
   if (!apiKeyPresent) {
@@ -184,7 +184,7 @@ aiGatewayRouter.post("/generate", async (req: AuthRequest, res: Response) => {
 
 // GET /api/ai/status — check if AI is available
 aiGatewayRouter.get("/status", async (req: AuthRequest, res: Response) => {
-  const hasKey = !!(process.env.OPENAI_API_KEY || process.env.NVIDIA_API_KEY);
+  const hasKey = !!AI_CONFIG.apiKey;
   res.json({
     available: hasKey,
     model: hasKey ? AI_CONFIG.model : null,

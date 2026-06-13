@@ -51,7 +51,7 @@ async function extractTextWithOpenAIVision(imagePath: string): Promise<string> {
     const ext = path.extname(imagePath).replace(".", "") || "jpeg";
     const mimeType = ext === "jpg" ? "image/jpeg" : `image/${ext}`;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -102,7 +102,7 @@ ${criteria.map(c => `- ${c.keyword}: ${c.marks} marks${c.description ? ` (${c.de
 Respond with JSON: { "grade": <number 0-${totalMarks}>, "feedback": "<brief feedback>", "suggestions": ["<tip1>", "<tip2>"] }`;
 
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

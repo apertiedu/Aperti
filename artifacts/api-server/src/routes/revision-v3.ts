@@ -47,7 +47,7 @@ Weak areas from recent tests: ${weakAreas.map((w: any) => `score ${w.score}% on 
 ${examDate ? `Exam date: ${examDate}.` : ""}
 Return JSON array of 5-8 items, each with: {"type":"summary|key_points|practice_q|tip","title":"...","content":"..."}`;
 
-        const aiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        const aiRes = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
           method: "POST",
           headers: { "Authorization": `Bearer ${OPENAI_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({

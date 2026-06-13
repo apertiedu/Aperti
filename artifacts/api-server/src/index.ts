@@ -20,11 +20,19 @@ if (Number.isNaN(port) || port <= 0) {
 }
 
 async function main() {
-  // ── API key aliasing ───────────────────────────────────────────────────────
-  // NVIDIA_API_KEY is stored in Replit secrets; map it to OPENAI_API_KEY so all
-  // AI routes that read process.env.OPENAI_API_KEY work without code changes.
-  if (!process.env.OPENAI_API_KEY && process.env.NVIDIA_API_KEY) {
-    process.env.OPENAI_API_KEY = process.env.NVIDIA_API_KEY;
+  // ── API key + base URL aliasing ────────────────────────────────────────────
+  // NVIDIA_API_KEY is stored in Replit secrets. Map it so all AI routes that
+  // read process.env.OPENAI_API_KEY / OPENAI_BASE_URL work without code changes.
+  if (process.env.NVIDIA_API_KEY) {
+    if (!process.env.OPENAI_API_KEY) {
+      process.env.OPENAI_API_KEY = process.env.NVIDIA_API_KEY;
+    }
+    if (!process.env.OPENAI_BASE_URL) {
+      process.env.OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1";
+    }
+    if (!process.env.OPENAI_MODEL) {
+      process.env.OPENAI_MODEL = "openai/gpt-oss-20b";
+    }
   }
 
   // ── Environment validation ─────────────────────────────────────────────────

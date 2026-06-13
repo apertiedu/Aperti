@@ -18,7 +18,7 @@ async function isLinked(parentId: number, studentId: number): Promise<boolean> {
 async function openaiChat(messages: any[], maxTokens = 600): Promise<string> {
   const apiKey = process.env["OPENAI_API_KEY"];
   if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const response = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({ model: "gpt-4o-mini", messages, max_tokens: maxTokens }),
