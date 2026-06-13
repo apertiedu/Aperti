@@ -77,6 +77,8 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
     "@types/three": "^0.184.1",
     "html5-qrcode": "^2.3.8",
     "idb": "^8.0.3",
