@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import {
   AlertTriangle, CheckCircle, Database, RefreshCw, Wrench, Users,
-  BookOpen, CalendarCheck, ClipboardList, XCircle, TrendingUp
+  BookOpen, CalendarCheck, ClipboardList, XCircle, TrendingUp, ShieldAlert
 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -32,6 +33,8 @@ type QualityReport = {
     orphanedEnrollments: number;
     subjectsWithoutTeacher: number;
     homeworkWithoutDueDate: number;
+    attendanceWithoutSession: number;
+    lessonsWithoutTeacher: number;
   };
   generatedAt: string;
 };
@@ -95,15 +98,35 @@ export default function DataQualityPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Data Quality Center</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Scan for data integrity issues, orphaned records, and fixable problems</p>
         </div>
-        <Button onClick={() => refetch()} disabled={isFetching} className="gap-2">
-          <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-          {isFetching ? "Scanning…" : "Run Quality Scan"}
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {(data?.issues.filter(i => i.fixable).length ?? 0) > 1 && (
+            <Button
+              variant="outline"
+              className="gap-2 text-amber-700 border-amber-300 hover:bg-amber-50"
+              disabled={fix.isPending}
+              onClick={async () => {
+                const fixable = data?.issues.filter(i => i.fixable) ?? [];
+                for (const issue of fixable) {
+                  await runFix(issue.id).catch(() => {});
+                }
+                qc.invalidateQueries({ queryKey: ["admin", "data-quality"] });
+                toast({ title: "Repair complete", description: `Attempted auto-fix on ${fixable.length} issue(s).` });
+              }}
+            >
+              <ShieldAlert className="h-4 w-4" />
+              Repair All Fixable
+            </Button>
+          )}
+          <Button onClick={() => refetch()} disabled={isFetching} className="gap-2">
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+            {isFetching ? "Scanning…" : "Run Quality Scan"}
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -148,34 +171,47 @@ export default function DataQualityPage() {
             { label: "Medium Priority", items: medium, severity: "medium" as const },
             { label: "Low Priority", items: low, severity: "low" as const },
           ].filter(g => g.items.length > 0).map(({ label, items, severity }) => (
-            <Card key={severity} className={`shadow-sm border ${SEVERITY_CONFIG[severity].bg}`}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  {SEVERITY_CONFIG[severity].icon}
-                  {label} ({items.length})
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {items.map(issue => (
-                  <div key={issue.id} className="flex items-start justify-between gap-3 p-3 rounded-xl bg-background border border-border">
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${SEVERITY_CONFIG[severity].badge}`}>{severity}</span>
-                        <Badge variant="outline" className="text-[10px]">{issue.category}</Badge>
-                        <span className="text-xs font-semibold text-foreground">{issue.title}</span>
+            <motion.div
+              key={severity}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Card className={`shadow-sm border ${SEVERITY_CONFIG[severity].bg}`}>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    {SEVERITY_CONFIG[severity].icon}
+                    {label} ({items.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {items.map((issue, idx) => (
+                    <motion.div
+                      key={issue.id}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05, duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                      className="flex items-start justify-between gap-3 p-3 rounded-xl bg-background border border-border"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${SEVERITY_CONFIG[severity].badge}`}>{severity}</span>
+                          <Badge variant="outline" className="text-[10px]">{issue.category}</Badge>
+                          <span className="text-xs font-semibold text-foreground">{issue.title}</span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1">{issue.description}</p>
+                        <p className="text-xs font-medium mt-1"><span className={SEVERITY_CONFIG[severity].color}>{issue.count}</span> record(s) affected</p>
                       </div>
-                      <p className="text-xs text-muted-foreground mt-1">{issue.description}</p>
-                      <p className="text-xs font-medium mt-1"><span className={SEVERITY_CONFIG[severity].color}>{issue.count}</span> record(s) affected</p>
-                    </div>
-                    {issue.fixable && (
-                      <Button size="sm" variant="outline" className="shrink-0 gap-1.5 h-7 text-xs" onClick={() => fix.mutate(issue.id)} disabled={fix.isPending}>
-                        <Wrench className="h-3 w-3" />Auto-fix
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                      {issue.fixable && (
+                        <Button size="sm" variant="outline" className="shrink-0 gap-1.5 h-7 text-xs" onClick={() => fix.mutate(issue.id)} disabled={fix.isPending}>
+                          <Wrench className="h-3 w-3" />Auto-fix
+                        </Button>
+                      )}
+                    </motion.div>
+                  ))}
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
 
           {issues.length === 0 && (

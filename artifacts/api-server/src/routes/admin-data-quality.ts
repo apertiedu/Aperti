@@ -26,6 +26,8 @@ adminDataQualityRouter.get("/", async (_req, res) => {
     let duplicateAttendance = 0;
     let orphanedEnrollments = 0;
     let homeworkWithoutDueDate = 0;
+    let attendanceWithoutSession = 0;
+    let lessonsWithoutTeacher = 0;
 
     try {
       const dupRes = await pool.query(`
@@ -55,6 +57,26 @@ adminDataQualityRouter.get("/", async (_req, res) => {
       homeworkWithoutDueDate = parseInt(hwRes.rows[0]?.count ?? "0");
     } catch { /* ignore */ }
 
+    try {
+      const attRes = await pool.query(`
+        SELECT COUNT(*) as count FROM attendance a
+        WHERE NOT EXISTS (
+          SELECT 1 FROM lessons l WHERE l.id = a.lesson_id
+        )
+      `);
+      attendanceWithoutSession = parseInt(attRes.rows[0]?.count ?? "0");
+    } catch { /* ignore */ }
+
+    try {
+      const lessonRes = await pool.query(`
+        SELECT COUNT(*) as count FROM lessons l
+        WHERE NOT EXISTS (
+          SELECT 1 FROM accounts a WHERE a.id = l.teacher_account_id
+        )
+      `);
+      lessonsWithoutTeacher = parseInt(lessonRes.rows[0]?.count ?? "0");
+    } catch { /* ignore */ }
+
     const stats = {
       totalStudents: totalStudents.count,
       studentsWithoutSessions: studentsWithoutSessions.count,
@@ -63,6 +85,8 @@ adminDataQualityRouter.get("/", async (_req, res) => {
       orphanedEnrollments,
       subjectsWithoutTeacher: subjectsWithoutTeacher.count,
       homeworkWithoutDueDate,
+      attendanceWithoutSession,
+      lessonsWithoutTeacher,
     };
 
     // Build issues list
@@ -143,6 +167,30 @@ adminDataQualityRouter.get("/", async (_req, res) => {
       });
     }
 
+    if (stats.attendanceWithoutSession > 0) {
+      issues.push({
+        id: "attendance_no_session",
+        severity: "high",
+        category: "Attendance",
+        title: "Attendance records with no matching session",
+        description: "Attendance entries reference lesson IDs that no longer exist. These are orphaned records.",
+        count: stats.attendanceWithoutSession,
+        fixable: true,
+      });
+    }
+
+    if (stats.lessonsWithoutTeacher > 0) {
+      issues.push({
+        id: "lessons_no_teacher",
+        severity: "medium",
+        category: "Lessons",
+        title: "Lessons with no assigned teacher account",
+        description: "These lessons reference a teacher account that no longer exists.",
+        count: stats.lessonsWithoutTeacher,
+        fixable: false,
+      });
+    }
+
     // Score: start at 100, deduct per issue weighted by severity
     let score = 100;
     for (const issue of issues) {
@@ -188,6 +236,14 @@ adminDataQualityRouter.post("/fix", async (req, res) => {
         UPDATE students SET account_id = NULL
         WHERE account_id IS NOT NULL
         AND NOT EXISTS (SELECT 1 FROM accounts a WHERE a.id = students.account_id)
+      `);
+      fixed = result.rowCount ?? 0;
+    } else if (issueId === "attendance_no_session") {
+      const result = await pool.query(`
+        DELETE FROM attendance
+        WHERE NOT EXISTS (
+          SELECT 1 FROM lessons l WHERE l.id = attendance.lesson_id
+        )
       `);
       fixed = result.rowCount ?? 0;
     } else {

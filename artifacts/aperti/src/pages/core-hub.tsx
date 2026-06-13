@@ -1,5 +1,6 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
+import { useCountUp } from "@/lib/motion";
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from "@/components/ui/card";
@@ -65,7 +66,11 @@ function saveWidgets(v: Record<WidgetId, boolean>) {
   try { localStorage.setItem(WIDGET_KEY, JSON.stringify(v)); } catch {}
 }
 
-function StatsCard({ label, value, icon, sub, loading }: any) {
+function StatsCard({ label, value, icon, sub, loading, attention }: any) {
+  const numVal = typeof value === "number" ? value : parseInt(value, 10);
+  const isNumeric = !isNaN(numVal);
+  const animated = useCountUp(isNumeric ? numVal : 0, 700, !loading && isNumeric);
+
   if (loading) return (
     <Card><CardContent className="p-4 flex items-center gap-4">
       <Skeleton className="h-10 w-10 rounded-full" />
@@ -73,12 +78,14 @@ function StatsCard({ label, value, icon, sub, loading }: any) {
     </CardContent></Card>
   );
   return (
-    <motion.div variants={item}>
-      <Card className="card-hover">
+    <motion.div variants={item} whileHover={{ y: -2, transition: { duration: 0.15, type: "spring", stiffness: 400, damping: 28 } }}>
+      <Card className={`card-hover transition-shadow ${attention ? "attention-pulse" : ""}`}>
         <CardContent className="p-4 flex items-center gap-4">
           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">{icon}</div>
           <div>
-            <p className="text-2xl font-bold tabular-nums">{value ?? "—"}</p>
+            <p className="text-2xl font-bold tabular-nums stat-number">
+              {isNumeric ? animated : (value ?? "—")}
+            </p>
             <p className="text-xs text-muted-foreground">{label}</p>
             {sub && <p className="text-xs text-primary mt-0.5">{sub}</p>}
           </div>
@@ -400,16 +407,16 @@ export default function CoreHub() {
       {show("stats") && (
         <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-list">
           <StatsCard loading={sumLoading} label="Today's Classes" value={summary?.lessonsToday ?? 0} icon={<BookOpen className="h-5 w-5 text-primary" />} />
-          <StatsCard loading={sumLoading} label="Students Present" value={`${summary?.studentsPresent ?? 0}`} icon={<Users className="h-5 w-5 text-primary" />} sub={summary?.attendanceRate != null ? `${summary.attendanceRate}% rate` : undefined} />
-          <StatsCard loading={false} label="Pending Grading" value={pendingCount} icon={<Clock className="h-5 w-5 text-amber-500" />} />
-          <StatsCard loading={false} label="Question Bank" value={extended?.questionBankCount ?? "—"} icon={<FileText className="h-5 w-5 text-primary" />} />
+          <StatsCard loading={sumLoading} label="Students Present" value={summary?.studentsPresent ?? 0} icon={<Users className="h-5 w-5 text-primary" />} sub={summary?.attendanceRate != null ? `${summary.attendanceRate}% rate` : undefined} />
+          <StatsCard loading={false} label="Pending Grading" value={pendingCount} icon={<Clock className="h-5 w-5 text-amber-500" />} attention={pendingCount > 3} />
+          <StatsCard loading={false} label="Question Bank" value={extended?.questionBankCount ?? 0} icon={<FileText className="h-5 w-5 text-primary" />} />
         </motion.div>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
         {/* Today's Schedule */}
         {show("schedule") && (
-          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="xl:col-span-1">
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1, duration: 0.22, ease: [0.22, 1, 0.36, 1] }} className="xl:col-span-1">
             <Card className="h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -427,8 +434,14 @@ export default function CoreHub() {
                 ) : classes.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-6">No classes today</p>
                 ) : (
-                  classes.map((c: any) => (
-                    <div key={c.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                  classes.map((c: any, i: number) => (
+                    <motion.div
+                      key={c.id}
+                      initial={{ opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.06, duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                      className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/50 hover:bg-muted transition-colors"
+                    >
                       <div className="w-1 h-10 rounded-full bg-primary shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium truncate">{c.subject_name ?? `Lesson ${c.lesson_number}`}</p>
@@ -441,7 +454,7 @@ export default function CoreHub() {
                           </Button>
                         </a>
                       )}
-                    </div>
+                    </motion.div>
                   ))
                 )}
               </CardContent>
@@ -470,7 +483,7 @@ export default function CoreHub() {
                       <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                       <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} />
                       <Tooltip formatter={(v: any) => [`${v}%`, "Attendance"]} />
-                      <Line type="monotone" dataKey="rate" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                      <Line type="monotone" dataKey="rate" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} isAnimationActive animationDuration={800} animationEasing="ease-out" />
                     </LineChart>
                   </ResponsiveContainer>
                 )}

@@ -397,6 +397,30 @@ textarea:focus-visible {
 }
 .badge-urgent { animation: badgePulse 1.8s ease-in-out infinite; }
 
+/* ── Attention ring pulse (needs-attention cards) ──────────────────────────── */
+@keyframes attentionRing {
+  0%   { box-shadow: 0 0 0 0 rgba(13,148,136,.35); }
+  60%  { box-shadow: 0 0 0 8px rgba(13,148,136,0); }
+  100% { box-shadow: 0 0 0 0 rgba(13,148,136,0); }
+}
+.attention-pulse { animation: attentionRing 2.4s ease-out infinite; }
+
+/* ── Slide-in from right ────────────────────────────────────────────────────── */
+@keyframes slideFromRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-slide-right {
+  animation: slideFromRight 0.22s cubic-bezier(0.22,1,0.36,1) backwards;
+}
+
+/* ── Count-up number flash ─────────────────────────────────────────────────── */
+@keyframes numberFlash {
+  0%   { color: hsl(var(--primary)); }
+  100% { color: inherit; }
+}
+.number-updated { animation: numberFlash 0.6s ease-out forwards; }
+
 /* ── Stagger list animation ────────────────────────────────────────────────── */
 .stagger-list > * {
   animation: pageIn 0.22s ease-out backwards;

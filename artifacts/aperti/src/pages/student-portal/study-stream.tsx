@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -247,8 +247,14 @@ export default function StudyStream() {
                   <p className="text-sm text-muted-foreground py-2">No upcoming homework 🎉</p>
                 ) : (
                   <div className="space-y-2">
-                    {summary.upcomingHomework.slice(0, 4).map((hw: any) => (
-                      <div key={hw.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors">
+                    {summary.upcomingHomework.slice(0, 4).map((hw: any, i: number) => (
+                      <motion.div
+                        key={hw.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.06 * i, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        className="flex items-center justify-between p-3 rounded-xl bg-muted/50 hover:bg-muted/70 transition-colors"
+                      >
                         <div className="min-w-0">
                           <p className="font-medium text-sm truncate">{hw.title}</p>
                           <p className="text-xs text-muted-foreground">{hw.subjectName} · Due {hw.dueDate}</p>
@@ -256,7 +262,7 @@ export default function StudyStream() {
                         <Badge variant={hw.submissionStatus ? "secondary" : "default"} className="text-[10px] shrink-0 ml-2">
                           {hw.submissionStatus ? <><CheckCircle className="h-3 w-3 mr-1" />Done</> : <><AlertCircle className="h-3 w-3 mr-1" />Pending</>}
                         </Badge>
-                      </div>
+                      </motion.div>
                     ))}
                   </div>
                 )}
@@ -367,8 +373,15 @@ export default function StudyStream() {
                   {(masteryData.weakTopics?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1.5">
                       <span className="text-[10px] text-muted-foreground mr-1">Focus on:</span>
-                      {masteryData.weakTopics.slice(0, 3).map((t: string) => (
-                        <Badge key={t} variant="outline" className="text-[10px] h-4 border-amber-300 text-amber-700 dark:text-amber-400">{t}</Badge>
+                      {masteryData.weakTopics.slice(0, 3).map((t: string, i: number) => (
+                        <motion.div
+                          key={t}
+                          initial={{ opacity: 0, scale: 0.85 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.08 * i, duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                          <Badge variant="outline" className="text-[10px] h-4 border-amber-300 text-amber-700 dark:text-amber-400">{t}</Badge>
+                        </motion.div>
                       ))}
                     </div>
                   )}
