@@ -4,13 +4,12 @@ import { CreditCard, TrendingUp, Calendar, AlertCircle, CheckCircle2, Clock, XCi
 import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-const token = () => localStorage.getItem("aperti_token") || "";
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   return r.json();
 }
 async function postJSON(url: string, body: unknown = {}) {
-  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify(body) });
+  const r = await fetch(url, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   return r.json();
 }
 

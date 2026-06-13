@@ -1273,14 +1273,30 @@ founderRouter.post("/weekly-audit/generate", async (_req: AuthRequest, res: Resp
 });
 
 /* ── Error Logs ───────────────────────────────────────────────────────────── */
-founderRouter.get("/error-logs", async (_req: AuthRequest, res: Response) => {
+founderRouter.get("/error-logs", async (req: AuthRequest, res: Response) => {
   try {
-    const { rows } = await pool.query(`
-      SELECT id, level, message, stack, route, user_id, role, device, browser, created_at
-      FROM error_logs
-      ORDER BY created_at DESC
-      LIMIT 500
-    `).catch(() => ({ rows: [] }));
+    const { hours, source, level: levelFilter } = req.query as Record<string, string>;
+    const conditions: string[] = [];
+    const params: any[] = [];
+    if (hours && hours !== "all") {
+      params.push(parseInt(hours));
+      conditions.push(`created_at >= NOW() - INTERVAL '${parseInt(hours)} hours'`);
+    }
+    if (source && source !== "all") {
+      params.push(source);
+      conditions.push(`device = $${params.length}`);
+    }
+    if (levelFilter && levelFilter !== "all") {
+      params.push(levelFilter);
+      conditions.push(`level = $${params.length}`);
+    }
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+    const { rows } = await pool.query(
+      `SELECT id, level, message, stack, route, user_id, role, device, browser, created_at
+       FROM error_logs ${where}
+       ORDER BY created_at DESC LIMIT 1000`,
+      params
+    ).catch(() => ({ rows: [] }));
     res.json({ logs: rows, total: rows.length });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

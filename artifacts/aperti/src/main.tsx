@@ -9,17 +9,16 @@ function reportToBackend(payload: Record<string, unknown>) {
     const body = JSON.stringify({ ...payload, ts: new Date().toISOString() });
     fetch("/api/errors/log", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body,
     }).catch(() => {});
-    const token = localStorage.getItem("aperti_token") || "";
-    if (token) {
-      fetch("/api/founder/frontend-errors", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body,
-      }).catch(() => {});
-    }
+    fetch("/api/founder/frontend-errors", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body,
+    }).catch(() => {});
   } catch {}
 }
 

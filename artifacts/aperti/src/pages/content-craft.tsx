@@ -21,11 +21,10 @@ import { SaveIndicator } from "@/components/save-indicator";
 import { MathHtml, smartTextToHtml } from "@/components/math-renderer";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(options?.headers || {}) },
+    headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
     ...options,
   });
   if (!res.ok) throw new Error("Failed");
@@ -304,7 +303,7 @@ function FullScreenEditor({
     mutationFn: (data: any) =>
       fetch(`${API}/content-craft${lesson ? `/${lesson.id}` : ""}`, {
         method: lesson ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }).then(r => r.json()),
     onSuccess: () => {
@@ -654,7 +653,7 @@ export default function ContentCraft() {
     mutationFn: (id: number) =>
       fetch(`${API}/content-craft/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token()}` },
+        headers: {},
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["content-craft"] }),
   });

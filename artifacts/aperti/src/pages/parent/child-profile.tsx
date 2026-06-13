@@ -10,7 +10,7 @@ import { Link } from "wouter";
 import { BarChart3, ClipboardList, BookOpen, GraduationCap, Brain, ArrowLeft, User, Flame } from "lucide-react";
 
 const TEAL = "#0D9488";
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 const TABS = ["Overview", "Performance", "Revision"];
 

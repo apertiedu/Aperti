@@ -84,6 +84,8 @@ import ErrorLogsPage from "./ErrorLogsPage";
 import FounderEmergencyPage from "./FounderEmergencyPage";
 import PlatformHealthScorePage from "./PlatformHealthScorePage";
 import DebugCenterPage from "./DebugCenterPage";
+// Phase 44 — Production Hardening
+import SystemInventoryPage from "./SystemInventoryPage";
 
 export default function AdminOS() {
   return (
@@ -204,6 +206,9 @@ export default function AdminOS() {
         <Route path="/admin/os/emergency" component={FounderEmergencyPage} />
         <Route path="/admin/os/platform-health" component={PlatformHealthScorePage} />
         <Route path="/admin/launch" component={LaunchCertificationPage} />
+
+        {/* Phase 44 — Production Hardening */}
+        <Route path="/admin/os/system-inventory" component={SystemInventoryPage} />
 
         <Route component={Dashboard} />
       </Switch>

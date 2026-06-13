@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,10 +17,9 @@ import {
 } from "lucide-react";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
     ...opts,
   });
   if (!res.ok) throw new Error("Failed");
@@ -83,6 +83,7 @@ function ResourceCard({ resource, isAdmin, onApprove }: { resource: any; isAdmin
 }
 
 export default function ResourcesLibrary() {
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -90,7 +91,7 @@ export default function ResourcesLibrary() {
   const [approvalFilter, setApprovalFilter] = useState("approved");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const userRole = (() => { try { const t = localStorage.getItem("aperti_token"); if (!t) return "student"; const p = JSON.parse(atob(t.split(".")[1])); return p.role || "student"; } catch { return "student"; } })();
+  const userRole = user?.role || "student";
   const isAdmin = ["admin", "teacher"].includes(userRole);
 
   const { data: resources, isLoading } = useQuery({

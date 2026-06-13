@@ -13,12 +13,15 @@ export interface AuthRequest extends Request<Record<string, string>> {
 }
 
 export function authenticate(req: AuthRequest, res: Response, next: NextFunction) {
+  const cookieToken = (req as any).cookies?.aperti_token as string | undefined;
   const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) {
+  const raw = cookieToken || (header?.startsWith("Bearer ") ? header.slice(7) : null);
+
+  if (!raw) {
     return res.status(401).json({ error: "Missing token" });
   }
   try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
+    const payload = jwt.verify(raw, JWT_SECRET) as any;
     if (!payload || typeof payload !== "object" || !payload.id || !payload.role) {
       return res.status(401).json({ error: "Invalid token payload" });
     }

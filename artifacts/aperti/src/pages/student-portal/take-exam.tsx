@@ -13,7 +13,6 @@ import { useLocation } from "wouter";
 import { MathRenderer } from "@/components/math-renderer";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 // ── Theory Answer Editor ──────────────────────────────────────────────────────
 function TheoryAnswerEditor({ value, onChange, marks }: { value: string; onChange: (v: string) => void; marks: number }) {
@@ -109,7 +108,7 @@ export default function TakeExam() {
     queryKey: ["exam", "take", examId],
     queryFn: async () => {
       const res = await fetch(`${API}/exams/student/${examId}/take`, {
-        headers: { Authorization: `Bearer ${token()}` },
+        headers: {},
       });
       return res.json();
     },
@@ -137,7 +136,7 @@ export default function TakeExam() {
         if (!sessionToken) return;
         await fetch(`${API}/exam-session/heartbeat`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             session_token: sessionToken,
             tab_switch: pending.tab ?? false,
@@ -193,7 +192,7 @@ export default function TakeExam() {
     mutationFn: (answersArray: any[]) =>
       fetch(`${API}/exams/student/${examId}/submit`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           answers: answersArray,
           integrityData: {

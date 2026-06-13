@@ -14,7 +14,7 @@ export default function ServerError() {
     try {
       await fetch("/api/problem-reports", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("aperti_token") ?? ""}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: "User-reported 500 error from error page", route: window.location.href, type: "server_error" }),
       });
     } catch {}

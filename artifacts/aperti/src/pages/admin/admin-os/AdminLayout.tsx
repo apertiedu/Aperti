@@ -108,6 +108,9 @@ const NAV = [
   { label: "Route Health",         icon: Activity,    href: "/admin/os/route-health" },
   { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
 
+  { label: "— Production Hardening", header: true },
+  { label: "System Inventory",     icon: Package,     href: "/admin/os/system-inventory" },
+
   { label: "— Intelligence & Health", header: true },
   { label: "Debug Center",         icon: Bug,         href: "/admin/os/debug-center" },
   { label: "Analytics Deep Dive",  icon: BarChart3,   href: "/admin/os/analytics-extended" },

@@ -12,12 +12,11 @@ export class ApiError extends Error {
 const API_BASE = "";
 
 export function apiFetch(url: string, options?: RequestInit): Promise<Response> {
-  const token = (() => { try { return localStorage.getItem("aperti_token"); } catch { return null; } })();
   return fetch(`${API_BASE}${url}`, {
     ...options,
+    credentials: "include",
     headers: {
       ...(options?.headers as Record<string, string> | undefined),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
 }

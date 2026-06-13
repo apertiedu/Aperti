@@ -4,9 +4,8 @@ import { Check, Zap, Star, Crown } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/auth";
 
-const token = () => localStorage.getItem("aperti_token") || "";
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   return r.json();
 }
 

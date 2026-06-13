@@ -10,8 +10,6 @@ export function logError(
   const err = error instanceof Error ? error : new Error(String(error));
   console.error("[logError]", err.message, context);
 
-  const token = (() => { try { return localStorage.getItem("aperti_token"); } catch { return null; } })();
-
   const payload = {
     message: err.message?.slice(0, 1000),
     stack: err.stack?.slice(0, 3000),
@@ -24,10 +22,8 @@ export function logError(
 
   fetch("/api/errors/log", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   }).catch(() => {});
 }

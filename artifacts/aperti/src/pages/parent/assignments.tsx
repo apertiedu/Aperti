@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 import ParentChildSwitcher from "@/components/parent-child-switcher";
 
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 type Tab = "pending" | "submitted" | "overdue";
 

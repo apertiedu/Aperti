@@ -11,7 +11,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { LifeBuoy, Eye, CheckCircle } from "lucide-react";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 export default function HelpDeskAdmin() {
   const queryClient = useQueryClient();
@@ -21,7 +20,7 @@ export default function HelpDeskAdmin() {
   const { data: tickets, isLoading } = useQuery({
     queryKey: ["helpdesk", "admin"],
     queryFn: async () => {
-      const res = await fetch(`${API}/helpdesk/admin/all`, { headers: { Authorization: `Bearer ${token()}` } });
+      const res = await fetch(`${API}/helpdesk/admin/all`, { credentials: "include" });
       return res.json();
     },
   });
@@ -30,7 +29,7 @@ export default function HelpDeskAdmin() {
     mutationFn: ({ id, data }: { id: number; data: any }) =>
       fetch(`${API}/helpdesk/admin/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }),
     onSuccess: () => {

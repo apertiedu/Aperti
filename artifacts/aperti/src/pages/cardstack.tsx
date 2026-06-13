@@ -22,11 +22,10 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 const API = "/api";
-const tok = () => localStorage.getItem("aperti_token");
 async function apiFetch(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
     ...opts,
-    headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
   });
   if (!res.ok) throw new Error("Failed");
   return res.json();

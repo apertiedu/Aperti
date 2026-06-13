@@ -85,7 +85,7 @@ export default function NotificationRulesPage() {
   });
 
   const deleteMut = useMutation({
-    mutationFn: (id: number) => fetch(`/api/admin/notification-rules/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` } }),
+    mutationFn: (id: number) => fetch(`/api/admin/notification-rules/${id}`, { method: "DELETE", credentials: "include" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["notification-rules"] }),
   });
 

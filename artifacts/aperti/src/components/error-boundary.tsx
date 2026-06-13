@@ -20,17 +20,16 @@ function logErrorToBackend(error: Error, componentStack: string) {
     };
     fetch("/api/errors/log", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }).catch(() => {});
-    const token = localStorage.getItem("aperti_token") || "";
-    if (token) {
-      fetch("/api/founder/frontend-errors", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify(payload),
-      }).catch(() => {});
-    }
+    fetch("/api/founder/frontend-errors", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
   } catch {}
 }
 

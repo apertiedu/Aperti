@@ -11,9 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Lightbulb, AlertTriangle, Search, BookOpen, TrendingUp, CheckCircle2, Star } from "lucide-react";
 
 const API = "/api";
-const tok = () => localStorage.getItem("aperti_token");
 async function apiFetch(url: string) {
-  const res = await fetch(`${API}${url}`, { headers: { Authorization: `Bearer ${tok()}` } });
+  const res = await fetch(`${API}${url}`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }

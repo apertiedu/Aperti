@@ -49,6 +49,16 @@ adminPaymentsRouter.get("/transactions", async (req: Request, res: Response) => 
 adminPaymentsRouter.post("/transactions", async (req: Request, res: Response) => {
   try {
     const { userId, subscriptionId, amount, currency = "EGP", method, referenceNumber, screenshotUrl, notes } = req.body;
+    if (!userId || !amount) return res.status(400).json({ error: "userId and amount are required" });
+    if (referenceNumber) {
+      const existing = await db.select({ id: paymentTransactionsTable.id })
+        .from(paymentTransactionsTable)
+        .where(eq(paymentTransactionsTable.referenceNumber, referenceNumber))
+        .limit(1);
+      if (existing.length > 0) {
+        return res.status(409).json({ error: "Duplicate reference number — this payment has already been submitted" });
+      }
+    }
     const [tx] = await db.insert(paymentTransactionsTable).values({ userId, subscriptionId, amount, currency, method: method || "instapay", referenceNumber, screenshotUrl, status: "pending", notes }).returning();
     res.status(201).json(tx);
   } catch (err) {

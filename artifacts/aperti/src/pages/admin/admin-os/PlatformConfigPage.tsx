@@ -72,7 +72,7 @@ export default function PlatformConfigPage() {
   const [pendingPayments, setPendingPayments] = useState(0);
 
   useEffect(() => {
-    fetch("/api/admin/features", { headers: { Authorization: `Bearer ${token}` } })
+    fetch("/api/admin/features", { credentials: "include" })
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -82,7 +82,7 @@ export default function PlatformConfigPage() {
         }
       }).catch(() => {});
 
-    fetch("/api/admin/payments?status=pending", { headers: { Authorization: `Bearer ${token}` } })
+    fetch("/api/admin/payments?status=pending", { credentials: "include" })
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) setPendingPayments(data.length);

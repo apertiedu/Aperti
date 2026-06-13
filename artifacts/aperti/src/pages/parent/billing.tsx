@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CreditCard, FileText, CheckCircle2, Clock, XCircle } from "lucide-react";
 
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 function statusBadge(status: string) {
   switch ((status || "").toLowerCase()) {

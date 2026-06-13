@@ -15,10 +15,9 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar,
 } from "recharts";
 
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
@@ -26,7 +25,7 @@ async function fetchJSON(url: string) {
 async function postJSON(url: string, body: object) {
   const res = await fetch(url, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error("Failed");

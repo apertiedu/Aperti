@@ -222,8 +222,7 @@ export default function TestRunner() {
   const [running, setRunning] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(GROUPS));
 
-  const token = (() => { try { return localStorage.getItem("aperti_token"); } catch { return null; } })();
-
+  
   const runAll = useCallback(async () => {
     setRunning(true);
     const fresh: Record<string, TestResult> = {};

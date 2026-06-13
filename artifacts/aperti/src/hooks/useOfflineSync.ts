@@ -1,7 +1,6 @@
 import { useEffect, useCallback, useState } from "react";
 import { openOfflineDB, queueOfflineAction } from "./use-pwa";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 export function useOfflineSync() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -59,10 +58,8 @@ export function useOfflineSync() {
 
       const res = await fetch("/api/offline/sync", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${tok()}`,
-        },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ actions: items }),
       });
 

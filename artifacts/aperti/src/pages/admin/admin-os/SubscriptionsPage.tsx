@@ -41,7 +41,7 @@ export default function SubscriptionsPage() {
   });
 
   const archivePlanMutation = useMutation({
-    mutationFn: (id: number) => fetch(`/api/admin/subscriptions/plans/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` } }).then(r => r.json()),
+    mutationFn: (id: number) => fetch(`/api/admin/subscriptions/plans/${id}`, { method: "DELETE", credentials: "include" }).then(r => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-plans"] }); toast.success("Plan archived"); },
     onError: () => toast.error("Archive failed"),
   });

@@ -7,8 +7,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const token = () => localStorage.getItem("aperti_token") || "";
-const authH = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${token()}` });
+const authH = () => ({ "Content-Type": "application/json" });
 async function fetchJSON(url: string) { const r = await fetch(url, { headers: authH() }); return r.json(); }
 async function postJSON(url: string, body: unknown) { const r = await fetch(url, { method: "POST", headers: authH(), body: JSON.stringify(body) }); return r.json(); }
 async function putJSON(url: string, body: unknown) { const r = await fetch(url, { method: "PUT", headers: authH(), body: JSON.stringify(body) }); return r.json(); }

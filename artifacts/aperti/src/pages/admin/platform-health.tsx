@@ -13,10 +13,9 @@ import {
 
 const TEAL = "#0D9488";
 
-function tok() { return localStorage.getItem("aperti_token") ?? ""; }
 
 async function apiFetch(url: string) {
-  const res = await fetch(`/api${url}`, { headers: { Authorization: `Bearer ${tok()}` } });
+  const res = await fetch(`/api${url}`, { credentials: "include" });
   if (!res.ok) throw new Error(await res.text().catch(() => res.statusText));
   return res.json();
 }

@@ -14,7 +14,6 @@ import {
   TrendingUp, Play, ExternalLink,
 } from "lucide-react";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 interface Enrollment {
   id: number; course_id: number; course_title: string; subject: string | null;
@@ -97,7 +96,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
   const { data: flashcards } = useQuery({
     queryKey: ["flashcards", "student", "decks"],
     queryFn: async () => {
-      const res = await fetch("/api/flashcards/student/decks", { headers: { Authorization: `Bearer ${tok()}` } });
+      const res = await fetch("/api/flashcards/student/decks", { credentials: "include" });
       if (!res.ok) return [];
       return res.json();
     },
@@ -248,7 +247,7 @@ export default function CourseHub() {
     queryKey: ["student-enrollments"],
     queryFn: async () => {
       const res = await fetch("/courses/my/enrollments", {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       });
       if (!res.ok) return [];
       return res.json();

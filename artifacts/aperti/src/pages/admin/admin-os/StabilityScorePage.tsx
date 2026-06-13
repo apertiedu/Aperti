@@ -7,9 +7,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string) =>
-  fetch(path, { headers: { Authorization: `Bearer ${tok()}` } }).then(r => r.json());
+  fetch(path, { credentials: "include" }).then(r => r.json());
 
 function ScoreRing({ score }: { score: number }) {
   const pct = Math.min(100, Math.max(0, score));

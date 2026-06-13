@@ -8,7 +8,6 @@ import { Camera, Upload, ScanLine, CheckCircle2, XCircle, RotateCcw, Lightbulb, 
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
-const token = () => localStorage.getItem("aperti_token");
 
 type Status = "idle" | "uploading" | "done" | "error";
 
@@ -63,7 +62,7 @@ export default function SnapGrade() {
     try {
       const res = await fetch("/api/snapgrade/scan", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token()}` },
+        headers: {},
         body: formData,
       });
 

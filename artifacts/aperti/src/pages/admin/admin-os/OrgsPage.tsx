@@ -30,7 +30,7 @@ export default function OrgsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => fetch(`/api/admin/organizations/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` } }).then(r => r.json()),
+    mutationFn: (id: number) => fetch(`/api/admin/organizations/${id}`, { method: "DELETE", credentials: "include" }).then(r => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-orgs"] }); toast.success("Organization archived"); },
     onError: () => toast.error("Delete failed"),
   });

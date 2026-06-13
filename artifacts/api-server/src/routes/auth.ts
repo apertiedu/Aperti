@@ -177,7 +177,15 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
 
     await recordLoginHistory(account.id, identifier, req, true);
 
+    const isProduction = process.env.NODE_ENV === "production";
     const token = jwt.sign({ id: account.id, role: account.role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    res.cookie("aperti_token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
     if (deviceId) {
       await db.insert(deviceSessionsTable).values({
         accountId: account.id,
@@ -243,12 +251,14 @@ authRouter.post("/setup", async (req: Request, res: Response) => {
   }
 });
 
-// GET /auth/me – validate token
+// GET /auth/me – validate token (accepts cookie or Authorization header)
 authRouter.get("/me", async (req: Request, res: Response) => {
+  const cookieToken = (req as any).cookies?.aperti_token as string | undefined;
   const header = req.headers.authorization;
-  if (!header?.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
+  const raw = cookieToken || (header?.startsWith("Bearer ") ? header.slice(7) : null);
+  if (!raw) return res.status(401).json({ error: "Unauthorized" });
   try {
-    const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
+    const payload = jwt.verify(raw, JWT_SECRET) as any;
     const { pool: dbPool } = await import("@workspace/db");
     const { rows } = await dbPool.query(
       `SELECT id, username, display_name, email, role, avatar_url, bio, phone, country, first_name, last_name, status, mfa_enabled, must_change_password FROM accounts WHERE id=$1`,
@@ -282,17 +292,20 @@ authRouter.post("/logout", async (req: Request, res: Response) => {
     if (deviceId) {
       await db.delete(deviceSessionsTable).where(eq(deviceSessionsTable.deviceId, deviceId));
     }
-    // Decode token (best-effort) to record who logged out
+    const cookieToken = (req as any).cookies?.aperti_token as string | undefined;
     const header = req.headers.authorization;
-    if (header?.startsWith("Bearer ")) {
+    const raw = cookieToken || (header?.startsWith("Bearer ") ? header.slice(7) : null);
+    if (raw) {
       try {
-        const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
+        const payload = jwt.verify(raw, JWT_SECRET) as any;
         writeAudit({ accountId: payload.id, action: "logout", resource: "auth", ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
       } catch { /* token already expired — still allow logout */ }
     }
   } catch {
     // ignore logout errors
   }
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("aperti_token", { httpOnly: true, secure: isProduction, sameSite: isProduction ? "none" : "lax", path: "/" });
   res.json({ success: true });
 });
 

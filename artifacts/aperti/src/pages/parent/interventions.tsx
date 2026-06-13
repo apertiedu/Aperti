@@ -8,7 +8,7 @@ import { AlertTriangle, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const authFetch = (url: string, opts?: RequestInit) =>
-  fetch(url, { ...opts, headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });
+  fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
 const riskConfig: Record<string, { bg: string; text: string; border: string }> = {
   critical: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },

@@ -15,7 +15,7 @@ export default function GuardianPulseAdmin() {
     mutationFn: () =>
       fetch(`${API}/guardian-pulse/trigger`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` },
+        headers: {},
       }).then(r => r.json()),
     onSuccess: (data) => setResult({ success: true, message: data.message || "Notifications sent successfully." }),
     onError: () => setResult({ success: false, message: "Failed to send notifications. Check server configuration." }),

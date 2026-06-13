@@ -10,7 +10,7 @@ import { Folder, Download, FileText, Award, CreditCard, Filter } from "lucide-re
 
 const TEAL = "#0D9488";
 const authFetch = (url: string) =>
-  fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+  fetch(url, { credentials: "include" });
 
 const typeConfig: Record<string, { icon: any; colour: string; bg: string }> = {
   report:      { icon: FileText, colour: "#6366f1", bg: "bg-indigo-50" },
@@ -62,9 +62,8 @@ export default function ParentDocuments() {
     }
     // For auto-generated reports, download via the PDF endpoint
     if (doc.type === "report" && doc.student_id) {
-      const token = localStorage.getItem("aperti_token") || "";
       const res = await fetch(`/api/parent/child/${doc.student_id}/report-pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       if (res.ok) {
         const blob = await res.blob();

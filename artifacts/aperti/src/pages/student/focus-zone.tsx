@@ -8,13 +8,12 @@ import { Play, Pause, RotateCcw, Coffee, Brain, CheckCircle2 } from "lucide-reac
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 
-const token = () => localStorage.getItem("aperti_token");
 
 async function startSessionAPI(mode: string, durationMinutes: number): Promise<number | null> {
   try {
     const res = await fetch("/api/focus-sessions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode, durationMinutes }),
     });
     if (!res.ok) return null;
@@ -27,7 +26,7 @@ async function completeSessionAPI(sessionId: number, durationMinutes: number, mo
   try {
     await fetch(`/api/focus-sessions/${sessionId}`, {
       method: "PATCH",
-      headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ durationMinutes, mode }),
     });
   } catch { /* silent */ }

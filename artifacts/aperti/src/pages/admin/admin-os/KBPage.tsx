@@ -72,7 +72,7 @@ export default function KBPage() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      fetch(`/api/admin/kb/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` } }).then(r => r.json()),
+      fetch(`/api/admin/kb/${id}`, { method: "DELETE", credentials: "include" }).then(r => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["kb-articles"] }); toast.success("Article deleted"); },
     onError: () => toast.error("Delete failed"),
   });

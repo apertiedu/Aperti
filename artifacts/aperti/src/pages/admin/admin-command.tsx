@@ -12,7 +12,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -22,7 +21,7 @@ function ActivityHeatmap() {
     queryKey: ["admin-activity-heatmap"],
     queryFn: async () => {
       const res = await fetch("/dashboard/admin/activity-heatmap?days=30", {
-        headers: { Authorization: `Bearer ${tok()}` },
+        credentials: "include",
       });
       if (!res.ok) return null;
       return res.json();
@@ -259,7 +258,7 @@ export default function AdminCommand() {
   const { data: stats } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: async () => {
-      const res = await fetch("/api/dashboard", { headers: { Authorization: `Bearer ${tok()}` } });
+      const res = await fetch("/api/dashboard", { credentials: "include" });
       if (!res.ok) return null;
       return res.json();
     },
@@ -269,9 +268,7 @@ export default function AdminCommand() {
   const { data: liveStats, dataUpdatedAt } = useQuery({
     queryKey: ["admin-live-stats"],
     queryFn: async () => {
-      const res = await fetch("/dashboard/admin/live-stats", {
-        headers: { Authorization: `Bearer ${tok()}` },
-      });
+      const res = await fetch("/dashboard/admin/live-stats", { credentials: "include" });
       if (!res.ok) return null;
       return res.json();
     },
@@ -282,9 +279,7 @@ export default function AdminCommand() {
   const { data: liveCounts, refetch: refetchCounts } = useQuery({
     queryKey: ["admin-live-counts"],
     queryFn: async () => {
-      const res = await fetch("/api/admin/analytics/live-counts", {
-        headers: { Authorization: `Bearer ${tok()}` },
-      });
+      const res = await fetch("/api/admin/analytics/live-counts", { credentials: "include" });
       if (!res.ok) return null;
       return res.json();
     },

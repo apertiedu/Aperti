@@ -12,11 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Award, Plus, Medal } from "lucide-react";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
     ...opts,
   });
   if (!res.ok) throw new Error("Failed");

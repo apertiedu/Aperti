@@ -15,10 +15,6 @@ const CATEGORIES = [
 ] as const;
 
 const API = "/api";
-const authH = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}`,
-});
 
 export default function ReportProblemModal() {
   const { user } = useAuth();
@@ -46,7 +42,8 @@ export default function ReportProblemModal() {
     try {
       const res = await fetch(`${API}/problem-reports`, {
         method: "POST",
-        headers: authH(),
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           category,
           description: description.trim(),

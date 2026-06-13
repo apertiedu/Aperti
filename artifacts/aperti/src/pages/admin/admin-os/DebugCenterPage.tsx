@@ -9,9 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string) =>
-  fetch(path, { headers: { Authorization: `Bearer ${tok()}` } }).then(r => {
+  fetch(path, { credentials: "include" }).then(r => {
     if (!r.ok) throw new Error(`${r.status}`);
     return r.json();
   });

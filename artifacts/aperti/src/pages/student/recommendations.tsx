@@ -12,17 +12,16 @@ import {
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   if (!r.ok) throw new Error("Failed");
   return r.json();
 }
 
 async function postJSON(url: string, body: unknown) {
   const r = await fetch(url, {
-    method: "POST", headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+    method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error("Failed");

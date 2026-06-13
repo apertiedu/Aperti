@@ -28,8 +28,6 @@ export default function DBHealthPage() {
   const qc = useQueryClient();
   const [vacuuming, setVacuuming] = useState(false);
   const [vacuumMsg, setVacuumMsg] = useState<string | null>(null);
-  const token = typeof window !== "undefined" ? localStorage.getItem("aperti_token") : "";
-
   const { data, isLoading, isFetching, refetch } = useQuery<any>({
     queryKey: ["admin-db-health"],
     queryFn: () => fetchJSON("/api/admin/db-health"),
@@ -44,7 +42,8 @@ export default function DBHealthPage() {
     try {
       const r = await fetch("/api/admin/db-health/vacuum", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
       });
       const d = await r.json();
       setVacuumMsg(d.message ?? "VACUUM completed.");

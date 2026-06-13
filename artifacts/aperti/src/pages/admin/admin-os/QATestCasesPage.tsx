@@ -11,9 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string, opts?: RequestInit) =>
-  fetch(path, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
+  fetch(path, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
 
 const STATUS_STYLES: Record<string, { icon: any; label: string; cls: string }> = {
   pending: { icon: Clock,        label: "Pending", cls: "text-gray-500 bg-gray-50 border-gray-200" },

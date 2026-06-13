@@ -9,9 +9,8 @@ import {
   BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, Radar,
 } from "recharts";
 
-const token = () => localStorage.getItem("aperti_token");
 async function fetchJSON(url: string) {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }

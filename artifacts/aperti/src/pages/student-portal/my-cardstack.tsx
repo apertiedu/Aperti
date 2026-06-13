@@ -13,7 +13,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { MathRenderer } from "@/components/math-renderer";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 interface Deck {
   id: number;
@@ -67,7 +66,7 @@ export default function MyCardStack() {
     queryKey: ["flashcards", "student", "decks"],
     queryFn: async () => {
       const res = await fetch("/api/flashcards/student/decks", {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       });
       if (!res.ok) return [];
       return res.json();
@@ -78,7 +77,7 @@ export default function MyCardStack() {
     queryKey: ["flashcards", "smart-stats"],
     queryFn: async () => {
       const res = await fetch("/api/flashcards/smart-stats", {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       });
       if (!res.ok) return null;
       return res.json();
@@ -90,7 +89,7 @@ export default function MyCardStack() {
     queryKey: ["flashcards", "decks", selectedDeck?.id, "cards"],
     queryFn: async () => {
       const res = await fetch(`/api/flashcards/decks/${selectedDeck!.id}/cards`, {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       });
       if (!res.ok) return [];
       return res.json();
@@ -104,7 +103,7 @@ export default function MyCardStack() {
     mutationFn: (deckId: number) =>
       fetch(`/api/flashcards/v3/decks/${deckId}/ai-enhance`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       }).then((r) => r.json()),
     onMutate: (deckId) => setEnhancingId(deckId),
     onSettled: () => setEnhancingId(null),
@@ -122,7 +121,7 @@ export default function MyCardStack() {
     mutationFn: ({ cardId, quality }: { cardId: number; quality: number }) =>
       fetch("/api/flashcards/review", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${tok()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cardId, quality }),
       }).then((r) => r.json()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["flashcards"] }),

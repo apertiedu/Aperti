@@ -147,7 +147,7 @@ function DbIntegrityWidget({ token }: { token: string | null }) {
   const check = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/launch-dashboard/db-integrity", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/admin/launch-dashboard/db-integrity", { credentials: "include" });
       if (res.ok) setResult(await res.json());
     } finally {
       setLoading(false);
@@ -206,7 +206,7 @@ export default function LaunchDashboardPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/launch-dashboard", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/admin/launch-dashboard", { credentials: "include" });
       if (res.ok) {
         setData(await res.json());
         setLastRefresh(new Date());

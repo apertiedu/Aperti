@@ -38,10 +38,9 @@ export default function CourseDetail() {
 
   const enrollMutation = useMutation({
     mutationFn: async () => {
-      const token = localStorage.getItem("aperti_token") || "";
       const res = await fetch(`/courses/${courseId}/enroll`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));

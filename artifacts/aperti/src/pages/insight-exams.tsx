@@ -15,11 +15,10 @@ import { Plus, Clock, Eye, Trash2, FileText } from "lucide-react";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(options?.headers || {}) },
+    headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
     ...options,
   });
   if (!res.ok) throw new Error("Failed");
@@ -50,7 +49,7 @@ export default function InsightExams() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => fetch(`${API}/exams/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } }),
+    mutationFn: (id: number) => fetch(`${API}/exams/${id}`, { method: "DELETE", credentials: "include" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["exams"] }),
   });
 

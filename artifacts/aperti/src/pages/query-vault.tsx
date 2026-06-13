@@ -23,11 +23,10 @@ import { Plus, Search, Pencil, Trash2, ImageIcon, X, Upload, Brain } from "lucid
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(options?.headers || {}) },
+    headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
     ...options,
   });
   if (!res.ok) throw new Error("Failed");
@@ -61,7 +60,7 @@ export default function QueryVault() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => fetch(`${API}/question-bank/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } }),
+    mutationFn: (id: number) => fetch(`${API}/question-bank/${id}`, { method: "DELETE", credentials: "include" }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["question-bank"] }),
   });
 
@@ -207,7 +206,7 @@ function QuestionForm({ question, onClose, onRefresh, onLimitExceeded }: {
     mutationFn: async (data: any) => {
       const res = await fetch(`${API}/question-bank${question ? `/${question.id}` : ""}`, {
         method: question ? "PUT" : "POST",
-        headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
       const json = await res.json().catch(() => ({}));
@@ -243,9 +242,7 @@ function QuestionForm({ question, onClose, onRefresh, onLimitExceeded }: {
         const res = await fetch("/upload", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token()}`,
-          },
+            "Content-Type": "application/json" },
           body: JSON.stringify({ fileName: file.name, fileType: file.type, fileData }),
         });
         if (!res.ok) throw new Error("Upload failed");

@@ -13,10 +13,9 @@ import {
 import { useMutation } from "@tanstack/react-query";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
     ...opts,
   });
   if (!res.ok) throw new Error("Failed");

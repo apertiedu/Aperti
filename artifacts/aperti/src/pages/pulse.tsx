@@ -19,9 +19,8 @@ import { EmptyState } from "@/components/empty-state";
 import { Link } from "wouter";
 
 const API = "/api";
-const tok = () => localStorage.getItem("aperti_token") || "";
 async function apiFetch(url: string) {
-  const res = await fetch(`${API}${url}`, { headers: { Authorization: `Bearer ${tok()}` } });
+  const res = await fetch(`${API}${url}`, { credentials: "include" });
   if (!res.ok) throw new Error(`Failed: ${res.status}`);
   return res.json();
 }

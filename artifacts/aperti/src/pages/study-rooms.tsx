@@ -9,10 +9,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 
-const token = () => localStorage.getItem("aperti_token") ?? "";
-const fetchJSON = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${token()}` } }).then((r) => r.json());
+const fetchJSON = (url: string) => fetch(url, { credentials: "include" }).then((r) => r.json());
 const postJSON = (url: string, body: unknown) =>
-  fetch(url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify(body) }).then((r) => r.json());
+  fetch(url, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
 
 type Room = {
   id: number; name: string; type: string; course_id: number | null;

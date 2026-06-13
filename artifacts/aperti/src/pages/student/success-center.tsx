@@ -9,8 +9,7 @@ import {
 import { apiFetch } from "@/lib/api";
 import { format, parseISO } from "date-fns";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${tok()}` } }).then(r => r.json());
+const authFetch = (url: string) => fetch(url, { credentials: "include" }).then(r => r.json());
 
 const stagger = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.07 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 280, damping: 24 } } } as any;

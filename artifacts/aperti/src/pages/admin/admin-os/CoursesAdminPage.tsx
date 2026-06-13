@@ -26,7 +26,8 @@ export default function CoursesAdminPage() {
     mutationFn: ({ id, visibility }: any) =>
       fetch(`/api/admin/courses/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("aperti_token")}` },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ visibility }),
       }).then((r) => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-courses"] }); toast.success("Course updated"); },
@@ -37,7 +38,7 @@ export default function CoursesAdminPage() {
     mutationFn: (id: number) =>
       fetch(`/api/admin/courses/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` },
+        credentials: "include",
       }).then((r) => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-courses"] }); toast.success("Course archived"); },
     onError: () => toast.error("Archive failed"),

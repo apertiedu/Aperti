@@ -15,12 +15,10 @@ import { useToast } from "@/hooks/use-toast";
 const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {
     ...opts,
     headers: {
-      Authorization: `Bearer ${tok()}`,
       "Content-Type": "application/json",
       ...(opts?.headers || {}),
     },

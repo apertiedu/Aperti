@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import RevisionModesSelector from "@/components/revision-modes-selector";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 const MODE_ICONS: Record<string, any> = {
   flashcards: Layers,
@@ -144,7 +143,7 @@ export default function Revisit() {
     queryKey: ["revisit", "plan", planType],
     queryFn: async () => {
       const res = await fetch(`/api/revisit/plan?type=${planType}`, {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       });
       if (!res.ok) throw new Error("Failed");
       return res.json();

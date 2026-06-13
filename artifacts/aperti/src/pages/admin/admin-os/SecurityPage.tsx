@@ -21,7 +21,7 @@ export default function SecurityPage() {
     mutationFn: (id: number) =>
       fetch(`/api/admin/security/sessions/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` },
+        headers: {},
       }).then((r) => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-sessions"] }); toast.success("Session terminated"); },
     onError: () => toast.error("Failed"),
@@ -31,7 +31,7 @@ export default function SecurityPage() {
     mutationFn: (userId: number) =>
       fetch(`/api/admin/security/sessions/user/${userId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token")}` },
+        headers: {},
       }).then((r) => r.json()),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-sessions"] }); toast.success("All sessions terminated"); },
     onError: () => toast.error("Failed"),

@@ -22,12 +22,10 @@ import {
 import { useAuth } from "@/context/auth";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
     headers: {
-      Authorization: `Bearer ${token()}`,
       "Content-Type": "application/json",
       ...(options?.headers as object | undefined),
     },

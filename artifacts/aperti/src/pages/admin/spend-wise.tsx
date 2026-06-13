@@ -4,13 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { DollarSign, TrendingDown, Zap, BarChart3, RefreshCw } from "lucide-react";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 export default function SpendWise() {
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["ai-costs-spend"],
     queryFn: () =>
-      fetch("/api/admin/ai/costs", { headers: { Authorization: `Bearer ${tok()}` } })
+      fetch("/api/admin/ai/costs", { credentials: "include" })
         .then(r => r.json()),
     staleTime: 60000,
   });

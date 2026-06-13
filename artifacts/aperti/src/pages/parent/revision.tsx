@@ -10,7 +10,7 @@ import { Brain, Target, Clock, CheckCircle2, Flame, Layers } from "lucide-react"
 import ParentChildSwitcher from "@/components/parent-child-switcher";
 
 const TEAL = "#0D9488";
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 function HeatmapCell({ minutes }: { minutes: number }) {
   const opacity = minutes === 0 ? 0 : Math.min(1, 0.15 + (minutes / 120) * 0.85);

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/auth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,13 +14,14 @@ import { Link } from "wouter";
 
 const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
-  fetch(url, { ...opts, headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });
+  fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
 interface Conversation { other_id: number; other_name: string; last_msg: string; last_time: string; unread_count: number; }
 interface Message { id: number; message: string; read: string; created_at: string; from_account_id: number; to_account_id: number; from_name: string; to_name: string; }
 
 export default function GuardianLink() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const qc = useQueryClient();
   const [selected, setSelected] = useState<{ id: number; name: string } | null>(null);
   const [input, setInput] = useState("");
@@ -60,9 +62,7 @@ export default function GuardianLink() {
   // Merge conversations with teachers who haven't messaged yet
   const allTeachers = [...teachers].filter(t => !conversations.find(c => c.other_id === t.id));
 
-  const myAccountId = (() => {
-    try { return JSON.parse(atob((localStorage.getItem("aperti_token") || "").split(".")[1] || ""))?.id; } catch { return null; }
-  })();
+  const myAccountId = user?.id ?? null;
 
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto h-[calc(100vh-4rem)] flex flex-col gap-4">

@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 export default function PaperVaultAdmin() {
   const queryClient = useQueryClient();
@@ -36,7 +35,7 @@ export default function PaperVaultAdmin() {
   const { data: papers = [], isLoading } = useQuery({
     queryKey: ["admin", "past-papers"],
     queryFn: async () => {
-      const res = await fetch(`${API}/past-papers`, { headers: { Authorization: `Bearer ${token()}` } });
+      const res = await fetch(`${API}/past-papers`, { credentials: "include" });
       return res.json();
     },
   });
@@ -57,7 +56,7 @@ export default function PaperVaultAdmin() {
         return new Promise<any>((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           xhr.open("POST", `${API}/past-papers/upload`);
-          xhr.setRequestHeader("Authorization", `Bearer ${token()}`);
+          xhr.withCredentials = true;
           xhr.upload.onprogress = (e) => {
             if (e.lengthComputable) setUploadProgress(Math.round((e.loaded / e.total) * 100));
           };
@@ -73,7 +72,7 @@ export default function PaperVaultAdmin() {
         setUploadProgress(50);
         const res = await fetch(`${API}/past-papers`, {
           method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ board: data.board, subject: data.subject, year: Number(data.year), session: data.session, component: data.component, paperNumber: data.paperNumber, variant: data.variant, fileUrl: data.fileUrl }),
         });
         setUploadProgress(100);
@@ -94,7 +93,7 @@ export default function PaperVaultAdmin() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      fetch(`${API}/past-papers/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } }),
+      fetch(`${API}/past-papers/${id}`, { method: "DELETE", credentials: "include" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "past-papers"] });
       toast({ title: "Paper deleted" });

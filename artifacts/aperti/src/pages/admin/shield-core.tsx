@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Shield, AlertTriangle, Eye, Clock, CheckCircle2, ScanFace, Info, ShieldOff, ClipboardX, Copy, EyeOff, Activity } from "lucide-react";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 const ACTIVE_MEASURES = [
   { label: "Tab-switch detection", description: "Students are flagged each time they leave the exam tab" },
@@ -27,7 +26,7 @@ export default function ShieldCore() {
   const { data: flagged, isLoading } = useQuery<any[]>({
     queryKey: ["shield-violations"],
     queryFn: async () => {
-      const res = await fetch("/api/shield/violations", { headers: { Authorization: `Bearer ${tok()}` } });
+      const res = await fetch("/api/shield/violations", { credentials: "include" });
       if (!res.ok) throw new Error("Failed");
       const json = await res.json();
       return Array.isArray(json) ? json : (json.violations ?? []);

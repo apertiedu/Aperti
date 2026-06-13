@@ -14,11 +14,10 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 async function api(url: string, opts?: RequestInit) {
   const res = await fetch(`/api${url}`, {
-    headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers || {}) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers || {}) },
     ...opts,
   });
   if (!res.ok) throw new Error("Failed");

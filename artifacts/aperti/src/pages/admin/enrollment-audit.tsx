@@ -11,12 +11,11 @@ import {
   Copy, Trash2, Link as LinkIcon, ShieldCheck,
 } from "lucide-react";
 
-const tok = () => localStorage.getItem("aperti_token") ?? "";
 
 async function apiFetch(url: string, opts?: RequestInit) {
   const res = await fetch(`/api${url}`, {
     ...opts,
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${tok()}`, ...opts?.headers },
+    headers: { "Content-Type": "application/json", ...opts?.headers },
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();

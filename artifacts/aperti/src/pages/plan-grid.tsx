@@ -27,11 +27,10 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(opts?.headers as any) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers as any) },
     ...opts,
   });
   if (!res.ok) throw new Error("Failed");
@@ -109,7 +108,7 @@ export default function PlanGrid() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      fetch(`${API}/lessons/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } }),
+      fetch(`${API}/lessons/${id}`, { method: "DELETE", credentials: "include" }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["lessons"] });
       toast({ title: "Lesson removed" });
@@ -426,7 +425,7 @@ function LessonForm({ lesson, onClose, onRefresh }: {
     mutationFn: (data: any) =>
       fetch(`${API}/lessons${lesson ? `/${lesson.id}` : ""}`, {
         method: lesson ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }).then(r => r.json()),
     onSuccess: () => {

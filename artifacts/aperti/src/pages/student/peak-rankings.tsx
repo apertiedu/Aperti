@@ -10,9 +10,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Trophy, Medal, Star, TrendingUp, TrendingDown, Minus, RefreshCw } from "lucide-react";
 import { useAuth } from "@/context/auth";
 
-const token = () => localStorage.getItem("aperti_token");
 async function fetchJSON(url: string) {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }

@@ -10,7 +10,6 @@ import Geometrix from "./labs/geometric";
 import BioSphere from "./labs/biosphere";
 import { useToast } from "@/hooks/use-toast";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 function PulseLab() {
   const { toast } = useToast();
@@ -46,7 +45,7 @@ Be encouraging and educational. Keep response under 300 words.`;
     try {
       const res = await fetch("/api/mentor/chat", {
         method: "POST",
-        headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: prompt, sessionId: "pulseLab" }),
       });
 

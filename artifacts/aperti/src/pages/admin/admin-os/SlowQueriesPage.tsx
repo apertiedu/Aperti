@@ -5,9 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string) =>
-  fetch(path, { headers: { Authorization: `Bearer ${tok()}` } }).then(r => r.json());
+  fetch(path, { credentials: "include" }).then(r => r.json());
 
 function SeverityBadge({ ms }: { ms: number }) {
   if (ms > 2000) return <Badge variant="destructive" className="text-[10px]">Critical &gt;2s</Badge>;

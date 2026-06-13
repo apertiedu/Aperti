@@ -8,10 +8,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
-const authH = () => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}`,
-});
+const authH = () => ({ "Content-Type": "application/json" });
 
 type DeviceSession = {
   id: number;
@@ -67,7 +64,7 @@ export default function SessionsPage() {
   const { data: sessions = [], isLoading, error, refetch } = useQuery<DeviceSession[]>({
     queryKey: ["device-sessions"],
     queryFn: async () => {
-      const res = await fetch(`${API}/auth/devices`, { headers: authH() });
+      const res = await fetch(`${API}/auth/devices`, { credentials: "include", headers: authH() });
       const text = await res.text();
       try { return JSON.parse(text); } catch { return []; }
     },
@@ -77,6 +74,7 @@ export default function SessionsPage() {
     mutationFn: async (deviceId: string) => {
       const res = await fetch(`${API}/auth/devices/${encodeURIComponent(deviceId)}`, {
         method: "DELETE",
+        credentials: "include",
         headers: authH(),
       });
       if (!res.ok) throw new Error("Failed to revoke session");
@@ -95,6 +93,7 @@ export default function SessionsPage() {
     mutationFn: async () => {
       const res = await fetch(`${API}/auth/devices`, {
         method: "DELETE",
+        credentials: "include",
         headers: authH(),
       });
       if (!res.ok) throw new Error("Failed");

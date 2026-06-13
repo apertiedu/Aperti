@@ -13,17 +13,16 @@ import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { ReportModal } from "@/components/ReportModal";
 
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }
 async function postJSON(url: string, body: object) {
   const res = await fetch(url, {
     method: "POST",
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error("Failed");
@@ -32,7 +31,7 @@ async function postJSON(url: string, body: object) {
 async function deleteReq(url: string) {
   const res = await fetch(url, {
     method: "DELETE",
-    headers: { Authorization: `Bearer ${token()}` },
+    headers: {},
   });
   if (!res.ok) throw new Error("Failed");
   return res.json();

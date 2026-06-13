@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Activity, Cpu, HardDrive, Database, Clock, RefreshCw, Wifi, AlertTriangle } from "lucide-react";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 function MetricCard({ icon: Icon, label, value, unit, color, warn }: {
   icon: any; label: string; value: number | string; unit?: string; color: string; warn?: boolean;
@@ -38,7 +37,7 @@ export default function AutoScale() {
   const { data, isLoading, isFetching, refetch, dataUpdatedAt } = useQuery({
     queryKey: ["system-metrics"],
     queryFn: () =>
-      fetch("/api/founder/system-metrics", { headers: { Authorization: `Bearer ${tok()}` } })
+      fetch("/api/founder/system-metrics", { credentials: "include" })
         .then(r => r.json()),
     refetchInterval: 8000,
     staleTime: 4000,

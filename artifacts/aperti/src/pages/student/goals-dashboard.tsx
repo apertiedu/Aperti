@@ -14,17 +14,16 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   if (!r.ok) throw new Error("Failed");
   return r.json();
 }
 
 async function postJSON(url: string, body: unknown, method = "POST") {
   const r = await fetch(url, {
-    method, headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+    method, headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error("Failed");
@@ -93,7 +92,7 @@ export default function GoalsDashboard() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => fetch(`/api/learning-goals/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } }).then(r => r.json()),
+    mutationFn: (id: number) => fetch(`/api/learning-goals/${id}`, { method: "DELETE", credentials: "include" }).then(r => r.json()),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["learning-goals"] }),
   });
 

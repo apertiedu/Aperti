@@ -14,22 +14,20 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Legend
 } from "recharts";
 
-const token = () => localStorage.getItem("aperti_token") || "";
-const authHeaders = () => ({ "Content-Type": "application/json", Authorization: `Bearer ${token()}` });
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: authHeaders() });
+  const r = await fetch(url, { credentials: "include" });
   return r.json();
 }
 async function postJSON(url: string, body: unknown) {
-  const r = await fetch(url, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
+  const r = await fetch(url, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   return r.json();
 }
 async function putJSON(url: string, body: unknown) {
-  const r = await fetch(url, { method: "PUT", headers: authHeaders(), body: JSON.stringify(body) });
+  const r = await fetch(url, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   return r.json();
 }
 async function deleteReq(url: string) {
-  const r = await fetch(url, { method: "DELETE", headers: authHeaders() });
+  const r = await fetch(url, { method: "DELETE", credentials: "include" });
   return r.json();
 }
 

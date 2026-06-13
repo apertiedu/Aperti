@@ -4,9 +4,8 @@ import { History, CheckCircle, XCircle, SkipForward, Cpu, User } from "lucide-re
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string) =>
-  fetch(path, { headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" } });
+  fetch(path, { credentials: "include", headers: { "Content-Type": "application/json" } });
 
 function MiniBar({ passed, failed, skipped, total }: { passed: number; failed: number; skipped: number; total: number }) {
   if (total === 0) return <div className="h-2 bg-gray-100 rounded-full w-full" />;

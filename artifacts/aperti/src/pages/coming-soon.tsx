@@ -4,9 +4,8 @@ import { Rocket, Clock, Mail, ArrowRight, Sparkles } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { Link } from "wouter";
 
-const token = () => localStorage.getItem("aperti_token") || "";
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   return r.json();
 }
 

@@ -8,9 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#0D9488";
-const tok = () => localStorage.getItem("aperti_token") || "";
 const authFetch = (url: string, opts?: RequestInit) =>
-  fetch(url, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });
+  fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
 interface PendingStudent {
   id: number; username: string; display_name: string; email: string | null;

@@ -6,9 +6,8 @@ import {
   Ticket, BookOpen, Zap, Activity, Calendar,
 } from "lucide-react";
 
-const token = () => localStorage.getItem("aperti_token") ?? "";
 const fetchJSON = (url: string) =>
-  fetch(url, { headers: { Authorization: `Bearer ${token()}` } }).then((r) => r.json());
+  fetch(url, { credentials: "include" }).then((r) => r.json());
 
 type CommAnalytics = {
   summary: {

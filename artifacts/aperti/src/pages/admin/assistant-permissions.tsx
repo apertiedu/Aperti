@@ -9,11 +9,10 @@ import { Shield, User, ChevronDown, ChevronUp, Check, AlertCircle, Users } from 
 import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#0D9488";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`/api${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(opts?.headers as object) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers as object) },
     ...opts,
   });
   if (!res.ok) throw new Error("Failed");

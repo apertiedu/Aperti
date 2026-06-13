@@ -5,15 +5,14 @@ import { Check, Copy, Upload, Clock, ChevronRight, Loader2, X } from "lucide-rea
 import { useRoute, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-const token = () => localStorage.getItem("aperti_token") || "";
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   return r.json();
 }
 async function postJSON(url: string, body: unknown) {
   const r = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
   return r.json();

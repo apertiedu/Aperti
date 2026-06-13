@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AlertTriangle, TrendingUp } from "lucide-react";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 export default function ErrorTrace() {
   const studentId = 1; // dynamic later
@@ -15,7 +14,7 @@ export default function ErrorTrace() {
     queryKey: ["error-trace", studentId],
     queryFn: async () => {
       const res = await fetch(`${API}/error-trace/student/${studentId}`, {
-        headers: { Authorization: `Bearer ${token()}` },
+        headers: {},
       });
       return res.json();
     },

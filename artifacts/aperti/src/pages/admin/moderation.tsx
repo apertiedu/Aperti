@@ -7,15 +7,14 @@ import {
   MessageSquare, Hash, Users,
 } from "lucide-react";
 
-const token = () => localStorage.getItem("aperti_token") ?? "";
 const fetchJSON = (url: string) =>
-  fetch(url, { headers: { Authorization: `Bearer ${token()}` } }).then((r) => r.json());
+  fetch(url, { credentials: "include" }).then((r) => r.json());
 const postJSON = (url: string, body: unknown) =>
-  fetch(url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify(body) }).then((r) => r.json());
+  fetch(url, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
 const putJSON = (url: string, body: unknown) =>
-  fetch(url, { method: "PUT", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify(body) }).then((r) => r.json());
+  fetch(url, { method: "PUT", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
 const deleteReq = (url: string) =>
-  fetch(url, { method: "DELETE", headers: { Authorization: `Bearer ${token()}` } }).then((r) => r.json());
+  fetch(url, { method: "DELETE", credentials: "include" }).then((r) => r.json());
 
 type Report = {
   id: number; reported_by_name: string; content_type: string; content_id: number;

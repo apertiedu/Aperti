@@ -19,8 +19,8 @@ const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {
     ...opts,
+    credentials: "include",
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}`,
       "Content-Type": "application/json",
       ...(opts?.headers || {}),
     },
@@ -108,7 +108,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
     const socket: Socket = SocketIO("/parent", {
       path: "/socket.io",
       transports: ["websocket", "polling"],
-      auth: { token: localStorage.getItem("aperti_token") || "" },
+      withCredentials: true,
     });
 
     socketRef.current = socket;

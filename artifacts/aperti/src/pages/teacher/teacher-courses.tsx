@@ -22,11 +22,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
-const tok = () => localStorage.getItem("aperti_token");
 async function apiFetch(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
     ...opts,
-    headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) },
+    headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
   });
   if (!res.ok) throw new Error("Failed");
   return res.json();
@@ -44,7 +43,7 @@ function QualityScoreBadge({ courseId }: { courseId: number }) {
     queryKey: ["quality-score", courseId],
     queryFn: () =>
       fetch(`/api/teacher/courses/${courseId}/quality-score`, {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       }).then(r => r.ok ? r.json() : null),
     staleTime: 5 * 60 * 1000,
     retry: false,

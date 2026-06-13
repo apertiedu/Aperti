@@ -9,7 +9,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 
 import { ClipboardList, CheckCircle2, XCircle, Clock } from "lucide-react";
 import ParentChildSwitcher from "@/components/parent-child-switcher";
 
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 function statusColor(s: string) {
   const lower = s?.toLowerCase() || "";

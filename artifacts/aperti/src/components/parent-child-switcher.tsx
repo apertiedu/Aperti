@@ -3,7 +3,7 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 const TEAL = "#0D9488";
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 interface Child { linkId: number; studentId: number; name: string; studentCode: string; }
 

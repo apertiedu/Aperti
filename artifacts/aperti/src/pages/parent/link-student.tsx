@@ -9,9 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#0D9488";
-const tok = () => localStorage.getItem("aperti_token") || "";
 const authFetch = (url: string, opts?: RequestInit) =>
-  fetch(url, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });
+  fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
 interface GuardianLink {
   id: number; status: string; student_name: string; student_code: string;

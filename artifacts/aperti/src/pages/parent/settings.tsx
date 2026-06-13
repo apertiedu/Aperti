@@ -13,7 +13,7 @@ import { useAuth } from "@/context/auth";
 
 const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
-  fetch(url, { ...opts, headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });
+  fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
 export default function ParentSettings() {
   const { toast } = useToast();

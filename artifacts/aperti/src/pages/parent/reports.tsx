@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
-  fetch(url, { ...opts, headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}`, "Content-Type": "application/json", ...(opts?.headers || {}) } });
+  fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
 export default function ParentReports() {
   const { toast } = useToast();
@@ -98,9 +98,8 @@ export default function ParentReports() {
                 disabled={!selectedChild}
                 onClick={async () => {
                   if (!selectedChild) return;
-                  const token = localStorage.getItem("aperti_token") || "";
                   const res = await fetch(`/api/parent/child/${selectedChild}/report-pdf`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                    credentials: "include",
                   });
                   if (res.ok) {
                     const blob = await res.blob();

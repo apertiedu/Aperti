@@ -11,9 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string, opts?: RequestInit) =>
-  fetch(path, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
+  fetch(path, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
 
 const SEVERITY_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   critical: { label: "Critical", color: "text-red-700",    bg: "bg-red-100 border-red-200" },

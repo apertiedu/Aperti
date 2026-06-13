@@ -32,7 +32,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E0F2F1";
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   A: { bg: "#dcfce7", text: "#16a34a", border: "#86efac" },
@@ -46,7 +45,7 @@ function CourseCoverageBadge({ courseId }: { courseId: number }) {
     queryKey: ["course-coverage", courseId],
     queryFn: () =>
       fetch(`/api/course-health/${courseId}/coverage`, {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       }).then(r => r.ok ? r.json() : null),
     staleTime: 10 * 60 * 1000,
     retry: false,
@@ -88,7 +87,7 @@ function QualityScoreBadge({ courseId }: { courseId: number }) {
     queryKey: ["quality-score", courseId],
     queryFn: () =>
       fetch(`/api/teacher/courses/${courseId}/quality-score`, {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       }).then(r => r.ok ? r.json() : null),
     staleTime: 5 * 60 * 1000,
     retry: false,
@@ -123,7 +122,6 @@ const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {
     ...opts,
     headers: {
-      Authorization: `Bearer ${tok()}`,
       "Content-Type": "application/json",
       ...(opts?.headers || {}),
     },

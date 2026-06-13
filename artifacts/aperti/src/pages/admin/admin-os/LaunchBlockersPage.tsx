@@ -7,9 +7,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string, opts?: RequestInit) =>
-  fetch(path, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
+  fetch(path, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
 
 const SEV: Record<string, { label: string; color: string; bg: string; icon: any; ring: string }> = {
   critical: { label: "Critical",  color: "text-red-700",    bg: "bg-red-50",     icon: Flame,        ring: "border-red-200" },

@@ -10,9 +10,8 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string) =>
-  fetch(path, { headers: { Authorization: `Bearer ${tok()}` } }).then(r => r.json());
+  fetch(path, { credentials: "include" }).then(r => r.json());
 
 const CHECK_META: Record<string, { icon: any; link?: string; color: string }> = {
   auth_passes:              { icon: Lock,           link: "/admin/os/security",        color: "text-blue-600"   },

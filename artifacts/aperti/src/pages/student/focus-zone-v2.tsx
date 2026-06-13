@@ -14,10 +14,9 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   if (!r.ok) throw new Error("Failed");
   return r.json();
 }
@@ -26,7 +25,7 @@ async function startSessionAPI(mode: string, durationMinutes: number): Promise<n
   try {
     const res = await fetch("/api/focus-sessions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode, durationMinutes }),
     });
     if (!res.ok) return null;
@@ -39,7 +38,7 @@ async function completeSessionAPI(sessionId: number, durationMinutes: number, mo
   try {
     const res = await fetch(`/api/focus-sessions/${sessionId}/complete`, {
       method: "PATCH",
-      headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ durationMinutes, mode, distractionsCount }),
     });
     if (!res.ok) return null;

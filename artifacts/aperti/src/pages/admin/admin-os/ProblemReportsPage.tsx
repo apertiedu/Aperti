@@ -4,9 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AlertTriangle, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp, RefreshCw, Monitor, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string, opts?: RequestInit) =>
-  fetch(path, { ...opts, headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
+  fetch(path, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) } });
 
 const STATUS_META: Record<string, { label: string; cls: string; icon: any }> = {
   open:        { label: "Open",        cls: "bg-yellow-100 text-yellow-700", icon: AlertTriangle },

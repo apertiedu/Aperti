@@ -8,9 +8,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 const api = (path: string, opts?: RequestInit) =>
-  fetch(path, { headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" }, ...opts }).then(r => r.json());
+  fetch(path, { headers: { "Content-Type": "application/json" }, ...opts }).then(r => r.json());
 
 function ReportCard({ report, index }: { report: any; index: number }) {
   const data = typeof report.report_data === "string" ? JSON.parse(report.report_data) : (report.report_data ?? {});

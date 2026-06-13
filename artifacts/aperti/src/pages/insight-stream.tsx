@@ -13,9 +13,8 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const API = "/api";
-const tok = () => localStorage.getItem("aperti_token");
 async function apiFetch(url: string) {
-  const res = await fetch(`${API}${url}`, { headers: { Authorization: `Bearer ${tok()}` } });
+  const res = await fetch(`${API}${url}`, { credentials: "include" });
   if (!res.ok) throw new Error("Failed");
   return res.json();
 }

@@ -10,16 +10,14 @@ export async function authFetch(
   opts: RequestInit = {},
   retries = MAX_RETRIES
 ): Promise<Response> {
-  const token = localStorage.getItem("aperti_token") || "";
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...(opts.headers as Record<string, string> || {}),
   };
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const res = await fetch(url, { ...opts, headers });
+      const res = await fetch(url, { ...opts, credentials: "include", headers });
       if (res.status < 500 || attempt === retries) return res;
       await sleep(RETRY_DELAY_MS * (attempt + 1));
     } catch (err) {

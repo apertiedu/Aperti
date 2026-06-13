@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronLeft, ChevronRight, CalendarDays, BookOpen, FileText, GraduationCap, Users, X } from "lucide-react";
 
 const authFetch = (url: string) =>
-  fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+  fetch(url, { credentials: "include" });
 
 type EventType = "homework" | "exam" | "class" | "meeting";
 

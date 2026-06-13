@@ -47,7 +47,7 @@ contentQualityRouter.post("/refresh", async (_req: AuthRequest, res: Response) =
            WHERE es.answers::text ILIKE '%"question_id":' || $1 || '%'`, [q.id]
         ).catch(() => ({ rows: [{ cnt: 0 }] }));
         const usageCount = parseInt(usage[0]?.cnt ?? 0);
-        const qualityScore = Math.min(100, 50 + usageCount * 2 + Math.random() * 20);
+        const qualityScore = Math.min(100, 50 + usageCount * 2 + (q.id % 20));
         await pool.query(
           `INSERT INTO content_quality_scores (content_type, content_id, quality_score, usage_count, reviewed_at)
            VALUES ('question', $1, $2, $3, NOW())

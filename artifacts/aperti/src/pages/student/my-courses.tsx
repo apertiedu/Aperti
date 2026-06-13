@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const TEAL = "#0D9488";
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 interface Enrollment {
   id: number; course_id: number; course_title: string; subject: string | null;
@@ -63,7 +62,7 @@ export default function MyCourses() {
     queryKey: ["student-enrollments"],
     queryFn: async () => {
       const res = await fetch("/courses/my/enrollments", {
-        headers: { Authorization: `Bearer ${tok()}` },
+        headers: {},
       });
       if (!res.ok) return [];
       return res.json();

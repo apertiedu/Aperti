@@ -33,10 +33,10 @@ export class AIErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    const tok = () => localStorage.getItem("aperti_token") ?? "";
     fetch("/api/ai/log-error", {
       method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${tok()}` },
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         feature: this.props.featureName ?? "unknown",
         error: error.message?.slice(0, 500),

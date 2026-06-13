@@ -15,7 +15,6 @@ import {
 import { useAuth } from "@/context/auth";
 import { MathRenderer } from "@/components/math-renderer";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
 
 interface Message {
   id: string;
@@ -31,7 +30,7 @@ interface EchoProfile {
 
 async function fetchEchoProfile(): Promise<EchoProfile> {
   const res = await fetch("/api/echo/profile", {
-    headers: { Authorization: `Bearer ${tok()}` },
+    headers: {},
   });
   if (!res.ok) return { weakTopics: [], preferredStyle: "conceptual", retentionScores: {} };
   const data = await res.json();
@@ -44,7 +43,7 @@ async function fetchEchoProfile(): Promise<EchoProfile> {
 
 async function fetchHistory(): Promise<any[]> {
   const res = await fetch("/api/mentor/sessions", {
-    headers: { Authorization: `Bearer ${tok()}` },
+    headers: {},
   });
   if (!res.ok) return [];
   return res.json();
@@ -95,7 +94,7 @@ export default function TheMentor() {
     try {
       const response = await fetch("/api/mentor/chat", {
         method: "POST",
-        headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, sessionId: `web-${Date.now()}` }),
       });
 

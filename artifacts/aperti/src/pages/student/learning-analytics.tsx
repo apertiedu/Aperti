@@ -13,10 +13,9 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, AreaChart, Area,
 } from "recharts";
 
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string) {
-  const r = await fetch(url, { headers: { Authorization: `Bearer ${token()}` } });
+  const r = await fetch(url, { credentials: "include" });
   if (!r.ok) throw new Error("Failed");
   return r.json();
 }

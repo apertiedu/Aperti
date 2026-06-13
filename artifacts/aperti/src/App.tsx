@@ -297,15 +297,12 @@ function useRoleGuard(role: "student" | "teacher" | "parent") {
     if (isBlocked && location !== lastBlocked.current) {
       lastBlocked.current = location;
       navigate("/access-denied");
-      // Fire-and-forget: record the access attempt in the audit log
-      const t = localStorage.getItem("aperti_token");
-      if (t) {
-        fetch("/api/auth/audit-event", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-          body: JSON.stringify({ action: "access_denied", resource: location, details: { role } }),
-        }).catch(() => {});
-      }
+      fetch("/api/auth/audit-event", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "access_denied", resource: location, details: { role } }),
+      }).catch(() => {});
     } else if (!isBlocked) {
       lastBlocked.current = null;
     }

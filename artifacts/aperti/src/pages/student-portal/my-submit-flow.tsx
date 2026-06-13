@@ -18,11 +18,10 @@ import {
 } from "lucide-react";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, ...(options?.headers || {}) },
+    headers: { ...(options?.headers || {}) },
     ...options,
   });
   if (!res.ok) throw new Error("Failed");
@@ -92,7 +91,7 @@ function StudentHomeworkCard({ homework }: { homework: Homework }) {
     mutationFn: (content: string) =>
       fetch(`${API}/homework/${homework.id}/submit`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
       }),
     onSuccess: () => {

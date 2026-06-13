@@ -10,10 +10,9 @@ import {
 import { useAuth } from "@/context/auth";
 import { useLocation } from "wouter";
 
-const token = () => localStorage.getItem("aperti_token") ?? "";
-const fetchJSON = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${token()}` } }).then((r) => r.json());
+const fetchJSON = (url: string) => fetch(url, { credentials: "include" }).then((r) => r.json());
 const postJSON = (url: string, body: unknown) =>
-  fetch(url, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` }, body: JSON.stringify(body) }).then((r) => r.json());
+  fetch(url, { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then((r) => r.json());
 
 type RoomMessage = {
   id: number; room_id: number; sender_id: number; sender_name: string;
@@ -91,10 +90,9 @@ export default function CollaborateRoom() {
     try {
       const context = messages.slice(-10).map((m) => `${m.sender_name}: ${m.content}`).join("\n");
       const r = await postJSON("/api/messages/translate", { content: `Room context:\n${context}\n\nQuestion: ${aiQuery}`, target_language: "English" });
-      const key = localStorage.getItem("aperti_token");
       const resp = await fetch("/api/coremind/chat", {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token()}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: aiQuery, context }),
       });
       if (resp.ok) {

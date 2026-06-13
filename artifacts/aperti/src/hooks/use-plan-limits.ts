@@ -1,7 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 
-const tok = () => localStorage.getItem("aperti_token") || "";
-
 export interface PlanUsage {
   planName: string;
   limits: Record<string, number>;
@@ -9,9 +7,7 @@ export interface PlanUsage {
 }
 
 async function fetchMyUsage(): Promise<PlanUsage> {
-  const r = await fetch("/api/commerce/my", {
-    headers: { Authorization: `Bearer ${tok()}` },
-  });
+  const r = await fetch("/api/commerce/my", { credentials: "include" });
   if (!r.ok) throw new Error("Failed to fetch usage");
   const data = await r.json();
   return {

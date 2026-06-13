@@ -15,7 +15,7 @@ const REPORT_REASONS = [
   "Other",
 ];
 
-const tok = () => localStorage.getItem("aperti_token");
+
 
 interface ReportModalProps {
   open: boolean;
@@ -40,7 +40,8 @@ export function ReportModal({ open, onClose, targetType, targetId }: ReportModal
     try {
       const res = await fetch("/api/safety/report", {
         method: "POST",
-        headers: { Authorization: `Bearer ${tok()}`, "Content-Type": "application/json" },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ targetType, targetId: String(targetId), reason, description }),
       });
       if (!res.ok) throw new Error();

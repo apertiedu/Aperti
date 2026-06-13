@@ -32,13 +32,10 @@ const ROLE_SUGGESTIONS: Record<string, Array<{ label: string; href: string }>> =
 };
 
 function sendReport(message: string, code?: number) {
-  const token = (() => { try { return localStorage.getItem("aperti_token") ?? ""; } catch { return ""; } })();
   fetch("/api/errors/log", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       message: `[user-report] ${message}`,
       route: window.location.pathname,

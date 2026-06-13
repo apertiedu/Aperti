@@ -10,10 +10,9 @@ import { BadgeCheck, Users, Award, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json" },
     ...opts,
   });
 

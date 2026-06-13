@@ -13,11 +13,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
-const token = () => localStorage.getItem("aperti_token");
 
 async function fetchJSON(url: string, options?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token()}`, "Content-Type": "application/json", ...(options?.headers as object) },
+    headers: { "Content-Type": "application/json", ...(options?.headers as object) },
     ...options,
   });
   if (!res.ok) throw new Error("Failed");

@@ -2,14 +2,11 @@ import { useCallback } from "react";
 
 export function useFeatureTrack() {
   const track = useCallback((featureKey: string, category = "general") => {
-    const token = localStorage.getItem("aperti_token");
-    if (!token || !featureKey) return;
+    if (!featureKey) return;
     fetch("/api/feature/track", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ featureKey: featureKey.slice(0, 100), category }),
     }).catch(() => {});
   }, []);

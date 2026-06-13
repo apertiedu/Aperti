@@ -10,7 +10,7 @@ import { BarChart3, TrendingUp, TrendingDown, BookOpen, MessageSquare } from "lu
 import ParentChildSwitcher from "@/components/parent-child-switcher";
 
 const TEAL = "#0D9488";
-const authFetch = (url: string) => fetch(url, { headers: { Authorization: `Bearer ${localStorage.getItem("aperti_token") || ""}` } });
+const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 function getGradeLabel(pct: number) {
   if (pct >= 90) return "A*";
