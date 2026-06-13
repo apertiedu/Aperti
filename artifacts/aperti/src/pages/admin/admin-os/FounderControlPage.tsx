@@ -504,7 +504,7 @@ export default function FounderControlPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="font-semibold text-gray-900 text-sm">Production Readiness Score</p>
-                <p className="text-xs text-gray-400 mt-0.5">Phase 44 hardening — as of June 2026</p>
+                <p className="text-xs text-gray-400 mt-0.5">Phase 46 hardening — as of June 2026</p>
               </div>
               <button onClick={() => nav("/admin/os/system-inventory")}
                 className="text-xs text-teal-600 hover:underline flex items-center gap-1">
@@ -512,15 +512,15 @@ export default function FounderControlPage() {
               </button>
             </div>
             <div className="flex items-center gap-6">
-              <QualityGauge score={83} />
+              <QualityGauge score={92} />
               <div className="flex-1 space-y-2">
                 {[
-                  { label: "Security",     score: 88 },
-                  { label: "Stability",    score: 80 },
-                  { label: "DB Integrity", score: 85 },
-                  { label: "AI Reliability", score: 78 },
-                  { label: "Performance", score: 82 },
-                  { label: "Observability", score: 75 },
+                  { label: "Security",       score: 92 },
+                  { label: "Stability",      score: 90 },
+                  { label: "DB Integrity",   score: 88 },
+                  { label: "AI Reliability", score: 85 },
+                  { label: "Performance",    score: 88 },
+                  { label: "Observability",  score: 92 },
                 ].map(({ label, score }) => (
                   <div key={label} className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 w-28 shrink-0">{label}</span>

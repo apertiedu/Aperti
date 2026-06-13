@@ -10,6 +10,7 @@ export class ApiError extends Error {
 }
 
 const API_BASE = "";
+const RETRY_DELAY_MS = 600;
 
 export function apiFetch(url: string, options?: RequestInit): Promise<Response> {
   return fetch(`${API_BASE}${url}`, {
@@ -34,8 +35,30 @@ async function extractErrorMessage(res: Response): Promise<string> {
   return text.slice(0, 200);
 }
 
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function fetchJSON<T = any>(url: string): Promise<T> {
-  const res = await apiFetch(url);
+  let res: Response;
+  try {
+    res = await apiFetch(url);
+  } catch {
+    await sleep(RETRY_DELAY_MS);
+    try {
+      res = await apiFetch(url);
+    } catch {
+      throw new ApiError("Cannot reach the server — check your connection.", "ERR_NETWORK", 0);
+    }
+  }
+  if (!res.ok && res.status >= 500) {
+    await sleep(RETRY_DELAY_MS);
+    try {
+      res = await apiFetch(url);
+    } catch {
+      throw new ApiError("Cannot reach the server — check your connection.", "ERR_NETWORK", 0);
+    }
+  }
   if (!res.ok) {
     const msg = await extractErrorMessage(res);
     throw new ApiError(msg, `ERR_${res.status}`, res.status);
