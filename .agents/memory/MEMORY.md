@@ -3,3 +3,4 @@
 - [DB migration pattern](db-migration.md) — use `psql "$DATABASE_URL" -c "..."` for migrations; node -e with `pg` doesn't work from workspace root (no pg module there).
 - [Session slots schema](session-slots-schema.md) — new `session_slots` table added, exported from lib/db/src/schema/index.ts, FK to lessons(id).
 - [Aperti Phase 35 features](aperti-phase35.md) — DAU/WAU/MAU endpoint, command palette navigation + TYPE_ICONS, maxLength on all password inputs, focus-visible CSS, CORS ALLOWED_ORIGINS, extractErrorMessage in api.ts
+- [Aperti Phase 36 features](aperti-phase36.md) — Emergency tools (/founder/emergency/*), platform health score, recently visited on CoreHub, /admin/launch route, user journey audit complete

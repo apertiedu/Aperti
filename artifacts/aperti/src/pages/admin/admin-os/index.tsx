@@ -80,6 +80,9 @@ import NoMockDataPage from "./NoMockDataPage";
 import DBHealthPage from "./DBHealthPage";
 import AnalyticsExtendedPage from "./AnalyticsExtendedPage";
 import ErrorLogsPage from "./ErrorLogsPage";
+// Phase 36 — Emergency Tools & Health Score
+import FounderEmergencyPage from "./FounderEmergencyPage";
+import PlatformHealthScorePage from "./PlatformHealthScorePage";
 
 export default function AdminOS() {
   return (
@@ -192,6 +195,11 @@ export default function AdminOS() {
         <Route path="/admin/os/db-health" component={DBHealthPage} />
         <Route path="/admin/os/analytics-extended" component={AnalyticsExtendedPage} />
         <Route path="/admin/os/error-logs" component={ErrorLogsPage} />
+
+        {/* Phase 36 — Emergency Tools & Health Score */}
+        <Route path="/admin/os/emergency" component={FounderEmergencyPage} />
+        <Route path="/admin/os/platform-health" component={PlatformHealthScorePage} />
+        <Route path="/admin/launch" component={LaunchCertificationPage} />
 
         <Route component={Dashboard} />
       </Switch>

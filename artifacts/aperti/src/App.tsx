@@ -573,6 +573,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/feature-status" component={FeatureStatusPage} />
     <Route path="/admin/data-quality" component={DataQualityPage} />
     <Route path="/admin/session-slots" component={SessionSlotsAdminPage} />
+    {/* Phase 36 — /admin/launch shortcut */}
+    <Route path="/admin/launch" component={AdminOS} />
   </>
 );
 

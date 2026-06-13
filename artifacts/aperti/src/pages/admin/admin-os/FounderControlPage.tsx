@@ -538,6 +538,8 @@ export default function FounderControlPage() {
               { label: "AI Costs", href: "/admin/os/ai-costs", icon: Zap, color: "text-amber-600 bg-amber-50" },
               { label: "Founder Alerts", href: "/admin/os/founder-alerts", icon: AlertCircle, color: "text-rose-600 bg-rose-50" },
               { label: "Launch Command", href: "/admin/os/launch-command", icon: ShieldCheck, color: "text-teal-600 bg-teal-50" },
+              { label: "Emergency Tools", href: "/admin/os/emergency", icon: AlertCircle, color: "text-red-600 bg-red-50" },
+              { label: "Platform Health", href: "/admin/os/platform-health", icon: Activity, color: "text-indigo-600 bg-indigo-50" },
             ].map((link) => (
               <button key={link.href} onClick={() => nav(link.href)}
                 className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all text-left group">

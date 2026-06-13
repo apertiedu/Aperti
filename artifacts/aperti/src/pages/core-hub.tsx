@@ -541,6 +541,69 @@ export default function CoreHub() {
           </Card>
         </motion.div>
       )}
+
+      {/* Recently Used */}
+      <RecentlyUsedSection />
     </div>
+  );
+}
+
+function RecentlyUsedSection() {
+  const [items, setItems] = useState<{ href: string; label: string; visitedAt: number }[]>([]);
+  const [, nav] = useLocation();
+
+  useEffect(() => {
+    function load() {
+      try {
+        const stored = JSON.parse(localStorage.getItem("aperti_recent_pages") || "[]");
+        setItems(stored.slice(0, 6));
+      } catch {
+        setItems([]);
+      }
+    }
+    load();
+    window.addEventListener("storage", load);
+    return () => window.removeEventListener("storage", load);
+  }, []);
+
+  if (items.length === 0) return null;
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              Recently Visited
+            </CardTitle>
+            <button
+              onClick={() => { localStorage.removeItem("aperti_recent_pages"); setItems([]); }}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+            {items.map(item => (
+              <button
+                key={item.href}
+                onClick={() => nav(item.href)}
+                className="flex flex-col items-start p-3 rounded-lg border border-gray-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all text-left group"
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
+                  {new Date(item.visitedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                <span className="text-xs font-medium text-gray-800 line-clamp-2 leading-snug group-hover:text-teal-700">
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 }

@@ -1,4 +1,5 @@
 import { Router, Response } from "express";
+import jwt from "jsonwebtoken";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { dispatchAlert, invalidateConfigCache } from "../lib/alert-dispatch";
@@ -1315,6 +1316,189 @@ founderRouter.get("/performance", async (_req: AuthRequest, res: Response) => {
       live: liveRows.rows,
       generatedAt: new Date().toISOString(),
     });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── Platform Health Score (composite 0-100) ─────────────────────────────── */
+founderRouter.get("/platform-health-score", async (_req: AuthRequest, res: Response) => {
+  try {
+    const [errorRes, latencyRes, critBugsRes, permLeakRes, dbTablesRes, activeUsersRes] = await Promise.allSettled([
+      pool.query("SELECT COUNT(*) FROM frontend_error_logs WHERE created_at >= NOW()-INTERVAL '24h'"),
+      pool.query("SELECT COALESCE(AVG(duration_ms),0) AS avg FROM api_metrics WHERE recorded_at >= NOW()-INTERVAL '1h'").catch(() => ({ rows: [{ avg: 0 }] })),
+      pool.query("SELECT COUNT(*) FROM qa_bugs WHERE status IN ('open','in_progress') AND severity='critical'").catch(() => ({ rows: [{ count: 0 }] })),
+      pool.query("SELECT COUNT(*) FROM frontend_error_logs WHERE (message ILIKE '%403%' OR message ILIKE '%unauthorized%') AND created_at >= NOW()-INTERVAL '24h'").catch(() => ({ rows: [{ count: 0 }] })),
+      pool.query("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public' AND table_type='BASE TABLE'"),
+      pool.query("SELECT COUNT(DISTINCT account_id) FROM audit_logs WHERE created_at >= NOW()-INTERVAL '24h'").catch(() => ({ rows: [{ count: 0 }] })),
+    ]);
+
+    const errors24h   = errorRes.status === "fulfilled"       ? parseInt((errorRes.value as any).rows[0]?.count  ?? 0) : 0;
+    const avgLatency  = latencyRes.status === "fulfilled"     ? parseFloat((latencyRes.value as any).rows[0]?.avg ?? 0) : 0;
+    const critBugs    = critBugsRes.status === "fulfilled"    ? parseInt((critBugsRes.value as any).rows[0]?.count ?? 0) : 0;
+    const permLeaks   = permLeakRes.status === "fulfilled"    ? parseInt((permLeakRes.value as any).rows[0]?.count ?? 0) : 0;
+    const dbTables    = dbTablesRes.status === "fulfilled"    ? parseInt((dbTablesRes.value as any).rows[0]?.count ?? 0) : 0;
+    const activeUsers = activeUsersRes.status === "fulfilled" ? parseInt((activeUsersRes.value as any).rows[0]?.count ?? 0) : 0;
+
+    const securityScore    = Math.max(0, 100 - critBugs * 15 - permLeaks * 10);
+    const performanceScore = Math.max(0, 100 - (avgLatency > 2000 ? 40 : avgLatency > 1000 ? 20 : avgLatency > 500 ? 10 : 0));
+    const reliabilityScore = Math.max(0, 100 - Math.min(errors24h * 3, 60));
+    const dbScore          = dbTables >= 100 ? 100 : dbTables >= 50 ? 80 : 60;
+    const composite        = Math.round((securityScore + performanceScore + reliabilityScore + dbScore) / 4);
+
+    const grade = composite >= 90 ? "A" : composite >= 80 ? "B" : composite >= 70 ? "C" : composite >= 50 ? "D" : "F";
+    const label = composite >= 90 ? "Excellent" : composite >= 80 ? "Good" : composite >= 70 ? "Fair" : composite >= 50 ? "Needs Work" : "Critical";
+
+    res.json({
+      composite, grade, label,
+      dimensions: {
+        security:    { score: securityScore,    label: "Security",    detail: `${critBugs} critical bugs · ${permLeaks} auth issues` },
+        performance: { score: performanceScore, label: "Performance",  detail: `${Math.round(avgLatency)}ms avg API latency` },
+        reliability: { score: reliabilityScore, label: "Reliability",  detail: `${errors24h} frontend errors (24h)` },
+        database:    { score: dbScore,           label: "Database",    detail: `${dbTables} tables · ${activeUsers} active users (24h)` },
+      },
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ── Emergency Tools ─────────────────────────────────────────────────────── */
+
+const JWT_SECRET_EMERGENCY = process.env.JWT_SECRET || "aperti-dev-secret-change-in-prod";
+
+async function logEmergencyAction(actorId: number | undefined, action: string, targetId: string | number) {
+  await pool.query(
+    `INSERT INTO audit_logs (account_id, action, resource, resource_id, severity)
+     VALUES ($1, $2, 'account', $3, 'critical')`,
+    [actorId ?? null, action, String(targetId)]
+  ).catch(() => {});
+}
+
+founderRouter.post("/emergency/impersonate", async (req: AuthRequest, res: Response) => {
+  const { targetUserId } = req.body;
+  if (!targetUserId) return res.status(400).json({ error: "targetUserId required" }) as any;
+  try {
+    const { rows } = await pool.query("SELECT id, role, username FROM accounts WHERE id = $1", [targetUserId]);
+    if (!rows.length) return res.status(404).json({ error: "User not found" }) as any;
+    const target = rows[0];
+    const token = jwt.sign(
+      { id: target.id, role: target.role, impersonated_by: req.user?.id },
+      JWT_SECRET_EMERGENCY,
+      { expiresIn: "1h" }
+    );
+    await logEmergencyAction(req.user?.id, `founder:impersonate:${target.username}`, targetUserId);
+    res.json({ token, username: target.username, role: target.role, expiresIn: "1h" });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.post("/emergency/force-logout", async (req: AuthRequest, res: Response) => {
+  const { targetUserId } = req.body;
+  if (!targetUserId) return res.status(400).json({ error: "targetUserId required" }) as any;
+  try {
+    const [acc] = await Promise.all([
+      pool.query("SELECT username FROM accounts WHERE id = $1", [targetUserId]),
+    ]);
+    if (!acc.rows.length) return res.status(404).json({ error: "User not found" }) as any;
+    const [devDel, sessDel] = await Promise.allSettled([
+      pool.query("DELETE FROM device_sessions WHERE account_id = $1 RETURNING id", [targetUserId]),
+      pool.query("DELETE FROM session WHERE sess::text LIKE $1 RETURNING sid", [`%"accountId":${targetUserId}%`]),
+    ]);
+    const devCount  = devDel.status === "fulfilled"  ? (devDel.value.rowCount ?? 0)  : 0;
+    const sessCount = sessDel.status === "fulfilled" ? (sessDel.value.rowCount ?? 0) : 0;
+    await logEmergencyAction(req.user?.id, `founder:force-logout:${acc.rows[0].username}`, targetUserId);
+    res.json({ success: true, deviceSessionsRevoked: devCount, sessionsRevoked: sessCount, username: acc.rows[0].username });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.post("/emergency/reset-device-limit", async (req: AuthRequest, res: Response) => {
+  const { targetUserId } = req.body;
+  if (!targetUserId) return res.status(400).json({ error: "targetUserId required" }) as any;
+  try {
+    const acc = await pool.query("SELECT username FROM accounts WHERE id = $1", [targetUserId]);
+    if (!acc.rows.length) return res.status(404).json({ error: "User not found" }) as any;
+    const del = await pool.query("DELETE FROM device_sessions WHERE account_id = $1 RETURNING id", [targetUserId]);
+    await logEmergencyAction(req.user?.id, `founder:reset-device-limit:${acc.rows[0].username}`, targetUserId);
+    res.json({ success: true, devicesCleared: del.rowCount ?? 0, username: acc.rows[0].username });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.post("/emergency/unlock-account", async (req: AuthRequest, res: Response) => {
+  const { targetUserId } = req.body;
+  if (!targetUserId) return res.status(400).json({ error: "targetUserId required" }) as any;
+  try {
+    const acc = await pool.query("SELECT username, status FROM accounts WHERE id = $1", [targetUserId]);
+    if (!acc.rows.length) return res.status(404).json({ error: "User not found" }) as any;
+    await pool.query(
+      `UPDATE accounts SET failed_login_attempts = 0, locked_until = NULL, status = CASE WHEN status = 'locked' THEN 'active' ELSE status END WHERE id = $1`,
+      [targetUserId]
+    ).catch(async () => {
+      await pool.query(`UPDATE accounts SET status = 'active' WHERE id = $1 AND status = 'locked'`, [targetUserId]);
+    });
+    await logEmergencyAction(req.user?.id, `founder:unlock-account:${acc.rows[0].username}`, targetUserId);
+    res.json({ success: true, username: acc.rows[0].username, previousStatus: acc.rows[0].status });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.post("/emergency/repair-enrollments", async (req: AuthRequest, res: Response) => {
+  try {
+    const results: Record<string, any> = {};
+
+    const orphanStudents = await pool.query(`
+      SELECT s.id, s.name FROM students s
+      WHERE NOT EXISTS (
+        SELECT 1 FROM student_courses sc WHERE sc.student_id = s.id AND sc.status = 'enrolled'
+      ) AND s.status = 'active'
+      LIMIT 50
+    `).catch(() => ({ rows: [] }));
+    results.studentsWithoutEnrollment = orphanStudents.rows.length;
+
+    const orphanCourses = await pool.query(`
+      SELECT tc.id FROM teacher_courses tc
+      WHERE NOT EXISTS (
+        SELECT 1 FROM subjects s WHERE s.teacher_course_id = tc.id
+      ) LIMIT 50
+    `).catch(() => ({ rows: [] }));
+    results.coursesWithoutSubjects = orphanCourses.rows.length;
+
+    const staleDevices = await pool.query(`
+      DELETE FROM device_sessions WHERE last_seen < NOW() - INTERVAL '90 days' RETURNING id
+    `).catch(() => ({ rowCount: 0 }));
+    results.staleDeviceSessionsRemoved = staleDevices.rowCount ?? 0;
+
+    const expiredTokens = await pool.query(`
+      DELETE FROM password_reset_tokens WHERE expires_at < NOW() RETURNING id
+    `).catch(() => ({ rowCount: 0 }));
+    results.expiredPasswordTokensRemoved = expiredTokens.rowCount ?? 0;
+
+    await logEmergencyAction(req.user?.id, "founder:repair-enrollments", "system");
+    res.json({ success: true, ...results, repairedAt: new Date().toISOString() });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+founderRouter.get("/emergency/audit-trail", async (_req: AuthRequest, res: Response) => {
+  try {
+    const { rows } = await pool.query(`
+      SELECT al.id, al.action, al.resource, al.resource_id, al.severity, al.created_at,
+             a.username AS actor_username
+      FROM audit_logs al
+      LEFT JOIN accounts a ON a.id = al.account_id
+      WHERE al.action LIKE 'founder:%'
+      ORDER BY al.created_at DESC
+      LIMIT 50
+    `).catch(() => ({ rows: [] }));
+    res.json({ trail: rows });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
