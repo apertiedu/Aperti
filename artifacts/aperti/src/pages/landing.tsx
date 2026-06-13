@@ -1132,10 +1132,9 @@ function InteractiveDemo({ teal }: { teal: string }) {
 
 /* ─────────────────────────── Pricing Visual ─────────────────────────── */
 const PRICING_STATS = [
-  { value: "5×", label: "Faster grading", color: "#0D9488", icon: Zap },
-  { value: "40%", label: "More retention", color: "#7C3AED", icon: Target },
-  { value: "24/7", label: "AI mentor", color: "#0891B2", icon: Brain },
-  { value: "0", label: "Setup fees", color: "#059669", icon: Shield },
+  { value: "5×", label: "Faster grading", icon: Zap },
+  { value: "40%", label: "More retention", icon: Target },
+  { value: "24/7", label: "AI mentor", icon: Brain },
 ];
 
 function PricingVisual({ teal }: { teal: string }) {
@@ -1194,7 +1193,7 @@ function PricingVisual({ teal }: { teal: string }) {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           {PRICING_STATS.map((s, i) => (
             <motion.div
               key={i}

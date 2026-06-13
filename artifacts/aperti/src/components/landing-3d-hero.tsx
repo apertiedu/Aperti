@@ -93,7 +93,7 @@ export function Landing3DHeroCanvas() {
             <circle cx="1" cy="1" r="1" fill={T} opacity="0.06" />
           </pattern>
           <radialGradient id="lradial" cx="50%" cy="45%" r="50%">
-            <stop offset="0%" stopColor={T} stopOpacity="0.12" />
+            <stop offset="0%" stopColor={T} stopOpacity="0.03" />
             <stop offset="100%" stopColor={T} stopOpacity="0" />
           </radialGradient>
           <filter id="lglow">
@@ -105,27 +105,18 @@ export function Landing3DHeroCanvas() {
         <ellipse cx="50%" cy="45%" rx="40%" ry="35%" fill="url(#lradial)" />
       </svg>
 
-      {/* Ambient glow blobs */}
+      {/* Subtle corner accents — very low opacity */}
       <div style={{
-        position: "absolute", top: "-15%", right: "-10%",
-        width: 480, height: 480, borderRadius: "50%",
-        background: T, filter: "blur(80px)",
-        animation: "glowPulse 7s ease-in-out infinite",
-        transformOrigin: "center",
+        position: "absolute", top: "-10%", right: "-8%",
+        width: 340, height: 340, borderRadius: "50%",
+        background: T, filter: "blur(100px)",
+        opacity: 0.04,
       }} />
       <div style={{
-        position: "absolute", bottom: "-10%", left: "-8%",
-        width: 320, height: 320, borderRadius: "50%",
-        background: T, filter: "blur(80px)",
-        animation: "glowPulse2 9s ease-in-out 2s infinite",
-        transformOrigin: "center",
-      }} />
-      <div style={{
-        position: "absolute", top: "40%", left: "40%",
-        width: 200, height: 200, borderRadius: "50%",
-        background: T, filter: "blur(60px)",
-        animation: "glowPulse 11s ease-in-out 4s infinite",
-        transformOrigin: "center",
+        position: "absolute", bottom: "-8%", left: "-6%",
+        width: 240, height: 240, borderRadius: "50%",
+        background: T, filter: "blur(90px)",
+        opacity: 0.03,
       }} />
 
       {/* CSS 3D Cubes */}
