@@ -173,6 +173,16 @@ searchRouter.get("/", async (req: Request, res: Response) => {
       }
     }
 
+    const [recordings] = await Promise.all([
+      pool.query(
+        `SELECT r.id, r.title AS name, s.name AS subtitle,
+                'recording' AS type, 'Recordings' AS category
+         FROM recordings r LEFT JOIN subjects s ON s.id = r.subject_id
+         WHERE r.title ILIKE $1 LIMIT 4`,
+        [like]
+      ).catch(() => ({ rows: [] as any[] })),
+    ]);
+
     const results = [
       ...accounts.rows,
       ...syllabusResults.rows,
@@ -182,6 +192,7 @@ searchRouter.get("/", async (req: Request, res: Response) => {
       ...assessments.rows,
       ...flashDecks.rows,
       ...revNotes.rows,
+      ...recordings.rows,
     ];
 
     await logSearch(userId, q, results.length);

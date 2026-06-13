@@ -82,7 +82,7 @@ export default function ChangePasswordModal({ trigger }: { trigger: React.ReactN
           <div className="space-y-1.5">
             <Label>Current Password</Label>
             <div className="relative">
-              <Input type={show.current ? "text" : "password"} value={form.current} onChange={e => setForm({ ...form, current: e.target.value })} required className="pr-10" />
+              <Input type={show.current ? "text" : "password"} value={form.current} onChange={e => setForm({ ...form, current: e.target.value })} required maxLength={500} className="pr-10" />
               <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" onClick={() => setShow(s => ({ ...s, current: !s.current }))}>
                 {show.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -102,7 +102,7 @@ export default function ChangePasswordModal({ trigger }: { trigger: React.ReactN
 
           <div className="space-y-1.5">
             <Label>Confirm New Password</Label>
-            <Input type="password" value={form.confirm} onChange={e => setForm({ ...form, confirm: e.target.value })} required />
+            <Input type="password" value={form.confirm} onChange={e => setForm({ ...form, confirm: e.target.value })} required maxLength={500} />
             {form.confirm && form.next !== form.confirm && <p className="text-xs text-red-500 mt-1">Passwords do not match</p>}
           </div>
 

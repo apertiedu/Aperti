@@ -133,7 +133,18 @@ const globalLimiter = rateLimit({
 app.use(globalLimiter);
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-app.use(cors({ origin: true, credentials: true }));
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
+  : null;
+app.use(cors({
+  origin: ALLOWED_ORIGINS
+    ? (origin, cb) => {
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) cb(null, true);
+        else cb(new Error("CORS: origin not allowed"));
+      }
+    : true,
+  credentials: true,
+}));
 
 // ── Body parsing ──────────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));

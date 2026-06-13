@@ -139,7 +139,7 @@ export default function SecurityPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                <input type="password" value={recoveryPassword} onChange={(e) => setRecoveryPassword(e.target.value)} placeholder="New temporary password" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
+                <input type="password" value={recoveryPassword} onChange={(e) => setRecoveryPassword(e.target.value)} placeholder="New temporary password" maxLength={500} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
               </div>
               <button
                 onClick={() => { if (confirm("This will reset the user's password and log them out everywhere. Proceed?")) recoveryMutation.mutate(); }}

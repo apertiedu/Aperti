@@ -1095,6 +1095,65 @@ founderRouter.get("/platform-stability-metrics", async (_req: AuthRequest, res: 
   }
 });
 
+/* ── DAU / WAU / MAU — Active User Metrics ──────────────────────────────── */
+founderRouter.get("/user-activity-metrics", async (_req: AuthRequest, res: Response) => {
+  try {
+    const [dauRes, wauRes, mauRes, retentionRes, featureRes] = await Promise.allSettled([
+      pool.query(`
+        SELECT COUNT(DISTINCT account_id) AS count
+        FROM login_history
+        WHERE created_at >= NOW() - INTERVAL '24 hours' AND success = true
+      `).catch(() => ({ rows: [{ count: 0 }] })),
+
+      pool.query(`
+        SELECT COUNT(DISTINCT account_id) AS count
+        FROM login_history
+        WHERE created_at >= NOW() - INTERVAL '7 days' AND success = true
+      `).catch(() => ({ rows: [{ count: 0 }] })),
+
+      pool.query(`
+        SELECT COUNT(DISTINCT account_id) AS count
+        FROM login_history
+        WHERE created_at >= NOW() - INTERVAL '30 days' AND success = true
+      `).catch(() => ({ rows: [{ count: 0 }] })),
+
+      pool.query(`
+        SELECT
+          TO_CHAR(DATE_TRUNC('day', created_at), 'YYYY-MM-DD') AS day,
+          COUNT(DISTINCT account_id) AS active_users
+        FROM login_history
+        WHERE created_at >= NOW() - INTERVAL '30 days' AND success = true
+        GROUP BY 1 ORDER BY 1
+      `).catch(() => ({ rows: [] })),
+
+      pool.query(`
+        SELECT
+          SUM(CASE WHEN created_at >= NOW()-INTERVAL '7d' THEN 1 ELSE 0 END) AS submissions_7d,
+          SUM(CASE WHEN created_at >= NOW()-INTERVAL '7d' THEN 1 ELSE 0 END) AS assessments_7d
+        FROM snapgrade_submissions
+        WHERE created_at >= NOW()-INTERVAL '7d'
+      `).catch(() => ({ rows: [{ submissions_7d: 0, assessments_7d: 0 }] })),
+    ]);
+
+    const dau = dauRes.status === "fulfilled" ? parseInt((dauRes.value as any).rows[0]?.count ?? 0) : 0;
+    const wau = wauRes.status === "fulfilled" ? parseInt((wauRes.value as any).rows[0]?.count ?? 0) : 0;
+    const mau = mauRes.status === "fulfilled" ? parseInt((mauRes.value as any).rows[0]?.count ?? 0) : 0;
+    const retention30d = retentionRes.status === "fulfilled" ? (retentionRes.value as any).rows : [];
+    const stickinessRatio = mau > 0 ? Math.round((dau / mau) * 100) : 0;
+
+    res.json({
+      dau, wau, mau,
+      stickinessRatio,
+      dauWauRatio: wau > 0 ? Math.round((dau / wau) * 100) : 0,
+      wauMauRatio: mau > 0 ? Math.round((wau / mau) * 100) : 0,
+      retention30d,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 /* ── Slow Query Log ──────────────────────────────────────────────────────── */
 founderRouter.get("/slow-queries", async (req: AuthRequest, res: Response) => {
   try {

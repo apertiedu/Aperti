@@ -245,10 +245,10 @@ export default function Settings() {
                   <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
                     <h2 className="text-base font-semibold text-gray-900">Change password</h2>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Current password</Label>
-                      <div className="relative"><Input type={showPw ? "text" : "password"} value={currentPw} onChange={e => setCurrentPw(e.target.value)} className="h-10 rounded-xl border-gray-200 pr-10" />
+                      <div className="relative"><Input type={showPw ? "text" : "password"} value={currentPw} onChange={e => setCurrentPw(e.target.value)} className="h-10 rounded-xl border-gray-200 pr-10" maxLength={500} />
                         <button type="button" onClick={() => setShowPw(!showPw)} className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600">{showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div></div>
-                    <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">New password</Label><Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} className="h-10 rounded-xl border-gray-200" /></div>
-                    <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Confirm new password</Label><Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="h-10 rounded-xl border-gray-200" /></div>
+                    <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">New password</Label><Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} className="h-10 rounded-xl border-gray-200" maxLength={500} /></div>
+                    <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Confirm new password</Label><Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="h-10 rounded-xl border-gray-200" maxLength={500} /></div>
                     <div className="flex justify-end">
                       <Button onClick={changePassword} disabled={pwSaving || !currentPw || !newPw} className="rounded-xl px-6 h-10" style={{ background: TEAL }}>
                         {pwSaving ? "Changing…" : "Change password"}

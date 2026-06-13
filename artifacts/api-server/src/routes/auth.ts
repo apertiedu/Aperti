@@ -121,6 +121,12 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
     if (!username || !password) {
       return res.status(400).json({ error: "Username and password are required" });
     }
+    if (typeof username !== "string" || username.length > 200) {
+      return res.status(400).json({ error: "Invalid username" });
+    }
+    if (typeof password !== "string" || password.length > 500) {
+      return res.status(400).json({ error: "Invalid password" });
+    }
     const identifier = username.trim().toLowerCase();
     const { pool: dbPool } = await import("@workspace/db");
     const { rows: acctRows } = await dbPool.query(
@@ -350,6 +356,9 @@ authRouter.post("/student-register", async (req: Request, res: Response) => {
   try {
     const { username, password, displayName, email, teacherId } = req.body;
     if (!username || !password) return res.status(400).json({ error: "Username and password are required" });
+    if (typeof username !== "string" || username.length > 200) return res.status(400).json({ error: "Invalid username" });
+    if (typeof password !== "string" || password.length > 500) return res.status(400).json({ error: "Invalid password" });
+    if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
     if (!teacherId) return res.status(400).json({ error: "Please select a teacher" });
 
     const { rows: teacherRows } = await (await import("@workspace/db")).pool.query(

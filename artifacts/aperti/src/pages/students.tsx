@@ -341,7 +341,7 @@ export default function Students() {
               </div>
               <div className="space-y-1.5">
                 <Label>Initial Password</Label>
-                <Input type="password" placeholder="Min 6 characters" value={createAccountPassword} onChange={e => setCreateAccountPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleCreateAccount()} />
+                <Input type="password" placeholder="Min 6 characters" value={createAccountPassword} onChange={e => setCreateAccountPassword(e.target.value)} onKeyDown={e => e.key === "Enter" && handleCreateAccount()} maxLength={500} />
               </div>
               <Button className="w-full gap-2" disabled={createAccountSaving || createAccountPassword.length < 6} onClick={handleCreateAccount}>
                 <UserCheck className="h-4 w-4" />{createAccountSaving ? "Creating..." : "Create Account"}

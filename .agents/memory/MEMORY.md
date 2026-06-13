@@ -2,3 +2,4 @@
 - [Sidebar logo pattern](sidebar-logo.md) — logo section uses text-only "Aperti." — no icon. The "Educational OS" subtitle was removed in Phase 34 to simplify the logo.
 - [DB migration pattern](db-migration.md) — use `psql "$DATABASE_URL" -c "..."` for migrations; node -e with `pg` doesn't work from workspace root (no pg module there).
 - [Session slots schema](session-slots-schema.md) — new `session_slots` table added, exported from lib/db/src/schema/index.ts, FK to lessons(id).
+- [Aperti Phase 35 features](aperti-phase35.md) — DAU/WAU/MAU endpoint, command palette navigation + TYPE_ICONS, maxLength on all password inputs, focus-visible CSS, CORS ALLOWED_ORIGINS, extractErrorMessage in api.ts

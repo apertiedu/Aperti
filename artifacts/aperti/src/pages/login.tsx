@@ -57,6 +57,7 @@ function FloatField({
           autoComplete={autoComplete}
           autoFocus={autoFocus}
           disabled={disabled}
+          maxLength={type === "password" ? 500 : 200}
           className="w-full h-11 px-4 rounded-xl text-sm text-slate-900 bg-white outline-none transition-all duration-200 border disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             borderColor: disabled ? "#e2e8f0" : focused ? TEAL : filled ? "#94a3b8" : "#e2e8f0",

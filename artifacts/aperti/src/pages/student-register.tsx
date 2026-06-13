@@ -143,7 +143,7 @@ export default function StudentRegister() {
                 <Label className="text-xs font-semibold text-gray-600">Full Name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
-                  <Input className="pl-9 h-11 rounded-xl border-gray-200" placeholder="Your full name" required
+                  <Input className="pl-9 h-11 rounded-xl border-gray-200" placeholder="Your full name" required maxLength={150}
                     value={form.displayName} onChange={e => setForm(f => ({ ...f, displayName: e.target.value }))} />
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function StudentRegister() {
                 <Label className="text-xs font-semibold text-gray-600">Username</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 text-sm">@</span>
-                  <Input className="pl-8 h-11 rounded-xl border-gray-200" placeholder="username" required
+                  <Input className="pl-8 h-11 rounded-xl border-gray-200" placeholder="username" required maxLength={80}
                     value={form.username} onChange={e => setForm(f => ({ ...f, username: e.target.value }))} />
                 </div>
               </div>
@@ -187,7 +187,7 @@ export default function StudentRegister() {
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
                     <Input type={showPw ? "text" : "password"} className="pl-9 pr-9 h-11 rounded-xl border-gray-200"
-                      placeholder="••••••••" required minLength={6}
+                      placeholder="••••••••" required minLength={6} maxLength={500}
                       value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} />
                     <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300"
                       onClick={() => setShowPw(s => !s)}>
@@ -198,7 +198,7 @@ export default function StudentRegister() {
                 <div className="space-y-1.5">
                   <Label className="text-xs font-semibold text-gray-600">Confirm</Label>
                   <Input type="password" className="h-11 rounded-xl border-gray-200"
-                    placeholder="••••••••" required
+                    placeholder="••••••••" required maxLength={500}
                     value={form.confirmPassword} onChange={e => setForm(f => ({ ...f, confirmPassword: e.target.value }))} />
                 </div>
               </div>

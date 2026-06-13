@@ -5,34 +5,86 @@ import {
   LayoutDashboard, CheckSquare, Users, CalendarClock, FileBarChart,
   BookOpen, ClipboardList, BarChart3, Shield, Search, ChevronRight,
   BookMarked, MessageSquare, TrendingUp, Loader2, User, GraduationCap,
-  FileQuestion, Book, Sparkles,
+  FileQuestion, Book, Sparkles, Video, FileText, CheckSquare2,
 } from "lucide-react";
 import { useAuth } from "@/context/auth";
 import { apiFetch } from "@/lib/api";
 
 const ALL_ROUTES = [
-  { name: "Dashboard",      href: "/",             icon: LayoutDashboard, roles: ["admin", "teacher", "assistant"] },
-  { name: "Mark Attendance",href: "/attendance",    icon: CheckSquare,     roles: ["admin", "teacher", "assistant"] },
-  { name: "Students",       href: "/students",      icon: Users,           roles: ["admin", "teacher", "assistant"] },
-  { name: "Sessions",       href: "/sessions",      icon: CalendarClock,   roles: ["admin", "teacher"] },
-  { name: "Subjects",       href: "/subjects",      icon: BookOpen,        roles: ["admin", "teacher"] },
-  { name: "Exams & Marks",  href: "/exams",         icon: ClipboardList,   roles: ["admin", "teacher", "assistant"] },
-  { name: "Analytics",      href: "/analytics",     icon: BarChart3,       roles: ["admin", "teacher"] },
-  { name: "Reports",        href: "/reports",       icon: FileBarChart,    roles: ["admin", "teacher"] },
-  { name: "Question Bank",  href: "/question-bank", icon: BookMarked,      roles: ["admin", "teacher"] },
-  { name: "Parent Comms",   href: "/parent-comms",  icon: MessageSquare,   roles: ["admin", "teacher"] },
-  { name: "Admin Panel",    href: "/admin",         icon: Shield,          roles: ["admin"] },
-  { name: "AutoPilot",      href: "/automation",    icon: TrendingUp,      roles: ["admin", "teacher"] },
+  // Core
+  { name: "CoreHub",             href: "/",                          icon: LayoutDashboard, roles: ["teacher","assistant"], category: "Core" },
+  { name: "Command Center",      href: "/",                          icon: LayoutDashboard, roles: ["admin"],               category: "Core" },
+  { name: "CheckIn",             href: "/checkin",                   icon: CheckSquare,     roles: ["admin","teacher","assistant"], category: "Core" },
+  { name: "PlanGrid",            href: "/plan-grid",                 icon: CalendarClock,   roles: ["admin","teacher"],     category: "Core" },
+  // Teaching
+  { name: "Assessments",         href: "/teacher/assessments",       icon: ClipboardList,   roles: ["admin","teacher"],     category: "Teaching" },
+  { name: "SubmitFlow",          href: "/submit-flow",               icon: FileBarChart,    roles: ["admin","teacher"],     category: "Teaching" },
+  { name: "GradeFlow",           href: "/grade-flow",                icon: CheckSquare,     roles: ["admin","teacher","assistant"], category: "Teaching" },
+  { name: "SchemeCraft",         href: "/scheme-craft",              icon: BookOpen,        roles: ["admin","teacher"],     category: "Teaching" },
+  { name: "Exams",               href: "/exams",                     icon: ClipboardList,   roles: ["admin","teacher","assistant"], category: "Teaching" },
+  { name: "InsightExams",        href: "/insight-exams",             icon: BarChart3,       roles: ["admin","teacher","assistant"], category: "Teaching" },
+  // Content
+  { name: "QueryVault",          href: "/query-vault",               icon: BookMarked,      roles: ["admin","teacher"],     category: "Content" },
+  { name: "Question Bank",       href: "/question-bank",             icon: BookMarked,      roles: ["admin","teacher"],     category: "Content" },
+  { name: "Question Extract",    href: "/teacher/questions/extract", icon: Sparkles,        roles: ["admin","teacher"],     category: "Content" },
+  { name: "CardStack (Flashcards)", href: "/cardstack",              icon: Book,            roles: ["admin","teacher"],     category: "Content" },
+  { name: "Syllabuilder",        href: "/syllabuilder",              icon: BookOpen,        roles: ["admin","teacher"],     category: "Content" },
+  { name: "ContentCraft",        href: "/content-craft",             icon: Sparkles,        roles: ["admin","teacher"],     category: "Content" },
+  { name: "LabBuilder",          href: "/lab-builder",               icon: BookOpen,        roles: ["admin","teacher"],     category: "Content" },
+  { name: "MarkerMind",          href: "/marker-mind",               icon: TrendingUp,      roles: ["admin","teacher","assistant"], category: "Content" },
+  { name: "ScanScribe",          href: "/scan-scribe",               icon: FileBarChart,    roles: ["admin","teacher","assistant"], category: "Content" },
+  { name: "TutorCraft AI",       href: "/tutorcraft",                icon: Sparkles,        roles: ["admin","teacher","assistant"], category: "Content" },
+  // Students & People
+  { name: "Students",            href: "/students",                  icon: Users,           roles: ["admin","teacher","assistant"], category: "People" },
+  { name: "Subjects",            href: "/subjects",                  icon: BookOpen,        roles: ["admin","teacher"],     category: "People" },
+  { name: "Sessions",            href: "/sessions",                  icon: CalendarClock,   roles: ["admin","teacher"],     category: "People" },
+  { name: "Student Approvals",   href: "/student-approvals",         icon: Users,           roles: ["admin","teacher"],     category: "People" },
+  { name: "Teacher Verification",href: "/admin/teacher-verification",icon: Shield,          roles: ["admin"],               category: "People" },
+  // Insights & Reports
+  { name: "Gradebook",           href: "/teacher/gradebook",         icon: BarChart3,       roles: ["admin","teacher"],     category: "Insights" },
+  { name: "Gradebook+",          href: "/gradebook-plus",            icon: BarChart3,       roles: ["admin","teacher"],     category: "Insights" },
+  { name: "Pulse Analytics",     href: "/pulse",                     icon: BarChart3,       roles: ["admin","teacher"],     category: "Insights" },
+  { name: "InsightStream",       href: "/insight-stream",            icon: TrendingUp,      roles: ["admin","teacher"],     category: "Insights" },
+  { name: "Reports",             href: "/reports",                   icon: FileBarChart,    roles: ["admin","teacher"],     category: "Insights" },
+  { name: "Analytics",           href: "/analytics",                 icon: BarChart3,       roles: ["admin","teacher"],     category: "Insights" },
+  // Communication
+  { name: "Messages",            href: "/messages",                  icon: MessageSquare,   roles: ["admin","teacher","assistant"], category: "Communication" },
+  { name: "Parent Comms",        href: "/parent-comms",              icon: MessageSquare,   roles: ["admin","teacher"],     category: "Communication" },
+  { name: "Announcements",       href: "/announcements",             icon: MessageSquare,   roles: ["admin","teacher","assistant"], category: "Communication" },
+  { name: "Inbox",               href: "/inbox",                     icon: MessageSquare,   roles: ["admin","teacher","assistant"], category: "Communication" },
+  { name: "Notifications",       href: "/notifications",             icon: MessageSquare,   roles: ["admin","teacher","assistant"], category: "Communication" },
+  { name: "Support Tickets",     href: "/support",                   icon: MessageSquare,   roles: ["admin","teacher","assistant"], category: "Communication" },
+  { name: "Study Rooms",         href: "/rooms",                     icon: Users,           roles: ["admin","teacher","assistant"], category: "Communication" },
+  // Admin
+  { name: "Admin Overview",      href: "/admin/command",             icon: Shield,          roles: ["admin"], category: "Admin" },
+  { name: "Users",               href: "/admin/users",               icon: Users,           roles: ["admin"], category: "Admin" },
+  { name: "Route Health",        href: "/admin/route-health",        icon: Shield,          roles: ["admin"], category: "Admin" },
+  { name: "Founder Control",     href: "/admin/os/founder",          icon: BarChart3,       roles: ["admin"], category: "Admin" },
+  { name: "ShieldCore",          href: "/admin/shield-core",         icon: Shield,          roles: ["admin"], category: "Admin" },
+  { name: "AutoPilot",           href: "/automation",                icon: TrendingUp,      roles: ["admin","teacher"], category: "Admin" },
+  { name: "Launch Certification",href: "/admin/os/launch",           icon: Shield,          roles: ["admin"], category: "Admin" },
+  { name: "QA Dashboard",        href: "/admin/os/qa/readiness",     icon: Shield,          roles: ["admin"], category: "Admin" },
+  { name: "Audit Log",           href: "/admin/os/audit",            icon: FileBarChart,    roles: ["admin"], category: "Admin" },
+  { name: "Attendance Audit",    href: "/attendance-audit",          icon: CheckSquare,     roles: ["admin","teacher"], category: "Admin" },
+  { name: "Enrollment Timeline", href: "/enrollment-timeline",       icon: TrendingUp,      roles: ["admin","teacher"], category: "Admin" },
+  // Billing
+  { name: "Pricing Plans",       href: "/pricing",                   icon: FileBarChart,    roles: ["admin","teacher","assistant"], category: "Billing" },
+  { name: "My Subscription",     href: "/account/subscription",      icon: FileBarChart,    roles: ["admin","teacher","assistant"], category: "Billing" },
+  { name: "Courses Marketplace", href: "/courses",                   icon: BookOpen,        roles: ["admin","teacher","assistant","parent"], category: "Marketplace" },
 ];
 
 const TYPE_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
-  person:   User,
-  student:  GraduationCap,
-  course:   Book,
-  subject:  BookOpen,
-  topic:    Sparkles,
-  question: FileQuestion,
-  lesson:   BookOpen,
+  person:        User,
+  student:       GraduationCap,
+  course:        Book,
+  subject:       BookOpen,
+  topic:         Sparkles,
+  question:      FileQuestion,
+  lesson:        BookOpen,
+  recording:     Video,
+  flashcard_deck: Book,
+  revision_note: FileText,
+  assessment:    CheckSquare2,
 };
 
 const SEMANTIC_TRIGGER = /\s|weak|hard|easy|igcse|gcse|struggling|explain|find|who|what|show|quiz|exam|topic|chapter/i;
@@ -54,6 +106,21 @@ interface CommandPaletteProps {
 
 const RECENT_KEY = "aperti_recent_searches";
 const MAX_RECENT = 5;
+
+function buildEntityHref(item: SemanticResult): string | null {
+  switch (item.type) {
+    case "person":      return `/admin/users`;
+    case "student":     return `/students/${item.id}`;
+    case "course":      return `/courses/${item.id}`;
+    case "subject":     return `/subjects`;
+    case "question":    return `/query-vault`;
+    case "assessment":  return `/teacher/assessments`;
+    case "flashcard_deck": return `/cardstack`;
+    case "revision_note": return `/revision-notes`;
+    case "lesson":      return `/plan-grid`;
+    default:            return null;
+  }
+}
 
 function getRecentSearches(): string[] {
   try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]"); } catch { return []; }
@@ -204,6 +271,8 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
           <input
             autoFocus
             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            aria-label="Search pages or ask a question"
+            aria-autocomplete="list"
             placeholder="Search pages or ask anything…"
             value={query}
             onChange={e => { setQuery(e.target.value); setSelected(0); }}
@@ -218,26 +287,62 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
         </div>
 
         <div className="max-h-[440px] overflow-y-auto">
-          {/* Navigation results */}
+          {/* Navigation results — grouped by category when query present */}
           {routes.length > 0 && (
             <div className="p-2">
-              {!isSemantic && (
-                <p className="text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase px-3 pb-1">Pages</p>
+              {query ? (
+                (() => {
+                  const grouped = routes.reduce((acc: Record<string, typeof routes>, r) => {
+                    const cat = (r as any).category ?? "Pages";
+                    if (!acc[cat]) acc[cat] = [];
+                    acc[cat].push(r);
+                    return acc;
+                  }, {});
+                  let globalIdx = 0;
+                  return Object.entries(grouped).map(([cat, items]) => (
+                    <div key={cat}>
+                      <p className="text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase px-3 py-1">{cat}</p>
+                      {items.map((route) => {
+                        const idx = globalIdx++;
+                        return (
+                          <button
+                            key={route.href + route.name}
+                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left ${
+                              idx === selected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                            }`}
+                            onMouseEnter={() => setSelected(idx)}
+                            onClick={() => handleSelect(route.href)}
+                          >
+                            <route.icon className="h-4 w-4 flex-shrink-0" />
+                            <span className="flex-1">{route.name}</span>
+                            <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ));
+                })()
+              ) : (
+                <>
+                  {!isSemantic && (
+                    <p className="text-[10px] font-bold tracking-widest text-muted-foreground/60 uppercase px-3 pb-1">Pages</p>
+                  )}
+                  {routes.slice(0, 8).map((route, i) => (
+                    <button
+                      key={route.href + route.name}
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left ${
+                        i === selected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                      }`}
+                      onMouseEnter={() => setSelected(i)}
+                      onClick={() => handleSelect(route.href)}
+                    >
+                      <route.icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="flex-1">{route.name}</span>
+                      <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                    </button>
+                  ))}
+                </>
               )}
-              {routes.map((route, i) => (
-                <button
-                  key={route.href}
-                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left ${
-                    i === selected ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-                  }`}
-                  onMouseEnter={() => setSelected(i)}
-                  onClick={() => handleSelect(route.href)}
-                >
-                  <route.icon className="h-4 w-4 flex-shrink-0" />
-                  <span className="flex-1">{route.name}</span>
-                  <ChevronRight className="h-3.5 w-3.5 opacity-50" />
-                </button>
-              ))}
             </div>
           )}
 
@@ -258,7 +363,12 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                       return (
                         <div key={`${item.type}-${item.id}`}
                           className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted cursor-pointer"
-                          onClick={() => onOpenChange(false)}>
+                          onClick={() => {
+                            addRecentSearch(query);
+                            const href = (item as any).href ?? buildEntityHref(item);
+                            if (href) { navigate(href); }
+                            onOpenChange(false);
+                          }}>
                           <Icon className="h-4 w-4 flex-shrink-0 text-primary/70" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{item.name}</p>
@@ -266,6 +376,7 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                               <p className="text-[11px] text-muted-foreground truncate">{item.subtitle}</p>
                             )}
                           </div>
+                          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/40 shrink-0" />
                         </div>
                       );
                     })}
@@ -288,7 +399,12 @@ export default function CommandPalette({ open, onOpenChange }: CommandPalettePro
                       <div
                         key={`${item.type}-${item.id}`}
                         className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-muted cursor-pointer text-left"
-                        onClick={() => onOpenChange(false)}
+                        onClick={() => {
+                          addRecentSearch(query);
+                          const href = (item as any).href ?? buildEntityHref(item);
+                          if (href) { navigate(href); }
+                          onOpenChange(false);
+                        }}
                       >
                         <Icon className="h-4 w-4 flex-shrink-0 text-primary" />
                         <div className="flex-1 min-w-0">

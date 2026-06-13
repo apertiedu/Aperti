@@ -302,6 +302,12 @@ export default function FounderControlPage() {
     refetchInterval: 60000,
     retry: false,
   });
+  const { data: activityMetrics } = useQuery({
+    queryKey: ["founder-user-activity"],
+    queryFn: () => fetchJSON("/api/founder/user-activity-metrics"),
+    refetchInterval: 300000,
+    retry: false,
+  });
 
   const unread = (alerts?.alerts ?? []).filter((a: any) => !a.is_read).length;
   const monthly = (rev?.monthly ?? []).slice(-6);
@@ -357,6 +363,21 @@ export default function FounderControlPage() {
               <StatCard label="Active Teachers" value={users.teachers ?? 0} icon={Users} color="blue" />
               <StatCard label="Active Parents" value={users.parents ?? 0} icon={Users} color="purple" />
               <StatCard label="New (30d)" value={users.new30d ?? 0} icon={TrendingUp} color="green" />
+            </div>
+          </div>
+
+          {/* DAU / WAU / MAU */}
+          <div>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Engagement (Active Users)</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <StatCard label="Daily Active (DAU)" value={activityMetrics?.dau ?? "—"} icon={Activity} color="teal"
+                sub="Unique logins today" />
+              <StatCard label="Weekly Active (WAU)" value={activityMetrics?.wau ?? "—"} icon={TrendingUp} color="blue"
+                sub="Last 7 days" />
+              <StatCard label="Monthly Active (MAU)" value={activityMetrics?.mau ?? "—"} icon={Users} color="purple"
+                sub="Last 30 days" />
+              <StatCard label="Stickiness (DAU/MAU)" value={activityMetrics?.stickinessRatio != null ? `${activityMetrics.stickinessRatio}%` : "—"} icon={Target} color="green"
+                sub={activityMetrics?.stickinessRatio != null ? (activityMetrics.stickinessRatio >= 20 ? "Healthy" : "Needs growth") : ""} />
             </div>
           </div>
 
