@@ -36,14 +36,22 @@ async function main() {
   }
 
   // ── Environment validation ─────────────────────────────────────────────────
-  const requiredEnv = ["DATABASE_URL", "PORT"];
+  const requiredEnv = ["DATABASE_URL", "PORT", "JWT_SECRET"];
   const missingEnv = requiredEnv.filter(k => !process.env[k]);
   if (missingEnv.length > 0) {
     console.error(`[startup] FATAL: Missing required environment variables: ${missingEnv.join(", ")}`);
     process.exit(1);
   }
-  // Warn about optional-but-important variables
-  const warnEnv = ["JWT_SECRET", "SESSION_SECRET", "OPENAI_API_KEY"];
+  const jwtSecret = process.env.JWT_SECRET!;
+  if (jwtSecret.length < 32) {
+    console.error(`[startup] FATAL: JWT_SECRET must be at least 32 characters long. Current length: ${jwtSecret.length}`);
+    process.exit(1);
+  }
+  if (jwtSecret === "aperti-dev-secret-change-in-prod") {
+    console.error("[startup] FATAL: JWT_SECRET is set to the default insecure value. Please set a strong, unique secret.");
+    process.exit(1);
+  }
+  const warnEnv = ["SESSION_SECRET", "OPENAI_API_KEY"];
   const missingWarn = warnEnv.filter(k => !process.env[k]);
   if (missingWarn.length > 0) {
     console.warn(`[startup] WARN: Missing recommended environment variables: ${missingWarn.join(", ")} — some features may be limited`);

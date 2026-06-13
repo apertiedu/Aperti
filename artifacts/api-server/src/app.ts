@@ -168,7 +168,7 @@ app.use(metricsMiddleware());
 app.use(
   session({
     store: new PgSession({ pool, tableName: "session" }),
-    secret: process.env["SESSION_SECRET"] || "aperti-fallback-secret",
+    secret: process.env["SESSION_SECRET"] || process.env["JWT_SECRET"] || "aperti-session-key",
     resave: false,
     saveUninitialized: false,
     cookie: {

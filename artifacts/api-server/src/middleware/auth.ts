@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret-change-in-prod";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("[auth] FATAL: JWT_SECRET environment variable is not set. The server cannot operate securely without it.");
+  process.exit(1);
+}
 
 export interface AuthRequest extends Request<Record<string, string>> {
   userId?: number;

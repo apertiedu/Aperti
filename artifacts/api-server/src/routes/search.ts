@@ -63,9 +63,11 @@ searchRouter.get("/", async (req: Request, res: Response) => {
     if (token) {
       try {
         const jwt = await import("jsonwebtoken");
-        const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret-change-in-prod";
-        const payload = jwt.default.verify(token, JWT_SECRET) as any;
-        userId = payload?.id ?? null;
+        const jwtSecret = process.env.JWT_SECRET;
+        if (jwtSecret) {
+          const payload = jwt.default.verify(token, jwtSecret) as any;
+          userId = payload?.id ?? null;
+        }
       } catch { /* best-effort */ }
     }
 

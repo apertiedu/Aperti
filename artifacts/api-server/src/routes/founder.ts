@@ -1366,7 +1366,7 @@ founderRouter.get("/platform-health-score", async (_req: AuthRequest, res: Respo
 
 /* ── Emergency Tools ─────────────────────────────────────────────────────── */
 
-const JWT_SECRET_EMERGENCY = process.env.JWT_SECRET || "aperti-dev-secret-change-in-prod";
+const JWT_SECRET_EMERGENCY = process.env.JWT_SECRET!;
 
 async function logEmergencyAction(actorId: number | undefined, action: string, targetId: string | number) {
   await pool.query(

@@ -28,7 +28,7 @@ function writeAudit(entry: {
   }).catch(() => {});
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || "aperti-dev-secret-change-in-prod";
+const JWT_SECRET = process.env.JWT_SECRET!;
 const TOKEN_EXPIRY = "7d";
 
 export const authRouter = Router();
