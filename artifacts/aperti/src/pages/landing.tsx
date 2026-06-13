@@ -8,7 +8,6 @@ import {
   Shield, Zap, Target, Star, Globe, Quote, ChevronDown, ExternalLink,
   Rocket, Map, FileText, Activity, Check, Minus, Building2,
 } from "lucide-react";
-import { Landing3DHeroCanvas } from "@/components/landing-3d-hero";
 
 const TEAL = "#0D9488";
 const TEAL_LIGHT = "#E6F4F1";
@@ -872,7 +871,7 @@ function EarlyAccessForm({ ctaText, email }: { ctaText?: string; email?: string 
       <button type="submit" disabled={loading}
         className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
         style={{ background: TEAL }}>
-        {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting…</> : <>{ctaText ?? "Request Early Access"} <ArrowRight className="h-4 w-4" /></>}
+        {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting…</> : <>{ctaText ?? "Get Started Free"} <ArrowRight className="h-4 w-4" /></>}
       </button>
       {email && (
         <p className="text-center text-xs text-gray-400 mt-4">
@@ -1395,7 +1394,7 @@ export default function Landing() {
   const pricingHeadline = (pricingS.headline as string) ?? "Plans that scale with you.";
   const pricingAccent   = (pricingS.headline_accent as string) ?? "";
   const contactHeadline = (contactS.headline as string) ?? "Start teaching smarter.";
-  const contactCta      = (contactS.cta_text as string) ?? "Request Early Access";
+  const contactCta      = (contactS.cta_text as string) ?? "Get Started Free";
   const contactEmail    = (contactS.email as string)    ?? "support@aperti.ai";
 
   return (
@@ -1407,7 +1406,6 @@ export default function Landing() {
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: teal }} />
           <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: teal }} />
-          <Landing3DHeroCanvas />
         </div>
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

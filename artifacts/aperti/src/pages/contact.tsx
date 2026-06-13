@@ -17,7 +17,19 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
+    try {
+      await fetch("/api/errors/log", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `[contact-form] ${form.subject}: ${form.message}`,
+          route: "/contact",
+          source: "ContactForm",
+          browserInfo: `Name: ${form.name} | Email: ${form.email} | Topic: ${form.subject}`,
+          timestamp: new Date().toISOString(),
+        }),
+      });
+    } catch {}
     setLoading(false);
     setSubmitted(true);
   };

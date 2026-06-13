@@ -85,7 +85,7 @@ function WaitlistModal({ featureId, featureName, onClose }: { featureId: number;
             <div className="flex items-start justify-between mb-5">
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Join the Waitlist</h3>
-                <p className="text-sm text-gray-500 mt-0.5">Get early access to <strong>{featureName}</strong></p>
+                <p className="text-sm text-gray-500 mt-0.5">Join the waitlist for <strong>{featureName}</strong></p>
               </div>
               <button onClick={onClose} className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100"><X className="w-4 h-4" /></button>
             </div>
