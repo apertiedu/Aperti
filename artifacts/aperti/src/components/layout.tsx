@@ -93,7 +93,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     {
       label: "Insights",
       items: [
-        { name: "Gradebook", href: "/teacher/gradebook", icon: TableProperties, roles: ["admin","teacher"] },
         { name: "Gradebook+", href: "/gradebook-plus", icon: TableProperties, roles: ["admin","teacher"] },
         { name: "Moderation", href: "/teacher/moderation", icon: Scale, roles: ["admin","teacher"] },
         { name: "Pulse", href: "/pulse", icon: BarChart3, roles: ["admin","teacher"] },
@@ -147,6 +146,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Session Slots",           href: "/admin/session-slots",        icon: CalendarDays,roles: ["admin", "teacher"] },
         { name: "Attendance Audit",        href: "/attendance-audit",           icon: Shield,      roles: ["admin", "teacher"] },
         { name: "Enrollment Timeline",     href: "/enrollment-timeline",        icon: History,     roles: ["admin", "teacher"] },
+        { name: "System Debug",            href: "/admin/debug",                icon: Terminal,    roles: ["admin"] },
       ],
     },
     {
@@ -219,11 +219,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={`p-3 border-b border-sidebar-border flex items-center ${(!isMobile && collapsed) ? "justify-center" : "justify-between"} gap-2 shrink-0`}
       >
         {(!isMobile && collapsed) ? (
-          <span className="font-bold text-sm tracking-tight text-foreground">A<span className="text-primary">.</span></span>
+          <span className="font-bold text-sm tracking-tight text-foreground">A</span>
         ) : (
           <div className="overflow-hidden">
             <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">
-              Aperti<span className="text-primary">.</span>
+              Aperti
             </h1>
           </div>
         )}

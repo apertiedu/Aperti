@@ -108,6 +108,8 @@ import { userExportRouter } from "./user-export";
 import { contentCraftRouter } from "./content-craft";
 import { problemReportsRouter } from "./problem-reports";
 import { phase25Router } from "./phase25";
+import { aiGatewayRouter } from "./ai-gateway";
+import { adminDebugRouter } from "./admin-debug";
 
 const router: IRouter = Router();
 
@@ -242,6 +244,10 @@ router.use(problemReportsRouter);
 
 // Phase 25 — Product Excellence
 router.use(phase25Router);
+
+// Phase 38 — AI Gateway & Admin Debug
+router.use("/ai", aiGatewayRouter);
+router.use("/admin/debug", adminDebugRouter);
 
 export default router;
 

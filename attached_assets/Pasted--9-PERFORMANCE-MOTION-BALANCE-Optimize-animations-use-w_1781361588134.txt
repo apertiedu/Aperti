@@ -1,0 +1,75 @@
+
+## 9. PERFORMANCE + MOTION BALANCE
+
+- Optimize animations: use `will‑change` sparingly, promote layers, avoid animating layout properties (height, width, padding) – use `transform` and `opacity` whenever possible.
+- Lazy‑load animation libraries (Framer Motion already loaded, but 3D libraries must be dynamic imports).
+- Bundle size audit: remove unused animation dependencies.
+
+---
+
+## 10. DATA + UI SYNCHRONIZATION ENGINE
+
+- When data updates (e.g., attendance marked, grade submitted, AI response received), the UI must:
+  - Update instantly (optimistic update with TanStack Query).
+  - Smoothly animate the change (e.g., a number slides up, a card appears).
+  - Never flicker or reset the scroll position.
+- Implement this pattern for key actions: attendance, enrollment, grading, assignment submission.
+
+---
+
+## 11. ERROR EXPERIENCE REBUILD
+
+- Redesign error states to be calm and helpful:
+  - Soft animation pause (no jarring red flash).
+  - Friendly message: “We hit a small snag. Please try again.”
+  - Action buttons: “Retry”, “Go Back”, “Report Problem”.
+  - Automatic error logging to the debug panel.
+- Apply to 404, 500, network error, and component crash boundaries.
+
+---
+
+## 12. AI SYSTEM STABILITY
+
+- Ensure the AI gateway (Phase 38) works reliably:
+  - Streaming responses must show a typing indicator and never freeze.
+  - If AI service is down, fallback to a template response (e.g., predefined explanation for common topics) instead of a blank screen.
+  - Log every AI call to `ai_interactions` with success/fail and latency.
+
+---
+
+## 13. CROSS‑ROLE TESTING SIMULATION
+
+- Run manual tests for:
+  - Teacher running a full class (create session → mark attendance → grade → view analytics).
+  - Student submitting assignments, using flashcards, talking to Mentor.
+  - Parent monitoring child progress, receiving updates.
+  - Admin managing users, plans, and viewing debug panel.
+- Fix any inconsistency or broken flow.
+
+---
+
+## 14. LANDING PAGE FINAL POLISH
+
+- Integrate the controlled 3D elements described above.
+- Ensure all statistics are fetched from the live database (no hardcoded numbers).
+- Review copy, spacing, and mobile responsiveness one final time.
+
+---
+
+## IMPLEMENTATION ORDER
+
+1. Fix sidebar icon and sign‑in error.
+2. Build the motion system layer – implement interactive, data, and structural motion across dashboards.
+3. Add animation safety guards (performance detection, reduced‑motion support).
+4. Conduct full data linking audit and clean up orphans.
+5. Enforce single source of truth – remove duplicate stores/caches.
+6. Make dashboards “living” with the specified animations.
+7. Implement controlled 3D on the landing page only.
+8. Expand error detection engine and error experience rebuild.
+9. Lock UI consistency and finalize design tokens.
+10. Optimize performance and sync data‑UI updates.
+11. Stabilize AI streaming and fallback.
+12. Cross‑role simulation testing.
+13. Final landing page polish.
+
+**Start now. Deliver an Aperti that feels alive, moves with purpose, and holds its data and UI together flawlessly.**  

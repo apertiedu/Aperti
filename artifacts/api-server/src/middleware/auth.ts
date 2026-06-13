@@ -15,6 +15,9 @@ export function authenticate(req: AuthRequest, res: Response, next: NextFunction
   }
   try {
     const payload = jwt.verify(header.slice(7), JWT_SECRET) as any;
+    if (!payload || typeof payload !== "object" || !payload.id || !payload.role) {
+      return res.status(401).json({ error: "Invalid token payload" });
+    }
     req.userId = payload.id;
     req.role = payload.role;
     next();

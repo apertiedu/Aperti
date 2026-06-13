@@ -1,4 +1,4 @@
-import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -60,6 +60,7 @@ import RouteHealthPage from "@/pages/admin/route-health";
 import FeatureStatusPage from "@/pages/admin/feature-status";
 import DataQualityPage from "@/pages/admin/data-quality";
 import SessionSlotsAdminPage from "@/pages/admin/session-slots";
+import AdminDebugPage from "@/pages/admin/debug";
 // Admin
 import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
 import SubpilotSettings from "@/pages/admin/subpilot-settings";
@@ -506,7 +507,7 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/assessments" component={TeacherAssessments} />
     <Route path="/teacher/assessments/:id/builder" component={AssessmentBuilder} />
     <Route path="/teacher/assessments/:id/monitor" component={AssessmentMonitor} />
-    <Route path="/teacher/gradebook" component={TeacherGradebook} />
+    <Route path="/teacher/gradebook"><Redirect to="/gradebook-plus" /></Route>
     <Route path="/teacher/moderation" component={ModerationCenter} />
     <Route path="/teacher/archives" component={ExamArchives} />
     {/* Phase 7 — Communication */}
@@ -578,6 +579,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/feature-status" component={FeatureStatusPage} />
     <Route path="/admin/data-quality" component={DataQualityPage} />
     <Route path="/admin/session-slots" component={SessionSlotsAdminPage} />
+    <Route path="/admin/debug" component={AdminDebugPage} />
     {/* Phase 36 — /admin/launch shortcut */}
     <Route path="/admin/launch" component={AdminOS} />
   </>

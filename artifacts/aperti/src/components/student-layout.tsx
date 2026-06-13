@@ -85,7 +85,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
       {/* Top bar — desktop */}
       <header className="hidden md:flex sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/40 px-6 h-12 items-center justify-between shrink-0" role="banner">
         <div className="flex items-center gap-1.5">
-          <span className="font-bold text-base text-foreground">Aperti<span className="text-primary" aria-hidden="true">.</span></span>
+          <span className="font-bold text-base text-foreground">Aperti</span>
           <span className="text-muted-foreground/40 text-xs ml-2" aria-label="Student portal">Student</span>
         </div>
         <nav className="flex items-center gap-0.5" aria-label="Primary navigation">
