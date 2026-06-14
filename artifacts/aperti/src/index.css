@@ -598,11 +598,14 @@ body, #root {
 .landing-scroll {
   height: 100vh;
   overflow-y: scroll;
-  scroll-snap-type: y proximity;
+  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 .snap-start {
   scroll-snap-align: start;
+  scroll-snap-stop: always;
+  min-height: 100vh;
 }
 .mesh-orb {
   position: absolute;
@@ -631,3 +634,10 @@ body, #root {
   to   { transform: rotate(360deg); }
 }
 .spin-slow { animation: spin-slow 40s linear infinite; }
+
+/* ── Hero section transitions ──────────────────────────── */
+@keyframes hero-glow-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.05); }
+}
+.hero-glow-pulse { animation: hero-glow-pulse 4s ease-in-out infinite; }

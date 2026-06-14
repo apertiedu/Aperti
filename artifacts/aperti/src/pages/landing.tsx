@@ -1,6 +1,7 @@
 import { useState, useRef, FormEvent, useEffect, useMemo } from "react";
 import { motion, useInView, AnimatePresence, useScroll, useTransform, useReducedMotion, useMotionValue, useSpring } from "framer-motion";
 import { Link } from "wouter";
+import { Landing3DHeroCanvas } from "@/components/landing-3d-hero";
 import { useQuery } from "@tanstack/react-query";
 import { animate as animeAnimate, stagger as animeStagger } from "animejs";
 import {
@@ -194,26 +195,54 @@ function AbstractGeometry() {
 function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 30);
-    window.addEventListener("scroll", fn, { passive: true });
-    return () => window.removeEventListener("scroll", fn);
+    const container = document.querySelector(".landing-scroll") as HTMLElement | null;
+    if (!container) return;
+    scrollRef.current = container;
+    const fn = () => setScrolled(container.scrollTop > 60);
+    container.addEventListener("scroll", fn, { passive: true });
+    return () => container.removeEventListener("scroll", fn);
   }, []);
+
+  const navBg = scrolled
+    ? "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
+    : "bg-transparent backdrop-blur-sm";
+  const logoColor = scrolled ? "#121212" : "#ffffff";
+  const linkColor = scrolled ? "text-gray-500 hover:text-gray-900" : "text-white/70 hover:text-white";
+  const mobileIconColor = scrolled ? "text-gray-500" : "text-white/70";
+
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
-        <Link href="/"><span className="text-xl font-extrabold tracking-tight cursor-pointer" style={{ color: "#121212" }}>Aperti<span style={{ color: TEAL }}>.</span></span></Link>
-        <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-500">
-          <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
-          <Link href="/courses" className="hover:text-gray-900 transition-colors">Courses</Link>
-          <a href="#pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
-          <a href="#apply" className="hover:text-gray-900 transition-colors">Apply</a>
+        <Link href="/">
+          <span className="text-xl font-extrabold tracking-tight cursor-pointer transition-colors duration-300" style={{ color: logoColor }}>
+            Aperti<span style={{ color: TEAL }}>.</span>
+          </span>
+        </Link>
+        <div className={`hidden md:flex items-center gap-7 text-sm font-medium transition-colors duration-300 ${linkColor}`}>
+          <a href="#features" className="transition-colors">Features</a>
+          <Link href="/courses" className="transition-colors">Courses</Link>
+          <a href="#pricing" className="transition-colors">Pricing</a>
+          <a href="#apply" className="transition-colors">Apply</a>
         </div>
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/courses"><button className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 transition-all">Explore Courses</button></Link>
-          <Link href="/login"><button className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all hover:opacity-90" style={{ background: TEAL }}>Sign In</button></Link>
+          <Link href="/courses">
+            <button className="text-sm font-medium px-4 py-2 rounded-xl transition-all duration-300"
+              style={scrolled
+                ? { border: "1px solid #e5e7eb", color: "#374151", background: "transparent" }
+                : { border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.8)", background: "rgba(255,255,255,0.06)" }}>
+              Explore Courses
+            </button>
+          </Link>
+          <Link href="/login">
+            <button className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all hover:opacity-90" style={{ background: TEAL }}>
+              Sign In
+            </button>
+          </Link>
         </div>
-        <button className="md:hidden p-2 rounded-lg text-gray-500 hover:bg-gray-100" onClick={() => setOpen(!open)}>
+        <button className={`md:hidden p-2 rounded-lg transition-colors ${mobileIconColor}`} onClick={() => setOpen(!open)}>
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
@@ -919,8 +948,8 @@ function EarlyAccessForm({ ctaText, email }: { ctaText?: string; email?: string 
 }
 
 /* ─────────────────────────── Anime Hero Title ─────────────────────────── */
-function AnimeHeroTitle({ headline, headlineAccent, teal }: {
-  headline: string; headlineAccent: string; teal: string;
+function AnimeHeroTitle({ headline, headlineAccent, teal, dark = false }: {
+  headline: string; headlineAccent: string; teal: string; dark?: boolean;
 }) {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const prefersReduced = useReducedMotion();
@@ -928,12 +957,12 @@ function AnimeHeroTitle({ headline, headlineAccent, teal }: {
   useEffect(() => {
     if (prefersReduced || !titleRef.current) return;
     const spans = titleRef.current.querySelectorAll<HTMLElement>(".word-span");
-    spans.forEach(s => { s.style.opacity = "0"; s.style.transform = "translateY(24px)"; });
+    spans.forEach(s => { s.style.opacity = "0"; s.style.transform = "translateY(28px)"; });
     animeAnimate(spans, {
       opacity: [0, 1],
-      translateY: [24, 0],
+      translateY: [28, 0],
       delay: animeStagger(55),
-      duration: 750,
+      duration: 800,
       ease: "outExpo",
     });
   }, [headline, headlineAccent, prefersReduced]);
@@ -943,8 +972,8 @@ function AnimeHeroTitle({ headline, headlineAccent, teal }: {
 
   return (
     <h1 ref={titleRef}
-      className="text-5xl md:text-6xl lg:text-[64px] font-black leading-[1.06] tracking-tight mb-6"
-      style={{ color: "#121212" }}>
+      className="text-5xl md:text-6xl lg:text-[68px] font-black leading-[1.04] tracking-tight mb-6"
+      style={{ color: dark ? "#ffffff" : "#121212" }}>
       {headlineWords.map((word, i) => (
         <span key={i} className="word-span inline-block" style={{ marginRight: "0.25em" }}>
           {word}
@@ -1636,43 +1665,58 @@ export default function Landing() {
       <Nav />
 
       {/* ── HERO ── */}
-      <section className="snap-start min-h-screen flex items-center pt-20 pb-10 px-5 relative overflow-hidden" style={{ background: "white" }}>
-        <div className="mesh-orb w-[700px] h-[700px] opacity-[0.07] -top-40 -right-40 float-3d" style={{ background: teal }} />
-        <div className="mesh-orb w-[500px] h-[500px] opacity-[0.05] -bottom-28 -left-28" style={{ background: teal }} />
-        <div className="mesh-orb w-[360px] h-[360px] opacity-[0.04] top-1/2 left-1/3 -translate-y-1/2" style={{ background: '#818cf8' }} />
-        <div className="spin-slow absolute top-16 right-20 w-28 h-28 opacity-[0.07] hidden lg:block"
-          style={{ border: `1.5px solid ${teal}`, borderRadius: '50%' }} />
-        <div className="spin-slow absolute bottom-28 left-12 w-16 h-16 opacity-[0.06] hidden lg:block"
-          style={{ border: `1.5px solid ${teal}`, borderRadius: '50%', animationDuration: '24s', animationDirection: 'reverse' }} />
-        <div className="max-w-7xl mx-auto w-full">
+      <section className="snap-start min-h-screen flex items-center pt-20 pb-10 px-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #060D1B 0%, #091525 55%, #0D1F2D 100%)" }}>
+
+        {/* Fullscreen 3D animated background */}
+        <Landing3DHeroCanvas />
+
+        {/* Subtle dark gradient overlay for text readability */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(to right, rgba(6,13,27,0.85) 0%, rgba(6,13,27,0.55) 55%, rgba(6,13,27,0.2) 100%)" }} />
+
+        {/* Teal glow blobs */}
+        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}18 0%, transparent 70%)`, filter: "blur(40px)" }} />
+        <div className="absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}10 0%, transparent 70%)`, filter: "blur(60px)" }} />
+
+        <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, ease: [0.22,1,0.36,1] }}>
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: [0.22,1,0.36,1] }}>
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold mb-7 border"
-                style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+                style={{ background: `${teal}18`, color: teal, borderColor: `${teal}40` }}>
                 <Sparkles className="h-3 w-3" />
                 {badgeText}
               </motion.div>
-              <AnimeHeroTitle headline={headline} headlineAccent={headlineAccent} teal={teal} />
-              <p className="text-lg text-gray-500 leading-relaxed mb-9 max-w-xl">{subheadline}</p>
-              <div className="flex flex-wrap gap-3 mb-8">
+              <AnimeHeroTitle headline={headline} headlineAccent={headlineAccent} teal={teal} dark />
+              <motion.p
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+                className="text-lg leading-relaxed mb-9 max-w-xl"
+                style={{ color: "rgba(255,255,255,0.65)" }}>
+                {subheadline}
+              </motion.p>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
+                className="flex flex-wrap gap-3 mb-8">
                 <Link href="/register">
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-white shadow-lg"
-                    style={{ background: teal, boxShadow: `0 8px 24px ${teal}30` }}>
+                  <motion.button whileHover={{ scale: 1.03, boxShadow: `0 12px 36px ${teal}50` }} whileTap={{ scale: 0.97 }}
+                    className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-white shadow-xl transition-shadow"
+                    style={{ background: `linear-gradient(135deg, ${teal}, #00897B)`, boxShadow: `0 8px 28px ${teal}40` }}>
                     Get Started Free <ArrowRight className="h-4 w-4" />
                   </motion.button>
                 </Link>
                 <a href="#how-it-works">
-                  <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm text-gray-700 border border-gray-200 bg-white hover:border-gray-300 transition-colors">
+                  <motion.button whileHover={{ scale: 1.02, background: "rgba(255,255,255,0.1)" }} whileTap={{ scale: 0.97 }}
+                    className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all"
+                    style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.85)", border: "1px solid rgba(255,255,255,0.15)" }}>
                     See How It Works
                   </motion.button>
                 </a>
-              </div>
-              {/* Trust signals */}
+              </motion.div>
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.7 }}
                 className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 {[
                   { icon: Shield,       label: "No lock-in"          },
@@ -1680,23 +1724,34 @@ export default function Landing() {
                   { icon: CheckCircle2, label: "IGCSE & IB ready"     },
                   { icon: Star,         label: "AI-powered grading"   },
                 ].map(({ icon: Icon, label }) => (
-                  <span key={label} className="flex items-center gap-1.5 text-xs text-gray-400">
-                    <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: teal }} />
+                  <span key={label} className="flex items-center gap-1.5 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+                    <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: `${teal}cc` }} />
                     {label}
                   </span>
                 ))}
               </motion.div>
             </motion.div>
-            <motion.div style={{ y: heroY }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.9, delay: 0.2, ease: [0.22,1,0.36,1] }}
+
+            <motion.div style={{ y: heroY }} initial={{ opacity: 0, x: 40, scale: 0.96 }} animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 1, delay: 0.25, ease: [0.22,1,0.36,1] }}
               className="relative hidden lg:block">
-              <LiveDashboardPreview />
+              {/* Glow ring behind the preview */}
+              <div className="absolute inset-0 -m-8 rounded-3xl pointer-events-none"
+                style={{ background: `radial-gradient(ellipse at center, ${teal}20 0%, transparent 70%)`, filter: "blur(20px)" }} />
+              <div className="relative" style={{ filter: "drop-shadow(0 32px 64px rgba(0,0,0,0.5))" }}>
+                <LiveDashboardPreview />
+              </div>
             </motion.div>
           </div>
         </div>
-        <div className="scroll-cue absolute bottom-8 left-1/2 flex flex-col items-center gap-1.5">
-          <div className="w-5 h-8 rounded-full border-2 border-gray-300 flex items-start justify-center pt-1.5">
-            <div className="w-1.5 h-2 rounded-full bg-gray-400" />
+
+        {/* Scroll cue */}
+        <div className="scroll-cue absolute bottom-8 left-1/2 flex flex-col items-center gap-1.5 z-10">
+          <div className="w-5 h-8 rounded-full flex items-start justify-center pt-1.5"
+            style={{ border: "1.5px solid rgba(255,255,255,0.2)" }}>
+            <motion.div className="w-1.5 h-2 rounded-full" style={{ background: teal }}
+              animate={{ y: [0, 8, 0], opacity: [1, 0.3, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} />
           </div>
         </div>
       </section>

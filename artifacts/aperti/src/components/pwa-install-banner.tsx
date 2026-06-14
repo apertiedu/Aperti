@@ -4,6 +4,8 @@ import { Download, X, Bell } from "lucide-react";
 import { usePWA } from "@/hooks/use-pwa";
 import { useToast } from "@/hooks/use-toast";
 
+const PUBLIC_PATHS = ["/", "/login", "/register", "/student-register", "/courses", "/features", "/terms", "/privacy", "/contact", "/roadmap", "/status", "/trust", "/paper-vault", "/release-notes", "/sitemap"];
+
 export default function PWAInstallBanner() {
   const { canInstall, triggerInstall, pushSupported, pushPermission, subscribeToPush } = usePWA();
   const { toast } = useToast();
@@ -11,6 +13,12 @@ export default function PWAInstallBanner() {
   const [pushDismissed, setPushDismissed] = useState(() =>
     localStorage.getItem("aperti_push_dismissed") === "1"
   );
+
+  const isPublicPage = typeof window !== "undefined" && PUBLIC_PATHS.some(p =>
+    window.location.pathname === p || window.location.pathname.startsWith(p + "/")
+  );
+
+  if (isPublicPage) return null;
 
   const handleInstall = async () => {
     const ok = await triggerInstall();
@@ -35,7 +43,6 @@ export default function PWAInstallBanner() {
 
   return (
     <div className="fixed bottom-20 lg:bottom-5 right-4 z-40 space-y-2 pointer-events-none">
-      {/* Install Banner */}
       <AnimatePresence>
         {canInstall && !dismissed && (
           <motion.div
@@ -49,35 +56,19 @@ export default function PWAInstallBanner() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground">Install Aperti</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Add to your home screen for the best mobile experience.
-              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">Add to your home screen for the best experience.</p>
               <div className="flex gap-2 mt-2.5">
-                <button
-                  onClick={handleInstall}
-                  className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-lg min-h-[32px]"
-                >
-                  Install
-                </button>
-                <button
-                  onClick={() => setDismissed(true)}
-                  className="px-3 py-1.5 text-muted-foreground text-xs rounded-lg hover:bg-muted min-h-[32px]"
-                >
-                  Later
-                </button>
+                <button onClick={handleInstall} className="px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded-lg min-h-[32px]">Install</button>
+                <button onClick={() => setDismissed(true)} className="px-3 py-1.5 text-muted-foreground text-xs rounded-lg hover:bg-muted min-h-[32px]">Later</button>
               </div>
             </div>
-            <button
-              onClick={() => setDismissed(true)}
-              className="text-muted-foreground hover:text-foreground shrink-0 p-0.5"
-            >
+            <button onClick={() => setDismissed(true)} className="text-muted-foreground hover:text-foreground shrink-0 p-0.5">
               <X className="w-3.5 h-3.5" />
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Push Notification Banner */}
       <AnimatePresence>
         {pushSupported && pushPermission === "default" && !pushDismissed && !canInstall && (
           <motion.div
@@ -91,22 +82,10 @@ export default function PWAInstallBanner() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-foreground">Stay in the loop</p>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Get notified for new assignments, grades, and announcements.
-              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">Get notified for new assignments, grades, and announcements.</p>
               <div className="flex gap-2 mt-2.5">
-                <button
-                  onClick={handlePushEnable}
-                  className="px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-lg min-h-[32px]"
-                >
-                  Enable
-                </button>
-                <button
-                  onClick={dismissPush}
-                  className="px-3 py-1.5 text-muted-foreground text-xs rounded-lg hover:bg-muted min-h-[32px]"
-                >
-                  No thanks
-                </button>
+                <button onClick={handlePushEnable} className="px-3 py-1.5 bg-amber-500 text-white text-xs font-semibold rounded-lg min-h-[32px]">Enable</button>
+                <button onClick={dismissPush} className="px-3 py-1.5 text-muted-foreground text-xs rounded-lg hover:bg-muted min-h-[32px]">No thanks</button>
               </div>
             </div>
             <button onClick={dismissPush} className="text-muted-foreground hover:text-foreground shrink-0 p-0.5">
