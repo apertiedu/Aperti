@@ -279,7 +279,7 @@ export default function StudentDashboard() {
           className="lg:col-span-2 bg-card rounded-2xl shadow-sm border border-border overflow-hidden flex flex-col">
           <div className="flex items-center justify-between px-5 py-4 border-b border-border bg-muted/20">
             <h2 className="font-bold text-foreground flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" />Action Items</h2>
-            <button onClick={() => navigate("/homework")} className="text-xs text-primary hover:text-primary/80 font-semibold transition-colors flex items-center">
+            <button onClick={() => navigate("/my-homework")} className="text-xs text-primary hover:text-primary/80 font-semibold transition-colors flex items-center">
               View all <ChevronRight className="h-3 w-3 ml-0.5" />
             </button>
           </div>
@@ -298,7 +298,7 @@ export default function StudentDashboard() {
                   return (
                     <motion.div key={hw.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 + i*0.1 }}
                       className="flex items-center gap-4 px-5 py-4 hover:bg-muted/50 transition-colors cursor-pointer group"
-                      onClick={() => navigate("/homework")}>
+                      onClick={() => navigate("/my-homework")}>
                       <div className={`w-3 h-3 rounded-full flex-shrink-0 shadow-sm ${submitted ? "bg-emerald-500 shadow-emerald-500/40" : isOverdue ? "bg-red-500 shadow-red-500/40 animate-pulse" : "bg-amber-500 shadow-amber-500/40"}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-foreground truncate group-hover:text-primary transition-colors">{hw.title}</p>
@@ -328,7 +328,7 @@ export default function StudentDashboard() {
               <h2 className="font-bold text-foreground flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-primary" />Today's Sessions
               </h2>
-              <button onClick={() => navigate("/timetable")} className="text-xs text-primary hover:text-primary/80 font-semibold transition-colors flex items-center">
+              <button onClick={() => navigate("/my-timetable")} className="text-xs text-primary hover:text-primary/80 font-semibold transition-colors flex items-center">
                 Full timetable <ChevronRight className="h-3 w-3 ml-0.5" />
               </button>
             </div>

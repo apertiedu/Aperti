@@ -121,7 +121,7 @@ export default function Courses() {
       const params = new URLSearchParams();
       if (debouncedSearch) params.set("search", debouncedSearch);
       if (subject !== "All Subjects") params.set("subject", subject);
-      const res = await fetch(`/courses?${params}`);
+      const res = await fetch(`/api/courses?${params}`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to load courses");
       return res.json();
     },

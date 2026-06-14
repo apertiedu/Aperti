@@ -29,7 +29,7 @@ export default function CourseDetail() {
   const { data: course, isLoading } = useQuery<Course>({
     queryKey: ["course", courseId],
     queryFn: async () => {
-      const res = await fetch(`/courses/${courseId}`);
+      const res = await fetch(`/api/courses/${courseId}`, { credentials: "include" });
       if (!res.ok) throw new Error("Course not found");
       return res.json();
     },
@@ -38,7 +38,7 @@ export default function CourseDetail() {
 
   const enrollMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`/courses/${courseId}/enroll`, {
+      const res = await fetch(`/api/courses/${courseId}/enroll`, {
         method: "POST",
         credentials: "include",
       });

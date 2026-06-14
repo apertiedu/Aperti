@@ -45,7 +45,7 @@ function CourseCoverageBadge({ courseId }: { courseId: number }) {
     queryKey: ["course-coverage", courseId],
     queryFn: () =>
       fetch(`/api/course-health/${courseId}/coverage`, {
-        headers: {},
+        credentials: "include",
       }).then(r => r.ok ? r.json() : null),
     staleTime: 10 * 60 * 1000,
     retry: false,
@@ -87,7 +87,7 @@ function QualityScoreBadge({ courseId }: { courseId: number }) {
     queryKey: ["quality-score", courseId],
     queryFn: () =>
       fetch(`/api/teacher/courses/${courseId}/quality-score`, {
-        headers: {},
+        credentials: "include",
       }).then(r => r.ok ? r.json() : null),
     staleTime: 5 * 60 * 1000,
     retry: false,

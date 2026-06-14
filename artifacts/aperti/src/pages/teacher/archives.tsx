@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
@@ -158,9 +159,16 @@ export default function ExamArchives() {
           <Archive className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
           <p className="font-medium text-muted-foreground">No archives yet</p>
           <p className="text-xs text-muted-foreground mt-1">Archive an assessment to store its paper, mark scheme, and report.</p>
-          <Button variant="outline" className="mt-4 gap-2" onClick={() => setShowArchiveModal(true)}>
-            <Plus className="w-4 h-4" /> Create First Archive
-          </Button>
+          <div className="flex flex-col sm:flex-row items-center gap-2 mt-4 justify-center">
+            <Button variant="outline" className="gap-2" onClick={() => setShowArchiveModal(true)}>
+              <Plus className="w-4 h-4" /> Create First Archive
+            </Button>
+            <Link href="/teacher/assessments">
+              <Button variant="ghost" className="gap-2 text-primary">
+                <BookOpen className="w-4 h-4" /> Go to Assessment Hub
+              </Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
