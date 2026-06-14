@@ -2,12 +2,17 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 
 const API = "/auth";
 
-interface User {
+export type UserRole = "admin" | "teacher" | "assistant" | "student" | "parent" | "guest";
+
+export interface User {
   id: number;
   username: string;
   displayName: string;
-  role: "admin" | "teacher" | "assistant" | "student" | "parent";
-  mustChangePassword?: boolean;
+  email: string | null;
+  role: UserRole;
+  status: string;
+  mfaEnabled: boolean;
+  mustChangePassword: boolean;
 }
 
 interface AuthContextType {
@@ -109,3 +114,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 export const useAuth = () => useContext(AuthContext);
+
+export const useRole = (): UserRole => {
+  const { user } = useContext(AuthContext);
+  return user?.role ?? "guest";
+};
+
+export const useIsRole = (...roles: UserRole[]): boolean => {
+  const role = useRole();
+  return roles.includes(role);
+};
