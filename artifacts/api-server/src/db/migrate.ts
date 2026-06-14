@@ -1431,4 +1431,19 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_ai_usage_log_account ON ai_usage_log(account_id, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_ai_usage_log_module  ON ai_usage_log(module, created_at DESC)`,
+
+  /* repair_log — auto-repair script findings and manual fix history */
+  `CREATE TABLE IF NOT EXISTS repair_log (
+    id          serial PRIMARY KEY,
+    run_at      timestamptz NOT NULL DEFAULT NOW(),
+    type        text NOT NULL,
+    severity    text NOT NULL DEFAULT 'warning',
+    file        text,
+    line_number integer,
+    content     text,
+    suggestion  text,
+    auto_fixed  boolean NOT NULL DEFAULT false
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_repair_log_run_at   ON repair_log(run_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_repair_log_severity ON repair_log(severity, run_at DESC)`,
 ];

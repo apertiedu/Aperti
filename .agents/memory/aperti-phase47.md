@@ -3,6 +3,25 @@ name: Aperti Phase 47 — Unified V2 System Upgrade
 description: Permission matrix, AI Teaching Assistant, repair script, deploy pipeline, launch certification — all delivered within existing monorepo structure (no restructure to aperti-v2/).
 ---
 
+## Items 6/7/8 additions
+
+### Env validation (`config/env.ts`)
+`validateEnv()` called in `app.ts` immediately after Express app + PgSession constants are defined (before `isProduction`). Exits process if DATABASE_URL or JWT_SECRET missing or JWT_SECRET < 32 chars. Warns on SESSION_SECRET absence and missing AI key. Call must stay before any middleware or route registration.
+
+### Repair system
+- `routes/admin-repair.ts` — orphan detection (7 types), one-click fix, launch score, route check, repair log
+- `pages/admin/repair-panel.tsx` — full UI with score gauge, orphan table, fix buttons, repair log viewer
+- `repair_log` table — appended to migrate.ts, populated by `scripts/repair.ts --fix` via psql and by `POST /api/admin/repair/fix-orphans`
+- Registered: `app.use("/api/admin/repair", adminRepairRouter)` in app.ts, route `/admin/repair` in App.tsx, "Repair Panel" in layout.tsx Admin group
+
+### Launch Readiness Score
+- `GET /api/admin/repair/launch-score` — 6 dimensions: route_health(20), db_integrity(20), permission_integrity(15), ai_stability(15), build_quality(15), data_integrity(15) → total 0-100
+- `certified = score >= 95 AND no "fail" dimensions`
+- FounderControlPage.tsx now queries `/api/admin/repair/launch-score` (queryKey "founder-launch-score") and renders live score replacing hardcoded 95
+
+### Scripts repair.ts V2
+New capabilities vs V1: `--fix` flag for actual auto-patch (unsafe role access, JWT fallbacks), route consistency check (compares route-registry.ts vs App.tsx), psql-based repair_log writes, `--json` for CI-friendly output
+
 ## Key decisions
 
 ### No V2 monorepo restructure

@@ -7,7 +7,7 @@ import {
   Award, CreditCard, HelpCircle,
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart, Package,
   RefreshCw, Settings, MessageSquare,
-  LogOut, ChevronLeft, ChevronRight, Search, KeyRound,
+  LogOut, ChevronLeft, ChevronRight, Search, KeyRound, Wrench,
   Sun, Moon, ShoppingBag, UserCheck, Link2, Bot, Sparkles,
   GraduationCap, TableProperties, Medal, Scale, Archive,
   Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X, Activity,
@@ -151,6 +151,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Test Runner",             href: "/admin/test-runner",          icon: Activity,    roles: ["admin"] },
         { name: "Feature Registry",        href: "/admin/feature-registry",     icon: Layers,      roles: ["admin"] },
         { name: "Roles & Permissions",     href: "/admin/roles-matrix",         icon: KeyRound,    roles: ["admin"] },
+        { name: "Repair Panel",            href: "/admin/repair",               icon: Wrench,      roles: ["admin"] },
       ],
     },
     {

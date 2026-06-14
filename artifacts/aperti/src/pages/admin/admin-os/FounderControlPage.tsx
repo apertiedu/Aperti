@@ -308,6 +308,15 @@ export default function FounderControlPage() {
     refetchInterval: 300000,
     retry: false,
   });
+  const { data: launchScore, refetch: refetchLaunchScore } = useQuery<{
+    score: number; certified: boolean; label: string; checkedAt: string;
+    breakdown: Record<string, { score: number; max: number; label: string; status: string; details: string }>;
+  }>({
+    queryKey: ["founder-launch-score"],
+    queryFn: () => fetchJSON("/api/admin/repair/launch-score"),
+    refetchInterval: 120000,
+    retry: false,
+  });
 
   const unread = (alerts?.alerts ?? []).filter((a: any) => !a.is_read).length;
   const monthly = (rev?.monthly ?? []).slice(-6);
@@ -496,63 +505,71 @@ export default function FounderControlPage() {
       {/* Platform Stability Goal Dashboard */}
       <PlatformStabilitySection />
 
-      {/* Launch Certification Status */}
+      {/* Launch Readiness Score — live from repair system */}
       <div>
-        <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Launch Readiness</h2>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-          <div className="bg-white rounded-xl border border-gray-100 p-5">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="font-semibold text-gray-900 text-sm">Production Readiness Score</p>
-                <p className="text-xs text-gray-400 mt-0.5">Phase 46 complete — as of June 2026</p>
-              </div>
-              <button onClick={() => nav("/admin/os/system-inventory")}
-                className="text-xs text-teal-600 hover:underline flex items-center gap-1">
-                System Inventory <ArrowUpRight className="w-3 h-3" />
-              </button>
-            </div>
-            <div className="flex items-center gap-6">
-              <QualityGauge score={95} />
-              <div className="flex-1 space-y-2">
-                {[
-                  { label: "Security",       score: 95 },
-                  { label: "Stability",      score: 95 },
-                  { label: "DB Integrity",   score: 92 },
-                  { label: "AI Reliability", score: 90 },
-                  { label: "Performance",    score: 95 },
-                  { label: "Observability",  score: 95 },
-                ].map(({ label, score }) => (
-                  <div key={label} className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 w-28 shrink-0">{label}</span>
-                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full rounded-full bg-teal-500" style={{ width: `${score}%` }} />
-                    </div>
-                    <span className="text-xs font-semibold text-gray-700 w-8 text-right">{score}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3">
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex-1">
-              <p className="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">Green — Launch Ready</p>
-              <ul className="space-y-1 text-xs text-green-700">
-                {["HttpOnly cookie auth — XSS-safe", "RBAC on all 120+ routes", "Rate limiting (auth: 10/15min)", "AI circuit breaker with fallbacks", "/api/health + /api/ai/health live", "DB indexes on all query paths", "Error boundaries + frontend capture"].map(i => (
-                  <li key={i} className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />{i}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <p className="text-xs font-bold text-red-700 uppercase tracking-wide mb-2">Red — Blockers</p>
-              <ul className="space-y-1 text-xs text-red-600">
-                {["Password reset — SMTP not configured", "ToS / Privacy Policy — placeholder content", "Audit log retention — no TTL policy"].map(i => (
-                  <li key={i} className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />{i}</li>
-                ))}
-              </ul>
-            </div>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Launch Readiness</h2>
+          <div className="flex items-center gap-2">
+            <button onClick={() => refetchLaunchScore()}
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 transition-colors">
+              <RefreshCw className="w-3 h-3" /> Refresh
+            </button>
+            <button onClick={() => nav("/admin/repair")}
+              className="text-xs text-teal-600 hover:underline flex items-center gap-1">
+              Repair Panel <ArrowUpRight className="w-3 h-3" />
+            </button>
           </div>
         </div>
-        <LaunchCertBadge />
+        {launchScore ? (
+          <div className="space-y-3">
+            {/* Score banner */}
+            <div className={`rounded-xl border-2 p-5 flex items-center gap-5 ${
+              launchScore.certified ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200" :
+              launchScore.score >= 80 ? "bg-amber-50 border-amber-200" : "bg-red-50 border-red-200"
+            }`}>
+              <QualityGauge score={launchScore.score} />
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <p className="text-lg font-black" style={{ color: launchScore.score >= 95 ? "#16a34a" : launchScore.score >= 80 ? "#d97706" : "#dc2626" }}>
+                    {launchScore.label}
+                  </p>
+                  {launchScore.certified && (
+                    <span className="text-[10px] font-bold bg-green-100 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
+                      CERTIFIED
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-400">Live score · updated {new Date(launchScore.checkedAt).toLocaleTimeString()}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
+                  {Object.entries(launchScore.breakdown).map(([key, item]) => (
+                    <div key={key} className="flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${item.status === "pass" ? "bg-green-500" : item.status === "warn" ? "bg-amber-400" : "bg-red-500"}`} />
+                      <span className="text-xs text-gray-600 truncate">{item.label}</span>
+                      <span className={`text-xs font-bold ml-auto ${item.score === item.max ? "text-green-600" : "text-amber-600"}`}>{item.score}/{item.max}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* Cert + quick links row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+              <LaunchCertBadge />
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <p className="text-xs font-bold text-green-700 uppercase tracking-wide mb-2">V2 Security Posture</p>
+                <ul className="space-y-1 text-xs text-green-700">
+                  {["HttpOnly cookie auth — XSS-safe", "RBAC + requirePermission middleware", "Rate limiting (auth 10/15min, global 200/min)", "AI circuit breaker with fallbacks", "validateEnv() exits on missing JWT_SECRET"].map(i => (
+                    <li key={i} className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />{i}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+            <div className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse h-40" />
+            <div className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse h-40" />
+          </div>
+        )}
       </div>
 
       {/* Revenue trend + quick links */}

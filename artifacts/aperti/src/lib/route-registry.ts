@@ -43,7 +43,7 @@ const STATIC_ROUTES = new Set([
   "/admin/ai-safety", "/admin/guardian-pulse", "/admin/route-health",
   "/admin/feature-status", "/admin/data-quality",
   "/admin/session-slots", "/admin/debug", "/admin/test-runner", "/admin/feature-registry",
-  "/admin/roles-matrix", "/admin/health",
+  "/admin/roles-matrix", "/admin/health", "/admin/repair",
   "/features", "/roadmap", "/release-notes", "/status",
   "/terms", "/privacy", "/contact", "/trust", "/sitemap",
   "/paper-vault", "/checkout", "/mobile/home",

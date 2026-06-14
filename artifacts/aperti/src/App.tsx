@@ -167,6 +167,8 @@ import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 import AdminOS from "@/pages/admin/admin-os";
 // Phase 47 — Role & Permission Matrix
 import RolesMatrix from "@/pages/admin/roles-matrix";
+// Phase 47 — Repair Panel
+import RepairPanel from "@/pages/admin/repair-panel";
 
 // Phase 16 — Commercialization & Business Operations
 import PricingPage from "@/pages/pricing";
@@ -599,6 +601,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/launch" component={AdminOS} />
     {/* Phase 47 — Role & Permission Matrix */}
     <Route path="/admin/roles-matrix" component={RolesMatrix} />
+    {/* Phase 47 — System Repair Panel */}
+    <Route path="/admin/repair" component={RepairPanel} />
   </>
 );
 
