@@ -222,6 +222,7 @@ import AssessmentMonitor from "@/pages/teacher/assessment-monitor";
 import TeacherGradebook from "@/pages/teacher/gradebook";
 import ModerationCenter from "@/pages/teacher/moderation";
 import ExamArchives from "@/pages/teacher/archives";
+import TeacherSchedulePage from "@/pages/teacher/schedule";
 import AdminCertificates from "@/pages/admin/certificates";
 import StudentExamSession from "@/pages/student/exam-session";
 import ExamResults from "@/pages/student/exam-results";
@@ -523,6 +524,7 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/gradebook"><Redirect to="/gradebook-plus" /></Route>
     <Route path="/teacher/moderation" component={ModerationCenter} />
     <Route path="/teacher/archives" component={ExamArchives} />
+    <Route path="/teacher/schedule" component={TeacherSchedulePage} />
     {/* Phase 7 — Communication */}
     <Route path="/inbox" component={UnifiedInbox} />
     <Route path="/channels/:courseId" component={ClassChannel} />

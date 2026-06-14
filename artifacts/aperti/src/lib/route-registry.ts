@@ -28,7 +28,7 @@ const STATIC_ROUTES = new Set([
   "/link-parent", "/my-qr", "/flashcards/swipe",
   "/labs/forge-field", "/labs/react-sphere", "/labs/geometrix",
   "/labs/biosphere", "/teacher/assessments", "/teacher/moderation",
-  "/teacher/archives", "/teacher/contentcraft",
+  "/teacher/archives", "/teacher/contentcraft", "/teacher/schedule",
   "/teacher/question-studio", "/teacher/questions/import",
   "/teacher/questions/extract", "/teacher/analytics/content",
   "/guardian-link", "/parent/link-student",
