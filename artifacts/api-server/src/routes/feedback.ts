@@ -63,6 +63,49 @@ feedbackRouter.get("/summary", authenticate, requireRole("admin"), async (req: R
   }
 });
 
+// POST /api/feedback/ai — AI-generated lesson feedback for a student submission
+feedbackRouter.post("/ai", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const { submissionText, subject, studentName, assignmentTitle, targetGrade } = req.body;
+    if (!submissionText) return res.status(400).json({ error: "submissionText is required" });
+    const { openaiChat } = await import("../services/ai");
+    const raw = await openaiChat({
+      systemPrompt: `You are an expert ${subject || "subject"} teacher trained in IGCSE and A-Level marking. Provide structured, honest, actionable feedback. Respond ONLY with valid JSON — no markdown fences, no extra text.`,
+      userMessage: `Provide feedback for this submission.
+Student: ${studentName || "Student"}
+Assignment: ${assignmentTitle || "Assignment"}
+Subject: ${subject || "General"}
+Target Grade: ${targetGrade || "Not specified"}
+
+Submission:
+${(submissionText as string).slice(0, 3000)}
+
+Respond with ONLY this JSON structure:
+{
+  "strengths": ["point 1", "point 2", "point 3"],
+  "improvements": ["point 1", "point 2", "point 3"],
+  "examTips": ["tip 1", "tip 2"],
+  "suggestedGrade": "A/B/C/D/E/U",
+  "overallFeedback": "2-3 sentence overall assessment.",
+  "nextSteps": "What to focus on next."
+}`,
+      maxTokens: 900,
+    });
+    if (!raw) return res.status(503).json({ error: "AI service unavailable" });
+    let parsed: any;
+    try {
+      const match = raw.match(/\{[\s\S]*\}/);
+      parsed = JSON.parse(match?.[0] || raw);
+    } catch {
+      return res.status(500).json({ error: "Could not parse AI response", raw });
+    }
+    res.json({ success: true, feedback: parsed });
+  } catch (err: any) {
+    console.error("AI feedback error:", err);
+    res.status(500).json({ error: "Failed to generate AI feedback", details: err.message });
+  }
+});
+
 // GET /api/feedback/feature/:feature — all feedback for a feature
 feedbackRouter.get("/feature/:feature", authenticate, requireRole("admin"), async (req: Request, res: Response) => {
   try {

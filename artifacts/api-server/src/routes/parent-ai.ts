@@ -21,7 +21,7 @@ async function openaiChat(messages: any[], maxTokens = 600): Promise<string> {
   const response = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model: "gpt-4o-mini", messages, max_tokens: maxTokens }),
+    body: JSON.stringify({ model: process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct", messages, max_tokens: maxTokens }),
   });
   if (!response.ok) throw new Error(`OpenAI ${response.status}`);
   return ((await response.json()) as any).choices?.[0]?.message?.content ?? "";

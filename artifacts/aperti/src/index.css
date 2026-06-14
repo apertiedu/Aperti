@@ -593,3 +593,41 @@ body, #root {
 .pb-safe {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
+
+/* ── Landing: Full-Screen 3D Scroll System ──────────────────────────── */
+.landing-scroll {
+  height: 100vh;
+  overflow-y: scroll;
+  scroll-snap-type: y proximity;
+  scroll-behavior: smooth;
+}
+.snap-start {
+  scroll-snap-align: start;
+}
+.mesh-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  will-change: transform;
+}
+@keyframes float-3d {
+  0%, 100% { transform: translateY(0) rotateX(0deg) rotateZ(0deg); }
+  33%       { transform: translateY(-14px) rotateX(4deg) rotateZ(1deg); }
+  66%       { transform: translateY(7px) rotateX(-2deg) rotateZ(-1.5deg); }
+}
+.float-3d { animation: float-3d 9s ease-in-out infinite; }
+@keyframes scroll-cue {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.4; }
+  50%       { transform: translateX(-50%) translateY(8px); opacity: 1; }
+}
+.scroll-cue { animation: scroll-cue 2.4s ease-in-out infinite; }
+.grid-perspective {
+  perspective: 1400px;
+  perspective-origin: 50% 0%;
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spin-slow { animation: spin-slow 40s linear infinite; }

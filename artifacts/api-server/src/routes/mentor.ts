@@ -112,7 +112,7 @@ Your task:
 
   try {
     const body = JSON.stringify({
-      model: "gpt-4o-mini",
+      model: process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct",
       messages: [
         { role: "system", content: localizedSystemPrompt },
         { role: "user", content: message },

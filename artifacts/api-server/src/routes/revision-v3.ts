@@ -51,7 +51,7 @@ Return JSON array of 5-8 items, each with: {"type":"summary|key_points|practice_
           method: "POST",
           headers: { "Authorization": `Bearer ${OPENAI_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            model: "gpt-3.5-turbo",
+            model: process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct",
             messages: [{ role: "user", content: prompt }],
             temperature: 0.7,
             max_tokens: 1500,

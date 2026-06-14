@@ -58,7 +58,7 @@ async function extractTextWithOpenAIVision(imagePath: string): Promise<string> {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct",
         messages: [{
           role: "user",
           content: [
@@ -109,7 +109,7 @@ Respond with JSON: { "grade": <number 0-${totalMarks}>, "feedback": "<brief feed
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
         max_tokens: 300,

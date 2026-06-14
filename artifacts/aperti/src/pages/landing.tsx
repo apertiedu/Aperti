@@ -977,16 +977,18 @@ function AnimeFeatureGrid({ features, teal }: {
     if (prefersReduced || !gridRef.current) return;
     const el = gridRef.current;
     const cards = el.querySelectorAll<HTMLElement>(".anim-feature-card");
-    cards.forEach(c => { c.style.opacity = "0"; c.style.transform = "translateY(32px)"; });
+    cards.forEach(c => { c.style.opacity = "0"; c.style.transform = "rotateX(55deg) translateZ(-70px) translateY(30px)"; });
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && !hasAnimated.current) {
         hasAnimated.current = true;
         observer.disconnect();
         animeAnimate(cards, {
           opacity: [0, 1],
-          translateY: [32, 0],
+          rotateX: ['55deg', '0deg'],
+          translateZ: ['-70px', '0px'],
+          translateY: [30, 0],
           delay: animeStagger(80),
-          duration: 700,
+          duration: 850,
           ease: "outExpo",
         });
       }
@@ -996,7 +998,7 @@ function AnimeFeatureGrid({ features, teal }: {
   }, [features, prefersReduced]);
 
   return (
-    <div ref={gridRef} className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${cols}`}>
+    <div ref={gridRef} className={`grid-perspective grid grid-cols-1 sm:grid-cols-2 gap-5 ${cols}`}>
       {features.map((f, i) => {
         const Icon = getIcon(f.icon);
         return (
@@ -1027,26 +1029,90 @@ function AnimePricingGrid({ plans, teal, isStudent }: {
     if (prefersReduced || !gridRef.current) return;
     const el = gridRef.current;
     const cards = el.querySelectorAll<HTMLElement>(".anim-pricing-card");
-    cards.forEach(c => { c.style.opacity = "0"; c.style.transform = "translateY(24px)"; });
+    cards.forEach(c => { c.style.opacity = "0"; c.style.transform = "rotateX(40deg) translateZ(-60px) translateY(24px)"; });
     if (hasAnimated.current) return;
     hasAnimated.current = true;
     requestAnimationFrame(() => {
       animeAnimate(cards, {
         opacity: [0, 1],
+        rotateX: ['40deg', '0deg'],
+        translateZ: ['-60px', '0px'],
         translateY: [24, 0],
         delay: animeStagger(70),
-        duration: 600,
+        duration: 750,
         ease: "outExpo",
       });
     });
   }, [plans, prefersReduced]);
 
   return (
-    <div ref={gridRef} className={`grid grid-cols-1 sm:grid-cols-2 ${cols} gap-6 mt-8`}>
+    <div ref={gridRef} className={`grid-perspective grid grid-cols-1 sm:grid-cols-2 ${cols} gap-6 mt-8`}>
       {plans.map((p, i) => (
         <div key={p.id} className="anim-pricing-card" style={{ opacity: prefersReduced ? 1 : 0 }}>
           <CMSPricingCard plan={p} colorIdx={i} isStudent={isStudent} />
         </div>
+      ))}
+    </div>
+  );
+}
+
+/* ─────────────────────────── Anime 3D Steps ─────────────────────────── */
+function Anime3DSteps({ teal }: { teal: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+  const prefersReduced = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReduced || !containerRef.current) return;
+    const el = containerRef.current;
+    const cards = el.querySelectorAll<HTMLElement>('.step-3d');
+    cards.forEach(c => {
+      c.style.opacity = '0';
+      c.style.transform = 'rotateY(65deg) translateZ(-90px)';
+    });
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !hasAnimated.current) {
+        hasAnimated.current = true;
+        observer.disconnect();
+        animeAnimate(cards, {
+          opacity: [0, 1],
+          rotateY: ['65deg', '0deg'],
+          translateZ: ['-90px', '0px'],
+          delay: animeStagger(130),
+          duration: 950,
+          ease: 'outExpo',
+        });
+      }
+    }, { threshold: 0.15 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [prefersReduced]);
+
+  const STEPS = [
+    { step: "01", title: "Create your workspace", desc: "Sign up in minutes. Configure subjects and invite students — no setup fees, no waiting.", icon: Shield },
+    { step: "02", title: "Invite students & parents", desc: "Students register and select you as teacher. Parents link via secure pairing code. Approve with one click.", icon: Users },
+    { step: "03", title: "Teach, assess, analyse", desc: "Deliver courses, auto-grade exams, and watch real-time analytics tell you exactly which student needs help.", icon: BarChart3 },
+  ];
+
+  return (
+    <div ref={containerRef} className="grid-perspective grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+      <div className="hidden md:block absolute top-12 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-px"
+        style={{ background: `linear-gradient(to right, ${teal}30, ${teal}60, ${teal}30)` }} />
+      {STEPS.map((item) => (
+        <motion.div key={item.step} className="step-3d bg-white rounded-2xl p-7 border border-gray-100 shadow-sm relative text-center"
+          whileHover={{ y: -8, boxShadow: `0 24px 48px ${teal}14`, transition: { duration: 0.2 } }}
+          style={{ opacity: prefersReduced ? 1 : 0 }}>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 relative"
+            style={{ background: `${teal}12` }}>
+            <item.icon className="h-6 w-6" style={{ color: teal }} />
+            <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white"
+              style={{ background: teal }}>
+              {item.step.replace("0", "")}
+            </span>
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-3">{item.title}</h3>
+          <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+        </motion.div>
       ))}
     </div>
   );
@@ -1515,7 +1581,8 @@ function PricingSection({ teal, teacherPlans, studentPlans, pricingHeadline, pri
 
 /* ─────────────────────────── MAIN LANDING ─────────────────────────── */
 export default function Landing() {
-  const { scrollYProgress } = useScroll();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ container: scrollContainerRef });
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -40]);
   const { data: cms } = useLandingCMS();
 
@@ -1565,15 +1632,18 @@ export default function Landing() {
   const contactEmail    = (contactS.email as string)    ?? "support@aperti.ai";
 
   return (
-    <div className="min-h-screen font-sans" style={{ background: "#F5F5F5", color: "#121212" }}>
+    <div ref={scrollContainerRef} className="font-sans landing-scroll" style={{ color: "#121212", background: "#F5F5F5" }}>
       <Nav />
 
       {/* ── HERO ── */}
-      <section className="min-h-screen flex items-center pt-24 pb-16 px-5 relative overflow-hidden" style={{ background: "white" }}>
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full opacity-[0.04]" style={{ background: teal }} />
-          <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full opacity-[0.03]" style={{ background: teal }} />
-        </div>
+      <section className="snap-start min-h-screen flex items-center pt-20 pb-10 px-5 relative overflow-hidden" style={{ background: "white" }}>
+        <div className="mesh-orb w-[700px] h-[700px] opacity-[0.07] -top-40 -right-40 float-3d" style={{ background: teal }} />
+        <div className="mesh-orb w-[500px] h-[500px] opacity-[0.05] -bottom-28 -left-28" style={{ background: teal }} />
+        <div className="mesh-orb w-[360px] h-[360px] opacity-[0.04] top-1/2 left-1/3 -translate-y-1/2" style={{ background: '#818cf8' }} />
+        <div className="spin-slow absolute top-16 right-20 w-28 h-28 opacity-[0.07] hidden lg:block"
+          style={{ border: `1.5px solid ${teal}`, borderRadius: '50%' }} />
+        <div className="spin-slow absolute bottom-28 left-12 w-16 h-16 opacity-[0.06] hidden lg:block"
+          style={{ border: `1.5px solid ${teal}`, borderRadius: '50%', animationDuration: '24s', animationDirection: 'reverse' }} />
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.8, ease: [0.22,1,0.36,1] }}>
@@ -1624,14 +1694,19 @@ export default function Landing() {
             </motion.div>
           </div>
         </div>
+        <div className="scroll-cue absolute bottom-8 left-1/2 flex flex-col items-center gap-1.5">
+          <div className="w-5 h-8 rounded-full border-2 border-gray-300 flex items-start justify-center pt-1.5">
+            <div className="w-1.5 h-2 rounded-full bg-gray-400" />
+          </div>
+        </div>
       </section>
 
       {/* ── MARQUEE STRIP ── */}
       <MarqueeStrip />
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
-        <div className="max-w-7xl mx-auto">
+      <section id="how-it-works" className="snap-start min-h-screen flex items-center py-20 px-5" style={{ background: "#F5F5F5" }}>
+        <div className="max-w-7xl mx-auto w-full">
           <Reveal>
             <div className="text-center mb-16">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
@@ -1642,31 +1717,9 @@ export default function Landing() {
               <p className="text-gray-500 max-w-md mx-auto">No complex setup. No weeks of training. Just open Aperti and start teaching.</p>
             </div>
           </Reveal>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            <div className="hidden md:block absolute top-12 left-[calc(16.67%+1rem)] right-[calc(16.67%+1rem)] h-px"
-              style={{ background: `linear-gradient(to right, ${teal}30, ${teal}60, ${teal}30)` }} />
-            {[
-              { step: "01", title: "Create your workspace", desc: "Sign up and create your workspace in minutes. Configure your subjects and invite your students — no setup fees, no waiting.", icon: Shield },
-              { step: "02", title: "Invite students & parents", desc: "Students register and select you as their teacher. Parents link via a secure pairing code. You approve each connection with one click.", icon: Users },
-              { step: "03", title: "Teach, assess, analyse", desc: "Deliver courses, set homework, auto-grade exams, and watch real-time analytics tell you exactly which student needs help — before they fall behind.", icon: BarChart3 },
-            ].map((item, i) => (
-              <Reveal key={item.step} delay={i * 0.12}>
-                <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                  className="bg-white rounded-2xl p-7 border border-gray-100 shadow-sm relative text-center">
-                  <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 relative" style={{ background: `${teal}12` }}>
-                    <item.icon className="h-6 w-6" style={{ color: teal }} />
-                    <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white" style={{ background: teal }}>
-                      {item.step.replace("0", "")}
-                    </span>
-                  </div>
-                  <h3 className="font-extrabold text-gray-900 mb-3 text-base">{item.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
-                </motion.div>
-              </Reveal>
-            ))}
-          </div>
-          <Reveal delay={0.4}>
-            <div className="text-center mt-10">
+          <Anime3DSteps teal={teal} />
+          <Reveal delay={0.5}>
+            <div className="text-center mt-12">
               <a href="#apply">
                 <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                   className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm text-white shadow-lg"
@@ -1680,7 +1733,7 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="py-24 px-5 bg-white">
+      <section id="features" className="snap-start min-h-screen flex items-center py-16 px-5 bg-white">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
@@ -1710,12 +1763,15 @@ export default function Landing() {
       </section>
 
       {/* ── STATS STRIP ── */}
-      <StatsStrip cmsStats={statItems} />
+      <div className="snap-start">
+        <StatsStrip cmsStats={statItems} />
+      </div>
 
       {/* ── TESTIMONIALS (CMS-driven) ── */}
       <TestimonialsSection testimonials={testimonials} />
 
       {/* ── PRICING ── */}
+      <div className="snap-start">
       <PricingSection
         teal={teal}
         teacherPlans={teacherPlans}
@@ -1724,6 +1780,7 @@ export default function Landing() {
         pricingAccent={pricingAccent}
         contactEmail={contactEmail}
       />
+      </div>
 
       {/* ── COMPARISON TABLE ── */}
       <ComparisonSection teal={teal} />
@@ -1766,8 +1823,8 @@ export default function Landing() {
       )}
 
       {/* ── GET STARTED CTA ── */}
-      <section id="apply" className="py-24 px-5" style={{ background: "#F5F5F5" }}>
-        <div className="max-w-3xl mx-auto text-center">
+      <section id="apply" className="snap-start min-h-screen flex items-center py-20 px-5" style={{ background: "#F5F5F5" }}>
+        <div className="max-w-3xl mx-auto text-center w-full">
           <Reveal>
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
               style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
