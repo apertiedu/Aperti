@@ -19,16 +19,20 @@ Be concise, practical and professional. Format responses clearly using markdown 
 Address the teacher as a colleague. Always offer actionable next steps.`;
 
 async function openaiChat(messages: any[], maxTokens = 1200): Promise<string> {
-  const apiKey = process.env["OPENAI_API_KEY"];
-  if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
+  const apiKey = process.env["OPENAI_API_KEY"] || process.env["NVIDIA_API_KEY"];
+  if (!apiKey) throw new Error("No AI API key configured");
 
-  const response = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
+  const baseUrl = process.env["OPENAI_BASE_URL"] ||
+    (process.env["NVIDIA_API_KEY"] ? "https://integrate.api.nvidia.com/v1" : "https://api.openai.com/v1");
+  const model = process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct";
+
+  const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify({ model: "gpt-4o-mini", messages, max_tokens: maxTokens }),
+    body: JSON.stringify({ model, messages, max_tokens: maxTokens }),
   });
 
   if (!response.ok) {
