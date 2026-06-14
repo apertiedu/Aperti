@@ -445,20 +445,23 @@ commerceRouter.get("/flashcards/smart-stats", authenticate, async (req: AuthRequ
   const stats = await pool.query(
     `SELECT
        COUNT(fi.id) AS total_cards,
-       COUNT(fp.id) FILTER (WHERE fp.confidence < 3) AS weak_cards,
-       ROUND(AVG(fp.confidence) * 20, 1) AS mastery_pct,
+       COUNT(fp.id) FILTER (WHERE fp.last_confidence = 'hard') AS weak_cards,
+       ROUND(
+         COUNT(fp.id) FILTER (WHERE fp.last_confidence = 'easy') * 100.0
+         / NULLIF(COUNT(fp.id), 0), 1
+       ) AS mastery_pct,
        COUNT(fp.id) FILTER (WHERE fp.next_review <= NOW()) AS due_review
      FROM flashcard_items fi
      JOIN flashcard_decks fd ON fd.id = fi.deck_id
-     LEFT JOIN flashcard_progress fp ON fp.item_id = fi.id AND fp.student_id = $1
+     LEFT JOIN flashcard_progress fp ON fp.card_id = fi.id AND fp.student_id = $1
      WHERE fd.account_id = $1 OR fd.is_public = true`,
     [userId],
   );
   const weak = await pool.query(
-    `SELECT fi.front, fi.back, fp.confidence FROM flashcard_items fi
+    `SELECT fi.front, fi.back, fp.last_confidence AS confidence FROM flashcard_items fi
      JOIN flashcard_decks fd ON fd.id = fi.deck_id
-     JOIN flashcard_progress fp ON fp.item_id = fi.id AND fp.student_id = $1
-     WHERE fp.confidence < 3 ORDER BY fp.confidence ASC LIMIT 10`,
+     JOIN flashcard_progress fp ON fp.card_id = fi.id AND fp.student_id = $1
+     WHERE fp.last_confidence = 'hard' ORDER BY fp.last_review ASC LIMIT 10`,
     [userId],
   );
   res.json({ stats: stats.rows[0], weakCards: weak.rows });
@@ -468,18 +471,19 @@ commerceRouter.get("/flashcards/smart-stats", authenticate, async (req: AuthRequ
 commerceRouter.post("/flashcards/track", authenticate, async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   const { itemId, confidence } = req.body;
+  const confidenceLabel: string = confidence === "easy" ? "easy" : confidence === "hard" ? "hard" : "okay";
   const nextReview = new Date();
-  const days = confidence >= 4 ? 7 : confidence >= 3 ? 3 : confidence >= 2 ? 1 : 0;
+  const days = confidenceLabel === "easy" ? 7 : confidenceLabel === "okay" ? 3 : 1;
   nextReview.setDate(nextReview.getDate() + days);
 
   await pool.query(
-    `INSERT INTO flashcard_progress (student_id, item_id, confidence, next_review, last_reviewed)
+    `INSERT INTO flashcard_progress (student_id, card_id, last_confidence, next_review, last_review)
      VALUES ($1, $2, $3, $4, NOW())
-     ON CONFLICT (student_id, item_id) DO UPDATE
-     SET confidence = $3, next_review = $4, last_reviewed = NOW()`,
-    [userId, itemId, confidence, nextReview.toISOString()],
+     ON CONFLICT (student_id, card_id) DO UPDATE
+     SET last_confidence = $3, next_review = $4, last_review = NOW()`,
+    [userId, itemId, confidenceLabel, nextReview.toISOString()],
   ).catch(() => {});
-  res.json({ success: true, nextReview });
+  res.json({ success: true, nextReview, confidence: confidenceLabel });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

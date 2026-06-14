@@ -2,7 +2,6 @@ import { apiFetch } from "@/lib/api";
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import QRCode from "qrcode";
-import JSZip from "jszip";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Package, BarChart2, KeyRound, UserCheck, AlertTriangle } from "lucide-react";
+import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Printer, BarChart2, KeyRound, UserCheck, AlertTriangle, CreditCard } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -45,115 +44,233 @@ function SessionBadge({ session }: { session?: Session | null }) {
 }
 
 async function generateQRDataUrl(text: string): Promise<string> {
-  return QRCode.toDataURL(text, { width: 400, margin: 2, color: { dark: "#000000", light: "#ffffff" } });
+  return QRCode.toDataURL(text, {
+    width: 500,
+    margin: 2,
+    color: { dark: "#0D9488", light: "#ffffff" },
+    errorCorrectionLevel: "H",
+  });
+}
+
+function getInitials(name: string) {
+  return name.split(" ").map(n => n[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
+}
+
+function getSessionLines(student: StudentRecord): string {
+  const slots = [
+    { label: "L1", session: student.lesson1Session },
+    { label: "L2", session: student.lesson2Session },
+    { label: "L3", session: student.lesson3Session },
+  ].filter(s => s.session);
+  if (!slots.length) return "";
+  return slots.map(s => `${s.label}: ${s.session!.dayOfWeek} ${s.session!.startTime}`).join(" &nbsp;·&nbsp; ");
+}
+
+function buildIDCardHTML(student: StudentRecord, qrDataUrl: string, cardIndex = 0): string {
+  const initials = getInitials(student.studentName);
+  const sessionsHtml = getSessionLines(student);
+
+  return `
+    <div class="card" style="animation-delay:${cardIndex * 0.05}s">
+      <div class="card-header">
+        <div class="header-left">
+          <div class="brand-logo">Aperti.</div>
+          <div class="brand-sub">Educational OS</div>
+        </div>
+        <div class="avatar">${initials}</div>
+      </div>
+      <div class="card-body">
+        <div class="qr-wrap">
+          <img src="${qrDataUrl}" alt="QR" class="qr-img" />
+          <div class="qr-label">SCAN FOR ATTENDANCE</div>
+        </div>
+        <div class="student-info">
+          <div class="student-name">${student.studentName}</div>
+          <div class="student-code">${student.studentCode}</div>
+          ${sessionsHtml ? `<div class="sessions-line">${sessionsHtml}</div>` : ""}
+          <div class="issued-label">Aperti Student ID</div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <div class="footer-bar"></div>
+        <div class="footer-text">
+          <span>Attendance QR Card</span>
+          <span>${new Date().getFullYear()}</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+const ID_CARD_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+  @page { margin: 10mm; size: A4; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',system-ui,sans-serif; background:#f1f5f9; }
+  .page-title { text-align:center; padding:16px 0 20px; font-size:11pt; font-weight:700; color:#334155; text-transform:uppercase; letter-spacing:2px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:0 4px; }
+  .card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.12); break-inside:avoid; page-break-inside:avoid; }
+  .card-header { background:linear-gradient(135deg,#0D9488 0%,#0f766e 55%,#134e4a 100%); padding:11px 13px 9px; display:flex; align-items:flex-start; justify-content:space-between; position:relative; overflow:hidden; }
+  .card-header::before { content:''; position:absolute; top:-20px; right:-15px; width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.07); }
+  .card-header::after { content:''; position:absolute; bottom:-25px; left:-10px; width:55px; height:55px; border-radius:50%; background:rgba(255,255,255,0.05); }
+  .brand-logo { font-size:14pt; font-weight:900; color:white; letter-spacing:-0.5px; line-height:1; }
+  .brand-sub { font-size:6pt; color:rgba(255,255,255,0.65); text-transform:uppercase; letter-spacing:1.5px; margin-top:2px; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,0.22); border:1.5px solid rgba(255,255,255,0.45); display:flex; align-items:center; justify-content:center; color:white; font-weight:800; font-size:12pt; flex-shrink:0; }
+  .card-body { display:flex; padding:10px 12px; gap:10px; align-items:center; min-height:80px; }
+  .qr-wrap { display:flex; flex-direction:column; align-items:center; gap:3px; flex-shrink:0; }
+  .qr-img { width:68px; height:68px; border-radius:6px; border:1.5px solid #e2e8f0; padding:2px; }
+  .qr-label { font-size:4.5pt; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
+  .student-info { flex:1; min-width:0; }
+  .student-name { font-size:9.5pt; font-weight:800; color:#0f172a; line-height:1.2; word-break:break-word; }
+  .student-code { font-family:monospace; font-size:8pt; color:#0D9488; font-weight:700; margin-top:2px; }
+  .sessions-line { font-size:6pt; color:#64748b; margin-top:5px; line-height:1.4; }
+  .issued-label { font-size:5.5pt; color:#cbd5e1; margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }
+  .card-footer { border-top:1px solid #f1f5f9; padding:5px 12px; }
+  .footer-bar { height:3px; border-radius:2px; background:linear-gradient(90deg,#0D9488,#06b6d4,#8b5cf6); margin-bottom:4px; }
+  .footer-text { display:flex; justify-content:space-between; font-size:5.5pt; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+  @media print { body{background:white;} .card{box-shadow:none; border:1px solid #e2e8f0;} .no-print{display:none;} }
+`;
+
+function openPrintWindow(title: string, bodyContent: string) {
+  const w = window.open("", "_blank", "width=900,height=700");
+  if (!w) return;
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${title}</title><style>${ID_CARD_STYLES}</style></head><body>${bodyContent}</body></html>`);
+  w.document.close();
+  setTimeout(() => w.print(), 800);
 }
 
 function QRModal({ student }: { student: StudentRecord }) {
-  const [dataUrl, setDataUrl] = useState<string>("");
+  const [qrUrl, setQrUrl] = useState<string>("");
   const [open, setOpen] = useState(false);
+  const [printing, setPrinting] = useState(false);
   const { toast } = useToast();
-
-  const initials = student.studentName
-    .split(" ")
-    .map(n => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
 
   const handleOpen = async (v: boolean) => {
     setOpen(v);
-    if (v && !dataUrl) {
-      const url = await generateQRDataUrl(student.studentCode);
-      setDataUrl(url);
+    if (v && !qrUrl) setQrUrl(await generateQRDataUrl(student.studentCode));
+  };
+
+  const handlePrint = async () => {
+    setPrinting(true);
+    try {
+      const url = qrUrl || await generateQRDataUrl(student.studentCode);
+      if (!qrUrl) setQrUrl(url);
+      const html = buildIDCardHTML(student, url);
+      openPrintWindow(
+        `ID Card — ${student.studentName}`,
+        `<div class="page-title">Student ID Card</div><div class="grid" style="grid-template-columns:1fr 1fr;max-width:500px;margin:0 auto;">${html}${html}</div><p style="text-align:center;color:#94a3b8;font-size:8pt;margin-top:16px;" class="no-print">Two copies shown — print and cut as needed.</p>`
+      );
+      toast({ title: "Print window opened" });
+    } finally {
+      setPrinting(false);
     }
   };
 
-  const handleDownload = () => {
+  const handleDownloadQR = () => {
+    if (!qrUrl) return;
     const a = document.createElement("a");
-    a.href = dataUrl;
-    a.download = `${student.studentCode}_${student.studentName.replace(/\s+/g, "_")}.png`;
+    a.href = qrUrl;
+    a.download = `${student.studentCode}_qr.png`;
     a.click();
     toast({ title: "QR code downloaded" });
   };
 
+  const initials = getInitials(student.studentName);
+
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="View student ID card">
-          <QrCode className="h-3.5 w-3.5" />
+        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" title="View ID card">
+          <CreditCard className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-xs p-0 overflow-hidden border-0 shadow-2xl">
+      <DialogContent className="max-w-sm p-0 overflow-hidden border-0 shadow-2xl rounded-2xl">
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ opacity: 0, y: 24, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.98 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.97 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="relative bg-gradient-to-br from-[#0D9488] to-[#0F766E] px-6 pt-6 pb-8 text-white overflow-hidden">
-                <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/5" />
-                <div className="absolute -bottom-8 -left-4 h-20 w-20 rounded-full bg-white/5" />
-                <div className="relative">
-                  <p className="text-xs font-semibold tracking-[0.2em] uppercase text-white/60 mb-4">Aperti · Student ID</p>
-                  <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.08, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                    className="h-14 w-14 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center mb-3 border border-white/30"
-                  >
-                    <span className="text-xl font-bold text-white">{initials}</span>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.14 }}
-                  >
-                    <p className="text-lg font-bold leading-tight">{student.studentName}</p>
-                    <p className="text-xs font-mono text-white/70 mt-0.5 tracking-wider">{student.studentCode}</p>
+              <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0f766e 55%, #134e4a 100%)" }}>
+                <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/5" />
+                <div className="absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-white/5" />
+                <div className="relative px-6 pt-5 pb-6">
+                  <div className="flex items-start justify-between mb-5">
+                    <div>
+                      <p className="text-white font-black text-xl leading-none">Aperti.</p>
+                      <p className="text-white/60 text-[9px] uppercase tracking-[0.2em] mt-1">Educational OS</p>
+                    </div>
+                    <motion.div
+                      initial={{ scale: 0.7, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                      className="h-11 w-11 rounded-full bg-white/20 border border-white/40 flex items-center justify-center"
+                    >
+                      <span className="text-white font-extrabold text-base">{initials}</span>
+                    </motion.div>
+                  </div>
+                  <motion.div initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.12 }}>
+                    <p className="text-white font-bold text-lg leading-tight">{student.studentName}</p>
+                    <p className="text-white/65 font-mono text-sm mt-0.5 tracking-wider">{student.studentCode}</p>
+                    {(student.lesson1Session || student.lesson2Session || student.lesson3Session) && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {[student.lesson1Session, student.lesson2Session, student.lesson3Session].filter(Boolean).map((s, i) => (
+                          <span key={i} className="text-[9px] bg-white/15 text-white/80 rounded-full px-2 py-0.5 font-medium">
+                            L{i + 1}: {s!.dayOfWeek} {s!.startTime}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 flex flex-col items-center gap-4">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.18, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  className="bg-white rounded-2xl p-3 shadow-lg border border-gray-100"
-                >
-                  {dataUrl ? (
-                    <img src={dataUrl} alt={`QR for ${student.studentCode}`} className="w-44 h-44" />
-                  ) : (
-                    <div className="w-44 h-44 bg-gray-100 animate-pulse rounded-xl" />
-                  )}
-                </motion.div>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.28 }}
-                  className="text-xs text-center text-muted-foreground"
-                >
-                  Scan to mark attendance
-                </motion.p>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.32 }}
-                  className="w-full"
-                >
-                  <Button
-                    onClick={handleDownload}
-                    className="w-full gap-2 bg-[#0D9488] hover:bg-[#0B7B70] text-white"
-                    disabled={!dataUrl}
+              <div className="bg-white">
+                <div className="h-1" style={{ background: "linear-gradient(90deg, #0D9488, #06b6d4, #8b5cf6)" }} />
+                <div className="px-6 py-5 flex flex-col items-center gap-4">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.15, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    className="bg-white rounded-2xl p-3 shadow-md border border-gray-100"
                   >
-                    <Download className="h-4 w-4" />
-                    Download ID Card
-                  </Button>
-                </motion.div>
+                    {qrUrl ? (
+                      <img src={qrUrl} alt="QR code" className="w-44 h-44 rounded-xl" />
+                    ) : (
+                      <div className="w-44 h-44 bg-gray-100 rounded-xl animate-pulse" />
+                    )}
+                  </motion.div>
+                  <p className="text-[10px] text-center text-muted-foreground uppercase tracking-widest">Scan to mark attendance</p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25 }}
+                    className="w-full flex gap-2"
+                  >
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-1.5 text-xs"
+                      disabled={!qrUrl}
+                      onClick={handleDownloadQR}
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      QR PNG
+                    </Button>
+                    <Button
+                      className="flex-1 gap-1.5 text-xs"
+                      style={{ background: "linear-gradient(135deg, #0D9488, #0f766e)" }}
+                      disabled={printing}
+                      onClick={handlePrint}
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      {printing ? "Opening…" : "Print Card"}
+                    </Button>
+                  </motion.div>
+                </div>
+                <div className="px-6 pb-4 text-center">
+                  <p className="text-[9px] text-muted-foreground uppercase tracking-widest">Aperti Student ID Card · {new Date().getFullYear()}</p>
+                </div>
               </div>
             </motion.div>
           )}
@@ -319,32 +436,32 @@ export default function Students() {
     finally { setCreateAccountSaving(false); }
   };
 
-  const handleBulkExportQR = useCallback(async () => {
-    if (!students.length) return;
+  const handlePrintAllIDCards = useCallback(async () => {
+    const list = filteredStudents.length > 0 ? filteredStudents : students;
+    if (!list.length) return;
     setBulkExporting(true);
+    toast({ title: "Generating ID cards…", description: `Processing ${list.length} student${list.length !== 1 ? "s" : ""}` });
     try {
-      const zip = new JSZip();
-      const folder = zip.folder("aperti-qr-codes")!;
-      for (const student of students) {
-        const dataUrl = await generateQRDataUrl(student.studentCode);
-        const base64 = dataUrl.split(",")[1];
-        folder.file(`${student.studentCode}_${student.studentName.replace(/\s+/g, "_")}.png`, base64, { base64: true });
-      }
-      const blob = await zip.generateAsync({ type: "blob" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url; a.download = "aperti-qr-codes.zip"; a.click();
-      URL.revokeObjectURL(url);
-      toast({ title: "Downloaded", description: `${students.length} QR codes exported as ZIP` });
-    } catch { toast({ title: "Export failed", variant: "destructive" }); }
-    finally { setBulkExporting(false); }
+      const withQR = await Promise.all(
+        list.map(async (s, i) => ({ student: s, qr: await generateQRDataUrl(s.studentCode), index: i }))
+      );
+      const cardsHTML = withQR.map(({ student, qr, index }) => buildIDCardHTML(student, qr, index)).join("\n");
+      openPrintWindow(
+        `Aperti ID Cards — ${list.length} Students`,
+        `<div class="page-title">Aperti Student ID Cards &nbsp;·&nbsp; ${list.length} Students &nbsp;·&nbsp; ${new Date().toLocaleDateString("en-GB")}</div><div class="grid">${cardsHTML}</div>`
+      );
+      toast({ title: "Print window ready", description: "Use your browser's Print to PDF to save." });
+    } catch {
+      toast({ title: "Export failed", variant: "destructive" });
+    } finally {
+      setBulkExporting(false);
+    }
   }, [students, toast]);
 
   const filteredStudents = students.filter(s =>
     s.studentName.toLowerCase().includes(search.toLowerCase()) || s.studentCode.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Duplicate name detection — flag students with similar names (potential duplicates)
   const nameCounts = students.reduce((acc, s) => {
     const normalized = s.studentName.trim().toLowerCase();
     acc[normalized] = (acc[normalized] || 0) + 1;
@@ -362,8 +479,14 @@ export default function Students() {
           <p className="text-muted-foreground mt-1">Manage enrolled students and their session assignments.</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" className="gap-2" onClick={handleBulkExportQR} disabled={bulkExporting || !students.length}>
-            <Package className="h-4 w-4" />{bulkExporting ? "Exporting..." : "Export All QR Codes"}
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={handlePrintAllIDCards}
+            disabled={bulkExporting || !students.length}
+          >
+            <Printer className="h-4 w-4" />
+            {bulkExporting ? "Generating…" : `Print All ID Cards${search ? ` (${filteredStudents.length})` : ""}`}
           </Button>
 
           <Dialog open={isBulkOpen} onOpenChange={setIsBulkOpen}>
@@ -388,7 +511,6 @@ export default function Students() {
         </div>
       </div>
 
-      {/* Edit Student Dialog */}
       <Dialog open={!!editingStudent} onOpenChange={v => { if (!v) setEditingStudent(null); }}>
         <DialogContent>
           <DialogHeader><DialogTitle>Edit Student — {editingStudent?.studentCode}</DialogTitle></DialogHeader>
@@ -401,7 +523,6 @@ export default function Students() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Login Account Dialog */}
       <Dialog open={!!createAccountStudent} onOpenChange={v => { if (!v) { setCreateAccountStudent(null); setCreateAccountPassword(""); } }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -451,7 +572,7 @@ export default function Students() {
                   <TableHead>Lesson 1</TableHead>
                   <TableHead>Lesson 2</TableHead>
                   <TableHead>Lesson 3</TableHead>
-                  <TableHead className="text-right w-[120px]"></TableHead>
+                  <TableHead className="text-right w-[140px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

@@ -72,12 +72,14 @@ export default defineConfig({
     chunkSizeWarningLimit: 900,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "react/jsx-runtime"],
-          "vendor-query": ["@tanstack/react-query"],
-          "vendor-motion": ["framer-motion"],
-          "vendor-charts": ["recharts"],
-          "vendor-ui": ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu", "@radix-ui/react-select", "@radix-ui/react-tooltip"],
+        manualChunks(id) {
+          if (id.includes("/node_modules/react-dom/") || id.includes("/node_modules/react/")) return "vendor-react";
+          if (id.includes("/node_modules/@tanstack/")) return "vendor-query";
+          if (id.includes("/node_modules/framer-motion")) return "vendor-motion";
+          if (id.includes("/node_modules/recharts") || id.includes("/node_modules/d3-")) return "vendor-charts";
+          if (id.includes("/node_modules/@radix-ui/")) return "vendor-ui";
+          if (id.includes("/node_modules/katex") || id.includes("/node_modules/react-markdown") || id.includes("/node_modules/remark") || id.includes("/node_modules/rehype")) return "vendor-markdown";
+          if (id.includes("/node_modules/qrcode") || id.includes("/node_modules/jszip") || id.includes("/node_modules/html5-qrcode")) return "vendor-qr";
         },
         assetFileNames: "assets/[name]-[hash][extname]",
         chunkFileNames: "assets/[name]-[hash].js",
