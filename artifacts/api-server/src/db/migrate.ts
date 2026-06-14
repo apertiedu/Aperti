@@ -1410,4 +1410,25 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
     resolved_by  integer REFERENCES accounts(id) ON DELETE SET NULL
   )`,
   `CREATE INDEX IF NOT EXISTS idx_pwd_reset_req_status ON password_reset_requests(status, created_at DESC)`,
+
+  /* role_permissions — DB overrides for the V2 permission matrix (admin-editable) */
+  `CREATE TABLE IF NOT EXISTS role_permissions (
+    id         serial PRIMARY KEY,
+    role       text NOT NULL,
+    permission text NOT NULL,
+    granted    boolean NOT NULL DEFAULT true,
+    updated_at timestamptz NOT NULL DEFAULT NOW(),
+    UNIQUE (role, permission)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_role_permissions_role ON role_permissions(role)`,
+
+  /* ai_usage_log — per-user AI module usage tracking */
+  `CREATE TABLE IF NOT EXISTS ai_usage_log (
+    id         serial PRIMARY KEY,
+    account_id integer REFERENCES accounts(id) ON DELETE CASCADE,
+    module     text NOT NULL,
+    created_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_usage_log_account ON ai_usage_log(account_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_usage_log_module  ON ai_usage_log(module, created_at DESC)`,
 ];

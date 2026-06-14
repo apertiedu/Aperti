@@ -165,6 +165,8 @@ import CommunicationAnalytics from "@/pages/admin/communication-analytics";
 
 // Phase 9 — Admin OS
 import AdminOS from "@/pages/admin/admin-os";
+// Phase 47 — Role & Permission Matrix
+import RolesMatrix from "@/pages/admin/roles-matrix";
 
 // Phase 16 — Commercialization & Business Operations
 import PricingPage from "@/pages/pricing";
@@ -595,6 +597,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/feature-registry" component={FeatureRegistryPage} />
     {/* Phase 36 — /admin/launch shortcut */}
     <Route path="/admin/launch" component={AdminOS} />
+    {/* Phase 47 — Role & Permission Matrix */}
+    <Route path="/admin/roles-matrix" component={RolesMatrix} />
   </>
 );
 

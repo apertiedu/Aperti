@@ -150,6 +150,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "System Debug",            href: "/admin/debug",                icon: Terminal,    roles: ["admin"] },
         { name: "Test Runner",             href: "/admin/test-runner",          icon: Activity,    roles: ["admin"] },
         { name: "Feature Registry",        href: "/admin/feature-registry",     icon: Layers,      roles: ["admin"] },
+        { name: "Roles & Permissions",     href: "/admin/roles-matrix",         icon: KeyRound,    roles: ["admin"] },
       ],
     },
     {

@@ -101,6 +101,8 @@ import { enrollmentTimelineRouter } from "./routes/enrollment-timeline";
 import { notificationsInboxRouter } from "./routes/notifications-inbox";
 // Phase 33 — Error System & Performance
 import { errorsLogRouter } from "./routes/errors-log";
+// Phase 47 — AI Teaching Assistant & V2 Permissions
+import { aiTeachRouter } from "./routes/ai-teach";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 
 const app: Express = express();
@@ -381,6 +383,8 @@ app.use("/api/session-slots", sessionSlotsRouter);
 app.use("/api/attendance-audit", attendanceAuditRouter);
 app.use("/api/enrollment-timeline", enrollmentTimelineRouter);
 app.use("/api/notifications/inbox", notificationsInboxRouter);
+// Phase 47 — AI Teaching Assistant System
+app.use("/api/ai-teach", aiTeachRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
