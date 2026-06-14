@@ -1,0 +1,675 @@
+{
+  "generated_at": "2026-06-14T15:56:20.421Z",
+  "total_tables": 201,
+  "total_fk_constraints": 228,
+  "total_modules": 27,
+  "orphan_records": 0,
+  "orphan_checks_run": [
+    "attendance_no_student",
+    "marks_no_exam",
+    "submissions_no_hw",
+    "course_enroll_no_acct",
+    "guardian_no_student",
+    "guardian_no_parent"
+  ],
+  "standalone_tables": [
+    "absence_notify_log",
+    "absence_notify_settings",
+    "academic_analytics",
+    "api_metrics",
+    "attendance_audit",
+    "audit_logs",
+    "automation_tasks",
+    "backup_logs",
+    "branding_settings",
+    "coming_soon_items",
+    "content_quality_scores",
+    "conversion_events",
+    "currencies",
+    "curriculum_mappings",
+    "doc_articles",
+    "enrollment_timeline",
+    "feature_flags",
+    "founder_alert_config",
+    "founder_alerts",
+    "gov_ai_access_rules",
+    "gov_communication_permissions",
+    "gov_course_access_rules",
+    "gov_enrollment_workflows",
+    "gov_feature_access_matrix",
+    "landing_settings",
+    "languages",
+    "launch_audit_items",
+    "migrations_log",
+    "offline_sync_queue",
+    "past_papers",
+    "platform_analytics",
+    "platform_feature_flags",
+    "platform_metrics",
+    "platform_status",
+    "push_subscriptions",
+    "quality_scores",
+    "quests",
+    "releases",
+    "repair_log",
+    "retention_snapshots",
+    "role_permissions",
+    "route_perf_log",
+    "system_health_logs",
+    "test_runs"
+  ],
+  "standalone_note": "These tables have no FK relationships. They are intentionally standalone: config tables, log tables, analytics snapshots, and reference data.",
+  "modules": {
+    "auth_accounts": {
+      "description": "Core identity, authentication and authorization",
+      "tables": [
+        "accounts",
+        "device_sessions",
+        "device_login_log",
+        "login_history",
+        "password_reset_tokens",
+        "password_reset_requests",
+        "sessions",
+        "onboarding_progress",
+        "user_settings",
+        "user_lifecycle_stages",
+        "audit_logs"
+      ],
+      "core_fks": [
+        "device_sessions.account_id → accounts.id (CASCADE)",
+        "device_login_log.account_id → accounts.id (CASCADE)",
+        "login_history.account_id → accounts.id (SET NULL)",
+        "password_reset_tokens.account_id → accounts.id (CASCADE)",
+        "password_reset_requests.account_id → accounts.id (CASCADE)",
+        "onboarding_progress.account_id → accounts.id (CASCADE)",
+        "user_settings.account_id → accounts.id (CASCADE)",
+        "user_lifecycle_stages.user_id → accounts.id (CASCADE)",
+        "audit_logs: standalone (no FK — log table)"
+      ]
+    },
+    "student_management": {
+      "description": "Student records, profiles, and performance tracking",
+      "tables": [
+        "students",
+        "echo_memory",
+        "ascend_profiles",
+        "behavior_patterns",
+        "engagement_records",
+        "mastery_records",
+        "learning_analytics_snapshots",
+        "learning_goals",
+        "learning_paths",
+        "student_goals",
+        "student_feed_items",
+        "focus_sessions",
+        "intervention_alerts",
+        "micro_assessments",
+        "recommendation_feedback"
+      ],
+      "core_fks": [
+        "students.account_id → accounts.id (SET NULL)",
+        "students.teacher_account_id → accounts.id (CASCADE)",
+        "students.lesson1/2/3_session_id → lessons.id (SET NULL)",
+        "echo_memory.student_id → students.id (CASCADE)",
+        "ascend_profiles.student_account_id → accounts.id (CASCADE)",
+        "behavior_patterns.student_id → students.id (CASCADE)",
+        "engagement_records.student_id → students.id (CASCADE)",
+        "mastery_records.student_id → students.id (CASCADE)",
+        "learning_analytics_snapshots.student_id → students.id (CASCADE)",
+        "learning_goals.student_id → students.id (CASCADE)",
+        "learning_paths.student_id → students.id (CASCADE)",
+        "focus_sessions.student_id → students.id (CASCADE)",
+        "intervention_alerts.student_id → students.id (CASCADE)"
+      ]
+    },
+    "guardian_parent": {
+      "description": "Parent-student linking, guardian communications and notifications",
+      "tables": [
+        "guardian_links",
+        "guardian_messages",
+        "parent_notifications",
+        "parent_settings",
+        "meetings",
+        "absence_notify_log",
+        "absence_notify_settings"
+      ],
+      "core_fks": [
+        "guardian_links.parent_account_id → accounts.id (CASCADE)",
+        "guardian_links.student_id → students.id (CASCADE)",
+        "guardian_messages.from_account_id → accounts.id (NO ACTION)",
+        "guardian_messages.to_account_id → accounts.id (NO ACTION)",
+        "parent_notifications.parent_id → accounts.id (CASCADE)",
+        "parent_settings.parent_id → accounts.id (CASCADE)",
+        "meetings.teacher_id → accounts.id (CASCADE)",
+        "meetings.parent_id → accounts.id (CASCADE)",
+        "meetings.student_id → students.id (SET NULL)"
+      ]
+    },
+    "lessons_schedule": {
+      "description": "Lessons, sessions, schedule, and session slots",
+      "tables": [
+        "lessons",
+        "session_slots",
+        "checkin_tokens",
+        "lesson_content",
+        "content_blocks"
+      ],
+      "core_fks": [
+        "lessons.teacher_account_id → accounts.id (CASCADE)",
+        "lessons.subject_id → subjects.id (SET NULL)",
+        "session_slots.lesson_id → lessons.id (CASCADE)",
+        "checkin_tokens.lesson_id → lessons.id (CASCADE)",
+        "lesson_content.teacher_account_id → accounts.id (CASCADE)",
+        "content_blocks.page_id → lesson_content.id (CASCADE)",
+        "content_blocks.created_by → accounts.id (SET NULL)"
+      ]
+    },
+    "subjects_curriculum": {
+      "description": "Subjects, syllabus, curriculum mappings",
+      "tables": [
+        "subjects",
+        "curriculum_mappings"
+      ],
+      "core_fks": [
+        "subjects.teacher_account_id → accounts.id (CASCADE)"
+      ]
+    },
+    "courses_catalog": {
+      "description": "Course catalog, units, topics, enrollments, teacher courses",
+      "tables": [
+        "aperti_courses",
+        "teacher_courses",
+        "course_units",
+        "course_topics",
+        "course_lessons_map",
+        "course_enrollments",
+        "course_builder_templates"
+      ],
+      "core_fks": [
+        "aperti_courses.teacher_account_id → accounts.id (CASCADE)",
+        "teacher_courses.teacher_account_id → accounts.id (CASCADE)",
+        "teacher_courses.subject_id → subjects.id (SET NULL)",
+        "course_units.course_id → teacher_courses.id (CASCADE)",
+        "course_topics.unit_id → course_units.id (CASCADE)",
+        "course_lessons_map.topic_id → course_topics.id (CASCADE)",
+        "course_lessons_map.content_id → lesson_content.id (SET NULL)",
+        "course_enrollments.course_id → aperti_courses.id (CASCADE)",
+        "course_enrollments.student_account_id → accounts.id (CASCADE)"
+      ]
+    },
+    "attendance": {
+      "description": "Attendance records and audit trail",
+      "tables": [
+        "attendance",
+        "attendance_audit"
+      ],
+      "core_fks": [
+        "attendance.student_id → students.id (CASCADE)",
+        "attendance.session_id → lessons.id (CASCADE)",
+        "attendance_audit: standalone audit log (no FK constraints — log table)"
+      ]
+    },
+    "assessments_exams": {
+      "description": "Exams, questions, mark schemes, student marks, paper vault",
+      "tables": [
+        "exams",
+        "exam_questions",
+        "exam_vault_packages",
+        "examiner_reports",
+        "student_marks",
+        "mark_schemes",
+        "rubrics",
+        "trial_vault_attempts",
+        "past_papers"
+      ],
+      "core_fks": [
+        "exams.teacher_account_id → accounts.id (CASCADE)",
+        "exams.subject_id → subjects.id (SET NULL)",
+        "exam_questions.exam_id → exams.id (CASCADE)",
+        "exam_vault_packages.exam_id → exams.id (CASCADE)",
+        "exam_vault_packages.student_id → students.id (CASCADE)",
+        "student_marks.student_id → students.id (CASCADE)",
+        "student_marks.exam_id → exams.id (CASCADE)",
+        "student_marks.question_id → exam_questions.id (CASCADE)",
+        "mark_schemes.exam_question_id → exam_questions.id (CASCADE)",
+        "mark_schemes.question_bank_id → question_bank.id (CASCADE)"
+      ]
+    },
+    "homework": {
+      "description": "Homework assignments, submissions, snapgrade",
+      "tables": [
+        "homework",
+        "homework_submissions",
+        "snapgrade_submissions",
+        "peer_reviews"
+      ],
+      "core_fks": [
+        "homework.teacher_account_id → accounts.id (CASCADE)",
+        "homework.subject_id → subjects.id (SET NULL)",
+        "homework_submissions.homework_id → homework.id (CASCADE)",
+        "homework_submissions.student_id → students.id (CASCADE)",
+        "snapgrade_submissions.student_id → students.id (CASCADE)",
+        "snapgrade_submissions.homework_id → homework.id (SET NULL)",
+        "peer_reviews.reviewer_id → students.id (CASCADE)",
+        "peer_reviews.submission_id → snapgrade_submissions.id (CASCADE)"
+      ]
+    },
+    "question_bank": {
+      "description": "Question bank, extraction jobs, relationships",
+      "tables": [
+        "question_bank",
+        "question_extraction_jobs",
+        "question_import_logs",
+        "question_relationships"
+      ],
+      "core_fks": [
+        "question_bank.teacher_account_id → accounts.id (CASCADE)",
+        "question_bank.subject_id → subjects.id (SET NULL)",
+        "question_bank.moderated_by → accounts.id (SET NULL)",
+        "question_relationships.question_id → question_bank.id (CASCADE)",
+        "question_extraction_jobs.user_id → accounts.id (CASCADE)"
+      ]
+    },
+    "content_craft": {
+      "description": "ContentCraft CMS — pages, blocks, version history",
+      "tables": [
+        "contentcraft_pages",
+        "contentcraft_blocks",
+        "contentcraft_block_versions",
+        "block_version_history",
+        "entity_versions",
+        "documents",
+        "revision_notes",
+        "revision_smart_packs"
+      ],
+      "core_fks": [
+        "contentcraft_pages.teacher_account_id → accounts.id (CASCADE)",
+        "contentcraft_blocks.page_id → contentcraft_pages.id (CASCADE)",
+        "contentcraft_block_versions.block_id → contentcraft_blocks.id (CASCADE)",
+        "contentcraft_block_versions.author_id → accounts.id (NO ACTION)",
+        "block_version_history.changed_by → accounts.id (SET NULL)",
+        "documents.parent_id → accounts.id (CASCADE)",
+        "documents.student_id → students.id (SET NULL)",
+        "revision_notes.user_id → accounts.id (CASCADE)"
+      ]
+    },
+    "ai_intelligence": {
+      "description": "AI interactions, echo memory, misconceptions, shared memory, grade log",
+      "tables": [
+        "ai_interactions",
+        "ai_usage_log",
+        "ai_shared_memory",
+        "ai_grade_log",
+        "echo_memory",
+        "misconceptions",
+        "practice_sessions",
+        "geometrix_sessions",
+        "handwritten_submissions"
+      ],
+      "core_fks": [
+        "ai_interactions.user_id → accounts.id (SET NULL)",
+        "ai_usage_log.account_id → accounts.id (CASCADE)",
+        "ai_shared_memory.account_id → accounts.id (CASCADE)",
+        "ai_grade_log.student_account_id → accounts.id (CASCADE)",
+        "ai_grade_log.reviewed_by → accounts.id (SET NULL)",
+        "misconceptions.created_by → accounts.id (SET NULL)",
+        "practice_sessions.student_id → accounts.id (CASCADE)",
+        "geometrix_sessions.student_id → accounts.id (CASCADE)"
+      ]
+    },
+    "communication": {
+      "description": "Messages, threads, announcements, channels, collaboration rooms",
+      "tables": [
+        "messages",
+        "message_threads",
+        "message_threads_ext",
+        "thread_messages",
+        "thread_participants",
+        "student_messages",
+        "announcements",
+        "announcement_reads",
+        "class_channels",
+        "channel_messages",
+        "collaboration_rooms",
+        "room_members",
+        "room_messages",
+        "shared_resources"
+      ],
+      "core_fks": [
+        "messages.from_account_id → accounts.id (CASCADE)",
+        "messages.to_account_id → accounts.id (CASCADE)",
+        "message_threads_ext.created_by → accounts.id (CASCADE)",
+        "thread_messages.thread_id → message_threads_ext.id (CASCADE)",
+        "thread_messages.sender_id → accounts.id (CASCADE)",
+        "thread_participants.thread_id → message_threads_ext.id (CASCADE)",
+        "thread_participants.user_id → accounts.id (CASCADE)",
+        "announcements.sender_id → accounts.id (CASCADE)",
+        "announcement_reads.announcement_id → announcements.id (CASCADE)",
+        "collaboration_rooms.created_by → accounts.id (CASCADE)",
+        "room_members.room_id → collaboration_rooms.id (CASCADE)",
+        "room_messages.room_id → collaboration_rooms.id (CASCADE)"
+      ]
+    },
+    "payments_subscriptions": {
+      "description": "Subscription plans, subscriptions, payments, invoices, coupons",
+      "tables": [
+        "subscription_plans",
+        "subscriptions",
+        "payment_transactions",
+        "payment_requests",
+        "billing_invoices",
+        "invoices",
+        "coupons",
+        "revenue_records",
+        "currencies"
+      ],
+      "core_fks": [
+        "subscriptions.account_id → accounts.id (CASCADE)",
+        "subscriptions.plan_id → subscription_plans.id (NO ACTION)",
+        "subscriptions.coupon_id → coupons.id (NO ACTION)",
+        "payment_transactions.user_id → accounts.id (CASCADE)",
+        "payment_transactions.subscription_id → subscriptions.id (NO ACTION)",
+        "payment_requests.user_id → accounts.id (CASCADE)",
+        "payment_requests.plan_id → subscription_plans.id (CASCADE)",
+        "billing_invoices.user_id → accounts.id (CASCADE)",
+        "billing_invoices.subscription_id → subscriptions.id (SET NULL)",
+        "invoices.teacher_account_id → accounts.id (CASCADE)",
+        "invoices.student_id → students.id (CASCADE)"
+      ]
+    },
+    "organizations": {
+      "description": "Multi-tenant organizations and settings",
+      "tables": [
+        "organizations",
+        "organization_settings",
+        "branding_settings"
+      ],
+      "core_fks": [
+        "organization_settings.organization_id → organizations.id (CASCADE)",
+        "organizations.subscription_plan_id → subscription_plans.id (NO ACTION)"
+      ]
+    },
+    "governance": {
+      "description": "Role-based access control, enrollment workflows, subscription governance",
+      "tables": [
+        "gov_roles",
+        "gov_permissions",
+        "gov_role_permissions",
+        "gov_user_roles",
+        "gov_enrollments",
+        "gov_enrollment_workflows",
+        "gov_course_access_rules",
+        "gov_feature_access_matrix",
+        "gov_communication_permissions",
+        "gov_ai_access_rules",
+        "gov_subscription_governance",
+        "gov_assistant_approvals",
+        "gov_audit_enforcement",
+        "gov_conflict_logs",
+        "role_permissions",
+        "compliance_requests"
+      ],
+      "core_fks": [
+        "gov_roles.organization_id → organizations.id (SET NULL)",
+        "gov_role_permissions.role_id → gov_roles.id (CASCADE)",
+        "gov_role_permissions.permission_id → gov_permissions.id (CASCADE)",
+        "gov_user_roles.user_id → accounts.id (CASCADE)",
+        "gov_user_roles.role_id → gov_roles.id (CASCADE)",
+        "gov_user_roles.organization_id → organizations.id (CASCADE)",
+        "gov_enrollments.student_id → accounts.id (CASCADE)"
+      ]
+    },
+    "notifications": {
+      "description": "Notifications, push subscriptions, preferences",
+      "tables": [
+        "notifications",
+        "notification_preferences",
+        "notification_rules",
+        "push_subscriptions"
+      ],
+      "core_fks": [
+        "notifications.account_id → accounts.id (CASCADE)",
+        "notification_preferences.user_id → accounts.id (CASCADE)",
+        "notification_rules.user_id → accounts.id (CASCADE)"
+      ]
+    },
+    "gamification": {
+      "description": "Kudos, badges, challenges, study groups, flashcards, knowledge graph",
+      "tables": [
+        "kudos_points",
+        "kudos_badges",
+        "kudos_settings",
+        "challenges",
+        "challenge_participations",
+        "group_challenges",
+        "study_groups",
+        "group_members",
+        "flashcard_decks",
+        "flashcard_items",
+        "flashcard_progress",
+        "knowledge_nodes",
+        "knowledge_edges",
+        "quests"
+      ],
+      "core_fks": [
+        "kudos_points.teacher_account_id → accounts.id (CASCADE)",
+        "kudos_badges.assistant_account_id → accounts.id (NO ACTION)",
+        "challenges.created_by → accounts.id (SET NULL)",
+        "challenge_participations.challenge_id → challenges.id (CASCADE)",
+        "challenge_participations.student_id → students.id (CASCADE)",
+        "study_groups.creator_id → students.id (CASCADE)",
+        "flashcard_decks.teacher_account_id → accounts.id (CASCADE)",
+        "flashcard_items.deck_id → flashcard_decks.id (CASCADE)",
+        "flashcard_progress.card_id → flashcard_items.id (CASCADE)",
+        "knowledge_edges.from_node_id → knowledge_nodes.id (CASCADE)",
+        "knowledge_edges.to_node_id → knowledge_nodes.id (CASCADE)"
+      ]
+    },
+    "resources_media": {
+      "description": "Resources, recordings, notebooks, lab configurations",
+      "tables": [
+        "resources",
+        "recordings",
+        "notebooks",
+        "notebook_pages",
+        "lab_configurations",
+        "simulations",
+        "simulation_results"
+      ],
+      "core_fks": [
+        "resources.teacher_account_id → accounts.id (CASCADE)",
+        "resources.subject_id → subjects.id (SET NULL)",
+        "recordings.teacher_account_id → accounts.id (CASCADE)",
+        "notebooks.account_id → accounts.id (CASCADE)",
+        "notebook_pages.notebook_id → notebooks.id (CASCADE)",
+        "lab_configurations.teacher_id → accounts.id (CASCADE)",
+        "simulations.created_by → accounts.id (NO ACTION)",
+        "simulation_results.simulation_id → simulations.id (CASCADE)"
+      ]
+    },
+    "platform_admin": {
+      "description": "Platform settings, health, feature flags, metrics, launch checklist",
+      "tables": [
+        "platform_settings",
+        "platform_analytics",
+        "platform_metrics",
+        "platform_status",
+        "platform_feature_flags",
+        "feature_flags",
+        "feature_registry",
+        "feature_retirement_log",
+        "system_health_logs",
+        "api_metrics",
+        "route_perf_log",
+        "error_logs",
+        "repair_log",
+        "test_cases",
+        "test_runs",
+        "launch_checklist",
+        "launch_audit_items",
+        "roadmap_items",
+        "release_notes",
+        "releases",
+        "migrations_log",
+        "backup_logs",
+        "coming_soon_items"
+      ],
+      "core_fks": [
+        "platform_settings.updated_by → accounts.id (NO ACTION)",
+        "feature_retirement_log.retired_by → accounts.id (SET NULL)",
+        "launch_checklist.verified_by → accounts.id (SET NULL)",
+        "release_notes.feature_id → feature_registry.id (SET NULL)",
+        "roadmap_items.feature_id → feature_registry.id (SET NULL)",
+        "error_logs.user_id → accounts.id (SET NULL)",
+        "test_cases.tested_by → accounts.id (SET NULL)"
+      ]
+    },
+    "analytics_reporting": {
+      "description": "Academic analytics, engagement, retention, cohort, learning snapshots",
+      "tables": [
+        "academic_analytics",
+        "retention_snapshots",
+        "enrollment_timeline",
+        "search_logs",
+        "usage_tracking",
+        "conversion_events",
+        "engagement_records",
+        "learning_analytics_snapshots",
+        "user_feedback"
+      ],
+      "core_fks": [
+        "search_logs.user_id → accounts.id (SET NULL)",
+        "usage_tracking.user_id → accounts.id (CASCADE)",
+        "user_feedback.account_id → accounts.id (SET NULL)"
+      ]
+    },
+    "support": {
+      "description": "Support tickets, helpdesk, bug reports, knowledge base",
+      "tables": [
+        "support_tickets",
+        "ticket_responses",
+        "helpdesk_tickets",
+        "bugs",
+        "knowledge_base_articles",
+        "doc_articles"
+      ],
+      "core_fks": [
+        "support_tickets.user_id → accounts.id (CASCADE)",
+        "support_tickets.assigned_to → accounts.id (SET NULL)",
+        "ticket_responses.ticket_id → support_tickets.id (CASCADE)",
+        "ticket_responses.responder_id → accounts.id (CASCADE)",
+        "helpdesk_tickets.account_id → accounts.id (CASCADE)",
+        "bugs.reported_by → accounts.id (SET NULL)",
+        "bugs.assigned_to → accounts.id (SET NULL)",
+        "knowledge_base_articles.created_by → accounts.id (NO ACTION)"
+      ]
+    },
+    "workspaces": {
+      "description": "Collaborative workspaces, members, roles",
+      "tables": [
+        "workspaces",
+        "workspace_members",
+        "workspace_roles"
+      ],
+      "core_fks": [
+        "workspaces.owner_id → accounts.id (CASCADE)",
+        "workspace_members.workspace_id → workspaces.id (CASCADE)",
+        "workspace_members.account_id → accounts.id (CASCADE)",
+        "workspace_members.role_id → workspace_roles.id (NO ACTION)",
+        "workspace_roles.workspace_id → workspaces.id (CASCADE)"
+      ]
+    },
+    "mobile_offline": {
+      "description": "Mobile app, offline sync, push",
+      "tables": [
+        "offline_content",
+        "offline_sync_queue",
+        "mobile"
+      ],
+      "core_fks": [
+        "offline_content.student_id → students.id (CASCADE)"
+      ]
+    },
+    "landing_settings": {
+      "description": "Public landing page settings and CMS",
+      "tables": [
+        "landing_settings"
+      ],
+      "core_fks": []
+    },
+    "content_moderation": {
+      "description": "Content moderation, quality scoring, compliance",
+      "tables": [
+        "content_moderation",
+        "content_quality_scores",
+        "content_comments",
+        "moderation_logs",
+        "quality_scores"
+      ],
+      "core_fks": [
+        "content_moderation.reported_by → accounts.id (NO ACTION)",
+        "content_moderation.reviewed_by → accounts.id (NO ACTION)",
+        "content_comments.user_id → accounts.id (CASCADE)",
+        "moderation_logs.reported_by → accounts.id (CASCADE)"
+      ]
+    },
+    "assistant_invitations": {
+      "description": "AI assistant permissions and invitations",
+      "tables": [
+        "assistant_permissions",
+        "assistant_invitations"
+      ],
+      "core_fks": [
+        "assistant_permissions.assistant_id → accounts.id (CASCADE)",
+        "assistant_invitations.invited_by → accounts.id (NO ACTION)",
+        "assistant_invitations.organization_id → organizations.id (NO ACTION)"
+      ]
+    }
+  },
+  "core_workflow_chains": {
+    "Teacher → Course → Unit → Topic → Lesson": [
+      "accounts (role=teacher)",
+      "  → subjects (teacher_account_id)",
+      "  → teacher_courses (teacher_account_id, subject_id)",
+      "     → course_units (course_id)",
+      "        → course_topics (unit_id)",
+      "           → course_lessons_map (topic_id)",
+      "              → lesson_content (content_id)",
+      "  → lessons (teacher_account_id, subject_id)"
+    ],
+    "Account → Student → Attendance → Audit": [
+      "accounts (role=student)",
+      "  → students (account_id, teacher_account_id)",
+      "     → attendance (student_id, session_id→lessons.id)",
+      "        → attendance_audit (student_id, lesson_id) [standalone audit log]"
+    ],
+    "Parent → GuardianLink → Student": [
+      "accounts (role=parent)",
+      "  → guardian_links (parent_account_id, student_id)",
+      "     → students.id"
+    ],
+    "Teacher → Exam → Question → Mark": [
+      "exams (teacher_account_id, subject_id)",
+      "  → exam_questions (exam_id)",
+      "     → student_marks (exam_id, question_id, student_id)",
+      "     → mark_schemes (exam_question_id)"
+    ],
+    "Teacher → Homework → Submission → Review": [
+      "homework (teacher_account_id, subject_id)",
+      "  → homework_submissions (homework_id, student_id)",
+      "  → snapgrade_submissions (homework_id, student_id)",
+      "     → peer_reviews (submission_id, reviewer_id)"
+    ],
+    "Student → Flashcard Progress → Mastery": [
+      "flashcard_decks (teacher_account_id)",
+      "  → flashcard_items (deck_id)",
+      "     → flashcard_progress (card_id, student_id)"
+    ],
+    "Account → Subscription → Payment": [
+      "subscription_plans",
+      "  → subscriptions (account_id, plan_id)",
+      "     → payment_transactions (subscription_id, user_id)",
+      "     → billing_invoices (subscription_id, user_id)"
+    ]
+  }
+}

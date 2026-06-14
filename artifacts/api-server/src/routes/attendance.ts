@@ -62,8 +62,8 @@ attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Respo
 
 attendanceRouter.post("/mark-by-code", authenticate, async (req: AuthRequest, res: Response) => {
   const { studentCode, lessonId, date, status, deviceInfo } = req.body;
-  if (!studentCode || !lessonId || !date) {
-    return res.status(400).json({ error: "studentCode, lessonId, and date are required" });
+  if (!studentCode || !date) {
+    return res.status(400).json({ error: "studentCode and date are required" });
   }
   const [student] = await db
     .select()
@@ -75,15 +75,15 @@ attendanceRouter.post("/mark-by-code", authenticate, async (req: AuthRequest, re
   }
   const [existing] = await db.select({ id: attendanceTable.id, status: attendanceTable.status })
     .from(attendanceTable)
-    .where(and(eq(attendanceTable.studentId, student.id), eq(attendanceTable.sessionId, Number(lessonId)), eq(attendanceTable.date, date)))
+    .where(and(eq(attendanceTable.studentId, student.id), ...(lessonId ? [eq(attendanceTable.sessionId, Number(lessonId))] : []), eq(attendanceTable.date, date)))
     .limit(1);
   const newStatus = status || "Present";
   if (existing) {
     await db.update(attendanceTable).set({ status: newStatus, markedAt: sql`now()` }).where(eq(attendanceTable.id, existing.id));
-    await logAudit({ attendanceId: existing.id, studentId: student.id, lessonId: Number(lessonId), action: "update_qr", oldStatus: existing.status, newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
+    await logAudit({ attendanceId: existing.id, studentId: student.id, lessonId: lessonId ? Number(lessonId) : undefined, action: "update_qr", oldStatus: existing.status, newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
   } else {
-    const [inserted] = await db.insert(attendanceTable).values({ studentId: student.id, sessionId: Number(lessonId), date, status: newStatus }).returning();
-    await logAudit({ attendanceId: inserted?.id, studentId: student.id, lessonId: Number(lessonId), action: "scan_qr", newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
+    const [inserted] = await db.insert(attendanceTable).values({ studentId: student.id, sessionId: lessonId ? Number(lessonId) : null, date, status: newStatus }).returning();
+    await logAudit({ attendanceId: inserted?.id, studentId: student.id, lessonId: lessonId ? Number(lessonId) : undefined, action: "scan_qr", newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
   }
   res.json({
     success: true,

@@ -23,18 +23,26 @@ homeworkRouter.get("/teacher", authenticate, requireRole("teacher", "admin"), as
 homeworkRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   const teacherId = req.userId!;
   const { subjectId, title, description, instructions, dueDate, totalMarks, allowLate, classFilter } = req.body;
-  const [hw] = await db.insert(homeworkTable).values({
-    teacherAccountId: teacherId,
-    subjectId, title, description, instructions, dueDate, totalMarks: totalMarks?.toString(),
-    allowLate, classFilter, isPublished: true,
-  }).returning();
-  // Push notification to all students
-  sendPushToRole("student", {
-    title: "New Assignment Posted 📚",
-    body: title ? `"${title}" has been assigned.` : "A new homework assignment has been posted.",
-    url: "/my-homework",
-  }).catch(() => {});
-  res.status(201).json(hw);
+  if (!title?.trim()) return res.status(400).json({ error: "title is required" });
+  try {
+    const [hw] = await db.insert(homeworkTable).values({
+      teacherAccountId: teacherId,
+      subjectId: subjectId || null,
+      title, description, instructions, dueDate,
+      totalMarks: totalMarks != null ? totalMarks.toString() : null,
+      allowLate: allowLate ?? false,
+      classFilter: classFilter || null,
+      isPublished: true,
+    }).returning();
+    sendPushToRole("student", {
+      title: "New Assignment Posted 📚",
+      body: title ? `"${title}" has been assigned.` : "A new homework assignment has been posted.",
+      url: "/my-homework",
+    }).catch(() => {});
+    res.status(201).json(hw);
+  } catch (err: any) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 // PUT /homework/:id — update homework

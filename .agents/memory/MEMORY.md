@@ -14,3 +14,4 @@
 - [Aperti Phase 48 final stack](aperti-phase48.md) — SSE AI gateway, multi-agent orchestrator (teacher/student/admin), V2 namespace, classforge mount, ai_shared_memory table, live SSE debug dashboard all complete.
 - [Aperti Phase 47 V2 Upgrade](aperti-phase47.md) — permission matrix, AI Teaching Assistant (4 modules), repair script, deploy pipeline, launch cert — all in existing structure (no aperti-v2/ restructure).
 - [Aperti credentials recovery](aperti-credentials-recovery.md) — root cause of ~80% of 401/undefined errors: local apiFetch/fetchJSON without credentials:"include". 18 files fixed. Pattern to check: any file with a local fetch wrapper must have credentials:"include".
+- [Aperti admin-repair table names](aperti-admin-repair-tables.md) — orphans/fix-orphans endpoints must use course_enrollments (not enrollments), session_id (not lesson_id) on attendance, guardian_links_no_student (not expired_sessions). Wrong table names cause -1 count errors silently.
