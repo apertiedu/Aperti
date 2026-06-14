@@ -2,6 +2,7 @@ import { useState, useRef, FormEvent, useEffect, useMemo } from "react";
 import { motion, useInView, AnimatePresence, useScroll, useTransform, useReducedMotion, useMotionValue, useSpring } from "framer-motion";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { animate as animeAnimate, stagger as animeStagger } from "animejs";
 import {
   ArrowRight, BookOpen, Brain, BarChart3, Video, CheckCircle2,
   Menu, X, GraduationCap, Clock, Users, ChevronRight, Sparkles,
@@ -349,7 +350,9 @@ function useCountUp(target: number, duration = 1600) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
   const hasRun = useRef(false);
+  const prefersReduced = useReducedMotion();
   useEffect(() => {
+    if (prefersReduced) { setCount(target); return; }
     const el = ref.current;
     if (!el) return;
     const observer = new IntersectionObserver((entries) => {
@@ -357,20 +360,19 @@ function useCountUp(target: number, duration = 1600) {
         hasRun.current = true;
         observer.disconnect();
         if (target === 0) return;
-        const startTime = performance.now();
-        const tick = (now: number) => {
-          const elapsed = now - startTime;
-          const progress = Math.min(elapsed / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          setCount(Math.round(eased * target));
-          if (progress < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+        const obj = { value: 0 };
+        animeAnimate(obj, {
+          value: target,
+          duration,
+          ease: "outCubic",
+          onUpdate() { setCount(Math.round(obj.value)); },
+          onComplete() { setCount(target); },
+        });
       }
     }, { threshold: 0.2 });
     observer.observe(el);
     return () => observer.disconnect();
-  }, [target, duration]);
+  }, [target, duration, prefersReduced]);
   return { count, ref };
 }
 
@@ -451,7 +453,22 @@ const MARQUEE_ITEMS = [
 
 function MarqueeStrip() {
   const prefersReduced = useReducedMotion();
+  const trackRef = useRef<HTMLDivElement>(null);
+  const animRef = useRef<any>(null);
   const doubled = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+
+  useEffect(() => {
+    if (prefersReduced || !trackRef.current) return;
+    const el = trackRef.current;
+    animRef.current = animeAnimate(el, {
+      translateX: "-50%",
+      duration: 34000,
+      ease: "linear",
+      loop: true,
+    });
+    return () => { animRef.current?.pause?.(); };
+  }, [prefersReduced]);
+
   return (
     <div className="relative overflow-hidden py-3" style={{ background: "#F9FAFB", borderTop: "1px solid #F0F0F0", borderBottom: "1px solid #F0F0F0" }}>
       <div className="absolute inset-y-0 left-0 w-24 z-10 pointer-events-none"
@@ -467,10 +484,7 @@ function MarqueeStrip() {
           ))}
         </div>
       ) : (
-        <motion.div
-          className="flex items-center gap-10 whitespace-nowrap"
-          animate={{ x: ["0%", "-50%"] }}
-          transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+        <div ref={trackRef} className="flex items-center gap-10 whitespace-nowrap will-change-transform"
           style={{ width: "max-content" }}>
           {doubled.map((item, i) => (
             <span key={i} className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400">
@@ -478,7 +492,7 @@ function MarqueeStrip() {
               {item}
             </span>
           ))}
-        </motion.div>
+        </div>
       )}
     </div>
   );
@@ -501,11 +515,8 @@ function CMSPricingCard({ plan, colorIdx, isStudent }: { plan: CMSPlan; colorIdx
   const popular = plan.is_highlighted || plan.badge === "POPULAR";
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: colorIdx * 0.07, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -5, boxShadow: `0 20px 48px ${color}18`, transition: { duration: 0.2 } }}
-      className="bg-white rounded-2xl p-6 border-2 relative flex flex-col"
+      className="bg-white rounded-2xl p-6 border-2 relative flex flex-col h-full"
       style={{ borderColor: popular ? color : "#f0f0f0" }}>
       {popular && (
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold text-white whitespace-nowrap"
@@ -904,6 +915,140 @@ function EarlyAccessForm({ ctaText, email }: { ctaText?: string; email?: string 
         </p>
       )}
     </form>
+  );
+}
+
+/* ─────────────────────────── Anime Hero Title ─────────────────────────── */
+function AnimeHeroTitle({ headline, headlineAccent, teal }: {
+  headline: string; headlineAccent: string; teal: string;
+}) {
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const prefersReduced = useReducedMotion();
+
+  useEffect(() => {
+    if (prefersReduced || !titleRef.current) return;
+    const spans = titleRef.current.querySelectorAll<HTMLElement>(".word-span");
+    spans.forEach(s => { s.style.opacity = "0"; s.style.transform = "translateY(24px)"; });
+    animeAnimate(spans, {
+      opacity: [0, 1],
+      translateY: [24, 0],
+      delay: animeStagger(55),
+      duration: 750,
+      ease: "outExpo",
+    });
+  }, [headline, headlineAccent, prefersReduced]);
+
+  const headlineWords = headline.split(" ");
+  const accentWords = headlineAccent.split(" ");
+
+  return (
+    <h1 ref={titleRef}
+      className="text-5xl md:text-6xl lg:text-[64px] font-black leading-[1.06] tracking-tight mb-6"
+      style={{ color: "#121212" }}>
+      {headlineWords.map((word, i) => (
+        <span key={i} className="word-span inline-block" style={{ marginRight: "0.25em" }}>
+          {word}
+        </span>
+      ))}
+      <br />
+      {accentWords.map((word, i) => (
+        <span key={i} className="word-span inline-block" style={{ color: teal, marginRight: "0.25em" }}>
+          {word}
+        </span>
+      ))}
+    </h1>
+  );
+}
+
+/* ─────────────────────────── Anime Feature Grid ─────────────────────────── */
+function AnimeFeatureGrid({ features, teal }: {
+  features: Array<{ icon: string; title: string; description: string }>;
+  teal: string;
+}) {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+  const prefersReduced = useReducedMotion();
+  const cols = features.length <= 3 ? "lg:grid-cols-3"
+    : features.length === 4 ? "lg:grid-cols-4"
+    : features.length === 5 ? "lg:grid-cols-5"
+    : "lg:grid-cols-3";
+
+  useEffect(() => {
+    if (prefersReduced || !gridRef.current) return;
+    const el = gridRef.current;
+    const cards = el.querySelectorAll<HTMLElement>(".anim-feature-card");
+    cards.forEach(c => { c.style.opacity = "0"; c.style.transform = "translateY(32px)"; });
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && !hasAnimated.current) {
+        hasAnimated.current = true;
+        observer.disconnect();
+        animeAnimate(cards, {
+          opacity: [0, 1],
+          translateY: [32, 0],
+          delay: animeStagger(80),
+          duration: 700,
+          ease: "outExpo",
+        });
+      }
+    }, { threshold: 0.08 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [features, prefersReduced]);
+
+  return (
+    <div ref={gridRef} className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${cols}`}>
+      {features.map((f, i) => {
+        const Icon = getIcon(f.icon);
+        return (
+          <div key={i} className="anim-feature-card"
+            style={{ opacity: prefersReduced ? 1 : 0 }}>
+            <Feature3DTiltCard teal={teal} Icon={Icon} title={f.title} description={f.description} index={i} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────────────────────── Anime Pricing Stagger ─────────────────────────── */
+function AnimePricingGrid({ plans, teal, isStudent }: {
+  plans: CMSPlan[]; teal: string; isStudent: boolean;
+}) {
+  const gridRef = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+  const prefersReduced = useReducedMotion();
+  const cols = plans.length >= 4 ? "lg:grid-cols-4" : plans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2";
+
+  useEffect(() => {
+    hasAnimated.current = false;
+  }, [isStudent]);
+
+  useEffect(() => {
+    if (prefersReduced || !gridRef.current) return;
+    const el = gridRef.current;
+    const cards = el.querySelectorAll<HTMLElement>(".anim-pricing-card");
+    cards.forEach(c => { c.style.opacity = "0"; c.style.transform = "translateY(24px)"; });
+    if (hasAnimated.current) return;
+    hasAnimated.current = true;
+    requestAnimationFrame(() => {
+      animeAnimate(cards, {
+        opacity: [0, 1],
+        translateY: [24, 0],
+        delay: animeStagger(70),
+        duration: 600,
+        ease: "outExpo",
+      });
+    });
+  }, [plans, prefersReduced]);
+
+  return (
+    <div ref={gridRef} className={`grid grid-cols-1 sm:grid-cols-2 ${cols} gap-6 mt-8`}>
+      {plans.map((p, i) => (
+        <div key={p.id} className="anim-pricing-card" style={{ opacity: prefersReduced ? 1 : 0 }}>
+          <CMSPricingCard plan={p} colorIdx={i} isStudent={isStudent} />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -1344,15 +1489,12 @@ function PricingSection({ teal, teacherPlans, studentPlans, pricingHeadline, pri
         <AnimatePresence mode="wait">
           <motion.div
             key={tab}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.25 }}
-            className={`grid grid-cols-1 sm:grid-cols-2 ${cols} gap-6 mt-8`}
+            transition={{ duration: 0.22 }}
           >
-            {activePlans.map((p, i) => (
-              <CMSPricingCard key={p.id} plan={p} colorIdx={i} isStudent={isStudent} />
-            ))}
+            <AnimePricingGrid plans={activePlans} teal={teal} isStudent={isStudent} />
           </motion.div>
         </AnimatePresence>
 
@@ -1441,10 +1583,7 @@ export default function Landing() {
                 <Sparkles className="h-3 w-3" />
                 {badgeText}
               </motion.div>
-              <h1 className="text-5xl md:text-6xl lg:text-[64px] font-black leading-[1.06] tracking-tight mb-6" style={{ color: "#121212" }}>
-                {headline}<br />
-                <span style={{ color: teal }}>{headlineAccent}</span>
-              </h1>
+              <AnimeHeroTitle headline={headline} headlineAccent={headlineAccent} teal={teal} />
               <p className="text-lg text-gray-500 leading-relaxed mb-9 max-w-xl">{subheadline}</p>
               <div className="flex flex-wrap gap-3 mb-8">
                 <Link href="/register">
@@ -1556,21 +1695,7 @@ export default function Landing() {
               <p className="text-gray-500 max-w-lg mx-auto">Built for modern educators who demand the best from every tool they use.</p>
             </div>
           </Reveal>
-          <div className={`grid grid-cols-1 sm:grid-cols-2 gap-5 ${
-            displayFeatures.length <= 3 ? "lg:grid-cols-3" :
-            displayFeatures.length === 4 ? "lg:grid-cols-4" :
-            displayFeatures.length === 5 ? "lg:grid-cols-5" :
-            "lg:grid-cols-3"
-          }`}>
-            {displayFeatures.map((f, i) => {
-              const Icon = getIcon(f.icon);
-              return (
-                <Reveal key={i} delay={i * 0.08}>
-                  <Feature3DTiltCard teal={teal} Icon={Icon} title={f.title} description={f.description} index={i} />
-                </Reveal>
-              );
-            })}
-          </div>
+          <AnimeFeatureGrid features={displayFeatures} teal={teal} />
           <Reveal delay={0.3}>
             <div className="text-center mt-10">
               <Link href="/features">
