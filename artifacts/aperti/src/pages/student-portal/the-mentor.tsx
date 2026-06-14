@@ -285,7 +285,7 @@ export default function TheMentor() {
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <Card className="flex-1 flex flex-col shadow-sm border-gray-100 rounded-xl overflow-hidden">
             <CardContent className="flex-1 flex flex-col p-0">
-              <ScrollArea className="flex-1 p-4" style={{ height: "calc(100vh - 340px)" }}>
+              <ScrollArea className="min-h-0 flex-1 p-4">
                 <div className="space-y-4">
                   {messages.map((msg) => (
                     <motion.div
@@ -337,41 +337,44 @@ export default function TheMentor() {
                 </div>
               </ScrollArea>
 
-              {/* Quick chips */}
-              <div className="px-4 pt-3 pb-2 border-t border-gray-50">
-                <div className="flex gap-2 flex-wrap">
-                  {quickChips.map(({ label, prompt }) => (
-                    <button
-                      key={label}
-                      onClick={() => handleQuickChip(prompt)}
+              {/* Input + Quick chips */}
+              <div className="shrink-0 border-t border-gray-100 bg-white">
+                {quickChips.length > 0 && (
+                  <div className="px-4 pt-3 pb-1">
+                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Suggested</p>
+                    <div className="flex gap-1.5 flex-wrap">
+                      {quickChips.map(({ label, prompt }) => (
+                        <button
+                          key={label}
+                          onClick={() => handleQuickChip(prompt)}
+                          disabled={streaming}
+                          className="text-xs px-2.5 py-1 rounded-full bg-gray-50 border border-gray-200 text-gray-600 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-700 transition-all disabled:opacity-50 whitespace-nowrap"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="p-3">
+                  <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
+                    <Input
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      placeholder="Ask anything… e.g. 'Help me understand waves'"
                       disabled={streaming}
-                      className="text-xs px-3 py-1.5 rounded-full bg-gray-50 border border-gray-200 text-gray-600 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-700 transition-all disabled:opacity-50"
+                      className="flex-1 h-10 rounded-xl border-gray-200 bg-white text-sm"
+                    />
+                    <Button
+                      type="submit"
+                      disabled={streaming || !input.trim()}
+                      className="h-10 w-10 p-0 rounded-xl shrink-0"
+                      style={{ background: "#0D9488" }}
                     >
-                      {label}
-                    </button>
-                  ))}
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </form>
                 </div>
-              </div>
-
-              {/* Input */}
-              <div className="p-4 pt-2">
-                <form onSubmit={(e) => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-                  <Input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask anything… e.g. 'Help me understand waves'"
-                    disabled={streaming}
-                    className="flex-1 h-10 rounded-xl border-gray-200 bg-white text-sm"
-                  />
-                  <Button
-                    type="submit"
-                    disabled={streaming || !input.trim()}
-                    className="h-10 w-10 p-0 rounded-xl shrink-0"
-                    style={{ background: "#0D9488" }}
-                  >
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </form>
               </div>
             </CardContent>
           </Card>

@@ -142,12 +142,14 @@ export default function ParentAIAssistant() {
 
         {/* Quick questions */}
         {messages.length <= 1 && (
-          <div className="px-4 pb-2">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1"><Sparkles className="h-3 w-3" />Quick questions</p>
-            <div className="flex flex-wrap gap-1.5">
+          <div className="shrink-0 px-4 pb-2 pt-2 border-t border-gray-50">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-2 flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />Quick questions
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
               {QUICK_QUESTIONS.map((q, i) => (
                 <button key={i} onClick={() => send(q)}
-                  className="text-[11px] px-2.5 py-1 rounded-full border border-gray-200 text-gray-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-all">
+                  className="text-[11px] px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-all text-left leading-snug">
                   {q}
                 </button>
               ))}

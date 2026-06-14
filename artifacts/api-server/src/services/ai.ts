@@ -33,7 +33,7 @@ const BASE_URL: string =
 
 const DEFAULT_MODEL: string =
   process.env.OPENAI_MODEL ??
-  (NVIDIA_KEY ? "openai/gpt-oss-20b" : "gpt-4o-mini");
+  (NVIDIA_KEY ? "meta/llama-3.1-8b-instruct" : "gpt-4o-mini");
 
 // ── Public AI status flag ─────────────────────────────────────────────────────
 
