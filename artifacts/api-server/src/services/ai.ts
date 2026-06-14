@@ -201,7 +201,7 @@ export async function openaiChat(opts: {
 // ── Export config for routes that need it (read-only) ────────────────────────
 
 export const AI_CONFIG = {
-  provider: "openai" as const,
+  provider: (NVIDIA_KEY ? "nvidia" : REPLIT_KEY ? "replit" : "openai") as string,
   model: DEFAULT_MODEL,
   baseUrl: BASE_URL,
   apiKey: API_KEY,

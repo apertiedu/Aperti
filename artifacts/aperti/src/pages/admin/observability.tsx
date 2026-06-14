@@ -13,9 +13,10 @@ import {
 import { useStaggerEntrance } from "@/lib/anime-utils";
 
 type Tab = "database" | "api" | "ai";
+type LucideIcon = React.FC<{ size?: number; className?: string }>;
 
 function StatCard({ label, value, sub, color = "teal", Icon }: {
-  label: string; value: string | number; sub?: string; color?: string; Icon: React.ElementType;
+  label: string; value: string | number; sub?: string; color?: string; Icon: LucideIcon;
 }) {
   const colorMap: Record<string, string> = {
     teal: "bg-teal-50 text-teal-700",
@@ -42,10 +43,10 @@ function StatCard({ label, value, sub, color = "teal", Icon }: {
   );
 }
 
-function TabButton({ tab, current, label, Icon }: { tab: Tab; current: Tab; label: string; Icon: React.ElementType; }) {
+function TabButton({ tab, current, label, Icon, onClick }: { tab: Tab; current: Tab; label: string; Icon: LucideIcon; onClick: (t: Tab) => void }) {
   return (
     <button
-      onClick={() => {}}
+      onClick={() => onClick(tab)}
       className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
         tab === current
           ? "bg-teal-600 text-white shadow-sm"

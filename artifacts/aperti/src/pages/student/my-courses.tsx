@@ -61,8 +61,8 @@ export default function MyCourses() {
   const { data: enrollments, isLoading } = useQuery<Enrollment[]>({
     queryKey: ["student-enrollments"],
     queryFn: async () => {
-      const res = await fetch("/courses/my/enrollments", {
-        headers: {},
+      const res = await fetch("/api/courses/my/enrollments", {
+        credentials: "include",
       });
       if (!res.ok) return [];
       return res.json();

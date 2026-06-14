@@ -32,14 +32,14 @@ const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_BASE = process.env.OPENAI_BASE_URL;
 
 const API_KEY: string | null =
-  (REPLIT_KEY && REPLIT_BASE ? REPLIT_KEY : null) ??
   NVIDIA_KEY ??
+  (REPLIT_KEY && REPLIT_BASE ? REPLIT_KEY : null) ??
   OPENAI_KEY ??
   null;
 
 const BASE_URL: string =
-  (REPLIT_KEY && REPLIT_BASE ? REPLIT_BASE : null) ??
   (NVIDIA_KEY ? "https://integrate.api.nvidia.com/v1" : null) ??
+  (REPLIT_KEY && REPLIT_BASE ? REPLIT_BASE : null) ??
   OPENAI_BASE ??
   "https://api.openai.com/v1";
 

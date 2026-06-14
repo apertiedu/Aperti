@@ -20,7 +20,7 @@ function ActivityHeatmap() {
   const { data, isLoading } = useQuery({
     queryKey: ["admin-activity-heatmap"],
     queryFn: async () => {
-      const res = await fetch("/dashboard/admin/activity-heatmap?days=30", {
+      const res = await fetch("/api/dashboard/admin/activity-heatmap?days=30", {
         credentials: "include",
       });
       if (!res.ok) return null;
@@ -268,7 +268,7 @@ export default function AdminCommand() {
   const { data: liveStats, dataUpdatedAt } = useQuery({
     queryKey: ["admin-live-stats"],
     queryFn: async () => {
-      const res = await fetch("/dashboard/admin/live-stats", { credentials: "include" });
+      const res = await fetch("/api/dashboard/admin/live-stats", { credentials: "include" });
       if (!res.ok) return null;
       return res.json();
     },

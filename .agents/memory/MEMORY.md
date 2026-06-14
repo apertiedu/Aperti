@@ -1,3 +1,6 @@
+- [Aperti AI config](aperti-ai-config.md) — NVIDIA_API_KEY drives AI; ai.ts is canonical; ai-gateway.ts priority must be NVIDIA → Replit → OpenAI; AI_CONFIG already exported at bottom of ai.ts (do not add a second one).
+- [Aperti auth pattern](aperti-auth-pattern.md) — JWT via httpOnly cookies (credentials:"include"); token is never exposed to JS; test-runner token guards must be removed so cookies authenticate instead.
+- [Aperti route paths](aperti-route-paths.md) — All frontend fetch() calls need /api/ prefix; dashboard sub-routes mount at /api/dashboard/; missing prefix causes silent 404s with null data (no crash because fallbacks handle it).
 - [Phase 34 implementation](phase34.md) — session slots, QR center, data quality, route health, feature status all implemented and live.
 - [Sidebar logo pattern](sidebar-logo.md) — logo section uses text-only "Aperti." — no icon. The "Educational OS" subtitle was removed in Phase 34 to simplify the logo.
 - [DB migration pattern](db-migration.md) — use `psql "$DATABASE_URL" -c "..."` for migrations; node -e with `pg` doesn't work from workspace root (no pg module there).

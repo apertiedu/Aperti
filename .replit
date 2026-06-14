@@ -19,6 +19,7 @@ VAPID_SUBJECT = "mailto:admin@aperti.app"
 OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1"
 OPENAI_MODEL = "openai/gpt-oss-20b"
 JWT_SECRET = "6AiU5GnYRcCKNDdsn_ErbGgQyb8vdPuqumXYSkDz0WpXcLvfeGRiGVPWclUQLQmS"
+NVIDIA_API_KEY = "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"
 
 [userenv.development]
 

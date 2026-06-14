@@ -129,7 +129,7 @@ export default function ParentGrades() {
                       <div key={i} className="p-3 rounded-xl border border-gray-100 bg-white">
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-xs font-semibold text-gray-800">{f.title}</p>
-                          <span className="text-xs font-bold" style={{ color: getGradeColor((f.marks_awarded / f.total_marks) * 100) }}>
+                          <span className="text-xs font-bold" style={{ color: getGradeColor(f.total_marks > 0 ? (f.marks_awarded / f.total_marks) * 100 : 0) }}>
                             {f.marks_awarded}/{f.total_marks}
                           </span>
                         </div>

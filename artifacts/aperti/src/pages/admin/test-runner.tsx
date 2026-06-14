@@ -119,37 +119,25 @@ const TESTS: TestCase[] = [
     id: "students_authed",
     name: "Students list (admin auth)",
     group: "Admin API",
-    run: async (token) => {
-      if (!token) return { ok: false, detail: "No auth token — log in as admin first" };
-      return checkEndpoint("/api/students", "GET", undefined, token);
-    },
+    run: async () => checkEndpoint("/api/students", "GET", undefined, null),
   },
   {
     id: "subjects_authed",
     name: "Subjects list (admin auth)",
     group: "Admin API",
-    run: async (token) => {
-      if (!token) return { ok: false, detail: "No auth token" };
-      return checkEndpoint("/api/subjects", "GET", undefined, token);
-    },
+    run: async () => checkEndpoint("/api/subjects", "GET", undefined, null),
   },
   {
     id: "data_quality",
     name: "Data quality report (admin)",
     group: "Admin API",
-    run: async (token) => {
-      if (!token) return { ok: false, detail: "No auth token" };
-      return checkEndpoint("/api/admin/data-quality", "GET", undefined, token);
-    },
+    run: async () => checkEndpoint("/api/admin/data-quality", "GET", undefined, null),
   },
   {
     id: "route_health",
     name: "Route health audit (admin)",
     group: "Admin API",
-    run: async (token) => {
-      if (!token) return { ok: false, detail: "No auth token" };
-      return checkEndpoint("/api/admin/route-health", "GET", undefined, token);
-    },
+    run: async () => checkEndpoint("/api/admin/route-health", "GET", undefined, null),
   },
   {
     id: "error_log",
@@ -166,19 +154,13 @@ const TESTS: TestCase[] = [
     id: "lessons_authed",
     name: "Lessons list (admin auth)",
     group: "Admin API",
-    run: async (token) => {
-      if (!token) return { ok: false, detail: "No auth token" };
-      return checkEndpoint("/api/lessons", "GET", undefined, token);
-    },
+    run: async () => checkEndpoint("/api/lessons", "GET", undefined, null),
   },
   {
     id: "homework_authed",
     name: "Homework endpoint (admin auth)",
     group: "Admin API",
-    run: async (token) => {
-      if (!token) return { ok: false, detail: "No auth token" };
-      return checkEndpoint("/api/homework", "GET", undefined, token);
-    },
+    run: async () => checkEndpoint("/api/homework", "GET", undefined, null),
   },
   {
     id: "404_api",
@@ -218,11 +200,11 @@ function statusBadge(s: TestResult["status"]) {
 
 export default function TestRunner() {
   const { user } = useAuth();
+  const token = null as string | null;
   const [results, setResults] = useState<Record<string, TestResult>>({});
   const [running, setRunning] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set(GROUPS));
 
-  
   const runAll = useCallback(async () => {
     setRunning(true);
     const fresh: Record<string, TestResult> = {};

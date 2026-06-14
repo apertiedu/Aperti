@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import { useStaggerEntrance } from "@/lib/anime-utils";
 
-const LEVEL_CONFIG: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
+type LucideIcon = React.FC<{ size?: number; className?: string }>;
+
+const LEVEL_CONFIG: Record<string, { label: string; color: string; bg: string; icon: LucideIcon }> = {
   critical: { label: "Critical", color: "text-red-700", bg: "bg-red-100", icon: ShieldAlert },
   error:    { label: "Error",    color: "text-rose-700", bg: "bg-rose-100", icon: AlertCircle },
   warn:     { label: "Warning",  color: "text-amber-700", bg: "bg-amber-100", icon: AlertTriangle },
@@ -32,7 +34,7 @@ function LevelBadge({ level }: { level: string }) {
 }
 
 function StatCard({ label, value, sub, color = "teal", Icon }: {
-  label: string; value: number | string; sub?: string; color?: string; Icon: React.ElementType;
+  label: string; value: number | string; sub?: string; color?: string; Icon: LucideIcon;
 }) {
   const colorMap: Record<string, string> = {
     teal: "bg-teal-50 text-teal-700",
