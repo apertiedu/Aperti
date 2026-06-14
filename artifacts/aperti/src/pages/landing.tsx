@@ -422,6 +422,23 @@ function StatItem({ value, suffix = "", label, delay }: { value: number; suffix?
   );
 }
 
+function DarkStatItem({ value, suffix = "", label, delay, teal }: { value: number; suffix?: string; label: string; delay: number; teal: string }) {
+  const { count, ref } = useCountUp(value, 2000);
+  return (
+    <motion.div ref={ref} className="text-center"
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}>
+      <p className="text-4xl md:text-5xl font-black mb-2"
+        style={{ color: teal, textShadow: `0 0 48px ${teal}50` }}>
+        {count.toLocaleString()}{suffix}
+      </p>
+      <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>{label}</p>
+    </motion.div>
+  );
+}
+
 function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: string }> }) {
   const { data: stats } = useQuery<LiveStats>({
     queryKey: ["landing-live-stats"],
@@ -434,40 +451,62 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
   });
 
   const hasRealData = (stats?.students ?? 0) > 0 || (stats?.teachers ?? 0) > 0;
+  const teal = TEAL;
 
-  const HONEST_STATEMENTS = [
-    { label: "IGCSE-ready curriculum tools", isText: true },
-    { label: "Built for Egyptian educators", isText: true },
-    { label: "AI-powered learning for every student", isText: true },
-    { label: "Trusted by teachers across Egypt", isText: true },
-  ];
-
-  const liveItems = [
-    { value: stats?.students ?? 0, suffix: "+", label: "Active students" },
-    { value: stats?.teachers ?? 0, suffix: "", label: "Educators on the platform" },
-    { value: stats?.courses ?? 0, suffix: "", label: "Published courses" },
-    { value: stats?.assessments_completed ?? 0, suffix: "+", label: "Assessments submitted" },
+  const PLATFORM_CAPABILITIES = [
+    { label: "IGCSE-ready curriculum", sublabel: "Full syllabus coverage", icon: BookOpen },
+    { label: "AI-powered grading", sublabel: "Seconds, not hours", icon: Brain },
+    { label: "Built for Egypt", sublabel: "Arabic & English support", icon: Globe },
+    { label: "Live analytics", sublabel: "Every student tracked", icon: BarChart3 },
   ];
 
   return (
-    <div className="py-16 px-5 border-y border-gray-100" style={{ background: "#F9FAFB" }}>
-      <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-        {hasRealData
-          ? liveItems.map((s, i) => (
-              <StatItem key={i} value={s.value} suffix={s.suffix} label={s.label} delay={i * 0.08} />
-            ))
-          : HONEST_STATEMENTS.map((s, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-                className="flex flex-col items-center text-center gap-1"
-              >
-                <div className="text-sm font-semibold text-gray-700 leading-snug">{s.label}</div>
-              </motion.div>
-            ))
-        }
+    <div className="py-20 px-5 relative overflow-hidden"
+      style={{ background: "linear-gradient(135deg, #060D1B 0%, #091525 60%, #0D1F2D 100%)" }}>
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: `linear-gradient(${teal}08 1px, transparent 1px), linear-gradient(90deg, ${teal}08 1px, transparent 1px)`, backgroundSize: "64px 64px" }} />
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ background: `radial-gradient(ellipse 70% 50% at 50% 100%, ${teal}18 0%, transparent 65%)` }} />
+      <div className="max-w-5xl mx-auto relative z-10">
+        {hasRealData ? (
+          <>
+            <p className="text-center text-xs font-bold uppercase tracking-widest mb-12"
+              style={{ color: `${teal}80`, letterSpacing: "0.2em" }}>Live platform metrics</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+              {[
+                { value: stats?.students ?? 0, suffix: "+", label: "Active students" },
+                { value: stats?.teachers ?? 0, suffix: "", label: "Educators" },
+                { value: stats?.courses ?? 0, suffix: "", label: "Published courses" },
+                { value: stats?.assessments_completed ?? 0, suffix: "+", label: "Assessments graded" },
+              ].map((s, i) => (
+                <DarkStatItem key={i} value={s.value} suffix={s.suffix} label={s.label} delay={i * 0.1} teal={teal} />
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="text-center text-xs font-bold uppercase tracking-widest mb-12"
+              style={{ color: `${teal}80`, letterSpacing: "0.2em" }}>Platform capabilities</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+              {PLATFORM_CAPABILITIES.map((cap, i) => (
+                <motion.div key={i}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  className="text-center p-6 rounded-2xl"
+                  style={{ background: `${teal}08`, border: `1px solid ${teal}20` }}>
+                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                    style={{ background: `${teal}15` }}>
+                    <cap.icon className="h-6 w-6" style={{ color: teal }} />
+                  </div>
+                  <p className="text-base font-bold mb-1" style={{ color: "rgba(255,255,255,0.85)" }}>{cap.label}</p>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{cap.sublabel}</p>
+                </motion.div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -478,6 +517,7 @@ const MARQUEE_ITEMS = [
   "AI Grading", "Live Classes", "Parent Portal", "IGCSE Ready",
   "Smart Analytics", "Auto Feedback", "Attendance Tracking", "Exam Preparation",
   "AI Mentor 24/7", "Question Bank", "GradeBook+", "Progress Reports",
+  "Spaced Repetition", "Instant QR Attendance", "SnapGrade AI", "Parent Alerts",
 ];
 
 function MarqueeStrip() {
@@ -491,7 +531,7 @@ function MarqueeStrip() {
     const el = trackRef.current;
     animRef.current = animeAnimate(el, {
       translateX: "-50%",
-      duration: 34000,
+      duration: 38000,
       ease: "linear",
       loop: true,
     });
@@ -499,16 +539,17 @@ function MarqueeStrip() {
   }, [prefersReduced]);
 
   return (
-    <div className="relative overflow-hidden py-3" style={{ background: "#F9FAFB", borderTop: "1px solid #F0F0F0", borderBottom: "1px solid #F0F0F0" }}>
-      <div className="absolute inset-y-0 left-0 w-24 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to right, #F9FAFB, transparent)" }} />
-      <div className="absolute inset-y-0 right-0 w-24 z-10 pointer-events-none"
-        style={{ background: "linear-gradient(to left, #F9FAFB, transparent)" }} />
+    <div className="relative overflow-hidden py-3.5"
+      style={{ background: `linear-gradient(90deg, #0A4A44 0%, #0D9488 50%, #0A4A44 100%)` }}>
+      <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(to right, #0A4A44, transparent)" }} />
+      <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none"
+        style={{ background: "linear-gradient(to left, #0A4A44, transparent)" }} />
       {prefersReduced ? (
         <div className="flex flex-wrap gap-4 justify-center px-8">
           {MARQUEE_ITEMS.map((item, i) => (
-            <span key={i} className="text-xs font-semibold text-gray-400 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full" style={{ background: TEAL }} />{item}
+            <span key={i} className="text-xs font-semibold text-white/70 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-white/40" />{item}
             </span>
           ))}
         </div>
@@ -516,8 +557,8 @@ function MarqueeStrip() {
         <div ref={trackRef} className="flex items-center gap-10 whitespace-nowrap will-change-transform"
           style={{ width: "max-content" }}>
           {doubled.map((item, i) => (
-            <span key={i} className="inline-flex items-center gap-2 text-xs font-semibold text-gray-400">
-              <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: TEAL }} />
+            <span key={i} className="inline-flex items-center gap-2 text-xs font-bold text-white/75 uppercase tracking-wide">
+              <span className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
               {item}
             </span>
           ))}
@@ -695,9 +736,9 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
 /* ─────────────────────────── Get Started Steps ─────────────────────────── */
 function GetStartedSteps({ teal }: { teal: string }) {
   const steps = [
-    { step: "01", icon: "🏫", title: "Create your workspace", desc: "Sign up, name your centre, and configure your subjects in under 3 minutes. No credit card required." },
-    { step: "02", icon: "👨‍🎓", title: "Invite your students", desc: "Share a unique join code. Students register instantly and land on their personalised portal." },
-    { step: "03", icon: "📈", title: "Teach, track & grow", desc: "Assign work, run live sessions, auto-mark quizzes, and watch every student improve in real time." },
+    { step: "01", icon: Building2, title: "Create your workspace", desc: "Sign up, name your centre, and configure your subjects in under 3 minutes. No credit card required." },
+    { step: "02", icon: Users, title: "Invite your students", desc: "Share a unique join code. Students register instantly and land on their personalised portal." },
+    { step: "03", icon: BarChart3, title: "Teach, track & grow", desc: "Assign work, run live sessions, auto-mark quizzes, and watch every student improve in real time." },
   ];
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
@@ -722,8 +763,9 @@ function GetStartedSteps({ teal }: { teal: string }) {
                 transition={{ delay: i * 0.15, duration: 0.5 }}
                 className="flex flex-col items-center text-center">
                 <div className="relative mb-5">
-                  <div className="w-20 h-20 rounded-2xl bg-gray-50 border-2 border-gray-100 flex items-center justify-center text-4xl shadow-sm">
-                    {s.icon}
+                  <div className="w-20 h-20 rounded-2xl flex items-center justify-center shadow-sm"
+                    style={{ background: `${teal}10`, border: `2px solid ${teal}20` }}>
+                    <s.icon className="h-8 w-8" style={{ color: teal }} />
                   </div>
                   <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full text-xs font-extrabold flex items-center justify-center text-white"
                     style={{ background: teal }}>
@@ -879,7 +921,7 @@ function FAQSection({ faqs }: { faqs: CMSFAQ[] }) {
 }
 
 /* ─────────────────────────── Early Access Form ─────────────────────────── */
-function EarlyAccessForm({ ctaText, email }: { ctaText?: string; email?: string }) {
+function EarlyAccessForm({ ctaText, email, dark = false }: { ctaText?: string; email?: string; dark?: boolean }) {
   const [form, setForm] = useState({ name: "", email: "", students: "", subjects: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -898,19 +940,30 @@ function EarlyAccessForm({ ctaText, email }: { ctaText?: string; email?: string 
     setSubmitted(true);
   };
 
+  const cardBg = dark ? "rgba(255,255,255,0.06)" : "white";
+  const cardBorder = dark ? "rgba(255,255,255,0.12)" : "#f0f0f0";
+  const labelColor = dark ? "rgba(255,255,255,0.5)" : "#4B5563";
+  const inputBg = dark ? "rgba(255,255,255,0.06)" : "#F9FAFB";
+  const inputBorder = dark ? "rgba(255,255,255,0.12)" : "#E5E7EB";
+  const inputColor = dark ? "rgba(255,255,255,0.85)" : "#111827";
+
   if (submitted) return (
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-      className="bg-white rounded-2xl p-10 text-center shadow-sm border border-gray-100 max-w-lg mx-auto">
-      <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: TEAL_LIGHT }}>
+      className="rounded-2xl p-10 text-center max-w-lg mx-auto"
+      style={{ background: cardBg, border: `1px solid ${cardBorder}`, backdropFilter: "blur(12px)" }}>
+      <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: `${TEAL}20` }}>
         <CheckCircle2 className="h-7 w-7" style={{ color: TEAL }} />
       </div>
-      <h3 className="text-xl font-extrabold text-gray-900 mb-2">Application received!</h3>
-      <p className="text-gray-500 text-sm">We will personally reach out within 48 hours to set up your workspace.</p>
+      <h3 className="text-xl font-extrabold mb-2" style={{ color: dark ? "#ffffff" : "#111827" }}>Application received!</h3>
+      <p className="text-sm" style={{ color: dark ? "rgba(255,255,255,0.5)" : "#6B7280" }}>
+        We will personally reach out within 48 hours to set up your workspace.
+      </p>
     </motion.div>
   );
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 max-w-lg mx-auto">
+    <form onSubmit={handleSubmit} className="rounded-2xl p-8 max-w-lg mx-auto"
+      style={{ background: cardBg, border: `1px solid ${cardBorder}`, backdropFilter: dark ? "blur(16px)" : "none", boxShadow: dark ? "0 24px 64px rgba(0,0,0,0.3)" : "0 4px 24px rgba(0,0,0,0.06)" }}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         {[
           { key: "name", label: "Full Name *", placeholder: "Dr. Ahmed Hassan", type: "text", required: true },
@@ -919,27 +972,31 @@ function EarlyAccessForm({ ctaText, email }: { ctaText?: string; email?: string 
           { key: "subjects", label: "Subjects Taught", placeholder: "Physics, Math…", type: "text", required: false },
         ].map(field => (
           <div key={field.key}>
-            <label className="block text-xs font-semibold text-gray-600 mb-1.5">{field.label}</label>
+            <label className="block text-xs font-semibold mb-1.5" style={{ color: labelColor }}>{field.label}</label>
             <input required={field.required} type={field.type} value={form[field.key as keyof typeof form]}
               onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 bg-gray-50/50"
+              className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all"
+              style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: inputColor }}
               placeholder={field.placeholder} />
           </div>
         ))}
       </div>
       <div className="mb-5">
-        <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tell us about your school</label>
+        <label className="block text-xs font-semibold mb-1.5" style={{ color: labelColor }}>Tell us about your school</label>
         <textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} rows={3}
-          className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 bg-gray-50/50 resize-none"
+          className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none transition-all"
+          style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: inputColor }}
           placeholder="Tell us about your teaching setup, current challenges, and what you hope Aperti can do for your students…" />
       </div>
       <button type="submit" disabled={loading}
-        className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-        style={{ background: TEAL }}>
-        {loading ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting…</> : <>{ctaText ?? "Get Started Free"} <ArrowRight className="h-4 w-4" /></>}
+        className="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
+        style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)`, boxShadow: `0 8px 24px ${TEAL}35` }}>
+        {loading
+          ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting…</>
+          : <>{ctaText ?? "Get Started Free"} <ArrowRight className="h-4 w-4" /></>}
       </button>
       {email && (
-        <p className="text-center text-xs text-gray-400 mt-4">
+        <p className="text-center text-xs mt-4" style={{ color: dark ? "rgba(255,255,255,0.3)" : "#9CA3AF" }}>
           Or email us at <a href={`mailto:${email}`} className="underline" style={{ color: TEAL }}>{email}</a>
         </p>
       )}
@@ -1345,13 +1402,20 @@ const DEMO_STEPS = [
 
 function InteractiveDemo({ teal }: { teal: string }) {
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
   const step = DEMO_STEPS[active];
 
+  useEffect(() => {
+    if (paused) return;
+    const id = setInterval(() => setActive(a => (a + 1) % DEMO_STEPS.length), 3500);
+    return () => clearInterval(id);
+  }, [paused]);
+
   return (
-    <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
+    <section className="py-24 px-5 bg-white">
       <div className="max-w-6xl mx-auto">
         <Reveal>
-          <div className="text-center mb-12">
+          <div className="text-center mb-14">
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
               style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
               <Activity className="h-3 w-3" />See it in action
@@ -1360,76 +1424,102 @@ function InteractiveDemo({ teal }: { teal: string }) {
               From lesson to insight<br />
               <span style={{ color: teal }}>in four steps.</span>
             </h2>
-            <p className="text-gray-500 max-w-md mx-auto">The complete teaching cycle — from setting work to acting on results — happens inside Aperti.</p>
+            <p className="text-gray-500 max-w-md mx-auto">The complete teaching cycle — from setting work to acting on results — happens entirely inside Aperti.</p>
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}>
+
           {/* Step selector */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {DEMO_STEPS.map((s, i) => (
-              <motion.button key={i} onClick={() => setActive(i)} whileHover={{ x: 4 }}
-                className={`w-full text-left rounded-2xl p-5 border transition-all ${
-                  i === active ? "bg-white shadow-md" : "bg-white/40 border-transparent hover:bg-white/70"
-                }`}
-                style={{ borderColor: i === active ? `${s.color}30` : "transparent" }}>
+              <motion.button key={i} onClick={() => setActive(i)}
+                className="w-full text-left rounded-2xl p-5 border-2 transition-all relative overflow-hidden"
+                style={{
+                  borderColor: i === active ? `${s.color}35` : "#F3F4F6",
+                  background: i === active ? `${s.color}05` : "white",
+                }}>
+                {i === active && (
+                  <motion.div
+                    className="absolute bottom-0 left-0 h-0.5 rounded-full"
+                    style={{ background: s.color }}
+                    initial={{ width: "0%" }}
+                    animate={{ width: paused ? "current" : "100%" }}
+                    transition={{ duration: 3.5, ease: "linear" }}
+                  />
+                )}
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all"
                     style={{ background: i === active ? `${s.color}15` : `${s.color}08` }}>
                     <s.icon className="h-5 w-5" style={{ color: s.color }} />
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2 mb-0.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
                       <span className="text-[10px] font-bold rounded-full px-2 py-0.5"
                         style={{ background: `${s.color}12`, color: s.color }}>{s.role}</span>
-                      <span className="text-xs font-bold text-gray-800">{s.step}</span>
+                      <span className="text-sm font-bold text-gray-800">{s.step}</span>
                     </div>
                     <p className="text-xs text-gray-500 leading-relaxed">{s.desc}</p>
                   </div>
+                  {i === active && (
+                    <div className="w-2 h-2 rounded-full shrink-0 mt-1"
+                      style={{ background: s.color }} />
+                  )}
                 </div>
               </motion.button>
             ))}
           </div>
 
           {/* Visual mockup */}
-          <Reveal>
-            <AnimatePresence mode="wait">
-              <motion.div key={active}
-                initial={{ opacity: 0, scale: 0.96, y: 12 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -12 }}
-                transition={{ duration: 0.3 }}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
-                {/* Mock top bar */}
-                <div className="px-5 py-3.5 border-b border-gray-100 flex items-center gap-3"
-                  style={{ background: `${step.color}08` }}>
+          <AnimatePresence mode="wait">
+            <motion.div key={active}
+              initial={{ opacity: 0, x: 20, scale: 0.97 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -20, scale: 0.97 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex flex-col"
+              style={{ boxShadow: `0 20px 60px ${step.color}14, 0 4px 20px rgba(0,0,0,0.06)` }}>
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-3"
+                style={{ background: `linear-gradient(135deg, ${step.color}08, ${step.color}04)` }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+                  style={{ background: `${step.color}15` }}>
                   <step.icon className="h-4 w-4" style={{ color: step.color }} />
-                  <span className="text-sm font-bold text-gray-800">{step.visual.title}</span>
-                  <span className="ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full"
-                    style={{ background: `${step.color}15`, color: step.color }}>Live</span>
                 </div>
-                <div className="p-5 space-y-3">
-                  {step.visual.items.map((item, i) => (
-                    <motion.div key={i} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 bg-gray-50/70">
-                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: step.color }} />
-                      <span className="text-sm text-gray-700">{item}</span>
-                    </motion.div>
+                <div>
+                  <span className="text-sm font-bold text-gray-800">{step.visual.title}</span>
+                </div>
+                <div className="ml-auto flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: step.color }} />
+                  <span className="text-[10px] font-bold" style={{ color: step.color }}>Live</span>
+                </div>
+              </div>
+              <div className="p-5 space-y-3 flex-1">
+                {step.visual.items.map((item, i) => (
+                  <motion.div key={`${active}-${i}`}
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.1, duration: 0.3 }}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3"
+                    style={{ background: `${step.color}06`, border: `1px solid ${step.color}12` }}>
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: step.color }} />
+                    <span className="text-sm text-gray-700 font-medium">{item}</span>
+                  </motion.div>
+                ))}
+              </div>
+              <div className="px-5 py-3 border-t border-gray-50 flex items-center justify-between">
+                <span className="text-[10px] text-gray-400">Step {active + 1} of {DEMO_STEPS.length}</span>
+                <div className="flex gap-1.5">
+                  {DEMO_STEPS.map((s, i) => (
+                    <button key={i} onClick={() => setActive(i)}
+                      className="rounded-full transition-all"
+                      style={{ width: i === active ? 20 : 6, height: 6, background: i === active ? step.color : "#E5E7EB" }} />
                   ))}
                 </div>
-              </motion.div>
-            </AnimatePresence>
-          </Reveal>
-        </div>
-
-        {/* Step indicators */}
-        <div className="flex justify-center gap-2 mt-8">
-          {DEMO_STEPS.map((s, i) => (
-            <button key={i} onClick={() => setActive(i)}
-              className="h-2 rounded-full transition-all"
-              style={{ width: i === active ? 24 : 8, background: i === active ? teal : "#E5E7EB" }} />
-          ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>
@@ -1574,7 +1664,7 @@ function PricingSection({ teal, teacherPlans, studentPlans, pricingHeadline, pri
                     color: tab === t ? "white" : "#6B7280",
                     boxShadow: tab === t ? `0 2px 8px ${teal}30` : "none",
                   }}>
-                  {t === "teacher" ? "👩‍🏫 For Teachers" : "🎓 For Students"}
+                  {t === "teacher" ? "For Teachers" : "For Students"}
                 </button>
               ))}
             </div>
@@ -1817,6 +1907,11 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* ── INTERACTIVE DEMO ── */}
+      <div className="snap-start">
+        <InteractiveDemo teal={teal} />
+      </div>
+
       {/* ── STATS STRIP ── */}
       <div className="snap-start">
         <StatsStrip cmsStats={statItems} />
@@ -1878,55 +1973,162 @@ export default function Landing() {
       )}
 
       {/* ── GET STARTED CTA ── */}
-      <section id="apply" className="snap-start min-h-screen flex items-center py-20 px-5" style={{ background: "#F5F5F5" }}>
-        <div className="max-w-3xl mx-auto text-center w-full">
+      <section id="apply" className="snap-start min-h-screen flex items-center py-20 px-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #060D1B 0%, #091525 55%, #0D1F2D 100%)" }}>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: `linear-gradient(${teal}06 1px, transparent 1px), linear-gradient(90deg, ${teal}06 1px, transparent 1px)`, backgroundSize: "80px 80px" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}18 0%, transparent 65%)`, filter: "blur(60px)" }} />
+        <div className="max-w-3xl mx-auto text-center w-full relative z-10">
           <Reveal>
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-              style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
-              <Globe className="h-3 w-3" />Get started today
-            </span>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">{contactHeadline}</h2>
-            <p className="text-gray-500 max-w-lg mx-auto text-lg leading-relaxed mb-10">
-              Create your workspace, invite your students, and run your first class — all in one place.
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold mb-8 border"
+              style={{ background: `${teal}18`, color: teal, borderColor: `${teal}40` }}>
+              <Rocket className="h-3 w-3" />
+              Join the platform now — it's free to start
+            </motion.div>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.06]"
+              style={{ color: "#ffffff" }}>
+              {contactHeadline || "Your classroom."}<br />
+              <span style={{ color: teal }}>Transformed.</span>
+            </h2>
+            <p className="max-w-lg mx-auto text-lg leading-relaxed mb-10"
+              style={{ color: "rgba(255,255,255,0.55)" }}>
+              Create your workspace, invite your students, and run your first class — all in one place. No setup fee. No lock-in.
             </p>
           </Reveal>
-          <EarlyAccessForm ctaText={contactCta} email={contactEmail} />
+          <Reveal delay={0.15}>
+            <EarlyAccessForm ctaText={contactCta} email={contactEmail} dark />
+          </Reveal>
+          <Reveal delay={0.3}>
+            <div className="flex flex-wrap items-center justify-center gap-5 mt-10">
+              {[
+                { icon: Shield, label: "No credit card required" },
+                { icon: Zap, label: "Live in under 5 minutes" },
+                { icon: CheckCircle2, label: "Cancel anytime" },
+              ].map(({ icon: Icon, label }) => (
+                <span key={label} className="flex items-center gap-1.5 text-sm"
+                  style={{ color: "rgba(255,255,255,0.4)" }}>
+                  <Icon className="h-4 w-4" style={{ color: `${teal}cc` }} />
+                  {label}
+                </span>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="border-t border-gray-100 py-12 px-5 bg-white">
+      <footer className="py-16 px-5 relative overflow-hidden"
+        style={{ background: "#0A0F1A", borderTop: `1px solid ${teal}15` }}>
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-10">
-            <div className="max-w-xs">
-              <p className="text-lg font-extrabold text-gray-900 mb-1">Aperti<span style={{ color: teal }}>.</span></p>
-              <p className="text-xs text-gray-400 leading-relaxed">Where every mind finds its rhythm. The educational operating system for modern educators.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
+
+            {/* Brand */}
+            <div className="lg:col-span-1">
+              <p className="text-xl font-extrabold mb-3" style={{ color: "#ffffff" }}>
+                Aperti<span style={{ color: teal }}>.</span>
+              </p>
+              <p className="text-sm leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.4)" }}>
+                The educational operating system for modern IGCSE educators. AI-powered, built for Egypt.
+              </p>
+              <Link href="/register">
+                <button className="text-sm font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90"
+                  style={{ background: `linear-gradient(135deg, ${teal}, #00897B)`, boxShadow: `0 6px 20px ${teal}30` }}>
+                  Get Started Free
+                </button>
+              </Link>
             </div>
-            <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-sm text-gray-400">
-              <Link href="/courses"><span className="hover:text-gray-700 transition-colors cursor-pointer">Course Marketplace</span></Link>
-              <Link href="/features"><span className="hover:text-gray-700 transition-colors cursor-pointer">Features</span></Link>
-              <Link href="/roadmap"><span className="hover:text-gray-700 transition-colors cursor-pointer">Roadmap</span></Link>
-              <Link href="/release-notes"><span className="hover:text-gray-700 transition-colors cursor-pointer">Release Notes</span></Link>
-              <Link href="/status"><span className="hover:text-gray-700 transition-colors cursor-pointer">Status</span></Link>
-              <a href="/paper-vault" className="hover:text-gray-700 transition-colors">Past Papers</a>
-              <a href="/terms" className="hover:text-gray-700 transition-colors">Terms</a>
-              <a href="/privacy" className="hover:text-gray-700 transition-colors">Privacy</a>
-              <a href="/contact" className="hover:text-gray-700 transition-colors">Contact</a>
-              <Link href="/trust"><span className="hover:text-gray-700 transition-colors cursor-pointer">Trust Center</span></Link>
-              <a href="/sitemap" className="hover:text-gray-700 transition-colors">Sitemap</a>
-            </div>
+
+            {/* Product */}
             <div>
-              <a href={`mailto:${contactEmail}`} className="text-sm font-semibold hover:opacity-80 transition-opacity" style={{ color: teal }}>{contactEmail}</a>
-              <div className="mt-4">
-                <Link href="/register">
-                  <button className="text-sm font-semibold px-5 py-2.5 rounded-xl text-white" style={{ background: teal }}>Get Started Free</button>
-                </Link>
+              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.15em" }}>Product</p>
+              <div className="space-y-3">
+                {[
+                  { label: "Features", href: "/features" },
+                  { label: "Course Marketplace", href: "/courses" },
+                  { label: "Assessment Hub", href: "/login" },
+                  { label: "AI Mentor", href: "/login" },
+                  { label: "Past Papers", href: "/paper-vault" },
+                ].map(({ label, href }) => (
+                  <div key={label}>
+                    <Link href={href}>
+                      <span className="text-sm transition-colors cursor-pointer" style={{ color: "rgba(255,255,255,0.5)" }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "#ffffff")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}>
+                        {label}
+                      </span>
+                    </Link>
+                  </div>
+                ))}
               </div>
             </div>
+
+            {/* Company */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.15em" }}>Company</p>
+              <div className="space-y-3">
+                {[
+                  { label: "Roadmap", href: "/roadmap" },
+                  { label: "Release Notes", href: "/release-notes" },
+                  { label: "Status", href: "/status" },
+                  { label: "Trust Center", href: "/trust" },
+                  { label: "Sitemap", href: "/sitemap" },
+                ].map(({ label, href }) => (
+                  <div key={label}>
+                    <Link href={href}>
+                      <span className="text-sm transition-colors cursor-pointer" style={{ color: "rgba(255,255,255,0.5)" }}
+                        onMouseEnter={e => (e.currentTarget.style.color = "#ffffff")}
+                        onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}>
+                        {label}
+                      </span>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Legal & contact */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest mb-5" style={{ color: "rgba(255,255,255,0.3)", letterSpacing: "0.15em" }}>Legal</p>
+              <div className="space-y-3 mb-6">
+                {[
+                  { label: "Terms of Service", href: "/terms" },
+                  { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Contact", href: "/contact" },
+                ].map(({ label, href }) => (
+                  <div key={label}>
+                    <a href={href} className="text-sm transition-colors"
+                      style={{ color: "rgba(255,255,255,0.5)" }}
+                      onMouseEnter={e => (e.currentTarget.style.color = "#ffffff")}
+                      onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}>
+                      {label}
+                    </a>
+                  </div>
+                ))}
+              </div>
+              {contactEmail && (
+                <a href={`mailto:${contactEmail}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold transition-opacity hover:opacity-80"
+                  style={{ color: teal }}>
+                  {contactEmail}
+                </a>
+              )}
+            </div>
           </div>
-          <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-400">
-            <span>© 2026 Aperti. All rights reserved.</span>
-            <span>Built for educators who refuse to compromise.</span>
+
+          <div className="pt-8 border-t flex flex-col sm:flex-row justify-between items-center gap-3"
+            style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+            <span className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+              © 2026 Aperti. All rights reserved.
+            </span>
+            <span className="text-xs font-medium" style={{ color: "rgba(255,255,255,0.2)" }}>
+              Built for educators who refuse to compromise.
+            </span>
           </div>
         </div>
       </footer>

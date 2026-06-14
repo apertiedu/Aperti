@@ -641,3 +641,45 @@ body, #root {
   50%       { opacity: 1;   transform: scale(1.05); }
 }
 .hero-glow-pulse { animation: hero-glow-pulse 4s ease-in-out infinite; }
+
+/* ── Landing mobile overrides ──────────────────────────── */
+@media (max-width: 640px) {
+  .landing-scroll .snap-start {
+    scroll-snap-stop: normal;
+  }
+  .landing-scroll {
+    scroll-snap-type: none;
+  }
+}
+
+/* ── Landing section base ──────────────────────────────── */
+.landing-section-light {
+  background: #F8FAFB;
+}
+.landing-section-white {
+  background: #ffffff;
+}
+
+/* ── Dark glass card ────────────────────────────────────── */
+.dark-glass-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Teal text glow ─────────────────────────────────────── */
+.teal-glow {
+  text-shadow: 0 0 32px rgba(13,148,136,0.45);
+}
+
+/* ── Marquee animation ───────────────────────────────────── */
+@keyframes marquee-rtl {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-rtl {
+  animation: marquee-rtl 28s linear infinite;
+  will-change: transform;
+}
+.marquee-rtl:hover { animation-play-state: paused; }
