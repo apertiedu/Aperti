@@ -195,44 +195,34 @@ function AbstractGeometry() {
 function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const container = document.querySelector(".landing-scroll") as HTMLElement | null;
-    if (!container) return;
-    scrollRef.current = container;
-    const fn = () => setScrolled(container.scrollTop > 60);
-    container.addEventListener("scroll", fn, { passive: true });
-    return () => container.removeEventListener("scroll", fn);
+    const fn = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", fn, { passive: true });
+    return () => window.removeEventListener("scroll", fn);
   }, []);
 
   const navBg = scrolled
     ? "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
-    : "bg-transparent backdrop-blur-sm";
-  const logoColor = scrolled ? "#121212" : "#ffffff";
-  const linkColor = scrolled ? "text-gray-500 hover:text-gray-900" : "text-white/70 hover:text-white";
-  const mobileIconColor = scrolled ? "text-gray-500" : "text-white/70";
+    : "bg-white/80 backdrop-blur-sm border-b border-gray-100/60";
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
         <Link href="/">
-          <span className="text-xl font-extrabold tracking-tight cursor-pointer transition-colors duration-300" style={{ color: logoColor }}>
+          <span className="text-xl font-extrabold tracking-tight cursor-pointer" style={{ color: "#121212" }}>
             Aperti<span style={{ color: TEAL }}>.</span>
           </span>
         </Link>
-        <div className={`hidden md:flex items-center gap-7 text-sm font-medium transition-colors duration-300 ${linkColor}`}>
-          <a href="#features" className="transition-colors">Features</a>
-          <Link href="/courses" className="transition-colors">Courses</Link>
-          <a href="#pricing" className="transition-colors">Pricing</a>
-          <a href="#apply" className="transition-colors">Apply</a>
+        <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-500">
+          <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
+          <Link href="/courses" className="hover:text-gray-900 transition-colors">Courses</Link>
+          <a href="#pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
+          <a href="#apply" className="hover:text-gray-900 transition-colors">Apply</a>
         </div>
         <div className="hidden md:flex items-center gap-3">
           <Link href="/courses">
-            <button className="text-sm font-medium px-4 py-2 rounded-xl transition-all duration-300"
-              style={scrolled
-                ? { border: "1px solid #e5e7eb", color: "#374151", background: "transparent" }
-                : { border: "1px solid rgba(255,255,255,0.2)", color: "rgba(255,255,255,0.8)", background: "rgba(255,255,255,0.06)" }}>
+            <button className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all duration-200">
               Explore Courses
             </button>
           </Link>
@@ -242,7 +232,7 @@ function Nav() {
             </button>
           </Link>
         </div>
-        <button className={`md:hidden p-2 rounded-lg transition-colors ${mobileIconColor}`} onClick={() => setOpen(!open)}>
+        <button className="md:hidden p-2 rounded-lg text-gray-500 transition-colors" onClick={() => setOpen(!open)}>
           {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
@@ -1755,21 +1745,23 @@ export default function Landing() {
       <Nav />
 
       {/* ── HERO ── */}
-      <section className="snap-start min-h-screen flex items-center pt-20 pb-10 px-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #060D1B 0%, #091525 55%, #0D1F2D 100%)" }}>
+      <section className="min-h-screen flex items-center pt-20 pb-10 px-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #F0FDF8 0%, #EEF6FF 50%, #FAF5FF 100%)" }}>
 
-        {/* Fullscreen 3D animated background */}
-        <Landing3DHeroCanvas />
+        {/* Colorful animated background (canvas adapted for light) */}
+        <div className="absolute inset-0 opacity-30 pointer-events-none"><Landing3DHeroCanvas /></div>
 
-        {/* Subtle dark gradient overlay for text readability */}
+        {/* Light gradient overlay for readability */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(to right, rgba(6,13,27,0.85) 0%, rgba(6,13,27,0.55) 55%, rgba(6,13,27,0.2) 100%)" }} />
+          style={{ background: "linear-gradient(to right, rgba(240,253,248,0.85) 0%, rgba(238,246,255,0.55) 55%, rgba(250,245,255,0.2) 100%)" }} />
 
-        {/* Teal glow blobs */}
-        <div className="absolute -top-32 -right-32 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${teal}18 0%, transparent 70%)`, filter: "blur(40px)" }} />
-        <div className="absolute -bottom-24 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${teal}10 0%, transparent 70%)`, filter: "blur(60px)" }} />
+        {/* Colorful decorative blobs */}
+        <div className="absolute -top-24 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}28 0%, transparent 70%)`, filter: "blur(60px)" }} />
+        <div className="absolute -bottom-16 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #818CF840 0%, transparent 70%)", filter: "blur(80px)" }} />
+        <div className="absolute top-1/2 right-1/4 w-[300px] h-[300px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #34D39920 0%, transparent 70%)", filter: "blur(50px)" }} />
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -1780,11 +1772,10 @@ export default function Landing() {
                 <Sparkles className="h-3 w-3" />
                 {badgeText}
               </motion.div>
-              <AnimeHeroTitle headline={headline} headlineAccent={headlineAccent} teal={teal} dark />
+              <AnimeHeroTitle headline={headline} headlineAccent={headlineAccent} teal={teal} />
               <motion.p
                 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
-                className="text-lg leading-relaxed mb-9 max-w-xl"
-                style={{ color: "rgba(255,255,255,0.65)" }}>
+                className="text-lg leading-relaxed mb-9 max-w-xl text-gray-500">
                 {subheadline}
               </motion.p>
               <motion.div
@@ -1798,9 +1789,9 @@ export default function Landing() {
                   </motion.button>
                 </Link>
                 <a href="#how-it-works">
-                  <motion.button whileHover={{ scale: 1.02, background: "rgba(255,255,255,0.1)" }} whileTap={{ scale: 0.97 }}
-                    className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all"
-                    style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.85)", border: "1px solid rgba(255,255,255,0.15)" }}>
+                  <motion.button whileHover={{ scale: 1.02, background: "#F9FAFB" }} whileTap={{ scale: 0.97 }}
+                    className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-gray-700 transition-all"
+                    style={{ background: "white", border: "1.5px solid #E5E7EB", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
                     See How It Works
                   </motion.button>
                 </a>
@@ -1814,8 +1805,8 @@ export default function Landing() {
                   { icon: CheckCircle2, label: "IGCSE & IB ready"     },
                   { icon: Star,         label: "AI-powered grading"   },
                 ].map(({ icon: Icon, label }) => (
-                  <span key={label} className="flex items-center gap-1.5 text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
-                    <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: `${teal}cc` }} />
+                  <span key={label} className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: teal }} />
                     {label}
                   </span>
                 ))}
@@ -1828,7 +1819,7 @@ export default function Landing() {
               {/* Glow ring behind the preview */}
               <div className="absolute inset-0 -m-8 rounded-3xl pointer-events-none"
                 style={{ background: `radial-gradient(ellipse at center, ${teal}20 0%, transparent 70%)`, filter: "blur(20px)" }} />
-              <div className="relative" style={{ filter: "drop-shadow(0 32px 64px rgba(0,0,0,0.5))" }}>
+              <div className="relative" style={{ filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.12))" }}>
                 <LiveDashboardPreview />
               </div>
             </motion.div>
@@ -1838,7 +1829,7 @@ export default function Landing() {
         {/* Scroll cue */}
         <div className="scroll-cue absolute bottom-8 left-1/2 flex flex-col items-center gap-1.5 z-10">
           <div className="w-5 h-8 rounded-full flex items-start justify-center pt-1.5"
-            style={{ border: "1.5px solid rgba(255,255,255,0.2)" }}>
+            style={{ border: "1.5px solid rgba(0,0,0,0.15)" }}>
             <motion.div className="w-1.5 h-2 rounded-full" style={{ background: teal }}
               animate={{ y: [0, 8, 0], opacity: [1, 0.3, 1] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }} />
@@ -1850,7 +1841,7 @@ export default function Landing() {
       <MarqueeStrip />
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="snap-start min-h-screen flex items-center py-20 px-5" style={{ background: "#F5F5F5" }}>
+      <section id="how-it-works" className="flex items-center py-24 px-5" style={{ background: "#F5F5F5" }}>
         <div className="max-w-7xl mx-auto w-full">
           <Reveal>
             <div className="text-center mb-16">
@@ -1878,7 +1869,7 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="snap-start min-h-screen flex items-center py-16 px-5 bg-white">
+      <section id="features" className="flex items-center py-20 px-5 bg-white">
         <div className="max-w-7xl mx-auto">
           <Reveal>
             <div className="text-center mb-16">
@@ -1908,20 +1899,15 @@ export default function Landing() {
       </section>
 
       {/* ── INTERACTIVE DEMO ── */}
-      <div className="snap-start">
-        <InteractiveDemo teal={teal} />
-      </div>
+      <InteractiveDemo teal={teal} />
 
       {/* ── STATS STRIP ── */}
-      <div className="snap-start">
-        <StatsStrip cmsStats={statItems} />
-      </div>
+      <StatsStrip cmsStats={statItems} />
 
       {/* ── TESTIMONIALS (CMS-driven) ── */}
       <TestimonialsSection testimonials={testimonials} />
 
       {/* ── PRICING ── */}
-      <div className="snap-start">
       <PricingSection
         teal={teal}
         teacherPlans={teacherPlans}
@@ -1930,7 +1916,6 @@ export default function Landing() {
         pricingAccent={pricingAccent}
         contactEmail={contactEmail}
       />
-      </div>
 
       {/* ── COMPARISON TABLE ── */}
       <ComparisonSection teal={teal} />
@@ -1973,12 +1958,16 @@ export default function Landing() {
       )}
 
       {/* ── GET STARTED CTA ── */}
-      <section id="apply" className="snap-start min-h-screen flex items-center py-20 px-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #060D1B 0%, #091525 55%, #0D1F2D 100%)" }}>
+      <section id="apply" className="flex items-center py-28 px-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #F0FDF8 0%, #EEF6FF 50%, #FAF5FF 100%)" }}>
         <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: `linear-gradient(${teal}06 1px, transparent 1px), linear-gradient(90deg, ${teal}06 1px, transparent 1px)`, backgroundSize: "80px 80px" }} />
+          style={{ backgroundImage: `linear-gradient(${teal}08 1px, transparent 1px), linear-gradient(90deg, ${teal}08 1px, transparent 1px)`, backgroundSize: "80px 80px" }} />
+        <div className="absolute -top-24 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}28 0%, transparent 70%)`, filter: "blur(80px)" }} />
+        <div className="absolute -bottom-16 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #818CF840 0%, transparent 70%)", filter: "blur(80px)" }} />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${teal}18 0%, transparent 65%)`, filter: "blur(60px)" }} />
+          style={{ background: `radial-gradient(circle, ${teal}15 0%, transparent 65%)`, filter: "blur(60px)" }} />
         <div className="max-w-3xl mx-auto text-center w-full relative z-10">
           <Reveal>
             <motion.div
@@ -1991,18 +1980,16 @@ export default function Landing() {
               <Rocket className="h-3 w-3" />
               Join the platform now — it's free to start
             </motion.div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.06]"
-              style={{ color: "#ffffff" }}>
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6 leading-[1.06] text-gray-900">
               {contactHeadline || "Your classroom."}<br />
               <span style={{ color: teal }}>Transformed.</span>
             </h2>
-            <p className="max-w-lg mx-auto text-lg leading-relaxed mb-10"
-              style={{ color: "rgba(255,255,255,0.55)" }}>
+            <p className="max-w-lg mx-auto text-lg leading-relaxed mb-10 text-gray-500">
               Create your workspace, invite your students, and run your first class — all in one place. No setup fee. No lock-in.
             </p>
           </Reveal>
           <Reveal delay={0.15}>
-            <EarlyAccessForm ctaText={contactCta} email={contactEmail} dark />
+            <EarlyAccessForm ctaText={contactCta} email={contactEmail} />
           </Reveal>
           <Reveal delay={0.3}>
             <div className="flex flex-wrap items-center justify-center gap-5 mt-10">
@@ -2011,9 +1998,8 @@ export default function Landing() {
                 { icon: Zap, label: "Live in under 5 minutes" },
                 { icon: CheckCircle2, label: "Cancel anytime" },
               ].map(({ icon: Icon, label }) => (
-                <span key={label} className="flex items-center gap-1.5 text-sm"
-                  style={{ color: "rgba(255,255,255,0.4)" }}>
-                  <Icon className="h-4 w-4" style={{ color: `${teal}cc` }} />
+                <span key={label} className="flex items-center gap-1.5 text-sm text-gray-400">
+                  <Icon className="h-4 w-4" style={{ color: teal }} />
                   {label}
                 </span>
               ))}

@@ -594,18 +594,13 @@ body, #root {
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
-/* ── Landing: Full-Screen 3D Scroll System ──────────────────────────── */
+/* ── Landing: Normal scroll (no snap/magnet) ──────────────────────────── */
 .landing-scroll {
-  height: 100vh;
-  overflow-y: scroll;
-  scroll-snap-type: y mandatory;
+  overflow-y: auto;
   scroll-behavior: smooth;
-  -webkit-overflow-scrolling: touch;
 }
 .snap-start {
-  scroll-snap-align: start;
-  scroll-snap-stop: always;
-  min-height: 100vh;
+  /* scroll snapping removed — content flows naturally */
 }
 .mesh-orb {
   position: absolute;
@@ -644,11 +639,8 @@ body, #root {
 
 /* ── Landing mobile overrides ──────────────────────────── */
 @media (max-width: 640px) {
-  .landing-scroll .snap-start {
-    scroll-snap-stop: normal;
-  }
   .landing-scroll {
-    scroll-snap-type: none;
+    overflow-x: hidden;
   }
 }
 
