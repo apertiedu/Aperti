@@ -6,6 +6,9 @@ export const guardianLinksTable = pgTable("guardian_links", {
   id: serial("id").primaryKey(),
   parentAccountId: integer("parent_account_id").notNull().references(() => accountsTable.id, { onDelete: "cascade" }),
   studentId: integer("student_id").notNull().references(() => studentsTable.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("pending"),
+  pairingCode: text("pairing_code"),
+  requestedAt: timestamp("requested_at", { withTimezone: true }).defaultNow(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

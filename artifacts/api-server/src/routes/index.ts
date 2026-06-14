@@ -106,9 +106,11 @@ import { adminLaunchAuditRouter } from "./admin-launch-audit";
 import { i18nRouter } from "./i18n";
 import { userExportRouter } from "./user-export";
 import { contentCraftRouter } from "./content-craft";
+import { contentcraftStudioRouter } from "./contentcraft-studio";
 import { problemReportsRouter } from "./problem-reports";
 import { phase25Router } from "./phase25";
 import { aiGatewayRouter } from "./ai-gateway";
+import { aiStudioRouter } from "./ai-studio";
 import { adminDebugRouter } from "./admin-debug";
 
 const router: IRouter = Router();
@@ -238,6 +240,7 @@ router.use("/admin/launch-audit", adminLaunchAuditRouter);
 router.use(i18nRouter);
 router.use(userExportRouter);
 router.use("/content-craft", contentCraftRouter);
+router.use("/contentcraft", contentcraftStudioRouter);
 
 // Phase 24 — Production Hardening
 router.use(problemReportsRouter);
@@ -247,6 +250,7 @@ router.use(phase25Router);
 
 // Phase 38 — AI Gateway & Admin Debug
 router.use("/ai", aiGatewayRouter);
+router.use("/ai-studio", aiStudioRouter);
 router.use("/admin/debug", adminDebugRouter);
 
 export default router;
