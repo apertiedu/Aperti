@@ -12,22 +12,22 @@ import { pool } from "@workspace/db";
 
 // ── Config (resolved once at module load) ─────────────────────────────────────
 
+const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
 const REPLIT_KEY = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
 const REPLIT_BASE = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_BASE = process.env.OPENAI_BASE_URL;
 
-// Priority: Replit AI Integration → NVIDIA → plain OpenAI
+// Priority: NVIDIA → Replit AI Integration → plain OpenAI
 const API_KEY: string | null =
-  (REPLIT_KEY && REPLIT_BASE ? REPLIT_KEY : null) ??
   NVIDIA_KEY ??
+  (REPLIT_KEY && REPLIT_BASE ? REPLIT_KEY : null) ??
   OPENAI_KEY ??
   null;
 
 const BASE_URL: string =
-  (REPLIT_KEY && REPLIT_BASE ? REPLIT_BASE : null) ??
   (NVIDIA_KEY ? "https://integrate.api.nvidia.com/v1" : null) ??
+  (REPLIT_KEY && REPLIT_BASE ? REPLIT_BASE : null) ??
   OPENAI_BASE ??
   "https://api.openai.com/v1";
 
