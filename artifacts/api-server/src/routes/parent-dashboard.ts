@@ -52,7 +52,7 @@ parentDashboardRouter.get("/parent/dashboard", ...authParent, async (req: AuthRe
       const nextWeek = new Date();
       nextWeek.setDate(nextWeek.getDate() + 7);
       const { rows: upcoming } = await pool.query(
-        `SELECT h.id, h.title, h.due_date, sub.subject_name,
+        `SELECT h.id, h.title, h.due_date, sub.name,
                 hs.status AS submission_status
          FROM homework h
          LEFT JOIN subjects sub ON h.subject_id = sub.id
@@ -65,16 +65,15 @@ parentDashboardRouter.get("/parent/dashboard", ...authParent, async (req: AuthRe
 
       // Current avg grade (last 10 student_marks)
       const { rows: marks } = await pool.query(
-        `SELECT sm.marks_scored, eq.marks FROM student_marks sm
+        `SELECT sm.marks_scored, eq.max_marks FROM student_marks sm
          JOIN exam_questions eq ON sm.question_id = eq.id
-         JOIN exams e ON eq.exam_id = e.id
-         WHERE e.student_id = $1 OR sm.student_id = $1
-         ORDER BY sm.graded_at DESC LIMIT 20`,
+         WHERE sm.student_id = $1
+         ORDER BY sm.marked_at DESC LIMIT 20`,
         [sid]
       );
       let avgGrade = 0;
       if (marks.length > 0) {
-        const scores = marks.map(m => m.marks > 0 ? (m.marks_scored / m.marks) * 100 : 0);
+        const scores = marks.map(m => m.max_marks > 0 ? (m.marks_scored / m.max_marks) * 100 : 0);
         avgGrade = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
       }
 
@@ -106,21 +105,17 @@ parentDashboardRouter.get("/parent/dashboard", ...authParent, async (req: AuthRe
 
       // Recent achievements
       const { rows: ascend } = await pool.query(
-        "SELECT level, xp, rank, streak FROM ascend_profiles WHERE student_id=$1 LIMIT 1", [sid]
+        "SELECT level, xp, rank, streak FROM ascend_profiles WHERE student_account_id=$1 LIMIT 1", [sid]
       );
 
       // Today's lessons
-      const dow = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];
       const { rows: todayLessons } = await pool.query(
-        `SELECT ses.subject_id, sub.subject_name, ses.session_time, ses.session_name
-         FROM sessions ses
-         LEFT JOIN subjects sub ON ses.subject_id = sub.id
-         WHERE (ses.id = ANY(
-           SELECT unnest(ARRAY[lesson1_session_id, lesson2_session_id, lesson3_session_id])
-           FROM students WHERE id=$1
-         ))
-         LIMIT 5`, [sid]
-      );
+        `SELECT l.id, l.day_of_week, l.start_time, sub.name AS subject_name
+         FROM lessons l
+         LEFT JOIN subjects sub ON l.subject_id = sub.id
+         WHERE l.is_active = true
+         ORDER BY l.start_time LIMIT 5`
+      ).catch(() => ({ rows: [] }));
 
       return {
         linkId: link.link_id,
@@ -164,26 +159,25 @@ parentDashboardRouter.get("/parent/child/:studentId", ...authParent, async (req:
 
     // Subjects enrolled in
     const { rows: subjects } = await pool.query(
-      `SELECT DISTINCT sub.id, sub.subject_name
-       FROM lessons l
-       JOIN subjects sub ON l.subject_id = sub.id
-       WHERE l.student_id = $1 OR l.session_id IN (
-         SELECT unnest(ARRAY[lesson1_session_id,lesson2_session_id,lesson3_session_id]) FROM students WHERE id=$1
-       )`, [sid]
-    );
+      `SELECT DISTINCT sub.id, sub.name
+       FROM course_enrollments ce
+       JOIN aperti_courses ac ON ac.id = ce.course_id
+       JOIN subjects sub ON ac.teacher_account_id = sub.id
+       WHERE ce.student_account_id = $1 AND ce.status = 'approved'`, [sid]
+    ).catch(() => ({ rows: [] }));
 
     // Last 10 assessments
     const { rows: assessments } = await pool.query(
-      `SELECT e.id, e.title, e.date, e.total_marks,
+      `SELECT e.id, e.title, e.exam_date AS date, e.total_marks,
               SUM(sm.marks_scored) AS scored,
               COUNT(sm.id) AS q_count
        FROM exams e
        JOIN exam_questions eq ON eq.exam_id = e.id
        LEFT JOIN student_marks sm ON sm.question_id = eq.id AND sm.student_id=$1
-       WHERE e.student_id=$1 OR sm.student_id=$1
-       GROUP BY e.id, e.title, e.date, e.total_marks
-       ORDER BY e.date DESC LIMIT 10`, [sid]
-    );
+       WHERE sm.student_id=$1
+       GROUP BY e.id, e.title, e.exam_date, e.total_marks
+       ORDER BY e.exam_date DESC LIMIT 10`, [sid]
+    ).catch(() => ({ rows: [] }));
 
     // Attendance trends (last 12 weeks)
     const { rows: attTrend } = await pool.query(
@@ -213,7 +207,7 @@ parentDashboardRouter.get("/parent/child/:studentId", ...authParent, async (req:
 
     // Ascend profile
     const { rows: ascend } = await pool.query(
-      "SELECT * FROM ascend_profiles WHERE student_id=$1 LIMIT 1", [sid]
+      "SELECT * FROM ascend_profiles WHERE student_account_id=$1 LIMIT 1", [sid]
     );
 
     res.json({
@@ -243,38 +237,38 @@ parentDashboardRouter.get("/parent/child/:studentId/grades", ...authParent, asyn
 
     // Per-subject marks breakdown
     const { rows: subjectGrades } = await pool.query(
-      `SELECT sub.id, sub.subject_name,
+      `SELECT sub.id, sub.name,
               COUNT(sm.id) AS total_questions,
               SUM(sm.marks_scored) AS total_scored,
-              SUM(eq.marks) AS total_possible,
-              AVG(sm.marks_scored::float / NULLIF(eq.marks,0) * 100) AS avg_pct,
-              MAX(e.date) AS last_exam
+              SUM(eq.max_marks) AS total_possible,
+              AVG(sm.marks_scored::float / NULLIF(eq.max_marks,0) * 100) AS avg_pct,
+              MAX(e.exam_date) AS last_exam
        FROM student_marks sm
        JOIN exam_questions eq ON eq.id = sm.question_id
        JOIN exams e ON e.id = eq.exam_id
        LEFT JOIN subjects sub ON e.subject_id = sub.id
        WHERE sm.student_id = $1
-       GROUP BY sub.id, sub.subject_name
+       GROUP BY sub.id, sub.name
        ORDER BY avg_pct DESC`, [sid]
     );
 
     // Grade trend (last 12 individual exams)
     const { rows: trend } = await pool.query(
-      `SELECT e.id, e.title, e.date, sub.subject_name,
+      `SELECT e.id, e.title, e.exam_date, sub.name,
               SUM(sm.marks_scored) AS scored,
-              SUM(eq.marks) AS possible,
-              ROUND(SUM(sm.marks_scored)::numeric / NULLIF(SUM(eq.marks),0) * 100, 1) AS pct
+              SUM(eq.max_marks) AS possible,
+              ROUND(SUM(sm.marks_scored)::numeric / NULLIF(SUM(eq.max_marks),0) * 100, 1) AS pct
        FROM exams e
        JOIN exam_questions eq ON eq.exam_id = e.id
        JOIN student_marks sm ON sm.question_id = eq.id AND sm.student_id = $1
        LEFT JOIN subjects sub ON e.subject_id = sub.id
-       GROUP BY e.id, e.title, e.date, sub.subject_name
-       ORDER BY e.date DESC LIMIT 12`, [sid]
+       GROUP BY e.id, e.title, e.exam_date, sub.name
+       ORDER BY e.exam_date DESC LIMIT 12`, [sid]
     );
 
     // Recent homework feedback
     const { rows: hwFeedback } = await pool.query(
-      `SELECT h.title, sub.subject_name, hs.marks_awarded, h.total_marks, hs.teacher_feedback, hs.graded_at
+      `SELECT h.title, sub.name, hs.marks_awarded, h.total_marks, hs.teacher_feedback, hs.graded_at
        FROM homework_submissions hs
        JOIN homework h ON h.id = hs.homework_id
        LEFT JOIN subjects sub ON h.subject_id = sub.id
@@ -296,7 +290,7 @@ parentDashboardRouter.get("/parent/child/:studentId/attendance", ...authParent, 
 
     const { rows: records } = await pool.query(
       `SELECT a.date, a.status, a.method, ses.session_name,
-              sub.subject_name
+              sub.name
        FROM attendance a
        LEFT JOIN sessions ses ON a.session_id = ses.id
        LEFT JOIN subjects sub ON ses.subject_id = sub.id
@@ -401,7 +395,7 @@ parentDashboardRouter.get("/parent/child/:studentId/assignments", ...authParent,
 
     const { rows } = await pool.query(
       `SELECT h.id, h.title, h.description, h.due_date, h.total_marks,
-              sub.subject_name,
+              sub.name,
               hs.status AS submission_status,
               hs.marks_awarded,
               hs.teacher_feedback,
@@ -432,32 +426,32 @@ parentDashboardRouter.get("/parent/child/:studentId/exam-readiness", ...authPare
 
     // Recent mock scores
     const { rows: mocks } = await pool.query(
-      `SELECT e.id, e.title, e.date, sub.subject_name,
-              ROUND(SUM(sm.marks_scored)::numeric / NULLIF(SUM(eq.marks),0) * 100, 1) AS score_pct
+      `SELECT e.id, e.title, e.exam_date, sub.name,
+              ROUND(SUM(sm.marks_scored)::numeric / NULLIF(SUM(eq.max_marks),0) * 100, 1) AS score_pct
        FROM exams e
        JOIN exam_questions eq ON eq.exam_id=e.id
        JOIN student_marks sm ON sm.question_id=eq.id AND sm.student_id=$1
        LEFT JOIN subjects sub ON e.subject_id=sub.id
-       GROUP BY e.id, e.title, e.date, sub.subject_name
-       ORDER BY e.date DESC LIMIT 10`, [sid]
+       GROUP BY e.id, e.title, e.exam_date, sub.name
+       ORDER BY e.exam_date DESC LIMIT 10`, [sid]
     );
 
     // Per-subject readiness
     const { rows: subjectReadiness } = await pool.query(
-      `SELECT sub.subject_name,
-              ROUND(AVG(sm.marks_scored::float / NULLIF(eq.marks,0) * 100), 1) AS readiness_pct,
+      `SELECT sub.name,
+              ROUND(AVG(sm.marks_scored::float / NULLIF(eq.max_marks,0) * 100), 1) AS readiness_pct,
               COUNT(DISTINCT e.id) AS exams_taken
        FROM student_marks sm
        JOIN exam_questions eq ON eq.id=sm.question_id
        JOIN exams e ON e.id=eq.exam_id
        LEFT JOIN subjects sub ON e.subject_id=sub.id
        WHERE sm.student_id=$1
-       GROUP BY sub.subject_name`, [sid]
+       GROUP BY sub.name`, [sid]
     );
 
     // Trial vault attempts
     const { rows: trialAttempts } = await pool.query(
-      `SELECT ta.created_at, ta.score, ta.topic_breakdown, sub.subject_name
+      `SELECT ta.created_at, ta.score, ta.topic_breakdown, sub.name
        FROM trial_vault_attempts ta
        LEFT JOIN subjects sub ON ta.subject_id=sub.id
        WHERE ta.student_id=$1
@@ -466,10 +460,10 @@ parentDashboardRouter.get("/parent/child/:studentId/exam-readiness", ...authPare
 
     // Next exam
     const { rows: nextExam } = await pool.query(
-      `SELECT e.id, e.title, e.date, sub.subject_name
+      `SELECT e.id, e.title, e.exam_date, sub.name
        FROM exams e LEFT JOIN subjects sub ON e.subject_id=sub.id
-       WHERE e.date > NOW()
-       ORDER BY e.date ASC LIMIT 1`
+       WHERE e.exam_date > NOW()
+       ORDER BY e.exam_date ASC LIMIT 1`
     );
 
     const overallReadiness = subjectReadiness.length > 0
@@ -492,7 +486,7 @@ parentDashboardRouter.get("/parent/child/:studentId/exam-readiness", ...authPare
 parentDashboardRouter.get("/parent/teachers", ...authParent, async (req: AuthRequest, res: Response) => {
   try {
     const { rows } = await pool.query(
-      `SELECT DISTINCT a.id, a.display_name, a.email, sub.subject_name
+      `SELECT DISTINCT a.id, a.display_name, a.email, sub.name
        FROM guardian_links gl
        JOIN students s ON gl.student_id=s.id
        JOIN accounts a ON s.teacher_account_id=a.id
@@ -868,7 +862,7 @@ parentDashboardRouter.post("/parent/generate-report", ...authParent, async (req:
     const [attRows, hwRows, gradeRows, studentRows] = await Promise.all([
       pool.query(`SELECT COUNT(*) AS total, SUM(CASE WHEN LOWER(status)='present' THEN 1 ELSE 0 END) AS present FROM attendance WHERE student_id=$1`, [sid]),
       pool.query(`SELECT COUNT(*) AS submitted, COUNT(CASE WHEN status NOT IN ('submitted','graded') AND due_date < NOW() THEN 1 END) AS overdue FROM homework_submissions WHERE student_id=$1`, [sid]),
-      pool.query(`SELECT ROUND(AVG(marks_scored::float / NULLIF(eq.marks,0)*100),1) AS avg FROM student_marks sm JOIN exam_questions eq ON eq.id=sm.question_id WHERE sm.student_id=$1`, [sid]),
+      pool.query(`SELECT ROUND(AVG(marks_scored::float / NULLIF(eq.max_marks,0)*100),1) AS avg FROM student_marks sm JOIN exam_questions eq ON eq.id=sm.question_id WHERE sm.student_id=$1`, [sid]),
       pool.query(`SELECT s.student_name, a.display_name FROM students s LEFT JOIN accounts a ON a.id=s.account_id WHERE s.id=$1`, [sid]),
     ]);
 

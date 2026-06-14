@@ -194,6 +194,8 @@ router.use("/grading", gradingRouter);
 router.use("/coremind", coremindAnalyticsRouter);
 router.use(parentAiRouter);
 router.use("/parent", parentRouter);
+router.use("/parent", parentDashboardRouter);
+router.use("/parent", parentPhase4Router);
 
 // Phase 7 — Communication, Collaboration & Community Ecosystem
 // commThreadsRouter must come BEFORE studentMessagesThreadedRouter to avoid

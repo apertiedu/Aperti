@@ -139,7 +139,7 @@ export default function SuccessCenter() {
               <h2 className="font-bold text-foreground flex items-center gap-2">
                 <CalendarDays className="w-4 h-4 text-amber-500" /> Coming Up
               </h2>
-              <Link href="/homework">
+              <Link href="/my-homework">
                 <span className="text-xs text-primary font-semibold cursor-pointer flex items-center gap-1 hover:text-primary/80">All tasks <ChevronRight className="w-3 h-3" /></span>
               </Link>
             </div>

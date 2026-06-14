@@ -153,7 +153,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
             ) : (
               <div className="space-y-2">
                 {homework.slice(0, 5).map((hw: any) => (
-                  <Link href="/assignments" key={hw.id}>
+                  <Link href="/my-homework" key={hw.id}>
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{hw.title}</p>
@@ -168,7 +168,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
                     </div>
                   </Link>
                 ))}
-                <Link href="/assignments">
+                <Link href="/my-homework">
                   <Button variant="ghost" size="sm" className="w-full text-xs text-teal-600 mt-2">
                     View all assignments <ArrowRight className="h-3 w-3 ml-1" />
                   </Button>
