@@ -46,7 +46,7 @@ import Syllabuilder from "@/pages/syllabuilder";
 import KudosEngine from "@/pages/kudos-engine";
 import Pulse from "@/pages/pulse";
 import ContentCraft from "@/pages/content-craft";
-import LabBuilder from "@/pages/lab-builder";
+import LabsComingSoon from "@/pages/labs-coming-soon";
 import MarkerMind from "@/pages/marker-mind";
 import InsightStream from "@/pages/insight-stream";
 import HelpDesk from "@/pages/helpdesk";
@@ -97,7 +97,6 @@ import MyAttendance from "@/pages/student/my-attendance";
 import TheMentor from "@/pages/student/the-mentor";
 import MyCardStack from "@/pages/student/my-cardstack";
 import Ascend from "@/pages/student/ascend";
-import SimVerse from "@/pages/student/simverse";
 import TakeExam from "@/pages/student/take-exam";
 import SkillBadge from "@/pages/student/skill-badge";
 import MyQRPage from "@/pages/student/my-qr";
@@ -118,10 +117,6 @@ import StudentAnalytics from "@/pages/student/analytics";
 import StudyGroups from "@/pages/student/study-groups";
 import StudentMessages from "@/pages/student/messages";
 import ExamVault from "@/pages/student/exam-vault";
-import ForgeFieldLab from "@/pages/student/labs/forge-field";
-import ReactSphereLab from "@/pages/student/labs/react-sphere";
-import GeometrixLab from "@/pages/student/labs/geometrix";
-import BioSphereLab from "@/pages/student/labs/biosphere";
 
 // Shared pages
 import TeamForge from "@/pages/team-forge";
@@ -198,8 +193,6 @@ import ContentAnalytics from "@/pages/teacher/content-analytics";
 import PracticeCenter from "@/pages/student/practice-center";
 import HandwrittenSubmit from "@/pages/student/handwritten-submit";
 import ResourcesLibrary from "@/pages/resources-library";
-import SimverseLabs from "@/pages/simverse-labs";
-import SimverseGeometrix from "@/pages/simverse-geometrix";
 
 // Phase 8 — Learning Experience, Content Delivery & Adaptive Personalization
 import LearningPathPage from "@/pages/student/learning-path";
@@ -400,7 +393,7 @@ function StudentRouter() {
         <Route path="/mentor" component={TheMentor} />
         <Route path="/flashcards" component={MyCardStack} />
         <Route path="/ascend" component={Ascend} />
-        <Route path="/simverse" component={SimVerse} />
+        <Route path="/simverse" component={LabsComingSoon} />
         <Route path="/exams/:examId/take" component={TakeExam} />
         <Route path="/skill-badge" component={SkillBadge} />
         <Route path="/learn-path" component={LearnPath} />
@@ -412,10 +405,10 @@ function StudentRouter() {
         <Route path="/peak-rankings" component={PeakRankings} />
         <Route path="/peer-review" component={PeerReview} />
         <Route path="/snap-grade" component={SnapGrade} />
-        <Route path="/labs/forge-field" component={ForgeFieldLab} />
-        <Route path="/labs/react-sphere" component={ReactSphereLab} />
-        <Route path="/labs/geometrix" component={GeometrixLab} />
-        <Route path="/labs/biosphere" component={BioSphereLab} />
+        <Route path="/labs/forge-field" component={LabsComingSoon} />
+        <Route path="/labs/react-sphere" component={LabsComingSoon} />
+        <Route path="/labs/geometrix" component={LabsComingSoon} />
+        <Route path="/labs/biosphere" component={LabsComingSoon} />
         <Route path="/papers" component={PastPaperLibrary} />
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
@@ -454,8 +447,8 @@ function StudentRouter() {
         <Route path="/practice" component={PracticeCenter} />
         <Route path="/submit/handwritten" component={HandwrittenSubmit} />
         <Route path="/resources/library" component={ResourcesLibrary} />
-        <Route path="/simverse/labs" component={SimverseLabs} />
-        <Route path="/simverse/geometrix" component={SimverseGeometrix} />
+        <Route path="/simverse/labs" component={LabsComingSoon} />
+        <Route path="/simverse/geometrix" component={LabsComingSoon} />
         {/* Phase 16 — Commercialization */}
         <Route path="/pricing" component={PricingPage} />
         <Route path="/subscribe/:planId" component={SubscribePage} />
@@ -497,7 +490,7 @@ const TEACHER_ROUTES = (
     <Route path="/kudos-engine" component={KudosEngine} />
     <Route path="/pulse" component={Pulse} />
     <Route path="/content-craft" component={ContentCraft} />
-    <Route path="/lab-builder" component={LabBuilder} />
+    <Route path="/lab-builder" component={LabsComingSoon} />
     <Route path="/exams" component={Exams} />
     <Route path="/marker-mind" component={MarkerMind} />
     <Route path="/insight-stream" component={InsightStream} />
@@ -544,8 +537,8 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/questions/extract" component={QuestionExtractionPage} />
     <Route path="/teacher/analytics/content" component={ContentAnalytics} />
     <Route path="/resources/library" component={ResourcesLibrary} />
-    <Route path="/simverse/labs" component={SimverseLabs} />
-    <Route path="/simverse/geometrix" component={SimverseGeometrix} />
+    <Route path="/simverse/labs" component={LabsComingSoon} />
+    <Route path="/simverse/geometrix" component={LabsComingSoon} />
     {/* Phase 16 — Commercialization */}
     <Route path="/pricing" component={PricingPage} />
     <Route path="/subscribe/:planId" component={SubscribePage} />
