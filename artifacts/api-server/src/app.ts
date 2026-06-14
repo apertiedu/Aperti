@@ -32,6 +32,7 @@ import { parentRouter } from "./routes/parent";
 import { parentDashboardRouter } from "./routes/parent-dashboard";
 import { parentPhase4Router } from "./routes/parent-phase4";
 import { adminUsersRouter } from "./routes/admin-users";
+import { adminPasswordResetsRouter } from "./routes/admin-password-resets";
 import { adminOrgsRouter } from "./routes/admin-organizations";
 import { adminSubscriptionsRouter } from "./routes/admin-subscriptions";
 import { adminPaymentsRouter } from "./routes/admin-payments";
@@ -316,6 +317,7 @@ app.use("/api", parentPhase4Router);
 
 // Phase 9 — Admin OS
 app.use("/api/admin/users", adminUsersRouter);
+app.use("/api/admin/password-resets", adminPasswordResetsRouter);
 app.use("/api/admin/organizations", adminOrgsRouter);
 app.use("/api/admin/subscriptions", adminSubscriptionsRouter);
 app.use("/api/admin/payments", adminPaymentsRouter);

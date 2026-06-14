@@ -27,8 +27,8 @@ export default function ForgotPassword() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong");
       setSubmitted(true);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -73,18 +73,19 @@ export default function ForgotPassword() {
                     <CheckCircle2 className="h-7 w-7" style={{ color: TEAL }} />
                   </div>
                 </div>
-                <h2 className="text-lg font-bold text-slate-900 mb-2">Check your inbox</h2>
+                <h2 className="text-lg font-bold text-slate-900 mb-2">Request submitted</h2>
                 <p className="text-sm text-slate-500 mb-6">
-                  If an account with <strong>{email}</strong> exists, we've sent a password reset link. It expires in 1 hour.
+                  Your password reset request has been received. An administrator will review it and provide you with a temporary password. Please contact your school admin if this is urgent.
                 </p>
-                <p className="text-xs text-slate-400">Didn't get it? Check your spam folder or{" "}
+                <p className="text-xs text-slate-400">
+                  Submitted the wrong email?{" "}
                   <button
                     onClick={() => { setSubmitted(false); setEmail(""); }}
                     className="font-semibold hover:underline"
                     style={{ color: TEAL }}
                   >
-                    try again
-                  </button>.
+                    Try again
+                  </button>
                 </p>
               </motion.div>
             ) : (
@@ -95,7 +96,7 @@ export default function ForgotPassword() {
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 leading-tight">Forgot your password?</h2>
-                    <p className="text-xs text-slate-500">We'll send a reset link to your email.</p>
+                    <p className="text-xs text-slate-500">Enter your email and an admin will reset it for you.</p>
                   </div>
                 </div>
 
@@ -136,10 +137,10 @@ export default function ForgotPassword() {
                   >
                     {isSubmitting ? (
                       <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1, repeat: Infinity }}>
-                        Sending…
+                        Submitting…
                       </motion.span>
                     ) : (
-                      "Send reset link"
+                      "Request password reset"
                     )}
                   </Button>
                 </form>

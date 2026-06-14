@@ -1,51 +1,31 @@
-const REPLIT_KEY = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
-const REPLIT_BASE = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
-const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
-const OPENAI_KEY = process.env.OPENAI_API_KEY;
+/**
+ * ai-config.ts — backward-compat shim
+ *
+ * All new code should import from "../services/ai" directly.
+ * This file re-exports everything so existing routes don't break.
+ */
+export {
+  AI_CONFIG,
+  AI_AVAILABLE,
+  openaiChat,
+  generateAIResponse,
+  generateAIText,
+} from "../services/ai";
 
-const USE_REPLIT = !!(REPLIT_KEY && REPLIT_BASE);
-const USE_NVIDIA = !USE_REPLIT && !!NVIDIA_KEY;
+export type { AIOptions, AIResponse } from "../services/ai";
 
-export const AI_CONFIG = {
-  provider: "openai" as const,
-  model: USE_REPLIT
-    ? (process.env.OPENAI_MODEL || "gpt-4o-mini")
-    : USE_NVIDIA
-      ? (process.env.NVIDIA_MODEL || "openai/gpt-oss-20b")
-      : (process.env.OPENAI_MODEL || "gpt-4o-mini"),
-  maxTokens: {
-    default: 1000,
-    feedback: 200,
-    analysis: 1500,
-    summary: 800,
-    syllabus: 2000,
-  },
-  baseUrl: USE_REPLIT
-    ? REPLIT_BASE!
-    : USE_NVIDIA
-      ? "https://integrate.api.nvidia.com/v1"
-      : (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"),
-  apiKey: USE_REPLIT
-    ? REPLIT_KEY!
-    : NVIDIA_KEY || OPENAI_KEY || null,
-};
+// ── Language utilities (used by several routes) ───────────────────────────────
 
 const LANG_NAMES: Record<string, string> = {
-  ar: "Arabic",
-  fr: "French",
-  es: "Spanish",
-  de: "German",
-  zh: "Chinese (Simplified)",
-  hi: "Hindi",
-  ur: "Urdu",
-  tr: "Turkish",
-  pt: "Portuguese",
+  ar: "Arabic", fr: "French", es: "Spanish", de: "German",
+  zh: "Chinese (Simplified)", hi: "Hindi", ur: "Urdu",
+  tr: "Turkish", pt: "Portuguese",
 };
 
 export function withLanguage(systemPrompt: string, language?: string): string {
   if (!language || language === "en") return systemPrompt;
-  const langName = LANG_NAMES[language] ?? language;
-  return systemPrompt + `\n\nIMPORTANT: You must respond entirely in ${langName}. All explanations, feedback, and messages must be in ${langName} only.`;
+  const name = LANG_NAMES[language] ?? language;
+  return systemPrompt + `\n\nIMPORTANT: You must respond entirely in ${name}. All explanations, feedback, and messages must be in ${name} only.`;
 }
 
 export const ARABIC_PHRASES: Record<string, string> = {
@@ -77,38 +57,5 @@ export const LANG_PHRASES: Record<string, Record<string, string>> = {
 
 export function getFallbackPhrase(key: string, language?: string): string {
   if (!language || language === "en") return "";
-  const phrases = LANG_PHRASES[language];
-  if (!phrases) return "";
-  return phrases[key] ?? "";
-}
-
-export async function openaiChat(opts: {
-  systemPrompt: string;
-  userMessage: string;
-  maxTokens?: number;
-  language?: string;
-}): Promise<string | null> {
-  if (!AI_CONFIG.apiKey) return null;
-
-  const system = withLanguage(opts.systemPrompt, opts.language);
-
-  try {
-    const res = await fetch(`${AI_CONFIG.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${AI_CONFIG.apiKey}` },
-      body: JSON.stringify({
-        model: AI_CONFIG.model,
-        max_tokens: opts.maxTokens ?? AI_CONFIG.maxTokens.default,
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: opts.userMessage },
-        ],
-      }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json() as any;
-    return data.choices?.[0]?.message?.content ?? null;
-  } catch {
-    return null;
-  }
+  return LANG_PHRASES[language]?.[key] ?? "";
 }

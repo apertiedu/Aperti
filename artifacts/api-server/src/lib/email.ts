@@ -1,19 +1,18 @@
-import nodemailer from "nodemailer";
+/**
+ * Email stub — no SMTP budget is available.
+ *
+ * All calls succeed silently so that callers don't crash,
+ * but nothing is actually sent. Any feature that previously
+ * relied on email (e.g. password reset) now uses an
+ * admin-assisted in-app flow instead.
+ */
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: parseInt(process.env.EMAIL_PORT || "587"),
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-  await transporter.sendMail({
-    from: "Aperti <noreply@aperti.ai>",
-    to,
-    subject,
-    html,
-  });
+export async function sendEmail(_opts: {
+  to: string;
+  subject: string;
+  html: string;
+  text?: string;
+}): Promise<void> {
+  // Email sending is intentionally disabled.
+  // See admin-password-resets.ts for the replacement flow.
 }

@@ -1395,4 +1395,19 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   /* past_papers — mark_scheme_url and examiner_report_url queried by past-papers route */
   `ALTER TABLE past_papers ADD COLUMN IF NOT EXISTS mark_scheme_url text`,
   `ALTER TABLE past_papers ADD COLUMN IF NOT EXISTS examiner_report_url text`,
+
+  /* password_reset_requests — admin-assisted flow (no email required) */
+  `CREATE TABLE IF NOT EXISTS password_reset_requests (
+    id           serial PRIMARY KEY,
+    account_id   integer REFERENCES accounts(id) ON DELETE CASCADE,
+    email        text,
+    username     text,
+    status       text NOT NULL DEFAULT 'pending',
+    admin_note   text,
+    temp_password text,
+    created_at   timestamptz NOT NULL DEFAULT NOW(),
+    resolved_at  timestamptz,
+    resolved_by  integer REFERENCES accounts(id) ON DELETE SET NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_pwd_reset_req_status ON password_reset_requests(status, created_at DESC)`,
 ];

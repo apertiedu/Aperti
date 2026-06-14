@@ -475,57 +475,42 @@ const forgotPasswordLimiter = rateLimit({
   },
 });
 
-// POST /auth/forgot-password
+// POST /auth/forgot-password — admin-assisted flow (no email sent)
 authRouter.post("/forgot-password", forgotPasswordLimiter, async (req: Request, res: Response) => {
-  const { email } = req.body;
-  if (!email?.trim()) return res.status(400).json({ error: "Email is required" });
-  const SAFE = { message: "If an account with that email exists, a password reset link has been sent." };
+  const { email, username } = req.body;
+  if (!email?.trim() && !username?.trim()) {
+    return res.status(400).json({ error: "Email or username is required" });
+  }
+  const SAFE = { message: "Your request has been submitted. An administrator will reset your password and provide you with a temporary one shortly." };
   try {
     const { pool: dbPool } = await import("@workspace/db");
-    const { rows } = await dbPool.query(
-      "SELECT id, email, display_name FROM accounts WHERE LOWER(email)=$1 AND status='active' LIMIT 1",
-      [email.toLowerCase().trim()]
-    );
-    if (!rows.length) return res.json(SAFE);
-    const account = rows[0] as any;
-
-    const crypto = await import("crypto");
-    const token = crypto.randomBytes(32).toString("hex");
-    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-    await dbPool.query(
-      `INSERT INTO password_reset_tokens (account_id, token, expires_at) VALUES ($1, $2, $3)`,
-      [account.id, token, expires]
-    );
-
-    const appUrl = process.env.APP_URL || `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`;
-    const resetLink = `${appUrl}/reset-password?token=${token}`;
-
-    try {
-      const { sendEmail } = await import("../lib/email");
-      await sendEmail({
-        to: account.email,
-        subject: "Reset your Aperti password",
-        html: `
-          <div style="font-family:Inter,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;color:#1e293b">
-            <h1 style="font-size:22px;font-weight:800;margin:0 0 8px">Aperti<span style="color:#00796B">.</span></h1>
-            <p style="color:#64748b;margin:0 0 24px;font-size:14px">Where every mind finds its rhythm.</p>
-            <h2 style="font-size:18px;font-weight:700;margin:0 0 12px">Reset your password</h2>
-            <p style="font-size:15px;margin:0 0 24px">Hi ${account.display_name || "there"},<br><br>
-            We received a request to reset the password for your Aperti account. Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.</p>
-            <a href="${resetLink}" style="display:inline-block;background:#00796B;color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 28px;border-radius:10px">Reset Password</a>
-            <p style="font-size:13px;color:#94a3b8;margin:24px 0 0">If you didn't request this, you can safely ignore this email — your password won't change.<br><br>
-            Or copy this link: <a href="${resetLink}" style="color:#00796B;word-break:break-all">${resetLink}</a></p>
-          </div>`,
-      });
-    } catch {
-      // Email send failed (not configured) — still return success to avoid leaking info
+    let account: any = null;
+    if (email?.trim()) {
+      const { rows } = await dbPool.query(
+        "SELECT id, email, username FROM accounts WHERE LOWER(email)=$1 AND status='active' LIMIT 1",
+        [email.toLowerCase().trim()]
+      );
+      account = rows[0] ?? null;
     }
-
+    if (!account && username?.trim()) {
+      const { rows } = await dbPool.query(
+        "SELECT id, email, username FROM accounts WHERE LOWER(username)=$1 AND status='active' LIMIT 1",
+        [username.toLowerCase().trim()]
+      );
+      account = rows[0] ?? null;
+    }
+    if (account) {
+      await dbPool.query(
+        `INSERT INTO password_reset_requests (account_id, email, username, status, created_at)
+         VALUES ($1, $2, $3, 'pending', NOW())`,
+        [account.id, account.email ?? email?.trim() ?? null, account.username ?? username?.trim() ?? null]
+      );
+    }
+    // Always return the same safe message whether or not account was found
     res.json(SAFE);
   } catch (err) {
     console.error("Forgot password error:", err);
-    res.json(SAFE); // always return safe message
+    res.json(SAFE);
   }
 });
 
