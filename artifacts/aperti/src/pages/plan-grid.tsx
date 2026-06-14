@@ -21,7 +21,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Plus, Pencil, Trash2, Clock, MapPin, Monitor, Users, CalendarDays, List,
-  AlertTriangle,
+  AlertTriangle, Copy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +30,7 @@ const API = "/api";
 
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...(opts?.headers as any) },
     ...opts,
   });
@@ -115,6 +116,15 @@ export default function PlanGrid() {
     },
   });
 
+  const duplicateMutation = useMutation({
+    mutationFn: (id: number) =>
+      fetch(`${API}/lessons/${id}/duplicate`, { method: "POST", credentials: "include" }).then(r => r.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["lessons"] });
+      toast({ title: "Lesson duplicated" });
+    },
+  });
+
   const lessonList: Lesson[] = Array.isArray(lessons) ? lessons : [];
   const conflicts = detectConflicts(lessonList);
   const subjectMap = Object.fromEntries(
@@ -176,6 +186,7 @@ export default function PlanGrid() {
           subjectMap={subjectMap}
           onEdit={openEdit}
           onDelete={id => deleteMutation.mutate(id)}
+          onDuplicate={id => duplicateMutation.mutate(id)}
         />
       ) : (
         <ListViewTable
@@ -184,6 +195,7 @@ export default function PlanGrid() {
           subjectMap={subjectMap}
           onEdit={openEdit}
           onDelete={id => deleteMutation.mutate(id)}
+          onDuplicate={id => duplicateMutation.mutate(id)}
         />
       )}
 
@@ -204,12 +216,13 @@ export default function PlanGrid() {
 }
 
 /* ── Weekly Calendar Grid ──────────────────────────────────────────────── */
-function WeekCalendar({ lessons, conflicts, subjectMap, onEdit, onDelete }: {
+function WeekCalendar({ lessons, conflicts, subjectMap, onEdit, onDelete, onDuplicate }: {
   lessons: Lesson[];
   conflicts: Set<number>;
   subjectMap: Record<number, string>;
   onEdit: (l: Lesson) => void;
   onDelete: (id: number) => void;
+  onDuplicate: (id: number) => void;
 }) {
   const activeDays = DAYS.filter(d => lessons.some(l => l.dayOfWeek === d));
   const displayDays = activeDays.length > 0 ? activeDays : DAYS.slice(0, 5);
@@ -258,6 +271,7 @@ function WeekCalendar({ lessons, conflicts, subjectMap, onEdit, onDelete }: {
                           subjectMap={subjectMap}
                           onEdit={() => onEdit(lesson)}
                           onDelete={() => onDelete(lesson.id)}
+                          onDuplicate={() => onDuplicate(lesson.id)}
                         />
                       ))}
                     </div>
@@ -280,12 +294,13 @@ function WeekCalendar({ lessons, conflicts, subjectMap, onEdit, onDelete }: {
   );
 }
 
-function LessonCard({ lesson, hasConflict, subjectMap, onEdit, onDelete }: {
+function LessonCard({ lesson, hasConflict, subjectMap, onEdit, onDelete, onDuplicate }: {
   lesson: Lesson;
   hasConflict: boolean;
   subjectMap: Record<number, string>;
   onEdit: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
   const subName = lesson.subjectId ? subjectMap[lesson.subjectId] : null;
@@ -316,6 +331,9 @@ function LessonCard({ lesson, hasConflict, subjectMap, onEdit, onDelete }: {
             <Button variant="outline" size="sm" className="h-6 text-xs gap-1 flex-1" onClick={onEdit}>
               <Pencil className="h-3 w-3" /> Edit
             </Button>
+            <Button variant="outline" size="sm" className="h-6 text-xs gap-1" onClick={e => { e.stopPropagation(); onDuplicate(); }}>
+              <Copy className="h-3 w-3" />
+            </Button>
             <Button variant="destructive" size="sm" className="h-6 text-xs gap-1 flex-1" onClick={onDelete}>
               <Trash2 className="h-3 w-3" /> Remove
             </Button>
@@ -327,12 +345,13 @@ function LessonCard({ lesson, hasConflict, subjectMap, onEdit, onDelete }: {
 }
 
 /* ── List View ─────────────────────────────────────────────────────────── */
-function ListViewTable({ lessons, conflicts, subjectMap, onEdit, onDelete }: {
+function ListViewTable({ lessons, conflicts, subjectMap, onEdit, onDelete, onDuplicate }: {
   lessons: Lesson[];
   conflicts: Set<number>;
   subjectMap: Record<number, string>;
   onEdit: (l: Lesson) => void;
   onDelete: (id: number) => void;
+  onDuplicate: (id: number) => void;
 }) {
   return (
     <Card>
@@ -385,6 +404,9 @@ function ListViewTable({ lessons, conflicts, subjectMap, onEdit, onDelete }: {
                         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onEdit(lesson)}>
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={() => onDuplicate(lesson.id)} title="Duplicate">
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => onDelete(lesson.id)}>
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
@@ -425,6 +447,7 @@ function LessonForm({ lesson, onClose, onRefresh }: {
     mutationFn: (data: any) =>
       fetch(`${API}/lessons${lesson ? `/${lesson.id}` : ""}`, {
         method: lesson ? "PUT" : "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       }).then(r => r.json()),

@@ -170,3 +170,36 @@ studentsRouter.post("/:id/create-account", authenticate, async (req: AuthRequest
   await db.update(studentsTable).set({ accountId: account.id }).where(eq(studentsTable.id, studentId));
   res.json({ success: true, accountId: account.id, username });
 });
+
+studentsRouter.get("/:id/id-card", authenticate, async (req: AuthRequest, res: Response) => {
+  const id = Number(req.params.id);
+  const [student] = await db.select().from(studentsTable).where(eq(studentsTable.id, id)).limit(1);
+  if (!student) return res.status(404).json({ error: "Student not found" });
+  const html = `<!DOCTYPE html>
+<html><head><title>Student ID Card — ${student.studentName}</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f0fdfa;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.card{width:340px;background:white;border-radius:20px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.15);}
+.header{background:linear-gradient(135deg,#0D9488 0%,#0f766e 100%);padding:24px;color:white;text-align:center;}
+.header h2{font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.header p{font-size:11px;opacity:0.8;margin-top:2px;text-transform:uppercase;letter-spacing:2px;}
+.body{padding:24px;display:flex;flex-direction:column;align-items:center;gap:16px;}
+.info{text-align:center;width:100%;}
+.name{font-size:20px;font-weight:700;color:#0f172a;}
+.code{font-size:14px;color:#0D9488;font-weight:600;font-family:monospace;margin-top:4px;}
+.footer{background:#f8fafc;border-top:1px solid #e2e8f0;padding:12px;text-align:center;}
+.footer p{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;}
+@media print{body{background:white;}.card{box-shadow:none;}}
+</style></head><body>
+<div class="card">
+<div class="header"><h2>Aperti.</h2><p>Student Identification Card</p></div>
+<div class="body">
+<div class="info"><p class="name">${student.studentName}</p><p class="code">ID: ${student.studentCode}</p></div>
+</div>
+<div class="footer"><p>Aperti Educational Platform</p></div>
+</div>
+</body></html>`;
+  res.setHeader("Content-Type", "text/html");
+  res.send(html);
+});

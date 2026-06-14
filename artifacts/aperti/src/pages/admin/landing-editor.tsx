@@ -8,6 +8,7 @@ const TEAL = "#0D9488";
 
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(url, {
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...(opts?.headers as object) },
     ...opts,
   });

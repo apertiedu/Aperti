@@ -14,6 +14,7 @@ const TEAL_LIGHT = "#E6F4F1";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {
     ...opts,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...(opts?.headers || {}),

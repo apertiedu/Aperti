@@ -15,6 +15,7 @@ import {
 async function apiFetch(url: string, opts?: RequestInit) {
   const res = await fetch(`/api${url}`, {
     ...opts,
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...opts?.headers },
   });
   if (!res.ok) throw new Error(await res.text());

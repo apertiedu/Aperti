@@ -30,6 +30,7 @@ interface EchoProfile {
 
 async function fetchEchoProfile(): Promise<EchoProfile> {
   const res = await fetch("/api/echo/profile", {
+    credentials: "include",
     headers: {},
   });
   if (!res.ok) return { weakTopics: [], preferredStyle: "conceptual", retentionScores: {} };
@@ -43,6 +44,7 @@ async function fetchEchoProfile(): Promise<EchoProfile> {
 
 async function fetchHistory(): Promise<any[]> {
   const res = await fetch("/api/mentor/sessions", {
+    credentials: "include",
     headers: {},
   });
   if (!res.ok) return [];
@@ -94,6 +96,7 @@ export default function TheMentor() {
     try {
       const response = await fetch("/api/mentor/chat", {
         method: "POST",
+        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: text, sessionId: `web-${Date.now()}` }),
       });

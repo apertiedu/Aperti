@@ -9,10 +9,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const authH = () => ({ "Content-Type": "application/json" });
-const fetchJSON = (url: string) => fetch(url, { headers: authH() }).then(r => r.json());
-const postJSON = (url: string, b: unknown) => fetch(url, { method: "POST", headers: authH(), body: JSON.stringify(b) }).then(r => r.json());
-const putJSON  = (url: string, b: unknown) => fetch(url, { method: "PUT",  headers: authH(), body: JSON.stringify(b) }).then(r => r.json());
-const delReq   = (url: string)             => fetch(url, { method: "DELETE", headers: authH() }).then(r => r.json());
+const fetchJSON = (url: string) => fetch(url, { credentials: "include", headers: authH() }).then(r => r.json());
+const postJSON = (url: string, b: unknown) => fetch(url, { method: "POST", credentials: "include", headers: authH(), body: JSON.stringify(b) }).then(r => r.json());
+const putJSON  = (url: string, b: unknown) => fetch(url, { method: "PUT",  credentials: "include", headers: authH(), body: JSON.stringify(b) }).then(r => r.json());
+const delReq   = (url: string)             => fetch(url, { method: "DELETE", credentials: "include", headers: authH() }).then(r => r.json());
 
 type Plan = {
   id: number; name: string; type: "teacher" | "student" | "admin";
