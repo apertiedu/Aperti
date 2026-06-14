@@ -769,6 +769,21 @@ const PHASE18_MIGRATIONS: string[] = [
   `ALTER TABLE ai_interactions ADD COLUMN IF NOT EXISTS estimated_cost_usd numeric(12,8) NOT NULL DEFAULT 0`,
   `ALTER TABLE ai_interactions ADD COLUMN IF NOT EXISTS latency_ms integer NOT NULL DEFAULT 0`,
 
+  /* ── Phase 48 — AI Shared Memory ────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS ai_shared_memory (
+    id         serial PRIMARY KEY,
+    account_id integer REFERENCES accounts(id) ON DELETE CASCADE,
+    agent      text NOT NULL,
+    key        text NOT NULL,
+    value      jsonb NOT NULL DEFAULT '{}',
+    expires_at timestamptz,
+    created_at timestamptz NOT NULL DEFAULT NOW(),
+    updated_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_ai_shared_memory_unique ON ai_shared_memory(account_id, agent, key)`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_shared_memory_account ON ai_shared_memory(account_id)`,
+  `ALTER TABLE platform_feature_flags ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT NOW()`,
+
   /* ── System Health Logs ──────────────────────────────────────────────── */
   `CREATE TABLE IF NOT EXISTS system_health_logs (
     id        serial PRIMARY KEY,

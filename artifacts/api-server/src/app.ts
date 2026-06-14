@@ -105,6 +105,9 @@ import { errorsLogRouter } from "./routes/errors-log";
 import { aiTeachRouter } from "./routes/ai-teach";
 import { adminRepairRouter } from "./routes/admin-repair";
 import { aiGatewayRouter } from "./routes/ai-gateway";
+import { aiAgentsRouter } from "./routes/ai-agents";
+import { apiV2Router } from "./routes/api-v2";
+import { classforgeRouter } from "./routes/classforge";
 import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 
@@ -394,6 +397,12 @@ app.use("/api/ai-teach", aiTeachRouter);
 app.use("/api/admin/repair", adminRepairRouter);
 // Phase 48 — AI Gateway (streaming SSE, caching, cost tracking)
 app.use("/api/ai", aiGatewayRouter);
+// Phase 48 — AI Multi-Agent Orchestrator (teacher / student / admin agents)
+app.use("/api/ai", aiAgentsRouter);
+// Phase 48 — V2 Shadow API namespace
+app.use("/api/v2", apiV2Router);
+// ClassForge — live session engagement analytics
+app.use("/api", classforgeRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
