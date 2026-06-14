@@ -766,6 +766,8 @@ const PHASE18_MIGRATIONS: string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_ai_interactions_account ON ai_interactions(account_id)`,
   `CREATE INDEX IF NOT EXISTS idx_ai_interactions_created ON ai_interactions(created_at)`,
+  `ALTER TABLE ai_interactions ADD COLUMN IF NOT EXISTS estimated_cost_usd numeric(12,8) NOT NULL DEFAULT 0`,
+  `ALTER TABLE ai_interactions ADD COLUMN IF NOT EXISTS latency_ms integer NOT NULL DEFAULT 0`,
 
   /* ── System Health Logs ──────────────────────────────────────────────── */
   `CREATE TABLE IF NOT EXISTS system_health_logs (
@@ -1222,7 +1224,7 @@ export async function runMigrations(): Promise<void> {
     [`phase34-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-34 + Phase-Fixes migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-34 + Phase-47 + Phase-48 migrations applied");
 }
 
 const PHASE21_MIGRATIONS: string[] = [

@@ -104,6 +104,7 @@ import { errorsLogRouter } from "./routes/errors-log";
 // Phase 47 — AI Teaching Assistant, V2 Permissions, Repair System
 import { aiTeachRouter } from "./routes/ai-teach";
 import { adminRepairRouter } from "./routes/admin-repair";
+import { aiGatewayRouter } from "./routes/ai-gateway";
 import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 
@@ -391,6 +392,8 @@ app.use("/api/notifications/inbox", notificationsInboxRouter);
 app.use("/api/ai-teach", aiTeachRouter);
 // Phase 47 — Repair Panel & Launch Score
 app.use("/api/admin/repair", adminRepairRouter);
+// Phase 48 — AI Gateway (streaming SSE, caching, cost tracking)
+app.use("/api/ai", aiGatewayRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {

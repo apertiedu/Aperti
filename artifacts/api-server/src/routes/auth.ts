@@ -33,6 +33,28 @@ const TOKEN_EXPIRY = "7d";
 
 export const authRouter = Router();
 
+function safeUser(account: Record<string, unknown>): {
+  id: number;
+  username: string;
+  displayName: string;
+  email: string | null;
+  role: string;
+  status: string;
+  mfaEnabled: boolean;
+  mustChangePassword: boolean;
+} {
+  return {
+    id: (account.id as number) ?? 0,
+    username: (account.username as string) ?? "",
+    displayName: (account.display_name as string) ?? (account.displayName as string) ?? "",
+    email: (account.email as string | null) ?? null,
+    role: (account.role as string) ?? "guest",
+    status: (account.status as string) ?? "active",
+    mfaEnabled: Boolean(account.mfa_enabled ?? account.mfaEnabled ?? false),
+    mustChangePassword: Boolean(account.must_change_password ?? account.mustChangePassword ?? false),
+  };
+}
+
 // ── Login rate limiter: 5 failed attempts per 10 minutes per IP ───────────────
 // skipSuccessfulRequests=true means only 4xx/5xx responses count toward the limit
 const loginLimiter = rateLimit({
@@ -209,15 +231,7 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
     ).catch(() => {});
     res.json({
       token,
-      user: {
-        id: account.id,
-        username: account.username,
-        displayName: account.display_name,
-        email: account.email,
-        role: account.role,
-        mfaEnabled: account.mfa_enabled ?? false,
-        mustChangePassword: account.must_change_password ?? false,
-      },
+      user: safeUser(account as unknown as Record<string, unknown>),
     });
   } catch (err) {
     console.error("Login error:", err);
