@@ -90,13 +90,122 @@ async function ruleBasedChatWithQuestions(message: string, teacherAccountId: num
   return `**TutorCraft (Rule-based Mode)**\n\nYou asked: *${message}*\n\nFull AI generation requires an OpenAI API key. In the meantime:\n- Use the Question Bank to build assessments.\n- Review the Gradebook for student performance insights.\n- Use the Resources section to share learning materials.`;
 }
 
-/* ── Chat ──────────────────────────────────────────────────────────────── */
+/* ── Streaming Chat ─────────────────────────────────────────────────────── */
+tutorcraftRouter.post("/tutorcraft/stream", authenticate, async (req: AuthRequest, res: Response) => {
+  const { message, history = [] } = req.body;
+  if (!message) { res.status(400).json({ error: "message required" }); return; }
+
+  const AI_KEY = process.env.OPENAI_API_KEY || process.env.NVIDIA_API_KEY;
+  if (!AI_KEY) {
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    const fallback = await ruleBasedChatWithQuestions(message, req.userId!).catch(() => "TutorCraft is temporarily unavailable.");
+    res.write(`data: ${JSON.stringify({ content: fallback })}\n\n`);
+    res.write("data: [DONE]\n\n");
+    res.end();
+    return;
+  }
+
+  const AI_BASE = process.env.NVIDIA_API_KEY
+    ? "https://integrate.api.nvidia.com/v1"
+    : (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1");
+  const AI_MODEL = process.env.OPENAI_MODEL ||
+    (process.env.NVIDIA_API_KEY ? "meta/llama-3.1-8b-instruct" : "gpt-4o-mini");
+
+  let coremindContext = "";
+  const lowerMsg = message.toLowerCase();
+  if (lowerMsg.includes("at-risk") || lowerMsg.includes("struggling") || lowerMsg.includes("weak student") || lowerMsg.includes("underperform")) {
+    try {
+      const { analyzeStudent } = await import("../lib/coremind");
+      const { db: dbInst, studentsTable: st } = await import("@workspace/db");
+      const { eq: eqOp } = await import("drizzle-orm");
+      const students = await dbInst.select({ id: st.id, name: st.studentName })
+        .from(st).where(eqOp(st.teacherAccountId, req.userId!)).limit(20);
+      const analyses = await Promise.allSettled(students.map(s => analyzeStudent(s.id)));
+      const atRisk = analyses
+        .map((r, i) => r.status === "fulfilled" ? { ...r.value, studentName: students[i].name } : null)
+        .filter(Boolean).filter((a: any) => a.riskLevel === "high" || a.riskLevel === "medium").slice(0, 5);
+      if (atRisk.length > 0) {
+        coremindContext = `\n\n[CoreMind — ${new Date().toLocaleDateString()}]\n` +
+          atRisk.map((a: any) => `• ${a.studentName}: Risk=${a.riskLevel}, Readiness=${a.examReadiness}%, WeakTopics=[${(a.weakTopics ?? []).slice(0, 3).join(", ")}]`).join("\n");
+      }
+    } catch { /* best-effort */ }
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  try {
+    const upstreamRes = await fetch(`${AI_BASE}/chat/completions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${AI_KEY}` },
+      body: JSON.stringify({
+        model: AI_MODEL,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT + coremindContext },
+          ...history.map((m: any) => ({ role: m.role, content: m.content })),
+          { role: "user", content: message },
+        ],
+        stream: true,
+        max_tokens: 1200,
+        temperature: 0.7,
+      }),
+      signal: AbortSignal.timeout(30_000),
+    });
+
+    if (!upstreamRes.ok || !upstreamRes.body) {
+      const errText = await upstreamRes.text().catch(() => "");
+      throw new Error(`AI API ${upstreamRes.status}: ${errText}`);
+    }
+
+    const reader = upstreamRes.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    let fullReply = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop() ?? "";
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data: ")) continue;
+        const msg = trimmed.slice(6);
+        if (msg === "[DONE]") { res.write("data: [DONE]\n\n"); break; }
+        try {
+          const parsed = JSON.parse(msg);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) { fullReply += content; res.write(`data: ${JSON.stringify({ content })}\n\n`); }
+        } catch { /* skip */ }
+      }
+    }
+
+    pool.query(
+      `INSERT INTO ai_interactions (user_id, module, action, input_summary, output_summary, tokens_used, confidence, accepted, created_at)
+       VALUES ($1,'tutorcraft','stream_chat',$2,$3,0,0.9,true,NOW())`,
+      [req.userId, message.slice(0, 300), fullReply.slice(0, 300)]
+    ).catch(() => {});
+
+    res.end();
+  } catch (err: any) {
+    console.error("[tutorcraft] stream error:", err);
+    const fallback = await ruleBasedChatWithQuestions(message, req.userId!).catch(() => "TutorCraft is temporarily unavailable.");
+    res.write(`data: ${JSON.stringify({ content: fallback })}\n\n`);
+    res.write("data: [DONE]\n\n");
+    res.end();
+  }
+});
+
+/* ── Chat (legacy non-streaming) ────────────────────────────────────────── */
 tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { message, history = [] } = req.body;
     if (!message) { res.status(400).json({ error: "message required" }); return; }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.OPENAI_API_KEY && !process.env.NVIDIA_API_KEY) {
       const reply = await ruleBasedChatWithQuestions(message, req.userId!);
       res.json({ reply, fallback: true });
       return;

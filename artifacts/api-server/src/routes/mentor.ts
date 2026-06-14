@@ -74,7 +74,8 @@ Your task:
 
   const localizedSystemPrompt = withLanguage(systemPrompt, language);
 
-  if (!process.env.OPENAI_API_KEY) {
+  const AI_KEY = process.env.OPENAI_API_KEY || process.env.NVIDIA_API_KEY;
+  if (!AI_KEY) {
     const fallbackContent = relatedQuestions.length > 0
       ? `Here are some practice questions to help you with: **${message}**\n\n${relatedQuestions.map((q, i) =>
           `**Q${i + 1}:** ${q.questionText}\n\n*Model Answer:* ${q.modelAnswer ?? "Think through the key concepts carefully."}`
@@ -95,74 +96,77 @@ Your task:
     return;
   }
 
+  const AI_BASE = process.env.NVIDIA_API_KEY
+    ? "https://integrate.api.nvidia.com/v1"
+    : (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1");
+  const AI_MODEL = process.env.OPENAI_MODEL ||
+    (process.env.NVIDIA_API_KEY ? "meta/llama-3.1-8b-instruct" : "gpt-4o-mini");
+
   // Set up SSE streaming
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
-  const interactionId = await logInteraction({
+  await logInteraction({
     userId: studentId,
     module: "mentor",
     action: "chat",
     inputSummary: message?.slice(0, 200),
     outputSummary: "AI streaming response",
     confidence: mentorContext.confidence,
-    sources: ["openai_gpt4o_mini", ...mentorContext.sources],
+    sources: [AI_BASE.includes("nvidia") ? "nvidia_nim" : "openai", ...mentorContext.sources],
   });
 
   try {
-    const body = JSON.stringify({
-      model: process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct",
-      messages: [
-        { role: "system", content: localizedSystemPrompt },
-        { role: "user", content: message },
-      ],
-      stream: true,
-      temperature: 0.7,
-      max_tokens: 500,
-    });
-
-    const https = await import("node:https");
-    const reqOptions = {
-      hostname: "api.openai.com",
-      path: "/v1/chat/completions",
+    const upstreamRes = await fetch(`${AI_BASE}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Length": Buffer.byteLength(body),
+        Authorization: `Bearer ${AI_KEY}`,
       },
-    };
-
-    const apiReq = https.request(reqOptions, (apiRes) => {
-      apiRes.on("data", (chunk: Buffer) => {
-        const lines = chunk.toString().split("\n").filter((line: string) => line.trim() !== "");
-        for (const line of lines) {
-          const msg = line.replace(/^data: /, "");
-          if (msg === "[DONE]") {
-            res.write("data: [DONE]\n\n");
-            break;
-          }
-          try {
-            const parsed = JSON.parse(msg);
-            const content = parsed.choices[0]?.delta?.content;
-            if (content) {
-              res.write(`data: ${JSON.stringify({ content })}\n\n`);
-            }
-          } catch {
-            // skip non-JSON
-          }
-        }
-      });
-      apiRes.on("end", () => res.end());
-      apiRes.on("error", (err: Error) => { console.error("Mentor stream error:", err); res.end(); });
+      body: JSON.stringify({
+        model: AI_MODEL,
+        messages: [
+          { role: "system", content: localizedSystemPrompt },
+          { role: "user", content: message },
+        ],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 500,
+      }),
+      signal: AbortSignal.timeout(30_000),
     });
 
-    apiReq.on("error", (err: Error) => { console.error("Mentor request error:", err); res.end(); });
-    apiReq.write(body);
-    apiReq.end();
+    if (!upstreamRes.ok || !upstreamRes.body) {
+      const errText = await upstreamRes.text().catch(() => "");
+      throw new Error(`AI API ${upstreamRes.status}: ${errText}`);
+    }
+
+    const reader = upstreamRes.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split("\n");
+      buf = lines.pop() ?? "";
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith("data: ")) continue;
+        const msg = trimmed.slice(6);
+        if (msg === "[DONE]") { res.write("data: [DONE]\n\n"); break; }
+        try {
+          const parsed = JSON.parse(msg);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
+        } catch { /* skip non-JSON lines */ }
+      }
+    }
+    res.end();
   } catch (err) {
-    console.error("Mentor error:", err);
+    console.error("[mentor] stream error:", err);
     res.end();
   }
 });

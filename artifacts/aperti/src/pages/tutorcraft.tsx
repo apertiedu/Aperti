@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Sparkles, Send, User, Loader2, Plus, BookOpen,
+  Sparkles, Send, User, BookOpen,
   ClipboardList, MessageSquare, FileText, RotateCcw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,17 +13,11 @@ import ReactMarkdown from "react-markdown";
 
 const API = "/api";
 
-async function apiFetch(url: string, opts?: RequestInit) {
-  const res = await fetch(`${API}${url}`, {
-    ...opts,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
-  });
-  if (!res.ok) throw new Error("Failed");
-  return res.json();
+interface Message {
+  role: "user" | "assistant";
+  content: string;
+  streaming?: boolean;
 }
-
-interface Message { role: "user" | "assistant"; content: string; }
 
 const QUICK_PROMPTS = [
   { icon: <BookOpen className="h-4 w-4" />, label: "Lesson plan", prompt: "Create a 60-minute lesson plan for A-Level Physics on Newton's Laws of Motion. Include starter, main activities, and a plenary." },
@@ -33,44 +26,106 @@ const QUICK_PROMPTS = [
   { icon: <FileText className="h-4 w-4" />, label: "Mark scheme", prompt: "Generate a mark scheme for this question: 'Explain how enzymes lower the activation energy of a reaction. [4 marks]'" },
 ];
 
+function StreamingCursor() {
+  return (
+    <span
+      className="inline-block w-0.5 h-4 bg-primary align-middle ml-0.5"
+      style={{ animation: "tutorcraft-blink 0.8s step-end infinite" }}
+    />
+  );
+}
+
 export default function TutorCraft() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    return () => { abortRef.current?.abort(); };
+  }, []);
 
   async function send(text?: string) {
     const content = text ?? input.trim();
     if (!content || loading) return;
     setInput("");
 
-    const userMsg: Message = { role: "user", content };
-    const history = messages.slice(-10);
-    setMessages(prev => [...prev, userMsg]);
+    const history = messages.slice(-10).map(m => ({ role: m.role, content: m.content }));
+    setMessages(prev => [
+      ...prev,
+      { role: "user", content },
+      { role: "assistant", content: "", streaming: true },
+    ]);
     setLoading(true);
 
+    abortRef.current = new AbortController();
+
     try {
-      const { reply } = await apiFetch("/tutorcraft/chat", {
+      const res = await fetch(`${API}/tutorcraft/stream`, {
         method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: content, history }),
+        signal: abortRef.current.signal,
       });
-      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
-    } catch (err: any) {
-      const isTimeout = err?.message?.includes("timeout") || err?.message?.includes("network");
-      setMessages(prev => [
-        ...prev,
-        {
+
+      if (!res.ok || !res.body) throw new Error("Stream failed");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      let fullContent = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const lines = buf.split("\n");
+        buf = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6);
+          if (data === "[DONE]") break;
+          try {
+            const { content: chunk } = JSON.parse(data);
+            if (chunk) {
+              fullContent += chunk;
+              setMessages(prev => {
+                const next = [...prev];
+                next[next.length - 1] = { role: "assistant", content: fullContent, streaming: true };
+                return next;
+              });
+            }
+          } catch { /* skip non-JSON */ }
+        }
+      }
+
+      setMessages(prev => {
+        const next = [...prev];
+        next[next.length - 1] = {
           role: "assistant",
-          content: isTimeout
-            ? "The request timed out. Please check your connection and try again."
-            : "AI is temporarily unavailable. Your question has been noted — please try again in a moment.",
-        },
-      ]);
+          content: fullContent || "No response received.",
+          streaming: false,
+        };
+        return next;
+      });
+    } catch (err: any) {
+      if (err?.name === "AbortError") return;
+      setMessages(prev => {
+        const next = [...prev];
+        next[next.length - 1] = {
+          role: "assistant",
+          content: "AI is temporarily unavailable. Please try again in a moment.",
+          streaming: false,
+        };
+        return next;
+      });
     } finally {
       setLoading(false);
     }
@@ -80,9 +135,23 @@ export default function TutorCraft() {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   }
 
+  function newChat() {
+    abortRef.current?.abort();
+    setMessages([]);
+    setLoading(false);
+  }
+
+  const isStreaming = messages[messages.length - 1]?.streaming === true;
+
   return (
     <div className="min-h-screen bg-background flex flex-col page-transition">
-      {/* Header */}
+      <style>{`
+        @keyframes tutorcraft-blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
+
       <div className="border-b bg-card/50 px-6 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center">
@@ -92,15 +161,14 @@ export default function TutorCraft() {
             <h1 className="font-bold text-lg leading-tight">TutorCraft™ AI</h1>
             <p className="text-xs text-muted-foreground">Your expert teaching assistant</p>
           </div>
-          <Badge variant="secondary" className="text-xs ml-2">GPT-4o mini</Badge>
+          <Badge variant="secondary" className="text-xs ml-2">NVIDIA NIM</Badge>
         </div>
-        <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={() => setMessages([])}>
+        <Button variant="outline" size="sm" className="gap-2 text-xs" onClick={newChat}>
           <RotateCcw className="h-3.5 w-3.5" /> New Chat
         </Button>
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Messages */}
         <ScrollArea className="flex-1 px-6 py-4" ref={scrollRef as any}>
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
@@ -131,55 +199,64 @@ export default function TutorCraft() {
           ) : (
             <div className="space-y-4 max-w-3xl mx-auto">
               <AnimatePresence>
-                {messages.map((m, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={cn("flex gap-3", m.role === "user" ? "justify-end" : "justify-start")}
-                  >
-                    {m.role === "assistant" && (
-                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                        <Sparkles className="h-4 w-4 text-primary" />
-                      </div>
-                    )}
-                    <div className={cn(
-                      "max-w-[80%] rounded-2xl px-4 py-3 text-sm",
-                      m.role === "user"
-                        ? "bg-primary text-primary-foreground rounded-tr-sm"
-                        : "bg-muted rounded-tl-sm",
-                    )}>
-                      {m.role === "assistant" ? (
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          <ReactMarkdown>{m.content}</ReactMarkdown>
+                {messages.map((m, i) => {
+                  const isLastStreaming = m.streaming && i === messages.length - 1;
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={cn("flex gap-3", m.role === "user" ? "justify-end" : "justify-start")}
+                    >
+                      {m.role === "assistant" && (
+                        <div className={cn(
+                          "h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5 transition-all",
+                          isLastStreaming && "ring-2 ring-primary/30",
+                        )}>
+                          <Sparkles className={cn("h-4 w-4 text-primary", isLastStreaming && "animate-pulse")} />
                         </div>
-                      ) : (
-                        <p className="whitespace-pre-wrap">{m.content}</p>
                       )}
-                    </div>
-                    {m.role === "user" && (
-                      <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center shrink-0 mt-0.5">
-                        <User className="h-4 w-4" />
+                      <div className={cn(
+                        "max-w-[80%] rounded-2xl px-4 py-3 text-sm",
+                        m.role === "user"
+                          ? "bg-primary text-primary-foreground rounded-tr-sm"
+                          : "bg-muted rounded-tl-sm",
+                      )}>
+                        {m.role === "assistant" ? (
+                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                            {m.content ? (
+                              <>
+                                <ReactMarkdown>{m.content}</ReactMarkdown>
+                                {isLastStreaming && <StreamingCursor />}
+                              </>
+                            ) : (
+                              <span className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                                <span className="inline-flex gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+                                  <span className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+                                </span>
+                                Thinking…
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{m.content}</p>
+                        )}
                       </div>
-                    )}
-                  </motion.div>
-                ))}
-                {loading && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                      <Sparkles className="h-4 w-4 text-primary" />
-                    </div>
-                    <div className="bg-muted rounded-2xl rounded-tl-sm px-4 py-3">
-                      <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                    </div>
-                  </motion.div>
-                )}
+                      {m.role === "user" && (
+                        <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center shrink-0 mt-0.5">
+                          <User className="h-4 w-4" />
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           )}
         </ScrollArea>
 
-        {/* Input */}
         <div className="border-t bg-card/50 px-6 py-4 shrink-0">
           <div className="max-w-3xl mx-auto">
             <div className="relative flex items-end gap-2 rounded-2xl border bg-background p-2">
@@ -191,6 +268,7 @@ export default function TutorCraft() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKey}
+                disabled={loading}
               />
               <Button
                 size="icon"
@@ -202,7 +280,7 @@ export default function TutorCraft() {
               </Button>
             </div>
             <p className="text-[10px] text-muted-foreground text-center mt-2">
-              Press Enter to send · Shift+Enter for new line · AI responses may not always be accurate
+              {isStreaming ? "Generating response…" : "Press Enter to send · Shift+Enter for new line · AI responses may not always be accurate"}
             </p>
           </div>
         </div>
