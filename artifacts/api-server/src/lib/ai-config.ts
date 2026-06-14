@@ -1,12 +1,18 @@
+const REPLIT_KEY = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+const REPLIT_BASE = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
 const NVIDIA_KEY = process.env.NVIDIA_API_KEY;
 const OPENAI_KEY = process.env.OPENAI_API_KEY;
-const USE_NVIDIA = !!NVIDIA_KEY;
+
+const USE_REPLIT = !!(REPLIT_KEY && REPLIT_BASE);
+const USE_NVIDIA = !USE_REPLIT && !!NVIDIA_KEY;
 
 export const AI_CONFIG = {
   provider: "openai" as const,
-  model: USE_NVIDIA
-    ? (process.env.NVIDIA_MODEL || "openai/gpt-oss-20b")
-    : (process.env.OPENAI_MODEL || "gpt-4o-mini"),
+  model: USE_REPLIT
+    ? (process.env.OPENAI_MODEL || "gpt-4o-mini")
+    : USE_NVIDIA
+      ? (process.env.NVIDIA_MODEL || "openai/gpt-oss-20b")
+      : (process.env.OPENAI_MODEL || "gpt-4o-mini"),
   maxTokens: {
     default: 1000,
     feedback: 200,
@@ -14,10 +20,14 @@ export const AI_CONFIG = {
     summary: 800,
     syllabus: 2000,
   },
-  baseUrl: USE_NVIDIA
-    ? "https://integrate.api.nvidia.com/v1"
-    : (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"),
-  apiKey: NVIDIA_KEY || OPENAI_KEY || null,
+  baseUrl: USE_REPLIT
+    ? REPLIT_BASE!
+    : USE_NVIDIA
+      ? "https://integrate.api.nvidia.com/v1"
+      : (process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"),
+  apiKey: USE_REPLIT
+    ? REPLIT_KEY!
+    : NVIDIA_KEY || OPENAI_KEY || null,
 };
 
 const LANG_NAMES: Record<string, string> = {
