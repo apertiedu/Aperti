@@ -112,6 +112,7 @@ import { phase25Router } from "./phase25";
 import { aiGatewayRouter } from "./ai-gateway";
 import { aiStudioRouter } from "./ai-studio";
 import { adminDebugRouter } from "./admin-debug";
+import businessOpsRouter from "./business-ops";
 
 const router: IRouter = Router();
 
@@ -254,6 +255,9 @@ router.use(phase25Router);
 router.use("/ai", aiGatewayRouter);
 router.use("/ai-studio", aiStudioRouter);
 router.use("/admin/debug", adminDebugRouter);
+
+// Phase 15 — Business Operations & No-Code Admin Control Center
+router.use(businessOpsRouter);
 
 export default router;
 

@@ -108,6 +108,12 @@ const NAV = [
   { label: "Route Health",         icon: Activity,    href: "/admin/os/route-health" },
   { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
 
+  { label: "— Business Operations", header: true },
+  { label: "Biz Ops Center",       icon: DollarSign,  href: "/admin/os/biz-ops" },
+  { label: "Landing Page Editor",  icon: Layout,      href: "/admin/os/landing-settings" },
+  { label: "Signup Waitlist",      icon: Users,       href: "/admin/os/signup-waitlist" },
+  { label: "Business Analytics",   icon: BarChart3,   href: "/admin/os/business-analytics" },
+
   { label: "— Production Hardening", header: true },
   { label: "System Inventory",     icon: Package,     href: "/admin/os/system-inventory" },
 

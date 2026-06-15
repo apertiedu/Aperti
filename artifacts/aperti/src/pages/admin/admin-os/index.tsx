@@ -86,6 +86,11 @@ import PlatformHealthScorePage from "./PlatformHealthScorePage";
 import DebugCenterPage from "./DebugCenterPage";
 // Phase 44 — Production Hardening
 import SystemInventoryPage from "./SystemInventoryPage";
+// Phase 15 — Business Operations & No-Code Admin Control Center
+import BusinessOpsCenterPage from "./BusinessOpsCenterPage";
+import LandingSettingsEditorPage from "./LandingSettingsEditorPage";
+import SignupWaitlistPage from "./SignupWaitlistPage";
+import BusinessAnalyticsPage from "./BusinessAnalyticsPage";
 
 export default function AdminOS() {
   return (
@@ -209,6 +214,12 @@ export default function AdminOS() {
 
         {/* Phase 44 — Production Hardening */}
         <Route path="/admin/os/system-inventory" component={SystemInventoryPage} />
+
+        {/* Phase 15 — Business Operations & No-Code Admin Control Center */}
+        <Route path="/admin/os/biz-ops" component={BusinessOpsCenterPage} />
+        <Route path="/admin/os/landing-settings" component={LandingSettingsEditorPage} />
+        <Route path="/admin/os/signup-waitlist" component={SignupWaitlistPage} />
+        <Route path="/admin/os/business-analytics" component={BusinessAnalyticsPage} />
 
         <Route component={Dashboard} />
       </Switch>

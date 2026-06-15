@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchJSON, postJSON, putJSON } from "@/lib/api";
+import { fetchJSON, postJSON, putJSON, deleteJSON } from "@/lib/api";
 import { toast } from "sonner";
-import { Plus, Star, CheckCircle2, XCircle, Edit2, Quote } from "lucide-react";
+import { Plus, Star, CheckCircle2, XCircle, Edit2, Quote, Trash2 } from "lucide-react";
 
 const EMPTY = { name: "", role: "", organization: "", photo_url: "", quote: "", rating: 5, is_approved: false };
 
@@ -27,6 +27,12 @@ export default function TestimonialsAdminPage() {
   const toggleApprove = useMutation({
     mutationFn: ({ id, val }: { id: number; val: boolean }) => putJSON(`/api/admin/testimonials/${id}`, { is_approved: val }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-testimonials"] }); toast.success("Updated"); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteJSON(`/api/admin/testimonials/${id}`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-testimonials"] }); toast.success("Testimonial deleted"); },
+    onError: () => toast.error("Delete failed"),
   });
 
   function openCreate() { setEditing(null); setForm(EMPTY); setShowModal(true); }
@@ -72,13 +78,20 @@ export default function TestimonialsAdminPage() {
                 </div>
               </div>
               <div className="flex gap-1">
-                <button onClick={() => openEdit(t)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors"><Edit2 className="w-4 h-4" /></button>
+                <button onClick={() => openEdit(t)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors" title="Edit"><Edit2 className="w-4 h-4" /></button>
                 <button
                   onClick={() => toggleApprove.mutate({ id: t.id, val: !t.is_approved })}
                   className={`p-1.5 rounded transition-colors ${t.is_approved ? "text-green-500 hover:text-red-500" : "text-gray-400 hover:text-green-500"}`}
                   title={t.is_approved ? "Unapprove" : "Approve"}
                 >
                   {t.is_approved ? <CheckCircle2 className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                </button>
+                <button
+                  onClick={() => { if (confirm(`Delete testimonial from ${t.name}?`)) deleteMutation.mutate(t.id); }}
+                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </button>
               </div>
             </div>
