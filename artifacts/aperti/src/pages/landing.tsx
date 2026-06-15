@@ -628,8 +628,8 @@ const FALLBACK_TEACHER_PLANS: CMSPlan[] = [
 
 const FALLBACK_STUDENT_PLANS: CMSPlan[] = [
   { id: 5, name: "Basic",   type: "student", price_egp: 0,   max_students: null, badge: null, is_highlighted: false, features: ["Access to assigned lessons","Homework submission","Basic progress tracking"] },
-  { id: 6, name: "Learner", type: "student", price_egp: 299, max_students: null, badge: "POPULAR", is_highlighted: true, features: ["All Basic features","AI mentor access","Flashcards & revision","Exam practice vault"] },
-  { id: 7, name: "Scholar", type: "student", price_egp: 599, max_students: null, badge: null, is_highlighted: false, features: ["All Learner features","SnapGrade AI grading","Study groups","Parent progress reports","Priority AI responses"] },
+  { id: 6, name: "Learner", type: "student", price_egp: 150, max_students: null, badge: "POPULAR", is_highlighted: true, features: ["All Basic features","AI mentor access","Flashcards & revision","Exam practice vault"] },
+  { id: 7, name: "Scholar", type: "student", price_egp: 300, max_students: null, badge: null, is_highlighted: false, features: ["All Learner features","SnapGrade AI grading","Study groups","Parent progress reports","Priority AI responses"] },
 ];
 
 const FALLBACK_FAQS: CMSFAQ[] = [
