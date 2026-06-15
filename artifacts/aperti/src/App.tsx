@@ -167,6 +167,7 @@ const AdminOS = lazy(() => import("@/pages/admin/admin-os"));
 const RolesMatrix = lazy(() => import("@/pages/admin/roles-matrix"));
 // Phase 47 — Repair Panel
 const RepairPanel = lazy(() => import("@/pages/admin/repair-panel"));
+const ContentCalendarPage = lazy(() => import("@/pages/admin/content-calendar"));
 
 // Phase 16 — Commercialization & Business Operations
 const PricingPage = lazy(() => import("@/pages/pricing"));
@@ -636,6 +637,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/roles-matrix" component={RolesMatrix} />
     {/* Phase 47 — System Repair Panel */}
     <Route path="/admin/repair" component={RepairPanel} />
+    {/* Content Calendar */}
+    <Route path="/admin/content-calendar" component={ContentCalendarPage} />
   </>
 );
 

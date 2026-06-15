@@ -113,6 +113,7 @@ import { aiGatewayRouter } from "./ai-gateway";
 import { aiStudioRouter } from "./ai-studio";
 import { adminDebugRouter } from "./admin-debug";
 import businessOpsRouter from "./business-ops";
+import { contentCalendarRouter } from "./content-calendar";
 
 const router: IRouter = Router();
 
@@ -258,6 +259,9 @@ router.use("/admin/debug", adminDebugRouter);
 
 // Phase 15 — Business Operations & No-Code Admin Control Center
 router.use(businessOpsRouter);
+
+// Content Calendar
+router.use(contentCalendarRouter);
 
 export default router;
 
