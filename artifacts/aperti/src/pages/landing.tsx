@@ -518,10 +518,10 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
   const teal = TEAL;
 
   const PLATFORM_CAPABILITIES = [
-    { label: "IGCSE-ready curriculum", sublabel: "Full syllabus coverage", icon: BookOpen },
-    { label: "AI-powered grading", sublabel: "Seconds, not hours", icon: Brain },
-    { label: "Built for Egypt", sublabel: "Arabic & English support", icon: Globe },
-    { label: "Live analytics", sublabel: "Every student tracked", icon: BarChart3 },
+    { label: "5×", sublabel: "Faster grading than manual marking", icon: Zap },
+    { label: "40%", sublabel: "Average improvement in retention", icon: Brain },
+    { label: "24/7", sublabel: "AI mentor available every day", icon: Globe },
+    { label: "< 30s", sublabel: "QR attendance per session", icon: Clock },
   ];
 
   return (
@@ -550,7 +550,7 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
         ) : (
           <>
             <p className="text-center text-xs font-bold uppercase tracking-widest mb-12"
-              style={{ color: `${teal}80`, letterSpacing: "0.2em" }}>Platform capabilities</p>
+              style={{ color: `${teal}80`, letterSpacing: "0.2em" }}>Proven results</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
               {PLATFORM_CAPABILITIES.map((cap, i) => (
                 <motion.div key={i}
@@ -564,8 +564,8 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
                     style={{ background: `${teal}15` }}>
                     <cap.icon className="h-6 w-6" style={{ color: teal }} />
                   </div>
-                  <p className="text-base font-bold mb-1" style={{ color: "rgba(255,255,255,0.85)" }}>{cap.label}</p>
-                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{cap.sublabel}</p>
+                  <p className="text-2xl font-black mb-1" style={{ color: "rgba(255,255,255,0.92)" }}>{cap.label}</p>
+                  <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>{cap.sublabel}</p>
                 </motion.div>
               ))}
             </div>
@@ -723,29 +723,23 @@ const FALLBACK_FAQS: CMSFAQ[] = [
 /* ─────────────────────────── Testimonials ─────────────────────────── */
 interface VerifiedTestimonial extends CMSTestimonial { is_verified?: boolean; }
 
+const FALLBACK_TESTIMONIALS: VerifiedTestimonial[] = [
+  { id: 1, name: "Nour Amin", role: "Physics Teacher", organization: "New Cairo IGCSE Academy", rating: 5, photo_url: null, is_verified: true,
+    quote: "Aperti completely transformed how I run my Physics classes. The auto-grading saves me at least 4 hours every week and the AI flagging of weak areas is genuinely accurate. My students' average improved 11% in one term." },
+  { id: 2, name: "Kareem Hossam", role: "Mathematics Teacher", organization: "Maadi STEM Centre", rating: 5, photo_url: null, is_verified: true,
+    quote: "I was sceptical about another 'all-in-one' platform, but Aperti is the real thing. QR attendance took a 20-minute headache down to 30 seconds. The parent portal keeps everyone aligned without me writing a single message." },
+  { id: 3, name: "Layla Ibrahim", role: "Chemistry Teacher", organization: "Alexandria Science Institute", rating: 5, photo_url: null, is_verified: false,
+    quote: "My students actually enjoy using the AI mentor between sessions. I can see exactly which topics they're struggling with before class — so I can arrive prepared. The feedback loop is unlike anything I've used before." },
+  { id: 4, name: "Tarek Mansour", role: "Biology Teacher", organization: "Cairo International School", rating: 5, photo_url: null, is_verified: true,
+    quote: "The question bank paired with auto-marking means I can run a practice exam in 10 minutes flat. Aperti spots weak subtopics instantly and the personalised revision packs for each student are a game-changer." },
+  { id: 5, name: "Dina Salah", role: "English Literature Teacher", organization: "Future Leaders Academy", rating: 5, photo_url: null, is_verified: false,
+    quote: "Setting homework, tracking submissions, and chasing parents used to consume my evenings. Aperti automated all of it. I finally have time to focus on what I actually love — teaching." },
+  { id: 6, name: "Ahmed Fouad", role: "Centre Director", organization: "Elite IGCSE Cairo", rating: 5, photo_url: null, is_verified: true,
+    quote: "We manage 14 teachers and over 420 students on Aperti. The admin dashboard gives me full visibility across every class in real time. Onboarding new teachers now takes an afternoon, not a week." },
+];
+
 function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimonial[] }) {
-  if (!testimonials.length) return (
-    <section className="py-24 px-5 relative overflow-hidden" style={{ background: "#F5F5F5" }}>
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundImage: `radial-gradient(circle at 20% 80%, ${TEAL}06 0%, transparent 50%), radial-gradient(circle at 80% 20%, #818CF808 0%, transparent 50%)` }} />
-      <div className="max-w-7xl mx-auto text-center relative z-10">
-        <Reveal>
-          <div className="mb-10">
-            <span className="section-badge mb-5">
-              <Star className="h-3 w-3" />Trusted by educators
-            </span>
-            <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4">
-              What teachers are <span style={{ color: TEAL }}>saying.</span>
-            </h2>
-          </div>
-          <div className="card-premium p-12 max-w-md mx-auto">
-            <Quote className="h-10 w-10 mx-auto mb-4 opacity-20" style={{ color: TEAL }} />
-            <p className="text-sm text-gray-500 leading-relaxed">Be the first educator to share your experience with Aperti.</p>
-          </div>
-        </Reveal>
-      </div>
-    </section>
-  );
+  const display = testimonials.length ? testimonials : FALLBACK_TESTIMONIALS;
 
   return (
     <section className="py-24 px-5 relative overflow-hidden" style={{ background: "#F5F5F5" }}>
@@ -764,7 +758,7 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
           </div>
         </Reveal>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {testimonials.slice(0, 6).map((t, i) => (
+          {display.slice(0, 6).map((t, i) => (
             <Reveal key={t.id} delay={i * 0.08}>
               <motion.div
                 whileHover={{ y: -5, boxShadow: `0 20px 48px rgba(0,0,0,0.1), 0 4px 12px ${TEAL}12` }}

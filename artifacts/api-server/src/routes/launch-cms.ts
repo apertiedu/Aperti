@@ -505,7 +505,13 @@ router.get("/landing", async (req, res) => {
       pool.query('SELECT * FROM landing_sections WHERE is_published=true ORDER BY "order" ASC').catch(() => ({ rows: [] })),
       pool.query("SELECT id, name, role, organization, photo_url, quote, rating, is_verified, is_approved, created_at FROM testimonials WHERE is_approved=true ORDER BY is_verified DESC, created_at DESC LIMIT 6").catch(() => ({ rows: [] })),
       pool.query('SELECT * FROM faqs WHERE is_published=true ORDER BY "order" ASC').catch(() => ({ rows: [] })),
-      pool.query("SELECT id, name, type, price_egp, student_limit AS max_students, badge, (badge IS NOT NULL) AS is_highlighted, features FROM subscription_plans WHERE is_active=true ORDER BY sort_order ASC, price_egp ASC").catch(() => ({ rows: [] })),
+      pool.query(`
+        SELECT id, name, type, price_egp, student_limit AS max_students,
+          CASE WHEN sort_order = 2 THEN 'POPULAR' WHEN sort_order = 5 THEN 'BEST VALUE' ELSE NULL END AS badge,
+          CASE WHEN sort_order IN (2, 5) THEN true ELSE false END AS is_highlighted,
+          features
+        FROM subscription_plans WHERE is_active=true ORDER BY sort_order ASC, price_egp ASC
+      `).catch(() => ({ rows: [] })),
       pool.query("SELECT * FROM branding_settings ORDER BY id DESC LIMIT 1").catch(() => ({ rows: [] })),
     ]);
     res.json({
@@ -1053,6 +1059,29 @@ router.delete("/admin/early-access/:id", ...adminOnly, async (req, res) => {
   try {
     await pool.query("UPDATE early_access_program SET revoked_at=NOW() WHERE id=$1", [req.params.id]);
     res.json({ ok: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// POST /api/waitlist/join — public landing page CTA form submission
+router.post("/waitlist/join", async (req, res) => {
+  try {
+    const { name, email, metadata } = req.body;
+    if (!email || typeof email !== "string") {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    await pool.query(
+      "INSERT INTO waitlist_submissions (name, email, metadata) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING",
+      [name || null, email.trim().toLowerCase(), JSON.stringify(metadata || {})],
+    );
+    res.status(201).json({ ok: true });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/admin/waitlist/submissions — admin view all submissions
+router.get("/admin/waitlist/submissions", ...adminOnly, async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM waitlist_submissions ORDER BY created_at DESC LIMIT 200");
+    res.json(rows);
   } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
