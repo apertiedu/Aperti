@@ -261,15 +261,20 @@ const PageLoader = () => (
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
-      retryDelay: 600,
+      retry: (failureCount, error: any) => {
+        if (error?.status === 401 || error?.status === 403 || error?.status === 404) return false;
+        return failureCount < 2;
+      },
+      retryDelay: (attempt) => Math.min(600 * 2 ** attempt, 10_000),
       refetchOnWindowFocus: false,
       staleTime: 30_000,
       gcTime: 5 * 60_000,
       refetchOnMount: "always",
+      networkMode: "offlineFirst",
     },
     mutations: {
       retry: 0,
+      networkMode: "offlineFirst",
     },
   },
 });
@@ -387,6 +392,7 @@ function RoleOverrideBanner({ originalRole }: { originalRole: string }) {
 function StudentRouter() {
   useRoleGuard("student");
   return (
+    <ErrorBoundary>
     <StudentLayout>
       <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -481,6 +487,7 @@ function StudentRouter() {
       </Switch>
       </Suspense>
     </StudentLayout>
+    </ErrorBoundary>
   );
 }
 
@@ -618,6 +625,7 @@ const ADMIN_ROUTES = (
 
 function AdminRouter() {
   return (
+    <ErrorBoundary>
     <Layout>
       <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -632,12 +640,14 @@ function AdminRouter() {
       </Switch>
       </Suspense>
     </Layout>
+    </ErrorBoundary>
   );
 }
 
 function TeacherRouter() {
   useRoleGuard("teacher");
   return (
+    <ErrorBoundary>
     <Layout>
       <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -650,12 +660,14 @@ function TeacherRouter() {
       </Switch>
       </Suspense>
     </Layout>
+    </ErrorBoundary>
   );
 }
 
 function ParentRouter() {
   useRoleGuard("parent");
   return (
+    <ErrorBoundary>
     <ParentLayout>
       <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -706,6 +718,7 @@ function ParentRouter() {
       </Switch>
       </Suspense>
     </ParentLayout>
+    </ErrorBoundary>
   );
 }
 

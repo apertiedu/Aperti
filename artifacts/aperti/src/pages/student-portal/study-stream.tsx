@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
+import { useAnimeCounter } from "@/lib/anime-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -93,6 +94,11 @@ export default function StudyStream() {
   const container = { hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.06 } } };
   const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 240, damping: 24 } } };
 
+  const xpCount = useAnimeCounter(isLoading ? 0 : (summary?.ascend?.xp ?? 0), { delay: 120, duration: 1200 });
+  const levelCount = useAnimeCounter(isLoading ? 0 : (ascend?.level ?? 1), { delay: 200, duration: 1000 });
+  const attendanceCount = useAnimeCounter(isLoading ? 0 : (snapshot?.attendancePct ?? 0), { delay: 280, duration: 1100 });
+  const hwCount = useAnimeCounter(isLoading ? 0 : (snapshot?.hwCompletionRate ?? 0), { delay: 360, duration: 1100 });
+
   return (
     <div className="min-h-screen bg-[#F5F5F5] dark:bg-background p-4 md:p-6">
       {/* Header */}
@@ -120,19 +126,19 @@ export default function StudyStream() {
       {/* Top stats row */}
       <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         {[
-          { label: "XP Today", value: isLoading ? "…" : `+${summary?.ascend?.xp ?? 0}`, icon: <Zap className="h-4 w-4 text-yellow-500" />, color: "bg-yellow-50 dark:bg-yellow-900/20" },
-          { label: "Current Level", value: isLoading ? "…" : `Lv ${ascend?.level ?? 1}`, icon: <Star className="h-4 w-4 text-primary" />, color: "bg-primary/5" },
-          { label: "Attendance", value: isLoading ? "…" : `${snapshot?.attendancePct ?? 0}%`, icon: <CheckCircle className="h-4 w-4 text-emerald-500" />, color: "bg-emerald-50 dark:bg-emerald-900/20" },
-          { label: "HW Done", value: isLoading ? "…" : `${snapshot?.hwCompletionRate ?? 0}%`, icon: <BookOpen className="h-4 w-4 text-blue-500" />, color: "bg-blue-50 dark:bg-blue-900/20" },
+          { label: "XP Today", value: isLoading ? "…" : `+${xpCount}`, icon: <Zap className="h-4 w-4 text-yellow-500" />, color: "bg-yellow-50 dark:bg-yellow-900/20" },
+          { label: "Current Level", value: isLoading ? "…" : `Lv ${levelCount}`, icon: <Star className="h-4 w-4 text-primary" />, color: "bg-primary/5" },
+          { label: "Attendance", value: isLoading ? "…" : `${attendanceCount}%`, icon: <CheckCircle className="h-4 w-4 text-emerald-500" />, color: "bg-emerald-50 dark:bg-emerald-900/20" },
+          { label: "HW Done", value: isLoading ? "…" : `${hwCount}%`, icon: <BookOpen className="h-4 w-4 text-blue-500" />, color: "bg-blue-50 dark:bg-blue-900/20" },
         ].map(({ label, value, icon, color }) => (
           <motion.div key={label} variants={item}>
-            <Card className="shadow-sm">
+            <Card className="shadow-sm card-hover card-shine">
               <CardContent className={`p-3 flex items-center gap-3 rounded-xl ${color}`}>
                 <div className="w-9 h-9 rounded-xl bg-white/70 dark:bg-white/10 flex items-center justify-center shrink-0">
                   {icon}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-lg font-bold leading-none">{value}</p>
+                  <p className="text-lg font-bold leading-none stat-number">{value}</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
                 </div>
               </CardContent>
