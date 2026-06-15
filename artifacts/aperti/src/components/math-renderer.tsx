@@ -1,5 +1,6 @@
 import katex from "katex";
 import "katex/dist/katex.min.css";
+import DOMPurify from "dompurify";
 
 function renderKatex(tex: string, displayMode: boolean): string {
   try {

@@ -80,6 +80,11 @@ export default defineConfig({
           if (id.includes("/node_modules/@radix-ui/")) return "vendor-ui";
           if (id.includes("/node_modules/katex") || id.includes("/node_modules/react-markdown") || id.includes("/node_modules/remark") || id.includes("/node_modules/rehype")) return "vendor-markdown";
           if (id.includes("/node_modules/qrcode") || id.includes("/node_modules/jszip") || id.includes("/node_modules/html5-qrcode")) return "vendor-qr";
+          if (id.includes("/node_modules/animejs")) return "vendor-anime";
+          if (id.includes("/node_modules/socket.io") || id.includes("/node_modules/engine.io")) return "vendor-socket";
+          if (id.includes("/node_modules/zod") || id.includes("/node_modules/@hookform/") || id.includes("/node_modules/react-hook-form")) return "vendor-forms";
+          if (id.includes("/node_modules/dompurify")) return "vendor-security";
+          if (id.includes("/node_modules/three") || id.includes("/node_modules/@react-three/")) return "vendor-3d";
         },
         assetFileNames: "assets/[name]-[hash][extname]",
         chunkFileNames: "assets/[name]-[hash].js",

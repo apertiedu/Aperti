@@ -217,8 +217,21 @@ qaRouter.post("/admin/quality/calculate", async (req: AuthRequest, res: Response
     const checklistProgress = checklistTotal > 0 ? (checklistDone / checklistTotal) * 100 : 0;
     const securityScore = Math.max(20, checklistProgress * 0.6 + (criticalOpen === 0 ? 40 : 0));
 
-    const performanceScore = 72; // Placeholder — would pull from Phase 10 metrics
-    const accessibilityScore = 65; // Placeholder — would pull from Phase 10 checks
+    // Performance: penalize if many high-latency or 5xx entries exist; default 80 when no data
+    let performanceScore = 80;
+    try {
+      const { rows: perfRows } = await pool.query<{ slow: number; errors: number }>(
+        `SELECT
+          COALESCE(SUM(CASE WHEN duration_ms > 2000 THEN 1 ELSE 0 END), 0)::int AS slow,
+          COALESCE(SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END), 0)::int AS errors
+         FROM api_metrics WHERE recorded_at > NOW() - INTERVAL '1 hour'`
+      );
+      const { slow, errors } = perfRows[0] ?? { slow: 0, errors: 0 };
+      performanceScore = Math.max(20, 100 - slow * 3 - errors * 5);
+    } catch { /* api_metrics may not have recent data */ }
+    // Accessibility: based on open UI/UX bugs labelled "accessibility"
+    const a11yBugs = openBugs.filter(b => b.module?.toLowerCase().includes("accessibility") || b.tags?.includes?.("a11y")).length;
+    const accessibilityScore = Math.max(30, 100 - a11yBugs * 15);
     const uxScore = Math.max(30, 90 - openBugs.filter(b => b.module?.includes("ui") || b.module?.includes("ux")).length * 5);
 
     const overallScore = Math.round(

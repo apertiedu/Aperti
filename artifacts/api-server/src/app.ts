@@ -125,7 +125,21 @@ if (isProduction || isReplit) {
 // ── Security headers ──────────────────────────────────────────────────────────
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Disabled to allow Vite dev proxy; enable in production
+    contentSecurityPolicy: isProduction
+      ? {
+          directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            styleSrc: ["'self'", "'unsafe-inline'"],
+            imgSrc: ["'self'", "data:", "blob:", "https:"],
+            connectSrc: ["'self'", "wss:", "ws:", "https:"],
+            fontSrc: ["'self'", "data:", "https:"],
+            objectSrc: ["'none'"],
+            frameAncestors: ["'none'"],
+            upgradeInsecureRequests: [],
+          },
+        }
+      : false,
     crossOriginEmbedderPolicy: false,
   }),
 );
@@ -181,7 +195,14 @@ app.use(metricsMiddleware());
 app.use(
   session({
     store: new PgSession({ pool, tableName: "session" }),
-    secret: process.env["SESSION_SECRET"] || process.env["JWT_SECRET"] || "aperti-session-key",
+    secret: (() => {
+      const secret = process.env["SESSION_SECRET"] || process.env["JWT_SECRET"];
+      if (!secret) {
+        console.error("[app] FATAL: SESSION_SECRET (or JWT_SECRET) must be set for secure sessions.");
+        process.exit(1);
+      }
+      return secret;
+    })(),
     resave: false,
     saveUninitialized: false,
     cookie: {

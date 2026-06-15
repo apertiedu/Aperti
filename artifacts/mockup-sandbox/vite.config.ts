@@ -1,6 +1,14 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 const PORT = process.env.PORT || 5173;
 export default defineConfig({
-  server: { port: PORT },
-  preview: { port: PORT },
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
+  },
+  server: { port: Number(PORT), host: '0.0.0.0', allowedHosts: true },
+  preview: { port: Number(PORT), host: '0.0.0.0', allowedHosts: true },
 });

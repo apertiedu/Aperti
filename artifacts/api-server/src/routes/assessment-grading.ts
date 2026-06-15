@@ -332,17 +332,8 @@ assessmentGradingRouter.get("/oral-exams/:id/transcript", ...anyAuth, async (req
     if (!rows.length) return res.status(404).json({ error: "Not found" });
     const oral = rows[0];
 
-    if (!oral.transcript && oral.recording_url) {
-      const aiTranscript = await openaiChat({
-        systemPrompt: "You are a transcription assistant for oral exams. Generate a realistic-looking placeholder transcript note.",
-        userMessage: `Recording URL: ${oral.recording_url}. Note that actual audio transcription requires a speech-to-text service (e.g. Whisper API). This is a placeholder.`,
-        maxTokens: 200,
-      });
-      if (aiTranscript) {
-        await pool.query("UPDATE oral_recordings SET transcript=$1 WHERE id=$2", [aiTranscript, id]);
-        oral.transcript = aiTranscript;
-      }
-    }
+    // Transcript is only populated by a real speech-to-text integration (e.g. Whisper).
+    // If no transcript exists yet, return null — do not generate a fake one.
 
     res.json({ oral });
   } catch (err: any) { res.status(500).json({ error: err.message }); }
