@@ -8,10 +8,10 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const authH = () => ({ "Content-Type": "application/json" });
-async function fetchJSON(url: string) { const r = await fetch(url, { headers: authH() }); return r.json(); }
-async function postJSON(url: string, body: unknown) { const r = await fetch(url, { method: "POST", headers: authH(), body: JSON.stringify(body) }); return r.json(); }
-async function putJSON(url: string, body: unknown) { const r = await fetch(url, { method: "PUT", headers: authH(), body: JSON.stringify(body) }); return r.json(); }
-async function deleteReq(url: string) { await fetch(url, { method: "DELETE", headers: authH() }); }
+async function fetchJSON(url: string) { const r = await fetch(url, { credentials: "include", headers: authH() }); return r.json(); }
+async function postJSON(url: string, body: unknown) { const r = await fetch(url, { method: "POST", credentials: "include", headers: authH(), body: JSON.stringify(body) }); return r.json(); }
+async function putJSON(url: string, body: unknown) { const r = await fetch(url, { method: "PUT", credentials: "include", headers: authH(), body: JSON.stringify(body) }); return r.json(); }
+async function deleteReq(url: string) { await fetch(url, { method: "DELETE", credentials: "include", headers: authH() }); }
 
 export default function RevisionNotesPage() {
   const qc = useQueryClient();

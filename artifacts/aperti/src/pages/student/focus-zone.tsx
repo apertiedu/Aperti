@@ -13,6 +13,7 @@ async function startSessionAPI(mode: string, durationMinutes: number): Promise<n
   try {
     const res = await fetch("/api/focus-sessions", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ mode, durationMinutes }),
     });
@@ -26,6 +27,7 @@ async function completeSessionAPI(sessionId: number, durationMinutes: number, mo
   try {
     await fetch(`/api/focus-sessions/${sessionId}`, {
       method: "PATCH",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ durationMinutes, mode }),
     });

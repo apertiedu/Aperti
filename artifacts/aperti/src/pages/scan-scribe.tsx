@@ -15,7 +15,7 @@ export default function ScanScribe() {
     setLoading(true);
     const formData = new FormData();
     formData.append("image", file);
-    const res = await fetch("/api/ocr/scan", { method: "POST", body: formData });
+    const res = await fetch("/api/ocr/scan", { method: "POST", credentials: "include", body: formData });
     const data = await res.json();
     setText(data.text || "No text extracted");
     setLoading(false);

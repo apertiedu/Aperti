@@ -31,7 +31,7 @@ async function main() {
       process.env.OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1";
     }
     if (!process.env.OPENAI_MODEL) {
-      process.env.OPENAI_MODEL = "meta/llama-3.1-8b-instruct";
+      process.env.OPENAI_MODEL = "openai/gpt-oss-20b";
     }
   }
 
