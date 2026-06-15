@@ -86,16 +86,16 @@ function ChildCard({ child, selected, onSelect }: { child: ChildData; selected: 
 
 function StatCard({ icon: Icon, label, value, sub, color }: { icon: any; label: string; value: string | number; sub?: string; color: string }) {
   return (
-    <Card className="border border-gray-100 shadow-sm">
+    <Card className="border border-border/40 shadow-sm">
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${color}15` }}>
-            <Icon className="h-4.5 w-4.5" style={{ color }} />
+            <Icon className="h-4 w-4" style={{ color }} />
           </div>
         </div>
-        <p className="text-2xl font-black text-gray-900">{value}</p>
-        <p className="text-xs text-gray-500 font-medium mt-0.5">{label}</p>
-        {sub && <p className="text-[10px] text-gray-400 mt-0.5">{sub}</p>}
+        <p className="text-2xl font-black text-foreground tabular-nums">{value}</p>
+        <p className="text-xs text-muted-foreground font-medium mt-0.5">{label}</p>
+        {sub && <p className="text-[10px] text-muted-foreground/70 mt-0.5">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -135,16 +135,16 @@ export default function ParentDashboard() {
   if (!children.length) {
     return (
       <div className="p-6">
-        <div className="bg-card rounded-2xl border border-dashed border-border p-16 text-center">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: "#E6F4F1" }}>
-            <Users className="h-8 w-8" style={{ color: TEAL }} />
+        <div className="bg-card rounded-2xl border border-dashed border-border p-16 text-center empty-bg">
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/10">
+            <Users className="h-8 w-8 text-primary" />
           </div>
-          <h3 className="text-lg font-extrabold text-gray-900 mb-2">No children linked yet</h3>
-          <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">
+          <h3 className="text-lg font-extrabold text-foreground mb-2">No children linked yet</h3>
+          <p className="text-muted-foreground text-sm max-w-xs mx-auto mb-6">
             Get your pairing code and share it with your child so they can link their account.
           </p>
           <Link href="/parent/link-student">
-            <Button className="gap-2 rounded-xl text-white" style={{ background: TEAL }}>
+            <Button className="gap-2 rounded-xl">
               Get Pairing Code <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -158,8 +158,8 @@ export default function ParentDashboard() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-black text-gray-900">GuardianHub<span style={{ color: TEAL }}>.</span></h1>
-          <p className="text-gray-500 text-sm mt-0.5">Your children's learning, at a glance.</p>
+          <h1 className="text-2xl font-black text-foreground">GuardianHub<span className="text-primary">.</span></h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Your children's learning, at a glance.</p>
         </div>
         <div className="flex gap-2">
           <Link href="/parent/messages">
@@ -237,17 +237,17 @@ export default function ParentDashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
             {/* Daily Snapshot */}
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="lg:col-span-2 space-y-4">
-              <Card className="border border-gray-100 shadow-sm overflow-hidden">
-                <div className="h-1" style={{ background: TEAL }} />
+              <Card className="border border-border/40 shadow-sm overflow-hidden">
+                <div className="h-1 bg-primary" />
                 <CardContent className="p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: TEAL }}>
+                        <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-bold">
                           {(child.name || "S").slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <h2 className="font-bold text-gray-900">{child.name}</h2>
+                          <h2 className="font-bold text-foreground">{child.name}</h2>
                           <div className="flex items-center gap-1.5 mt-0.5">{getAttendanceBadge(child.todayAttendance)}</div>
                         </div>
                       </div>
@@ -262,10 +262,10 @@ export default function ParentDashboard() {
                   {/* Today's lessons */}
                   {child.todayLessons.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Today's Classes</p>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">Today's Classes</p>
                       <div className="flex flex-wrap gap-2">
                         {child.todayLessons.map((l, i) => (
-                          <span key={i} className="text-xs bg-teal-50 text-teal-700 px-2.5 py-1 rounded-full border border-teal-100 font-medium">
+                          <span key={i} className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full border border-primary/20 font-medium">
                             {l.subject_name || "Class"} {l.session_time ? `· ${l.session_time}` : ""}
                           </span>
                         ))}
@@ -276,8 +276,8 @@ export default function ParentDashboard() {
                   {/* Revision progress */}
                   <div className="mb-4">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-gray-600 flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5 text-teal-500" />Revision Progress</span>
-                      <span className="text-xs font-bold text-gray-700">{child.revisionCompleted}/{child.revisionTotal} goals</span>
+                      <span className="text-xs font-medium text-muted-foreground flex items-center gap-1.5"><TrendingUp className="h-3.5 w-3.5 text-primary" />Revision Progress</span>
+                      <span className="text-xs font-bold text-foreground">{child.revisionCompleted}/{child.revisionTotal} goals</span>
                     </div>
                     <Progress value={child.revisionTotal > 0 ? (child.revisionCompleted / child.revisionTotal) * 100 : 0} className="h-2" />
                   </div>
@@ -300,26 +300,26 @@ export default function ParentDashboard() {
               {/* Academic summary */}
               <div className="grid grid-cols-2 gap-4">
                 <Link href={`/parent/grades?child=${child.studentId}`}>
-                  <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                  <Card className="border border-border/40 shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-3">
                         <BarChart3 className="h-5 w-5 text-indigo-500" />
-                        <ChevronRight className="h-4 w-4 text-gray-300" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
                       </div>
-                      <p className="text-xl font-black text-gray-900">{child.avgGrade ? `${child.avgGrade}%` : "—"}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Average Grade</p>
+                      <p className="text-xl font-black text-foreground tabular-nums">{child.avgGrade ? `${child.avgGrade}%` : "—"}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Average Grade</p>
                     </CardContent>
                   </Card>
                 </Link>
                 <Link href={`/parent/attendance?child=${child.studentId}`}>
-                  <Card className="border border-gray-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                  <Card className="border border-border/40 shadow-sm hover:shadow-md hover:border-primary/20 transition-all cursor-pointer">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-3">
-                        <CheckCircle2 className="h-5 w-5 text-teal-500" />
-                        <ChevronRight className="h-4 w-4 text-gray-300" />
+                        <CheckCircle2 className="h-5 w-5 text-primary" />
+                        <ChevronRight className="h-4 w-4 text-muted-foreground/40" />
                       </div>
-                      <p className="text-xl font-black text-gray-900">{child.attendanceRate}%</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Attendance Rate</p>
+                      <p className="text-xl font-black text-foreground tabular-nums">{child.attendanceRate}%</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">Attendance Rate</p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -330,22 +330,22 @@ export default function ParentDashboard() {
             <div className="space-y-4">
               {/* Upcoming deadlines */}
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-                <Card className="border border-gray-100 shadow-sm">
+                <Card className="border border-border/40 shadow-sm">
                   <CardContent className="p-5">
                     <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5"><Clock className="h-4 w-4 text-amber-500" />Upcoming Deadlines</h3>
-                      <Link href={`/parent/assignments?child=${child.studentId}`}><span className="text-[10px] text-teal-600 font-medium cursor-pointer">See all</span></Link>
+                      <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5"><Clock className="h-4 w-4 text-amber-500" />Upcoming Deadlines</h3>
+                      <Link href={`/parent/assignments?child=${child.studentId}`}><span className="text-[10px] text-primary font-medium cursor-pointer">See all</span></Link>
                     </div>
                     {child.upcomingDeadlines.length === 0 ? (
-                      <p className="text-xs text-gray-400 text-center py-3">No upcoming deadlines 🎉</p>
+                      <p className="text-xs text-muted-foreground text-center py-3">No upcoming deadlines 🎉</p>
                     ) : (
                       <div className="space-y-2">
                         {child.upcomingDeadlines.slice(0, 3).map(hw => (
-                          <div key={hw.id} className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-100">
+                          <div key={hw.id} className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800/40">
                             <BookOpen className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
                             <div className="min-w-0">
-                              <p className="text-xs font-medium text-gray-800 truncate">{hw.title}</p>
-                              <p className="text-[10px] text-gray-400">{hw.subject_name} · Due {new Date(hw.due_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</p>
+                              <p className="text-xs font-medium text-foreground truncate">{hw.title}</p>
+                              <p className="text-[10px] text-muted-foreground">{hw.subject_name} · Due {new Date(hw.due_date).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</p>
                             </div>
                           </div>
                         ))}
@@ -385,16 +385,16 @@ export default function ParentDashboard() {
               {/* Achievement Feed */}
               {child.ascend && (
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }}>
-                  <Card className="border border-gray-100 shadow-sm">
+                  <Card className="border border-border/40 shadow-sm">
                     <CardContent className="p-5">
-                      <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5 mb-3"><Trophy className="h-4 w-4 text-amber-500" />Progress</h3>
-                      <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-100">
+                      <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5 mb-3"><Trophy className="h-4 w-4 text-amber-500" />Progress</h3>
+                      <div className="flex items-center gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800/40">
                         <div className="w-10 h-10 rounded-full bg-amber-400 flex items-center justify-center text-white font-black text-sm">
                           {child.ascend.level}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-gray-800">{child.ascend.rank}</p>
-                          <p className="text-[10px] text-gray-500">{child.ascend.xp.toLocaleString()} XP · {child.ascend.streak} day streak</p>
+                          <p className="text-sm font-bold text-foreground">{child.ascend.rank}</p>
+                          <p className="text-[10px] text-muted-foreground">{child.ascend.xp.toLocaleString()} XP · {child.ascend.streak} day streak</p>
                         </div>
                       </div>
                     </CardContent>
@@ -405,17 +405,17 @@ export default function ParentDashboard() {
               {/* Recent messages */}
               {child.recentMessages.length > 0 && (
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }}>
-                  <Card className="border border-gray-100 shadow-sm">
+                  <Card className="border border-border/40 shadow-sm">
                     <CardContent className="p-5">
                       <div className="flex items-center justify-between mb-3">
-                        <h3 className="text-sm font-bold text-gray-800 flex items-center gap-1.5"><MessageSquare className="h-4 w-4 text-teal-500" />Recent Messages</h3>
-                        <Link href="/parent/messages"><span className="text-[10px] text-teal-600 font-medium cursor-pointer">Open</span></Link>
+                        <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5"><MessageSquare className="h-4 w-4 text-primary" />Recent Messages</h3>
+                        <Link href="/parent/messages"><span className="text-[10px] text-primary font-medium cursor-pointer">Open</span></Link>
                       </div>
                       <div className="space-y-2">
                         {child.recentMessages.slice(0, 2).map(msg => (
-                          <div key={msg.id} className="p-2.5 rounded-lg bg-gray-50 border border-gray-100">
-                            <p className="text-[10px] font-semibold text-teal-600">{msg.from_name}</p>
-                            <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">{msg.message}</p>
+                          <div key={msg.id} className="p-2.5 rounded-lg bg-muted/50 border border-border/40">
+                            <p className="text-[10px] font-semibold text-primary">{msg.from_name}</p>
+                            <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{msg.message}</p>
                           </div>
                         ))}
                       </div>

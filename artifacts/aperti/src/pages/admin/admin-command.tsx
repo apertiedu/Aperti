@@ -46,14 +46,14 @@ function ActivityHeatmap() {
     : null;
 
   function cellColor(count: number) {
-    if (count === 0) return "bg-gray-100";
+    if (count === 0) return "bg-muted/60 dark:bg-muted/30";
     const intensity = count / maxCount;
-    if (intensity < 0.15) return "bg-teal-100";
-    if (intensity < 0.30) return "bg-teal-200";
-    if (intensity < 0.50) return "bg-teal-300";
-    if (intensity < 0.70) return "bg-teal-400";
-    if (intensity < 0.85) return "bg-teal-500";
-    return "bg-teal-600";
+    if (intensity < 0.15) return "bg-primary/15";
+    if (intensity < 0.30) return "bg-primary/30";
+    if (intensity < 0.50) return "bg-primary/45";
+    if (intensity < 0.70) return "bg-primary/60";
+    if (intensity < 0.85) return "bg-primary/80";
+    return "bg-primary";
   }
 
   return (
@@ -61,17 +61,17 @@ function ActivityHeatmap() {
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-teal-50 flex items-center justify-center">
-              <Flame className="h-4 w-4 text-teal-600" />
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Flame className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">Activity Heatmap</h2>
-              <p className="text-xs text-gray-400">Login activity by day &amp; hour · last 30 days</p>
+              <h2 className="text-sm font-semibold text-foreground">Activity Heatmap</h2>
+              <p className="text-xs text-muted-foreground">Login activity by day &amp; hour · last 30 days</p>
             </div>
           </div>
-          <div className="flex items-center gap-3 text-xs text-gray-500">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
             {peakLabel && (
-              <span className="hidden sm:flex items-center gap-1 bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-medium">
+              <span className="hidden sm:flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
                 <Flame className="h-3 w-3" /> Peak: {peakLabel}
               </span>
             )}
@@ -91,7 +91,7 @@ function ActivityHeatmap() {
                 {HOURS.map(h => (
                   <div key={h} className="flex-1 text-center">
                     {h % 3 === 0 && (
-                      <span className="text-[9px] text-gray-400 font-medium">
+                      <span className="text-[9px] text-muted-foreground font-medium">
                         {h === 0 ? "12a" : h < 12 ? `${h}a` : h === 12 ? "12p" : `${h - 12}p`}
                       </span>
                     )}
@@ -102,7 +102,7 @@ function ActivityHeatmap() {
               {/* Rows */}
               {DAYS.map((day, dow) => (
                 <div key={day} className="flex items-center gap-1 mb-1">
-                  <span className="text-[10px] text-gray-400 font-medium w-8 text-right shrink-0">{day}</span>
+                  <span className="text-[10px] text-muted-foreground font-medium w-8 text-right shrink-0">{day}</span>
                   <div className="flex flex-1 gap-0.5">
                     {HOURS.map(hour => {
                       const count = grid[dow][hour];
@@ -121,11 +121,11 @@ function ActivityHeatmap() {
 
               {/* Legend */}
               <div className="flex items-center justify-end gap-1.5 mt-3">
-                <span className="text-[10px] text-gray-400">Less</span>
-                {["bg-gray-100", "bg-teal-100", "bg-teal-200", "bg-teal-300", "bg-teal-400", "bg-teal-500", "bg-teal-600"].map(c => (
+                <span className="text-[10px] text-muted-foreground">Less</span>
+                {["bg-muted/60", "bg-primary/15", "bg-primary/30", "bg-primary/45", "bg-primary/60", "bg-primary/80", "bg-primary"].map(c => (
                   <div key={c} className={`w-3 h-3 rounded-sm ${c}`} />
                 ))}
-                <span className="text-[10px] text-gray-400">More</span>
+                <span className="text-[10px] text-muted-foreground">More</span>
               </div>
             </div>
           </div>
@@ -202,18 +202,18 @@ function DeploymentDebugPanel() {
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-teal-50 flex items-center justify-center">
-              <Server className="h-4 w-4 text-teal-600" />
+            <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Server className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-gray-900">Deployment Status</h2>
-              <p className="text-xs text-gray-400">Live health check · auto-refreshes every 60s</p>
+              <h2 className="text-sm font-semibold text-foreground">Deployment Status</h2>
+              <p className="text-xs text-muted-foreground">Live health check · auto-refreshes every 60s</p>
             </div>
           </div>
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
             title="Refresh"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
@@ -229,8 +229,8 @@ function DeploymentDebugPanel() {
                   : <XCircle className="h-3 w-3 text-red-500" />
                 }
               </div>
-              <p className="text-[11px] font-bold text-gray-700 truncate">{value}</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">{label}</p>
+              <p className="text-[11px] font-bold text-foreground truncate tabular-nums">{value}</p>
+              <p className="text-[10px] text-muted-foreground mt-0.5">{label}</p>
             </div>
           ))}
         </div>
@@ -303,7 +303,7 @@ export default function AdminCommand() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] p-6">
+    <div className="min-h-screen bg-background p-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -311,13 +311,13 @@ export default function AdminCommand() {
               <Terminal className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Admin Command Centre</h1>
-              <p className="text-sm text-gray-500">Full platform control at your fingertips</p>
+              <h1 className="text-2xl font-bold text-foreground">Admin Command Centre</h1>
+              <p className="text-sm text-muted-foreground">Full platform control at your fingertips</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
             {lastUpdated && (
-              <span className="flex items-center gap-1.5 text-xs text-gray-400">
+              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Clock className="h-3 w-3" />
                 Updated {lastUpdated}
               </span>
@@ -348,8 +348,8 @@ export default function AdminCommand() {
                   <h.icon className="h-4 w-4" style={{ color: h.color }} />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-2xl font-bold text-gray-900 leading-none">{h.value}</p>
-                  <p className="text-xs text-gray-400 mt-0.5 leading-tight">{h.label}</p>
+                  <p className="text-2xl font-bold text-foreground leading-none tabular-nums">{h.value}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{h.label}</p>
                 </div>
               </CardContent>
             </Card>
@@ -403,18 +403,18 @@ export default function AdminCommand() {
                     <Bug className="h-4 w-4 text-red-500" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-semibold text-gray-900">Error Monitor</h2>
-                    <p className="text-xs text-gray-400">
+                    <h2 className="text-sm font-semibold text-foreground">Error Monitor</h2>
+                    <p className="text-xs text-muted-foreground">
                       {liveCounts.errors24h} error{liveCounts.errors24h !== 1 ? "s" : ""} in last 24h · {liveCounts.errors1h} in last hour
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button onClick={() => refetchCounts()} className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                  <button onClick={() => refetchCounts()} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
                     <RefreshCw className="h-3.5 w-3.5" />
                   </button>
                   <Link href="/admin/debug">
-                    <span className="text-xs text-teal-600 hover:underline cursor-pointer">Full debug panel →</span>
+                    <span className="text-xs text-primary hover:underline cursor-pointer">Full debug panel →</span>
                   </Link>
                 </div>
               </div>
@@ -426,17 +426,17 @@ export default function AdminCommand() {
               ) : liveCounts.topErrors?.length > 0 ? (
                 <div className="space-y-2">
                   {liveCounts.topErrors.slice(0, 5).map((e: any, i: number) => (
-                    <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg border border-gray-100 bg-gray-50/60 group">
-                      <div className="h-6 w-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                    <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg border border-border/40 bg-muted/30 group">
+                      <div className="h-6 w-6 rounded-full bg-red-100 dark:bg-red-950/40 flex items-center justify-center shrink-0">
                         <AlertTriangle className="h-3 w-3 text-red-500" />
                       </div>
-                      <p className="text-xs text-gray-700 flex-1 truncate font-mono">{e.message}</p>
-                      <Badge className="bg-red-100 text-red-700 border-red-200 text-[10px] shrink-0">×{e.count}</Badge>
+                      <p className="text-xs text-foreground flex-1 truncate font-mono">{e.message}</p>
+                      <Badge className="bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800 text-[10px] shrink-0">×{e.count}</Badge>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="text-sm text-gray-400 py-2">
+                <div className="text-sm text-muted-foreground py-2">
                   {liveCounts.errors24h} error{liveCounts.errors24h !== 1 ? "s" : ""} logged — check the debug panel for details.
                 </div>
               )}
@@ -480,10 +480,10 @@ export default function AdminCommand() {
                     <mod.icon className={`h-5 w-5 ${(mod as any).highlight || (mod as any).highlight2 ? "text-white" : "text-primary"}`} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`font-semibold text-sm ${(mod as any).highlight || (mod as any).highlight2 ? "text-white" : "text-gray-900"}`}>{mod.label}</p>
-                    <p className={`text-xs truncate ${(mod as any).highlight || (mod as any).highlight2 ? "text-white/70" : "text-gray-400"}`}>{mod.desc}</p>
+                    <p className={`font-semibold text-sm ${(mod as any).highlight || (mod as any).highlight2 ? "text-white" : "text-foreground"}`}>{mod.label}</p>
+                    <p className={`text-xs truncate ${(mod as any).highlight || (mod as any).highlight2 ? "text-white/70" : "text-muted-foreground"}`}>{mod.desc}</p>
                   </div>
-                  <ChevronRight className={`h-4 w-4 group-hover:translate-x-0.5 transition-all ${(mod as any).highlight || (mod as any).highlight2 ? "text-white/60 group-hover:text-white" : "text-gray-300 group-hover:text-primary"}`} />
+                  <ChevronRight className={`h-4 w-4 group-hover:translate-x-0.5 transition-all ${(mod as any).highlight || (mod as any).highlight2 ? "text-white/60 group-hover:text-white" : "text-muted-foreground/40 group-hover:text-primary"}`} />
                 </CardContent>
               </Card>
             </Link>
