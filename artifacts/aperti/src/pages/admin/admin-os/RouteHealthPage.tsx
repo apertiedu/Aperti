@@ -49,7 +49,7 @@ export default function RouteHealthPage() {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/route-health", {
-        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();

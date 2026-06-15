@@ -1805,9 +1805,9 @@ export default function Landing() {
   const pricingS = getSection(sections, "pricing");
   const contactS = getSection(sections, "contact");
 
-  const headline       = (hero.headline as string)         ?? "The platform IGCSE tutors";
-  const headlineAccent = (hero.headline_accent as string)  ?? "trust to run their class.";
-  const subheadline    = (hero.subheadline as string)      ?? "Attendance, grading, AI feedback, parent updates, and student analytics — all in one place. Built for Egyptian IGCSE educators.";
+  const headline       = (hero.headline as string)         ?? "Run your entire teaching operation";
+  const headlineAccent = (hero.headline_accent as string)  ?? "from one screen.";
+  const subheadline    = (hero.subheadline as string)      ?? "Attendance, AI grading, parent updates, and live student analytics — all in one place. Built for Egyptian IGCSE educators. Free to start.";
   const badgeText      = (hero.badge_text as string)       ?? "Educational Operating System";
   const ctaPrimary     = (hero.cta_primary_text as string) ?? "Explore Courses";
   const ctaSecondary   = (hero.cta_secondary_text as string) ?? "Create Free Account";

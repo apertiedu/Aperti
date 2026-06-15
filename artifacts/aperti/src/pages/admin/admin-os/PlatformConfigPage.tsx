@@ -96,7 +96,8 @@ export default function PlatformConfigPage() {
     try {
       const res = await fetch(`/api/admin/features/${key}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ enabled: newVal }),
       });
       if (res.ok) {

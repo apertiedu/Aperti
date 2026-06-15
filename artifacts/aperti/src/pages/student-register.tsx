@@ -43,7 +43,7 @@ export default function StudentRegister() {
     e.preventDefault();
     setError("");
     if (form.password !== form.confirmPassword) { setError("Passwords do not match"); return; }
-    if (form.password.length < 6) { setError("Password must be at least 6 characters"); return; }
+    if (form.password.length < 8) { setError("Password must be at least 8 characters"); return; }
     if (!form.teacherId) { setError("Please select your teacher"); return; }
     setSubmitting(true);
     try {

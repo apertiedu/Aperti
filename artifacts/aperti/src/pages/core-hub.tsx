@@ -288,9 +288,9 @@ export default function CoreHub() {
 
   const quickStartSteps = [
     { step: 1, icon: Users, label: "Add your first student", desc: "Register or invite students to your workspace", href: "/students", done: (summary?.studentsTotal ?? 0) > 0 },
-    { step: 2, icon: BookOpen, label: "Create a subject", desc: "Organise your teaching by subject or class", href: "/subjects", done: false },
-    { step: 3, icon: CalendarCheck, label: "Schedule a session", desc: "Plan your first lesson in PlanGrid", href: "/plan-grid", done: false },
-    { step: 4, icon: ClipboardList, label: "Set an assignment", desc: "Give students their first homework task", href: "/submit-flow", done: false },
+    { step: 2, icon: BookOpen, label: "Create a subject", desc: "Organise your teaching by subject or class", href: "/subjects", done: (summary?.questionBank ?? 0) > 0 },
+    { step: 3, icon: CalendarCheck, label: "Schedule a session", desc: "Plan your first lesson in PlanGrid", href: "/plan-grid", done: classes.length > 0 || (summary?.lessonsToday ?? 0) > 0 },
+    { step: 4, icon: ClipboardList, label: "Set an assignment", desc: "Give students their first homework task", href: "/submit-flow", done: submissions.length > 0 || (extended?.pendingGrading ?? 0) > 0 },
   ];
 
   return (
@@ -432,7 +432,20 @@ export default function CoreHub() {
                 {todayLoading ? (
                   [1, 2, 3].map(i => <Skeleton key={i} className="h-14 rounded-lg" />)
                 ) : classes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-6">No classes today</p>
+                  <div className="flex flex-col items-center gap-3 py-6 text-center">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                      <CalendarCheck className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Free today</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">No sessions scheduled</p>
+                    </div>
+                    <Link href="/plan-grid">
+                      <Button size="sm" variant="outline" className="h-7 text-xs gap-1.5">
+                        <CalendarCheck className="h-3 w-3" /> Schedule a session
+                      </Button>
+                    </Link>
+                  </div>
                 ) : (
                   classes.map((c: any, i: number) => (
                     <motion.div

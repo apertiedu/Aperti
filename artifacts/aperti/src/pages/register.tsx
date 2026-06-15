@@ -178,6 +178,7 @@ export default function Register() {
       const res = await fetch("/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           firstName: form.firstName.trim(), lastName: form.lastName.trim(),
           username: form.username.trim().toLowerCase(),
@@ -186,7 +187,6 @@ export default function Register() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Registration failed. Please try again."); return; }
-      localStorage.setItem("aperti_token", data.token);
       setSuccess(true);
       setTimeout(() => { window.location.href = "/"; }, 900);
     } catch { setError("Network error. Please check your connection and try again."); }

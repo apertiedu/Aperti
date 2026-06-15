@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useAnimeCounter } from "@/lib/anime-utils";
@@ -49,6 +49,7 @@ function CircularProgress({ value, size = 96 }: { value: number; size?: number }
 
 export default function StudyStream() {
   const { user } = useAuth();
+  const [showAllActions, setShowAllActions] = useState(false);
 
   const { data: summary, isLoading } = useQuery({
     queryKey: ["student", "home-summary"],
@@ -444,29 +445,44 @@ export default function StudyStream() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="px-4 pb-4">
-                <div className="grid grid-cols-2 gap-2">
-                  {[
+                {(() => {
+                  const ALL_ACTIONS = [
                     { href: "/mentor", label: "The Mentor", icon: Brain, color: "text-purple-500" },
-                    { href: "/revisit", label: "Revisit", icon: Target, color: "text-blue-500" },
+                    { href: "/my-homework", label: "Assignments", icon: BookOpen, color: "text-rose-500" },
                     { href: "/focus-zone", label: "FocusZone", icon: Clock, color: "text-teal-500" },
-                    { href: "/learning-path", label: "Learn Path", icon: Route, color: "text-primary" },
+                    { href: "/flashcards", label: "Flashcards", icon: Layers, color: "text-green-500" },
                     { href: "/challenges", label: "Challenges", icon: Trophy, color: "text-amber-500" },
                     { href: "/goals", label: "Goals", icon: Shield, color: "text-emerald-500" },
+                    { href: "/revisit", label: "Revisit", icon: Target, color: "text-blue-500" },
+                    { href: "/learning-path", label: "Learn Path", icon: Route, color: "text-primary" },
                     { href: "/micro-assessment", label: "Quick Quiz", icon: Zap, color: "text-yellow-500" },
                     { href: "/learning-analytics", label: "Analytics", icon: BarChart3, color: "text-blue-500" },
                     { href: "/simverse", label: "SimVerse", icon: FlaskConical, color: "text-orange-500" },
-                    { href: "/flashcards", label: "Flashcards", icon: Layers, color: "text-green-500" },
-                    { href: "/my-homework", label: "Assignments", icon: BookOpen, color: "text-rose-500" },
                     { href: "/recommendations", label: "For You", icon: Sparkles, color: "text-violet-500" },
-                  ].map(({ href, label, icon: Icon, color }) => (
-                    <Link key={href} href={href}>
-                      <button className="w-full flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border hover:border-primary/30 hover:bg-primary/5 transition-colors">
-                        <Icon className={`h-5 w-5 ${color}`} />
-                        <span className="text-[11px] font-medium text-foreground">{label}</span>
+                  ];
+                  const visible = showAllActions ? ALL_ACTIONS : ALL_ACTIONS.slice(0, 6);
+                  return (
+                    <>
+                      <div className="grid grid-cols-2 gap-2">
+                        {visible.map(({ href, label, icon: Icon, color }) => (
+                          <Link key={href} href={href}>
+                            <button className="w-full flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border hover:border-primary/30 hover:bg-primary/5 transition-colors">
+                              <Icon className={`h-5 w-5 ${color}`} />
+                              <span className="text-[11px] font-medium text-foreground">{label}</span>
+                            </button>
+                          </Link>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => setShowAllActions(s => !s)}
+                        className="w-full mt-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
+                      >
+                        {showAllActions ? "Show less" : `+${ALL_ACTIONS.length - 6} more`}
+                        <ArrowRight className={`h-3 w-3 transition-transform ${showAllActions ? "rotate-90" : ""}`} />
                       </button>
-                    </Link>
-                  ))}
-                </div>
+                    </>
+                  );
+                })()}
               </CardContent>
             </Card>
           </motion.div>

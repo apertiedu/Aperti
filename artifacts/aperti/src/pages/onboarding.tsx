@@ -11,7 +11,7 @@ const TEAL = "#0D9488";
 
 const SUBJECTS = ["Mathematics","Physics","Chemistry","Biology","English Language","English Literature","Arabic","History","Geography","Computer Science","Economics","Business Studies","Statistics","Further Mathematics","ICT"];
 const BOARDS = ["CAIE (Cambridge A-Level / IGCSE)","Edexcel / Pearson","IB (International Baccalaureate)","AQA","OCR","Egyptian National Curriculum","American Curriculum","Other"];
-const EXAM_SESSIONS = ["May/June 2025","October/November 2025","February/March 2026","May/June 2026","October/November 2026","Not applicable"];
+const EXAM_SESSIONS = ["May/June 2026","October/November 2026","February/March 2027","May/June 2027","October/November 2027","Not applicable"];
 const COUNTRIES = ["Egypt","Saudi Arabia","UAE","United Kingdom","United States","Canada","Australia","Germany","France","Other"];
 const GOAL_OPTIONS = ["Get an A*","Improve my grade","Build strong foundations","Prepare for university","Pass a retake","Self-improvement","Follow a structured plan"];
 const TEACHING_TYPES = [

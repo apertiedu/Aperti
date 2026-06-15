@@ -247,7 +247,7 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!captchaValid) {
+    if (attempts > 0 && !captchaValid) {
       setError("Please solve the security check correctly.");
       refreshCaptcha();
       triggerShake();
@@ -284,7 +284,7 @@ export default function Login() {
   };
 
   const isLocked = rateLimited || suspended;
-  const canSubmit = !isSubmitting && !isLocked && username && password && captchaInput;
+  const canSubmit = !isSubmitting && !isLocked && username && password && (attempts === 0 || captchaInput);
 
   return (
     <div
@@ -368,11 +368,12 @@ export default function Login() {
                       </button>
                     </FloatField>
 
+                    {attempts > 0 && (
                     <motion.div
                       className="space-y-1.5"
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.26, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ delay: 0.1, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                     >
                       <div className="flex items-center justify-between">
                         <Label className="text-slate-600 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
@@ -427,6 +428,7 @@ export default function Login() {
                         </AnimatePresence>
                       </div>
                     </motion.div>
+                    )}
 
                     <AnimatePresence>
                       {error && (
