@@ -25,10 +25,10 @@ export default function WhatNextCard() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
-        <div className="h-4 w-28 bg-slate-100 rounded animate-pulse mb-3" />
+      <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
+        <div className="h-4 w-28 bg-muted rounded animate-pulse mb-3" />
         <div className="space-y-2">
-          {[...Array(3)].map((_, i) => <div key={i} className="h-12 bg-slate-50 rounded-xl animate-pulse" />)}
+          {[...Array(3)].map((_, i) => <div key={i} className="h-12 bg-muted/50 rounded-xl animate-pulse" />)}
         </div>
       </div>
     );
@@ -42,7 +42,7 @@ export default function WhatNextCard() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="bg-white rounded-2xl border border-border p-5 shadow-sm"
+      className="bg-card rounded-2xl border border-border p-5 shadow-sm"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

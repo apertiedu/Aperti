@@ -50,14 +50,14 @@ function ScoreGauge({ score, label, color, icon: Icon, description }: {
 }) {
   const clipped = Math.max(0, Math.min(100, score));
   return (
-    <div className="flex flex-col items-center gap-2 p-4 rounded-xl border bg-white">
+    <div className="flex flex-col items-center gap-2 p-4 rounded-xl border bg-card">
       <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ background: `${color}18` }}>
         <Icon className="h-5 w-5" style={{ color }} />
       </div>
       <div className="text-center">
         <p className="text-2xl font-bold tabular-nums" style={{ color }}>{clipped}</p>
-        <p className="text-xs font-medium text-gray-700">{label}</p>
-        <p className="text-[10px] text-gray-400 mt-0.5">{description}</p>
+        <p className="text-xs font-medium text-foreground">{label}</p>
+        <p className="text-[10px] text-muted-foreground mt-0.5">{description}</p>
       </div>
       <div className="w-full">
         <Progress value={clipped} className="h-1.5" style={{ "--tw-progress-fill": color } as any} />

@@ -48,7 +48,7 @@ function FocusItem({
         transition={{ duration: 0.15 }}
         className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${c.bg} ${c.border} hover:opacity-90`}
       >
-        <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm flex-shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-card flex items-center justify-center shadow-sm flex-shrink-0">
           <Icon className={`w-4 h-4 ${c.icon}`} />
         </div>
         <div className="flex-1 min-w-0">
@@ -71,10 +71,10 @@ export default function TeacherDailyFocus() {
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-2xl border border-border p-5 shadow-sm">
+      <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-5 h-5 rounded-full bg-teal-100 animate-pulse" />
-          <div className="h-4 w-32 bg-slate-100 rounded animate-pulse" />
+          <div className="h-4 w-32 bg-muted rounded animate-pulse" />
         </div>
         <div className="grid grid-cols-2 gap-2">
           {[...Array(4)].map((_, i) => (
@@ -107,7 +107,7 @@ export default function TeacherDailyFocus() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      className="bg-white rounded-2xl border border-border p-5 shadow-sm"
+      className="bg-card rounded-2xl border border-border p-5 shadow-sm"
     >
       <div className="flex items-start justify-between mb-4">
         <div>

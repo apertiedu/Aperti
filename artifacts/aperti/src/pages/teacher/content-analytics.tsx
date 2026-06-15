@@ -25,7 +25,7 @@ async function fetchJSON(url: string, opts?: RequestInit) {
 function StatCard({ icon: Icon, label, value, sub, color }: { icon: any; label: string; value: any; sub?: string; color: string }) {
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} whileHover={{ y: -2 }}>
-      <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-shadow">
+      <Card className="bg-card border-0 shadow-sm hover:shadow-md transition-shadow">
         <CardContent className="pt-5 pb-4">
           <div className="flex items-start justify-between mb-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}><Icon size={18} /></div>
@@ -120,7 +120,7 @@ export default function ContentAnalytics() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="bg-white border border-gray-200">
+              <TabsList className="bg-card border border-border">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="questions">Questions</TabsTrigger>
                 <TabsTrigger value="lessons">Lessons</TabsTrigger>
@@ -130,7 +130,7 @@ export default function ContentAnalytics() {
 
               <TabsContent value="overview" className="mt-4 space-y-4">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <Card className="bg-white border-0 shadow-sm">
+                  <Card className="bg-card border-0 shadow-sm">
                     <CardHeader><CardTitle className="text-base">Question Bank Health</CardTitle></CardHeader>
                     <CardContent className="space-y-4">
                       <DifficultyBar label="Easy" value={difficultyData.easy} total={totalQuestions} color="bg-green-500" />
@@ -150,7 +150,7 @@ export default function ContentAnalytics() {
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-white border-0 shadow-sm">
+                  <Card className="bg-card border-0 shadow-sm">
                     <CardHeader><CardTitle className="text-base">Content Activity</CardTitle></CardHeader>
                     <CardContent>
                       <div className="space-y-4">
@@ -199,7 +199,7 @@ export default function ContentAnalytics() {
               </TabsContent>
 
               <TabsContent value="questions" className="mt-4">
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader><CardTitle className="text-base">Question Bank Analytics</CardTitle></CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -228,7 +228,7 @@ export default function ContentAnalytics() {
               </TabsContent>
 
               <TabsContent value="lessons" className="mt-4">
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader><CardTitle className="text-base">Lesson & Content Pages</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-3">
@@ -253,7 +253,7 @@ export default function ContentAnalytics() {
               </TabsContent>
 
               <TabsContent value="top-content" className="mt-4">
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader><CardTitle className="text-base">Most Accessed Content (Last 30 Days)</CardTitle></CardHeader>
                   <CardContent>
                     {(topContent || []).length === 0 ? (
@@ -283,7 +283,7 @@ export default function ContentAnalytics() {
                 </Card>
               </TabsContent>
               <TabsContent value="interventions" className="mt-4">
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div>

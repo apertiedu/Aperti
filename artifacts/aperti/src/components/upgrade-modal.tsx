@@ -51,7 +51,7 @@ export default function UpgradeModal({ open, onClose, resource, message, current
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
             transition={{ type: "spring", damping: 20 }}
-            className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
+            className="relative z-10 bg-card rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
           >
             {/* Header gradient */}
             <div className="bg-gradient-to-r from-teal-500 to-emerald-500 px-6 pt-6 pb-8 text-white relative">

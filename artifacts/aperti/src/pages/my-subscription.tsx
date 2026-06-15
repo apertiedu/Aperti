@@ -68,7 +68,7 @@ export default function MySubscriptionPage() {
       </div>
 
       {/* Current plan card */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-2xl border border-border shadow-sm p-6">
         {sub ? (
           <>
             <div className="flex items-start justify-between mb-4">
@@ -138,8 +138,8 @@ export default function MySubscriptionPage() {
 
       {/* Payment requests */}
       {data?.paymentRequests?.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="font-bold text-gray-800 mb-4">Payment Requests</h3>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-card rounded-2xl border border-border shadow-sm p-6">
+          <h3 className="font-bold text-foreground mb-4">Payment Requests</h3>
           <div className="space-y-2">
             {data.paymentRequests.map((pr: any) => (
               <div key={pr.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl text-sm">
@@ -161,8 +161,8 @@ export default function MySubscriptionPage() {
 
       {/* Invoice history */}
       {invoices.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="font-bold text-gray-800 mb-4">Invoice History</h3>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-card rounded-2xl border border-border shadow-sm p-6">
+          <h3 className="font-bold text-foreground mb-4">Invoice History</h3>
           <table className="w-full text-sm">
             <thead><tr className="text-left text-xs text-gray-400 border-b border-gray-100"><th className="pb-2">Plan</th><th className="pb-2">Date</th><th className="pb-2 text-right">Amount</th><th className="pb-2 text-right">Status</th></tr></thead>
             <tbody>

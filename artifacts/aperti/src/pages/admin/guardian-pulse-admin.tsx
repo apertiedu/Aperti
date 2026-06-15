@@ -89,7 +89,7 @@ export default function GuardianPulseAdmin() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 + i * 0.07 }}
           >
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border-0 shadow-sm bg-card">
               <CardContent className="p-5 flex items-start gap-4">
                 <div className="h-9 w-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <item.icon className="h-4.5 w-4.5 text-primary" />

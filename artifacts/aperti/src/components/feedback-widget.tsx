@@ -90,7 +90,7 @@ export default function FeedbackWidget({ feature, trigger = "auto", delayMs = 30
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.95 }}
           transition={{ type: "spring", stiffness: 280, damping: 24 }}
-          className="fixed bottom-6 right-6 z-50 w-72 bg-white rounded-2xl border border-border shadow-xl shadow-black/10 p-5"
+          className="fixed bottom-6 right-6 z-50 w-72 bg-card rounded-2xl border border-border shadow-xl shadow-black/10 p-5"
         >
           <button
             onClick={handleDismiss}

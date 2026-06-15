@@ -51,7 +51,7 @@ export default function ParentChildSwitcher({ selected, onSelect }: { selected: 
       </button>
 
       {open && (
-        <div className="absolute top-full mt-1 left-0 bg-white border border-gray-200 rounded-xl shadow-lg z-30 min-w-48 overflow-hidden">
+        <div className="absolute top-full mt-1 left-0 bg-card border border-border rounded-xl shadow-lg z-30 min-w-48 overflow-hidden">
           {children.map(c => (
             <button
               key={c.studentId}

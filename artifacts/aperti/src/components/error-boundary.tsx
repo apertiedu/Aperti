@@ -66,7 +66,7 @@ export default class ErrorBoundary extends Component<Props, State> {
           initial={{ opacity: 0, y: 16, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-sm w-full bg-white border border-slate-100 rounded-2xl shadow-md p-8 text-center"
+          className="max-w-sm w-full bg-card border border-border rounded-2xl shadow-md p-8 text-center"
         >
           <motion.div
             initial={{ scale: 0.6, opacity: 0 }}

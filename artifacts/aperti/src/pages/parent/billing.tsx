@@ -65,7 +65,7 @@ export default function ParentBilling() {
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Invoices</h2>
               <div className="space-y-2">
                 {data.invoices.map((inv: any, i: number) => (
-                  <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 bg-white">
+                  <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-card">
                     <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center shrink-0">
                       <FileText className="h-4 w-4 text-gray-400" />
                     </div>

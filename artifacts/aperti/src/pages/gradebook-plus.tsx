@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   BarChart3, Download, Settings, Search, ChevronDown,
   Award, TrendingUp, Users, Calculator, FileText,
-  CheckCircle2, AlertCircle, Plus,
+  CheckCircle2, AlertCircle, Plus, Printer,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -160,10 +160,13 @@ export default function GradebookPlus() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => exportCSVMut.mutate()}>
+          <Button variant="outline" size="sm" className="gap-2 no-print" onClick={() => window.print()}>
+            <Printer className="w-4 h-4" /> Print
+          </Button>
+          <Button variant="outline" size="sm" className="gap-2 no-print" onClick={() => exportCSVMut.mutate()}>
             <Download className="w-4 h-4" /> Export CSV
           </Button>
-          <Button size="sm" className="gap-2" onClick={() => setTab("settings")}>
+          <Button size="sm" className="gap-2 no-print" onClick={() => setTab("settings")}>
             <Settings className="w-4 h-4" /> Settings
           </Button>
         </div>

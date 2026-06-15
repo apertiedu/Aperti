@@ -331,7 +331,7 @@ export default function ObservabilityPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-              tab === t ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"
+              tab === t ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:bg-card"
             }`}
           >
             <Icon size={15} />

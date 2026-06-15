@@ -109,22 +109,22 @@ function GeometryCanvas({ module, tools }: { module: any; tools: string[] }) {
           const Icon = TOOL_ICONS[t] || Calculator;
           return (
             <button key={t} onClick={() => setActiveTool(t)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 border transition-all ${activeTool === t ? "bg-teal-600 text-white border-teal-600" : "bg-white text-gray-600 border-gray-200 hover:border-teal-300"}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 border transition-all ${activeTool === t ? "bg-teal-600 text-white border-teal-600" : "bg-card text-muted-foreground border-border hover:border-teal-300"}`}>
               <Icon size={12} /> {t}
             </button>
           );
         })}
         <div className="ml-auto flex gap-2">
-          <button onClick={() => setShowGrid(!showGrid)} className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${showGrid ? "bg-gray-100 border-gray-300" : "bg-white border-gray-200"}`}>
+          <button onClick={() => setShowGrid(!showGrid)} className={`px-3 py-1.5 rounded-lg text-xs border transition-all ${showGrid ? "bg-muted border-border" : "bg-card border-border"}`}>
             <Grid size={12} />
           </button>
-          <button onClick={clearCanvas} className="px-3 py-1.5 rounded-lg text-xs border border-gray-200 bg-white hover:bg-red-50 hover:border-red-300 transition-all">
+          <button onClick={clearCanvas} className="px-3 py-1.5 rounded-lg text-xs border border-border bg-card hover:bg-red-50 hover:border-red-300 transition-all">
             <RotateCcw size={12} />
           </button>
           <Button size="sm" className="h-7 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={() => saveSession.mutate()}>Save</Button>
         </div>
       </div>
-      <div className="bg-white border-2 border-gray-200 rounded-xl overflow-hidden cursor-crosshair">
+      <div className="bg-card border-2 border-border rounded-xl overflow-hidden cursor-crosshair">
         <canvas ref={canvasRef} width={700} height={420} className="w-full"
           onMouseDown={handleCanvasMouseDown} onMouseUp={handleCanvasMouseUp} />
       </div>
@@ -183,7 +183,7 @@ export default function SimverseGeometrix() {
                     return (
                       <motion.div key={mod.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}
                         whileHover={{ y: -4, boxShadow: "0 8px 25px rgba(0,0,0,0.1)" }}
-                        className="bg-white border border-gray-100 rounded-2xl p-5 cursor-pointer hover:border-purple-300 transition-all"
+                        className="bg-card border border-border rounded-2xl p-5 cursor-pointer hover:border-purple-300 transition-all"
                         onClick={() => setActiveModule(mod)}>
                         <div className="w-12 h-12 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center mb-4">
                           <Icon size={22} />

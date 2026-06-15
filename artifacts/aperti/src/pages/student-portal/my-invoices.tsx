@@ -75,7 +75,7 @@ export default function MyInvoices() {
       )}
 
       {invoices.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-indigo-50">
+        <div className="bg-card rounded-2xl p-12 text-center shadow-sm border border-indigo-50">
           <CreditCard className="h-12 w-12 text-indigo-200 mx-auto mb-3" />
           <p className="text-gray-400 font-medium">No invoices yet</p>
           <p className="text-gray-300 text-sm mt-1">Your teacher will send invoices here when fees are due</p>
@@ -88,7 +88,7 @@ export default function MyInvoices() {
             const isOverdue = inv.status === "pending" && inv.dueDate && inv.dueDate < new Date().toISOString().split("T")[0];
             return (
               <motion.div key={inv.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
-                className={`bg-white rounded-2xl p-4 shadow-sm border ${isOverdue ? "border-red-100" : "border-indigo-50"}`}>
+                className={`bg-card rounded-2xl p-4 shadow-sm border ${isOverdue ? "border-red-100" : "border-indigo-50"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="font-bold text-gray-900">{inv.title}</p>

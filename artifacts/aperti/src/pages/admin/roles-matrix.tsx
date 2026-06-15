@@ -160,7 +160,7 @@ export default function RolesMatrixPage() {
       )}
 
       {/* Matrix table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
+      <div className="bg-card rounded-xl border border-border shadow-sm overflow-x-auto">
         <table className="w-full text-sm border-collapse">
           <thead>
             <tr className="border-b border-gray-100">
@@ -213,7 +213,7 @@ export default function RolesMatrixPage() {
                     transition={{ delay: pi * 0.01 }}
                     className="border-t border-gray-50 hover:bg-gray-50/50 transition-colors"
                   >
-                    <td className="px-3 py-2 text-xs text-slate-600 font-mono sticky left-0 bg-white">
+                    <td className="px-3 py-2 text-xs text-slate-600 font-mono sticky left-0 bg-card">
                       {perm.replace(":", "​:")}
                     </td>
                     {data.roles.map(role => {
@@ -259,7 +259,7 @@ export default function RolesMatrixPage() {
               initial={{ scale: 0.95, y: 8 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: 8 }}
-              className="bg-white rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4"
+              className="bg-card rounded-2xl shadow-xl p-6 max-w-sm w-full mx-4"
               onClick={e => e.stopPropagation()}
             >
               <div className="flex items-center gap-2 mb-3">

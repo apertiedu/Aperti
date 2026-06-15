@@ -63,7 +63,7 @@ export default function ShieldCore() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
         {ACTIVE_MEASURES.map((m, i) => (
           <motion.div key={m.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.07 }}>
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border-0 shadow-sm bg-card">
               <CardContent className="p-4 flex items-start gap-3">
                 <div className="h-7 w-7 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600" />
@@ -81,7 +81,7 @@ export default function ShieldCore() {
 
       {/* Risk score legend */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }} className="mb-6">
-        <Card className="border-0 shadow-sm bg-white">
+        <Card className="border-0 shadow-sm bg-card">
           <CardContent className="p-4 flex flex-wrap items-center gap-6">
             <div className="flex items-center gap-2">
               <Activity className="h-4 w-4 text-muted-foreground" />
@@ -129,7 +129,7 @@ export default function ShieldCore() {
       </motion.div>
 
       {/* Violation log */}
-      <Card className="border-0 shadow-sm bg-white">
+      <Card className="border-0 shadow-sm bg-card">
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base">Integrity Violation Log</CardTitle>

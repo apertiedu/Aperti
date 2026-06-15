@@ -92,7 +92,7 @@ export default function ParentAttendance() {
                     <h2 className="text-sm font-bold text-gray-800">Attendance Rate</h2>
                     <div className="flex bg-gray-100 rounded-lg p-0.5">
                       {(["weekly","monthly"] as const).map(v => (
-                        <button key={v} onClick={() => setView(v)} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${view === v ? "bg-white shadow text-teal-600" : "text-gray-500"}`}>{v}</button>
+                        <button key={v} onClick={() => setView(v)} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${view === v ? "bg-card shadow text-teal-600" : "text-gray-500"}`}>{v}</button>
                       ))}
                     </div>
                   </div>

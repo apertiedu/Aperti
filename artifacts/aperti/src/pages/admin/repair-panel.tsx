@@ -162,7 +162,7 @@ export default function RepairPanelPage() {
       </div>
 
       {/* Launch Readiness Score */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Launch Readiness Score</h2>
           <button onClick={() => refetchScore()} className="text-xs text-slate-400 hover:text-teal-600">
@@ -206,7 +206,7 @@ export default function RepairPanelPage() {
       </div>
 
       {/* Orphan Record Detection */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <Database className="w-4 h-4 text-slate-500" />
@@ -287,7 +287,7 @@ export default function RepairPanelPage() {
       </div>
 
       {/* Repair Log */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-center gap-2 mb-4">
           <FileWarning className="w-4 h-4 text-slate-500" />
           <h2 className="text-sm font-semibold text-slate-700">Repair Log</h2>

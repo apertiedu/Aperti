@@ -1,0 +1,177 @@
+Got you 😄🚀 here’s a Replit Agent fully autonomous “do everything” prompt — more aggressive, more structured, and optimized for real execution:
+
+
+---
+
+🤖 REPLIT AGENT: FULL AUTONOMOUS UI/UX + 3D PREMIUM OVERHAUL
+
+You are acting as a senior frontend engineer + UI/UX designer + motion designer working on a production web app.
+
+Your mission is to fully upgrade the project to a premium SaaS-grade, visually stunning, highly polished interface.
+
+
+---
+
+📦 STEP 1 — INSTALL & INTEGRATE UI/UX SYSTEM
+
+Clone and integrate: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.git
+
+Requirements:
+
+Fully install and wire into the current codebase
+
+Ensure compatibility with existing stack
+
+Fix any dependency conflicts automatically
+
+Do NOT leave partial integration
+
+
+
+---
+
+🎨 STEP 2 — COMPLETE UI/UX REBUILD PASS
+
+Upgrade EVERYTHING visually:
+
+Visual System Upgrade:
+
+Consistent spacing system (8px grid or similar)
+
+Modern typography hierarchy (clear headings, subheadings, body)
+
+Unified design tokens (colors, shadows, radii)
+
+Premium button styles (hover, active, focus states)
+
+Card redesign with depth + soft shadows
+
+Clean navigation UX with improved structure
+
+
+UX Improvements:
+
+Reduce friction in all user flows
+
+Improve readability and scanning
+
+Make key actions obvious and visually dominant
+
+Ensure intuitive navigation across all pages
+
+
+
+---
+
+✨ STEP 3 — PREMIUM ANIMATION LAYER
+
+Add smooth, modern motion design:
+
+Must include:
+
+Scroll-based reveal animations
+
+Micro-interactions (hover, click, focus)
+
+Smooth page transitions
+
+Floating / depth-based hover effects
+
+Subtle parallax movement
+
+
+Rules:
+
+Animations must feel premium, not flashy
+
+No jitter, no lag, no over-animation
+
+Prioritize performance
+
+
+
+---
+
+🧊 STEP 4 — 3D / DEPTH ENHANCEMENT (LIGHTWEIGHT)
+
+Add modern depth effects:
+
+Parallax layers for hero sections
+
+Floating UI elements (subtle movement)
+
+Depth-based hover scaling
+
+Optional: Three.js ONLY if lightweight and necessary
+
+Prefer Framer Motion / CSS transforms first
+
+
+
+---
+
+📱 STEP 5 — MOBILE + RESPONSIVENESS FIX
+
+Fully responsive across all screen sizes
+
+Mobile-first layout corrections
+
+Fix spacing, overflow, scaling issues
+
+Ensure touch interactions feel smooth
+
+
+
+---
+
+🧪 STEP 6 — FINAL POLISH PASS (CRITICAL)
+
+Do a final “product launch” review:
+
+Remove visual inconsistencies
+
+Normalize spacing everywhere
+
+Ensure all components feel part of ONE system
+
+Check contrast, alignment, rhythm
+
+Optimize performance (no unnecessary re-renders or heavy assets)
+
+
+
+---
+
+🚫 HARD RULES
+
+Do NOT break existing features
+
+Do NOT remove functionality unless necessary for cleanup
+
+Avoid heavy libraries unless absolutely needed
+
+Keep code clean, modular, production-ready
+
+No unfinished UI states
+
+
+
+---
+
+🏁 FINAL GOAL
+
+Deliver a website that feels like:
+
+✨ A modern SaaS startup landing page
+💎 High-end product UI (Apple / Stripe level polish)
+🚀 Smooth, animated, immersive experience
+📱 Perfect on mobile and desktop
+
+
+---
+
+If you want next level upgrade, I can also: 🔥 add “AI design direction system”
+🔥 or make it auto-generate UI themes per page
+🔥 or turn it into a full design system architecture for Aperti
+
+Just say 👍

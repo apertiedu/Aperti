@@ -72,7 +72,7 @@ function QuestionCard({
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04 }}
-      className={`bg-white rounded-xl border transition-all ${
+      className={`bg-card rounded-xl border transition-all ${
         q.status === "approved" ? "border-green-300 bg-green-50/20" :
         q.status === "rejected" ? "border-red-200 bg-red-50/10 opacity-50" :
         selected ? "border-teal-500 bg-teal-50/20" :
@@ -308,7 +308,7 @@ export default function QuestionExtractionPage() {
 
       {!jobId ? (
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+          <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-4">
             {/* Mode tabs */}
             <div className="flex gap-1 p-1 bg-gray-100 rounded-xl w-fit">
               {(["text", "pdf"] as InputMode[]).map(m => (
@@ -316,7 +316,7 @@ export default function QuestionExtractionPage() {
                   key={m}
                   onClick={() => setMode(m)}
                   className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                    mode === m ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                    mode === m ? "bg-card text-foreground shadow-sm" : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
                   {m === "text" ? <><FileText className="h-3.5 w-3.5" />Paste Text</> : <><Paperclip className="h-3.5 w-3.5" />Upload PDF</>}
@@ -414,7 +414,7 @@ export default function QuestionExtractionPage() {
       ) : (
         <div className="space-y-5">
           {/* Status bar */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+          <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 {job?.status === "processing" || job?.status === "pending" ? (

@@ -125,7 +125,7 @@ export default function CollaborateRoom() {
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col font-[Inter,sans-serif]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center gap-4">
+      <div className="bg-card border-b border-border px-6 py-3 flex items-center gap-4">
         <button onClick={() => navigate("/rooms")} className="p-1.5 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -171,7 +171,7 @@ export default function CollaborateRoom() {
                           </div>
                           <div className={`max-w-[70%] flex flex-col gap-1 ${isMe ? "items-end" : "items-start"}`}>
                             {!isMe && <span className="text-xs text-gray-500 px-1">{msg.sender_name}</span>}
-                            <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm ${isMe ? "bg-teal-600 text-white rounded-tr-sm" : "bg-white border border-gray-100 text-gray-800 rounded-tl-sm"}`}>
+                            <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm ${isMe ? "bg-teal-600 text-white rounded-tr-sm" : "bg-card border border-border text-foreground rounded-tl-sm"}`}>
                               {msg.content}
                             </div>
                             <span className="text-[10px] text-gray-400 px-1">
@@ -184,7 +184,7 @@ export default function CollaborateRoom() {
                   )}
                   <div ref={messagesEndRef} />
                 </div>
-                <div className="bg-white border-t border-gray-100 p-4">
+                <div className="bg-card border-t border-border p-4">
                   <div className="flex items-end gap-3">
                     <div className="flex-1">
                       <textarea value={compose} onChange={(e) => setCompose(e.target.value)}
@@ -214,7 +214,7 @@ export default function CollaborateRoom() {
                 <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Room Members ({members.length})</h2>
                 <div className="space-y-3">
                   {members.map((m) => (
-                    <div key={m.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3">
+                    <div key={m.id} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
                         <span className="text-sm font-semibold text-teal-700">{m.name[0]}</span>
                       </div>
@@ -251,7 +251,7 @@ export default function CollaborateRoom() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {resources.map((r) => (
-                      <div key={r.id} className="bg-white rounded-xl border border-gray-100 p-4 flex items-center gap-3">
+                      <div key={r.id} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center">
                           {RESOURCE_ICONS[r.resource_type] ?? <FileText className="w-4 h-4 text-gray-400" />}
                         </div>
@@ -321,7 +321,7 @@ export default function CollaborateRoom() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+              className="bg-card rounded-2xl shadow-xl w-full max-w-sm p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">Share Resource</h3>
                 <button onClick={() => setShowShare(false)}><X className="w-5 h-5 text-gray-400" /></button>

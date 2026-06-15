@@ -24,7 +24,7 @@ function MetricCard({ label, value, sub, icon: Icon, color = "teal", delay = 0 }
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+      className="bg-card rounded-2xl border border-border shadow-sm p-5"
     >
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${colors[color]}`}>
         <Icon className="w-4.5 h-4.5" />
@@ -86,7 +86,7 @@ export default function ExecutiveDashboardPage() {
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Top plans */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          className="bg-card rounded-2xl border border-border shadow-sm p-6">
           <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
             <Crown className="w-4 h-4 text-amber-500" /> Top Plans by Subscribers
           </h3>
@@ -115,7 +115,7 @@ export default function ExecutiveDashboardPage() {
 
         {/* Recent subscriptions */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          className="bg-card rounded-2xl border border-border shadow-sm p-6">
           <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
             <Clock className="w-4 h-4 text-blue-500" /> Recent Subscriptions
           </h3>
@@ -145,7 +145,7 @@ export default function ExecutiveDashboardPage() {
       {/* Platform Usage */}
       {(d.platformUsage ?? []).length > 0 && (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          className="bg-card rounded-2xl border border-border shadow-sm p-6">
           <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
             <Activity className="w-4 h-4 text-purple-500" /> Platform Usage by Resource
           </h3>

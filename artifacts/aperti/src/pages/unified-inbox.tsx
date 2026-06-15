@@ -115,7 +115,7 @@ export default function UnifiedInbox() {
   return (
     <div className="h-[calc(100vh-64px)] flex bg-gray-50 font-[Inter,sans-serif]">
       {/* Thread List Panel */}
-      <div className="w-80 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
+      <div className="w-80 flex-shrink-0 bg-card border-r border-border flex flex-col">
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -189,7 +189,7 @@ export default function UnifiedInbox() {
         {selectedThread ? (
           <>
             {/* Header */}
-            <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between">
+            <div className="bg-card border-b border-border px-6 py-3 flex items-center justify-between">
               <div>
                 <h2 className="font-semibold text-gray-900">{threadLabel(selectedThread)}</h2>
                 <p className="text-xs text-gray-500">
@@ -233,7 +233,7 @@ export default function UnifiedInbox() {
                       )}
                       <div className={`px-4 py-2.5 rounded-2xl text-sm ${isMe
                         ? "bg-teal-600 text-white rounded-tr-sm"
-                        : "bg-white border border-gray-100 text-gray-800 rounded-tl-sm shadow-sm"}`}>
+                        : "bg-card border border-border text-foreground rounded-tl-sm shadow-sm"}`}>
                         {msg.ai_generated && (
                           <div className="flex items-center gap-1 text-xs opacity-70 mb-1">
                             <Bot className="w-3 h-3" /> AI-generated
@@ -258,7 +258,7 @@ export default function UnifiedInbox() {
             </div>
 
             {/* Compose */}
-            <div className="bg-white border-t border-gray-100 p-4">
+            <div className="bg-card border-t border-border p-4">
               <div className="flex items-end gap-3">
                 <div className="flex-1 relative">
                   <textarea value={compose} onChange={(e) => setCompose(e.target.value)}
@@ -287,7 +287,7 @@ export default function UnifiedInbox() {
 
       {/* Context Sidebar */}
       {selectedThread && (
-        <div className="w-64 flex-shrink-0 bg-white border-l border-gray-100 p-4 overflow-y-auto">
+        <div className="w-64 flex-shrink-0 bg-card border-l border-border p-4 overflow-y-auto">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Context</h3>
 
           {selectedThread.context_type && (
@@ -340,7 +340,7 @@ export default function UnifiedInbox() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+              className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">New Conversation</h3>
                 <button onClick={() => setShowCompose(false)}><X className="w-5 h-5 text-gray-400" /></button>

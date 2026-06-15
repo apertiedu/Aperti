@@ -110,7 +110,7 @@ export default function QuestionImport() {
         <AnimatePresence mode="wait">
           {step === 0 && (
             <motion.div key="step0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-card border-0 shadow-sm">
                 <CardHeader><CardTitle className="text-base">Upload Document</CardTitle></CardHeader>
                 <CardContent className="space-y-5">
                   <div>
@@ -163,7 +163,7 @@ export default function QuestionImport() {
 
               {extractedQuestions.map((q, i) => (
                 <motion.div key={i} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}
-                  className={`bg-white border-2 rounded-xl p-4 transition-all ${approved.has(i) ? "border-green-300" : rejected.has(i) ? "border-red-200 opacity-60" : "border-gray-100"}`}>
+                  className={`bg-card border-2 rounded-xl p-4 transition-all ${approved.has(i) ? "border-green-300" : rejected.has(i) ? "border-red-200 opacity-60" : "border-gray-100"}`}>
                   {editingQ === i ? (
                     <div className="space-y-3">
                       <textarea value={editForm.questionText || q.questionText} onChange={e => setEditForm((p: any) => ({ ...p, questionText: e.target.value }))}
@@ -214,7 +214,7 @@ export default function QuestionImport() {
 
           {step === 2 && importResult && (
             <motion.div key="step2" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-card border-0 shadow-sm">
                 <CardContent className="py-12 text-center space-y-4">
                   <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle size={40} className="text-green-600" />

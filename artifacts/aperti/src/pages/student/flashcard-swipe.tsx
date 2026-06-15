@@ -275,7 +275,7 @@ export default function FlashcardSwipe() {
         <AnimatePresence>
           {showModeSelector && (
             <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-              className="bg-white rounded-2xl border border-border/60 shadow-lg p-3 space-y-1.5">
+              className="bg-card rounded-2xl border border-border/60 shadow-lg p-3 space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-1 pb-1">Learning Mode</p>
               {LEARNING_MODES.map(mode => (
                 <button key={mode.value}

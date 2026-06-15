@@ -211,7 +211,7 @@ export default function FamilyCalendar() {
         <div className="flex bg-gray-100 rounded-xl p-1">
           {(["month","week"] as const).map(v => (
             <button key={v} onClick={() => setView(v)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${view === v ? "bg-white shadow text-gray-900" : "text-gray-500"}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize ${view === v ? "bg-card shadow text-foreground" : "text-gray-500"}`}>
               {v}
             </button>
           ))}

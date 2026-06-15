@@ -52,7 +52,7 @@ export default function WhatsNewModal() {
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
           >
-            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full pointer-events-auto overflow-hidden">
+            <div className="bg-card rounded-2xl shadow-2xl max-w-lg w-full pointer-events-auto overflow-hidden">
               {/* Header */}
               <div className="relative bg-gradient-to-br from-teal-500 to-teal-700 p-6 text-white overflow-hidden">
                 <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full" />

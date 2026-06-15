@@ -47,7 +47,7 @@ export default function LabsComingSoon() {
         <h1 className="text-2xl font-bold text-gray-900 mb-2">{meta.name}</h1>
         <p className="text-sm text-gray-500 leading-relaxed mb-8">{meta.desc}</p>
 
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 text-left mb-8 space-y-3">
+        <div className="bg-card rounded-xl border border-border shadow-sm p-5 text-left mb-8 space-y-3">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">What to expect</p>
           <ul className="space-y-2 text-sm text-gray-600">
             <li className="flex items-start gap-2"><span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />Real-time interactive simulations built for IGCSE learners</li>

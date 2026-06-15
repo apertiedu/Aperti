@@ -155,7 +155,7 @@ export default function StudyRooms() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+              className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-semibold text-gray-900">Create Collaboration Room</h3>
                 <button onClick={() => setShowCreate(false)}><X className="w-5 h-5 text-gray-400" /></button>
@@ -203,7 +203,7 @@ function RoomCard({ room, onOpen, onJoin, isJoined }: { room: Room; onOpen: () =
   const meta = TYPE_META[room.type] ?? TYPE_META.study_group;
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+      className="bg-card rounded-2xl shadow-sm border border-border p-4 hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between mb-3">
         <div className={`flex items-center gap-1.5 text-xs px-2 py-1 rounded-full font-medium ${meta.color}`}>
           {meta.icon} {meta.label}

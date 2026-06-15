@@ -183,7 +183,7 @@ export default function MyCardStack() {
                 { label: "Due Review", value: smartStats.stats.due_review ?? 0, color: "#F59E0B" },
                 { label: "Weak Cards", value: smartStats.stats.weak_cards ?? 0, color: "#EF4444" },
               ].map(({ label, value, color }) => (
-                <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 text-center">
+                <div key={label} className="bg-card rounded-xl border border-border shadow-sm p-3 text-center">
                   <p className="text-lg font-black" style={{ color }}>{value}</p>
                   <p className="text-[10px] text-gray-400 mt-0.5">{label}</p>
                 </div>
@@ -197,7 +197,7 @@ export default function MyCardStack() {
             {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl" />)}
           </div>
         ) : !decks?.length ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+          <div className="text-center py-16 bg-card rounded-2xl border border-border">
             <Layers className="h-10 w-10 mx-auto mb-3 text-gray-200" />
             <p className="font-bold text-gray-700">No flashcard decks yet</p>
             <p className="text-sm text-gray-400 mt-1">Your teacher will assign decks soon.</p>
@@ -212,7 +212,7 @@ export default function MyCardStack() {
                 transition={{ delay: i * 0.07 }}
                 whileHover={{ y: -3, boxShadow: "0 8px 24px rgba(0,0,0,0.08)" }}
                 onClick={() => openDeck(deck)}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 cursor-pointer group"
+                className="bg-card rounded-2xl border border-border shadow-sm p-5 cursor-pointer group"
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
@@ -307,7 +307,7 @@ export default function MyCardStack() {
               </div>
             </motion.div>
             <div className={`min-h-[260px] rounded-2xl border shadow-sm flex flex-col items-center justify-center p-8 text-center transition-colors ${
-              showBack ? "bg-teal-50 border-teal-100" : "bg-white border-gray-100"
+              showBack ? "bg-teal-50 border-teal-100" : "bg-card border-border"
             }`}>
               <div className="mb-3">
                 {showBack ? (
@@ -334,7 +334,7 @@ export default function MyCardStack() {
             </div>
           </motion.div>
         ) : (
-          <div className="min-h-[260px] bg-white rounded-2xl border border-gray-100 flex items-center justify-center">
+          <div className="min-h-[260px] bg-card rounded-2xl border border-border flex items-center justify-center">
             <p className="text-gray-400 text-sm">No cards in this deck yet.</p>
           </div>
         )}
@@ -353,7 +353,7 @@ export default function MyCardStack() {
                 { quality: 5, label: "Easy", icon: Check, color: "border-emerald-200 hover:bg-emerald-50 text-emerald-600" },
               ].map(({ quality, label, icon: Icon, color }) => (
                 <button key={quality} onClick={() => handleReview(quality)}
-                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 bg-white transition-all ${color}`}>
+                  className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 bg-card transition-all ${color}`}>
                   <Icon className="h-5 w-5" />
                   <span className="text-xs font-semibold">{label}</span>
                 </button>
@@ -379,7 +379,7 @@ export default function MyCardStack() {
             onClick={() => setView("study")}>
             <motion.div initial={{ y: 200 }} animate={{ y: 0 }} exit={{ y: 200 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md mb-16">
+              className="bg-card rounded-2xl shadow-xl p-6 w-full max-w-md mb-16">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-gray-900 flex items-center gap-2">
                   <BarChart3 className="h-4 w-4 text-teal-600" /> Session Analytics

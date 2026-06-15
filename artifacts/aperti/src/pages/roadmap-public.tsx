@@ -41,7 +41,7 @@ export default function RoadmapPublicPage() {
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
       {/* Nav */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
           <div className="flex items-center gap-4">
@@ -52,7 +52,7 @@ export default function RoadmapPublicPage() {
       </div>
 
       {/* Hero */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-background border-b border-border">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 text-center">
           <Reveal>
             <div className="flex items-center justify-center gap-2 mb-6">
@@ -88,7 +88,7 @@ export default function RoadmapPublicPage() {
                   </div>
                   <div className="space-y-3 pl-4 border-l-2" style={{ borderColor: group.dotColor + "40" }}>
                     {group.items.map((item: any, i: number) => (
-                      <motion.div key={item.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 -ml-px">
+                      <motion.div key={item.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.07 }} className="bg-card rounded-xl p-4 shadow-sm border border-border -ml-px">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <h3 className="font-semibold text-gray-900">{item.title}</h3>

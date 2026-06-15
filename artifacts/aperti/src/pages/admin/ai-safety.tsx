@@ -137,7 +137,7 @@ export default function AiSafety() {
             key={t}
             onClick={() => setTab(t)}
             className={`px-4 py-2 text-sm font-medium rounded-t transition-colors ${
-              tab === t ? "bg-white border border-b-white border-slate-100 text-slate-800" : "text-slate-500 hover:text-slate-700"
+              tab === t ? "bg-card border border-b-card border-border text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {t === "pending" ? "Pending Review" : "Misconception Patterns"}

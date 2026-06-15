@@ -88,7 +88,7 @@ export default function MyRecordings() {
               placeholder="Search recordings..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white rounded-2xl border border-indigo-100 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+              className="w-full pl-10 pr-4 py-2.5 bg-card rounded-2xl border border-indigo-100 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-indigo-200"
             />
           </div>
           <div className="flex gap-1.5 flex-wrap">
@@ -103,7 +103,7 @@ export default function MyRecordings() {
                   className={`px-3 py-1 rounded-xl text-xs font-semibold transition-all border ${
                     platformFilter === p
                       ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-indigo-200"
+                      : "bg-card text-muted-foreground border-border hover:border-indigo-200"
                   }`}
                 >
                   {labels[p]} {count > 0 && <span className="opacity-60 ml-0.5">({count})</span>}
@@ -115,7 +115,7 @@ export default function MyRecordings() {
       )}
 
       {filtered.length === 0 ? (
-        <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-indigo-50">
+        <div className="bg-card rounded-2xl p-12 text-center shadow-sm border border-indigo-50">
           <Video className="h-12 w-12 text-indigo-200 mx-auto mb-3" />
           <p className="text-gray-400 font-medium">{search ? "No matching recordings" : "No recordings available"}</p>
           <p className="text-gray-300 text-sm mt-1">Your teacher will share lesson recordings here</p>
@@ -127,7 +127,7 @@ export default function MyRecordings() {
             const platLabel = PLATFORM_LABELS[rec.platform] ?? "Recording";
             return (
               <motion.div key={rec.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.06 }}
-                className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-50 hover:border-indigo-200 transition-colors">
+                className="bg-card rounded-2xl p-4 shadow-sm border border-indigo-50 hover:border-indigo-200 transition-colors">
                 <div className="flex items-start gap-3">
                   <div className={`w-10 h-10 rounded-xl ${platColor} flex items-center justify-center flex-shrink-0`}>
                     <Video className="h-5 w-5" />

@@ -135,7 +135,7 @@ export default function ParentDocuments() {
             const childName = doc.student_display_name || doc.student_name;
             return (
               <motion.div key={doc.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-                <div className="flex items-center gap-4 p-3.5 rounded-xl border border-gray-100 bg-white hover:shadow-sm transition-shadow">
+                <div className="flex items-center gap-4 p-3.5 rounded-xl border border-border bg-card hover:shadow-sm transition-shadow">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.bg}`}>
                     <Icon className="h-5 w-5" style={{ color: cfg.colour }} />
                   </div>

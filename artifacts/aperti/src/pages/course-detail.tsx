@@ -82,7 +82,7 @@ export default function CourseDetail() {
   return (
     <div className="min-h-screen" style={{ background: "#F5F5F5" }}>
       {/* Header strip */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-20 backdrop-blur">
+      <div className="bg-background/95 border-b border-border sticky top-0 z-20 backdrop-blur">
         <div className="max-w-5xl mx-auto px-5 py-4 flex items-center gap-4">
           <Link href="/courses">
             <button className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors">
@@ -98,7 +98,7 @@ export default function CourseDetail() {
           <div className="lg:col-span-2 space-y-6">
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
               {/* Hero card */}
-              <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+              <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
                 <div className="h-52 flex items-center justify-center relative"
                   style={{ background: `linear-gradient(135deg, ${TEAL}15, ${TEAL}30)` }}>
                   {course.thumbnail_url ? (
@@ -132,8 +132,8 @@ export default function CourseDetail() {
               </div>
 
               {/* What you'll get */}
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h2 className="font-bold text-gray-900 mb-4">What's included</h2>
+              <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+                <h2 className="font-bold text-foreground mb-4">What's included</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {[
                     "Live interactive sessions", "AI-powered mentor access",
@@ -152,7 +152,7 @@ export default function CourseDetail() {
 
           {/* Right: Enroll card */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 sticky top-20">
+            <div className="bg-card rounded-2xl p-6 shadow-sm border border-border sticky top-20">
               <div className="text-3xl font-black mb-1" style={{ color: TEAL }}>{price}</div>
               <p className="text-xs text-gray-400 mb-5">per month · cancel anytime</p>
 

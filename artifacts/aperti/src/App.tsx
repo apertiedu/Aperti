@@ -247,8 +247,12 @@ const ChildProfile = lazy(() => import("@/pages/parent/child-profile"));
 const Subjects = lazy(() => import("@/pages/subjects"));
 
 const PageLoader = () => (
-  <div className="min-h-[60vh] flex items-center justify-center">
-    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 animate-in fade-in duration-300">
+    <div className="relative">
+      <div className="w-8 h-8 border-2 border-primary/20 rounded-full" />
+      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+    </div>
+    <p className="text-xs text-muted-foreground">Loading…</p>
   </div>
 );
 
@@ -745,9 +749,15 @@ function AppContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground text-xs">Loading Aperti…</p>
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-10 h-10 border-2 border-primary/20 rounded-full" />
+            <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+          </div>
+          <div className="text-center">
+            <p className="font-semibold text-foreground text-sm">Aperti.</p>
+            <p className="text-muted-foreground text-xs mt-0.5">Loading your workspace…</p>
+          </div>
         </div>
       </div>
     );

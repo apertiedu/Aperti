@@ -543,7 +543,7 @@ export default function TakeExam() {
         {/* Desktop sidebar navigator */}
         <div className="hidden lg:block w-56 shrink-0">
           <div className="sticky top-20 space-y-3">
-            <div className="bg-white rounded-xl border shadow-sm p-4">
+            <div className="bg-card rounded-xl border shadow-sm p-4">
               <p className="text-xs font-bold text-muted-foreground mb-3 uppercase tracking-wide">Navigator</p>
               <div className="grid grid-cols-5 gap-1.5">
                 {questions.map((q: any, i: number) => {

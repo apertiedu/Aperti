@@ -25,7 +25,7 @@ function EnrollmentCard({ enroll, index }: { enroll: Enrollment; index: number }
   const StatusIcon = cfg.icon;
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07 }}>
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
+      <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden flex flex-col sm:flex-row">
         <div className="h-28 sm:h-auto sm:w-32 flex items-center justify-center shrink-0"
           style={{ background: `linear-gradient(135deg, ${TEAL}12, ${TEAL}25)` }}>
           {enroll.thumbnail_url ? (
@@ -92,7 +92,7 @@ export default function MyCourses() {
       {isLoading ? (
         <div className="space-y-3">{[...Array(3)].map((_,i)=><Skeleton key={i} className="h-28 rounded-2xl"/>)}</div>
       ) : !enrollments?.length ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-12 text-center">
           <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-200" />
           <h3 className="font-bold text-gray-700 mb-2">You haven't enrolled in any courses yet</h3>
           <p className="text-sm text-gray-400 mb-5">Browse the course marketplace and request enrollment.</p>

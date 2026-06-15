@@ -77,7 +77,7 @@ export function KeyboardShortcutsHelp() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
             >
-              <div className="pointer-events-auto w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
+              <div className="pointer-events-auto w-full max-w-lg bg-card rounded-2xl shadow-2xl overflow-hidden border border-border">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                   <div className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">

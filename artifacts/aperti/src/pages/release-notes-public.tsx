@@ -42,7 +42,7 @@ export default function ReleaseNotesPublicPage() {
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
           <div className="flex items-center gap-4">
@@ -52,7 +52,7 @@ export default function ReleaseNotesPublicPage() {
         </div>
       </div>
 
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-background border-b border-border">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 text-center">
           <Reveal>
             <div className="flex items-center justify-center gap-2 mb-6">
@@ -79,7 +79,7 @@ export default function ReleaseNotesPublicPage() {
             const NoteIcon = meta.icon;
             return (
               <Reveal key={note.id} delay={i * 0.05}>
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
                   <div className="px-6 py-5 border-b border-gray-50">
                     <div className="flex items-start justify-between gap-4">
                       <div>

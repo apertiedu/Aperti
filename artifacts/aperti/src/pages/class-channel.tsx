@@ -62,7 +62,7 @@ export default function ClassChannel() {
   );
 
   if (error || !channel) return (
-    <div className="max-w-xl mx-auto mt-12 p-6 bg-white rounded-2xl shadow-sm text-center font-[Inter,sans-serif]">
+    <div className="max-w-xl mx-auto mt-12 p-6 bg-card rounded-2xl shadow-sm text-center font-[Inter,sans-serif]">
       <Hash className="w-10 h-10 text-gray-300 mx-auto mb-3" />
       <h2 className="font-semibold text-gray-700 mb-1">No Channel Yet</h2>
       <p className="text-sm text-gray-500">This course doesn't have a discussion channel yet.</p>
@@ -77,9 +77,9 @@ export default function ClassChannel() {
   );
 
   return (
-    <div className="h-[calc(100vh-64px)] flex flex-col bg-gray-50 font-[Inter,sans-serif]">
+    <div className="h-[calc(100vh-64px)] flex flex-col bg-muted/30 font-[Inter,sans-serif]">
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between">
+      <div className="bg-card border-b border-border px-6 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
             <Hash className="w-4 h-4 text-blue-600" />
@@ -143,7 +143,7 @@ export default function ClassChannel() {
                   </div>
                   <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm ${isMe
                     ? "bg-teal-600 text-white rounded-tr-sm"
-                    : "bg-white border border-gray-100 text-gray-800 rounded-tl-sm"}`}>
+                    : "bg-card border border-border text-foreground rounded-tl-sm"}`}>
                     {msg.content}
                   </div>
                   <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export default function ClassChannel() {
       </div>
 
       {/* Compose */}
-      <div className="bg-white border-t border-gray-100 p-4">
+      <div className="bg-card border-t border-border p-4">
         {channel.is_locked && !isTeacher ? (
           <div className="flex items-center gap-2 text-sm text-gray-400 justify-center py-2">
             <Lock className="w-4 h-4" /> This channel is locked by the teacher
@@ -193,9 +193,9 @@ export default function ClassChannel() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+              className="bg-card rounded-2xl shadow-xl w-full max-w-sm p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900">Channel Settings</h3>
+                <h3 className="font-semibold text-foreground">Channel Settings</h3>
                 <button onClick={() => setShowSettings(false)}><X className="w-5 h-5 text-gray-400" /></button>
               </div>
               <p className="text-sm text-gray-600 mb-4">Pin a message by clicking "Pin" beneath it in the channel.</p>

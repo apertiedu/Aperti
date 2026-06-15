@@ -582,7 +582,7 @@ export default function Geometrix() {
     <div className="min-h-screen flex flex-col" style={{ background: "#F5F5F5" }}>
 
       {/* ── HEADER ── */}
-      <div className="bg-white border-b border-gray-100 px-5 py-3 flex items-center gap-3 shrink-0">
+      <div className="bg-card border-b border-border px-5 py-3 flex items-center gap-3 shrink-0">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}15` }}>
           <Box className="h-5 w-5" style={{ color: TEAL }} />
         </div>
@@ -619,7 +619,7 @@ export default function Geometrix() {
       <div className="flex flex-1 overflow-hidden" style={{ minHeight: 0 }}>
 
         {/* ── LEFT SIDEBAR — Shape picker ── */}
-        <div className="w-52 bg-white border-r border-gray-100 flex flex-col shrink-0 overflow-y-auto">
+        <div className="w-52 bg-card border-r border-border flex flex-col shrink-0 overflow-y-auto">
           <div className="p-3">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2">Shape Library</p>
             {CATEGORIES.map(cat => (
@@ -665,7 +665,7 @@ export default function Geometrix() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.97 }}
                 transition={{ duration: 0.22 }}
-                className="flex-1 bg-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                className="flex-1 bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
                 <div className="absolute top-4 left-4 right-4 flex items-center gap-2">
                   <span className="text-xs font-bold text-gray-800">{shape.name} — Net</span>
                   {shape.net.desc && (
@@ -693,7 +693,7 @@ export default function Geometrix() {
                 <div ref={labelDivRef} className="absolute inset-0 pointer-events-none" />
                 {/* Reset camera */}
                 <button onClick={resetCamera}
-                  className="absolute top-3 right-3 z-10 bg-white/90 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-600 flex items-center gap-1.5 shadow-sm hover:bg-white transition-colors backdrop-blur-sm">
+                  className="absolute top-3 right-3 z-10 bg-white/90 border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs font-medium text-gray-600 flex items-center gap-1.5 shadow-sm hover:bg-card transition-colors backdrop-blur-sm">
                   <RotateCcw className="h-3 w-3" /> Reset
                 </button>
                 <div className="absolute bottom-3 left-3 z-10 bg-white/85 border border-gray-100 rounded-lg px-3 py-1.5 text-[10px] text-gray-400 shadow-sm backdrop-blur-sm">
@@ -704,7 +704,7 @@ export default function Geometrix() {
           </AnimatePresence>
 
           {/* ── DIMENSIONS & COLOR BAR ── */}
-          <div className="bg-white border-t border-gray-100 px-4 py-2.5 flex items-center gap-5 flex-wrap shrink-0">
+          <div className="bg-card border-t border-border px-4 py-2.5 flex items-center gap-5 flex-wrap shrink-0">
             <div className="flex items-center gap-2">
               <Palette className="h-3.5 w-3.5 text-gray-400" />
               <div className="flex gap-1 flex-wrap">
@@ -732,7 +732,7 @@ export default function Geometrix() {
         </div>
 
         {/* ── RIGHT PANEL — Measurements ── */}
-        <div className="w-56 bg-white border-l border-gray-100 flex flex-col shrink-0 overflow-y-auto">
+        <div className="w-56 bg-card border-l border-border flex flex-col shrink-0 overflow-y-auto">
           <div className="p-4 space-y-4">
 
             {/* Shape card */}

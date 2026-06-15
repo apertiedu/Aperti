@@ -40,7 +40,7 @@ function ResourceCard({ resource, isAdmin, onApprove }: { resource: any; isAdmin
   const Icon = TYPE_ICONS[resource.type] || FileText;
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-100 rounded-xl p-5 hover:border-teal-200 hover:shadow-sm transition-all group">
+      className="bg-card border border-border rounded-xl p-5 hover:border-teal-200 hover:shadow-sm transition-all group">
       <div className="flex items-start gap-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${TYPE_COLORS[resource.type] || "bg-gray-100 text-gray-600"}`}>
           <Icon size={20} />
@@ -144,7 +144,7 @@ export default function ResourcesLibrary() {
         <div className="flex gap-2 flex-wrap">
           {["all", "pdf", "video", "worksheet", "notes", "presentation"].map(t => (
             <button key={t} onClick={() => setTypeFilter(t)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${typeFilter === t ? "bg-teal-600 text-white border-teal-600" : "bg-white text-gray-600 border-gray-200 hover:border-teal-300"}`}>
+              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${typeFilter === t ? "bg-teal-600 text-white border-teal-600" : "bg-card text-muted-foreground border-border hover:border-teal-300"}`}>
               {t === "all" ? `All (${(resources || []).length})` : `${t.charAt(0).toUpperCase() + t.slice(1)} ${typeCounts[t] ? `(${typeCounts[t]})` : ""}`}
             </button>
           ))}
@@ -154,16 +154,16 @@ export default function ResourcesLibrary() {
         <div className="flex gap-3">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search resources..." className="pl-9 bg-white" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search resources..." className="pl-9 bg-card" />
           </div>
           <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-            <SelectTrigger className="w-44 bg-white"><SelectValue placeholder="All Subjects" /></SelectTrigger>
+            <SelectTrigger className="w-44 bg-card"><SelectValue placeholder="All Subjects" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Subjects</SelectItem>
               {(subjects || []).map((s: any) => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <div className="flex border border-gray-200 rounded-lg overflow-hidden bg-white">
+          <div className="flex border border-border rounded-lg overflow-hidden bg-card">
             <button onClick={() => setViewMode("grid")} className={`px-3 py-2 transition-colors ${viewMode === "grid" ? "bg-teal-600 text-white" : "text-gray-500 hover:bg-gray-50"}`}><Grid size={15} /></button>
             <button onClick={() => setViewMode("list")} className={`px-3 py-2 transition-colors ${viewMode === "list" ? "bg-teal-600 text-white" : "text-gray-500 hover:bg-gray-50"}`}><List size={15} /></button>
           </div>

@@ -83,7 +83,7 @@ export default function ResetPassword() {
           <p className="text-slate-500 text-sm mt-1">Where every mind finds its rhythm.</p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+        <div className="bg-card rounded-2xl border border-border shadow-sm p-8">
           <AnimatePresence mode="wait">
             {done ? (
               <motion.div

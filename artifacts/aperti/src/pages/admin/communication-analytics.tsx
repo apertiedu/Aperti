@@ -56,7 +56,7 @@ export default function CommunicationAnalytics() {
         <div className="flex gap-1 bg-gray-100 p-1 rounded-xl">
           {[7, 30, 90].map((d) => (
             <button key={d} onClick={() => setPeriod(d)}
-              className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${period === d ? "bg-white text-gray-900 shadow-sm font-medium" : "text-gray-600"}`}>
+              className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${period === d ? "bg-card text-foreground shadow-sm font-medium" : "text-muted-foreground"}`}>
               {d}d
             </button>
           ))}
@@ -77,7 +77,7 @@ export default function CommunicationAnalytics() {
             ].map((card, i) => (
               <motion.div key={card.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                className="bg-card rounded-2xl border border-border shadow-sm p-4">
                 <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${card.color}`}>
                   {card.icon}
                 </div>
@@ -89,7 +89,7 @@ export default function CommunicationAnalytics() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             {/* Daily activity heatmap */}
-            <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="lg:col-span-2 bg-card rounded-2xl border border-border shadow-sm p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-gray-500" /> Daily Message Activity (last {period}d)
               </h3>
@@ -116,7 +116,7 @@ export default function CommunicationAnalytics() {
             </div>
 
             {/* Ticket stats */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Ticket className="w-4 h-4 text-gray-500" /> Ticket Status Breakdown
               </h3>
@@ -151,7 +151,7 @@ export default function CommunicationAnalytics() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Top messagers */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-gray-500" /> Most Active Users
               </h3>
@@ -192,7 +192,7 @@ export default function CommunicationAnalytics() {
             </div>
 
             {/* Channel activity */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
               <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-gray-500" /> Most Active Class Channels
               </h3>

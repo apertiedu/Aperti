@@ -81,7 +81,7 @@ function LatexInsertBtn({ onInsert }: { onInsert: (latex: string, display: boole
         <span className="text-[10px] font-bold">TeX</span>
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg p-3 w-72">
+        <div className="absolute top-full left-0 mt-1 z-50 bg-card border border-border rounded-xl shadow-lg p-3 w-72">
           <p className="text-[10px] font-bold text-gray-500 mb-2 uppercase tracking-wide">Insert LaTeX Formula</p>
           <input
             ref={inputRef}
@@ -175,7 +175,7 @@ function RichTextEditor({
   };
 
   return (
-    <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
+    <div className="border border-border rounded-xl overflow-hidden bg-card">
       {!preview && (
         <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 bg-gray-50 border-b">
           <ToolbarBtn title="Bold (Ctrl+B)" onClick={() => exec("bold")}><Bold className="h-3.5 w-3.5" /></ToolbarBtn>
@@ -359,7 +359,7 @@ function FullScreenEditor({
   return (
     <div className="fixed inset-0 z-[999] bg-[#F5F5F5] flex flex-col overflow-hidden">
       {/* Top bar */}
-      <div className="flex items-center h-14 border-b bg-white px-4 gap-3 shrink-0 shadow-sm">
+      <div className="flex items-center h-14 border-b bg-card px-4 gap-3 shrink-0 shadow-sm">
         <button type="button" onClick={onClose} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 transition-colors">
           <X className="h-4 w-4" />
           <span className="text-sm">Back</span>
@@ -396,7 +396,7 @@ function FullScreenEditor({
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel – structure */}
-        <div className="w-60 shrink-0 border-r bg-white overflow-auto p-3 space-y-0.5">
+        <div className="w-60 shrink-0 border-r bg-card overflow-auto p-3 space-y-0.5">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide mb-2 px-1">Structure</p>
           <button
             type="button"
@@ -690,7 +690,7 @@ export default function ContentCraft() {
         {/* Feature chips */}
         <div className="flex gap-2 mb-6 flex-wrap">
           {["LaTeX formulas", "Rich text", "Video embed", "Quizzes", "Simulations", "Flashcard decks"].map(f => (
-            <span key={f} className="text-[11px] bg-white border border-border rounded-full px-3 py-1 text-gray-500">{f}</span>
+            <span key={f} className="text-[11px] bg-card border border-border rounded-full px-3 py-1 text-muted-foreground">{f}</span>
           ))}
         </div>
 

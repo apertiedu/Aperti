@@ -19,7 +19,7 @@ function Metric({ icon: Icon, label, value, color, alert }: {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className={`flex-1 min-w-0 rounded-xl p-3 border ${alert ? "bg-red-50 border-red-100" : "bg-white border-gray-100"} shadow-sm`}
+      className={`flex-1 min-w-0 rounded-xl p-3 border ${alert ? "bg-red-50 border-red-100" : "bg-card border-border"} shadow-sm`}
     >
       <div className={`w-7 h-7 rounded-lg flex items-center justify-center mb-2 ${color}`}>
         <Icon className="w-3.5 h-3.5" />

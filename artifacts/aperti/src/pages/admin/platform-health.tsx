@@ -32,7 +32,7 @@ function MetricCard({ label, value, sub, status, icon: Icon }: {
   };
   const cls = colors[status ?? "neutral"];
   return (
-    <Card className="border-0 shadow-sm bg-white">
+    <Card className="border-0 shadow-sm bg-card">
       <CardContent className="p-5 flex items-center gap-4">
         {Icon && (
           <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${cls}`}>
@@ -152,7 +152,7 @@ export default function PlatformHealth() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Top errors */}
-        <Card className="border-0 shadow-sm bg-white">
+        <Card className="border-0 shadow-sm bg-card">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <XCircle className="h-4 w-4 text-red-500" />
@@ -182,7 +182,7 @@ export default function PlatformHealth() {
         </Card>
 
         {/* Slow endpoints */}
-        <Card className="border-0 shadow-sm bg-white">
+        <Card className="border-0 shadow-sm bg-card">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-amber-500" />
@@ -216,7 +216,7 @@ export default function PlatformHealth() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Failed logins */}
-        <Card className="border-0 shadow-sm bg-white">
+        <Card className="border-0 shadow-sm bg-card">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Shield className="h-4 w-4 text-red-500" />
@@ -248,7 +248,7 @@ export default function PlatformHealth() {
         </Card>
 
         {/* DB overview */}
-        <Card className="border-0 shadow-sm bg-white">
+        <Card className="border-0 shadow-sm bg-card">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <BarChart2 className="h-4 w-4" style={{ color: TEAL }} />

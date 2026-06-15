@@ -122,7 +122,7 @@ export default function Announcements() {
         <div className="space-y-3">
           {filtered.map((ann) => (
             <motion.div key={ann.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-              className={`bg-white rounded-2xl shadow-sm border p-5 ${!ann.is_read && !isTeacher ? "border-l-4 border-l-teal-500" : "border-gray-100"}`}>
+              className={`bg-card rounded-2xl shadow-sm border p-5 ${!ann.is_read && !isTeacher ? "border-l-4 border-l-teal-500" : "border-border"}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -179,7 +179,7 @@ export default function Announcements() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+              className="bg-card rounded-2xl shadow-xl w-full max-w-lg p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-semibold text-gray-900">Create Announcement</h3>
                 <button onClick={() => setShowCreate(false)}><X className="w-5 h-5 text-gray-400" /></button>

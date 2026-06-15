@@ -86,7 +86,7 @@ function PaperCard({ paper, index }: { paper: Paper; index: number }) {
       variants={itemVariants}
       layout
       whileHover={{ y: -4, boxShadow: "0 16px 40px rgba(0,0,0,0.10)", transition: { duration: 0.2 } }}
-      className="bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col"
+      className="bg-card rounded-2xl overflow-hidden border border-border flex flex-col"
       style={{ boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}
     >
       {/* Colour accent strip */}
@@ -164,7 +164,7 @@ function PaperCard({ paper, index }: { paper: Paper; index: number }) {
 /* ── Skeleton loader ── */
 function PaperSkeleton() {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 animate-pulse">
+    <div className="bg-card rounded-2xl overflow-hidden border border-border animate-pulse">
       <div className="h-1.5 w-full bg-gray-200" />
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-3">
@@ -317,7 +317,7 @@ export default function PastPaperLibrary() {
       </motion.div>
 
       {/* ── Search & filters ── */}
-      <div className="px-4 sm:px-6 py-5 bg-white border-b border-gray-100 space-y-4 sticky top-0 z-10 shadow-sm">
+      <div className="px-4 sm:px-6 py-5 bg-card border-b border-border space-y-4 sticky top-0 z-10 shadow-sm">
         {/* Search bar */}
         <motion.div
           initial={{ opacity: 0, y: 8 }}
@@ -389,7 +389,7 @@ export default function PastPaperLibrary() {
           <select
             value={filterYear}
             onChange={e => setFilterYear(e.target.value)}
-            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-gray-600 focus:outline-none focus:ring-1 cursor-pointer"
+            className="text-xs font-medium px-3 py-1.5 rounded-lg border border-border bg-card text-muted-foreground focus:outline-none focus:ring-1 cursor-pointer"
           >
             <option value="">All years</option>
             {years.map(y => <option key={y} value={String(y)}>{y}</option>)}

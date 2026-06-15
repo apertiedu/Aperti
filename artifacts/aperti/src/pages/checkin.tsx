@@ -252,7 +252,7 @@ export default function CheckIn() {
             transition={{ duration: 0.18 }}
           >
             <motion.div
-              className="bg-white rounded-2xl shadow-2xl border border-gray-100 px-8 py-7 flex flex-col items-center gap-3 mx-4"
+              className="bg-card rounded-2xl shadow-2xl border border-border px-8 py-7 flex flex-col items-center gap-3 mx-4"
               style={{ maxWidth: 300 }}
               initial={{ scale: 0.82, y: 16 }}
               animate={{ scale: 1, y: 0 }}
@@ -305,7 +305,7 @@ export default function CheckIn() {
       {/* Controls row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
         <Select value={lessonId} onValueChange={v => { setLessonId(v); setRecent([]); }}>
-          <SelectTrigger className="bg-white border-gray-200 h-10">
+          <SelectTrigger className="bg-background border-input h-10">
             <SelectValue placeholder="Select lesson…" />
           </SelectTrigger>
           <SelectContent>
@@ -324,11 +324,11 @@ export default function CheckIn() {
           type="date"
           value={date}
           onChange={e => setDate(e.target.value)}
-          className="bg-white border-gray-200 h-10"
+          className="bg-background border-input h-10"
         />
 
         <Select value={markStatus} onValueChange={(v: MarkStatus) => setMarkStatus(v)}>
-          <SelectTrigger className="bg-white border-gray-200 h-10">
+          <SelectTrigger className="bg-background border-input h-10">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -368,7 +368,7 @@ export default function CheckIn() {
         {/* Left: Scanner */}
         <div className="lg:col-span-2 space-y-4">
           <Card className="border-0 shadow-sm overflow-hidden">
-            <CardHeader className="pb-3 border-b bg-white">
+            <CardHeader className="pb-3 border-b bg-card">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                   <Camera className="h-4 w-4 text-[#0D9488]" />
@@ -444,7 +444,7 @@ export default function CheckIn() {
                         value={manualCode}
                         onChange={e => setManualCode(e.target.value.toUpperCase())}
                         placeholder="e.g. STU001"
-                        className="text-center font-mono bg-white"
+                        className="text-center font-mono bg-background"
                         autoFocus
                       />
                       <Button type="submit" className="bg-[#0D9488] hover:bg-[#0B7B70] text-white">

@@ -129,7 +129,7 @@ export default function Ascend() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Profile Card */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 h-full">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-5 h-full">
               {/* Avatar + rank */}
               <div className="flex items-center gap-4 mb-5">
                 <div className="relative">
@@ -201,7 +201,7 @@ export default function Ascend() {
               <TabsContent value="quests">
                 <AnimatePresence mode="wait">
                   <motion.div key="quests" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                    className="bg-card rounded-2xl border border-border shadow-sm p-5">
                     <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                       <Target className="h-4 w-4 text-teal-600" /> Today's Quests
                     </h3>
@@ -253,7 +253,7 @@ export default function Ascend() {
 
               <TabsContent value="subjects">
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  className="bg-card rounded-2xl border border-border shadow-sm p-5">
                   <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-teal-600" /> Subject XP Progress
                   </h3>
@@ -288,7 +288,7 @@ export default function Ascend() {
 
               <TabsContent value="leaderboard">
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  className="bg-card rounded-2xl border border-border shadow-sm p-5">
                   <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <Trophy className="h-4 w-4 text-yellow-500" /> Class Rankings
                   </h3>
@@ -329,7 +329,7 @@ export default function Ascend() {
 
               <TabsContent value="unlockables">
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  className="bg-card rounded-2xl border border-border shadow-sm p-5">
                   <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <Star className="h-4 w-4 text-purple-500" /> Unlockables
                   </h3>

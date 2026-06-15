@@ -287,7 +287,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
                 key={dt}
                 type="button"
                 onClick={() => f("deliveryType", dt)}
-                className={`flex-1 text-xs font-semibold transition-colors ${form.deliveryType === dt ? "bg-[#0D9488] text-white" : "bg-white text-gray-600 hover:bg-gray-50"}`}
+                className={`flex-1 text-xs font-semibold transition-colors ${form.deliveryType === dt ? "bg-[#0D9488] text-white" : "bg-card text-muted-foreground hover:bg-muted"}`}
               >
                 {dt}
               </button>

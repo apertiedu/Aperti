@@ -203,7 +203,7 @@ export default function Settings() {
             <AnimatePresence mode="wait">
               {tab === "profile" && (
                 <motion.div key="profile" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+                  className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-5">
                   <h2 className="text-base font-semibold text-gray-900">Profile information</h2>
                   {/* Avatar */}
                   <div className="flex items-center gap-4">
@@ -229,7 +229,7 @@ export default function Settings() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20..." className="h-10 rounded-xl border-gray-200" /></div>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-                      <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-white">
+                      <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
                         <option value="">Select…</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
                   </div>
                   <div className="flex justify-end pt-1">
@@ -242,7 +242,7 @@ export default function Settings() {
 
               {tab === "security" && (
                 <motion.div key="security" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }} className="space-y-4">
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-4">
                     <h2 className="text-base font-semibold text-gray-900">Change password</h2>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Current password</Label>
                       <div className="relative"><Input type={showPw ? "text" : "password"} value={currentPw} onChange={e => setCurrentPw(e.target.value)} className="h-10 rounded-xl border-gray-200 pr-10" maxLength={500} />
@@ -255,7 +255,7 @@ export default function Settings() {
                       </Button>
                     </div>
                   </div>
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-6">
                     <h2 className="text-base font-semibold text-gray-900 mb-1">Two-factor authentication</h2>
                     <p className="text-sm text-gray-500 mb-3">Add an extra layer of protection to your account.</p>
                     <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">Coming Soon</span>
@@ -265,7 +265,7 @@ export default function Settings() {
 
               {tab === "notifications" && (
                 <motion.div key="notifs" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-1">
+                  className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-1">
                   <h2 className="text-base font-semibold text-gray-900 mb-4">Notification preferences</h2>
                   {[
                     { key: "notify_assignments", label: "Assignment notifications", desc: "New assignments and due date reminders" },
@@ -286,7 +286,7 @@ export default function Settings() {
 
               {tab === "appearance" && (
                 <motion.div key="appearance" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+                  className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-4">
                   <h2 className="text-base font-semibold text-gray-900">Appearance</h2>
                   <div className="flex items-center justify-between py-3 border-b border-gray-100">
                     <div><p className="text-sm font-medium text-gray-900">Dark mode</p><p className="text-xs text-gray-400 mt-0.5">Switch to a darker colour scheme</p></div>
@@ -295,7 +295,7 @@ export default function Settings() {
                   <div className="flex items-center justify-between py-3">
                     <div><p className="text-sm font-medium text-gray-900">Interface language</p><p className="text-xs text-gray-400 mt-0.5">Choose your preferred language</p></div>
                     <select value={settingsMap["language"] || "en"} onChange={e => saveSetting("language", e.target.value)}
-                      className="h-9 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-white">
+                      className="h-9 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
                       <option value="en">English</option>
                       <option value="ar" disabled>العربية (Coming Soon)</option>
                     </select>
@@ -305,7 +305,7 @@ export default function Settings() {
 
               {tab === "devices" && (
                 <motion.div key="devices" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                  className="bg-card rounded-2xl border border-border shadow-sm p-6">
                   <div className="flex items-center justify-between mb-1">
                     <h2 className="text-base font-semibold text-gray-900">Active sessions</h2>
                     {sessions.length > 1 && (
@@ -371,7 +371,7 @@ export default function Settings() {
               {tab === "accessibility" && (
                 <motion.div key="accessibility" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
                   className="space-y-4">
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-5">
                     <h2 className="text-base font-semibold text-gray-900">Accessibility & Reading</h2>
 
                     {/* Font size */}
@@ -467,7 +467,7 @@ export default function Settings() {
                   </div>
 
                   {/* Safety */}
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-4">
                     <h2 className="text-base font-semibold text-gray-900">Safety & Wellbeing</h2>
                     <div className="flex items-center justify-between py-3 border-b border-gray-50">
                       <div>
@@ -501,7 +501,7 @@ export default function Settings() {
               {tab === "ai" && (
                 <motion.div key="ai" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }}
                   className="space-y-4">
-                  <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
+                  <div className="bg-card rounded-2xl border border-border shadow-sm p-6 space-y-5">
                     <h2 className="text-base font-semibold text-gray-900">AI Tutor Preferences</h2>
 
                     {/* Explanation style */}
@@ -598,7 +598,7 @@ export default function Settings() {
                   <h2 className="text-lg font-semibold text-gray-900">Privacy & Data</h2>
 
                   {/* Data Export */}
-                  <div className="bg-white rounded-2xl border border-gray-100 p-5 space-y-3">
+                  <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
                     <div className="flex items-start gap-3">
                       <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0"><Download size={16} className="text-blue-600" /></div>
                       <div className="flex-1">
@@ -629,7 +629,7 @@ export default function Settings() {
                   </div>
 
                   {/* Account Deletion */}
-                  <div className="bg-white rounded-2xl border border-red-100 p-5 space-y-3">
+                  <div className="bg-card rounded-2xl border border-red-200 p-5 space-y-3">
                     <div className="flex items-start gap-3">
                       <div className="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center shrink-0"><Trash2 size={16} className="text-red-500" /></div>
                       <div className="flex-1">
@@ -647,7 +647,7 @@ export default function Settings() {
                         <p className="text-sm font-medium text-red-700 flex items-center gap-2"><AlertTriangle size={14} /> This action cannot be undone. Please confirm.</p>
                         <textarea value={deletionReason} onChange={e => setDeletionReason(e.target.value)}
                           placeholder="Optional: reason for leaving…"
-                          className="w-full text-sm border border-red-200 rounded-lg px-3 py-2 bg-white resize-none" rows={2} />
+                          className="w-full text-sm border border-red-200 rounded-lg px-3 py-2 bg-card resize-none" rows={2} />
                         <div className="flex gap-2">
                           <button onClick={async () => {
                             try {

@@ -94,7 +94,7 @@ function AssignmentCard({ hw, today, expanded, onToggle, onSubmit, draft, onDraf
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className={`bg-white rounded-2xl border shadow-sm overflow-hidden ${isOverdue ? "border-red-200" : "border-gray-100"}`}
+      className={`bg-card rounded-2xl border shadow-sm overflow-hidden ${isOverdue ? "border-red-200" : "border-border"}`}
       role="article" aria-label={`Assignment: ${hw.title}`}>
       <button className="w-full flex items-start gap-4 p-5 text-left hover:bg-gray-50/50 transition-colors"
         onClick={onToggle} aria-expanded={expanded}>
@@ -296,7 +296,7 @@ export default function AssignmentCenter() {
           return (
             <button key={id} onClick={() => setActiveTab(id)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
-                activeTab === id ? "bg-white shadow-sm text-gray-900" : "text-gray-500 hover:text-gray-700"
+                activeTab === id ? "bg-card shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground"
               }`}>
               {label}
               {count > 0 && (
@@ -314,7 +314,7 @@ export default function AssignmentCenter() {
           {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
         </div>
       ) : tabData[activeTab].length === 0 ? (
-        <div className="py-16 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
+        <div className="py-16 text-center text-gray-400 bg-card rounded-2xl border border-border">
           {activeTab === "overdue"
             ? <AlertTriangle className="h-10 w-10 mx-auto mb-3 opacity-20" />
             : activeTab === "returned"

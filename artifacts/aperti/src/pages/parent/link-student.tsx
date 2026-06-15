@@ -141,7 +141,7 @@ function LinkedStudentsSection() {
   const active = links.filter(l => l.status === "active");
   const rejected = links.filter(l => l.status === "rejected");
 
-  if (isLoading) return <div className="h-24 bg-white animate-pulse rounded-2xl border" />;
+  if (isLoading) return <div className="h-24 bg-muted animate-pulse rounded-2xl border" />;
 
   return (
     <Card className="border border-gray-100 shadow-sm">

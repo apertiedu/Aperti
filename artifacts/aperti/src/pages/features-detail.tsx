@@ -70,7 +70,7 @@ function WaitlistModal({ featureId, featureName, onClose }: { featureId: number;
       className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
         transition={{ type: "spring", bounce: 0.2 }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
+        className="bg-card rounded-2xl shadow-2xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
         {done ? (
           <div className="text-center py-4">
             <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: TEAL_LIGHT }}>
@@ -145,7 +145,7 @@ export default function FeatureDetailPage() {
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
       {/* Nav */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
           <div className="flex items-center gap-4">
@@ -181,7 +181,7 @@ export default function FeatureDetailPage() {
           <div className="space-y-6">
             {/* Hero card */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+              className="bg-card rounded-2xl border border-border shadow-sm p-8">
               <div className="flex flex-col md:flex-row md:items-start gap-6">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ background: TEAL_LIGHT }}>
                   <Rocket className="w-7 h-7" style={{ color: TEAL }} />
@@ -247,7 +247,7 @@ export default function FeatureDetailPage() {
                 {feature.documentation_url && (
                   <a href={feature.documentation_url} target="_blank" rel="noopener noreferrer">
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-700 bg-white hover:border-gray-300 transition-colors">
+                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border border-border text-foreground bg-card hover:border-gray-300 transition-colors">
                       <ExternalLink className="w-4 h-4" />Documentation
                     </motion.button>
                   </a>
@@ -269,14 +269,14 @@ export default function FeatureDetailPage() {
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
                 className="grid grid-cols-2 gap-4">
                 {feature.waitlist_count > 0 && (
-                  <div className="bg-white rounded-xl border border-gray-100 p-5 text-center shadow-sm">
+                  <div className="bg-card rounded-xl border border-border p-5 text-center shadow-sm">
                     <Users className="w-5 h-5 mx-auto mb-2" style={{ color: TEAL }} />
                     <p className="text-2xl font-black text-gray-900">{feature.waitlist_count}</p>
                     <p className="text-xs text-gray-500 mt-1">on the waitlist</p>
                   </div>
                 )}
                 {feature.beta_count > 0 && (
-                  <div className="bg-white rounded-xl border border-gray-100 p-5 text-center shadow-sm">
+                  <div className="bg-card rounded-xl border border-border p-5 text-center shadow-sm">
                     <TestTube className="w-5 h-5 mx-auto mb-2 text-orange-500" />
                     <p className="text-2xl font-black text-gray-900">{feature.beta_count}</p>
                     <p className="text-xs text-gray-500 mt-1">beta testers</p>
@@ -288,7 +288,7 @@ export default function FeatureDetailPage() {
             {/* Dependencies */}
             {feature.dependencies && feature.dependencies.length > 0 && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                className="bg-card rounded-2xl border border-border shadow-sm p-6">
                 <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <GitBranch className="w-4 h-4" style={{ color: TEAL }} />Dependencies
                 </h2>

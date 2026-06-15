@@ -159,7 +159,7 @@ export default function DiscussButton({
               initial={{ opacity: 0, y: 12, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.97 }}
-              className="fixed bottom-6 right-6 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden font-[Inter,sans-serif]"
+              className="fixed bottom-6 right-6 z-50 w-96 bg-card rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden font-[Inter,sans-serif]"
               style={{ maxHeight: "480px" }}
             >
               {/* Header */}

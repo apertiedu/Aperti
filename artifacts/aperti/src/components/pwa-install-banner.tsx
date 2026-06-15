@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, X, Bell } from "lucide-react";
 import { usePWA } from "@/hooks/use-pwa";
 import { useToast } from "@/hooks/use-toast";
 
 const PUBLIC_PATHS = ["/", "/login", "/register", "/student-register", "/courses", "/features", "/terms", "/privacy", "/contact", "/roadmap", "/status", "/trust", "/paper-vault", "/release-notes", "/sitemap"];
+
+const DELAY_MS = 20_000;
 
 export default function PWAInstallBanner() {
   const { canInstall, triggerInstall, pushSupported, pushPermission, subscribeToPush } = usePWA();
@@ -13,12 +15,18 @@ export default function PWAInstallBanner() {
   const [pushDismissed, setPushDismissed] = useState(() =>
     localStorage.getItem("aperti_push_dismissed") === "1"
   );
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), DELAY_MS);
+    return () => clearTimeout(t);
+  }, []);
 
   const isPublicPage = typeof window !== "undefined" && PUBLIC_PATHS.some(p =>
     window.location.pathname === p || window.location.pathname.startsWith(p + "/")
   );
 
-  if (isPublicPage) return null;
+  if (isPublicPage || !ready) return null;
 
   const handleInstall = async () => {
     const ok = await triggerInstall();

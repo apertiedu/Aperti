@@ -44,7 +44,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
       whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
       <Link href={`/courses/${course.id}`}>
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer hover:shadow-lg transition-shadow h-full flex flex-col">
+        <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border cursor-pointer hover:shadow-lg transition-shadow h-full flex flex-col">
           {/* Thumbnail */}
           <div className="h-44 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${color}15, ${color}30)` }}>
             {course.thumbnail_url ? (
@@ -99,7 +99,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+    <div className="bg-card rounded-2xl overflow-hidden shadow-sm border border-border">
       <Skeleton className="h-44 w-full" />
       <div className="p-5 space-y-3">
         <Skeleton className="h-4 w-3/4" />
@@ -136,7 +136,7 @@ export default function Courses() {
   return (
     <div className="min-h-screen" style={{ background: "#F5F5F5" }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-background border-b border-border">
         <div className="max-w-6xl mx-auto px-5 py-8">
           <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
             <Badge className="mb-3 rounded-full px-3 py-1 text-xs border-0" style={{ background: "#E6F4F1", color: TEAL }}>

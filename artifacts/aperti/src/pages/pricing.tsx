@@ -90,7 +90,7 @@ export default function PricingPage() {
         )}
 
         {/* FAQ strip */}
-        <div className="mt-16 bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        <div className="mt-16 bg-card rounded-2xl shadow-sm border border-border p-8">
           <h3 className="text-lg font-bold text-gray-800 mb-4 text-center">Questions?</h3>
           <div className="grid sm:grid-cols-2 gap-6 text-sm text-gray-600">
             <div>
@@ -127,7 +127,7 @@ function PlanCard({ plan, index, onSelect }: { plan: any; index: number; onSelec
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
-      className={`relative bg-white rounded-2xl border shadow-sm p-6 flex flex-col gap-4 hover:shadow-md transition-shadow ${isPopular ? "border-teal-400 ring-1 ring-teal-200" : "border-gray-100"}`}
+      className={`relative bg-card rounded-2xl border shadow-sm p-6 flex flex-col gap-4 hover:shadow-md transition-shadow ${isPopular ? "border-teal-400 ring-1 ring-teal-200" : "border-border"}`}
     >
       {isPopular && (
         <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-teal-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">

@@ -38,7 +38,7 @@ function LabCard({ lab, onLaunch }: { lab: any; onLaunch: (lab: any) => void }) 
   const Icon = LAB_ICONS[lab.id] || FlaskConical;
   return (
     <motion.div layout whileHover={{ y: -3 }} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-      className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-teal-200 hover:shadow-md transition-all cursor-pointer group"
+      className="bg-card border border-border rounded-2xl overflow-hidden hover:border-teal-200 hover:shadow-md transition-all cursor-pointer group"
       onClick={() => onLaunch(lab)}>
       <div className={`h-2 ${lab.category === "Physics" ? "bg-gradient-to-r from-blue-400 to-blue-600" : lab.category === "Chemistry" ? "bg-gradient-to-r from-green-400 to-teal-500" : lab.category === "Biology" ? "bg-gradient-to-r from-emerald-400 to-green-500" : "bg-gradient-to-r from-purple-400 to-indigo-500"}`} />
       <div className="p-5">
@@ -82,7 +82,7 @@ function SimulationRunner({ lab, onClose }: { lab: any; onClose: () => void }) {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-6">
       <motion.div initial={{ scale: 0.92, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.92 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+        className="bg-card rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${CATEGORY_COLORS[lab.category] || "bg-gray-100 text-gray-600"}`}><Icon size={18} /></div>
@@ -190,7 +190,7 @@ export default function SimverseLabs() {
             { label: "Biology Labs", count: (labs || []).filter((l: any) => l.category === "Biology").length, color: "text-emerald-600", bg: "bg-emerald-50" },
             { label: "Maths Labs", count: (labs || []).filter((l: any) => l.category === "Mathematics").length, color: "text-purple-600", bg: "bg-purple-50" },
           ].map((s, i) => (
-            <Card key={i} className="bg-white border-0 shadow-sm">
+            <Card key={i} className="bg-card border-0 shadow-sm">
               <CardContent className={`pt-5 pb-4 ${s.bg} rounded-xl`}>
                 <p className="text-xs text-gray-500 mb-1">{s.label}</p>
                 <p className={`text-3xl font-bold ${s.color}`}>{s.count}</p>
@@ -203,12 +203,12 @@ export default function SimverseLabs() {
         <div className="flex gap-3 items-center">
           <div className="relative flex-1">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search labs..." className="pl-9 bg-white" />
+            <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search labs..." className="pl-9 bg-card" />
           </div>
           <div className="flex gap-2">
             {categories.map(c => (
               <button key={c} onClick={() => setCategory(c)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${category === c ? "bg-teal-600 text-white border-teal-600" : "bg-white text-gray-600 border-gray-200 hover:border-teal-300"}`}>
+                className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${category === c ? "bg-teal-600 text-white border-teal-600" : "bg-card text-muted-foreground border-border hover:border-teal-300"}`}>
                 {c}
               </button>
             ))}

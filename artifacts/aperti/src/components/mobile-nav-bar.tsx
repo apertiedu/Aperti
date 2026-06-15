@@ -49,7 +49,7 @@ export default function MobileNavBar() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-100 safe-area-bottom md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background/95 backdrop-blur-md border-t border-border safe-area-bottom md:hidden">
       <div className="flex items-center justify-around px-2 py-1">
         {items.map((item) => {
           const active = isActive(item.href);

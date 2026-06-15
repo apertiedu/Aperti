@@ -42,7 +42,7 @@ function LessonItem({ lesson, onUpdate, onDelete }: { lesson: any; onUpdate: (up
   const typeInfo = LESSON_TYPES.find(t => t.id === lesson.type) || LESSON_TYPES[0];
   const Icon = typeInfo.icon;
   return (
-    <div className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg hover:border-gray-200 group">
+    <div className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-border group">
       <GripVertical size={14} className="text-gray-300 cursor-grab" />
       <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${typeInfo.color}`}><Icon size={12} className="inline mr-1" />{typeInfo.label}</span>
       {editing ? (
@@ -103,7 +103,7 @@ function TopicPanel({ topic, unitIdx, topicIdx, onUpdate, onDelete }: {
       <AnimatePresence>
         {expanded && (
           <motion.div initial={{ height: 0 }} animate={{ height: "auto" }} exit={{ height: 0 }} className="overflow-hidden">
-            <div className="p-3 space-y-2 bg-white">
+            <div className="p-3 space-y-2 bg-card">
               {localLessons.map((lesson, li) => (
                 <LessonItem key={lesson.id || li} lesson={lesson} onUpdate={updates => updateLesson(li, updates)} onDelete={() => deleteLesson(li)} />
               ))}
@@ -212,7 +212,7 @@ export default function CourseBuilder() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
+      <div className="sticky top-0 z-20 bg-card border-b border-border px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/my-courses")}><ArrowLeft size={16} /></Button>
           <div>

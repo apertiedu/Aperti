@@ -31,7 +31,7 @@ export default function SessionExpiryModal({ open, onDismiss }: Props) {
             transition={{ type: "spring", stiffness: 360, damping: 28 }}
             className="fixed inset-0 z-[9996] flex items-center justify-center p-4"
           >
-            <div className="bg-white rounded-2xl shadow-2xl border border-border/50 max-w-sm w-full p-8 text-center">
+            <div className="bg-card rounded-2xl shadow-2xl border border-border/50 max-w-sm w-full p-8 text-center">
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}

@@ -80,7 +80,7 @@ export default function ReportProblemModal() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.97 }}
               transition={{ type: "spring", stiffness: 340, damping: 28 }}
-              className="fixed bottom-20 right-4 md:bottom-6 md:right-6 w-[340px] bg-white rounded-2xl shadow-2xl border border-border/50 z-[9990] overflow-hidden"
+              className="fixed bottom-20 right-4 md:bottom-6 md:right-6 w-[340px] bg-card rounded-2xl shadow-2xl border border-border/50 z-[9990] overflow-hidden"
             >
               <div className="flex items-center justify-between px-5 py-4 border-b border-border/40">
                 <div className="flex items-center gap-2.5">

@@ -49,7 +49,7 @@ export default function Profile() {
     <div className="min-h-screen bg-background py-10" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="max-w-lg mx-auto px-4">
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           {/* Banner */}
           <div className="h-28 relative" style={{ background: `linear-gradient(135deg, ${TEAL} 0%, #0f766e 100%)` }}>
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "40px 40px" }} />

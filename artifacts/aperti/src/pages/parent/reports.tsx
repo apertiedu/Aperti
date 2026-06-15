@@ -163,7 +163,7 @@ export default function ParentReports() {
           <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Previous Reports</h2>
           <div className="space-y-2">
             {reportNotifications.map((n: any) => (
-              <div key={n.id} className="flex items-center gap-3 p-3.5 rounded-xl border border-gray-100 bg-white">
+              <div key={n.id} className="flex items-center gap-3 p-3.5 rounded-xl border border-border bg-card">
                 <FileText className="h-4.5 w-4.5 text-gray-400 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-gray-800">{n.title}</p>

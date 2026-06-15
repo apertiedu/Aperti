@@ -71,7 +71,7 @@ export default function StudentRegister() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-10 max-w-md w-full text-center mx-4"
+          className="bg-card rounded-2xl shadow-sm border border-border p-10 max-w-md w-full text-center mx-4"
         >
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: TEAL_LIGHT }}>
             <CheckCircle2 className="h-8 w-8" style={{ color: TEAL }} />
@@ -132,7 +132,7 @@ export default function StudentRegister() {
             </button>
           </Link>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+          <div className="bg-card rounded-2xl shadow-sm border border-border p-8">
             <div className="mb-7">
               <h1 className="text-2xl font-extrabold text-gray-900">Create your account</h1>
               <p className="text-sm text-gray-400 mt-1">Student registration — pending teacher approval</p>

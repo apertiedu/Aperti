@@ -97,7 +97,7 @@ export default function SubscribePage() {
           {/* STEP 1: Review */}
           {step === "review" && (
             <motion.div key="review" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+              <div className="bg-card rounded-2xl border border-border shadow-sm p-7">
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Review your plan</h2>
                 {plan ? (
                   <>
@@ -142,7 +142,7 @@ export default function SubscribePage() {
           {/* STEP 2: Payment instructions */}
           {step === "payment" && paymentRequest && (
             <motion.div key="payment" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+              <div className="bg-card rounded-2xl border border-border shadow-sm p-7">
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Make your payment</h2>
                 <p className="text-sm text-gray-500 mb-5">Send the exact amount via InstaPay using the details below.</p>
 
@@ -157,7 +157,7 @@ export default function SubscribePage() {
                     </div>
                     <button
                       onClick={() => copyRef(paymentRequest.instapay?.reference)}
-                      className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-800 border border-teal-200 bg-white px-3 py-1.5 rounded-lg transition-colors"
+                      className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-800 border border-teal-200 bg-card px-3 py-1.5 rounded-lg transition-colors"
                     >
                       {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                       {copied ? "Copied!" : "Copy"}
@@ -182,7 +182,7 @@ export default function SubscribePage() {
           {/* STEP 3: Upload proof */}
           {step === "proof" && (
             <motion.div key="proof" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }}>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+              <div className="bg-card rounded-2xl border border-border shadow-sm p-7">
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Upload payment proof</h2>
                 <p className="text-sm text-gray-500 mb-5">Paste a link to your payment screenshot (hosted on Google Drive, Imgur, etc.) so we can verify your payment quickly.</p>
 
@@ -215,7 +215,7 @@ export default function SubscribePage() {
           {/* STEP 4: Confirmed */}
           {step === "confirmed" && (
             <motion.div key="confirmed" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}>
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+              <div className="bg-card rounded-2xl border border-border shadow-sm p-10 text-center">
                 <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center mx-auto mb-5">
                   <Clock className="w-8 h-8 text-teal-500" />
                 </div>
@@ -243,7 +243,7 @@ export default function SubscribePage() {
 
 function InfoRow({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`flex items-center justify-between p-3 rounded-xl border ${highlight ? "bg-gray-50 border-gray-200" : "bg-white border-gray-100"}`}>
+    <div className={`flex items-center justify-between p-3 rounded-xl border ${highlight ? "bg-gray-50 border-gray-200" : "bg-card border-border"}`}>
       <span className="text-xs text-gray-400 font-medium">{label}</span>
       <span className={`text-sm font-semibold ${highlight ? "text-gray-900" : "text-gray-600"}`}>{value}</span>
     </div>

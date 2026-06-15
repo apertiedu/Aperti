@@ -147,6 +147,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       {/* Desktop Sidebar */}
       <aside
         className={`hidden md:flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 shrink-0 ${collapsed ? "w-14" : "w-56"}`}

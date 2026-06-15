@@ -274,7 +274,7 @@ function QuestionForm({ question, onClose, onRefresh, onLimitExceeded }: {
             <button
               type="button"
               onClick={() => setForm(f => ({ ...f, imageUrl: "" }))}
-              className="absolute -top-2 -right-2 bg-white border border-gray-200 rounded-full p-0.5 shadow text-gray-500 hover:text-red-500"
+              className="absolute -top-2 -right-2 bg-card border border-border rounded-full p-0.5 shadow text-muted-foreground hover:text-red-500"
             >
               <X className="h-3.5 w-3.5" />
             </button>

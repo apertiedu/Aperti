@@ -97,7 +97,7 @@ export default function ParentNotifications() {
           {notifications.map((n, i) => (
             <motion.div key={n.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.02 }}>
               <div
-                className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${n.is_read ? "border-gray-100 bg-white opacity-70" : "border-gray-200 bg-white shadow-sm"}`}
+                className={`flex items-start gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${n.is_read ? "border-border bg-card opacity-70" : "border-border bg-card shadow-sm"}`}
                 onClick={() => !n.is_read && markRead.mutate(n.id)}
               >
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${typeColor(n.type)}`}>

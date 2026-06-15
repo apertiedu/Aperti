@@ -121,7 +121,7 @@ export default function QuickSwitch() {
             >
               <button
                 onClick={() => setSelected(role.id)}
-                className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-150 bg-white shadow-sm hover:shadow-md ${
+                className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-150 bg-card shadow-sm hover:shadow-md ${
                   isSelected
                     ? "border-[#0D9488] ring-1 ring-[#0D9488]/20"
                     : "border-gray-100 hover:border-gray-200"

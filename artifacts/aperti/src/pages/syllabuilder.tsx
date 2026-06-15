@@ -342,7 +342,7 @@ export default function Syllabuilder() {
 
       <Tabs defaultValue="subjects">
         <div className="flex items-center justify-between mb-5">
-          <TabsList className="bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+          <TabsList className="bg-card border border-border rounded-xl p-1 shadow-sm">
             <TabsTrigger value="subjects" className="rounded-lg text-sm gap-2">
               <FlaskConical className="h-3.5 w-3.5" /> Subjects ({subjectList.length})
             </TabsTrigger>

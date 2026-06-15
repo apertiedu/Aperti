@@ -484,7 +484,7 @@ export default function TeacherSchedulePage() {
             key={t}
             onClick={() => setTab(t)}
             className={`flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
-              tab === t ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:bg-white"
+              tab === t ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:bg-card"
             }`}
           >
             {t === "lessons" ? <BookOpen size={15} /> : <Clock size={15} />}

@@ -126,7 +126,7 @@ export default function ParentGrades() {
                   <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><MessageSquare className="h-4 w-4 text-teal-500" />Recent Teacher Feedback</h2>
                   <div className="space-y-3">
                     {data.hwFeedback.map((f: any, i: number) => (
-                      <div key={i} className="p-3 rounded-xl border border-gray-100 bg-white">
+                      <div key={i} className="p-3 rounded-xl border border-border bg-card">
                         <div className="flex items-center justify-between mb-1">
                           <p className="text-xs font-semibold text-gray-800">{f.title}</p>
                           <span className="text-xs font-bold" style={{ color: getGradeColor(f.total_marks > 0 ? (f.marks_awarded / f.total_marks) * 100 : 0) }}>

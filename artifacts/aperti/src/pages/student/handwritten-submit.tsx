@@ -94,7 +94,7 @@ export default function HandwrittenSubmit() {
         <AnimatePresence mode="wait">
           {step === "upload" && (
             <motion.div key="upload" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-card border-0 shadow-sm">
                 <CardHeader><CardTitle className="text-base">Upload Your Work</CardTitle></CardHeader>
                 <CardContent className="space-y-6">
                   {/* Hidden file inputs */}
@@ -168,7 +168,7 @@ export default function HandwrittenSubmit() {
 
           {step === "processing" && (
             <motion.div key="processing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-card border-0 shadow-sm">
                 <CardContent className="py-16 text-center space-y-6">
                   <div className="relative w-24 h-24 mx-auto">
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
@@ -217,7 +217,7 @@ export default function HandwrittenSubmit() {
 
               {/* Extracted text */}
               {result.processed_text && (
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><FileText size={14} className="text-teal-600" /> Extracted Text</CardTitle></CardHeader>
                   <CardContent>
                     <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 leading-relaxed font-mono whitespace-pre-wrap border border-gray-100">
@@ -229,7 +229,7 @@ export default function HandwrittenSubmit() {
 
               {/* Equations */}
               {equations.length > 0 && (
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><Sigma size={14} className="text-blue-600" /> Equations Detected</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -246,7 +246,7 @@ export default function HandwrittenSubmit() {
 
               {/* Diagrams */}
               {diagrams.length > 0 && (
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><GitBranch size={14} className="text-purple-600" /> Diagrams</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -260,7 +260,7 @@ export default function HandwrittenSubmit() {
 
               {/* Steps */}
               {steps.length > 0 && (
-                <Card className="bg-white border-0 shadow-sm">
+                <Card className="bg-card border-0 shadow-sm">
                   <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><ListOrdered size={14} className="text-green-600" /> Working Steps</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -289,7 +289,7 @@ export default function HandwrittenSubmit() {
 
           {step === "done" && (
             <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-card border-0 shadow-sm">
                 <CardContent className="py-14 text-center space-y-4">
                   <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle size={40} className="text-green-600" />

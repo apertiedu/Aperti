@@ -167,7 +167,7 @@ export default function SubPilot() {
       </motion.div>
 
       <Tabs defaultValue="current" className="space-y-6">
-        <TabsList className="bg-white border">
+        <TabsList className="bg-card border">
           <TabsTrigger value="current">Current Plan</TabsTrigger>
           <TabsTrigger value="plans">Upgrade</TabsTrigger>
           <TabsTrigger value="notifications" className="gap-1.5">

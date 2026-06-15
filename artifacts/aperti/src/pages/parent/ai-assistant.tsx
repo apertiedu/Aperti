@@ -96,7 +96,7 @@ export default function ParentAIAssistant() {
       </motion.div>
 
       {/* Chat area */}
-      <div className="flex-1 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col overflow-hidden">
+      <div className="flex-1 bg-card rounded-2xl border border-border shadow-sm flex flex-col overflow-hidden">
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             {messages.map((msg, i) => (

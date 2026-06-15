@@ -205,7 +205,7 @@ export default function ForgeField() {
             ref={canvasRef}
             width={600}
             height={400}
-            className="w-full border rounded-lg bg-white"
+            className="w-full border rounded-lg bg-card"
           />
           <p className="text-xs text-muted-foreground mt-2">
             Circuit: Battery → Switch → Bulb. Close the switch and press Run to light the bulb.

@@ -40,7 +40,7 @@ function WaitlistModal({ feature, onClose }: { feature: any; onClose: () => void
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {done ? (
           <div className="p-8 text-center">
             <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -117,7 +117,7 @@ export default function FeatureShowcasePage() {
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span className="text-teal-600">.</span></Link>
           <div className="flex items-center gap-4">
@@ -128,7 +128,7 @@ export default function FeatureShowcasePage() {
       </div>
 
       {/* Hero */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-background border-b border-border">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 text-center">
           <Reveal>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-medium mb-6">
@@ -146,14 +146,14 @@ export default function FeatureShowcasePage() {
           <div className="flex flex-wrap gap-3 mb-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search features..." className="pl-9 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-56" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search features..." className="pl-9 pr-4 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-56" />
             </div>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 bg-white rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
               <option value="">All Statuses</option>
               {Object.entries(STATUS_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
             {categories.length > 0 && (
-              <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} className="px-3 py-2 bg-white rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} className="px-3 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                 <option value="">All Categories</option>
                 {categories.map((c: any) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -173,7 +173,7 @@ export default function FeatureShowcasePage() {
               const Icon = meta.icon;
               return (
                 <Reveal key={feature.id} delay={i * 0.05}>
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
+                  <div className="bg-card rounded-2xl shadow-sm border border-border p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">

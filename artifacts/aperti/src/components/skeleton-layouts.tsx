@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 /* ── Base shimmer wrapper ─────────────────────────────────────────────────── */
 export function SkeletonCard({ className }: { className?: string }) {
   return (
-    <div className={cn("bg-white rounded-xl border border-gray-100 shadow-sm p-5 space-y-3", className)}>
+    <div className={cn("bg-card rounded-xl border border-border shadow-sm p-5 space-y-3", className)}>
       <div className="flex items-center gap-3">
         <Skeleton className="w-10 h-10 rounded-xl flex-shrink-0" />
         <div className="flex-1 space-y-1.5">
@@ -24,7 +24,7 @@ export function SkeletonCard({ className }: { className?: string }) {
 
 export function SkeletonStatCard({ className }: { className?: string }) {
   return (
-    <div className={cn("bg-white rounded-xl border border-gray-100 shadow-sm p-4", className)}>
+    <div className={cn("bg-card rounded-xl border border-border shadow-sm p-4", className)}>
       <div className="flex items-start justify-between mb-3">
         <Skeleton className="h-3 w-24 rounded" />
         <Skeleton className="w-8 h-8 rounded-lg" />
@@ -37,7 +37,7 @@ export function SkeletonStatCard({ className }: { className?: string }) {
 
 export function SkeletonTable({ rows = 5, cols = 4, className }: { rows?: number; cols?: number; className?: string }) {
   return (
-    <div className={cn("bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden", className)}>
+    <div className={cn("bg-card rounded-xl border border-border shadow-sm overflow-hidden", className)}>
       {/* Header */}
       <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 bg-gray-50/50">
         {Array.from({ length: cols }).map((_, i) => (
@@ -66,7 +66,7 @@ export function SkeletonTable({ rows = 5, cols = 4, className }: { rows?: number
 
 export function SkeletonChart({ className, height = 200 }: { className?: string; height?: number }) {
   return (
-    <div className={cn("bg-white rounded-xl border border-gray-100 shadow-sm p-5", className)}>
+    <div className={cn("bg-card rounded-xl border border-border shadow-sm p-5", className)}>
       <div className="flex items-center justify-between mb-4">
         <div className="space-y-1.5">
           <Skeleton className="h-4 w-36 rounded" />
@@ -134,7 +134,7 @@ export function SkeletonList({ count = 4, className }: { count?: number; classNa
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="bg-white rounded-xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4"
+          className="bg-card rounded-xl border border-border shadow-sm px-5 py-4 flex items-center gap-4"
         >
           <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
           <div className="flex-1 space-y-2 min-w-0">
@@ -150,7 +150,7 @@ export function SkeletonList({ count = 4, className }: { count?: number; classNa
 
 export function SkeletonProfile({ className }: { className?: string }) {
   return (
-    <div className={cn("bg-white rounded-xl border border-gray-100 shadow-sm p-6", className)}>
+    <div className={cn("bg-card rounded-xl border border-border shadow-sm p-6", className)}>
       <div className="flex items-center gap-5 mb-6">
         <Skeleton className="h-16 w-16 rounded-full flex-shrink-0" />
         <div className="space-y-2">
@@ -177,7 +177,7 @@ export function SkeletonAnalytics({ className }: { className?: string }) {
       <div className="grid grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => <SkeletonStatCard key={i} />)}
       </div>
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+      <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <Skeleton className="h-4 w-36 rounded mb-4" />
         <Skeleton className="h-52 w-full rounded-lg" />
       </div>

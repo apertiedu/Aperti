@@ -239,7 +239,7 @@ export default function GuardianHub() {
         </div>
       ) : links.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="bg-white rounded-2xl border border-dashed border-gray-200 p-16 text-center">
+          className="bg-card rounded-2xl border border-dashed border-border p-16 text-center">
           <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: TEAL_LIGHT }}>
             <Users className="h-8 w-8" style={{ color: TEAL }} />
           </div>
@@ -289,7 +289,7 @@ export default function GuardianHub() {
         </>
       )}
 
-      <div className="rounded-2xl p-4 text-xs text-gray-500 border border-dashed border-gray-200 bg-white">
+      <div className="rounded-2xl p-4 text-xs text-gray-500 border border-dashed border-border bg-card">
         <p className="font-semibold mb-1 flex items-center gap-1.5" style={{ color: TEAL }}>
           <BookOpen className="h-3.5 w-3.5" /> Quick tip
         </p>

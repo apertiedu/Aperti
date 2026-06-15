@@ -12,6 +12,7 @@ import {
   MessageSquare, BarChart3, Cpu, Lock, GraduationCap,
   Bell, Inbox, Megaphone, Ticket,
 } from "lucide-react";
+import NotificationBell from "@/components/notification-bell";
 
 const primaryNav = [
   { href: "/", label: "Home", icon: Home },
@@ -82,6 +83,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       {/* Top bar — desktop */}
       <header className="hidden md:flex sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border/40 px-6 h-12 items-center justify-between shrink-0" role="banner">
         <div className="flex items-center gap-1.5">
@@ -107,6 +109,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
           })}
         </nav>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <button
             onClick={toggleDark}
             className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-primary"

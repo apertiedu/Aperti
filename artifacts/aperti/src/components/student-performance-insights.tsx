@@ -66,7 +66,7 @@ export default function StudentPerformanceInsights({ courseId }: { courseId?: nu
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 p-4">
+      <div className="bg-card rounded-xl border border-border p-4">
         <div className="flex items-center gap-2 mb-3">
           <Skeleton className="h-4 w-4 rounded" />
           <Skeleton className="h-4 w-32" />
@@ -80,7 +80,7 @@ export default function StudentPerformanceInsights({ courseId }: { courseId?: nu
 
   if (students.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-gray-100 p-6 text-center">
+      <div className="bg-card rounded-xl border border-border p-6 text-center">
         <Users className="w-8 h-8 text-gray-200 mx-auto mb-2" />
         <p className="text-sm font-semibold text-gray-700">No student data yet</p>
         <p className="text-xs text-gray-400 mt-1">Mark attendance or grade exams to see insights here</p>
@@ -89,7 +89,7 @@ export default function StudentPerformanceInsights({ courseId }: { courseId?: nu
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50">
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-teal-600" />

@@ -107,7 +107,7 @@ export default function AdminModeration() {
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-xl w-fit">
         {(["reports", "blocklist", "analytics"] as const).map((t) => (
           <button key={t} onClick={() => setActiveTab(t)}
-            className={`px-4 py-2 text-sm rounded-lg transition-colors ${activeTab === t ? "bg-white text-gray-900 shadow-sm font-medium" : "text-gray-600 hover:text-gray-800"}`}>
+            className={`px-4 py-2 text-sm rounded-lg transition-colors ${activeTab === t ? "bg-card text-foreground shadow-sm font-medium" : "text-muted-foreground hover:text-foreground"}`}>
             {t === "reports" ? "Flagged Reports" : t === "blocklist" ? "Blocked Words" : "Analytics"}
           </button>
         ))}
@@ -145,7 +145,7 @@ export default function AdminModeration() {
               <div className="space-y-3">
                 {filtered.map((r) => (
                   <motion.div key={r.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                    className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                    className="bg-card rounded-2xl border border-border shadow-sm p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -183,7 +183,7 @@ export default function AdminModeration() {
         {/* BLOCKLIST TAB */}
         {activeTab === "blocklist" && (
           <motion.div key="blocklist" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-4 mb-4">
               <h3 className="text-sm font-semibold text-gray-900 mb-3">Add Blocked Word</h3>
               <div className="flex gap-3 items-end">
                 <div className="flex-1">
@@ -220,7 +220,7 @@ export default function AdminModeration() {
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {blocklist.map((w) => (
-                  <div key={w.id} className="bg-white rounded-xl border border-gray-100 p-3 flex items-center justify-between gap-2">
+                  <div key={w.id} className="bg-card rounded-xl border border-border p-3 flex items-center justify-between gap-2">
                     <div>
                       <p className="text-sm font-medium text-gray-900">{w.word}</p>
                       <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${SEVERITY_STYLES[w.severity] ?? SEVERITY_STYLES.medium}`}>{w.severity}</span>
@@ -246,7 +246,7 @@ export default function AdminModeration() {
                 { label: "Resolved", value: stats?.resolved ?? 0, icon: <CheckCircle className="w-5 h-5" />, color: "text-green-600 bg-green-50" },
                 { label: "Avg Response", value: `${Math.round(stats?.avg_response_hours ?? 0)}h`, icon: <TrendingUp className="w-5 h-5" />, color: "text-teal-600 bg-teal-50" },
               ].map((card) => (
-                <div key={card.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+                <div key={card.label} className="bg-card rounded-2xl border border-border shadow-sm p-4">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${card.color}`}>
                     {card.icon}
                   </div>
@@ -257,7 +257,7 @@ export default function AdminModeration() {
             </div>
 
             {stats?.by_type && stats.by_type.length > 0 && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
                 <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <BarChart2 className="w-4 h-4 text-gray-500" /> Reports by Content Type
                 </h3>
@@ -291,7 +291,7 @@ export default function AdminModeration() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+              className="bg-card rounded-2xl shadow-xl w-full max-w-md p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900">Review Report #{actionModal.id}</h3>
                 <button onClick={() => setActionModal(null)}><X className="w-5 h-5 text-gray-400" /></button>

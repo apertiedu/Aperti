@@ -92,7 +92,7 @@ export default function SupportTickets() {
   return (
     <div className="h-[calc(100vh-64px)] flex bg-gray-50 font-[Inter,sans-serif]">
       {/* Ticket List */}
-      <div className="w-80 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
+      <div className="w-80 flex-shrink-0 bg-card border-r border-border flex flex-col">
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
@@ -146,7 +146,7 @@ export default function SupportTickets() {
       <div className="flex-1 flex flex-col min-w-0">
         {selectedTicket ? (
           <>
-            <div className="bg-white border-b border-gray-100 px-6 py-4">
+            <div className="bg-card border-b border-border px-6 py-4">
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="font-semibold text-gray-900 mb-1">{selectedTicket.subject}</h2>
@@ -173,7 +173,7 @@ export default function SupportTickets() {
 
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {/* Original description */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-4">
+              <div className="bg-card rounded-2xl border border-border p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
                     <span className="text-xs font-semibold text-gray-600">{selectedTicket.user_name[0]}</span>
@@ -206,7 +206,7 @@ export default function SupportTickets() {
               {/* Responses */}
               {responses.map((r) => (
                 <motion.div key={r.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                  className={`bg-white rounded-2xl border p-4 ${r.responder_role === "admin" || r.responder_role === "teacher" ? "border-teal-100" : "border-gray-100"}`}>
+                  className={`bg-card rounded-2xl border p-4 ${r.responder_role === "admin" || r.responder_role === "teacher" ? "border-teal-100" : "border-gray-100"}`}>
                   <div className="flex items-center gap-2 mb-2">
                     <div className={`w-7 h-7 rounded-full flex items-center justify-center ${r.responder_role === "admin" || r.responder_role === "teacher" ? "bg-teal-100" : "bg-gray-100"}`}>
                       <span className="text-xs font-semibold text-teal-700">{r.responder_name[0]}</span>
@@ -226,7 +226,7 @@ export default function SupportTickets() {
 
             {/* Reply box */}
             {selectedTicket.status !== "closed" && (
-              <div className="bg-white border-t border-gray-100 p-4">
+              <div className="bg-card border-t border-border p-4">
                 <div className="flex items-end gap-3">
                   <textarea value={replyText} onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Write a reply…"
@@ -257,7 +257,7 @@ export default function SupportTickets() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
             <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+              className="bg-card rounded-2xl shadow-xl w-full max-w-lg p-6">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-semibold text-gray-900">New Support Ticket</h3>
                 <button onClick={() => setShowCreate(false)}><X className="w-5 h-5 text-gray-400" /></button>

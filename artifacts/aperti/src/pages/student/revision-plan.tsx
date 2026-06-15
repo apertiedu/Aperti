@@ -145,7 +145,7 @@ export default function RevisionPlanPage() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5"
+        className="bg-card rounded-2xl border border-border shadow-sm p-5"
       >
         <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
           <Sparkles className="h-4 w-4" style={{ color: TEAL }} />
@@ -210,7 +210,7 @@ export default function RevisionPlanPage() {
             className="space-y-4"
           >
             {/* Progress bar */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-4">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-semibold text-gray-700">
                   Progress — {completedCount}/{totalTasks} tasks
@@ -259,7 +259,7 @@ export default function RevisionPlanPage() {
                     key={day.day}
                     layout
                     onClick={() => setExpandedDay(isExpanded ? null : globalDi)}
-                    className={`bg-white rounded-xl border cursor-pointer transition-all ${
+                    className={`bg-card rounded-xl border cursor-pointer transition-all ${
                       isToday ? "border-teal-500 shadow-md" : dayCompleted ? "border-green-300 bg-green-50/30" : "border-gray-100 shadow-sm"
                     }`}
                     whileHover={{ y: -2 }}

@@ -54,7 +54,7 @@ function QuestionCard({ q, onEdit, onDuplicate, onDelete }: { q: any; onEdit: ()
   const quality = questionQualityScore(q);
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-white border border-gray-100 rounded-xl p-5 hover:border-gray-200 hover:shadow-sm transition-all group">
+      className="bg-card border border-border rounded-xl p-5 hover:border-border hover:shadow-sm transition-all group">
       <div className="flex items-start justify-between gap-4 mb-3">
         <p className="text-sm text-gray-800 leading-relaxed flex-1 line-clamp-3">{q.question_text}</p>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
@@ -293,7 +293,7 @@ export default function QuestionStudio() {
         <div className="grid grid-cols-4 gap-4">
           {statCards.map((s, i) => (
             <motion.div key={i} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.05 }}>
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-card border-0 shadow-sm">
                 <CardContent className="pt-5 pb-4">
                   <p className="text-xs text-gray-500 mb-1">{s.label}</p>
                   <p className={`text-3xl font-bold ${s.color}`}>{s.value}</p>
@@ -304,13 +304,13 @@ export default function QuestionStudio() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-white border border-gray-200">
+          <TabsList className="bg-card border border-border">
             <TabsTrigger value="bank">Question Bank</TabsTrigger>
             <TabsTrigger value="ai">AI Generator</TabsTrigger>
           </TabsList>
 
           <TabsContent value="bank" className="space-y-4 mt-4">
-            <Card className="bg-white border-0 shadow-sm">
+            <Card className="bg-card border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex gap-3">
                   <div className="relative flex-1">
@@ -382,7 +382,7 @@ export default function QuestionStudio() {
 
           <TabsContent value="ai" className="mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-white border-0 shadow-sm">
+              <Card className="bg-card border-0 shadow-sm">
                 <CardHeader><CardTitle className="text-base flex items-center gap-2"><Sparkles size={16} className="text-teal-600" /> AI Question Generator</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -415,7 +415,7 @@ export default function QuestionStudio() {
                 <AnimatePresence>
                   {aiGenResults.map((q, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: i * 0.05 }}
-                      className="bg-white border border-gray-100 rounded-xl p-4 hover:border-teal-200 transition-all">
+                      className="bg-card border border-border rounded-xl p-4 hover:border-teal-200 transition-all">
                       <p className="text-sm text-gray-800 mb-2 leading-relaxed">{q.questionText}</p>
                       <div className="flex gap-2 flex-wrap mb-3">
                         {q.commandWord && <Badge className="text-xs bg-blue-100 text-blue-700">{q.commandWord}</Badge>}

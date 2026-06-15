@@ -43,7 +43,7 @@ export default function StatusPublicPage() {
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
           <div className="flex items-center gap-4">
@@ -89,7 +89,7 @@ export default function StatusPublicPage() {
             <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">System Components</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {SERVICES.map((service) => (
-                <div key={service} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
+                <div key={service} className="bg-card rounded-xl p-4 shadow-sm border border-border flex items-center justify-between">
                   <span className="text-sm font-medium text-gray-800">{service}</span>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: current.status === "operational" ? "#10B981" : current.status === "incident" ? "#EF4444" : "#F59E0B" }} />
@@ -110,7 +110,7 @@ export default function StatusPublicPage() {
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-4">
                 <Activity className="w-4 h-4 inline mr-1" />Recent Incidents
               </h3>
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+              <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
                 <div className="divide-y divide-gray-50">
                   {history.slice(1, 8).map((entry: any) => {
                     const m = STATUS_META[entry.status] || STATUS_META.operational;
@@ -136,7 +136,7 @@ export default function StatusPublicPage() {
 
         {history.length <= 1 && !isLoading && (
           <Reveal>
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+            <div className="bg-card rounded-2xl shadow-sm border border-border p-8 text-center">
               <CheckCircle2 className="w-10 h-10 mx-auto mb-3" style={{ color: "#10B981" }} />
               <p className="text-gray-500 font-medium">No incidents in the past 30 days</p>
               <p className="text-gray-400 text-sm mt-1">Aperti has been fully operational.</p>

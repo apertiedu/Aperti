@@ -277,7 +277,7 @@ export default function MyQRPage() {
             <div className="flex flex-col items-center gap-5">
               <div className="relative">
                 <div className="absolute inset-0 rounded-3xl blur-2xl opacity-20" style={{ background: "radial-gradient(circle, #0D9488, transparent)" }} />
-                <div className="relative p-4 rounded-3xl border-2 bg-white shadow-lg" style={{ borderColor: "#0D9488" }}>
+                <div className="relative p-4 rounded-3xl border-2 bg-card shadow-lg" style={{ borderColor: "#0D9488" }}>
                   <img src={qrDataUrl} alt="Attendance QR Code" className="w-56 h-56 rounded-xl" />
                 </div>
               </div>

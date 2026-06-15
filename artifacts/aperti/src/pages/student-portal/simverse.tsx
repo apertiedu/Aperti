@@ -125,7 +125,7 @@ Be encouraging and educational. Keep response under 300 words.`;
       <AnimatePresence mode="wait">
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-3">
               <label className="text-sm font-bold text-gray-900">Hypothesis</label>
               <p className="text-xs text-gray-500">State what you predict will happen and why.</p>
               <Textarea
@@ -144,7 +144,7 @@ Be encouraging and educational. Keep response under 300 words.`;
         )}
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-3">
               <label className="text-sm font-bold text-gray-900">Procedure</label>
               <p className="text-xs text-gray-500">Describe what you did step by step. Include variables and controls.</p>
               <Textarea
@@ -166,7 +166,7 @@ Be encouraging and educational. Keep response under 300 words.`;
         )}
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+            <div className="bg-card rounded-2xl border border-border shadow-sm p-5 space-y-3">
               <label className="text-sm font-bold text-gray-900">Observations & Results</label>
               <p className="text-xs text-gray-500">Record what you observed. Include data, measurements, unexpected results.</p>
               <Textarea

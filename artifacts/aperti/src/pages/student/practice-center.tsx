@@ -125,7 +125,7 @@ export default function PracticeCenter() {
               { icon: TrendingUp, label: "Avg Accuracy", value: "—%", color: "text-blue-600" },
               { icon: Award, label: "Sessions Done", value: "—", color: "text-purple-600" },
             ].map((s, i) => (
-              <Card key={i} className="bg-white border-0 shadow-sm">
+              <Card key={i} className="bg-card border-0 shadow-sm">
                 <CardContent className="pt-5 pb-4 flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center`}><s.icon size={20} className={s.color} /></div>
                   <div><p className="text-xs text-gray-500">{s.label}</p><p className={`text-2xl font-bold ${s.color}`}>{s.value}</p></div>
@@ -134,7 +134,7 @@ export default function PracticeCenter() {
             ))}
           </div>
 
-          <Card className="bg-white border-0 shadow-sm">
+          <Card className="bg-card border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-base">Start Practice Session</CardTitle>
               <Select value={subject} onValueChange={setSubject}>
@@ -189,7 +189,7 @@ export default function PracticeCenter() {
     return (
       <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full space-y-6">
-          <Card className="bg-white border-0 shadow-lg overflow-hidden">
+          <Card className="bg-card border-0 shadow-lg overflow-hidden">
             <div className={`h-3 ${score >= 80 ? "bg-green-500" : score >= 60 ? "bg-amber-500" : "bg-red-500"}`} style={{ width: `${score}%` }} />
             <CardContent className="py-10 text-center space-y-4">
               <div className={`w-24 h-24 rounded-full mx-auto flex items-center justify-center text-3xl font-bold text-white ${score >= 80 ? "bg-green-500" : score >= 60 ? "bg-amber-500" : "bg-red-500"}`}>
@@ -235,7 +235,7 @@ export default function PracticeCenter() {
 
           {/* Question */}
           <motion.div key={qIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
-            <Card className="bg-white border-0 shadow-md">
+            <Card className="bg-card border-0 shadow-md">
               <CardContent className="py-8 space-y-6">
                 {currentQ.command_word && <Badge className="text-xs bg-blue-100 text-blue-700">{currentQ.command_word}</Badge>}
                 <p className="text-lg text-gray-800 leading-relaxed">{currentQ.question_text}</p>

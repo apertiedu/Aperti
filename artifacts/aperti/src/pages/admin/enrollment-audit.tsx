@@ -97,7 +97,7 @@ export default function EnrollmentAudit() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <Card className={`border-0 shadow-sm ${orphans.length > 0 ? "bg-red-50 border-red-200" : "bg-white"}`}>
+            <Card className={`border-0 shadow-sm ${orphans.length > 0 ? "bg-red-50 border-red-200" : "bg-card"}`}>
               <CardContent className="p-5 flex items-center gap-4">
                 <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${orphans.length > 0 ? "bg-red-100" : "bg-green-100"}`}>
                   {orphans.length > 0 ? <Trash2 className="h-5 w-5 text-red-500" /> : <CheckCircle2 className="h-5 w-5 text-green-500" />}
@@ -110,7 +110,7 @@ export default function EnrollmentAudit() {
               </CardContent>
             </Card>
 
-            <Card className={`border-0 shadow-sm ${dupes.length > 0 ? "bg-amber-50" : "bg-white"}`}>
+            <Card className={`border-0 shadow-sm ${dupes.length > 0 ? "bg-amber-50" : "bg-card"}`}>
               <CardContent className="p-5 flex items-center gap-4">
                 <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${dupes.length > 0 ? "bg-amber-100" : "bg-green-100"}`}>
                   {dupes.length > 0 ? <Copy className="h-5 w-5 text-amber-500" /> : <CheckCircle2 className="h-5 w-5 text-green-500" />}
@@ -123,7 +123,7 @@ export default function EnrollmentAudit() {
               </CardContent>
             </Card>
 
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border-0 shadow-sm bg-card">
               <CardContent className="p-5 flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 bg-gray-100">
                   <Users className="h-5 w-5 text-gray-400" />

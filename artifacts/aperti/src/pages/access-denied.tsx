@@ -73,7 +73,7 @@ export default function AccessDenied() {
             onClick={() => navigate(-1 as any)}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:border-slate-300 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border bg-card text-foreground text-sm font-medium hover:border-slate-300 transition-colors shadow-sm"
           >
             <ArrowLeft className="w-4 h-4" />
             Go back

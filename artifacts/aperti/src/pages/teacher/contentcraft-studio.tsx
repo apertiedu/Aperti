@@ -105,7 +105,7 @@ function SlashCommandPalette({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -8, scale: 0.97 }}
       transition={{ duration: 0.15 }}
-      className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-200 rounded-2xl shadow-2xl z-40 overflow-hidden"
+      className="absolute left-0 right-0 top-full mt-2 bg-card border border-border rounded-2xl shadow-2xl z-40 overflow-hidden"
     >
       <div className="p-3 border-b border-gray-100 flex items-center gap-2">
         <Search size={14} className="text-gray-400" />
@@ -260,7 +260,7 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
                 const letter = String.fromCharCode(65 + i);
                 const isCorrect = localContent.correct === i;
                 return (
-                  <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all ${quizRevealed && isCorrect ? "bg-green-100 border-green-400 text-green-800 font-semibold" : "bg-white border-gray-200 text-gray-700"}`}>
+                  <div key={i} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-all ${quizRevealed && isCorrect ? "bg-green-100 border-green-400 text-green-800 font-semibold" : "bg-card border-border text-foreground"}`}>
                     <span className="w-5 h-5 rounded-full bg-purple-100 text-purple-700 text-xs font-bold flex items-center justify-center shrink-0">{letter}</span>
                     {opt || `Option ${letter}`}
                     {quizRevealed && isCorrect && <span className="ml-auto text-green-600 text-xs font-bold">✓ Correct</span>}
@@ -490,7 +490,7 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className={`group relative bg-white rounded-xl border-2 transition-all duration-200 ${selected ? "border-teal-400 shadow-md" : "border-gray-100 hover:border-gray-200"}`}
+      className={`group relative bg-card rounded-xl border-2 transition-all duration-200 ${selected ? "border-teal-400 shadow-md" : "border-gray-100 hover:border-gray-200"}`}
       onClick={() => onSelect(block.id)}
     >
       {bt && (
@@ -710,7 +710,7 @@ export default function ContentCraftStudio() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
-      <div className="sticky top-0 z-30 bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between shadow-sm">
+      <div className="sticky top-0 z-30 bg-card border-b border-border px-6 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/contentcraft")}><ArrowLeft size={16} /></Button>
           <div>
@@ -768,7 +768,7 @@ export default function ContentCraftStudio() {
                   <>
                     <div className="fixed inset-0 z-30" onClick={() => setShowSlashMenu(false)} />
                     <div className="relative z-40">
-                      <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-40 overflow-hidden">
+                      <div className="absolute left-0 right-0 top-full mt-1 bg-card border border-border rounded-xl shadow-xl z-40 overflow-hidden">
                         {/* Search Input */}
                         <div className="p-3 border-b border-gray-100 flex items-center gap-2">
                           <Search size={14} className="text-gray-400 shrink-0" />

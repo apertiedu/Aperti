@@ -315,7 +315,7 @@ export default function TestRunner() {
           const gFailed = groupTests.filter((t) => results[t.id]?.status === "fail").length;
 
           return (
-            <div key={group} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div key={group} className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
               <button
                 className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 transition-colors"
                 onClick={() => toggleGroup(group)}

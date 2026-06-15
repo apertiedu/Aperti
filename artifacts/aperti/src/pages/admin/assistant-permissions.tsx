@@ -71,7 +71,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
   return (
     <motion.div
       layout
-      className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm"
+      className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm"
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}>
 
@@ -116,7 +116,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
                       className={`flex items-start gap-2.5 p-3 rounded-xl border transition-all text-left ${
                         enabled
                           ? "border-[#0D9488] bg-[#0D9488]/5"
-                          : "border-gray-200 hover:border-gray-300 bg-white"
+                          : "border-border hover:border-border bg-card"
                       }`}>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
                         enabled ? "bg-[#0D9488] border-[#0D9488]" : "border-gray-300"

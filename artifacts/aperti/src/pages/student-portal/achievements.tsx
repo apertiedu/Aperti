@@ -105,7 +105,7 @@ function UnlockModal({ badges, onClose }: { badges: Achievement[]; onClose: () =
         exit={{ scale: 0.7, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
         onClick={e => e.stopPropagation()}
-        className="relative bg-white rounded-3xl shadow-2xl p-8 max-w-xs w-full text-center overflow-hidden"
+        className="relative bg-card rounded-3xl shadow-2xl p-8 max-w-xs w-full text-center overflow-hidden"
       >
         {/* Glow */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 opacity-60" />

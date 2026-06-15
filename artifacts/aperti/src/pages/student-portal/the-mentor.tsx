@@ -174,7 +174,7 @@ export default function TheMentor() {
   return (
     <div className="min-h-screen bg-[#F8FAFB] flex flex-col" style={{ fontFamily: "Inter, sans-serif" }}>
       {/* Header */}
-      <div className="border-b border-gray-100 bg-white px-6 py-4 flex items-center gap-3">
+      <div className="border-b border-border bg-card px-6 py-4 flex items-center gap-3">
         <div className="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center">
           <Sparkles className="h-4.5 w-4.5 text-teal-600" style={{ width: 18, height: 18 }} />
         </div>
@@ -200,7 +200,7 @@ export default function TheMentor() {
               className="hidden lg:flex flex-col gap-3 w-64 shrink-0"
             >
               {/* Echo Memory */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Brain className="h-4 w-4 text-teal-600" />
                   <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Your Learning Profile</h3>
@@ -260,7 +260,7 @@ export default function TheMentor() {
               </div>
 
               {/* Session history */}
-              <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex-1">
+              <div className="bg-card rounded-xl border border-border shadow-sm p-4 flex-1">
                 <div className="flex items-center gap-2 mb-3">
                   <History className="h-4 w-4 text-gray-400" />
                   <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Recent Sessions</h3>
@@ -338,7 +338,7 @@ export default function TheMentor() {
               </ScrollArea>
 
               {/* Input + Quick chips */}
-              <div className="shrink-0 border-t border-gray-100 bg-white">
+              <div className="shrink-0 border-t border-border bg-card">
                 {quickChips.length > 0 && (
                   <div className="px-4 pt-3 pb-1">
                     <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Suggested</p>
@@ -363,7 +363,7 @@ export default function TheMentor() {
                       onChange={(e) => setInput(e.target.value)}
                       placeholder="Ask anything… e.g. 'Help me understand waves'"
                       disabled={streaming}
-                      className="flex-1 h-10 rounded-xl border-gray-200 bg-white text-sm"
+                      className="flex-1 h-10 rounded-xl border-border bg-card text-sm"
                     />
                     <Button
                       type="submit"

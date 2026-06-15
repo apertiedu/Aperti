@@ -15,7 +15,7 @@ type Tab = "pending" | "submitted" | "overdue";
 function AssignmentCard({ hw }: { hw: any }) {
   const pct = hw.total_marks && hw.marks_awarded != null ? Math.round((hw.marks_awarded / hw.total_marks) * 100) : null;
   return (
-    <div className="p-3.5 rounded-xl border border-gray-100 bg-white hover:shadow-sm transition-shadow">
+    <div className="p-3.5 rounded-xl border border-border bg-card hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
           <p className="text-sm font-semibold text-gray-900">{hw.title}</p>
@@ -95,7 +95,7 @@ export default function ParentAssignments() {
           <div className="flex bg-gray-100 rounded-xl p-1">
             {tabs.map(t => (
               <button key={t.key} onClick={() => setTab(t.key)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all ${tab === t.key ? "bg-white shadow text-gray-900" : "text-gray-500"}`}>
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-all ${tab === t.key ? "bg-card shadow text-foreground" : "text-gray-500"}`}>
                 <t.icon className="h-3.5 w-3.5" />
                 {t.label}
                 <span className={`ml-1 text-[9px] px-1.5 py-0.5 rounded-full font-bold ${tab === t.key ? "text-white" : "bg-gray-200 text-gray-500"}`}

@@ -38,7 +38,7 @@ function CourseCard({ enroll, idx, onClick }: { enroll: Enrollment; idx: number;
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.07 }}
       whileHover={isApproved ? { y: -3 } : {}}
-      className={`bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden ${isApproved ? "cursor-pointer" : ""}`}
+      className={`bg-card rounded-2xl border border-border shadow-sm overflow-hidden ${isApproved ? "cursor-pointer" : ""}`}
       onClick={isApproved ? onClick : undefined}
       role={isApproved ? "button" : undefined}
     >
@@ -109,7 +109,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
       </button>
 
       {/* Course header */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-5">
+      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden mb-5">
         <div className="h-28 flex items-center justify-center relative"
           style={{ background: `linear-gradient(135deg, ${color}20, ${color}50)` }}>
           {enroll.thumbnail_url
@@ -141,7 +141,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
 
         <TabsContent value="assignments">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            className="bg-card rounded-2xl border border-border shadow-sm p-5">
             <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
               <FileText className="h-4 w-4 text-blue-600" /> Assignments
             </h3>
@@ -180,7 +180,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
 
         <TabsContent value="flashcards">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            className="bg-card rounded-2xl border border-border shadow-sm p-5">
             <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
               <Layers className="h-4 w-4 text-blue-600" /> Flashcard Decks
             </h3>
@@ -211,7 +211,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
 
         <TabsContent value="resources">
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+            className="bg-card rounded-2xl border border-border shadow-sm p-5">
             <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
               <ExternalLink className="h-4 w-4 text-teal-600" /> Learning Resources
             </h3>
@@ -290,7 +290,7 @@ export default function CourseHub() {
       {isLoading ? (
         <div className="space-y-3">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}</div>
       ) : !enrollments?.length ? (
-        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+        <div className="text-center py-16 bg-card rounded-2xl border border-border">
           <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-200" />
           <h3 className="font-bold text-gray-700 mb-2">No courses yet</h3>
           <p className="text-sm text-gray-400 mb-5">Browse the marketplace and enroll.</p>

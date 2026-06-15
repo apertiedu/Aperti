@@ -51,7 +51,7 @@ function PlanCard({ item, idx }: { item: PlanItem; idx: number }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.05 }}
-      className={`bg-white rounded-2xl border shadow-sm p-4 ${isToday ? "border-teal-200 ring-1 ring-teal-100" : "border-gray-100"}`}
+      className={`bg-card rounded-2xl border shadow-sm p-4 ${isToday ? "border-teal-200 ring-1 ring-teal-100" : "border-gray-100"}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -113,7 +113,7 @@ function WeeklyCalendar({ items }: { items: PlanItem[] }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.04 }}
             className={`rounded-xl p-2 text-center border transition-all cursor-default ${
-              isToday ? "bg-teal-600 text-white border-teal-600 shadow-md" : "bg-white border-gray-100 hover:border-teal-100"
+              isToday ? "bg-teal-600 text-white border-teal-600 shadow-md" : "bg-card border-border hover:border-teal-100"
             }`}
           >
             <p className={`text-[9px] font-bold uppercase mb-1 ${isToday ? "text-teal-100" : "text-gray-400"}`}>
@@ -189,7 +189,7 @@ export default function Revisit() {
         {(["daily", "weekly", "sprint"] as const).map((type) => (
           <button key={type} onClick={() => setPlanType(type)}
             className={`px-4 py-2 rounded-lg text-xs font-semibold capitalize transition-all ${
-              planType === type ? "bg-white shadow-sm text-gray-900" : "text-gray-500 hover:text-gray-700"
+              planType === type ? "bg-card shadow-sm text-foreground" : "text-gray-500 hover:text-gray-700"
             }`}>
             {type}
           </button>
@@ -198,7 +198,7 @@ export default function Revisit() {
 
       {/* Weak topics */}
       {data?.weakTopics && data.weakTopics.length > 0 && (
-        <div className="mb-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="mb-4 bg-card rounded-xl border border-border shadow-sm p-4">
           <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
             <AlertTriangle className="h-3.5 w-3.5 text-amber-500" /> Your Weak Topics
           </p>
@@ -212,7 +212,7 @@ export default function Revisit() {
 
       {/* Upcoming exams */}
       {data?.upcomingExams && data.upcomingExams.length > 0 && (
-        <div className="mb-4 bg-white rounded-xl border border-gray-100 shadow-sm p-4">
+        <div className="mb-4 bg-card rounded-xl border border-border shadow-sm p-4">
           <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5 text-teal-600" /> Upcoming Exams
           </p>
@@ -230,7 +230,7 @@ export default function Revisit() {
       )}
 
       {/* ── AI Revision Modes ── */}
-      <div className="mb-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <div className="mb-5 bg-card rounded-2xl border border-border shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center">
             <Brain className="w-4 h-4 text-teal-600" />
@@ -317,7 +317,7 @@ export default function Revisit() {
           {data.plan.map((item, i) => <PlanCard key={item.date} item={item} idx={i} />)}
         </div>
       ) : (
-        <div className="text-center py-16 bg-white rounded-2xl border border-gray-100">
+        <div className="text-center py-16 bg-card rounded-2xl border border-border">
           <Target className="h-10 w-10 mx-auto mb-3 text-gray-200" />
           <p className="font-bold text-gray-700">No revision plan yet</p>
           <p className="text-sm text-gray-400 mt-1">Complete some activities to get a personalised plan</p>

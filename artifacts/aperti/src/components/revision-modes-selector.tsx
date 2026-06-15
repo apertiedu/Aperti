@@ -258,7 +258,7 @@ export default function RevisionModesSelector({ topicId, topicName, subjectName,
               className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all text-center ${
                 active
                   ? "shadow-sm"
-                  : "border-border bg-white hover:border-slate-300"
+                  : "border-border bg-card hover:border-slate-300"
               }`}
               style={active ? { borderColor: mode.color, background: mode.bg } : {}}
             >
@@ -309,7 +309,7 @@ export default function RevisionModesSelector({ topicId, topicName, subjectName,
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="bg-white rounded-2xl border border-border p-4 shadow-sm"
+            className="bg-card rounded-2xl border border-border p-4 shadow-sm"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">

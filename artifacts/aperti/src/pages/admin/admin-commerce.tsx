@@ -71,7 +71,7 @@ export default function AdminCommercePage() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-white text-teal-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-card text-teal-700 shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
               <Icon className="w-3.5 h-3.5" /> {t.label}
             </button>
@@ -175,7 +175,7 @@ function PaymentRequestsPanel({ qc, toast }: { qc: any; toast: any }) {
       {processed.length > 0 && (
         <section>
           <h3 className="font-bold text-gray-600 text-sm mb-3">Recently Processed</h3>
-          <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border overflow-hidden">
             <table className="w-full text-sm">
               <thead><tr className="bg-gray-50 border-b border-gray-100 text-xs text-gray-400">
                 <th className="text-left px-4 py-3">User</th><th className="text-left px-4 py-3">Plan</th>
@@ -223,7 +223,7 @@ function SubscriptionsPanel() {
           </button>
         ))}
       </div>
-      <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border overflow-hidden">
         <table className="w-full text-sm">
           <thead><tr className="bg-gray-50 border-b border-gray-100 text-xs text-gray-400">
             <th className="text-left px-4 py-3">User</th><th className="text-left px-4 py-3">Plan</th>
@@ -354,7 +354,7 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {(plans as any[]).map((plan: any) => (
-          <div key={plan.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div key={plan.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
             {editing === plan.id && editForm ? (
               <div className="space-y-2">
                 <input value={editForm.name} onChange={e => setEditForm((f: any) => ({...f, name: e.target.value}))} placeholder="Name"
@@ -435,7 +435,7 @@ function InvoicesPanel() {
   });
   if (isLoading) return <LoadingSpin />;
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <div className="bg-card rounded-2xl border border-border overflow-hidden">
       <table className="w-full text-sm">
         <thead><tr className="bg-gray-50 border-b text-xs text-gray-400">
           <th className="text-left px-4 py-3">User</th><th className="text-left px-4 py-3">Plan</th>
@@ -506,7 +506,7 @@ function ComingSoonPanel({ qc, toast }: { qc: any; toast: any }) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         {(items as any[]).map((item: any) => (
-          <div key={item.id} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+          <div key={item.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm flex flex-col gap-3">
             <div className="flex items-start justify-between">
               <h3 className="font-bold text-gray-900">{item.feature_name}</h3>
               <button onClick={() => deleteMut.mutate(item.id)} className="text-red-300 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
@@ -531,7 +531,7 @@ function KpiCard({ label, value, sub, icon: Icon, trend }: {
   icon: React.ComponentType<any>; trend?: "up"|"down"|"flat";
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex items-start gap-4">
+    <div className="bg-card rounded-2xl shadow-sm border border-border p-5 flex items-start gap-4">
       <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
         <Icon className="w-5 h-5 text-teal-600" />
       </div>
@@ -594,7 +594,7 @@ function AnalyticsPanel() {
       </div>
 
       {/* Revenue Over Time */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+      <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
         <h3 className="text-sm font-semibold text-gray-700 mb-4">Monthly Revenue (EGP)</h3>
         {revenueHistory.length === 0 ? (
           <p className="text-sm text-gray-400 text-center py-8">No revenue history yet</p>
@@ -613,7 +613,7 @@ function AnalyticsPanel() {
 
       {/* Plan Distribution + Status Breakdown */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
           <h3 className="text-sm font-semibold text-gray-700 mb-4">Subscribers by Plan</h3>
           {planDist.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">No data</p>
@@ -634,7 +634,7 @@ function AnalyticsPanel() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
           <h3 className="text-sm font-semibold text-gray-700 mb-4">Subscriptions by Status</h3>
           {statusDist.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">No data</p>
@@ -655,7 +655,7 @@ function AnalyticsPanel() {
 
       {/* New subscriptions per month (line chart) */}
       {revenueHistory.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <div className="bg-card rounded-2xl shadow-sm border border-border p-5">
           <h3 className="text-sm font-semibold text-gray-700 mb-4">New Subscriptions per Month</h3>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={revenueHistory} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>

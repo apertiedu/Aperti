@@ -72,7 +72,7 @@ export default function ChildProfile() {
       <div className="flex bg-gray-100 rounded-xl p-1">
         {TABS.map(t => (
           <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${tab === t ? "bg-white shadow text-gray-900" : "text-gray-500"}`}>
+            className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${tab === t ? "bg-card shadow text-foreground" : "text-gray-500"}`}>
             {t}
           </button>
         ))}

@@ -68,7 +68,7 @@ export default function RevisionNotesPage() {
   return (
     <div className="flex h-[calc(100vh-4rem)] overflow-hidden">
       {/* Sidebar */}
-      <div className="w-72 border-r border-gray-100 bg-white flex flex-col">
+      <div className="w-72 border-r border-border bg-card flex flex-col">
         <div className="p-4 border-b border-gray-100 space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-gray-900 flex items-center gap-2">
@@ -172,7 +172,7 @@ export default function RevisionNotesPage() {
         {selected ? (
           <>
             {/* Toolbar */}
-            <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between gap-4">
+            <div className="bg-card border-b border-border px-6 py-3 flex items-center justify-between gap-4">
               {editing ? (
                 <input
                   value={editTitle}
@@ -210,11 +210,11 @@ export default function RevisionNotesPage() {
                 <textarea
                   value={editContent}
                   onChange={e => setEditContent(e.target.value)}
-                  className="w-full h-full min-h-[400px] bg-white border border-gray-200 rounded-xl p-5 text-sm font-mono text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-300 resize-none shadow-sm"
+                  className="w-full h-full min-h-[400px] bg-card border border-border rounded-xl p-5 text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-teal-300 resize-none shadow-sm"
                   placeholder="Write your revision notes in Markdown…"
                 />
               ) : (
-                <div className="max-w-3xl mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+                <div className="max-w-3xl mx-auto bg-card rounded-2xl border border-border shadow-sm p-8">
                   <div className="prose prose-sm prose-teal max-w-none text-gray-800 whitespace-pre-wrap">
                     {selected.content}
                   </div>

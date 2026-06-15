@@ -183,7 +183,7 @@ export default function MyHomework() {
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
         {([["pending", "Pending", pending.length], ["submitted", "Submitted", submitted.length], ["graded", "Graded", graded.length]] as [typeof activeTab, string, number][]).map(([tab, label, count]) => (
           <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === tab ? "bg-white shadow-sm text-gray-900" : "text-gray-500 hover:text-gray-700"}`}>
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === tab ? "bg-card shadow-sm text-foreground" : "text-gray-500 hover:text-gray-700"}`}>
             {label}
             {count > 0 && <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab ? "bg-primary/10 text-primary" : "bg-gray-200 text-gray-600"}`}>{count}</span>}
           </button>
@@ -191,9 +191,9 @@ export default function MyHomework() {
       </div>
 
       {loading ? (
-        <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-20 bg-white animate-pulse rounded-2xl" />)}</div>
+        <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-20 bg-muted animate-pulse rounded-2xl" />)}</div>
       ) : tabData[activeTab].length === 0 ? (
-        <div className="py-16 text-center text-gray-400 bg-white rounded-2xl">
+        <div className="py-16 text-center text-gray-400 bg-card rounded-2xl">
           <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-20" />
           <p className="font-medium">No {activeTab} homework</p>
           {activeTab === "pending" && <p className="text-sm mt-1">You're all caught up! 🎉</p>}
@@ -213,7 +213,7 @@ export default function MyHomework() {
 
             return (
               <motion.div key={hw.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}
-                className={`bg-white rounded-2xl shadow-sm border overflow-hidden ${isOverdue ? "border-red-200" : "border-gray-100"}`}>
+                className={`bg-card rounded-2xl shadow-sm border overflow-hidden ${isOverdue ? "border-red-200" : "border-gray-100"}`}>
                 <button className="w-full flex items-start gap-4 p-5 text-left hover:bg-gray-50/50 transition-colors"
                   onClick={() => setExpandedId(isExpanded ? null : hw.id)}>
                   <div className={`w-1 self-stretch rounded-full flex-shrink-0 ${isOverdue ? "bg-red-400" : "bg-primary/40"}`} />

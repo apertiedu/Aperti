@@ -50,7 +50,7 @@ function Toggle({ on, onChange, label }: { on: boolean; onChange: () => void; la
 
 function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: React.ComponentType<{ className?: string }>; color: string }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center gap-4">
+    <div className="bg-card rounded-2xl border border-border shadow-sm px-5 py-4 flex items-center gap-4">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
         <Icon className="w-5 h-5" />
       </div>
@@ -84,7 +84,7 @@ function PlanForm({
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
           <select value={form.type} onChange={e => set("type", e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-300">
+            className="w-full border border-border rounded-xl px-3 py-2 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-teal-300">
             <option value="teacher">Teacher</option>
             <option value="student">Student</option>
           </select>
@@ -150,7 +150,7 @@ function PlanCard({ plan, onEdit, onDelete, onToggleVisibility, onToggleLanding 
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
-      className={`bg-white rounded-2xl border shadow-sm flex flex-col gap-0 transition-shadow hover:shadow-md overflow-hidden ${isPopular ? "border-teal-300 ring-1 ring-teal-100" : "border-gray-100"} ${!plan.visibility ? "opacity-60" : ""}`}>
+      className={`bg-card rounded-2xl border shadow-sm flex flex-col gap-0 transition-shadow hover:shadow-md overflow-hidden ${isPopular ? "border-teal-300 ring-1 ring-teal-100" : "border-border"} ${!plan.visibility ? "opacity-60" : ""}`}>
 
       {isPopular && (
         <div className="bg-teal-500 text-white text-[9px] font-extrabold text-center py-1 tracking-widest">
@@ -355,7 +355,7 @@ export default function PlansAdminPage() {
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
         {(["all", "teacher", "student"] as const).map(f => (
           <button key={f} onClick={() => setTypeFilter(f)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${typeFilter === f ? "bg-white text-teal-700 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}>
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${typeFilter === f ? "bg-card text-teal-700 shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
             {f === "all" ? `All (${plans.length})` : f === "teacher" ? `Teachers (${teacherPlans.length})` : `Students (${studentPlans.length})`}
           </button>
         ))}

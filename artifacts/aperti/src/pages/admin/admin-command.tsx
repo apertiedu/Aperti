@@ -57,7 +57,7 @@ function ActivityHeatmap() {
   }
 
   return (
-    <Card className="border-0 shadow-sm bg-white mb-8">
+    <Card className="border-0 shadow-sm bg-card mb-8">
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -198,7 +198,7 @@ function DeploymentDebugPanel() {
   ];
 
   return (
-    <Card className="border-0 shadow-sm bg-white mb-6">
+    <Card className="border-0 shadow-sm bg-card mb-6">
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -339,7 +339,7 @@ export default function AdminCommand() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07 }}
           >
-            <Card className="border-0 shadow-sm bg-white">
+            <Card className="border-0 shadow-sm bg-card">
               <CardContent className="p-5 flex items-center gap-3">
                 <div
                   className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0"
@@ -395,7 +395,7 @@ export default function AdminCommand() {
           transition={{ delay: 0.22 }}
           className="mb-8"
         >
-          <Card className="border-0 shadow-sm bg-white">
+          <Card className="border-0 shadow-sm bg-card">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -473,7 +473,7 @@ export default function AdminCommand() {
             transition={{ delay: 0.35 + i * 0.05 }}
           >
             <Link href={mod.to}>
-              <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white" : (mod as any).highlight2 ? "bg-gradient-to-r from-violet-600 to-purple-700 text-white" : "bg-white"}`}>
+              <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white" : (mod as any).highlight2 ? "bg-gradient-to-r from-violet-600 to-purple-700 text-white" : "bg-card"}`}>
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
                     style={{ background: (mod as any).highlight || (mod as any).highlight2 ? "rgba(255,255,255,0.2)" : "rgba(0,121,107,0.07)" }}>

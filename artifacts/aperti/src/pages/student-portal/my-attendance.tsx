@@ -45,9 +45,9 @@ export default function MyAttendance() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-8 bg-white animate-pulse rounded-xl w-48" />
-        <div className="grid grid-cols-2 gap-3">{[...Array(4)].map((_, i) => <div key={i} className="h-20 bg-white animate-pulse rounded-2xl" />)}</div>
-        <div className="h-40 bg-white animate-pulse rounded-2xl" />
+        <div className="h-8 bg-muted animate-pulse rounded-xl w-48" />
+        <div className="grid grid-cols-2 gap-3">{[...Array(4)].map((_, i) => <div key={i} className="h-20 bg-muted animate-pulse rounded-2xl" />)}</div>
+        <div className="h-40 bg-muted animate-pulse rounded-2xl" />
       </div>
     );
   }
@@ -72,7 +72,7 @@ export default function MyAttendance() {
       <div className="grid grid-cols-2 gap-3">
         {stats.map((s, i) => (
           <motion.div key={s.label} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.07 }}
-            className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+            className="bg-card rounded-2xl p-4 shadow-sm border border-border">
             <p className="text-xs text-gray-400">{s.label}</p>
             <p className={`text-2xl font-black mt-1 ${s.color}`}>{s.value}</p>
           </motion.div>
@@ -80,14 +80,14 @@ export default function MyAttendance() {
       </div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
-        className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        className="bg-card rounded-2xl shadow-sm border border-border p-5">
         <h2 className="text-sm font-bold text-gray-900 mb-4">Attendance Heatmap (Last 26 Weeks)</h2>
         <AttendanceHeatmap data={heatmap} weeks={26} />
       </motion.div>
 
       {records.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
           <h2 className="text-sm font-bold text-gray-900 px-5 py-4 border-b border-gray-50">Recent Sessions</h2>
           <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
             {records.slice(0, 30).map(r => (

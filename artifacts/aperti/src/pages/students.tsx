@@ -226,14 +226,14 @@ function QRModal({ student }: { student: StudentRecord }) {
                 </div>
               </div>
 
-              <div className="bg-white">
+              <div className="bg-card">
                 <div className="h-1" style={{ background: "linear-gradient(90deg, #0D9488, #06b6d4, #8b5cf6)" }} />
                 <div className="px-6 py-5 flex flex-col items-center gap-4">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.15, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                    className="bg-white rounded-2xl p-3 shadow-md border border-gray-100"
+                    className="bg-card rounded-2xl p-3 shadow-md border border-border"
                   >
                     {qrUrl ? (
                       <img src={qrUrl} alt="QR code" className="w-44 h-44 rounded-xl" />

@@ -113,11 +113,11 @@ function TeacherWizard({ onDone }: { onDone: () => void }) {
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20..." className="h-10 rounded-xl border-gray-200" /></div>
               <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-                <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-white">
+                <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
                   <option value="">Select…</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
             </div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Years of experience</Label>
-              <select value={exp} onChange={e => setExp(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-white">
+              <select value={exp} onChange={e => setExp(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
                 <option value="">Select…</option><option>Less than 1 year</option><option>1–3 years</option><option>3–5 years</option><option>5–10 years</option><option>10+ years</option></select></div>
           </motion.div>
         )}
@@ -208,7 +208,7 @@ function StudentWizard({ onDone }: { onDone: () => void }) {
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Short bio (optional)</Label>
               <textarea value={bio} onChange={e => setBio(e.target.value)} rows={2} placeholder="e.g. Year 12 student preparing for Cambridge A-Levels..." className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-teal-600" /></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-white">
+              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
                 <option value="">Select country</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
           </motion.div>
         )}
@@ -282,7 +282,7 @@ function ParentWizard({ onDone }: { onDone: () => void }) {
             <div><h2 className="text-xl font-bold text-gray-900 mb-1">Your profile</h2><p className="text-gray-500 text-sm">A few quick details to personalise your experience.</p></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Phone (optional)</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20..." className="h-10 rounded-xl border-gray-200" /></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-white">
+              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
                 <option value="">Select country</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
           </motion.div>
         )}
@@ -328,7 +328,7 @@ export default function Onboarding() {
         <div className="absolute bottom-1/3 left-1/4 w-64 h-64 rounded-full opacity-5" style={{ background: TEAL, filter: "blur(80px)" }} />
       </div>
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
-        className="relative z-10 w-full max-w-lg bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        className="relative z-10 w-full max-w-lg bg-card rounded-2xl shadow-sm border border-border p-8">
         <div className="flex items-center justify-between mb-8">
           <span className="text-xl font-bold" style={{ color: TEAL }}>Aperti.</span>
           <div className="flex items-center gap-2">

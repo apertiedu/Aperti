@@ -62,13 +62,13 @@ export default function MyResources() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
-        <Input className="pl-9 bg-white border-gray-200 rounded-xl" placeholder="Search resources..." value={search} onChange={e => setSearch(e.target.value)} />
+        <Input className="pl-9 bg-card border-border rounded-xl" placeholder="Search resources..." value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[...Array(6)].map((_, i) => <div key={i} className="h-28 bg-white animate-pulse rounded-2xl" />)}</div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">{[...Array(6)].map((_, i) => <div key={i} className="h-28 bg-muted animate-pulse rounded-2xl" />)}</div>
       ) : filtered.length === 0 ? (
-        <div className="py-16 text-center text-gray-400 bg-white rounded-2xl">
+        <div className="py-16 text-center text-gray-400 bg-card rounded-2xl">
           <FolderOpen className="h-10 w-10 mx-auto mb-3 opacity-20" />
           <p>{search ? "No resources match your search." : "No resources shared yet."}</p>
         </div>
@@ -82,7 +82,7 @@ export default function MyResources() {
                 const isExpanded = expandedId === r.id;
                 return (
                   <motion.div key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
-                    className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
                     <button className="w-full flex items-start gap-3 p-4 text-left hover:bg-gray-50/50 transition-colors"
                       onClick={() => handleOpen(r)}>
                       <div className={`w-9 h-9 rounded-xl ${cfg.bg} flex items-center justify-center flex-shrink-0`}>

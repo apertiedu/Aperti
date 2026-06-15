@@ -180,7 +180,7 @@ export default function SubPilotAdmin() {
       </motion.div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-white border border-gray-100 rounded-xl p-1 mb-6 w-fit">
+      <div className="flex gap-1 bg-card border border-border rounded-xl p-1 mb-6 w-fit">
         {TABS.map(tab => (
           <button
             key={tab}

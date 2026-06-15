@@ -216,7 +216,7 @@ export default function SmartEmptyState({
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                   action.primary
                     ? "text-white shadow-sm"
-                    : "bg-white border border-border text-foreground hover:bg-muted"
+                    : "bg-card border border-border text-foreground hover:bg-muted"
                 }`}
                 style={action.primary ? { background: preset.color } : {}}
               >
