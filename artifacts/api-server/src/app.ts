@@ -110,6 +110,7 @@ import { apiV2Router } from "./routes/api-v2";
 import { classforgeRouter } from "./routes/classforge";
 import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
+import { sanitizeBody } from "./middleware/sanitize-body";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -144,6 +145,15 @@ app.use(
   }),
 );
 
+// ── Extra security headers not fully covered by helmet defaults ───────────────
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  next();
+});
+
 // ── Compression ───────────────────────────────────────────────────────────────
 app.use(compression());
 
@@ -176,6 +186,7 @@ app.use(cors({
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(cookieParser());
+app.use(sanitizeBody);
 
 // ── HTTP logging ──────────────────────────────────────────────────────────────
 app.use(

@@ -1141,6 +1141,57 @@ body, #root {
   animation: tealBorderPulse 3s ease-in-out infinite;
 }
 
+/* ── Global mobile safety net ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Prevent any element from causing horizontal overflow */
+  #root { overflow-x: hidden; max-width: 100vw; }
+
+  /* Tables that haven't been explicitly wrapped get a scroller */
+  table:not(.no-responsive) { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Ensure form inputs don't trigger zoom on iOS */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="url"],
+  input[type="number"],
+  input[type="tel"],
+  select,
+  textarea {
+    font-size: max(16px, 1rem);
+  }
+
+  /* Minimum tap target size (WCAG 2.1 AA — 44×44px) */
+  button:not(.icon-btn-sm),
+  a[role="button"],
+  [role="button"] {
+    min-height: 44px;
+  }
+
+  /* Avoid text being too small on small screens */
+  .text-xs { font-size: 0.75rem; }
+
+  /* Card padding tighter on mobile */
+  .card-mobile-tight { padding: 1rem; }
+}
+
+/* ── Smooth scroll on all devices ───────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── High contrast mode support ─────────────────────────────────────────── */
+@media (prefers-contrast: high) {
+  .skeleton { background: #ccc !important; }
+  .text-muted-foreground { color: hsl(var(--foreground)) !important; }
+}
+
 /* ── Print styles (gradebook, reports, certificates) ───────────────────── */
 @media print {
   nav, aside, header, .no-print,

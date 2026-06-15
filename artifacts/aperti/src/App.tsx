@@ -15,6 +15,8 @@ const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
 const ResetPassword = lazy(() => import("@/pages/reset-password"));
 import LowBandwidthBanner from "@/components/LowBandwidthBanner";
 import { OfflineDetector } from "@/components/offline-detector";
+import { RouteProgressBar } from "@/components/route-progress-bar";
+import { NetworkStatusBanner } from "@/components/network-status-banner";
 const ServerError = lazy(() => import("@/pages/server-error"));
 
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
@@ -823,6 +825,8 @@ export default function App() {
                 <SessionExpiryGate />
               </ErrorBoundary>
           </AuthProvider>
+          <RouteProgressBar />
+          <NetworkStatusBanner />
           <Toaster />
           <LowBandwidthBanner />
           <OfflineDetector />

@@ -103,6 +103,8 @@ async function main() {
 
   setupParentNotifications(io);
 
+  setupGracefulShutdown(httpServer);
+
   httpServer.listen(port, (err?: Error) => {
     if (err) {
       logger.error({ err }, "Error listening on port");
@@ -110,6 +112,40 @@ async function main() {
     }
     logger.info({ port }, `Server started on port ${port}`);
   });
+}
+
+// ── Graceful shutdown — drain in-flight requests before exit ─────────────────
+function setupGracefulShutdown(server: ReturnType<typeof createServer>) {
+  let isShuttingDown = false;
+
+  const shutdown = (signal: string) => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    logger.info({ signal }, "Graceful shutdown initiated");
+
+    server.close(async () => {
+      logger.info("HTTP server closed — draining DB pool");
+      try {
+        const { pool: dbPool } = await import("@workspace/db");
+        await dbPool.end();
+        logger.info("DB pool closed cleanly");
+      } catch (e) {
+        logger.warn({ e }, "DB pool close warning");
+      }
+      logger.info("Shutdown complete");
+      process.exit(0);
+    });
+
+    setTimeout(() => {
+      logger.error("Forced shutdown after timeout");
+      process.exit(1);
+    }, 15_000).unref();
+  };
+
+  process.on("SIGTERM", () => shutdown("SIGTERM"));
+  process.on("SIGINT", () => shutdown("SIGINT"));
+
+  return shutdown;
 }
 
 // ── Process-level error capture ───────────────────────────────────────────────

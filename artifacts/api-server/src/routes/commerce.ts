@@ -1,4 +1,5 @@
 import { Router, Response } from "express";
+import rateLimit from "express-rate-limit";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { openaiChat } from "../lib/ai-config";
@@ -6,6 +7,16 @@ import { sendPushToUser } from "../lib/push";
 import crypto from "crypto";
 
 export const commerceRouter = Router();
+
+const subscribeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    res.status(429).json({ error: "Too many subscription attempts. Please wait 15 minutes." });
+  },
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPER
@@ -46,7 +57,7 @@ commerceRouter.get("/plans/public", async (_req, res: Response) => {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // POST /api/commerce/subscribe — initiate subscription, create payment_request
-commerceRouter.post("/commerce/subscribe", authenticate, async (req: AuthRequest, res: Response) => {
+commerceRouter.post("/commerce/subscribe", authenticate, subscribeLimiter, async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   const { planId } = req.body;
   if (!planId) { res.status(400).json({ error: "planId required" }); return; }

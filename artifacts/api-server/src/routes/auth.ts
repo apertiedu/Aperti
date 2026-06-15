@@ -55,6 +55,18 @@ function safeUser(account: Record<string, unknown>): {
   };
 }
 
+// ── Register rate limiter: 10 new accounts per hour per IP ───────────────────
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (_req: Request, res: Response) => {
+    res.setHeader("Content-Type", "application/json");
+    res.status(429).json({ error: "Too many registration attempts. Please try again in 1 hour." });
+  },
+});
+
 // ── Login rate limiter: 5 failed attempts per 10 minutes per IP ───────────────
 // skipSuccessfulRequests=true means only 4xx/5xx responses count toward the limit
 const loginLimiter = rateLimit({
@@ -379,7 +391,7 @@ authRouter.get("/public-teachers", async (_req: Request, res: Response) => {
 });
 
 // POST /auth/student-register — student self-registration (requires teacher approval)
-authRouter.post("/student-register", async (req: Request, res: Response) => {
+authRouter.post("/student-register", registerLimiter, async (req: Request, res: Response) => {
   try {
     const { username, password, displayName, email, teacherId } = req.body;
     if (!username || !password) return res.status(400).json({ error: "Username and password are required" });
@@ -419,7 +431,7 @@ authRouter.post("/student-register", async (req: Request, res: Response) => {
 })();
 
 // POST /auth/register — unified registration for all public roles
-authRouter.post("/register", async (req: Request, res: Response) => {
+authRouter.post("/register", registerLimiter, async (req: Request, res: Response) => {
   try {
     const { firstName, lastName, username: rawUsername, email, password, role, country, phone } = req.body;
     if (!email?.trim() || !password) return res.status(400).json({ error: "Email and password are required" });
