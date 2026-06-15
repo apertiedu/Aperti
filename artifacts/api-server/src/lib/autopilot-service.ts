@@ -1,5 +1,6 @@
 import { pool } from "@workspace/db";
 import { executeTask } from "../routes/autopilot";
+import { logger } from "./logger";
 
 const INTERVAL_MS = 60_000; // check every minute
 let _started = false;
@@ -24,15 +25,15 @@ export function startAutopilotService(): void {
             [task.id]
           );
         } catch (err) {
-          console.error(`[AutoPilot] Task ${task.id} failed:`, err);
+          logger.error({ taskId: task.id, err }, "[AutoPilot] Task failed");
         }
       }
     } catch (err) {
-      console.error("[AutoPilot] Scheduler tick failed:", err);
+      logger.error({ err }, "[AutoPilot] Scheduler tick failed");
     }
   }, INTERVAL_MS);
 
-  console.log("[AutoPilot] Scheduler started (60s interval)");
+  logger.info("[AutoPilot] Scheduler started (60s interval)");
 }
 
 function isDue(task: any, now: Date): boolean {

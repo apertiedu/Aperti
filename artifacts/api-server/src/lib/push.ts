@@ -11,9 +11,7 @@ function ensureVapid() {
 
   if (!publicKey || !privateKey) {
     const keys = webpush.generateVAPIDKeys();
-    console.warn("[push] VAPID keys not set — generated temporary keys (ephemeral, will not persist across restarts)");
-    console.warn("[push] Set VAPID_PUBLIC_KEY=" + keys.publicKey);
-    console.warn("[push] Set VAPID_PRIVATE_KEY=" + keys.privateKey);
+    console.warn("[push] VAPID keys not set — generated temporary keys (ephemeral, will not persist across restarts). Set VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY in Replit Secrets.");
     webpush.setVapidDetails(subject, keys.publicKey, keys.privateKey);
     (global as any).__VAPID_PUBLIC_KEY__ = keys.publicKey;
   } else {

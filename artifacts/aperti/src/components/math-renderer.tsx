@@ -47,8 +47,18 @@ function parseSegments(text: string): Seg[] {
   return out;
 }
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 function mdToHtml(text: string): string {
-  return text
+  const safe = escapeHtml(text);
+  return safe
     .replace(/\*\*\*(.*?)\*\*\*/gs, "<strong><em>$1</em></strong>")
     .replace(/\*\*(.*?)\*\*/gs, "<strong>$1</strong>")
     .replace(/__(.*?)__/gs, "<strong>$1</strong>")
@@ -81,7 +91,7 @@ export function MathRenderer({
   inline?: boolean;
 }) {
   if (!content) return null;
-  const html = segmentsToHtml(parseSegments(content));
+  const html = DOMPurify.sanitize(segmentsToHtml(parseSegments(content)), { ADD_TAGS: ["math", "svg"], ADD_ATTR: ["class", "style", "aria-hidden", "focusable", "role", "viewBox", "xmlns", "d", "fill", "stroke", "width", "height"] });
   if (inline) {
     return <span className={className} dangerouslySetInnerHTML={{ __html: html }} />;
   }
@@ -101,7 +111,8 @@ export function MathHtml({
   className?: string;
 }) {
   if (!html) return null;
-  const parts = html.split(/(<[^>]+>)/);
+  const sanitizedInput = DOMPurify.sanitize(html, { ADD_TAGS: ["math", "svg"], ADD_ATTR: ["class", "style", "aria-hidden", "focusable", "role", "viewBox", "xmlns", "d", "fill", "stroke", "width", "height"] });
+  const parts = sanitizedInput.split(/(<[^>]+>)/);
   const processed = parts
     .map(part => {
       if (part.startsWith("<") || !part.trim()) return part;
@@ -111,7 +122,7 @@ export function MathHtml({
           if (seg.type === "display")
             return `<span class="block my-3 overflow-x-auto text-center">${renderKatex(seg.content, true)}</span>`;
           if (seg.type === "inline") return renderKatex(seg.content, false);
-          return seg.content;
+          return escapeHtml(seg.content);
         })
         .join("");
     })

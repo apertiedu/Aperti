@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, requireRole, type AuthRequest } from "../middleware/auth";
+import { logger } from "../lib/logger";
 
 const router = Router();
 const adminOnly = [authenticate, requireRole("admin", "super_admin")];
@@ -20,7 +21,7 @@ function scheduleFeatureLaunch(featureId: number, releaseDate: Date) {
       [featureId],
     );
     scheduledTimers.delete(featureId);
-    console.log(`[LaunchCMS] Feature ${featureId} auto-released`);
+    logger.info({ featureId }, "[LaunchCMS] Feature auto-released");
   }, Math.min(delay, 2147483647));
   scheduledTimers.set(featureId, timer);
 }

@@ -1,4 +1,5 @@
 import { pool } from "@workspace/db";
+import { logger } from "../lib/logger";
 
 async function createAlert(type: string, message: string, severity: "info" | "warning" | "critical") {
   try {
@@ -109,6 +110,6 @@ export function startFounderAlertsWorker() {
   tick().catch(() => {});
   const interval = setInterval(() => tick().catch(() => {}), 5 * 60 * 1000);
 
-  console.log("[founder-alerts] Background worker started (5-min interval)");
+  logger.info("[founder-alerts] Background worker started (5-min interval)");
   return interval;
 }

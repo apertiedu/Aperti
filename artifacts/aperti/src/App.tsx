@@ -1,3 +1,4 @@
+import { useEffect, useRef, lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, useLocation, Redirect } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -5,245 +6,251 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/auth";
 import { ThemeProvider } from "@/context/theme";
 import ErrorBoundary from "@/components/error-boundary";
-import NotFound from "@/pages/not-found";
-import ForceChangePassword from "@/pages/force-change-password";
+const NotFound = lazy(() => import("@/pages/not-found"));
+const ForceChangePassword = lazy(() => import("@/pages/force-change-password"));
 import Layout from "@/components/layout";
 import StudentLayout from "@/components/student-layout";
-import Login from "@/pages/login";
-import ForgotPassword from "@/pages/forgot-password";
-import ResetPassword from "@/pages/reset-password";
+const Login = lazy(() => import("@/pages/login"));
+const ForgotPassword = lazy(() => import("@/pages/forgot-password"));
+const ResetPassword = lazy(() => import("@/pages/reset-password"));
 import LowBandwidthBanner from "@/components/LowBandwidthBanner";
 import { OfflineDetector } from "@/components/offline-detector";
-import ServerError from "@/pages/server-error";
-import { useEffect, useRef } from "react";
+const ServerError = lazy(() => import("@/pages/server-error"));
+
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 import { useToast } from "@/hooks/use-toast";
 
 // Public & Legal
-import Landing from "@/pages/landing";
-import FeatureShowcase from "@/pages/features-showcase";
-import FeatureDetail from "@/pages/features-detail";
-import RoadmapPublic from "@/pages/roadmap-public";
-import ReleaseNotesPublic from "@/pages/release-notes-public";
-import StatusPublic from "@/pages/status-public";
-import Terms from "@/pages/terms";
-import Privacy from "@/pages/privacy";
-import Contact from "@/pages/contact";
-import TrustCenter from "@/pages/trust";
-import Sitemap from "@/pages/sitemap";
-import PaperVaultPublic from "@/pages/paper-vault-public";
+const Landing = lazy(() => import("@/pages/landing"));
+const FeatureShowcase = lazy(() => import("@/pages/features-showcase"));
+const FeatureDetail = lazy(() => import("@/pages/features-detail"));
+const RoadmapPublic = lazy(() => import("@/pages/roadmap-public"));
+const ReleaseNotesPublic = lazy(() => import("@/pages/release-notes-public"));
+const StatusPublic = lazy(() => import("@/pages/status-public"));
+const Terms = lazy(() => import("@/pages/terms"));
+const Privacy = lazy(() => import("@/pages/privacy"));
+const Contact = lazy(() => import("@/pages/contact"));
+const TrustCenter = lazy(() => import("@/pages/trust"));
+const Sitemap = lazy(() => import("@/pages/sitemap"));
+const PaperVaultPublic = lazy(() => import("@/pages/paper-vault-public"));
 
 // Teacher / Admin / Assistant
-import CoreHub from "@/pages/core-hub";
-import PlanGrid from "@/pages/plan-grid";
-import CheckIn from "@/pages/checkin";
-import SubmitFlow from "@/pages/submit-flow";
-import GradeFlow from "@/pages/grade-flow";
-import SchemeCraft from "@/pages/scheme-craft";
-import QueryVault from "@/pages/query-vault";
-import CardStack from "@/pages/cardstack";
-import Syllabuilder from "@/pages/syllabuilder";
-import KudosEngine from "@/pages/kudos-engine";
-import Pulse from "@/pages/pulse";
-import ContentCraft from "@/pages/content-craft";
-import LabsComingSoon from "@/pages/labs-coming-soon";
-import MarkerMind from "@/pages/marker-mind";
-import InsightStream from "@/pages/insight-stream";
-import HelpDesk from "@/pages/helpdesk";
-import InsightExams from "@/pages/insight-exams";
-import Exams from "@/pages/exams";
-import ScanScribe from "@/pages/scan-scribe";
-import ErrorTrace from "@/pages/error-trace";
-import TutorCraft from "@/pages/tutorcraft";
-import Messages from "@/pages/messages";
+const CoreHub = lazy(() => import("@/pages/core-hub"));
+const PlanGrid = lazy(() => import("@/pages/plan-grid"));
+const CheckIn = lazy(() => import("@/pages/checkin"));
+const SubmitFlow = lazy(() => import("@/pages/submit-flow"));
+const GradeFlow = lazy(() => import("@/pages/grade-flow"));
+const SchemeCraft = lazy(() => import("@/pages/scheme-craft"));
+const QueryVault = lazy(() => import("@/pages/query-vault"));
+const CardStack = lazy(() => import("@/pages/cardstack"));
+const Syllabuilder = lazy(() => import("@/pages/syllabuilder"));
+const KudosEngine = lazy(() => import("@/pages/kudos-engine"));
+const Pulse = lazy(() => import("@/pages/pulse"));
+const ContentCraft = lazy(() => import("@/pages/content-craft"));
+const LabsComingSoon = lazy(() => import("@/pages/labs-coming-soon"));
+const MarkerMind = lazy(() => import("@/pages/marker-mind"));
+const InsightStream = lazy(() => import("@/pages/insight-stream"));
+const HelpDesk = lazy(() => import("@/pages/helpdesk"));
+const InsightExams = lazy(() => import("@/pages/insight-exams"));
+const Exams = lazy(() => import("@/pages/exams"));
+const ScanScribe = lazy(() => import("@/pages/scan-scribe"));
+const ErrorTrace = lazy(() => import("@/pages/error-trace"));
+const TutorCraft = lazy(() => import("@/pages/tutorcraft"));
+const Messages = lazy(() => import("@/pages/messages"));
 
 // Admin — Phase 34
-import RouteHealthPage from "@/pages/admin/route-health";
-import FeatureStatusPage from "@/pages/admin/feature-status";
-import DataQualityPage from "@/pages/admin/data-quality";
-import SessionSlotsAdminPage from "@/pages/admin/session-slots";
-import AdminDebugPage from "@/pages/admin/debug";
-import TestRunner from "@/pages/admin/test-runner";
-import FeatureRegistryPage from "@/pages/admin/feature-registry";
+const RouteHealthPage = lazy(() => import("@/pages/admin/route-health"));
+const FeatureStatusPage = lazy(() => import("@/pages/admin/feature-status"));
+const DataQualityPage = lazy(() => import("@/pages/admin/data-quality"));
+const SessionSlotsAdminPage = lazy(() => import("@/pages/admin/session-slots"));
+const AdminDebugPage = lazy(() => import("@/pages/admin/debug"));
+const TestRunner = lazy(() => import("@/pages/admin/test-runner"));
+const FeatureRegistryPage = lazy(() => import("@/pages/admin/feature-registry"));
 // Admin
-import PaperVaultAdmin from "@/pages/admin/paper-vault-admin";
-import SubpilotSettings from "@/pages/admin/subpilot-settings";
-import LandingEditor from "@/pages/admin/landing-editor";
-import AssistantPermissions from "@/pages/admin/assistant-permissions";
-import CheckoutPage from "@/pages/checkout";
-import HelpDeskAdmin from "@/pages/admin/helpdesk-admin";
-import ShieldCore from "@/pages/admin/shield-core";
-import QuickSwitch from "@/pages/admin/quick-switch";
-import BudgetSense from "@/pages/admin/budget-sense";
-import AutoScale from "@/pages/admin/auto-scale";
-import SpendWise from "@/pages/admin/spend-wise";
-import AdminCommand from "@/pages/admin/admin-command";
-import EnrollmentAudit from "@/pages/admin/enrollment-audit";
-import PlatformHealth from "@/pages/admin/platform-health";
-import WorldPilot from "@/pages/admin/world-pilot";
-import GuardianPulseAdmin from "@/pages/admin/guardian-pulse-admin";
-import TeacherVerification from "@/pages/admin/teacher-verification";
-import AiAnalytics from "@/pages/admin/ai-analytics";
-import AiSafety from "@/pages/admin/ai-safety";
+const PaperVaultAdmin = lazy(() => import("@/pages/admin/paper-vault-admin"));
+const SubpilotSettings = lazy(() => import("@/pages/admin/subpilot-settings"));
+const LandingEditor = lazy(() => import("@/pages/admin/landing-editor"));
+const AssistantPermissions = lazy(() => import("@/pages/admin/assistant-permissions"));
+const CheckoutPage = lazy(() => import("@/pages/checkout"));
+const HelpDeskAdmin = lazy(() => import("@/pages/admin/helpdesk-admin"));
+const ShieldCore = lazy(() => import("@/pages/admin/shield-core"));
+const QuickSwitch = lazy(() => import("@/pages/admin/quick-switch"));
+const BudgetSense = lazy(() => import("@/pages/admin/budget-sense"));
+const AutoScale = lazy(() => import("@/pages/admin/auto-scale"));
+const SpendWise = lazy(() => import("@/pages/admin/spend-wise"));
+const AdminCommand = lazy(() => import("@/pages/admin/admin-command"));
+const EnrollmentAudit = lazy(() => import("@/pages/admin/enrollment-audit"));
+const PlatformHealth = lazy(() => import("@/pages/admin/platform-health"));
+const WorldPilot = lazy(() => import("@/pages/admin/world-pilot"));
+const GuardianPulseAdmin = lazy(() => import("@/pages/admin/guardian-pulse-admin"));
+const TeacherVerification = lazy(() => import("@/pages/admin/teacher-verification"));
+const AiAnalytics = lazy(() => import("@/pages/admin/ai-analytics"));
+const AiSafety = lazy(() => import("@/pages/admin/ai-safety"));
 
 // Student Portal
-import PastPaperLibrary from "@/pages/student-portal/past-paper-library";
+const PastPaperLibrary = lazy(() => import("@/pages/student-portal/past-paper-library"));
 
 // Student
-import StudyStream from "@/pages/student/study-stream";
-import MyHomework from "@/pages/student/my-homework";
-import MyTimetable from "@/pages/student/my-timetable";
-import MyAttendance from "@/pages/student/my-attendance";
-import TheMentor from "@/pages/student/the-mentor";
-import MyCardStack from "@/pages/student/my-cardstack";
-import Ascend from "@/pages/student/ascend";
-import TakeExam from "@/pages/student/take-exam";
-import SkillBadge from "@/pages/student/skill-badge";
-import MyQRPage from "@/pages/student/my-qr";
-import LearnPath from "@/pages/student/learn-path";
-import RevisionPlanPage from "@/pages/student/revision-plan";
-import QuestionExtractionPage from "@/pages/teacher/question-extraction";
-import DiscoverFeed from "@/pages/student/discover-feed";
-import Revisit from "@/pages/student/revisit";
-import FocusCoach from "@/pages/student/focus-coach";
-import FocusZone from "@/pages/student/focus-zone";
-import SuccessCenter from "@/pages/student/success-center";
-import TrialVault from "@/pages/student/trial-vault";
-import PeakRankings from "@/pages/student/peak-rankings";
-import PeerReview from "@/pages/student/peer-review";
-import SnapGrade from "@/pages/student/snap-grade";
-import Echo from "@/pages/student/echo";
-import StudentAnalytics from "@/pages/student/analytics";
-import StudyGroups from "@/pages/student/study-groups";
-import StudentMessages from "@/pages/student/messages";
-import ExamVault from "@/pages/student/exam-vault";
+const StudyStream = lazy(() => import("@/pages/student/study-stream"));
+const MyHomework = lazy(() => import("@/pages/student/my-homework"));
+const MyTimetable = lazy(() => import("@/pages/student/my-timetable"));
+const MyAttendance = lazy(() => import("@/pages/student/my-attendance"));
+const TheMentor = lazy(() => import("@/pages/student/the-mentor"));
+const MyCardStack = lazy(() => import("@/pages/student/my-cardstack"));
+const Ascend = lazy(() => import("@/pages/student/ascend"));
+const TakeExam = lazy(() => import("@/pages/student/take-exam"));
+const SkillBadge = lazy(() => import("@/pages/student/skill-badge"));
+const MyQRPage = lazy(() => import("@/pages/student/my-qr"));
+const LearnPath = lazy(() => import("@/pages/student/learn-path"));
+const RevisionPlanPage = lazy(() => import("@/pages/student/revision-plan"));
+const QuestionExtractionPage = lazy(() => import("@/pages/teacher/question-extraction"));
+const DiscoverFeed = lazy(() => import("@/pages/student/discover-feed"));
+const Revisit = lazy(() => import("@/pages/student/revisit"));
+const FocusCoach = lazy(() => import("@/pages/student/focus-coach"));
+const FocusZone = lazy(() => import("@/pages/student/focus-zone"));
+const SuccessCenter = lazy(() => import("@/pages/student/success-center"));
+const TrialVault = lazy(() => import("@/pages/student/trial-vault"));
+const PeakRankings = lazy(() => import("@/pages/student/peak-rankings"));
+const PeerReview = lazy(() => import("@/pages/student/peer-review"));
+const SnapGrade = lazy(() => import("@/pages/student/snap-grade"));
+const Echo = lazy(() => import("@/pages/student/echo"));
+const StudentAnalytics = lazy(() => import("@/pages/student/analytics"));
+const StudyGroups = lazy(() => import("@/pages/student/study-groups"));
+const StudentMessages = lazy(() => import("@/pages/student/messages"));
+const ExamVault = lazy(() => import("@/pages/student/exam-vault"));
 
 // Shared pages
-import TeamForge from "@/pages/team-forge";
-import PrivacyVault from "@/pages/privacy-vault";
+const TeamForge = lazy(() => import("@/pages/team-forge"));
+const PrivacyVault = lazy(() => import("@/pages/privacy-vault"));
 
 // New Phase 1 pages
-import Register from "@/pages/register";
-import Onboarding from "@/pages/onboarding";
-import Settings from "@/pages/settings";
-import Profile from "@/pages/profile";
-import AccessDenied from "@/pages/access-denied";
-import SessionsPage from "@/pages/account/sessions";
+const Register = lazy(() => import("@/pages/register"));
+const Onboarding = lazy(() => import("@/pages/onboarding"));
+const Settings = lazy(() => import("@/pages/settings"));
+const Profile = lazy(() => import("@/pages/profile"));
+const AccessDenied = lazy(() => import("@/pages/access-denied"));
+const SessionsPage = lazy(() => import("@/pages/account/sessions"));
 import ReportProblemModal from "@/components/report-problem-modal";
 import SessionExpiryModal from "@/components/session-expiry-modal";
 
 // Marketplace & registration
-import Courses from "@/pages/courses";
-import CourseDetail from "@/pages/course-detail";
-import StudentRegister from "@/pages/student-register";
-import MyCourses from "@/pages/teacher/my-courses";
-import TeacherCourses from "@/pages/teacher/teacher-courses";
-import StudentMyCourses from "@/pages/student/my-courses";
-import AssignmentCenter from "@/pages/student/assignments";
-import StudentCourseHub from "@/pages/student/course-hub";
-import StudentApprovals from "@/pages/student-approvals";
-import Automation from "@/pages/automation";
-import LinkParent from "@/pages/student/link-parent";
+const Courses = lazy(() => import("@/pages/courses"));
+const CourseDetail = lazy(() => import("@/pages/course-detail"));
+const StudentRegister = lazy(() => import("@/pages/student-register"));
+const MyCourses = lazy(() => import("@/pages/teacher/my-courses"));
+const TeacherCourses = lazy(() => import("@/pages/teacher/teacher-courses"));
+const StudentMyCourses = lazy(() => import("@/pages/student/my-courses"));
+const AssignmentCenter = lazy(() => import("@/pages/student/assignments"));
+const StudentCourseHub = lazy(() => import("@/pages/student/course-hub"));
+const StudentApprovals = lazy(() => import("@/pages/student-approvals"));
+const Automation = lazy(() => import("@/pages/automation"));
+const LinkParent = lazy(() => import("@/pages/student/link-parent"));
 
 // Phase 7 — Communication, Collaboration & Community Ecosystem
-import UnifiedInbox from "@/pages/unified-inbox";
-import ClassChannel from "@/pages/class-channel";
-import AnnouncementsPage from "@/pages/announcements";
-import StudyRooms from "@/pages/study-rooms";
-import CollaborateRoom from "@/pages/collaborate";
-import SupportTickets from "@/pages/support-tickets";
-import NotificationCenter from "@/pages/notification-center";
-import AttendanceAuditPage from "@/pages/attendance-audit";
-import EnrollmentTimelinePage from "@/pages/enrollment-timeline";
-import AdminModeration from "@/pages/admin/moderation";
-import CommunicationAnalytics from "@/pages/admin/communication-analytics";
+const UnifiedInbox = lazy(() => import("@/pages/unified-inbox"));
+const ClassChannel = lazy(() => import("@/pages/class-channel"));
+const AnnouncementsPage = lazy(() => import("@/pages/announcements"));
+const StudyRooms = lazy(() => import("@/pages/study-rooms"));
+const CollaborateRoom = lazy(() => import("@/pages/collaborate"));
+const SupportTickets = lazy(() => import("@/pages/support-tickets"));
+const NotificationCenter = lazy(() => import("@/pages/notification-center"));
+const AttendanceAuditPage = lazy(() => import("@/pages/attendance-audit"));
+const EnrollmentTimelinePage = lazy(() => import("@/pages/enrollment-timeline"));
+const AdminModeration = lazy(() => import("@/pages/admin/moderation"));
+const CommunicationAnalytics = lazy(() => import("@/pages/admin/communication-analytics"));
 
 // Phase 9 — Admin OS
-import AdminOS from "@/pages/admin/admin-os";
+const AdminOS = lazy(() => import("@/pages/admin/admin-os"));
 // Phase 47 — Role & Permission Matrix
-import RolesMatrix from "@/pages/admin/roles-matrix";
+const RolesMatrix = lazy(() => import("@/pages/admin/roles-matrix"));
 // Phase 47 — Repair Panel
-import RepairPanel from "@/pages/admin/repair-panel";
+const RepairPanel = lazy(() => import("@/pages/admin/repair-panel"));
 
 // Phase 16 — Commercialization & Business Operations
-import PricingPage from "@/pages/pricing";
-import SubscribePage from "@/pages/subscribe";
-import MySubscriptionPage from "@/pages/my-subscription";
-import ComingSoonPage from "@/pages/coming-soon";
-import RevisionNotesPage from "@/pages/revision-notes";
-import AdminCommercePage from "@/pages/admin/admin-commerce";
-import PlansAdminPage from "@/pages/admin/plans-admin";
-import ExecutiveDashboardPage from "@/pages/admin/executive-dashboard";
+const PricingPage = lazy(() => import("@/pages/pricing"));
+const SubscribePage = lazy(() => import("@/pages/subscribe"));
+const MySubscriptionPage = lazy(() => import("@/pages/my-subscription"));
+const ComingSoonPage = lazy(() => import("@/pages/coming-soon"));
+const RevisionNotesPage = lazy(() => import("@/pages/revision-notes"));
+const AdminCommercePage = lazy(() => import("@/pages/admin/admin-commerce"));
+const PlansAdminPage = lazy(() => import("@/pages/admin/plans-admin"));
+const ExecutiveDashboardPage = lazy(() => import("@/pages/admin/executive-dashboard"));
 
 // Phase 17 — Mobile Ecosystem
-import StudentMobileHome from "@/pages/mobile/student-home";
-import TeacherMobileHome from "@/pages/mobile/teacher-home";
-import ParentMobileHome from "@/pages/mobile/parent-home";
-import AdminMobileHome from "@/pages/mobile/admin-home";
-import FlashcardSwipe from "@/pages/student/flashcard-swipe";
-import AdminPushPage from "@/pages/admin/admin-push";
+const StudentMobileHome = lazy(() => import("@/pages/mobile/student-home"));
+const TeacherMobileHome = lazy(() => import("@/pages/mobile/teacher-home"));
+const ParentMobileHome = lazy(() => import("@/pages/mobile/parent-home"));
+const AdminMobileHome = lazy(() => import("@/pages/mobile/admin-home"));
+const FlashcardSwipe = lazy(() => import("@/pages/student/flashcard-swipe"));
+const AdminPushPage = lazy(() => import("@/pages/admin/admin-push"));
 import PWAInstallBanner from "@/components/pwa-install-banner";
 
 // Phase 15 — Educational Content Ecosystem
-import ContentCraftStudio from "@/pages/teacher/contentcraft-studio";
-import CourseBuilder from "@/pages/teacher/course-builder";
-import QuestionStudio from "@/pages/teacher/question-studio";
-import QuestionImport from "@/pages/teacher/question-import";
-import ContentAnalytics from "@/pages/teacher/content-analytics";
-import PracticeCenter from "@/pages/student/practice-center";
-import HandwrittenSubmit from "@/pages/student/handwritten-submit";
-import ResourcesLibrary from "@/pages/resources-library";
+const ContentCraftStudio = lazy(() => import("@/pages/teacher/contentcraft-studio"));
+const CourseBuilder = lazy(() => import("@/pages/teacher/course-builder"));
+const QuestionStudio = lazy(() => import("@/pages/teacher/question-studio"));
+const QuestionImport = lazy(() => import("@/pages/teacher/question-import"));
+const ContentAnalytics = lazy(() => import("@/pages/teacher/content-analytics"));
+const PracticeCenter = lazy(() => import("@/pages/student/practice-center"));
+const HandwrittenSubmit = lazy(() => import("@/pages/student/handwritten-submit"));
+const ResourcesLibrary = lazy(() => import("@/pages/resources-library"));
 
 // Phase 8 — Learning Experience, Content Delivery & Adaptive Personalization
-import LearningPathPage from "@/pages/student/learning-path";
-import RecommendationHub from "@/pages/student/recommendations";
-import GoalsDashboard from "@/pages/student/goals-dashboard";
-import ChallengesPage from "@/pages/student/challenges";
-import LearningAnalyticsPage from "@/pages/student/learning-analytics";
-import MicroAssessmentPage from "@/pages/student/micro-assessment";
-import FocusZoneV2 from "@/pages/student/focus-zone-v2";
+const LearningPathPage = lazy(() => import("@/pages/student/learning-path"));
+const RecommendationHub = lazy(() => import("@/pages/student/recommendations"));
+const GoalsDashboard = lazy(() => import("@/pages/student/goals-dashboard"));
+const ChallengesPage = lazy(() => import("@/pages/student/challenges"));
+const LearningAnalyticsPage = lazy(() => import("@/pages/student/learning-analytics"));
+const MicroAssessmentPage = lazy(() => import("@/pages/student/micro-assessment"));
+const FocusZoneV2 = lazy(() => import("@/pages/student/focus-zone-v2"));
 
 // Phase 6 — Assessment, Examination & Certification Ecosystem
-import AssessmentHub from "@/pages/assessment-hub";
-import GradebookPlus from "@/pages/gradebook-plus";
-import Certifications from "@/pages/certifications";
-import ExamRoom from "@/pages/student/exam-room";
+const AssessmentHub = lazy(() => import("@/pages/assessment-hub"));
+const GradebookPlus = lazy(() => import("@/pages/gradebook-plus"));
+const Certifications = lazy(() => import("@/pages/certifications"));
+const ExamRoom = lazy(() => import("@/pages/student/exam-room"));
 // Phase 6 Extended pages
-import TeacherAssessments from "@/pages/teacher/assessments";
-import AssessmentBuilder from "@/pages/teacher/assessment-builder";
-import AssessmentMonitor from "@/pages/teacher/assessment-monitor";
-import TeacherGradebook from "@/pages/teacher/gradebook";
-import ModerationCenter from "@/pages/teacher/moderation";
-import ExamArchives from "@/pages/teacher/archives";
-import TeacherSchedulePage from "@/pages/teacher/schedule";
-import AdminCertificates from "@/pages/admin/certificates";
-import StudentExamSession from "@/pages/student/exam-session";
-import ExamResults from "@/pages/student/exam-results";
-import StudentTranscript from "@/pages/student/transcript";
-import StudentAppeals from "@/pages/student/appeals";
-import ExamReadiness from "@/pages/student/exam-readiness";
+const TeacherAssessments = lazy(() => import("@/pages/teacher/assessments"));
+const AssessmentBuilder = lazy(() => import("@/pages/teacher/assessment-builder"));
+const AssessmentMonitor = lazy(() => import("@/pages/teacher/assessment-monitor"));
+const TeacherGradebook = lazy(() => import("@/pages/teacher/gradebook"));
+const ModerationCenter = lazy(() => import("@/pages/teacher/moderation"));
+const ExamArchives = lazy(() => import("@/pages/teacher/archives"));
+const TeacherSchedulePage = lazy(() => import("@/pages/teacher/schedule"));
+const AdminCertificates = lazy(() => import("@/pages/admin/certificates"));
+const StudentExamSession = lazy(() => import("@/pages/student/exam-session"));
+const ExamResults = lazy(() => import("@/pages/student/exam-results"));
+const StudentTranscript = lazy(() => import("@/pages/student/transcript"));
+const StudentAppeals = lazy(() => import("@/pages/student/appeals"));
+const ExamReadiness = lazy(() => import("@/pages/student/exam-readiness"));
 
 // Parent
-import GuardianHub from "@/pages/parent/dashboard";
-import GuardianLink from "@/pages/parent/guardian-link";
-import LinkStudent from "@/pages/parent/link-student";
+const GuardianHub = lazy(() => import("@/pages/parent/dashboard"));
+const GuardianLink = lazy(() => import("@/pages/parent/guardian-link"));
+const LinkStudent = lazy(() => import("@/pages/parent/link-student"));
 import ParentLayout from "@/components/parent-layout";
-import ParentGrades from "@/pages/parent/grades";
-import ParentAttendance from "@/pages/parent/attendance";
-import ParentRevision from "@/pages/parent/revision";
-import ParentAssignments from "@/pages/parent/assignments";
-import ParentExamReadiness from "@/pages/parent/exam-readiness";
-import ParentMeetings from "@/pages/parent/meetings";
-import ParentNotifications from "@/pages/parent/notifications";
-import ParentInterventions from "@/pages/parent/interventions";
-import ParentReports from "@/pages/parent/reports";
-import FamilyCalendar from "@/pages/parent/calendar";
-import ParentDocuments from "@/pages/parent/documents";
-import ParentAIAssistant from "@/pages/parent/ai-assistant";
-import ParentBilling from "@/pages/parent/billing";
-import ParentSettings from "@/pages/parent/settings";
-import ChildProfile from "@/pages/parent/child-profile";
-import Subjects from "@/pages/subjects";
+const ParentGrades = lazy(() => import("@/pages/parent/grades"));
+const ParentAttendance = lazy(() => import("@/pages/parent/attendance"));
+const ParentRevision = lazy(() => import("@/pages/parent/revision"));
+const ParentAssignments = lazy(() => import("@/pages/parent/assignments"));
+const ParentExamReadiness = lazy(() => import("@/pages/parent/exam-readiness"));
+const ParentMeetings = lazy(() => import("@/pages/parent/meetings"));
+const ParentNotifications = lazy(() => import("@/pages/parent/notifications"));
+const ParentInterventions = lazy(() => import("@/pages/parent/interventions"));
+const ParentReports = lazy(() => import("@/pages/parent/reports"));
+const FamilyCalendar = lazy(() => import("@/pages/parent/calendar"));
+const ParentDocuments = lazy(() => import("@/pages/parent/documents"));
+const ParentAIAssistant = lazy(() => import("@/pages/parent/ai-assistant"));
+const ParentBilling = lazy(() => import("@/pages/parent/billing"));
+const ParentSettings = lazy(() => import("@/pages/parent/settings"));
+const ChildProfile = lazy(() => import("@/pages/parent/child-profile"));
+const Subjects = lazy(() => import("@/pages/subjects"));
+
+const PageLoader = () => (
+  <div className="min-h-[60vh] flex items-center justify-center">
+    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -375,6 +382,7 @@ function StudentRouter() {
   useRoleGuard("student");
   return (
     <StudentLayout>
+      <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/access-denied" component={AccessDenied} />
         <Route path="/account/sessions" component={SessionsPage} />
@@ -465,6 +473,7 @@ function StudentRouter() {
         <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
+      </Suspense>
     </StudentLayout>
   );
 }
@@ -604,6 +613,7 @@ const ADMIN_ROUTES = (
 function AdminRouter() {
   return (
     <Layout>
+      <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/access-denied" component={AccessDenied} />
         <Route path="/account/sessions" component={SessionsPage} />
@@ -614,6 +624,7 @@ function AdminRouter() {
         <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
+      </Suspense>
     </Layout>
   );
 }
@@ -622,6 +633,7 @@ function TeacherRouter() {
   useRoleGuard("teacher");
   return (
     <Layout>
+      <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/access-denied" component={AccessDenied} />
         <Route path="/account/sessions" component={SessionsPage} />
@@ -630,6 +642,7 @@ function TeacherRouter() {
         <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
+      </Suspense>
     </Layout>
   );
 }
@@ -638,6 +651,7 @@ function ParentRouter() {
   useRoleGuard("parent");
   return (
     <ParentLayout>
+      <Suspense fallback={<PageLoader />}>
       <Switch>
         <Route path="/access-denied" component={AccessDenied} />
         <Route path="/account/sessions" component={SessionsPage} />
@@ -684,12 +698,14 @@ function ParentRouter() {
         <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
+      </Suspense>
     </ParentLayout>
   );
 }
 
 function PublicRouter() {
   return (
+    <Suspense fallback={<PageLoader />}>
     <Switch>
       <Route path="/login" component={Login} />
       <Route path="/forgot-password" component={ForgotPassword} />
@@ -714,6 +730,7 @@ function PublicRouter() {
       <Route path="/500" component={ServerError} />
       <Route component={Landing} />
     </Switch>
+    </Suspense>
   );
 }
 

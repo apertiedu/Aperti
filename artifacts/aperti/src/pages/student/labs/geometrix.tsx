@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import * as THREE from "three";
-// @ts-ignore
+// @ts-expect-error — OrbitControls has no TypeScript declaration at this path
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";

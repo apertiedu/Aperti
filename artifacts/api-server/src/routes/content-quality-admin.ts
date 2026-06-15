@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
+import { logger } from "../lib/logger";
 
 export const contentQualityRouter = Router();
 contentQualityRouter.use(authenticate as any);
@@ -56,7 +57,7 @@ contentQualityRouter.post("/refresh", async (_req: AuthRequest, res: Response) =
           [q.id, qualityScore.toFixed(2), usageCount]
         ).catch(() => {});
       }
-      console.log("[content-quality] Refresh complete");
+      logger.info("[content-quality] Refresh complete");
     } catch (e) {
       console.error("[content-quality] Refresh error:", e);
     }
