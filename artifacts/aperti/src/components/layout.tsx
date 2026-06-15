@@ -304,13 +304,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   onClick={() => isMobile && setMobileOpen(false)}
                   className={`group flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 min-h-[36px] ${
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-sm nav-item-active"
                       : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                   } ${(!isMobile && collapsed) ? "justify-center" : ""}`}
                   title={(!isMobile && collapsed) ? item.name : undefined}
                 >
                   <item.icon
-                    className={`w-3.5 h-3.5 shrink-0 ${!isActive && "group-hover:text-primary"} transition-colors`}
+                    className={`w-3.5 h-3.5 shrink-0 ${isActive ? "" : "group-hover:text-primary"} transition-colors`}
                   />
                   {(isMobile || !collapsed) && <span className="truncate">{item.name}</span>}
                 </Link>
@@ -456,10 +456,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <AnimatePresence mode="wait">
             <motion.div
               key={location}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
+              initial={{ opacity: 0, y: 8, filter: "blur(3px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -6, filter: "blur(2px)" }}
+              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
               className="w-full h-full"
             >
               {children}

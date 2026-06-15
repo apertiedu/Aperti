@@ -880,6 +880,267 @@ body, #root {
   color: hsl(var(--destructive));
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   PREMIUM LAYER — Aperti Liquid Flow 2.0 · Phase 49 Polish
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Aurora gradient for hero backgrounds ────────────────────────────────── */
+@keyframes aurora {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.aurora-bg {
+  background: linear-gradient(-45deg, #F0FDF8, #EEF6FF, #FAF5FF, #F0FDF8, #E0F2FE);
+  background-size: 400% 400%;
+  animation: aurora 18s ease infinite;
+}
+
+/* ── Noise texture overlay ───────────────────────────────────────────────── */
+.noise-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+  opacity: 0.4;
+  border-radius: inherit;
+  z-index: 0;
+}
+
+/* ── Blur-reveal animation for Reveal component ──────────────────────────── */
+@keyframes blurReveal {
+  from { opacity: 0; filter: blur(6px); transform: translateY(24px); }
+  to   { opacity: 1; filter: blur(0px); transform: translateY(0); }
+}
+.blur-reveal {
+  animation: blurReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Premium card with depth shadow ─────────────────────────────────────── */
+.card-premium {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.6);
+  border-radius: 1rem;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 12px rgba(0,0,0,0.06),
+    0 12px 40px rgba(0,0,0,0.04);
+  transition: box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-premium:hover {
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.04),
+    0 8px 24px rgba(0,0,0,0.09),
+    0 24px 64px rgba(0,0,0,0.07);
+  transform: translateY(-2px);
+}
+
+/* ── Shimmer sweep (improved) ───────────────────────────────────────────── */
+@keyframes shimmerSweep {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(300%) skewX(-12deg); }
+}
+.shimmer-sweep {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.35) 50%, transparent 100%);
+  width: 40%;
+  animation: shimmerSweep 2.8s ease infinite;
+  pointer-events: none;
+}
+
+/* ── Premium nav link underline animation ───────────────────────────────── */
+.nav-link-premium {
+  position: relative;
+}
+.nav-link-premium::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 1.5px;
+  background: hsl(var(--primary));
+  border-radius: 2px;
+  transition: width 0.25s cubic-bezier(0.22, 1, 0.36, 1), left 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-link-premium:hover::after {
+  width: 100%;
+  left: 0;
+}
+
+/* ── Glow button ────────────────────────────────────────────────────────── */
+.btn-glow {
+  position: relative;
+  transition: box-shadow 0.25s ease, transform 0.15s ease;
+}
+.btn-glow:hover {
+  transform: translateY(-1px);
+}
+.btn-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.5), transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(8px);
+}
+.btn-glow:hover::before { opacity: 1; }
+
+/* ── Animated gradient border ───────────────────────────────────────────── */
+@keyframes gradientBorder {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+.gradient-border {
+  position: relative;
+  border-radius: inherit;
+}
+.gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.6), transparent, hsl(var(--primary) / 0.3));
+  background-size: 200% 200%;
+  animation: gradientBorder 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ── Floating orbs ──────────────────────────────────────────────────────── */
+@keyframes floatOrb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(12px, -18px) scale(1.04); }
+  66%       { transform: translate(-8px, 10px) scale(0.97); }
+}
+@keyframes floatOrb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-14px, 12px) scale(0.96); }
+  66%       { transform: translate(10px, -16px) scale(1.03); }
+}
+@keyframes floatOrb3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(8px, 14px) scale(1.05); }
+}
+.float-orb-1 { animation: floatOrb1 12s ease-in-out infinite; }
+.float-orb-2 { animation: floatOrb2 15s ease-in-out infinite; }
+.float-orb-3 { animation: floatOrb3 10s ease-in-out infinite; }
+
+/* ── Teal text gradient (animated) ──────────────────────────────────────── */
+@keyframes tealGradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+.teal-gradient-text {
+  background: linear-gradient(135deg, #0D9488, #0891B2, #10B981, #0D9488);
+  background-size: 250% 250%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: tealGradientShift 5s ease infinite;
+}
+
+/* ── Feature card icon glow on hover ────────────────────────────────────── */
+.feature-icon-wrap {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+.group:hover .feature-icon-wrap {
+  transform: scale(1.1) rotate(-4deg);
+}
+
+/* ── Section badge pill ─────────────────────────────────────────────────── */
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  padding: 0.25rem 0.875rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid hsl(var(--primary) / 0.25);
+  background: hsl(var(--primary) / 0.08);
+  color: hsl(var(--primary));
+  backdrop-filter: blur(4px);
+}
+
+/* ── Scroll indicator bounce ────────────────────────────────────────────── */
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0) translateX(-50%); opacity: 0.5; }
+  50%       { transform: translateY(6px) translateX(-50%); opacity: 1; }
+}
+.scroll-cue {
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+
+/* ── Landing section divider ────────────────────────────────────────────── */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, hsl(var(--border) / 0.5) 30%, hsl(var(--border) / 0.5) 70%, transparent 100%);
+}
+
+/* ── Page reveal transition ─────────────────────────────────────────────── */
+@keyframes pageReveal {
+  from { opacity: 0; transform: translateY(8px) scale(0.995); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+.page-reveal {
+  animation: pageReveal 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── 3D tilt card enhanced glow ─────────────────────────────────────────── */
+.card-tilt-glow {
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.03),
+    0 4px 16px rgba(0,0,0,0.06),
+    0 0 0 1px rgba(255,255,255,0.8) inset;
+  transition: box-shadow 0.3s ease;
+}
+.card-tilt-glow:hover {
+  box-shadow:
+    0 4px 8px rgba(0,0,0,0.04),
+    0 16px 48px rgba(13,148,136,0.12),
+    0 0 0 1px rgba(255,255,255,0.8) inset;
+}
+
+/* ── Magnetic button text track ─────────────────────────────────────────── */
+.magnetic-btn {
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* ── Responsive landing grid ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .landing-scroll {
+    overflow-x: hidden;
+  }
+}
+
+/* ── Teal border pulse for highlighted cards ────────────────────────────── */
+@keyframes tealBorderPulse {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0.25); }
+  50%       { box-shadow: 0 0 0 6px hsl(var(--primary) / 0); }
+}
+.border-pulse {
+  animation: tealBorderPulse 3s ease-in-out infinite;
+}
+
 /* ── Print styles (gradebook, reports, certificates) ───────────────────── */
 @media print {
   nav, aside, header, .no-print,

@@ -56,18 +56,27 @@ function getSection(sections: LandingSection[], slug: string) {
 /* ─────────────────────────── Animations ─────────────────────────── */
 function Reveal({ children, delay = 0, y = 28 }: { children: React.ReactNode; delay?: number; y?: number }) {
   const ref = useRef(null);
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
     <motion.div ref={ref}
-      initial={{ opacity: 0, y }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}>
+      initial={{ opacity: 0, y, filter: "blur(6px)" }}
+      animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}}
+      transition={{ duration: 0.75, delay, ease: [0.22, 1, 0.36, 1] }}>
       {children}
     </motion.div>
   );
 }
 
 /* ─────────────────────────── 3D Tilt Feature Card ─────────────────────────── */
+const ICON_THEMES = [
+  { bg: "#0D948812", color: "#0D9488" },
+  { bg: "#7C3AED12", color: "#7C3AED" },
+  { bg: "#0891B212", color: "#0891B2" },
+  { bg: "#D9770612", color: "#D97706" },
+  { bg: "#DC262612", color: "#DC2626" },
+  { bg: "#05966912", color: "#059669" },
+];
+
 function Feature3DTiltCard({ teal, Icon, title, description, index }: {
   teal: string;
   Icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
@@ -78,47 +87,56 @@ function Feature3DTiltCard({ teal, Icon, title, description, index }: {
   const cardRef = useRef<HTMLDivElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 200, damping: 28 });
-  const springY = useSpring(y, { stiffness: 200, damping: 28 });
-  const rotateX = useTransform(springY, [-60, 60], [7, -7]);
-  const rotateY = useTransform(springX, [-60, 60], [-7, 7]);
+  const springX = useSpring(x, { stiffness: 180, damping: 26 });
+  const springY = useSpring(y, { stiffness: 180, damping: 26 });
+  const rotateX = useTransform(springY, [-60, 60], [8, -8]);
+  const rotateY = useTransform(springX, [-60, 60], [-8, 8]);
   const glowOpacity = useMotionValue(0);
-  const glowSpring = useSpring(glowOpacity, { stiffness: 200, damping: 25 });
+  const glowSpring = useSpring(glowOpacity, { stiffness: 200, damping: 22 });
 
   const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
-    x.set(e.clientX - rect.left - rect.width / 2);
-    y.set(e.clientY - rect.top - rect.height / 2);
+    const cx = e.clientX - rect.left;
+    const cy = e.clientY - rect.top;
+    x.set(cx - rect.width / 2);
+    y.set(cy - rect.height / 2);
     glowOpacity.set(1);
   };
   const handleLeave = () => {
-    x.set(0);
-    y.set(0);
+    x.set(0); y.set(0);
     glowOpacity.set(0);
   };
 
-  const ICON_BGS = [`${teal}12`, "#7C3AED14", "#0891B214", "#DC262614", "#D9770614", "#05966914"];
+  const theme = ICON_THEMES[index % ICON_THEMES.length];
 
   return (
     <motion.div
       ref={cardRef}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      style={{ rotateX, rotateY, transformPerspective: 900 }}
-      className="relative card-shine bg-white rounded-2xl border border-gray-100 shadow-sm h-full overflow-hidden cursor-default">
+      style={{ rotateX, rotateY, transformPerspective: 1000 }}
+      whileHover={{ scale: 1.02 }}
+      transition={{ scale: { duration: 0.2 } }}
+      className="group relative card-shine card-tilt-glow bg-white rounded-2xl border border-gray-100 h-full overflow-hidden cursor-default">
       <motion.div
         className="absolute inset-0 rounded-2xl pointer-events-none"
         style={{
           opacity: glowSpring,
-          background: `radial-gradient(circle at 50% 0%, ${teal}10 0%, transparent 70%)`,
+          background: `radial-gradient(circle at 50% 30%, ${teal}16 0%, transparent 65%)`,
         }} />
+      <div className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        style={{ background: `linear-gradient(145deg, ${teal}06 0%, transparent 60%)` }} />
       <div className="p-6 h-full flex flex-col relative z-10">
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
-          style={{ background: ICON_BGS[index % ICON_BGS.length] }}>
-          <Icon className="h-5 w-5" style={{ color: teal }} />
+        <div className="feature-icon-wrap w-11 h-11 rounded-xl flex items-center justify-center mb-4"
+          style={{ background: theme.bg }}>
+          <Icon className="h-5 w-5" style={{ color: theme.color }} />
         </div>
-        <h3 className="font-bold text-gray-900 mb-2 text-sm">{title}</h3>
-        <p className="text-xs text-gray-500 leading-relaxed">{description}</p>
+        <h3 className="font-bold text-gray-900 mb-2 text-sm leading-snug">{title}</h3>
+        <p className="text-xs text-gray-500 leading-relaxed flex-1">{description}</p>
+        <div className="mt-4 flex items-center gap-1 text-[11px] font-semibold opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0"
+          style={{ color: theme.color }}>
+          Learn more <ChevronRight className="h-3 w-3" />
+        </div>
       </div>
     </motion.div>
   );
@@ -192,6 +210,12 @@ function AbstractGeometry() {
 }
 
 /* ─────────────────────────── Nav ─────────────────────────── */
+const NAV_LINKS = [
+  { href: "#features", label: "Features" },
+  { href: "#pricing",  label: "Pricing"  },
+  { href: "#apply",    label: "Apply"    },
+];
+
 function Nav() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -202,52 +226,102 @@ function Nav() {
     return () => window.removeEventListener("scroll", fn);
   }, []);
 
-  const navBg = scrolled
-    ? "bg-white/95 backdrop-blur-xl shadow-sm border-b border-gray-100"
-    : "bg-white/80 backdrop-blur-sm border-b border-gray-100/60";
-
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${navBg}`}>
-      <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      scrolled
+        ? "bg-white/96 backdrop-blur-2xl shadow-[0_1px_0_0_rgba(0,0,0,0.06),0_4px_16px_rgba(0,0,0,0.04)]"
+        : "bg-white/70 backdrop-blur-md"
+    }`}>
+      <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between gap-6">
         <Link href="/">
-          <span className="text-xl font-extrabold tracking-tight cursor-pointer" style={{ color: "#121212" }}>
+          <motion.span
+            whileHover={{ scale: 1.02 }}
+            className="text-xl font-extrabold tracking-tight cursor-pointer select-none"
+            style={{ color: "#121212" }}>
             Aperti<span style={{ color: TEAL }}>.</span>
-          </span>
+          </motion.span>
         </Link>
-        <div className="hidden md:flex items-center gap-7 text-sm font-medium text-gray-500">
-          <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
-          <Link href="/courses" className="hover:text-gray-900 transition-colors">Courses</Link>
-          <a href="#pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
-          <a href="#apply" className="hover:text-gray-900 transition-colors">Apply</a>
-        </div>
-        <div className="hidden md:flex items-center gap-3">
+
+        <div className="hidden md:flex items-center gap-1">
+          {NAV_LINKS.map(({ href, label }) => (
+            <a key={href} href={href}
+              className="nav-link-premium relative px-3.5 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 rounded-lg hover:bg-gray-50">
+              {label}
+            </a>
+          ))}
           <Link href="/courses">
-            <button className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all duration-200">
+            <span className="nav-link-premium relative px-3.5 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors duration-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+              Courses
+            </span>
+          </Link>
+        </div>
+
+        <div className="hidden md:flex items-center gap-2.5">
+          <Link href="/courses">
+            <motion.button
+              whileHover={{ scale: 1.02, backgroundColor: "#F9FAFB" }}
+              whileTap={{ scale: 0.98 }}
+              className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700 transition-colors duration-200">
               Explore Courses
-            </button>
+            </motion.button>
           </Link>
           <Link href="/login">
-            <button className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all hover:opacity-90" style={{ background: TEAL }}>
+            <motion.button
+              whileHover={{ scale: 1.02, boxShadow: `0 6px 20px ${TEAL}40` }}
+              whileTap={{ scale: 0.97 }}
+              className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all"
+              style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)`, boxShadow: `0 4px 12px ${TEAL}30` }}>
               Sign In
-            </button>
+            </motion.button>
           </Link>
         </div>
-        <button className="md:hidden p-2 rounded-lg text-gray-500 transition-colors" onClick={() => setOpen(!open)}>
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+
+        <motion.button
+          whileTap={{ scale: 0.94 }}
+          className="md:hidden p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all"
+          onClick={() => setOpen(!open)}>
+          <AnimatePresence mode="wait">
+            {open
+              ? <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}><X className="h-5 w-5" /></motion.span>
+              : <motion.span key="m" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}><Menu className="h-5 w-5" /></motion.span>
+            }
+          </AnimatePresence>
+        </motion.button>
       </div>
+
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }} className="md:hidden bg-white border-t border-gray-100 overflow-hidden">
-            <div className="px-5 py-4 space-y-3">
-              {[["#features","Features"],["#pricing","Pricing"],["#apply","Apply"]].map(([href,label]) => (
-                <a key={href} href={href} onClick={() => setOpen(false)} className="block text-sm font-medium text-gray-600 hover:text-gray-900 py-1">{label}</a>
+          <motion.div
+            initial={{ opacity: 0, height: 0, filter: "blur(4px)" }}
+            animate={{ opacity: 1, height: "auto", filter: "blur(0px)" }}
+            exit={{ opacity: 0, height: 0, filter: "blur(4px)" }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="md:hidden bg-white/98 backdrop-blur-xl border-t border-gray-100/80 overflow-hidden">
+            <div className="px-5 py-4 space-y-1">
+              {NAV_LINKS.map(({ href, label }) => (
+                <a key={href} href={href} onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2.5 rounded-xl transition-all">
+                  {label}
+                </a>
               ))}
-              <Link href="/courses"><span className="block text-sm font-medium text-gray-600 hover:text-gray-900 py-1" onClick={() => setOpen(false)}>Courses</span></Link>
-              <div className="pt-2 flex gap-2">
-                <Link href="/register" className="flex-1"><button className="w-full text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 text-gray-700">Register</button></Link>
-                <Link href="/login" className="flex-1"><button className="w-full text-sm font-semibold px-4 py-2 rounded-xl text-white" style={{ background: TEAL }}>Sign In</button></Link>
+              <Link href="/courses">
+                <span onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 px-3 py-2.5 rounded-xl transition-all cursor-pointer">
+                  Courses
+                </span>
+              </Link>
+              <div className="pt-3 pb-1 flex gap-2">
+                <Link href="/register" className="flex-1">
+                  <button className="w-full text-sm font-medium px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-all">
+                    Register
+                  </button>
+                </Link>
+                <Link href="/login" className="flex-1">
+                  <button className="w-full text-sm font-semibold px-4 py-2.5 rounded-xl text-white transition-all"
+                    style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}>
+                    Sign In
+                  </button>
+                </Link>
               </div>
             </div>
           </motion.div>
@@ -575,12 +649,15 @@ function CMSPricingCard({ plan, colorIdx, isStudent }: { plan: CMSPlan; colorIdx
   const popular = plan.is_highlighted || plan.badge === "POPULAR";
   return (
     <motion.div
-      whileHover={{ y: -5, boxShadow: `0 20px 48px ${color}18`, transition: { duration: 0.2 } }}
-      className="bg-white rounded-2xl p-6 border-2 relative flex flex-col h-full"
-      style={{ borderColor: popular ? color : "#f0f0f0" }}>
+      whileHover={{ y: -6, transition: { duration: 0.22, ease: [0.22,1,0.36,1] } }}
+      className={`bg-white rounded-2xl p-6 border-2 relative flex flex-col h-full transition-shadow duration-300 ${popular ? "border-pulse" : ""}`}
+      style={{
+        borderColor: popular ? color : "#f0f0f0",
+        boxShadow: popular ? `0 0 0 0 ${color}25, 0 8px 32px ${color}14` : "0 2px 12px rgba(0,0,0,0.04)",
+      }}>
       {popular && (
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold text-white whitespace-nowrap"
-          style={{ background: color }}>
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full text-[10px] font-bold text-white whitespace-nowrap shadow-lg"
+          style={{ background: `linear-gradient(135deg, ${color}, ${color}CC)`, boxShadow: `0 4px 12px ${color}40` }}>
           {plan.badge ?? "MOST POPULAR"}
         </div>
       )}
@@ -648,19 +725,20 @@ interface VerifiedTestimonial extends CMSTestimonial { is_verified?: boolean; }
 
 function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimonial[] }) {
   if (!testimonials.length) return (
-    <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
-      <div className="max-w-7xl mx-auto text-center">
+    <section className="py-24 px-5 relative overflow-hidden" style={{ background: "#F5F5F5" }}>
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: `radial-gradient(circle at 20% 80%, ${TEAL}06 0%, transparent 50%), radial-gradient(circle at 80% 20%, #818CF808 0%, transparent 50%)` }} />
+      <div className="max-w-7xl mx-auto text-center relative z-10">
         <Reveal>
           <div className="mb-10">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-              style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+            <span className="section-badge mb-5">
               <Star className="h-3 w-3" />Trusted by educators
             </span>
             <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4">
               What teachers are <span style={{ color: TEAL }}>saying.</span>
             </h2>
           </div>
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 max-w-md mx-auto">
+          <div className="card-premium p-12 max-w-md mx-auto">
             <Quote className="h-10 w-10 mx-auto mb-4 opacity-20" style={{ color: TEAL }} />
             <p className="text-sm text-gray-500 leading-relaxed">Be the first educator to share your experience with Aperti.</p>
           </div>
@@ -670,12 +748,13 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
   );
 
   return (
-    <section className="py-24 px-5" style={{ background: "#F5F5F5" }}>
-      <div className="max-w-7xl mx-auto">
+    <section className="py-24 px-5 relative overflow-hidden" style={{ background: "#F5F5F5" }}>
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: `radial-gradient(circle at 20% 80%, ${TEAL}06 0%, transparent 50%), radial-gradient(circle at 80% 20%, #818CF808 0%, transparent 50%)` }} />
+      <div className="max-w-7xl mx-auto relative z-10">
         <Reveal>
           <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-              style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+            <span className="section-badge mb-5">
               <Star className="h-3 w-3" />Trusted by educators
             </span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
@@ -687,8 +766,10 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {testimonials.slice(0, 6).map((t, i) => (
             <Reveal key={t.id} delay={i * 0.08}>
-              <motion.div whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full flex flex-col">
+              <motion.div
+                whileHover={{ y: -5, boxShadow: `0 20px 48px rgba(0,0,0,0.1), 0 4px 12px ${TEAL}12` }}
+                transition={{ duration: 0.25, ease: [0.22,1,0.36,1] }}
+                className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full flex flex-col group">
                 <div className="flex items-start justify-between mb-4">
                   <Quote className="h-6 w-6 opacity-30" style={{ color: TEAL }} />
                   {t.is_verified && (
@@ -812,11 +893,12 @@ function ComparisonSection({ teal }: { teal: string }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
-    <section className="py-24 px-5" style={{ background: "#F5F5F5" }} ref={ref}>
-      <div className="max-w-4xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} className="text-center mb-12">
-          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-            style={{ background: "#E6F4F1", color: teal, borderColor: `${teal}25` }}>
+    <section className="py-24 px-5 relative overflow-hidden" style={{ background: "#F5F5F5" }} ref={ref}>
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: `linear-gradient(${teal}04 1px, transparent 1px), linear-gradient(90deg, ${teal}04 1px, transparent 1px)`, backgroundSize: "80px 80px" }} />
+      <div className="max-w-4xl mx-auto relative z-10">
+        <motion.div initial={{ opacity: 0, y: 20, filter: "blur(4px)" }} animate={inView ? { opacity: 1, y: 0, filter: "blur(0px)" } : {}} className="text-center mb-12">
+          <span className="section-badge mb-5">
             <Building2 className="h-3 w-3" />Why Aperti?
           </span>
           <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">
@@ -881,27 +963,34 @@ function FAQSection({ faqs }: { faqs: CMSFAQ[] }) {
             </h2>
           </div>
         </Reveal>
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           {faqs.map((faq, i) => (
             <Reveal key={faq.id} delay={i * 0.04}>
-              <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm">
+              <motion.div
+                className="bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm transition-shadow duration-200"
+                whileHover={{ boxShadow: "0 4px 24px rgba(0,0,0,0.07)" }}>
                 <button onClick={() => setOpen(open === faq.id ? null : faq.id)}
-                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50/50 transition-colors">
-                  <span className="font-semibold text-gray-900 text-sm pr-4">{faq.question}</span>
-                  <motion.div animate={{ rotate: open === faq.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
-                    <ChevronDown className="h-4 w-4 shrink-0 text-gray-400" />
+                  className="w-full flex items-center justify-between px-6 py-4.5 text-left group transition-colors hover:bg-gray-50/60">
+                  <span className="font-semibold text-gray-900 text-sm pr-4 group-hover:text-gray-800 transition-colors">{faq.question}</span>
+                  <motion.div
+                    animate={{ rotate: open === faq.id ? 180 : 0 }}
+                    transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-gray-400 group-hover:text-gray-600 transition-colors" />
                   </motion.div>
                 </button>
                 <AnimatePresence>
                   {open === faq.id && (
-                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                       className="overflow-hidden">
-                      <p className="px-6 pb-5 text-sm text-gray-500 leading-relaxed border-t border-gray-50 pt-3">{faq.answer}</p>
+                      <p className="px-6 pb-5 text-sm text-gray-500 leading-relaxed border-t border-gray-100 pt-3.5">{faq.answer}</p>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
+              </motion.div>
             </Reveal>
           ))}
         </div>
@@ -1630,12 +1719,13 @@ function PricingSection({ teal, teacherPlans, studentPlans, pricingHeadline, pri
   const cols = activePlans.length >= 4 ? "lg:grid-cols-4" : activePlans.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-2";
 
   return (
-    <section id="pricing" className="py-24 px-5 bg-white">
-      <div className="max-w-7xl mx-auto">
+    <section id="pricing" className="py-24 px-5 bg-white relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none"
+        style={{ backgroundImage: `radial-gradient(circle at 90% 10%, ${teal}05 0%, transparent 40%), radial-gradient(circle at 10% 90%, #818CF806 0%, transparent 40%)` }} />
+      <div className="max-w-7xl mx-auto relative z-10">
         <Reveal>
           <div className="text-center mb-10">
-            <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-              style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+            <span className="section-badge mb-5">
               Transparent Pricing
             </span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
@@ -1745,52 +1835,58 @@ export default function Landing() {
       <Nav />
 
       {/* ── HERO ── */}
-      <section className="min-h-screen flex items-center pt-20 pb-10 px-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #F0FDF8 0%, #EEF6FF 50%, #FAF5FF 100%)" }}>
+      <section className="min-h-screen flex items-center pt-20 pb-10 px-5 relative overflow-hidden aurora-bg">
 
         {/* Colorful animated background (canvas adapted for light) */}
-        <div className="absolute inset-0 opacity-30 pointer-events-none"><Landing3DHeroCanvas /></div>
+        <div className="absolute inset-0 opacity-25 pointer-events-none"><Landing3DHeroCanvas /></div>
 
         {/* Light gradient overlay for readability */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(to right, rgba(240,253,248,0.85) 0%, rgba(238,246,255,0.55) 55%, rgba(250,245,255,0.2) 100%)" }} />
+          style={{ background: "linear-gradient(to right, rgba(240,253,248,0.88) 0%, rgba(238,246,255,0.6) 55%, rgba(250,245,255,0.15) 100%)" }} />
 
-        {/* Colorful decorative blobs */}
-        <div className="absolute -top-24 right-0 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${teal}28 0%, transparent 70%)`, filter: "blur(60px)" }} />
-        <div className="absolute -bottom-16 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, #818CF840 0%, transparent 70%)", filter: "blur(80px)" }} />
-        <div className="absolute top-1/2 right-1/4 w-[300px] h-[300px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, #34D39920 0%, transparent 70%)", filter: "blur(50px)" }} />
+        {/* Premium floating orbs */}
+        <div className="float-orb-1 absolute -top-24 right-0 w-[620px] h-[620px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}22 0%, transparent 70%)`, filter: "blur(64px)" }} />
+        <div className="float-orb-2 absolute -bottom-16 -left-24 w-[440px] h-[440px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #818CF838 0%, transparent 70%)", filter: "blur(80px)" }} />
+        <div className="float-orb-3 absolute top-1/2 right-1/4 w-[320px] h-[320px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #34D39918 0%, transparent 70%)", filter: "blur(52px)" }} />
+        <div className="absolute bottom-1/4 right-1/3 w-[200px] h-[200px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #A78BFA18 0%, transparent 70%)", filter: "blur(40px)", animation: "floatOrb2 18s ease-in-out infinite" }} />
 
         <div className="max-w-7xl mx-auto w-full relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.9, ease: [0.22,1,0.36,1] }}>
-              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-                className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold mb-7 border"
+            <motion.div initial={{ opacity: 0, x: -40, filter: "blur(8px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }} transition={{ duration: 1, ease: [0.22,1,0.36,1] }}>
+              <motion.div
+                initial={{ opacity: 0, y: 12, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.08, duration: 0.5, ease: [0.22,1,0.36,1] }}
+                className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-semibold mb-7 border shimmer-sweep"
                 style={{ background: `${teal}18`, color: teal, borderColor: `${teal}40` }}>
                 <Sparkles className="h-3 w-3" />
                 {badgeText}
               </motion.div>
               <AnimeHeroTitle headline={headline} headlineAccent={headlineAccent} teal={teal} />
               <motion.p
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+                initial={{ opacity: 0, y: 12, filter: "blur(4px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ delay: 0.48, duration: 0.7, ease: [0.22,1,0.36,1] }}
                 className="text-lg leading-relaxed mb-9 max-w-xl text-gray-500">
                 {subheadline}
               </motion.p>
               <motion.div
-                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.58, ease: [0.22,1,0.36,1] }}
                 className="flex flex-wrap gap-3 mb-8">
                 <Link href="/register">
-                  <motion.button whileHover={{ scale: 1.03, boxShadow: `0 12px 36px ${teal}50` }} whileTap={{ scale: 0.97 }}
-                    className="flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-white shadow-xl transition-shadow"
+                  <motion.button
+                    whileHover={{ scale: 1.03, boxShadow: `0 16px 40px ${teal}55` }}
+                    whileTap={{ scale: 0.97 }}
+                    className="magnetic-btn flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-white"
                     style={{ background: `linear-gradient(135deg, ${teal}, #00897B)`, boxShadow: `0 8px 28px ${teal}40` }}>
                     Get Started Free <ArrowRight className="h-4 w-4" />
                   </motion.button>
                 </Link>
                 <a href="#how-it-works">
-                  <motion.button whileHover={{ scale: 1.02, background: "#F9FAFB" }} whileTap={{ scale: 0.97 }}
-                    className="flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-gray-700 transition-all"
+                  <motion.button
+                    whileHover={{ scale: 1.02, backgroundColor: "#F9FAFB", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}
+                    whileTap={{ scale: 0.97 }}
+                    className="magnetic-btn flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm text-gray-700 transition-colors"
                     style={{ background: "white", border: "1.5px solid #E5E7EB", boxShadow: "0 2px 8px rgba(0,0,0,0.06)" }}>
                     See How It Works
                   </motion.button>
@@ -1813,13 +1909,16 @@ export default function Landing() {
               </motion.div>
             </motion.div>
 
-            <motion.div style={{ y: heroY }} initial={{ opacity: 0, x: 40, scale: 0.96 }} animate={{ opacity: 1, x: 0, scale: 1 }}
-              transition={{ duration: 1, delay: 0.25, ease: [0.22,1,0.36,1] }}
+            <motion.div style={{ y: heroY }}
+              initial={{ opacity: 0, x: 40, scale: 0.94, filter: "blur(8px)" }}
+              animate={{ opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }}
+              transition={{ duration: 1.1, delay: 0.2, ease: [0.22,1,0.36,1] }}
               className="relative hidden lg:block">
-              {/* Glow ring behind the preview */}
-              <div className="absolute inset-0 -m-8 rounded-3xl pointer-events-none"
-                style={{ background: `radial-gradient(ellipse at center, ${teal}20 0%, transparent 70%)`, filter: "blur(20px)" }} />
-              <div className="relative" style={{ filter: "drop-shadow(0 24px 48px rgba(0,0,0,0.12))" }}>
+              <div className="absolute inset-0 -m-10 rounded-3xl pointer-events-none"
+                style={{ background: `radial-gradient(ellipse at 60% 40%, ${teal}22 0%, transparent 65%)`, filter: "blur(24px)" }} />
+              <div className="absolute inset-0 -m-6 rounded-3xl pointer-events-none"
+                style={{ background: "radial-gradient(ellipse at 40% 80%, #818CF820 0%, transparent 65%)", filter: "blur(20px)" }} />
+              <div className="relative" style={{ filter: "drop-shadow(0 28px 56px rgba(0,0,0,0.13)) drop-shadow(0 8px 16px rgba(0,0,0,0.06))" }}>
                 <LiveDashboardPreview />
               </div>
             </motion.div>
@@ -1841,12 +1940,13 @@ export default function Landing() {
       <MarqueeStrip />
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="flex items-center py-24 px-5" style={{ background: "#F5F5F5" }}>
-        <div className="max-w-7xl mx-auto w-full">
+      <section id="how-it-works" className="flex items-center py-24 px-5 relative overflow-hidden" style={{ background: "#F5F5F5" }}>
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ backgroundImage: `linear-gradient(${teal}06 1px, transparent 1px), linear-gradient(90deg, ${teal}06 1px, transparent 1px)`, backgroundSize: "60px 60px" }} />
+        <div className="max-w-7xl mx-auto w-full relative z-10">
           <Reveal>
             <div className="text-center mb-16">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-                style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+              <span className="section-badge mb-5">
                 <Zap className="h-3 w-3" />Simple by design
               </span>
               <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">Up and running in three steps.</h2>
@@ -1869,12 +1969,12 @@ export default function Landing() {
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="flex items-center py-20 px-5 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section id="features" className="flex items-center py-24 px-5 bg-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: `linear-gradient(90deg, transparent 0%, ${teal}30 30%, ${teal}30 70%, transparent 100%)` }} />
+        <div className="max-w-7xl mx-auto relative z-10">
           <Reveal>
             <div className="text-center mb-16">
-              <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-                style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+              <span className="section-badge mb-5">
                 <Target className="h-3 w-3" />Platform Features
               </span>
               <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
@@ -1908,6 +2008,7 @@ export default function Landing() {
       <TestimonialsSection testimonials={testimonials} />
 
       {/* ── PRICING ── */}
+      <div className="section-divider" />
       <PricingSection
         teal={teal}
         teacherPlans={teacherPlans}
@@ -1958,25 +2059,24 @@ export default function Landing() {
       )}
 
       {/* ── GET STARTED CTA ── */}
-      <section id="apply" className="flex items-center py-28 px-5 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #F0FDF8 0%, #EEF6FF 50%, #FAF5FF 100%)" }}>
+      <section id="apply" className="flex items-center py-28 px-5 relative overflow-hidden aurora-bg">
         <div className="absolute inset-0 pointer-events-none"
-          style={{ backgroundImage: `linear-gradient(${teal}08 1px, transparent 1px), linear-gradient(90deg, ${teal}08 1px, transparent 1px)`, backgroundSize: "80px 80px" }} />
-        <div className="absolute -top-24 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${teal}28 0%, transparent 70%)`, filter: "blur(80px)" }} />
-        <div className="absolute -bottom-16 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle, #818CF840 0%, transparent 70%)", filter: "blur(80px)" }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${teal}15 0%, transparent 65%)`, filter: "blur(60px)" }} />
+          style={{ backgroundImage: `linear-gradient(${teal}07 1px, transparent 1px), linear-gradient(90deg, ${teal}07 1px, transparent 1px)`, backgroundSize: "80px 80px" }} />
+        <div className="float-orb-1 absolute -top-24 right-0 w-[500px] h-[500px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}24 0%, transparent 70%)`, filter: "blur(80px)" }} />
+        <div className="float-orb-2 absolute -bottom-16 -left-24 w-[400px] h-[400px] rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, #818CF838 0%, transparent 70%)", filter: "blur(80px)" }} />
+        <div className="float-orb-3 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
+          style={{ background: `radial-gradient(circle, ${teal}12 0%, transparent 65%)`, filter: "blur(60px)" }} />
         <div className="max-w-3xl mx-auto text-center w-full relative z-10">
           <Reveal>
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold mb-8 border"
-              style={{ background: `${teal}18`, color: teal, borderColor: `${teal}40` }}>
+              transition={{ duration: 0.55, ease: [0.22,1,0.36,1] }}
+              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold mb-8 border shimmer-sweep"
+              style={{ background: `${teal}15`, color: teal, borderColor: `${teal}35` }}>
               <Rocket className="h-3 w-3" />
               Join the platform now — it's free to start
             </motion.div>
