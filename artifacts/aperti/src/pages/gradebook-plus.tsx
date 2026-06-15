@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -217,10 +218,7 @@ export default function GradebookPlus() {
           {isLoading ? (
             <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-16 bg-muted/40 rounded-xl animate-pulse" />)}</div>
           ) : reports.length === 0 ? (
-            <div className="text-center py-16 border border-dashed border-border rounded-2xl">
-              <BarChart3 className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-              <p className="text-muted-foreground">No graded assessments yet</p>
-            </div>
+            <EmptyState icon="analytics" title="No graded assessments yet" description="Results will appear here after you grade your first assessment." />
           ) : (
             <div className="space-y-2">
               {reports.map((r, i) => {

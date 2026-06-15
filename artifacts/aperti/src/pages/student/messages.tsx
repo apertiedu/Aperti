@@ -12,6 +12,7 @@ import { MessageSquare, Send, Bell, Calendar, ChevronRight, Flag, Ban } from "lu
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { ReportModal } from "@/components/ReportModal";
+import { EmptyState } from "@/components/ui/empty-state";
 
 
 async function fetchJSON(url: string) {
@@ -290,13 +291,11 @@ export default function StudentMessages() {
             {threadsLoading ? (
               [1, 2, 3].map((i) => <Skeleton key={i} className="h-16 rounded-xl" />)
             ) : (threads ?? []).length === 0 ? (
-              <Card className="shadow-sm">
-                <CardContent className="p-8 text-center">
-                  <MessageSquare className="h-10 w-10 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
-                  <p className="font-medium mb-1">No conversations yet</p>
-                  <p className="text-sm text-muted-foreground">Your teacher can send you messages here.</p>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon="messages"
+                title="No conversations yet"
+                description="Your teacher will send you messages here. Check back soon."
+              />
             ) : (
               (threads ?? []).map((thread: any) => (
                 <motion.div key={thread.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} role="listitem">
@@ -332,11 +331,11 @@ export default function StudentMessages() {
             {announcementsLoading ? (
               [1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-xl" />)
             ) : (announcements ?? []).length === 0 ? (
-              <Card className="shadow-sm">
-                <CardContent className="p-8 text-center text-muted-foreground text-sm">
-                  No announcements yet.
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon="notifications"
+                title="No announcements yet"
+                description="School-wide announcements from your teachers will appear here."
+              />
             ) : (
               (announcements ?? []).map((a: any) => (
                 <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>

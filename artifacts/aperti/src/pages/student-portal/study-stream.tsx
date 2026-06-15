@@ -14,19 +14,14 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/context/auth";
+import { DashboardGreeting } from "@/components/ui/dashboard-greeting";
+import { EmptyState } from "@/components/ui/empty-state";
 
 
 async function fetchJSON(url: string) {
   const res = await fetch(url, { credentials: "include" });
   if (!res.ok) throw new Error("Failed");
   return res.json();
-}
-
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
 }
 
 function CircularProgress({ value, size = 96 }: { value: number; size?: number }) {
@@ -77,8 +72,6 @@ export default function StudyStream() {
   });
 
   const displayName = summary?.student?.studentName || user?.displayName || "Student";
-  const firstName = displayName.split(" ")[0];
-  const greeting = `${getGreeting()}, ${firstName}!`;
 
   const dailyGoals = goalsData?.today ?? [];
   const completedGoals = dailyGoals.filter((g: any) => g.completedAt).length;
@@ -103,26 +96,18 @@ export default function StudyStream() {
   return (
     <div className="min-h-screen bg-[#F5F5F5] dark:bg-background p-4 md:p-6">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-              {isLoading ? <Skeleton className="h-8 w-56" /> : greeting}
-            </h1>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-            </p>
+      <div className="flex items-start justify-between mb-6">
+        {isLoading
+          ? <Skeleton className="h-10 w-64 rounded-lg" />
+          : <DashboardGreeting name={displayName} role="student" />
+        }
+        {ascend && !isLoading && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-sm font-semibold shrink-0 ml-4">
+            <Flame className="h-4 w-4" />
+            {summary?.streakDays ?? 0} day streak
           </div>
-          {ascend && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-sm font-semibold">
-                <Flame className="h-4 w-4" />
-                {summary?.streakDays ?? 0} day streak
-              </div>
-            </div>
-          )}
-        </div>
-      </motion.div>
+        )}
+      </div>
 
       {/* Top stats row */}
       <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -133,7 +118,7 @@ export default function StudyStream() {
           { label: "HW Done", value: isLoading ? "…" : `${hwCount}%`, icon: <BookOpen className="h-4 w-4 text-blue-500" />, color: "bg-blue-50 dark:bg-blue-900/20" },
         ].map(({ label, value, icon, color }) => (
           <motion.div key={label} variants={item}>
-            <Card className="shadow-sm card-hover card-shine">
+            <Card className="shadow-sm card-hover card-shine card-lift">
               <CardContent className={`p-3 flex items-center gap-3 rounded-xl ${color}`}>
                 <div className="w-9 h-9 rounded-xl bg-white/70 dark:bg-white/10 flex items-center justify-center shrink-0">
                   {icon}
@@ -250,7 +235,12 @@ export default function StudyStream() {
                 {isLoading ? (
                   <div className="space-y-2">{[1, 2].map(i => <Skeleton key={i} className="h-14 rounded-xl" />)}</div>
                 ) : (summary?.upcomingHomework?.length ?? 0) === 0 ? (
-                  <p className="text-sm text-muted-foreground py-2">No upcoming homework 🎉</p>
+                  <EmptyState
+                    icon="assignments"
+                    title="No upcoming homework"
+                    description="You're all caught up — check back after your next class."
+                    compact
+                  />
                 ) : (
                   <div className="space-y-2">
                     {summary.upcomingHomework.slice(0, 4).map((hw: any, i: number) => (

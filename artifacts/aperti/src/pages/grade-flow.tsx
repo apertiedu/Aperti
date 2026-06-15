@@ -18,6 +18,7 @@ import {
   User, Clock, AlertCircle, Send, AlertTriangle, ShieldCheck, Info,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { StatusButton, useMutationStatus } from "@/components/ui/status-button";
 import { cn } from "@/lib/utils";
 
 const API = "/api";
@@ -400,18 +401,16 @@ export default function GradeFlow() {
                 />
               </div>
 
-              <Button
-                className="w-full gap-2 shrink-0"
+              <StatusButton
+                status={useMutationStatus(gradeMutation.isPending, gradeMutation.isSuccess, gradeMutation.isError)}
+                idleText={<><Send className="h-4 w-4" />{aiConfidence?.level === "low" && !feedback.trim() ? "Add feedback first" : "Submit Grade"}</>}
+                loadingText="Saving grade…"
+                successText="Grade saved"
+                errorText="Save failed"
                 onClick={handleSubmitGrade}
                 disabled={gradeMutation.isPending || (aiConfidence?.level === "low" && !feedback.trim())}
-              >
-                <Send className="h-4 w-4" />
-                {gradeMutation.isPending
-                  ? "Saving…"
-                  : aiConfidence?.level === "low" && !feedback.trim()
-                    ? "Add feedback before submitting"
-                    : "Submit Grade"}
-              </Button>
+                className="w-full"
+              />
             </CardContent>
           </Card>
         </div>

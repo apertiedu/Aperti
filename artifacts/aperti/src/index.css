@@ -1175,6 +1175,227 @@ body, #root {
   .card-mobile-tight { padding: 1rem; }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   PHASE 16 — PERCEIVED QUALITY & MICRO-UX EXCELLENCE
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Card lift interaction ───────────────────────────────────────────────── */
+.card-lift {
+  transition: transform 0.15s cubic-bezier(0.22,1,0.36,1), box-shadow 0.15s cubic-bezier(0.22,1,0.36,1);
+  will-change: transform;
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.08), 0 4px 8px rgba(0,0,0,.05);
+}
+.card-lift:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+
+/* ── Button press feel ───────────────────────────────────────────────────── */
+.btn-press {
+  transition: transform 0.08s cubic-bezier(0.22,1,0.36,1), box-shadow 0.08s ease;
+}
+.btn-press:hover  { transform: translateY(-1px); }
+.btn-press:active { transform: scale(0.97) translateY(0); }
+
+/* ── Stat number count-up style ─────────────────────────────────────────── */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ── Input focus glow ────────────────────────────────────────────────────── */
+input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
+}
+
+/* ── Form field validated states ─────────────────────────────────────────── */
+.field-valid   { border-color: #4ade80 !important; }
+.field-invalid { border-color: #f87171 !important; }
+
+/* ── Success flash (green overlay fade) ─────────────────────────────────── */
+@keyframes successFlash {
+  0%   { background: hsl(142 72% 50% / 0.15); }
+  100% { background: transparent; }
+}
+.success-flash { animation: successFlash 0.8s ease-out; }
+
+/* ── Checkmark draw animation ────────────────────────────────────────────── */
+@keyframes checkDraw {
+  from { stroke-dashoffset: 36; }
+  to   { stroke-dashoffset: 0; }
+}
+.check-draw {
+  stroke-dasharray: 36;
+  stroke-dashoffset: 36;
+  animation: checkDraw 0.35s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+/* ── Skeleton shimmer improved ───────────────────────────────────────────── */
+@keyframes shimmer16 {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(90deg,
+    hsl(var(--muted) / 0.8) 25%,
+    hsl(var(--muted) / 0.4) 50%,
+    hsl(var(--muted) / 0.8) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer16 1.6s ease-in-out infinite;
+}
+
+/* ── Context loader dot pulse ────────────────────────────────────────────── */
+@keyframes dotPulse {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40%           { transform: scale(1);   opacity: 1; }
+}
+.dot-pulse span {
+  display: inline-block;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: dotPulse 1.4s ease-in-out infinite both;
+}
+.dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+.dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ── Notification appear ─────────────────────────────────────────────────── */
+@keyframes notifSlideIn {
+  from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+.notif-enter { animation: notifSlideIn 0.2s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Quick action button ─────────────────────────────────────────────────── */
+.quick-action {
+  transition: background 0.12s ease, transform 0.1s ease, box-shadow 0.12s ease;
+  cursor: pointer;
+}
+.quick-action:hover  { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+.quick-action:active { transform: scale(0.97); }
+
+/* ── Modal backdrop ──────────────────────────────────────────────────────── */
+@keyframes backdropIn  { from { opacity: 0; backdrop-filter: blur(0); } to { opacity: 1; backdrop-filter: blur(4px); } }
+@keyframes modalSlideIn { from { opacity: 0; transform: scale(0.96) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+.modal-backdrop { animation: backdropIn  0.18s ease forwards; }
+.modal-panel    { animation: modalSlideIn 0.22s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Dropdown appear ─────────────────────────────────────────────────────── */
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.dropdown-enter { animation: dropIn 0.15s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Toast slide ─────────────────────────────────────────────────────────── */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.toast-enter { animation: toastIn 0.2s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Dashboard stat card highlight ──────────────────────────────────────── */
+@keyframes statHighlight {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+  50%      { box-shadow: 0 0 0 4px hsl(var(--primary) / 0.12); }
+}
+.stat-highlight { animation: statHighlight 2s ease-in-out 0.5s; }
+
+/* ── Optimistic update fade ──────────────────────────────────────────────── */
+@keyframes optimisticFade {
+  from { opacity: 0.6; }
+  to   { opacity: 1; }
+}
+.optimistic-update { animation: optimisticFade 0.25s ease-out; }
+
+/* ── Empty state entrance ────────────────────────────────────────────────── */
+@keyframes emptyReveal {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.empty-reveal { animation: emptyReveal 0.3s cubic-bezier(0.22,1,0.36,1) forwards; }
+
+/* ── Row stagger animation ───────────────────────────────────────────────── */
+@keyframes rowEnter {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.row-enter {
+  animation: rowEnter 0.18s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── Focus ring overrides (tight, teal) ─────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.7);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+button:focus-visible, [role="button"]:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.7);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ── Smooth tab transition ───────────────────────────────────────────────── */
+.tab-content-enter {
+  animation: staggerFadeUp 0.18s ease-out both;
+}
+
+/* ── Progress bar fill animation ─────────────────────────────────────────── */
+.progress-fill {
+  transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* ── Sync indicator pulse ────────────────────────────────────────────────── */
+@keyframes syncPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+.sync-pulse { animation: syncPulse 1.4s ease-in-out infinite; }
+
+/* ── Last saved fade ─────────────────────────────────────────────────────── */
+.save-indicator {
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* ── Interactive icon button ─────────────────────────────────────────────── */
+.icon-btn {
+  transition: background 0.1s ease, transform 0.1s ease, color 0.1s ease;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover  { background: hsl(var(--muted) / 0.7); }
+.icon-btn:active { transform: scale(0.92); }
+
+/* ── Tag/badge hover ─────────────────────────────────────────────────────── */
+.badge-interactive {
+  transition: background 0.12s ease, transform 0.1s ease;
+  cursor: pointer;
+}
+.badge-interactive:hover  { transform: scale(1.04); }
+.badge-interactive:active { transform: scale(0.97); }
+
+/* ── Sidebar nav item enhanced hover ────────────────────────────────────── */
+.sidebar-nav-item {
+  transition: background 0.12s ease, color 0.1s ease, transform 0.1s ease;
+}
+.sidebar-nav-item:hover { transform: translateX(1px); }
+
+/* ── Table row interactive ───────────────────────────────────────────────── */
+tr.table-row-interactive {
+  transition: background 0.1s ease;
+}
+tr.table-row-interactive:hover {
+  background: hsl(var(--muted) / 0.45);
+}
+
 /* ── Smooth scroll on all devices ───────────────────────────────────────── */
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { StatusButton, useMutationStatus } from "@/components/ui/status-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -355,9 +356,15 @@ export default function SubmitFlow() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave} disabled={!form.title || saveMutation.isPending}>
-              {saveMutation.isPending ? "Saving…" : editing ? "Update" : "Create Assignment"}
-            </Button>
+            <StatusButton
+              status={useMutationStatus(saveMutation.isPending, saveMutation.isSuccess, saveMutation.isError)}
+              idleText={editing ? "Update Assignment" : "Create Assignment"}
+              loadingText={editing ? "Updating…" : "Creating…"}
+              successText={editing ? "Updated" : "Created"}
+              errorText="Failed"
+              onClick={handleSave}
+              disabled={!form.title || saveMutation.isPending}
+            />
           </DialogFooter>
         </DialogContent>
       </Dialog>

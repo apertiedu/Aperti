@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/auth";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type NotifItem = {
   id: number; type: string; category: string;
@@ -175,15 +176,11 @@ export default function NotificationCenter() {
           {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <Card className="shadow-sm">
-          <CardContent className="p-12 text-center text-muted-foreground">
-            <Bell className="h-10 w-10 mx-auto mb-3 opacity-20" />
-            <p className="font-medium">
-              {filterType === "all" ? "You're all caught up!" : `No ${TYPE_META[filterType]?.label ?? filterType} notifications`}
-            </p>
-            <p className="text-sm mt-1">New activity will appear here automatically.</p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon="notifications"
+          title={filterType === "all" ? "You're all caught up!" : `No ${TYPE_META[filterType]?.label ?? filterType} notifications`}
+          description="New activity will appear here automatically."
+        />
       ) : (
         <AnimatePresence initial={false}>
           <div className="space-y-6">

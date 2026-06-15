@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -527,7 +528,7 @@ export default function CheckIn() {
                 </CardHeader>
                 <CardContent className="p-0 max-h-64 overflow-y-auto divide-y">
                   {records.length === 0 ? (
-                    <p className="text-sm text-gray-400 text-center py-8">No attendance marked yet — scan a QR code to start</p>
+                    <EmptyState icon="calendar" title="No attendance marked yet" description="Scan a QR code to start recording attendance." compact />
                   ) : (
                     records.map(r => {
                       const S = STATUS_STYLE[r.status as MarkStatus] ?? STATUS_STYLE.Present;

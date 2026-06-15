@@ -248,15 +248,31 @@ const ParentSettings = lazy(() => import("@/pages/parent/settings"));
 const ChildProfile = lazy(() => import("@/pages/parent/child-profile"));
 const Subjects = lazy(() => import("@/pages/subjects"));
 
-const PageLoader = () => (
-  <div className="min-h-[60vh] flex flex-col items-center justify-center gap-3 animate-in fade-in duration-300">
-    <div className="relative">
-      <div className="w-8 h-8 border-2 border-primary/20 rounded-full" />
-      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+const PAGE_MESSAGES = [
+  "Preparing your dashboard…",
+  "Loading content…",
+  "Almost ready…",
+  "Fetching data…",
+  "Getting things ready…",
+];
+
+const PageLoader = ({ message }: { message?: string }) => {
+  const msg = message ?? PAGE_MESSAGES[Math.floor(Math.random() * PAGE_MESSAGES.length)];
+  return (
+    <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 animate-in fade-in duration-300">
+      <div className="relative">
+        <div className="w-10 h-10 border-2 border-primary/10 rounded-full" />
+        <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin absolute inset-0" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-4 h-4 rounded-full bg-primary/10 animate-pulse" />
+        </div>
+      </div>
+      <div className="text-center space-y-1">
+        <p className="text-sm font-medium text-muted-foreground animate-pulse">{msg}</p>
+      </div>
     </div>
-    <p className="text-xs text-muted-foreground">Loading…</p>
-  </div>
-);
+  );
+};
 
 const queryClient = new QueryClient({
   defaultOptions: {

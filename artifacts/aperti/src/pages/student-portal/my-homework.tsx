@@ -1,5 +1,6 @@
 import { apiFetch } from "@/lib/api";
 import DiscussButton from "@/components/discuss-button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -193,11 +194,17 @@ export default function MyHomework() {
       {loading ? (
         <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-20 bg-muted animate-pulse rounded-2xl" />)}</div>
       ) : tabData[activeTab].length === 0 ? (
-        <div className="py-16 text-center text-gray-400 bg-card rounded-2xl">
-          <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-20" />
-          <p className="font-medium">No {activeTab} homework</p>
-          {activeTab === "pending" && <p className="text-sm mt-1">You're all caught up! 🎉</p>}
-        </div>
+        <EmptyState
+          icon="assignments"
+          title={`No ${activeTab} homework`}
+          description={
+            activeTab === "pending"
+              ? "You're all caught up — no pending assignments right now."
+              : activeTab === "submitted"
+              ? "No submitted homework yet. Submit your first assignment above."
+              : "No graded homework yet. Graded work will appear here."
+          }
+        />
       ) : (
         <div className="space-y-3">
           {tabData[activeTab].map((hw, i) => {

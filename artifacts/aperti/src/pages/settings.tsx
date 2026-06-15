@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Shield, Bell, Palette, Monitor, Eye, EyeOff, LogOut, Accessibility, Bot, Download, Trash2, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/context/auth";
+import { AutoSaveIndicator } from "@/components/ui/trust-signals";
 
 const TEAL = "#0D9488";
 
@@ -41,6 +42,8 @@ export default function Settings() {
   const [settingsMap, setSettingsMap] = useState<Record<string, string>>({});
   const [pageLoading, setPageLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const saveState = saving ? "saving" as const : savedAt ? "saved" as const : "idle" as const;
 
   const [displayName, setDisplayName] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -123,7 +126,7 @@ export default function Settings() {
         method: "PUT", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ displayName, firstName, lastName, bio, phone, country, avatarUrl }),
       });
-      if (res.ok) toast({ title: "Profile updated", description: "Your changes have been saved." });
+      if (res.ok) { setSavedAt(new Date()); toast({ title: "Profile updated", description: "Your changes have been saved." }); }
       else toast({ title: "Error", description: "Failed to save.", variant: "destructive" });
     } finally { setSaving(false); }
   };
@@ -232,7 +235,8 @@ export default function Settings() {
                       <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
                         <option value="">Select…</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
                   </div>
-                  <div className="flex justify-end pt-1">
+                  <div className="flex items-center justify-end gap-3 pt-1">
+                    <AutoSaveIndicator state={saveState} lastSaved={savedAt} />
                     <Button onClick={saveProfile} disabled={saving} className="rounded-xl px-6 h-10" style={{ background: TEAL }}>
                       {saving ? "Saving…" : "Save changes"}
                     </Button>

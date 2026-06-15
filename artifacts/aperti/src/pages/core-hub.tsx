@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { useCountUp } from "@/lib/motion";
+import { DashboardGreeting } from "@/components/ui/dashboard-greeting";
 import {
   Card, CardContent, CardHeader, CardTitle, CardDescription,
 } from "@/components/ui/card";
@@ -26,13 +27,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { apiFetch } from "@/lib/api";
-
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const item = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } };
@@ -298,12 +292,10 @@ export default function CoreHub() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">
-            {getGreeting()}, <span className="text-primary">{displayName}</span>
-          </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            {new Date().toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" })}
-          </p>
+          {sumLoading
+            ? <div className="space-y-1.5"><Skeleton className="h-7 w-56 rounded-lg" /><Skeleton className="h-4 w-40 rounded" /></div>
+            : <DashboardGreeting name={displayName} role="teacher" />
+          }
           {!sumLoading && (
             <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mt-1.5">
               {classes.length > 0 && (
