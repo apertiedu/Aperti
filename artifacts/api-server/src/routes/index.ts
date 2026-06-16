@@ -278,6 +278,13 @@ router.use("/shield", anomalyDetectionRouter);
 
 router.use("/system", systemRouter);
 
+import { securePaymentsRouter } from "./secure-payments";
+import { secureDiscountsRouter } from "./secure-discounts";
+import { assistantAssignmentsRouter } from "./assistant-assignments";
+router.use("/secure-payments", securePaymentsRouter);
+router.use("/secure-discounts", secureDiscountsRouter);
+router.use("/assistant-assignments", assistantAssignmentsRouter);
+
 export default router;
 
 // Phase 11 governance router is registered in app.ts under /api/admin/governance

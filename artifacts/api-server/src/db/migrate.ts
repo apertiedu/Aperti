@@ -1539,4 +1539,52 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_uxrv_route    ON ux_rule_violations(route, created_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_uxrv_severity ON ux_rule_violations(severity, created_at DESC)`,
+
+  /* ── Payment + Discount + Approval Security System ───────────────────── */
+  `ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS purpose TEXT NOT NULL DEFAULT 'platform_subscription'`,
+  `ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS target_id INTEGER`,
+  `ALTER TABLE payment_transactions ADD COLUMN IF NOT EXISTS approved_by_role TEXT`,
+  `ALTER TABLE aperti_courses ADD COLUMN IF NOT EXISTS teacher_id INTEGER REFERENCES accounts(id)`,
+  `ALTER TABLE coupons ADD COLUMN IF NOT EXISTS scope TEXT NOT NULL DEFAULT 'platform_subscription'`,
+  `ALTER TABLE coupons ADD COLUMN IF NOT EXISTS discount_type TEXT NOT NULL DEFAULT 'percentage'`,
+  `ALTER TABLE coupons ADD COLUMN IF NOT EXISTS teacher_id INTEGER REFERENCES accounts(id)`,
+  `ALTER TABLE coupons ADD COLUMN IF NOT EXISTS course_ids JSONB DEFAULT '[]'`,
+  `CREATE TABLE IF NOT EXISTS approval_log (
+    id bigserial PRIMARY KEY,
+    transaction_id INTEGER NOT NULL REFERENCES payment_transactions(id) ON DELETE CASCADE,
+    approved_by INTEGER NOT NULL REFERENCES accounts(id),
+    role TEXT NOT NULL,
+    action TEXT NOT NULL,
+    reason TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_approval_log_tx    ON approval_log(transaction_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_approval_log_actor ON approval_log(approved_by, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS financial_audit_log (
+    id bigserial PRIMARY KEY,
+    actor_id INTEGER REFERENCES accounts(id),
+    actor_role TEXT NOT NULL,
+    action TEXT NOT NULL,
+    target_id TEXT,
+    target_type TEXT,
+    ip_address TEXT,
+    result TEXT NOT NULL,
+    metadata JSONB,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_fal_actor  ON financial_audit_log(actor_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_fal_result ON financial_audit_log(result, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS assistant_assignments (
+    id bigserial PRIMARY KEY,
+    assistant_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    teacher_id INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    granted_by INTEGER NOT NULL REFERENCES accounts(id),
+    course_ids JSONB NOT NULL DEFAULT '[]',
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    revoked_at TIMESTAMPTZ,
+    UNIQUE (assistant_id, teacher_id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_aa_assistant ON assistant_assignments(assistant_id) WHERE active = TRUE`,
+  `CREATE INDEX IF NOT EXISTS idx_aa_teacher   ON assistant_assignments(teacher_id) WHERE active = TRUE`,
 ];
