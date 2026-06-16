@@ -118,6 +118,9 @@ import { fraudDetectionRouter } from "./routes/fraud-detection";
 import { refundEngineRouter } from "./routes/refund-engine";
 import { teacherRevenueRouter } from "./routes/teacher-revenue";
 import { subscriptionLifecycleRouter } from "./routes/subscription-lifecycle";
+import { ledgerRouter } from "./routes/ledger";
+import { fraudAlertsRouter } from "./routes/fraud-alerts";
+import { teacherPayoutsRouter } from "./routes/teacher-payouts";
 import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 import { sanitizeBody } from "./middleware/sanitize-body";
@@ -457,9 +460,12 @@ app.use("/api/secure-payments", securePaymentsRouter);
 app.use("/api/secure-discounts", secureDiscountsRouter);
 app.use("/api/assistant-assignments", assistantAssignmentsRouter);
 app.use("/api/fraud", fraudDetectionRouter);
+app.use("/api/fraud-alerts", fraudAlertsRouter);
 app.use("/api/refunds", refundEngineRouter);
 app.use("/api/revenue", teacherRevenueRouter);
 app.use("/api/subscriptions/lifecycle", subscriptionLifecycleRouter);
+app.use("/api/ledger", ledgerRouter);
+app.use("/api/payouts", teacherPayoutsRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {

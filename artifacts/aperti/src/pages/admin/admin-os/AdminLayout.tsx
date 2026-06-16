@@ -109,8 +109,11 @@ const NAV = [
   { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
 
   { label: "— FinTech", header: true },
+  { label: "Ledger",               icon: FileText,    href: "/admin/os/ledger" },
+  { label: "Fraud Alert Center",   icon: ShieldAlert, href: "/admin/os/fraud-alert-center" },
+  { label: "Teacher Payouts",      icon: DollarSign,  href: "/admin/os/teacher-payouts" },
   { label: "Fraud Monitor",        icon: ShieldAlert, href: "/admin/fraud-monitor" },
-  { label: "Refund Engine",        icon: FileText,    href: "/admin/os/refunds" },
+  { label: "Refund Engine",        icon: Scale,       href: "/admin/os/refunds" },
   { label: "Revenue Analytics",    icon: TrendingUp,  href: "/admin/os/revenue-analytics" },
   { label: "Subscription Lifecycle", icon: Activity,  href: "/admin/os/subscription-lifecycle" },
 

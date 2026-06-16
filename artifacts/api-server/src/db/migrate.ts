@@ -1241,14 +1241,79 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE53_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
     [`phase34-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-34 + Phase-47 + Phase-48 + Phase-52 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-34 + Phase-47 + Phase-48 + Phase-52 + Phase-53 migrations applied");
 }
+
+const PHASE53_MIGRATIONS: string[] = [
+  `CREATE TABLE IF NOT EXISTS ledger_entries (
+    id              BIGSERIAL PRIMARY KEY,
+    transaction_id  INTEGER REFERENCES payment_transactions(id) ON DELETE RESTRICT,
+    account_type    TEXT NOT NULL CHECK (account_type IN ('student_wallet','teacher_revenue','platform_revenue','refund_pool')),
+    entry_type      TEXT NOT NULL CHECK (entry_type IN ('debit','credit')),
+    amount          NUMERIC(12,4) NOT NULL CHECK (amount > 0),
+    currency        TEXT NOT NULL DEFAULT 'EGP',
+    reference       TEXT NOT NULL,
+    is_reversal     BOOLEAN NOT NULL DEFAULT FALSE,
+    reversal_of     BIGINT REFERENCES ledger_entries(id),
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_le_transaction  ON ledger_entries(transaction_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_le_account_type ON ledger_entries(account_type, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_le_created_at   ON ledger_entries(created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS fraud_alerts (
+    id          BIGSERIAL PRIMARY KEY,
+    severity    TEXT NOT NULL CHECK (severity IN ('low','medium','high')),
+    type        TEXT NOT NULL,
+    entity_id   TEXT,
+    entity_type TEXT,
+    message     TEXT NOT NULL,
+    status      TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open','reviewed','resolved','ignored')),
+    metadata    JSONB DEFAULT '{}',
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    resolved_by INTEGER REFERENCES accounts(id),
+    resolved_at TIMESTAMPTZ
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_fa_status   ON fraud_alerts(status, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_fa_severity ON fraud_alerts(severity, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS teacher_payouts (
+    id              BIGSERIAL PRIMARY KEY,
+    teacher_id      INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    gross_amount    NUMERIC(12,2) NOT NULL,
+    platform_cut    NUMERIC(12,2) NOT NULL DEFAULT 0,
+    net_payout      NUMERIC(12,2) NOT NULL,
+    status          TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','processing','paid','cancelled')),
+    method          TEXT NOT NULL DEFAULT 'instapay',
+    reference       TEXT,
+    period_start    TIMESTAMPTZ NOT NULL,
+    period_end      TIMESTAMPTZ NOT NULL,
+    ledger_snapshot JSONB NOT NULL DEFAULT '{}',
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    processed_at    TIMESTAMPTZ,
+    processed_by    INTEGER REFERENCES accounts(id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_tp_teacher ON teacher_payouts(teacher_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_tp_status  ON teacher_payouts(status, created_at DESC)`,
+  `INSERT INTO platform_settings (key, value, updated_at)
+   VALUES ('platform_cut_percent', '{"percent": 15}', NOW())
+   ON CONFLICT (key) DO NOTHING`,
+  `INSERT INTO platform_settings (key, value, updated_at)
+   VALUES ('refund_window_days', '{"days": 7}', NOW())
+   ON CONFLICT (key) DO NOTHING`,
+];
 
 const PHASE52_MIGRATIONS: string[] = [
   `CREATE TABLE IF NOT EXISTS fraud_audit_log (

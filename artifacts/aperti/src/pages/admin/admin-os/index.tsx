@@ -95,6 +95,10 @@ import BusinessAnalyticsPage from "./BusinessAnalyticsPage";
 import RefundManagementPage from "./RefundManagementPage";
 import PlatformRevenuePage from "./PlatformRevenuePage";
 import SubscriptionLifecyclePage from "./SubscriptionLifecyclePage";
+// Phase 53 — Ledger / Alerts / Payouts
+import LedgerPage from "./LedgerPage";
+import FraudAlertCenterPage from "./FraudAlertCenterPage";
+import TeacherPayoutsPage from "./TeacherPayoutsPage";
 
 export default function AdminOS() {
   return (
@@ -223,6 +227,11 @@ export default function AdminOS() {
         <Route path="/admin/os/refunds" component={RefundManagementPage} />
         <Route path="/admin/os/revenue-analytics" component={PlatformRevenuePage} />
         <Route path="/admin/os/subscription-lifecycle" component={SubscriptionLifecyclePage} />
+
+        {/* Phase 53 — Double-Entry Ledger, Fraud Alerts, Teacher Payouts */}
+        <Route path="/admin/os/ledger" component={LedgerPage} />
+        <Route path="/admin/os/fraud-alert-center" component={FraudAlertCenterPage} />
+        <Route path="/admin/os/teacher-payouts" component={TeacherPayoutsPage} />
 
         {/* Phase 15 — Business Operations & No-Code Admin Control Center */}
         <Route path="/admin/os/biz-ops" component={BusinessOpsCenterPage} />
