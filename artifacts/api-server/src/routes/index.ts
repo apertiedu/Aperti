@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import { systemRouter } from "./system";
 import { authRouter } from "./auth";
 import changePasswordRouter from "./change-password";
 import accountsRouter from "./accounts";
@@ -262,6 +263,8 @@ router.use(businessOpsRouter);
 
 // Content Calendar
 router.use(contentCalendarRouter);
+
+router.use("/system", systemRouter);
 
 export default router;
 

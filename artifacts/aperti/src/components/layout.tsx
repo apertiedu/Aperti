@@ -148,6 +148,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Session Slots",           href: "/admin/session-slots",        icon: CalendarDays,roles: ["admin", "teacher"] },
         { name: "Attendance Audit",        href: "/attendance-audit",           icon: Shield,      roles: ["admin", "teacher"] },
         { name: "Enrollment Timeline",     href: "/enrollment-timeline",        icon: History,     roles: ["admin", "teacher"] },
+        { name: "System Diagnostics",      href: "/admin/system-diagnostics",   icon: Activity,    roles: ["admin"] },
         { name: "System Debug",            href: "/admin/debug",                icon: Terminal,    roles: ["admin"] },
         { name: "Test Runner",             href: "/admin/test-runner",          icon: Activity,    roles: ["admin"] },
         { name: "Feature Registry",        href: "/admin/feature-registry",     icon: Layers,      roles: ["admin"] },

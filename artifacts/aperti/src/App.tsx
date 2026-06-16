@@ -66,6 +66,7 @@ const FeatureStatusPage = lazy(() => import("@/pages/admin/feature-status"));
 const DataQualityPage = lazy(() => import("@/pages/admin/data-quality"));
 const SessionSlotsAdminPage = lazy(() => import("@/pages/admin/session-slots"));
 const AdminDebugPage = lazy(() => import("@/pages/admin/debug"));
+const SystemDiagnosticsPage = lazy(() => import("@/pages/admin/system-diagnostics"));
 const TestRunner = lazy(() => import("@/pages/admin/test-runner"));
 const FeatureRegistryPage = lazy(() => import("@/pages/admin/feature-registry"));
 // Admin
@@ -629,6 +630,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/enrollment-audit" component={EnrollmentAudit} />
     <Route path="/admin/health" component={PlatformHealth} />
     <Route path="/admin/debug" component={AdminDebugPage} />
+    <Route path="/admin/system-diagnostics" component={SystemDiagnosticsPage} />
     <Route path="/admin/test-runner" component={TestRunner} />
     <Route path="/admin/feature-registry" component={FeatureRegistryPage} />
     {/* Phase 36 — /admin/launch shortcut */}
