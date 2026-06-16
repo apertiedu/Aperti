@@ -60,7 +60,7 @@ export function useAutoSave<T>(
 ) {
   const [state, setState] = useState<SaveState>("idle");
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const mountedRef = useRef(false);
 
   useEffect(() => {

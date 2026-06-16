@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,7 @@ import {
 const API = "/api";
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
     ...opts,
   });
@@ -125,6 +127,7 @@ function TopicPanel({ topic, unitIdx, topicIdx, onUpdate, onDelete }: {
 export default function CourseBuilder() {
   const [, params] = useRoute("/courses/:courseId/builder");
   const [, navigate] = useLocation();
+  const { toast } = useToast();
   const courseId = params?.courseId ? parseInt(params.courseId) : null;
   const qc = useQueryClient();
   const [units, setUnits] = useState<any[]>([]);
@@ -160,7 +163,9 @@ export default function CourseBuilder() {
         body: JSON.stringify({ ...aiForm, courseId, fileName: `${aiForm.subject} Syllabus` }),
       });
       setAiResult(result);
-    } catch {}
+    } catch (e: any) {
+      toast({ title: e?.message || "AI extraction failed", variant: "destructive" });
+    }
     setAiLoading(false);
   };
 
@@ -173,7 +178,9 @@ export default function CourseBuilder() {
       });
       setAiDialog(false);
       qc.invalidateQueries({ queryKey: ["course-structure", courseId] });
-    } catch {}
+    } catch (e: any) {
+      toast({ title: e?.message || "Failed to apply structure", variant: "destructive" });
+    }
   };
 
   const addUnit = () => {

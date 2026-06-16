@@ -94,6 +94,8 @@ export default function UsersPage() {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<any>(null);
+  const [resetPwdTarget, setResetPwdTarget] = useState<number | null>(null);
+  const [resetPwdValue, setResetPwdValue] = useState("");
   const [showCreate, setShowCreate] = useState(false);
   const [newUser, setNewUser] = useState({ username: "", password: "", displayName: "", email: "", role: "teacher" });
   const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
@@ -116,9 +118,7 @@ export default function UsersPage() {
       if (action === "restore") return putJSON(`/api/admin/users/${id}/restore`, {});
       if (action === "force-logout") return postJSON(`/api/admin/users/${id}/force-logout`, {});
       if (action === "reset-password") {
-        const pwd = prompt("Enter new password:");
-        if (!pwd) return;
-        return postJSON(`/api/admin/users/${id}/reset-password`, { newPassword: pwd });
+        return;
       }
       if (action === "impersonate") {
         const res: any = await postJSON(`/api/admin/users/${id}/impersonate`, {});
@@ -355,8 +355,50 @@ export default function UsersPage() {
         <UserDetailPanel
           user={selected}
           onClose={() => setSelected(null)}
-          onAction={(action: string, id: number) => mutate.mutate({ action, id })}
+          onAction={(action: string, id: number) => {
+            if (action === "reset-password") { setResetPwdTarget(id); setResetPwdValue(""); }
+            else mutate.mutate({ action, id });
+          }}
         />
+      )}
+
+      {/* Reset password dialog */}
+      {resetPwdTarget !== null && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-1">Reset Password</h2>
+            <p className="text-sm text-gray-500 mb-5">Enter a new password for this account.</p>
+            <input
+              type="password"
+              autoFocus
+              value={resetPwdValue}
+              onChange={(e) => setResetPwdValue(e.target.value)}
+              placeholder="New password…"
+              maxLength={128}
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 mb-5"
+            />
+            <div className="flex gap-3">
+              <button onClick={() => { setResetPwdTarget(null); setResetPwdValue(""); }} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">Cancel</button>
+              <button
+                disabled={!resetPwdValue.trim() || resetPwdValue.trim().length < 6}
+                onClick={async () => {
+                  try {
+                    await postJSON(`/api/admin/users/${resetPwdTarget}/reset-password`, { newPassword: resetPwdValue.trim() });
+                    toast.success("Password reset successfully");
+                  } catch {
+                    toast.error("Failed to reset password");
+                  } finally {
+                    setResetPwdTarget(null);
+                    setResetPwdValue("");
+                  }
+                }}
+                className="flex-1 px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-40"
+              >
+                Reset Password
+              </button>
+            </div>
+          </motion.div>
+        </div>
       )}
 
       {/* Create user modal */}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +25,7 @@ import {
 const API = "/api";
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`${API}${url}`, {
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...(opts?.headers ?? {}) },
     ...opts,
   });
@@ -85,6 +87,7 @@ function QuestionCard({ q, onEdit, onDuplicate, onDelete }: { q: any; onEdit: ()
 }
 
 function CreateQuestionDialog({ open, onClose, subjectId, onCreated }: { open: boolean; onClose: () => void; subjectId?: number; onCreated: () => void }) {
+  const { toast } = useToast();
   const [form, setForm] = useState({
     questionText: "", modelAnswer: "", topic: "", subtopic: "", difficulty: "medium",
     maxMarks: "4", commandWord: "", questionType: "structured", year: "", paper: "",
@@ -115,7 +118,9 @@ function CreateQuestionDialog({ open, onClose, subjectId, onCreated }: { open: b
       });
       onCreated();
       onClose();
-    } catch {}
+    } catch (e: any) {
+      toast({ title: e?.message || "Failed to save question", variant: "destructive" });
+    }
   };
 
   const aiGenerate = async () => {
@@ -130,7 +135,9 @@ function CreateQuestionDialog({ open, onClose, subjectId, onCreated }: { open: b
         const q = result.questions[0];
         setForm(p => ({ ...p, questionText: q.questionText || p.questionText, modelAnswer: q.modelAnswer || p.modelAnswer, commandWord: q.commandWord || p.commandWord }));
       }
-    } catch {}
+    } catch (e: any) {
+      toast({ title: e?.message || "AI generation failed", variant: "destructive" });
+    }
     setAiLoading(false);
   };
 

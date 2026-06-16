@@ -180,7 +180,7 @@ function LandingChangeFields({ payload, onChange }: { payload: Record<string, un
           </SelectContent>
         </Select>
       </div>
-      {payload.key && (
+      {!!payload.key && (
         <div>
           <Label>New Value</Label>
           {isToggle ? (
@@ -375,7 +375,7 @@ function PreviewModal({ item, onClose }: { item: CalendarItem; onClose: () => vo
               <div className="bg-muted/40 rounded-lg p-3 space-y-1">
                 <p><span className="text-muted-foreground">Field:</span> <strong>{String(item.payload.key ?? "")}</strong></p>
                 <p><span className="text-muted-foreground">New value:</span> <strong>{String(item.payload.value ?? "")}</strong></p>
-                {item.payload.note && <p><span className="text-muted-foreground">Note:</span> {String(item.payload.note)}</p>}
+                {!!item.payload.note && <p><span className="text-muted-foreground">Note:</span> {String(item.payload.note)}</p>}
               </div>
             </div>
           )}
@@ -650,7 +650,7 @@ export default function ContentCalendarPage() {
               icon="calendar"
               title="Nothing scheduled yet"
               description="Create your first scheduled content item to get started."
-              action={{ label: "Schedule Content", onClick: openCreate }}
+              action={<Button size="sm" onClick={openCreate}>Schedule Content</Button>}
             />
           ) : (
             <AnimatePresence initial={false}>
@@ -691,13 +691,13 @@ export default function ContentCalendarPage() {
                                 ) : <span className="italic">No schedule set</span>}
                                 {item.creator_name && <><span>·</span><span>by {item.creator_name}</span></>}
                               </div>
-                              {item.content_type === "announcement" && item.payload.message && (
+                              {item.content_type === "announcement" && !!item.payload.message && (
                                 <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{String(item.payload.message)}</p>
                               )}
-                              {item.content_type === "testimonial" && item.payload.author_name && (
+                              {item.content_type === "testimonial" && !!item.payload.author_name && (
                                 <p className="text-xs text-muted-foreground mt-1.5">By {String(item.payload.author_name)}, {String(item.payload.author_role ?? "")}</p>
                               )}
-                              {item.content_type === "landing_change" && item.payload.key && (
+                              {item.content_type === "landing_change" && !!item.payload.key && (
                                 <p className="text-xs text-muted-foreground mt-1.5">
                                   Changes <strong>{String(item.payload.key)}</strong> → <span className="font-mono">{String(item.payload.value)}</span>
                                 </p>

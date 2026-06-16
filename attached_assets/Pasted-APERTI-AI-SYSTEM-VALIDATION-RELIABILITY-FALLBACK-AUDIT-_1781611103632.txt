@@ -1,0 +1,254 @@
+APERTI AI SYSTEM VALIDATION, RELIABILITY & FALLBACK AUDIT
+
+You are acting as:
+
+- Senior AI Engineer
+- Senior Product Manager
+- Senior QA Engineer
+- Senior Education Technology Architect
+- Senior UX Designer
+
+MISSION:
+
+Perform a COMPLETE audit of every AI-powered feature in Aperti and ensure all AI systems are production-ready, reliable, measurable, and never become a blocking dependency.
+
+====================================================
+
+PHASE 1 — DISCOVER ALL AI FEATURES
+
+Find every AI-related feature including but not limited to:
+
+- AI Marking Engine
+- AI Homework Assessment
+- AI Feedback Generation
+- AI Assistant
+- AI Analytics
+- AI Recommendations
+- AI Study Planning
+- AI Revision Suggestions
+- AI Course Insights
+- AI Progress Tracking
+- AI Risk Detection
+- AI Content Generation
+- AI Reports
+- AI Parent Insights
+- AI Teacher Insights
+- Any hidden or unfinished AI feature
+
+Create an inventory of all AI capabilities.
+
+====================================================
+
+PHASE 2 — VERIFY REAL FUNCTIONALITY
+
+For every AI feature verify:
+
+1. Is a real AI model being called?
+2. Is the API key configured correctly?
+3. Is the API request actually executed?
+4. Are responses received successfully?
+5. Are responses parsed correctly?
+6. Are errors handled gracefully?
+7. Are timeouts handled?
+8. Are rate limits handled?
+9. Is retry logic present?
+10. Are invalid responses handled?
+
+Identify:
+
+- Mock responses
+- Placeholder outputs
+- Fake AI functionality
+- Hardcoded examples
+- Incomplete integrations
+
+Replace any fake implementation with a real implementation or clearly mark it unavailable.
+
+====================================================
+
+PHASE 3 — AI MARKING ENGINE VALIDATION
+
+Audit the AI marking engine thoroughly.
+
+Verify:
+
+- Submission upload works
+- OCR processing works
+- AI marking executes
+- Marks are calculated
+- Feedback is generated
+- Results are saved
+- Teacher can review results
+
+Measure:
+
+- Accuracy
+- Reliability
+- Failure rates
+- Processing speed
+
+Detect:
+
+- Hallucinations
+- Incorrect grading
+- Missing feedback
+- Score inconsistencies
+
+====================================================
+
+PHASE 4 — HUMAN OVERRIDE SYSTEM
+
+AI must NEVER be the only grading path.
+
+Implement a complete fallback workflow.
+
+Teachers must be able to:
+
+- Review AI marks
+- Override AI marks
+- Edit marks
+- Edit feedback
+- Add comments
+- Approve AI grading
+- Reject AI grading
+
+Store:
+
+- Original AI mark
+- Final teacher mark
+- Teacher changes
+- Audit history
+
+Display:
+
+AI Score
+Teacher Score
+Difference
+
+====================================================
+
+PHASE 5 — AI FAILURE ROUTES
+
+Create fallback behavior for:
+
+AI unavailable
+API timeout
+Rate limit exceeded
+OCR failure
+Network error
+Invalid response
+Model error
+
+System behavior:
+
+Never block teacher workflow.
+
+If AI fails:
+
+Allow manual marking immediately.
+
+Show:
+
+"AI review unavailable. Teacher review mode activated."
+
+Teachers must always be able to continue.
+
+====================================================
+
+PHASE 6 — ASSISTANT RELIABILITY
+
+Audit AI assistant.
+
+Verify:
+
+- Context retention
+- Student context
+- Teacher context
+- Permissions
+- Prompt safety
+- Data access rules
+
+Ensure assistant never:
+
+- Exposes private data
+- Hallucinates grades
+- Modifies records without permission
+
+====================================================
+
+PHASE 7 — QUALITY SCORING
+
+Create internal confidence scoring.
+
+For every AI output calculate:
+
+- Confidence
+- Reliability
+- Completeness
+
+If confidence is low:
+
+Require teacher review before acceptance.
+
+====================================================
+
+PHASE 8 — ADMIN MONITORING
+
+Create AI Monitoring Dashboard.
+
+Track:
+
+- Total AI requests
+- Success rate
+- Failure rate
+- Average response time
+- Marking accuracy
+- Teacher overrides
+- AI usage per feature
+
+====================================================
+
+PHASE 9 — USER EXPERIENCE
+
+Improve AI UX.
+
+Add:
+
+- Loading indicators
+- Progress states
+- Retry buttons
+- Error recovery
+- Clear status messages
+
+Examples:
+
+"Analyzing submission..."
+
+"Generating feedback..."
+
+"Teacher review required."
+
+"AI processing failed. Manual review available."
+
+====================================================
+
+PHASE 10 — PRODUCTION READINESS
+
+At completion provide:
+
+1. List of all AI features
+2. Which are fully functional
+3. Which require fixes
+4. Which require backend work
+5. Which should be removed
+6. Security concerns
+7. Performance concerns
+8. Reliability concerns
+9. Production readiness score out of 100
+
+Apply fixes automatically where safe.
+
+Do not leave placeholder AI functionality in production.
+Do not leave inaccessible workflows.
+Do not leave AI features without fallback routes.
+Do not leave AI features that can block teachers from completing work.

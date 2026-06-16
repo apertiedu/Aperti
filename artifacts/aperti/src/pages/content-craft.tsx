@@ -169,9 +169,15 @@ function RichTextEditor({
     onChange(editorRef.current?.innerHTML || "");
   }, [onChange]);
 
-  const insertLink = () => {
-    const url = prompt("Enter URL:");
-    if (url) exec("createLink", url);
+  const [linkUrl, setLinkUrl] = useState("");
+  const [showLinkInput, setShowLinkInput] = useState(false);
+
+  const insertLink = () => setShowLinkInput(true);
+
+  const confirmLink = () => {
+    if (linkUrl.trim()) exec("createLink", linkUrl.trim());
+    setLinkUrl("");
+    setShowLinkInput(false);
   };
 
   return (
@@ -205,6 +211,25 @@ function RichTextEditor({
           <div className="w-px h-5 bg-gray-300 mx-1" />
           <LatexInsertBtn onInsert={insertLatex} />
         </div>
+      )}
+
+      {showLinkInput && !preview && (
+        <form
+          className="flex items-center gap-2 px-3 py-2 bg-blue-50 border-b border-blue-100"
+          onSubmit={(e) => { e.preventDefault(); confirmLink(); }}
+        >
+          <Link2 className="h-3.5 w-3.5 text-blue-500 shrink-0" />
+          <input
+            autoFocus
+            type="url"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            placeholder="https://example.com"
+            className="flex-1 text-xs border border-blue-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-0"
+          />
+          <button type="submit" className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors shrink-0">Insert</button>
+          <button type="button" onClick={() => { setShowLinkInput(false); setLinkUrl(""); }} className="text-xs text-gray-500 hover:text-gray-700 px-2">Cancel</button>
+        </form>
       )}
 
       {preview ? (

@@ -199,6 +199,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     assistant: "text-primary",
     student: "text-primary",
     parent: "text-primary",
+    guest: "text-muted-foreground",
   }[user?.role ?? "teacher"] ?? "text-muted-foreground";
 
   const initials = (user?.displayName || user?.username || "U")

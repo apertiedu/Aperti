@@ -45,7 +45,7 @@ export default function SignupWaitlistPage() {
       if (statusFilter) p.set("status", statusFilter);
       return fetchJSON(`/api/admin/signup-waitlist?${p}`);
     },
-    placeholderData: (prev: unknown) => prev,
+    placeholderData: (prev) => prev,
   });
 
   const updateMutation = useMutation({

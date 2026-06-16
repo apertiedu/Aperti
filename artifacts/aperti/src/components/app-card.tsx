@@ -56,7 +56,7 @@ export function AppCard({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.18, ease: "easeOut" }}
         className={base}
-        {...(props as React.HTMLAttributes<HTMLDivElement>)}
+        {...(props as any)}
       >
         {children}
       </motion.div>

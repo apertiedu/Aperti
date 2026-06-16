@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { FlaskConical, ArrowLeft, Beaker, Atom, Dna, Triangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const LAB_META: Record<string, { name: string; desc: string; icon: React.ElementType; color: string }> = {
+const LAB_META: Record<string, { name: string; desc: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; color: string }> = {
   "forge-field":   { name: "ForgeField",   desc: "Electromagnetic field simulator — visualise field lines, forces, and interactions in real time.", icon: Atom,        color: "#0D9488" },
   "react-sphere":  { name: "ReactSphere",  desc: "Chemical reaction sandbox — build molecules, run virtual reactions, and observe energy changes.", icon: Beaker,       color: "#7C3AED" },
   "geometrix":     { name: "Geometrix",    desc: "3-D geometry explorer — construct, transform, and measure geometric solids interactively.",      icon: Triangle,     color: "#D97706" },

@@ -58,6 +58,7 @@ export function StatusButton({
       const t = setTimeout(() => setInternalStatus("idle"), resetDelay);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, [status, autoReset, resetDelay]);
 
   const isLoading = internalStatus === "loading";

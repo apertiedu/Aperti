@@ -34,11 +34,17 @@ function FileUploader({ onUploaded }: { onUploaded: (url: string, name: string) 
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
+  const { toast } = useToast();
+
   const handleFile = async (file: File) => {
     if (!["image/png", "image/jpeg", "image/jpg", "application/pdf"].includes(file.type)) {
-      alert("Only PNG, JPG and PDF files are supported."); return;
+      toast({ variant: "destructive", title: "Unsupported file type", description: "Only PNG, JPG and PDF files are supported." });
+      return;
     }
-    if (file.size > 10 * 1024 * 1024) { alert("File must be under 10 MB."); return; }
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "File too large", description: "File must be under 10 MB." });
+      return;
+    }
     setUploading(true);
     try {
       const reader = new FileReader();
@@ -55,7 +61,10 @@ function FileUploader({ onUploaded }: { onUploaded: (url: string, name: string) 
         setUploading(false);
       };
       reader.readAsDataURL(file);
-    } catch { alert("Upload failed. Please try again."); setUploading(false); }
+    } catch {
+      toast({ variant: "destructive", title: "Upload failed", description: "Please try again." });
+      setUploading(false);
+    }
   };
 
   return (

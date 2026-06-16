@@ -326,7 +326,7 @@ export default function ObservabilityPage() {
           { tab: "database", label: "Database", Icon: Database },
           { tab: "api", label: "API", Icon: Activity },
           { tab: "ai", label: "AI Usage", Icon: Brain },
-        ] as { tab: Tab; label: string; Icon: React.ElementType }[]).map(({ tab: t, label, Icon }) => (
+        ] as { tab: Tab; label: string; Icon: React.ComponentType<{ size?: number }> }[]).map(({ tab: t, label, Icon }) => (
           <button
             key={t}
             onClick={() => setTab(t)}

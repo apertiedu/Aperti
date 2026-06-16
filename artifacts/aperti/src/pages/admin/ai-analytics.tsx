@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ function MiniBar({ value, max, color = "#14b8a6" }: { value: number; max: number
 }
 
 export default function AiAnalytics() {
+  const { toast } = useToast();
   const { data: stats, isLoading, refetch } = useQuery({
     queryKey: ["ai-analytics-stats"],
     queryFn: async () => {
@@ -214,7 +216,7 @@ export default function AiAnalytics() {
             onClick={async () => {
               const res = await apiFetch("/api/weave/populate", { method: "POST" });
               const data = await res.json();
-              alert(`Weave populated: ${data.nodesCreated} nodes, ${data.edgesCreated} edges created.`);
+              toast({ title: "Weave populated", description: `${data.nodesCreated} nodes, ${data.edgesCreated} edges created.` });
             }}
           >
             <Network size={14} className="mr-1.5" /> Populate Weave from Existing Data
