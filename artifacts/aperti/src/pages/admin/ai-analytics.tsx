@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import { motion } from "framer-motion";
@@ -10,6 +11,19 @@ import {
   Network, AlertCircle, Zap, BarChart3, DollarSign, RefreshCw,
 } from "lucide-react";
 import { Link } from "wouter";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ReferenceLine,
+} from "recharts";
 
 function StatCard({ icon: Icon, label, value, sub, color = "teal" }: {
   icon: any; label: string; value: string | number; sub?: string; color?: string;
@@ -145,6 +159,9 @@ export default function AiAnalytics() {
         </section>
       )}
 
+      {/* AI Confidence Trend Chart */}
+      <ConfidenceTrendChart />
+
       {/* Accuracy Metrics */}
       <section>
         <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Accuracy & Acceptance</h2>
@@ -236,6 +253,250 @@ export default function AiAnalytics() {
         </div>
       )}
     </div>
+  );
+}
+
+const MODULE_COLORS: Record<string, string> = {
+  mentor: "#14b8a6",
+  grading: "#6366f1",
+  coremind: "#f59e0b",
+  "trial-vault": "#10b981",
+  "generate-content": "#8b5cf6",
+  snapgrade: "#ef4444",
+  unknown: "#94a3b8",
+};
+
+function getModuleColor(mod: string): string {
+  return MODULE_COLORS[mod] ?? "#94a3b8";
+}
+
+function ConfidenceTrendChart() {
+  const [windowDays, setWindowDays] = useState<30 | 14 | 7>(30);
+  const [view, setView] = useState<"overall" | "by-module">("overall");
+
+  const { data, isLoading, isError, refetch } = useQuery({
+    queryKey: ["confidence-trend", windowDays],
+    queryFn: async () => {
+      const res = await apiFetch(`/api/coremind/analytics/confidence-trend?days=${windowDays}`);
+      return res.json();
+    },
+    refetchInterval: 60000,
+  });
+
+  const overall: any[] = data?.overall ?? [];
+  const byModule: Record<string, any[]> = data?.byModule ?? {};
+  const modules: string[] = data?.modules ?? [];
+
+  const mergedForModuleChart = overall.map((row: any) => {
+    const merged: Record<string, any> = { date: row.date };
+    for (const mod of modules) {
+      const modRow = byModule[mod]?.find((r: any) => r.date === row.date);
+      merged[mod] = modRow?.avgConfidencePct ?? null;
+    }
+    return merged;
+  });
+
+  const formatDate = (d: string) => {
+    const dt = new Date(d);
+    return `${dt.getMonth() + 1}/${dt.getDate()}`;
+  };
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (!active || !payload?.length) return null;
+    return (
+      <div className="bg-white border border-slate-100 shadow-lg rounded-xl px-3 py-2 text-xs min-w-[140px]">
+        <p className="font-semibold text-slate-700 mb-1.5">{label}</p>
+        {payload.map((p: any) => (
+          p.value != null && (
+            <div key={p.dataKey} className="flex items-center justify-between gap-3 mb-0.5">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: p.color }} />
+                <span className="text-slate-500 capitalize">{p.name?.replace(/-/g, " ")}</span>
+              </span>
+              <span className="font-bold text-slate-700">{p.value}%</span>
+            </div>
+          )
+        ))}
+      </div>
+    );
+  };
+
+  const hasData = overall.length > 0;
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide flex items-center gap-2">
+          <TrendingUp size={15} className="text-teal-600" />
+          AI Confidence Trend
+        </h2>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs">
+            {(["overall", "by-module"] as const).map(v => (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={`px-2.5 py-1 transition-colors ${view === v ? "bg-teal-600 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}
+              >
+                {v === "overall" ? "Overall" : "By Module"}
+              </button>
+            ))}
+          </div>
+          <div className="flex rounded-lg border border-slate-200 overflow-hidden text-xs">
+            {([7, 14, 30] as const).map(d => (
+              <button
+                key={d}
+                onClick={() => setWindowDays(d)}
+                className={`px-2.5 py-1 transition-colors ${windowDays === d ? "bg-teal-600 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}
+              >
+                {d}d
+              </button>
+            ))}
+          </div>
+          <button onClick={() => refetch()} className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-400 transition-colors">
+            <RefreshCw size={13} />
+          </button>
+        </div>
+      </div>
+
+      <Card className="border border-slate-100 shadow-sm">
+        <CardContent className="p-5">
+          {isLoading && (
+            <div className="space-y-2">
+              <div className="h-48 bg-slate-100 rounded-xl animate-pulse" />
+            </div>
+          )}
+
+          {isError && (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+              <AlertCircle size={28} className="mb-2 text-rose-400" />
+              <p className="text-sm text-slate-500">Failed to load confidence trend</p>
+              <button onClick={() => refetch()} className="mt-2 text-xs text-teal-600 underline">Retry</button>
+            </div>
+          )}
+
+          {!isLoading && !isError && !hasData && (
+            <div className="flex flex-col items-center justify-center py-14 text-slate-400">
+              <Brain size={36} className="mb-3 opacity-30" />
+              <p className="text-sm font-medium text-slate-500">No confidence data yet</p>
+              <p className="text-xs text-slate-400 mt-1">Confidence scores will appear here once AI features are used</p>
+            </div>
+          )}
+
+          {!isLoading && !isError && hasData && view === "overall" && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                {(() => {
+                  const valid = overall.filter(d => d.avgConfidencePct != null);
+                  const latest = valid[valid.length - 1]?.avgConfidencePct ?? null;
+                  const earliest = valid[0]?.avgConfidencePct ?? null;
+                  const avg = valid.length > 0 ? Math.round(valid.reduce((s, d) => s + d.avgConfidencePct, 0) / valid.length * 10) / 10 : null;
+                  const delta = latest != null && earliest != null ? Math.round((latest - earliest) * 10) / 10 : null;
+                  return (
+                    <>
+                      <div className="bg-teal-50 rounded-xl p-3 border border-teal-100">
+                        <p className="text-xl font-bold text-teal-700">{latest != null ? `${latest}%` : "—"}</p>
+                        <p className="text-xs text-teal-600 mt-0.5">Latest</p>
+                      </div>
+                      <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                        <p className="text-xl font-bold text-slate-700">{avg != null ? `${avg}%` : "—"}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">Period Avg</p>
+                      </div>
+                      <div className={`rounded-xl p-3 border ${delta == null ? "bg-slate-50 border-slate-100" : delta >= 0 ? "bg-emerald-50 border-emerald-100" : "bg-rose-50 border-rose-100"}`}>
+                        <p className={`text-xl font-bold ${delta == null ? "text-slate-500" : delta >= 0 ? "text-emerald-700" : "text-rose-600"}`}>
+                          {delta != null ? `${delta >= 0 ? "+" : ""}${delta}%` : "—"}
+                        </p>
+                        <p className={`text-xs mt-0.5 ${delta == null ? "text-slate-400" : delta >= 0 ? "text-emerald-600" : "text-rose-500"}`}>
+                          {windowDays}d Change
+                        </p>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={overall} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="confGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.18} />
+                      <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="acceptGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <ReferenceLine y={80} stroke="#10b981" strokeDasharray="4 3" strokeWidth={1} label={{ value: "80%", position: "right", fontSize: 9, fill: "#10b981" }} />
+                  <ReferenceLine y={60} stroke="#f59e0b" strokeDasharray="4 3" strokeWidth={1} label={{ value: "60%", position: "right", fontSize: 9, fill: "#f59e0b" }} />
+                  <Area type="monotone" dataKey="avgConfidencePct" name="Avg Confidence" stroke="#14b8a6" strokeWidth={2} fill="url(#confGrad)" dot={false} connectNulls />
+                  <Area type="monotone" dataKey="acceptanceRate" name="Acceptance Rate" stroke="#6366f1" strokeWidth={1.5} fill="url(#acceptGrad)" dot={false} connectNulls strokeDasharray="5 3" />
+                </AreaChart>
+              </ResponsiveContainer>
+
+              <div className="flex items-center gap-4 text-xs text-slate-400 pt-1 border-t border-slate-50">
+                <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-teal-500 inline-block rounded" /> Avg Confidence</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-px bg-violet-500 inline-block rounded border-dashed border-t border-violet-500" style={{ borderStyle: "dashed" }} /> Acceptance Rate</span>
+                <span className="ml-auto">Green line = 80% target · Amber = 60% warning</span>
+              </div>
+            </div>
+          )}
+
+          {!isLoading && !isError && hasData && view === "by-module" && (
+            <div className="space-y-4">
+              <ResponsiveContainer width="100%" height={220}>
+                <LineChart data={mergedForModuleChart} margin={{ top: 4, right: 4, left: -16, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "#94a3b8" }} tickLine={false} axisLine={false} tickFormatter={v => `${v}%`} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Legend
+                    formatter={(value) => <span className="text-xs text-slate-500 capitalize">{value.replace(/-/g, " ")}</span>}
+                    iconType="circle" iconSize={8}
+                  />
+                  <ReferenceLine y={80} stroke="#10b981" strokeDasharray="4 3" strokeWidth={1} />
+                  <ReferenceLine y={60} stroke="#f59e0b" strokeDasharray="4 3" strokeWidth={1} />
+                  {modules.map(mod => (
+                    <Line
+                      key={mod}
+                      type="monotone"
+                      dataKey={mod}
+                      name={mod}
+                      stroke={getModuleColor(mod)}
+                      strokeWidth={2}
+                      dot={false}
+                      connectNulls
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {modules.map(mod => {
+                  const series = byModule[mod] ?? [];
+                  const valid = series.filter(d => d.avgConfidencePct != null);
+                  const latest = valid[valid.length - 1]?.avgConfidencePct ?? null;
+                  const totalCalls = series.reduce((s, d) => s + d.calls, 0);
+                  return (
+                    <div key={mod} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-slate-100 bg-slate-50/60">
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: getModuleColor(mod) }} />
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-slate-700 capitalize truncate">{mod.replace(/-/g, " ")}</p>
+                        <p className="text-xs text-slate-400">{latest != null ? `${latest}% conf` : "no data"} · {totalCalls} calls</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </section>
   );
 }
 

@@ -94,6 +94,88 @@ coremindAnalyticsRouter.post("/safety/review/:id", authenticate, requireRole("ad
   res.json({ success: true });
 });
 
+// GET /coremind/analytics/confidence-trend — Daily avg AI confidence over last 30 days, by module
+coremindAnalyticsRouter.get("/analytics/confidence-trend", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    const { pool } = await import("@workspace/db");
+    const days = parseInt(String(req.query.days ?? "30"));
+    const clampedDays = Math.min(Math.max(days, 7), 90);
+
+    const { rows } = await pool.query(`
+      SELECT
+        DATE_TRUNC('day', created_at AT TIME ZONE 'UTC')::date AS day,
+        module,
+        ROUND(AVG(confidence::numeric) * 100, 1)              AS avg_confidence_pct,
+        COUNT(*)::int                                          AS call_count,
+        COUNT(*) FILTER (WHERE accepted = true)::int           AS accepted_count,
+        COUNT(*) FILTER (WHERE accepted = false)::int          AS rejected_count
+      FROM ai_interactions
+      WHERE
+        created_at >= NOW() - ($1 || ' days')::interval
+        AND confidence IS NOT NULL
+      GROUP BY 1, 2
+      ORDER BY 1 ASC, 2
+    `, [clampedDays]);
+
+    // Build a sorted list of unique dates
+    const dateSet = new Set<string>(rows.map((r: any) => String(r.day)));
+    const dates = Array.from(dateSet).sort();
+
+    // Build per-module series
+    const moduleSet = new Set<string>(rows.map((r: any) => String(r.module)));
+    const modules = Array.from(moduleSet);
+
+    // Combined daily avg across all modules
+    const byDate: Record<string, { sumConf: number; count: number; accepted: number; rejected: number }> = {};
+    for (const r of rows) {
+      const d = String(r.day);
+      if (!byDate[d]) byDate[d] = { sumConf: 0, count: 0, accepted: 0, rejected: 0 };
+      byDate[d].sumConf  += parseFloat(r.avg_confidence_pct) * parseInt(r.call_count);
+      byDate[d].count    += parseInt(r.call_count);
+      byDate[d].accepted += parseInt(r.accepted_count);
+      byDate[d].rejected += parseInt(r.rejected_count);
+    }
+
+    const overall = dates.map(d => ({
+      date: d,
+      avgConfidencePct: byDate[d].count > 0
+        ? Math.round(byDate[d].sumConf / byDate[d].count * 10) / 10
+        : null,
+      calls:    byDate[d].count,
+      accepted: byDate[d].accepted,
+      rejected: byDate[d].rejected,
+      acceptanceRate: byDate[d].count > 0
+        ? Math.round(byDate[d].accepted / byDate[d].count * 100)
+        : null,
+    }));
+
+    // Per-module series (for multi-line chart)
+    const byModule: Record<string, Array<{ date: string; avgConfidencePct: number | null; calls: number }>> = {};
+    for (const mod of modules) {
+      const modRows = rows.filter((r: any) => r.module === mod);
+      const modByDate: Record<string, { sumConf: number; count: number }> = {};
+      for (const r of modRows) {
+        const d = String(r.day);
+        modByDate[d] = {
+          sumConf: parseFloat(r.avg_confidence_pct) * parseInt(r.call_count),
+          count:   parseInt(r.call_count),
+        };
+      }
+      byModule[mod] = dates.map(d => ({
+        date: d,
+        avgConfidencePct: modByDate[d]
+          ? Math.round(modByDate[d].sumConf / modByDate[d].count * 10) / 10
+          : null,
+        calls: modByDate[d]?.count ?? 0,
+      }));
+    }
+
+    res.json({ overall, byModule, modules, dates, windowDays: clampedDays });
+  } catch (err: any) {
+    res.status(500).json({ error: "An unexpected error occurred" });
+  }
+});
+
 // GET /coremind/analytics/impact — Student Impact Score (Mentor users vs non-users grade comparison)
 coremindAnalyticsRouter.get("/analytics/impact", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   try {
