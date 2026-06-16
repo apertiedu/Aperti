@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { AppEmptyState } from "@/components/app-empty-state";
 import {
   BookOpen, Plus, Pencil, Trash2, Users, Clock, ChevronRight,
   CheckCircle, Globe, Lock, TrendingUp, Layers, ArrowLeft,
@@ -225,11 +226,9 @@ export default function TeacherCourses() {
 
             <TabsContent value="overview">
               {units.length === 0 ? (
-                <Card>
-                  <CardContent className="p-12 text-center text-muted-foreground">
-                    <Layers className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                    <p className="font-medium">No units yet</p>
-                    <p className="text-sm mt-1">Units and topics will appear here once added to this course.</p>
+                <Card className="border-dashed border-2">
+                  <CardContent className="py-2">
+                    <AppEmptyState type="courses" title="No units yet" description="Units and topics will appear here once added to this course." size="md" />
                   </CardContent>
                 </Card>
               ) : (
@@ -320,12 +319,15 @@ export default function TeacherCourses() {
           {[1, 2, 3].map(i => <Skeleton key={i} className="h-48 rounded-xl" />)}
         </div>
       ) : courseList.length === 0 ? (
-        <Card>
-          <CardContent className="p-16 text-center text-muted-foreground">
-            <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium text-lg">No courses yet</p>
-            <p className="text-sm mt-1">Create your first structured course to start organising your teaching.</p>
-            <Button onClick={openCreate} className="mt-4 gap-2"><Plus className="h-4 w-4" /> Create First Course</Button>
+        <Card className="border-dashed border-2">
+          <CardContent className="py-4">
+            <AppEmptyState
+              type="first-run-teacher"
+              title="No courses yet"
+              description="Create your first structured course to start organising units, topics, students, and assessments in one place."
+              size="lg"
+              actions={[{ label: "Create First Course", primary: true, onClick: openCreate, icon: Plus }]}
+            />
           </CardContent>
         </Card>
       ) : (

@@ -10,6 +10,7 @@ import {
   Users, Search, BookOpen, ArrowRightLeft, UserPlus,
   UserMinus, RefreshCw, Download, History,
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 
 type TimelineRow = {
   id: number; student_id: number; action: string;
@@ -125,11 +126,9 @@ export default function EnrollmentTimelinePage() {
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <Card className="shadow-sm">
-          <CardContent className="p-12 text-center text-muted-foreground">
-            <History className="h-10 w-10 mx-auto mb-3 opacity-20" />
-            <p className="font-medium">No enrollment changes found</p>
-            <p className="text-sm mt-1">Enrollment events will appear here as students are added, moved, or removed.</p>
+        <Card className="shadow-sm border-dashed border-2">
+          <CardContent className="py-2">
+            <AppEmptyState type="enrollments" title="No enrollment changes found" description="Enrollment events will appear here as students are added, moved, or removed." size="md" />
           </CardContent>
         </Card>
       ) : (

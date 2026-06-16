@@ -4,7 +4,7 @@ import {
   Users, UserCheck, UserX, TrendingUp, BarChart3, Scan, Calendar,
   ArrowRight, Clock, ClipboardList, AlertTriangle, Wifi, Building2,
   BookOpen, ChevronRight, ExternalLink, Zap, Target, GraduationCap,
-  CheckCircle2, Circle
+  CheckCircle2, Circle, Plus
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ import TrustStatusBar from "@/components/trust-status-bar";
 import TeacherDailyFocus from "@/components/teacher-daily-focus";
 import PlanStatusStrip from "@/components/plan-status-strip";
 import StudentPerformanceInsights from "@/components/student-performance-insights";
+import { AppEmptyState, CelebrationBanner } from "@/components/app-empty-state";
+import { FirstRunBanner } from "@/components/first-run-banner";
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -146,6 +148,15 @@ export default function Dashboard() {
       {/* ── Plan status strip (shows only when near limit or expiry) ── */}
       <PlanStatusStrip />
 
+      {/* ── First-run experience for new teachers ── */}
+      {!loading.summary && summary?.totalStudents === 0 && (
+        <FirstRunBanner
+          role="teacher"
+          completedItems={[]}
+          className="mt-0"
+        />
+      )}
+
       {/* ── Teacher Daily Focus (teachers only) ── */}
       {(user?.role === "teacher" || user?.role === "assistant") && (
         <TeacherDailyFocus />
@@ -219,10 +230,13 @@ export default function Dashboard() {
             {loading.today ? (
               <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-16 rounded-xl" />)}</div>
             ) : todaySessions.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-                <div className="bg-muted p-3 rounded-full mb-3"><Clock className="w-5 h-5 opacity-40" /></div>
-                <p className="text-sm font-medium">No sessions scheduled for today</p>
-              </div>
+              <AppEmptyState
+                type="sessions"
+                title="No sessions today"
+                description={`You have no sessions scheduled for ${today}. Add a session to your course timetable to see it here.`}
+                size="sm"
+                actions={[{ label: "Manage Courses", href: "/my-courses", primary: true, icon: BookOpen }]}
+              />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {todaySessions.map((s, i) => {
@@ -304,9 +318,14 @@ export default function Dashboard() {
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[240px] flex flex-col items-center justify-center text-muted-foreground border-2 border-dashed border-border rounded-xl gap-2">
-                  <BarChart3 className="w-8 h-8 opacity-20" />
-                  <p className="text-sm font-medium">No attendance data this week</p>
+                <div className="h-[240px] border-2 border-dashed border-border rounded-xl flex items-center justify-center">
+                  <AppEmptyState
+                    type="attendance"
+                    title="No attendance data yet"
+                    description="Attendance data will appear once you mark registers in your sessions."
+                    size="sm"
+                    actions={[{ label: "Mark Attendance", href: "/attendance", primary: true }]}
+                  />
                 </div>
               )}
             </CardContent>
@@ -340,10 +359,12 @@ export default function Dashboard() {
                   ))}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-center gap-2">
-                  <div className="bg-muted p-3 rounded-full"><Clock className="w-5 h-5 opacity-30" /></div>
-                  <p className="text-sm font-medium">No activity yet</p>
-                </div>
+                <AppEmptyState
+                  type="all-done"
+                  title="No recent activity"
+                  description="Attendance and submission events will appear here as they happen."
+                  size="sm"
+                />
               )}
             </CardContent>
           </Card>
@@ -377,15 +398,13 @@ export default function Dashboard() {
               {loading.exams ? (
                 <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>
               ) : upcomingExams.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-muted-foreground gap-2">
-                  <div className="bg-muted p-3 rounded-full"><GraduationCap className="w-5 h-5 opacity-30" /></div>
-                  <p className="text-sm font-medium">No exams in the next 14 days</p>
-                  <Link href="/exams">
-                    <Button variant="outline" size="sm" className="mt-1 text-xs gap-1">
-                      Schedule one <ArrowRight className="w-3 h-3" />
-                    </Button>
-                  </Link>
-                </div>
+                <AppEmptyState
+                  type="assessments"
+                  title="No exams in the next 14 days"
+                  description="Create an assessment and schedule it to see it here."
+                  size="sm"
+                  actions={[{ label: "Create Exam", href: "/assessment-hub", primary: true, icon: Plus }]}
+                />
               ) : (
                 <div className="space-y-2">
                   {upcomingExams.map((e, i) => (

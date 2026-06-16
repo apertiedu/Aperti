@@ -9,6 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FolderOpen, Plus, Pencil, Trash2, Link2, FileText, Video, Mic, BookOpen, Eye, EyeOff } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Subject = { id: number; name: string };
 type Resource = { id: number; title: string; description: string | null; type: string; url: string | null; content: string | null; topic: string | null; tags: string | null; subjectId: number | null; subjectName: string | null; isStudentVisible: boolean; viewCount: number; createdAt: string };
@@ -94,8 +96,32 @@ export default function ResourcesPage() {
         ))}
       </div>
 
-      {loading ? <div className="text-center py-8 text-muted-foreground">Loading...</div> :
-        resources.length === 0 ? <Card className="border-dashed"><CardContent className="py-12 text-center text-muted-foreground flex flex-col items-center gap-3"><FolderOpen className="h-10 w-10 opacity-20" /><p>No resources yet.</p></CardContent></Card> :
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-xl border border-border p-4 space-y-3">
+              <div className="flex items-start gap-3">
+                <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="h-3 w-1/3" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : resources.length === 0 ? (
+        <Card className="border-dashed border-2">
+          <CardContent className="py-4">
+            <AppEmptyState
+              type="resources"
+              size="md"
+              actions={[{ label: "Add Resource", primary: true, icon: Plus, onClick: undefined }]}
+            />
+          </CardContent>
+        </Card>
+      ) :
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {resources.map(r => {
             const Icon = TYPE_ICONS[r.type] || FolderOpen;

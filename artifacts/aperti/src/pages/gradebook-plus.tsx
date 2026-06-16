@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
-import { EmptyState } from "@/components/ui/empty-state";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -218,7 +218,7 @@ export default function GradebookPlus() {
           {isLoading ? (
             <div className="space-y-2">{[1,2,3].map(i => <div key={i} className="h-16 bg-muted/40 rounded-xl animate-pulse" />)}</div>
           ) : reports.length === 0 ? (
-            <EmptyState icon="analytics" title="No graded assessments yet" description="Results will appear here after you grade your first assessment." />
+            <AppEmptyState type="gradebook" title="No graded assessments yet" description="Results will appear here after you grade your first assessment." size="md" />
           ) : (
             <div className="space-y-2">
               {reports.map((r, i) => {

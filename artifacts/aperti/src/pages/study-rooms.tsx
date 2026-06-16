@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocation } from "wouter";
+import { AppEmptyState } from "@/components/app-empty-state";
 import {
   Users, Plus, Search, BookOpen, Target, Zap, GraduationCap,
   X, Lock, Globe, ChevronRight, MessageSquare, Share2,
@@ -140,10 +141,8 @@ export default function StudyRooms() {
           )}
 
           {filtered.length === 0 && (
-            <div className="text-center py-16 text-gray-400">
-              <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p className="text-sm font-medium">No rooms found</p>
-              <p className="text-xs mt-1">Create a room to start collaborating</p>
+            <div className="border-2 border-dashed border-border rounded-2xl">
+              <AppEmptyState type="study-rooms" title="No study rooms" description="Create a study room to start collaborating with your students in real time." size="md" />
             </div>
           )}
         </>

@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Clock, Eye, Trash2, FileText } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { useQuery as useTanstackQuery } from "@tanstack/react-query";
 
 const API = "/api";
@@ -75,7 +76,11 @@ export default function InsightExams() {
       {isLoading ? (
         <div className="grid gap-4">{Array.from({length:3}).map((_,i)=><Skeleton key={i} className="h-24 rounded-xl"/>)}</div>
       ) : exams?.length === 0 ? (
-        <Card className="card-hover"><CardContent className="p-8 text-center text-muted-foreground">No exams yet.</CardContent></Card>
+        <Card className="card-hover border-dashed border-2">
+          <CardContent className="py-2">
+            <AppEmptyState type="assessments" title="No exams yet" description="Create an exam in the Assessment Hub to start tracking student performance analytics." size="md" actions={[{ label: "Go to Assessment Hub", href: "/assessment-hub", primary: true }]} />
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-4">
           {exams?.map((exam) => (

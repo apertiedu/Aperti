@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { BookOpen, Clock, GraduationCap, CheckCircle2, XCircle, Hourglass, ArrowRight } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -92,13 +93,14 @@ export default function MyCourses() {
       {isLoading ? (
         <div className="space-y-3">{[...Array(3)].map((_,i)=><Skeleton key={i} className="h-28 rounded-2xl"/>)}</div>
       ) : !enrollments?.length ? (
-        <div className="bg-card rounded-2xl shadow-sm border border-border p-12 text-center">
-          <BookOpen className="h-12 w-12 mx-auto mb-4 text-gray-200" />
-          <h3 className="font-bold text-gray-700 mb-2">You haven't enrolled in any courses yet</h3>
-          <p className="text-sm text-gray-400 mb-5">Browse the course marketplace and request enrollment.</p>
-          <Link href="/courses">
-            <Button className="rounded-xl" style={{ background: TEAL }}>Browse Courses</Button>
-          </Link>
+        <div className="bg-card rounded-2xl shadow-sm border-2 border-dashed border-border">
+          <AppEmptyState
+            type="first-run-student"
+            title="No courses yet"
+            description="You haven't enrolled in any courses. Browse the marketplace to find your teacher's class and request enrollment."
+            size="lg"
+            actions={[{ label: "Browse Courses", href: "/courses", primary: true, icon: BookOpen }]}
+          />
         </div>
       ) : (
         <div className="space-y-8">

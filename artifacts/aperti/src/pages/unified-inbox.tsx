@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { AppEmptyState } from "@/components/app-empty-state";
 import {
   MessageSquare, Search, Send, Paperclip, Mic, Sparkles,
   BookOpen, FileText, Clock, Users, Filter, Plus, X,
@@ -144,9 +145,11 @@ export default function UnifiedInbox() {
 
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
-            <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>
+            <div className="p-4 space-y-2">{[...Array(4)].map((_, i) => <div key={i} className="h-14 bg-gray-100 rounded-xl animate-pulse" />)}</div>
           ) : filtered.length === 0 ? (
-            <div className="p-8 text-center text-gray-400 text-sm">No conversations yet</div>
+            <div className="p-4">
+              <AppEmptyState type="messages" title="No conversations" description="Messages from students and parents will appear here." size="sm" />
+            </div>
           ) : (
             filtered.map((thread) => (
               <motion.button key={thread.id} onClick={() => { setSelectedThread(thread); setSummary(null); }}

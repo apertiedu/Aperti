@@ -15,6 +15,7 @@ import {
   CheckCircle, Clock, Eye, Star, Upload, Plus, Grid, List,
   ExternalLink, Tag, Shield,
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 
 const API = "/api";
 async function fetchJSON(url: string, opts?: RequestInit) {
@@ -176,11 +177,12 @@ export default function ResourcesLibrary() {
             {Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-36 rounded-xl" />)}
           </div>
         ) : (resources || []).length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            <Library size={48} className="mx-auto mb-4 opacity-30" />
-            <p className="text-lg font-medium">No resources found</p>
-            <p className="text-sm mt-1">Try adjusting your filters or search terms</p>
-          </div>
+          <AppEmptyState
+            type="search-no-results"
+            title="No resources found"
+            description="Try adjusting your filters or search terms to find what you're looking for."
+            size="lg"
+          />
         ) : (
           <div className={`grid gap-4 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" : "grid-cols-1"}`}>
             <AnimatePresence>

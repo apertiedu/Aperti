@@ -10,6 +10,7 @@ import {
   Brain, Zap, Search, ArrowUp, ArrowDown, Minus,
   CheckCircle2, Clock, Calendar, ChevronRight,
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const API = "/api";
@@ -155,11 +156,12 @@ export default function InsightStream() {
               {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
             </div>
           ) : riskStudents.length === 0 ? (
-            <div className="text-center py-16 border border-dashed border-border rounded-2xl">
-              <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="font-semibold text-muted-foreground mb-1">No student risk data yet</p>
-              <p className="text-sm text-muted-foreground/70">Add students and record attendance to see risk analysis here.</p>
-            </div>
+            <AppEmptyState
+              type="analytics"
+              title="No student risk data yet"
+              description="Add students and record attendance to see AI-powered risk analysis here."
+              size="lg"
+            />
           ) : (
             <>
               <SummaryBand summary={summary} />
@@ -244,7 +246,7 @@ export default function InsightStream() {
                   );
                 })}
                 {filtered.length === 0 && (
-                  <p className="text-center py-8 text-muted-foreground text-sm">No students match your search.</p>
+                  <AppEmptyState type="search-no-results" size="sm" />
                 )}
               </div>
             </>
@@ -291,11 +293,12 @@ export default function InsightStream() {
           {riskLoading ? (
             <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-28 rounded-xl" />)}</div>
           ) : atRisk.length === 0 ? (
-            <div className="text-center py-16 border border-dashed border-border rounded-2xl">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-              <p className="font-semibold text-muted-foreground mb-1">All students are on track</p>
-              <p className="text-sm text-muted-foreground/70">No critical or high-risk students right now. Keep it up!</p>
-            </div>
+            <AppEmptyState
+              type="no-warnings"
+              title="All students are on track"
+              description="No critical or high-risk students right now. Keep it up!"
+              size="lg"
+            />
           ) : (
             <div className="space-y-3">
               {atRisk.map((s: any) => (

@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, CheckSquare, Flame, Award, ChevronRight, Target, Star, Shield, Lock, Layers, Video, Sparkles, Clock, Wifi, Building2, CalendarDays, ExternalLink, Zap, AlertTriangle } from "lucide-react";
+import { AppEmptyState, CelebrationBanner } from "@/components/app-empty-state";
+import { FirstRunBanner } from "@/components/first-run-banner";
 import { useAuth } from "@/context/auth";
 import { Progress } from "@/components/ui/progress";
 import { format } from "date-fns";
@@ -97,9 +99,19 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="h-12 skeleton rounded-2xl w-72" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">{[...Array(3)].map((_, i) => <div key={i} className="h-48 skeleton rounded-2xl" />)}</div>
+      <div className="space-y-6 pb-6">
+        <div className="h-10 skeleton rounded-xl w-64" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(2)].map((_, i) => <div key={i} className="h-36 skeleton rounded-2xl" />)}
+        </div>
+        <div className="h-20 skeleton rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => <div key={i} className="h-52 skeleton rounded-2xl" />)}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 h-64 skeleton rounded-2xl" />
+          <div className="h-64 skeleton rounded-2xl" />
+        </div>
       </div>
     );
   }
@@ -119,8 +131,15 @@ export default function StudentDashboard() {
   if (focusItems.length === 0)
     focusItems.push({ icon: Sparkles, color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-100", text: "You're all caught up — great work today!", href: "/success" });
 
+  const isNewStudent = !loading && !data?.latestExam && !data?.upcomingHomework?.length && rate === 0;
+
   return (
     <div className="space-y-6 pb-6">
+      {/* ── First-run experience for brand new students ── */}
+      {isNewStudent && (
+        <FirstRunBanner role="student" completedItems={[]} />
+      )}
+
       {/* ── Intelligence Row: Momentum + What's Next ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <MomentumScore />
@@ -286,9 +305,14 @@ export default function StudentDashboard() {
           
           <div className="flex-1 flex flex-col">
             {!data?.upcomingHomework?.length ? (
-              <div className="flex-1 flex flex-col items-center justify-center py-10 text-muted-foreground text-sm">
-                <div className="bg-muted p-4 rounded-full mb-3"><BookOpen className="h-6 w-6 opacity-40" /></div>
-                <span className="font-medium">All caught up!</span>
+              <div className="flex-1">
+                <AppEmptyState
+                  type="no-overdue"
+                  title="All caught up"
+                  description="No pending assignments right now. Your teacher will notify you when new work is available."
+                  size="sm"
+                  variant="celebration"
+                />
               </div>
             ) : (
               <div className="divide-y divide-border">

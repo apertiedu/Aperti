@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Trash2, UserPlus, Upload, Search, Clock, Pencil, QrCode, Download, Printer, BarChart2, KeyRound, UserCheck, AlertTriangle, CreditCard } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Textarea } from "@/components/ui/textarea";
@@ -577,7 +578,18 @@ export default function Students() {
               </TableHeader>
               <TableBody>
                 {filteredStudents.length === 0 ? (
-                  <TableRow><TableCell colSpan={6} className="h-24 text-center text-muted-foreground">{search ? "No students match your search." : "No students yet. Add one above."}</TableCell></TableRow>
+                  <TableRow>
+                    <TableCell colSpan={6} className="p-0">
+                      <AppEmptyState
+                        type={search ? "search-no-results" : "students"}
+                        searchQuery={search || undefined}
+                        title={search ? undefined : "No students yet"}
+                        description={search ? undefined : "Add your first student using the form above or import from a spreadsheet."}
+                        size="sm"
+                        actions={search ? [] : [{ label: "Add Student", primary: true, icon: UserPlus, onClick: undefined }]}
+                      />
+                    </TableCell>
+                  </TableRow>
                 ) : filteredStudents.map(student => (
                   <TableRow key={student.id}>
                     <TableCell className="font-mono font-semibold text-sm">{student.studentCode}</TableCell>

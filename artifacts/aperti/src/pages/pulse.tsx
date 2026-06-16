@@ -15,7 +15,7 @@ import {
   Users, TrendingUp, AlertTriangle, CheckCircle, Target, BarChart2,
   BookOpen, Zap, ShieldAlert, Activity, TrendingDown, Minus,
 } from "lucide-react";
-import { EmptyState } from "@/components/empty-state";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { Link } from "wouter";
 
 const API = "/api";
@@ -177,13 +177,7 @@ export default function Pulse() {
               </CardHeader>
               <CardContent>
                 {attendanceTrend.length === 0 ? (
-                  <EmptyState
-                    icon={TrendingUp}
-                    title="No attendance data yet"
-                    description="Record attendance in CheckIn to see trends here."
-                    size="sm"
-                    action={{ label: "Go to CheckIn", onClick: () => window.location.href = "/checkin" }}
-                  />
+                  <AppEmptyState type="attendance" title="No attendance data yet" description="Record attendance in CheckIn to see trends here." size="sm" actions={[{ label: "Go to CheckIn", href: "/checkin", primary: true }]} />
                 ) : (
                   <ResponsiveContainer width="100%" height={200}>
                     <LineChart data={attendanceTrend}>
@@ -207,13 +201,7 @@ export default function Pulse() {
               </CardHeader>
               <CardContent>
                 {!hasGradeData ? (
-                  <EmptyState
-                    icon={BarChart2}
-                    title="No exam results yet"
-                    description="Create an exam and enter marks to see grade distribution."
-                    size="sm"
-                    action={{ label: "Create Exam", onClick: () => window.location.href = "/exams" }}
-                  />
+                  <AppEmptyState type="results" title="No exam results yet" description="Create an exam and enter marks to see grade distribution." size="sm" actions={[{ label: "Create Exam", href: "/exams", primary: true }]} />
                 ) : (
                   <>
                     <ResponsiveContainer width="100%" height={180}>
@@ -270,12 +258,7 @@ export default function Pulse() {
             </CardHeader>
             <CardContent>
               {attendanceTrend.length === 0 ? (
-                <EmptyState
-                  icon={TrendingUp}
-                  title="No attendance records yet"
-                  description="Start taking attendance in CheckIn to track trends here."
-                  action={{ label: "Take Attendance", onClick: () => window.location.href = "/checkin" }}
-                />
+                <AppEmptyState type="attendance" title="No attendance records yet" description="Start taking attendance in CheckIn to track trends here." size="md" actions={[{ label: "Take Attendance", href: "/checkin", primary: true }]} />
               ) : (
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={attendanceTrend}>
@@ -302,12 +285,7 @@ export default function Pulse() {
             </CardHeader>
             <CardContent>
               {!hasGradeData ? (
-                <EmptyState
-                  icon={BarChart2}
-                  title="No exam marks recorded"
-                  description="Grade your exams to see a breakdown of A*, A, B, C, D and U grades."
-                  action={{ label: "Go to Exams", onClick: () => window.location.href = "/exams" }}
-                />
+                <AppEmptyState type="results" title="No exam marks recorded" description="Grade your exams to see a breakdown of A*, A, B, C, D and U grades." size="md" actions={[{ label: "Go to Exams", href: "/exams", primary: true }]} />
               ) : (
                 <>
                   <ResponsiveContainer width="100%" height={280}>
@@ -342,12 +320,7 @@ export default function Pulse() {
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
             </div>
           ) : scored.length === 0 ? (
-            <EmptyState
-              icon={Zap}
-              title="No student data to score"
-              description="Add students and record attendance, homework and exams to calculate engagement, risk and consistency scores."
-              action={{ label: "Add Students", onClick: () => window.location.href = "/students" }}
-            />
+            <AppEmptyState type="analytics" title="No student data to score" description="Add students and record attendance, homework and exams to calculate engagement, risk and consistency scores." size="md" actions={[{ label: "Add Students", href: "/students", primary: true }]} />
           ) : (
             <>
               {/* Class averages */}
@@ -482,12 +455,7 @@ export default function Pulse() {
             </CardHeader>
             <CardContent>
               {studentList.length === 0 ? (
-                <EmptyState
-                  icon={Users}
-                  title="No students yet"
-                  description="You haven't added any students. Invite them to join your course."
-                  action={{ label: "Manage Students", onClick: () => window.location.href = "/students" }}
-                />
+                <AppEmptyState type="students" title="No students yet" description="You haven't added any students. Invite them to join your course." size="md" actions={[{ label: "Manage Students", href: "/students", primary: true }]} />
               ) : (
                 <div className="space-y-2">
                   {studentList.map((s: any) => (

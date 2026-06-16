@@ -8,6 +8,7 @@ import {
 import { fetchJSON } from "@/lib/api";
 import { Link } from "wouter";
 import SystemHealthWidget from "@/components/system-health-widget";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function StatCard({ title, value, subtitle, icon: Icon, color, href }: any) {
   const card = (
@@ -78,6 +79,7 @@ export default function AdminDashboard() {
   });
 
   const activeFlags = (flags as any[])?.filter((f: any) => f.enabled).length ?? 0;
+  const isLoading = !dash && !health && !userStats && !subStats && !revenue;
 
   return (
     <div className="space-y-6">
@@ -86,6 +88,20 @@ export default function AdminDashboard() {
         <h1 className="text-2xl font-bold text-gray-900">Platform Command Center</h1>
         <p className="text-sm text-gray-500 mt-0.5">Real-time overview of Aperti platform health and metrics</p>
       </div>
+
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className="space-y-4">
+          <Skeleton className="h-14 rounded-xl w-full" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Skeleton className="h-40 rounded-xl" />
+            <Skeleton className="h-40 rounded-xl md:col-span-2" />
+          </div>
+        </div>
+      )}
 
       {/* Health banner */}
       {health && (

@@ -20,6 +20,7 @@ import {
   CalendarDays, Plus, Pencil, Trash2, Clock, MapPin, Wifi,
   BookOpen, AlertTriangle, CheckCircle, ShieldAlert, ChevronRight,
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 const MODES = ["online", "in-person", "hybrid"] as const;
@@ -538,25 +539,13 @@ export default function TeacherSchedulePage() {
                 {[0, 1, 2].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
               </div>
             ) : sortedLessons.length === 0 ? (
-              <Card className="border border-slate-100 shadow-sm">
-                <CardContent className="p-12 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mx-auto mb-4">
-                    <BookOpen className="text-teal-500" size={32} />
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">No lessons yet</h3>
-                  <p className="text-sm text-slate-500 mb-6 max-w-xs mx-auto">
-                    Create your first lesson to define when your class meets.
-                    You can then add time slots to each lesson.
-                  </p>
-                  <Button
-                    className="gap-2 bg-teal-600 hover:bg-teal-700"
-                    onClick={() => setCreateLessonOpen(true)}
-                  >
-                    <Plus size={16} />
-                    Create Your First Lesson
-                  </Button>
-                </CardContent>
-              </Card>
+              <AppEmptyState
+                type="sessions"
+                title="No lessons yet"
+                description="Create your first lesson to define when your class meets. You can then add time slots to each lesson."
+                size="lg"
+                actions={[{ label: "Create Your First Lesson", primary: true, icon: Plus, onClick: () => setCreateLessonOpen(true) }]}
+              />
             ) : (
               <div className="space-y-3">
                 {sortedLessons.map(lesson => {
@@ -704,22 +693,13 @@ export default function TeacherSchedulePage() {
                     {[0, 1, 2].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
                   </div>
                 ) : slots.length === 0 ? (
-                  <Card className="border border-slate-100 shadow-sm">
-                    <CardContent className="p-10 text-center">
-                      <Clock className="mx-auto mb-3 text-slate-300" size={36} />
-                      <p className="font-medium text-slate-700 mb-1">No session slots yet</p>
-                      <p className="text-sm text-slate-400 mb-4">
-                        Add time slots to your lessons to define when students can attend.
-                      </p>
-                      <Button
-                        className="gap-2 bg-teal-600 hover:bg-teal-700"
-                        onClick={() => setCreateSlotOpen(true)}
-                      >
-                        <Plus size={14} />
-                        Create First Slot
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  <AppEmptyState
+                    type="sessions"
+                    title="No session slots yet"
+                    description="Add time slots to your lessons to define when students can attend."
+                    size="md"
+                    actions={[{ label: "Create First Slot", primary: true, icon: Plus, onClick: () => setCreateSlotOpen(true) }]}
+                  />
                 ) : (
                   <div className="space-y-3">
                     {sortedLessons.map(lesson => {

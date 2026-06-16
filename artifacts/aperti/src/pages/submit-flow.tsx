@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusButton, useMutationStatus } from "@/components/ui/status-button";
@@ -189,11 +190,9 @@ export default function SubmitFlow() {
               {isLoading ? (
                 <div className="space-y-2">{[1, 2, 3].map(i => <Skeleton key={i} className="h-14 rounded-lg" />)}</div>
               ) : list.length === 0 ? (
-                <Card>
-                  <CardContent className="p-12 text-center text-muted-foreground">
-                    <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                    <p className="font-medium">No assignments yet</p>
-                    <Button onClick={openCreate} className="mt-3 gap-2 text-sm"><Plus className="h-4 w-4" /> Create one</Button>
+                <Card className="border-dashed border-2">
+                  <CardContent className="py-2">
+                    <AppEmptyState type="homework" title="No assignments yet" description="Create an assignment and it will appear here for students to submit." size="md" actions={[{ label: "Create Assignment", primary: true, onClick: openCreate, icon: Plus }]} />
                   </CardContent>
                 </Card>
               ) : (

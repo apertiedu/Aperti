@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/auth";
-import { EmptyState } from "@/components/ui/empty-state";
+import { AppEmptyState, CelebrationBanner } from "@/components/app-empty-state";
 
 type NotifItem = {
   id: number; type: string; category: string;
@@ -175,11 +175,18 @@ export default function NotificationCenter() {
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}
         </div>
+      ) : filtered.length === 0 && search ? (
+        <AppEmptyState
+          type="search-no-results"
+          searchQuery={search}
+          size="md"
+        />
       ) : filtered.length === 0 ? (
-        <EmptyState
-          icon="notifications"
-          title={filterType === "all" ? "You're all caught up!" : `No ${TYPE_META[filterType]?.label ?? filterType} notifications`}
-          description="New activity will appear here automatically."
+        <AppEmptyState
+          type={filterType === "all" ? "inbox-zero" : "notifications"}
+          title={filterType === "all" ? "You're all caught up" : `No ${TYPE_META[filterType]?.label ?? filterType} notifications`}
+          description={filterType === "all" ? "No new activity. New messages, submissions, and alerts will appear here automatically." : `You have no ${TYPE_META[filterType]?.label?.toLowerCase() ?? filterType} notifications right now.`}
+          size="md"
         />
       ) : (
         <AnimatePresence initial={false}>
@@ -237,12 +244,11 @@ export default function NotificationCenter() {
         </AnimatePresence>
       )}
 
-      {!isLoading && total === 0 && (
-        <Card className="shadow-sm border-dashed">
-          <CardContent className="p-6 text-center text-muted-foreground text-sm">
-            As your activity grows — students submitting work, messages arriving, system alerts — they'll all appear here in real time.
-          </CardContent>
-        </Card>
+      {!isLoading && total === 0 && unreadCount === 0 && (
+        <CelebrationBanner
+          title="Notification history clear"
+          description="As your activity grows — submissions, messages, alerts — they'll all be logged here in real time."
+        />
       )}
     </div>
   );

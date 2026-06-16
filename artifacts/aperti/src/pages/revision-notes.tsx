@@ -5,6 +5,7 @@ import {
   FileText, Plus, Sparkles, Trash2, Edit2, Check, X,
   Loader2, BookOpen, ArrowRight, Search, ChevronDown, ChevronUp, Package2
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { useToast } from "@/hooks/use-toast";
 
 const authH = () => ({ "Content-Type": "application/json" });
@@ -141,9 +142,14 @@ export default function RevisionNotesPage() {
           {isLoading ? (
             <div className="flex justify-center py-10"><div className="w-5 h-5 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" /></div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-10 px-4">
-              <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p className="text-sm text-gray-400">{search ? "No matching notes" : "No notes yet"}</p>
+            <div className="py-2">
+              <AppEmptyState
+                type={search ? "search-no-results" : "notes"}
+                searchQuery={search || undefined}
+                title={search ? undefined : "No notes yet"}
+                description={search ? undefined : "Create your first revision note or use AI to generate one from a topic."}
+                size="sm"
+              />
             </div>
           ) : (
             <div className="divide-y divide-gray-50">

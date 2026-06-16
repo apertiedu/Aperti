@@ -7,6 +7,7 @@ import {
   Send, Edit3, Award, Paperclip, X, FileText, ImageIcon, RotateCcw,
   MessageSquare, Calendar,
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -323,19 +324,22 @@ export default function AssignmentCenter() {
           {[...Array(3)].map((_, i) => <Skeleton key={i} className="h-20 rounded-2xl" />)}
         </div>
       ) : tabData[activeTab].length === 0 ? (
-        <div className="py-16 text-center text-gray-400 bg-card rounded-2xl border border-border">
-          {activeTab === "overdue"
-            ? <AlertTriangle className="h-10 w-10 mx-auto mb-3 opacity-20" />
-            : activeTab === "returned"
-            ? <CheckCircle2 className="h-10 w-10 mx-auto mb-3 opacity-20" />
-            : <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-20" />}
-          <p className="font-medium text-sm">
-            {activeTab === "pending" ? "All caught up! 🎉"
-              : activeTab === "overdue" ? "No overdue work — great job!"
-              : activeTab === "returned" ? "No graded work yet"
-              : activeTab === "resubmission" ? "No resubmissions needed"
-              : `No ${activeTab} assignments`}
-          </p>
+        <div className="bg-card rounded-2xl border-2 border-dashed border-border">
+          {activeTab === "pending" && (
+            <AppEmptyState type="no-overdue" title="All caught up" description="No pending assignments right now. Your teacher will post new work here soon." size="md" variant="celebration" />
+          )}
+          {activeTab === "submitted" && (
+            <AppEmptyState type="all-done" title="Nothing submitted yet" description="Submit your pending assignments and they'll appear here for tracking." size="md" />
+          )}
+          {activeTab === "overdue" && (
+            <AppEmptyState type="no-overdue" title="No overdue work" description="You're on top of all your deadlines. Keep it up!" size="md" variant="celebration" />
+          )}
+          {activeTab === "returned" && (
+            <AppEmptyState type="gradebook" title="No graded work yet" description="Completed work that your teacher has marked and returned will appear here." size="md" />
+          )}
+          {activeTab === "resubmission" && (
+            <AppEmptyState type="all-done" title="No resubmissions needed" description="You're in good standing. No assignments require resubmission at this time." size="md" />
+          )}
         </div>
       ) : (
         <div className="space-y-3" role="list">

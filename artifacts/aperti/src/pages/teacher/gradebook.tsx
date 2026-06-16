@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { InlineError } from "@/components/inline-error";
+import { AppEmptyState } from "@/components/app-empty-state";
 
 const IGCSE_COLOR: Record<string, string> = {
   "A*": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -174,9 +175,13 @@ export default function TeacherGradebook() {
       {isLoading ? (
         <div className="space-y-2">{[1,2,3,4].map(i => <div key={i} className="h-12 bg-muted/40 rounded-xl animate-pulse" />)}</div>
       ) : studentRows.length === 0 ? (
-        <div className="text-center py-16 border border-dashed border-border rounded-2xl">
-          <BarChart3 className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="text-muted-foreground">No graded submissions yet</p>
+        <div className="border-2 border-dashed border-border rounded-2xl">
+          <AppEmptyState
+            type="gradebook"
+            title={search ? "No students match your search" : "No graded submissions yet"}
+            description={search ? `No students found for "${search}". Try a different name.` : "Grades will appear here once assessments are marked and published to students."}
+            size="md"
+          />
         </div>
       ) : (
         <div className="bg-card border border-border rounded-xl overflow-hidden">

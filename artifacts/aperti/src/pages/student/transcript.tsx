@@ -5,6 +5,7 @@ import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, RefreshCw, Award, BarChart3, Clock } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { useToast } from "@/hooks/use-toast";
 
 const IGCSE_COLOR: Record<string, string> = {
@@ -83,14 +84,18 @@ export default function StudentTranscript() {
       {isLoading || !studentId ? (
         <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-muted/40 rounded-xl animate-pulse" />)}</div>
       ) : !latestTranscript ? (
-        <div className="text-center py-16 border border-dashed border-border rounded-2xl">
-          <FileText className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
-          <p className="font-medium text-muted-foreground">No transcript generated yet</p>
-          <p className="text-xs text-muted-foreground mt-1">Generate your transcript to see all your grades and achievements.</p>
-          <Button className="mt-4 gap-2" onClick={() => generateMut.mutate()} disabled={generateMut.isPending}>
-            <RefreshCw className={`w-4 h-4 ${generateMut.isPending ? "animate-spin" : ""}`} />Generate Transcript
-          </Button>
-        </div>
+        <AppEmptyState
+          type="results"
+          title="No transcript generated yet"
+          description="Generate your transcript to see all your grades and achievements in one place."
+          size="lg"
+          actions={[{
+            label: generateMut.isPending ? "Generating..." : "Generate Transcript",
+            primary: true,
+            icon: RefreshCw,
+            onClick: () => generateMut.mutate()
+          }]}
+        />
       ) : (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5" id="printable-transcript">
           {/* Header */}

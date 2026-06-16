@@ -16,6 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Plus, Trash2, Grid3X3, Eye, Copy, Pencil, CheckSquare } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { useToast } from "@/hooks/use-toast";
 
 const API = "/api";
@@ -171,16 +172,13 @@ export default function SchemeCraft() {
       {isLoading ? (
         <div className="space-y-3">{[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
       ) : rubricList.length === 0 ? (
-        <Card>
-          <CardContent className="p-16 text-center text-muted-foreground">
-            <CheckSquare className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">No rubrics yet</p>
-            <p className="text-sm mt-1">Create your first rubric to enable structured marking across assignments.</p>
-            <Button onClick={openCreate} className="mt-4 gap-2">
-              <Plus className="h-4 w-4" /> Create Rubric
-            </Button>
-          </CardContent>
-        </Card>
+        <AppEmptyState
+          type="assessments"
+          title="No rubrics yet"
+          description="Create your first rubric to enable structured marking across assignments."
+          size="lg"
+          actions={[{ label: "Create Rubric", primary: true, icon: Plus, onClick: openCreate }]}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {rubricList.map((r: any) => {

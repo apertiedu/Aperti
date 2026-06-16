@@ -17,6 +17,7 @@ import {
   ChevronLeft, ChevronRight, CheckCircle2, Sparkles, FileText,
   User, Clock, AlertCircle, Send, AlertTriangle, ShieldCheck, Info,
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { useToast } from "@/hooks/use-toast";
 import { StatusButton, useMutationStatus } from "@/components/ui/status-button";
 import { cn } from "@/lib/utils";
@@ -210,13 +211,12 @@ export default function GradeFlow() {
       </Card>
 
       {!selectedHwId ? (
-        <Card>
-          <CardContent className="p-16 text-center text-muted-foreground">
-            <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">Select an assignment to begin marking</p>
-            <p className="text-sm mt-1">Assignments with pending submissions will appear in the list above.</p>
-          </CardContent>
-        </Card>
+        <AppEmptyState
+          type="homework"
+          title="Select an assignment to begin marking"
+          description="Assignments with pending submissions will appear in the list above."
+          size="lg"
+        />
       ) : subLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <Skeleton className="h-[500px] rounded-xl" />

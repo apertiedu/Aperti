@@ -19,6 +19,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AppEmptyState } from "@/components/app-empty-state";
 import {
   Plus, Pencil, Trash2, Clock, MapPin, Monitor, Users, CalendarDays, List,
   AlertTriangle, Copy,
@@ -282,11 +283,12 @@ function WeekCalendar({ lessons, conflicts, subjectMap, onEdit, onDelete, onDupl
           })}
 
           {lessons.length === 0 && (
-            <div className="p-16 text-center text-muted-foreground">
-              <CalendarDays className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">No lessons scheduled</p>
-              <p className="text-sm mt-1">Click "Add Lesson" to populate your timetable.</p>
-            </div>
+            <AppEmptyState
+              type="sessions"
+              title="No lessons scheduled"
+              description="Click 'Add Lesson' to start building your timetable."
+              size="md"
+            />
           )}
         </div>
       </CardContent>
@@ -371,9 +373,8 @@ function ListViewTable({ lessons, conflicts, subjectMap, onEdit, onDelete, onDup
           <TableBody>
             {lessons.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-muted-foreground py-12">
-                  <CalendarDays className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                  No lessons yet. Click "Add Lesson" to build your timetable.
+                <TableCell colSpan={7} className="p-0">
+                  <AppEmptyState type="sessions" title="No lessons yet" description='Click "Add Lesson" to build your timetable.' size="sm" />
                 </TableCell>
               </TableRow>
             ) : (

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { BookOpen, Plus, Pencil, Trash2 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { useAuth } from "@/context/auth";
 
 type Subject = { id: number; name: string; teacherAccountId: number; createdAt: string };
@@ -120,11 +121,10 @@ export default function Subjects() {
       <Card className="border-border/50 shadow-sm">
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-8 text-center text-muted-foreground">Loading...</div>
+            <div className="space-y-2 p-4">{[...Array(4)].map((_, i) => <div key={i} className="h-12 bg-muted/40 rounded-lg animate-pulse" />)}</div>
           ) : subjects.length === 0 ? (
-            <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-2">
-              <BookOpen className="h-10 w-10 opacity-20" />
-              <p>No subjects yet. Add your first subject.</p>
+            <div className="border-2 border-dashed border-border m-2 rounded-xl">
+              <AppEmptyState type="courses" title="No subjects yet" description="Add your first subject to start organising your curriculum." size="md" />
             </div>
           ) : (
             <Table>

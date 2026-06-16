@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { AppEmptyState } from "@/components/app-empty-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -66,8 +67,10 @@ export default function HelpDesk() {
       {isLoading ? (
         <div className="space-y-3">{[1,2].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>
       ) : tickets?.length === 0 ? (
-        <Card className="card-hover">
-          <CardContent className="p-8 text-center text-muted-foreground">No tickets yet. We're here 24/7.</CardContent>
+        <Card className="card-hover border-dashed border-2">
+          <CardContent className="py-2">
+            <AppEmptyState type="tickets" title="No support tickets" description="All clear — no open tickets. We're available 24/7 if you need help." size="md" variant="celebration" />
+          </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">

@@ -21,6 +21,7 @@ import {
   ChevronLeft, ChevronRight, Star, Tag, Clock, AlertCircle, Copy,
   Edit, Trash2, Link, BarChart3, FileText,
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 
 const API = "/api";
 async function fetchJSON(url: string, opts?: RequestInit) {
@@ -435,10 +436,12 @@ export default function QuestionStudio() {
                   ))}
                 </AnimatePresence>
                 {aiGenResults.length === 0 && (
-                  <div className="text-center py-12 text-gray-400">
-                    <Sparkles size={36} className="mx-auto mb-3 opacity-30" />
-                    <p className="text-sm">AI generated questions will appear here</p>
-                  </div>
+                  <AppEmptyState
+                    type="questions"
+                    title="AI generated questions will appear here"
+                    description="Select a subject, topic, and difficulty then click Generate to create questions instantly."
+                    size="md"
+                  />
                 )}
               </div>
             </div>

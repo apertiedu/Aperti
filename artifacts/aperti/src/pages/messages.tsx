@@ -23,6 +23,7 @@ import {
 import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { AppEmptyState } from "@/components/app-empty-state";
 
 const API = "/api";
 async function apiFetch(url: string, opts?: RequestInit) {
@@ -228,9 +229,13 @@ export default function Messages() {
                 {convLoading ? (
                   <div className="p-3 space-y-2">{[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-14 rounded-lg" />)}</div>
                 ) : filtered.length === 0 ? (
-                  <div className="p-6 text-center text-muted-foreground text-sm">
-                    <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                    No conversations yet
+                  <div className="p-4">
+                    <AppEmptyState
+                      type="messages"
+                      title={search ? "No results" : "No conversations yet"}
+                      description={search ? `Nothing matching "${search}"` : "Start a conversation using the Compose button above."}
+                      size="sm"
+                    />
                   </div>
                 ) : (
                   <div className="p-2 space-y-1">
@@ -264,11 +269,13 @@ export default function Messages() {
             {/* Thread */}
             <Card className="lg:col-span-2 flex flex-col overflow-hidden">
               {!selectedConv ? (
-                <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-                  <div className="text-center">
-                    <MessageSquare className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                    <p>Select a conversation</p>
-                  </div>
+                <div className="flex-1 flex items-center justify-center">
+                  <AppEmptyState
+                    type="messages"
+                    title="Select a conversation"
+                    description="Choose a conversation from the left to read and reply."
+                    size="sm"
+                  />
                 </div>
               ) : (
                 <>
@@ -320,11 +327,14 @@ export default function Messages() {
         <TabsContent value="announcements">
           <div className="space-y-3">
             {annList.length === 0 ? (
-              <Card>
-                <CardContent className="p-12 text-center text-muted-foreground">
-                  <Megaphone className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                  <p className="font-medium">No announcements sent yet</p>
-                  <p className="text-sm mt-1">Use the Announcement button to broadcast a message to all students or parents.</p>
+              <Card className="border-dashed border-2">
+                <CardContent className="py-4">
+                  <AppEmptyState
+                    type="announcements"
+                    title="No announcements yet"
+                    description="Broadcast a message to all students or parents using the Announcement button."
+                    size="md"
+                  />
                 </CardContent>
               </Card>
             ) : (

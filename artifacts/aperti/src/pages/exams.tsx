@@ -15,6 +15,7 @@ import {
   ClipboardList, Plus, Trash2, Eye, ChevronRight, CheckCircle2,
   Monitor, FileQuestion, PenLine, Clock, AlignLeft
 } from "lucide-react";
+import { AppEmptyState } from "@/components/app-empty-state";
 
 type Subject = { id: number; name: string };
 type Exam = {
@@ -598,13 +599,19 @@ export default function Exams() {
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading exams...</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {[...Array(3)].map((_, i) => <div key={i} className="h-40 bg-muted/40 rounded-xl animate-pulse" />)}
+        </div>
       ) : exams.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="p-12 text-center text-muted-foreground flex flex-col items-center gap-3">
-            <ClipboardList className="h-12 w-12 opacity-20" />
-            <p>No exams yet.</p>
-            {!isAssistant && <p className="text-sm">Create your first exam to start tracking student marks.</p>}
+        <Card className="border-dashed border-2">
+          <CardContent className="py-4">
+            <AppEmptyState
+              type="assessments"
+              title="No exams yet"
+              description={isAssistant ? "No exams have been created yet. Contact your teacher to schedule one." : "Create your first exam to start scheduling, entering marks, and generating grade reports."}
+              size="lg"
+              actions={isAssistant ? [] : [{ label: "Create First Exam", primary: true, icon: Plus, onClick: undefined }]}
+            />
           </CardContent>
         </Card>
       ) : (
