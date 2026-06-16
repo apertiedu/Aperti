@@ -132,7 +132,7 @@ export default function RepairPanelPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#E6F4F1" }}>
-              <Wrench className="w-4 h-4" className="text-primary" />
+              <Wrench className="w-4 h-4 text-primary" />
             </div>
             <h1 className="text-xl font-bold text-slate-900">System Repair Panel</h1>
           </div>
@@ -151,8 +151,7 @@ export default function RepairPanelPage() {
             <button
               onClick={handleFixAll}
               disabled={fixMutation.isPending}
-              className="flex items-center gap-1.5 text-xs text-white rounded-lg px-3 py-1.5 font-semibold transition-colors"
-              className="bg-primary text-primary-foreground"
+              className="flex items-center gap-1.5 text-xs text-white rounded-lg px-3 py-1.5 font-semibold transition-colors bg-primary text-primary-foreground"
             >
               <Hammer className="w-3.5 h-3.5" /> Fix All Fixable
             </button>

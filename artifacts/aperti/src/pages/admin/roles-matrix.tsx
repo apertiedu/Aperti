@@ -129,7 +129,7 @@ export default function RolesMatrixPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#E6F4F1" }}>
-              <Shield className="w-4 h-4" className="text-primary" />
+              <Shield className="w-4 h-4 text-primary" />
             </div>
             <h1 className="text-xl font-bold text-slate-900">Role & Permission Matrix</h1>
           </div>

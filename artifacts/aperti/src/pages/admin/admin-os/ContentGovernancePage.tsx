@@ -97,8 +97,7 @@ function EditModal({ entry, onClose }: { entry: GovernanceEntry; onClose: () => 
           <button
             onClick={() => save.mutate(form)}
             disabled={save.isPending}
-            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-            className="bg-primary text-primary-foreground">
+            className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 bg-primary text-primary-foreground">
             {save.isPending ? "Saving…" : "Save Changes"}
           </button>
         </div>
@@ -149,8 +148,8 @@ export default function ContentGovernancePage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
-            <Shield className="h-5 w-5" className="text-primary" />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/8">
+            <Shield className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900">Content Governance</h1>
@@ -213,8 +212,8 @@ export default function ContentGovernancePage() {
                     <tr key={entry.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" className="bg-primary/8">
-                            <FileText className="h-3.5 w-3.5" className="text-primary" />
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-primary/8">
+                            <FileText className="h-3.5 w-3.5 text-primary" />
                           </div>
                           <span className="font-semibold text-gray-900 text-xs">{entry.page_name}</span>
                         </div>
@@ -226,16 +225,14 @@ export default function ContentGovernancePage() {
                         </a>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                          style={{ className="bg-primary/8 text-primary" }}>
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/8 text-primary">
                           v{entry.version}
                         </span>
                       </td>
                       <td className="px-4 py-3">
                         {entry.owner_name ? (
                           <div className="flex items-center gap-1.5">
-                            <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                              className="bg-primary text-primary-foreground">
+                            <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0 bg-primary text-primary-foreground">
                               {entry.owner_name.charAt(0)}
                             </div>
                             <span className="text-xs text-gray-600">{entry.owner_name}</span>
@@ -283,7 +280,7 @@ export default function ContentGovernancePage() {
       {/* Notes section */}
       <div className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Tag className="h-4 w-4" className="text-primary" />
+          <Tag className="h-4 w-4 text-primary" />
           <h3 className="text-sm font-bold text-gray-900">Review Policy</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-500">

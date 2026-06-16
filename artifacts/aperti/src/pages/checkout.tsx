@@ -169,7 +169,7 @@ export default function CheckoutPage() {
               {selectedPlan.price > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-8">
                   <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Tag className="h-4 w-4" className="text-primary" /> Have a coupon code?
+                    <Tag className="h-4 w-4 text-primary" /> Have a coupon code?
                   </p>
                   <div className="flex gap-2">
                     <input
@@ -183,8 +183,7 @@ export default function CheckoutPage() {
                     <button
                       onClick={validateCoupon}
                       disabled={validatingCoupon || !couponCode.trim()}
-                      className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
-                      className="bg-primary">
+                      className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 bg-primary">
                       {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                     </button>
                   </div>
@@ -193,8 +192,7 @@ export default function CheckoutPage() {
                   )}
                   {coupon && (
                     <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                      className="text-xs font-semibold mt-2 flex items-center gap-1.5"
-                      className="text-primary">
+                      className="text-xs font-semibold mt-2 flex items-center gap-1.5 text-primary">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       {coupon.discountPercent}% off applied — saving EGP {discountAmt}
                     </motion.p>
@@ -245,7 +243,7 @@ export default function CheckoutPage() {
                     <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">1.</span>Open your bank's mobile app and go to InstaPay.</li>
                     <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">2.</span>Send <strong>EGP {finalPrice}</strong> to the Aperti InstaPay ID:</li>
                     <li>
-                      <code className="block bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm font-bold text-center" className="text-primary">
+                      <code className="block bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm font-bold text-center text-primary">
                         aperti@instapay.eg
                       </code>
                     </li>

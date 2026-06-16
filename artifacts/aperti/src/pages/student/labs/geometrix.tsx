@@ -582,8 +582,8 @@ export default function Geometrix() {
 
       {/* ── HEADER ── */}
       <div className="bg-card border-b border-border px-5 py-3 flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
-          <Box className="h-5 w-5" className="text-primary" />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+          <Box className="h-5 w-5 text-primary" />
         </div>
         <div>
           <h1 className="font-black text-gray-900 text-base leading-none">Geometrix</h1>
@@ -735,7 +735,7 @@ export default function Geometrix() {
           <div className="p-4 space-y-4">
 
             {/* Shape card */}
-            <div className="text-center py-3 rounded-xl border border-gray-100" className="bg-primary/8">
+            <div className="text-center py-3 rounded-xl border border-gray-100 bg-primary/8">
               <p className="text-3xl mb-1">{shape.emoji}</p>
               <p className="font-extrabold text-gray-900 text-sm leading-tight">{shape.name}</p>
               <p className="text-[10px] text-gray-400 mt-0.5">{shape.category}</p>
@@ -747,7 +747,7 @@ export default function Geometrix() {
               <div className="grid grid-cols-3 gap-1.5">
                 {[{ l: "V", v: shape.vef.v }, { l: "E", v: shape.vef.e }, { l: "F", v: shape.vef.f }].map(t => (
                   <div key={t.l} className="rounded-lg border border-gray-100 p-2 text-center">
-                    <p className="text-base font-black" className="text-primary">{t.v}</p>
+                    <p className="text-base font-black text-primary">{t.v}</p>
                     <p className="text-[9px] text-gray-400 mt-0.5">{t.l}</p>
                   </div>
                 ))}
@@ -770,7 +770,7 @@ export default function Geometrix() {
               <div className="space-y-2">
                 <div className="rounded-xl border border-gray-100 p-3">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-1">Surface Area</p>
-                  <p className="text-2xl font-black" className="text-primary">{saVal}</p>
+                  <p className="text-2xl font-black text-primary">{saVal}</p>
                   <p className="text-[9px] text-gray-400">units²</p>
                   {showFormulas && (
                     <p className="text-[10px] text-gray-400 mt-2 font-mono border-t border-gray-50 pt-2 leading-relaxed">

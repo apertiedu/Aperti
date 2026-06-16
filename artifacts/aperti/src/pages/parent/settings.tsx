@@ -79,7 +79,7 @@ export default function ParentSettings() {
               <CardContent className="p-5">
                 <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Users className="h-4 w-4 text-primary" />Profile</h2>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold" className="bg-primary text-primary-foreground">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold bg-primary text-primary-foreground">
                     {(user?.displayName || user?.username || "P").slice(0, 2).toUpperCase()}
                   </div>
                   <div>
@@ -143,7 +143,7 @@ export default function ParentSettings() {
                   <div className="space-y-2">
                     {children.map((c: any) => (
                       <div key={c.studentId} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" className="bg-primary text-primary-foreground">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-primary text-primary-foreground">
                           {(c.name || "S").slice(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1">
@@ -171,7 +171,7 @@ export default function ParentSettings() {
           </motion.div>
 
           {/* Save */}
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="w-full rounded-xl text-white" className="bg-primary text-primary-foreground">
+          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="w-full rounded-xl text-white bg-primary text-primary-foreground">
             {saveMutation.isPending ? "Saving…" : "Save Settings"}
           </Button>
         </div>

@@ -76,8 +76,7 @@ export default function ServerError() {
         >
           <button
             onClick={() => window.location.reload()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shadow-sm"
-            className="bg-primary"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shadow-sm bg-primary"
           >
             <RefreshCw className="h-4 w-4" />
             Try Again

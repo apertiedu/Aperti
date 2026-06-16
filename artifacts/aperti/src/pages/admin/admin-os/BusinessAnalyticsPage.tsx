@@ -7,7 +7,7 @@ import {
 import { Users, TrendingUp, CreditCard, Clock, UserCheck, BookOpen, Heart, Activity } from "lucide-react";
 
 
-const COLORS = [""hsl(var(--primary))"", "#3B82F6", "#8B5CF6", "#F59E0B"];
+const COLORS = ["hsl(var(--primary))", "#3B82F6", "#8B5CF6", "#F59E0B"];
 
 function MetricCard({
   label, value, sub, icon: Icon, color = "text-gray-600", bg = "bg-gray-50",

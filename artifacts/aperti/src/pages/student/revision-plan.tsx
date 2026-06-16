@@ -125,7 +125,7 @@ export default function RevisionPlanPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <Calendar className="h-6 w-6" className="text-primary" />
+            <Calendar className="h-6 w-6 text-primary" />
             Smart Revision Plan
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -134,7 +134,7 @@ export default function RevisionPlanPage() {
         </div>
         {plan && (
           <Badge variant="outline" className="gap-1 shrink-0">
-            {aiGenerated && <Sparkles className="h-3 w-3" className="text-primary" />}
+            {aiGenerated && <Sparkles className="h-3 w-3 text-primary" />}
             {aiGenerated ? "AI Plan" : "Smart Plan"}
           </Badge>
         )}
@@ -147,7 +147,7 @@ export default function RevisionPlanPage() {
         className="bg-card rounded-2xl border border-border shadow-sm p-5"
       >
         <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Sparkles className="h-4 w-4" className="text-primary" />
+          <Sparkles className="h-4 w-4 text-primary" />
           Configure Your Plan
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
@@ -187,8 +187,7 @@ export default function RevisionPlanPage() {
         <Button
           onClick={() => generate.mutate()}
           disabled={generate.isPending}
-          className="gap-2 text-white"
-          className="bg-primary text-primary-foreground"
+          className="gap-2 text-white bg-primary text-primary-foreground"
         >
           {generate.isPending ? (
             <><Loader2 className="h-4 w-4 animate-spin" />Generating…</>
@@ -220,8 +219,7 @@ export default function RevisionPlanPage() {
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div
-                  className="h-full rounded-full"
-                  className="bg-primary text-primary-foreground"
+                  className="h-full rounded-full bg-primary text-primary-foreground"
                   animate={{ width: `${(completedCount / Math.max(totalTasks, 1)) * 100}%` }}
                   transition={{ duration: 0.4 }}
                 />
@@ -273,7 +271,7 @@ export default function RevisionPlanPage() {
                         </div>
                         {dayCompleted && <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />}
                         {isToday && !dayCompleted && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white" className="bg-primary text-primary-foreground">TODAY</span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white bg-primary text-primary-foreground">TODAY</span>
                         )}
                       </div>
                       <div className="flex items-center gap-1 flex-wrap">
@@ -362,8 +360,8 @@ export default function RevisionPlanPage() {
           animate={{ opacity: 1 }}
           className="text-center py-16"
         >
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" className="bg-primary/8">
-            <Calendar className="h-8 w-8" className="text-primary" />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-primary/8">
+            <Calendar className="h-8 w-8 text-primary" />
           </div>
           <h3 className="font-bold text-gray-800 mb-2">Generate Your Revision Plan</h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">

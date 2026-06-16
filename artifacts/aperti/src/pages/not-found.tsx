@@ -165,8 +165,7 @@ export default function NotFound() {
             {query && (
               <button
                 onClick={handleSearch}
-                className="text-xs font-semibold px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
-                className="bg-primary"
+                className="text-xs font-semibold px-3 py-1 rounded-lg text-white transition-all hover:opacity-90 bg-primary"
               >
                 Search
               </button>

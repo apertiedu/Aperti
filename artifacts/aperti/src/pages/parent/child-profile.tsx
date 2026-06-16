@@ -58,7 +58,7 @@ export default function ChildProfile() {
             <ArrowLeft className="h-4 w-4" />
           </button>
         </Link>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" className="bg-primary text-primary-foreground">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold bg-primary text-primary-foreground">
           {(student.name || "S").slice(0, 2).toUpperCase()}
         </div>
         <div>

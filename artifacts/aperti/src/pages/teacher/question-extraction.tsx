@@ -297,7 +297,7 @@ export default function QuestionExtractionPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-          <Brain className="h-6 w-6" className="text-primary" />
+          <Brain className="h-6 w-6 text-primary" />
           AI Question Extraction 2.0
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -399,8 +399,7 @@ export default function QuestionExtractionPage() {
             <Button
               onClick={() => startExtraction.mutate()}
               disabled={!canExtract || startExtraction.isPending}
-              className="gap-2 text-white"
-              className="bg-primary text-primary-foreground"
+              className="gap-2 text-white bg-primary text-primary-foreground"
             >
               {startExtraction.isPending ? (
                 <><Loader2 className="h-4 w-4 animate-spin" />Starting…</>
@@ -417,8 +416,8 @@ export default function QuestionExtractionPage() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 {job?.status === "processing" || job?.status === "pending" ? (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" className="bg-primary/8">
-                    <Loader2 className="h-4 w-4 animate-spin" className="text-primary" />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-primary/8">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
                   </div>
                 ) : job?.status === "done" ? (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-100">
@@ -500,7 +499,7 @@ export default function QuestionExtractionPage() {
 
           {(job?.status === "pending" || job?.status === "processing") && questions.length === 0 && (
             <div className="text-center py-10">
-              <Loader2 className="h-8 w-8 mx-auto animate-spin mb-3" className="text-primary" />
+              <Loader2 className="h-8 w-8 mx-auto animate-spin mb-3 text-primary" />
               <p className="text-sm text-muted-foreground">AI is reading the paper and extracting questions…</p>
             </div>
           )}

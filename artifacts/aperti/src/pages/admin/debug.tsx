@@ -129,7 +129,7 @@ export default function AdminDebugPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Terminal className="w-5 h-5" className="text-primary" />
+            <Terminal className="w-5 h-5 text-primary" />
             Live Debug Dashboard
           </h1>
           <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-3">
@@ -223,7 +223,7 @@ export default function AdminDebugPage() {
       {data?.systemHealth && (
         <div className="bg-card rounded-xl border border-border shadow-sm p-4">
           <h2 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-            <Activity className="w-4 h-4" className="text-primary" /> System Health
+            <Activity className="w-4 h-4 text-primary" /> System Health
           </h2>
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 text-sm">

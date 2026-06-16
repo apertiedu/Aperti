@@ -137,7 +137,7 @@ export default function FeatureAdoptionPage() {
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-2 justify-end">
                               <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full transition-all" className="bg-primary h-full rounded-full transition-all" style={{ width: `${barPct}%` }} />
+                                <div className="h-full rounded-full transition-all bg-primary h-full rounded-full transition-all" style={{ width: `${barPct}%` }} />
                               </div>
                               <span className="text-xs font-semibold text-gray-700 w-6 text-right">{score}</span>
                             </div>
@@ -185,7 +185,7 @@ export default function FeatureAdoptionPage() {
                           <p className="text-[10px] text-gray-400">{f.feature_category}</p>
                         </div>
                         <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <motion.div className="h-full rounded-full" className="bg-primary text-primary-foreground"
+                          <motion.div className="h-full rounded-full bg-primary text-primary-foreground"
                             initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: i * 0.03 }} />
                         </div>
                         <div className="text-right shrink-0 w-24">
@@ -211,7 +211,7 @@ export default function FeatureAdoptionPage() {
                       const h = Math.max(Math.round((parseInt(d.events) / maxEvents) * 100), 4);
                       return (
                         <div key={d.day} className="flex-1 flex flex-col items-center gap-1" title={`${d.day}: ${d.events} events`}>
-                          <div className="w-full rounded-sm transition-all" className="bg-primary w-full rounded-sm transition-all" />
+                          <div className="w-full rounded-sm transition-all bg-primary w-full rounded-sm transition-all" />
                         </div>
                       );
                     })}

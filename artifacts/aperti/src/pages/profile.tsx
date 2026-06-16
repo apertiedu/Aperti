@@ -28,7 +28,7 @@ export default function Profile() {
 
   if (isLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" className="border-primary" />
+      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin border-primary" />
     </div>
   );
 
@@ -37,7 +37,7 @@ export default function Profile() {
       <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl">🔍</div>
       <p className="font-semibold text-gray-700">Profile not found</p>
       <p className="text-gray-400 text-sm">This account may not exist or is not public.</p>
-      <Link href="/" className="text-sm font-medium hover:underline" className="text-primary">← Go home</Link>
+      <Link href="/" className="text-sm font-medium hover:underline text-primary">← Go home</Link>
     </div>
   );
 
@@ -57,8 +57,7 @@ export default function Profile() {
           <div className="px-6 pb-6">
             {/* Avatar */}
             <div className="-mt-10 mb-3 flex items-end justify-between">
-              <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-white overflow-hidden flex-shrink-0"
-                className="bg-primary">
+              <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-white overflow-hidden flex-shrink-0 bg-primary">
                 {profile.avatar_url
                   ? <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" onError={() => {}} />
                   : initials}
@@ -92,7 +91,7 @@ export default function Profile() {
         </motion.div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          <Link href="/" className="hover:underline" className="text-primary">Aperti.</Link> — The Educational Operating System
+          <Link href="/" className="hover:underline text-primary">Aperti.</Link> — The Educational Operating System
         </p>
       </div>
     </div>

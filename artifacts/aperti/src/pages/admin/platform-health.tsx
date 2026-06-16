@@ -100,8 +100,8 @@ export default function PlatformHealth() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
-              <Activity className="h-5 w-5" className="text-primary" />
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/8">
+              <Activity className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Platform Health</h1>
@@ -250,7 +250,7 @@ export default function PlatformHealth() {
         <Card className="border-0 shadow-sm bg-card">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <BarChart2 className="h-4 w-4" className="text-primary" />
+              <BarChart2 className="h-4 w-4 text-primary" />
               <CardTitle className="text-base">Database Overview</CardTitle>
             </div>
             <CardDescription className="text-xs">Storage, connections, and growth</CardDescription>

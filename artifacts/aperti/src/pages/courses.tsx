@@ -68,7 +68,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
           <div className="p-5 flex flex-col flex-1">
             <div className="flex items-start justify-between gap-2 mb-2">
               <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 flex-1">{course.title}</h3>
-              <span className="font-bold text-sm shrink-0 whitespace-nowrap" className="text-primary">{price}</span>
+              <span className="font-bold text-sm shrink-0 whitespace-nowrap text-primary">{price}</span>
             </div>
 
             {course.description && (

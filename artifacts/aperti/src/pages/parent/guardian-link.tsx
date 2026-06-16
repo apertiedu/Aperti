@@ -66,8 +66,8 @@ export default function GuardianLink() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto h-[calc(100vh-4rem)] flex flex-col gap-4">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
-          <MessageSquare className="h-5 w-5" className="text-primary" />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+          <MessageSquare className="h-5 w-5 text-primary" />
         </div>
         <div>
           <h1 className="text-xl font-black text-gray-900">GuardianLink<span className="text-primary">.</span></h1>
@@ -90,7 +90,7 @@ export default function GuardianLink() {
                   {conversations.map(c => (
                     <button key={c.other_id} onClick={() => setSelected({ id: c.other_id, name: c.other_name })}
                       className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b border-gray-50 last:border-0 hover:bg-gray-50 ${selected?.id === c.other_id ? "bg-primary/8" : ""}`}>
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" className="bg-primary text-primary-foreground">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 bg-primary text-primary-foreground">
                         {(c.other_name || "T").slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -133,7 +133,7 @@ export default function GuardianLink() {
               {/* Header */}
               <div className="flex items-center gap-3 p-4 border-b border-gray-100 shrink-0">
                 <button onClick={() => setSelected(null)} className="md:hidden p-1 rounded-lg hover:bg-gray-100"><ArrowLeft className="h-4 w-4 text-gray-500" /></button>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" className="bg-primary text-primary-foreground">
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold bg-primary text-primary-foreground">
                   {(selected.name || "T").slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1">
@@ -163,7 +163,7 @@ export default function GuardianLink() {
                         <motion.div key={msg.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                           className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                           {!isMe && (
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold mr-2 shrink-0 mt-1" className="bg-primary text-primary-foreground">
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold mr-2 shrink-0 mt-1 bg-primary text-primary-foreground">
                               {(msg.from_name || "T").slice(0, 2).toUpperCase()}
                             </div>
                           )}
@@ -195,7 +195,7 @@ export default function GuardianLink() {
                     className="flex-1 text-sm rounded-xl"
                     disabled={sendMutation.isPending}
                   />
-                  <Button type="submit" disabled={!input.trim() || sendMutation.isPending} size="icon" className="rounded-xl" className="bg-primary text-primary-foreground">
+                  <Button type="submit" disabled={!input.trim() || sendMutation.isPending} size="icon" className="rounded-xl bg-primary text-primary-foreground">
                     <Send className="h-4 w-4" />
                   </Button>
                 </form>

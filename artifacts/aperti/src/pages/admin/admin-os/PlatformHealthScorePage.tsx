@@ -77,8 +77,7 @@ export default function PlatformHealthScorePage() {
         <button
           onClick={() => refetch()}
           disabled={isFetching}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60 transition-colors"
-          className="bg-primary text-primary-foreground"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60 transition-colors bg-primary text-primary-foreground"
         >
           <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
           {isFetching ? "Refreshing…" : "Refresh"}

@@ -404,8 +404,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
 
       <Button
         type="submit"
-        className="w-full h-10 rounded-xl font-semibold text-white"
-        className="bg-primary text-primary-foreground"
+        className="w-full h-10 rounded-xl font-semibold text-white bg-primary text-primary-foreground"
         disabled={mutation.isPending}
       >
         {mutation.isPending ? "Saving…" : course ? "Save Changes" : "Create Course"}
@@ -425,8 +424,7 @@ function EnrollmentRow({ e, onAction }: {
       <Card className="border border-gray-100 shadow-sm">
         <CardContent className="p-4 flex items-center gap-4">
           <div
-            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold"
-            className="bg-primary text-primary-foreground"
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold bg-primary text-primary-foreground"
           >
             {initials}
           </div>
@@ -450,8 +448,7 @@ function EnrollmentRow({ e, onAction }: {
               <>
                 <Button
                   size="sm"
-                  className="h-7 px-3 rounded-lg gap-1 text-xs text-white"
-                  className="bg-primary text-primary-foreground"
+                  className="h-7 px-3 rounded-lg gap-1 text-xs text-white bg-primary text-primary-foreground"
                   onClick={() => onAction(e.id, "approved")}
                 >
                   <CheckCircle2 className="h-3 w-3" /> Approve
@@ -595,7 +592,7 @@ export default function MyCourses() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <BookOpen className="h-6 w-6" className="text-primary" /> My Courses
+            <BookOpen className="h-6 w-6 text-primary" /> My Courses
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             Create, manage and publish your courses to the student marketplace.
@@ -604,8 +601,7 @@ export default function MyCourses() {
         <Dialog open={dialogOpen} onOpenChange={v => { if (!v) closeDialog(); else setDialogOpen(true); }}>
           <DialogTrigger asChild>
             <Button
-              className="gap-2 rounded-xl text-white shrink-0"
-              className="bg-primary text-primary-foreground"
+              className="gap-2 rounded-xl text-white shrink-0 bg-primary text-primary-foreground"
               onClick={() => { setEditing(null); setDialogOpen(true); }}
             >
               <Plus className="h-4 w-4" /> New Course
@@ -632,8 +628,8 @@ export default function MyCourses() {
         ].map(({ label, value, icon: Icon }) => (
           <Card key={label} className="border border-gray-100 shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" className="bg-primary/8">
-                <Icon className="h-4.5 w-4.5" className="text-primary" />
+              <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0 bg-primary/8">
+                <Icon className="h-4.5 w-4.5 text-primary" />
               </div>
               <div>
                 <p className="text-xl font-black text-gray-900">{value}</p>
@@ -655,8 +651,7 @@ export default function MyCourses() {
               Requests
               {pending.length > 0 && (
                 <Badge
-                  className="ml-1.5 text-white text-[10px] px-1.5 py-0 rounded-full h-4 min-w-4"
-                  className="bg-primary text-primary-foreground"
+                  className="ml-1.5 text-white text-[10px] px-1.5 py-0 rounded-full h-4 min-w-4 bg-primary text-primary-foreground"
                 >
                   {pending.length}
                 </Badge>
@@ -956,8 +951,7 @@ export default function MyCourses() {
               courseStudents.map(e => (
                 <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100">
                   <div
-                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold"
-                    className="bg-primary text-primary-foreground"
+                    className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold bg-primary text-primary-foreground"
                   >
                     {(e.student_name || e.student_username).slice(0, 2).toUpperCase()}
                   </div>
@@ -977,9 +971,9 @@ export default function MyCourses() {
             )}
           </div>
           {courseStudents.length > 0 && (
-            <div className="mt-4 p-3 rounded-xl flex items-center gap-2" className="bg-primary/8">
-              <TrendingUp className="h-4 w-4 shrink-0" className="text-primary" />
-              <p className="text-xs font-semibold" className="text-primary">
+            <div className="mt-4 p-3 rounded-xl flex items-center gap-2 bg-primary/8">
+              <TrendingUp className="h-4 w-4 shrink-0 text-primary" />
+              <p className="text-xs font-semibold text-primary">
                 {courseStudents.length} student{courseStudents.length !== 1 ? "s" : ""} enrolled
               </p>
             </div>

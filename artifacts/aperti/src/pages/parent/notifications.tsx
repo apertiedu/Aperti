@@ -107,7 +107,7 @@ export default function ParentNotifications() {
                     <p className={`text-sm ${n.is_read ? "font-medium text-gray-600" : "font-semibold text-gray-900"}`}>{n.title}</p>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-[10px] text-gray-400">{timeAgo(n.created_at)}</span>
-                      {!n.is_read && <div className="w-2 h-2 rounded-full" className="bg-primary text-primary-foreground" />}
+                      {!n.is_read && <div className="w-2 h-2 rounded-full bg-primary text-primary-foreground" />}
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>

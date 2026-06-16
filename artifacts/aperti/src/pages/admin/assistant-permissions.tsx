@@ -78,8 +78,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
       <button
         onClick={() => setExpanded(e => !e)}
         className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-gray-50 transition-colors">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm shrink-0"
-          className="bg-primary">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm shrink-0 bg-primary">
           {assistant.displayName[0]?.toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
@@ -148,8 +147,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
                       size="sm"
                       onClick={() => saveMutation.mutate()}
                       disabled={saveMutation.isPending}
-                      className="h-7 text-xs px-3 text-white"
-                      className="bg-primary text-primary-foreground">
+                      className="h-7 text-xs px-3 text-white bg-primary text-primary-foreground">
                       {saveMutation.isPending ? "Saving…" : "Save Permissions"}
                     </Button>
                   </div>
@@ -182,8 +180,8 @@ export default function AssistantPermissionsPage() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
-            <Shield className="h-5 w-5" className="text-primary" />
+          <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/8">
+            <Shield className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Assistant Permissions</h1>
@@ -207,8 +205,7 @@ export default function AssistantPermissionsPage() {
               Create assistant accounts in the Account Management section, then configure their permissions here.
             </p>
             <Button
-              className="mt-4 text-white text-sm"
-              className="bg-primary text-primary-foreground"
+              className="mt-4 text-white text-sm bg-primary text-primary-foreground"
               onClick={() => window.location.href = "/admin/command"}>
               Go to Account Management
             </Button>

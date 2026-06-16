@@ -69,7 +69,7 @@ export default function ParentMeetings() {
             <p className="text-sm text-gray-500">Schedule & manage teacher meetings</p>
           </div>
         </div>
-        <Button onClick={() => setShowNew(true)} className="gap-2 rounded-xl text-sm text-white" className="bg-primary text-primary-foreground">
+        <Button onClick={() => setShowNew(true)} className="gap-2 rounded-xl text-sm text-white bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Request Meeting
         </Button>
       </motion.div>
@@ -146,7 +146,7 @@ export default function ParentMeetings() {
             <div className="text-center py-16">
               <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-200" />
               <p className="text-gray-400 text-sm">No meetings scheduled yet</p>
-              <Button onClick={() => setShowNew(true)} className="mt-4 gap-2 rounded-xl text-white" className="bg-primary text-primary-foreground">
+              <Button onClick={() => setShowNew(true)} className="mt-4 gap-2 rounded-xl text-white bg-primary text-primary-foreground">
                 <Plus className="h-4 w-4" /> Request your first meeting
               </Button>
             </div>
@@ -191,8 +191,7 @@ export default function ParentMeetings() {
             <Button
               onClick={() => createMutation.mutate()}
               disabled={!form.teacherId || !form.title || !form.date || !form.time || createMutation.isPending}
-              className="w-full rounded-xl text-white"
-              className="bg-primary text-primary-foreground"
+              className="w-full rounded-xl text-white bg-primary text-primary-foreground"
             >
               {createMutation.isPending ? "Requesting…" : "Request Meeting"}
             </Button>

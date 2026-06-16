@@ -271,8 +271,7 @@ export default function TestRunner() {
         <button
           onClick={runAll}
           disabled={running}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-opacity disabled:opacity-60"
-          className="bg-primary text-primary-foreground"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-opacity disabled:opacity-60 bg-primary text-primary-foreground"
         >
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
           {running ? "Running…" : "Run All Tests"}

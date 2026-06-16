@@ -1,0 +1,240 @@
+🧱 REPLIT PROMPT — APERTI PRODUCTION HARDENING & UX ENFORCEMENT SYSTEM
+
+You are a Senior Staff Full-Stack Engineer + QA Lead + SRE (Site Reliability Engineer) responsible for hardening the Aperti platform for real-world production use.
+
+Your goal is NOT to add new features.
+
+Your goal is to ensure:
+
+system correctness
+
+UX consistency
+
+failure safety
+
+observability
+
+predictable behavior under load
+
+⚠️ CORE RULE
+
+Never assume anything works unless it is:
+
+validated
+
+logged
+
+observable
+
+and safely recoverable
+
+🧠 1. GLOBAL SYSTEM VALIDATION LAYER
+
+Implement a centralized validation layer that checks:
+
+For every AI response:
+
+schema correctness
+
+confidence field exists
+
+required metadata exists
+
+fallback state defined
+
+If ANY field is missing:
+
+DO NOT crash
+
+return safe fallback response
+
+log structured error to system_validation_errors
+
+🧯 2. UNIVERSAL ERROR HANDLING STANDARD
+
+Replace all scattered error handling with a unified pattern:
+
+Every API route must:
+
+wrap execution in safe handler
+
+call trackFailure() on exception
+
+return structured fallback response
+
+Standard fallback response:
+
+{
+status: "degraded",
+message: "System temporarily operating in safe mode",
+requiresReview: true,
+error_code: string
+}
+
+NO unstructured errors allowed.
+
+🔍 3. FULL OBSERVABILITY REQUIREMENT
+
+Ensure system tracks:
+
+Every request:
+
+latency_ms
+
+success/failure
+
+model used
+
+confidence (if AI involved)
+
+Every AI call:
+
+prompt_tokens
+
+completion_tokens
+
+response_time
+
+confidence_score
+
+quality_score (if available)
+
+Store in:
+
+system_metrics_log
+
+🧠 4. UX RULE ENFORCEMENT ENGINE (CRITICAL)
+
+Implement a UX rule validator middleware.
+
+This ensures UI consistency across all flows:
+
+Rules to enforce:
+
+loading states MUST exist for async actions
+
+every failure MUST show user-friendly message
+
+no blank screens allowed
+
+every AI output MUST have confidence badge if applicable
+
+fallback states MUST be visually distinct
+
+If a UI route violates rules:
+
+log ux_rule_violation
+
+fallback to safe UI component
+
+🧪 5. PRE-DEPLOYMENT SELF-CHECK SYSTEM
+
+Before any deployment or major change:
+
+Run automated checks:
+
+Backend checks:
+
+API routes respond correctly
+
+no undefined schema fields
+
+no missing error handlers
+
+Frontend checks:
+
+routes reachable
+
+loading states exist
+
+error states exist
+
+If ANY fail:
+
+block “production-ready” flag
+
+output report
+
+📊 6. SYSTEM HEALTH DASHBOARD (MANDATORY)
+
+Create a dashboard that ALWAYS shows:
+
+System health:
+
+uptime
+
+error rate
+
+AI failure rate
+
+average latency
+
+UX health:
+
+missing loading states count
+
+fallback activations
+
+UI violations
+
+AI health:
+
+average confidence
+
+override rate
+
+quality score trend
+
+🔁 7. SAFE MODE ARCHITECTURE
+
+If system instability detected:
+
+Trigger SAFE MODE:
+
+reduce AI complexity
+
+switch to fallback grading logic
+
+disable non-critical features
+
+preserve core functionality only
+
+🧱 8. BACKWARD COMPATIBILITY RULE
+
+No changes are allowed that:
+
+break existing API contracts
+
+remove existing fields
+
+alter expected response shapes without versioning
+
+🧠 9. UX CONSISTENCY GUARANTEE (IMPORTANT)
+
+Ensure:
+
+identical states behave identically everywhere
+
+loading, success, error states are standardized
+
+all AI responses follow same structure
+
+all dashboards reflect same data source of truth
+
+🧾 10. FINAL SYSTEM GOAL
+
+The system should behave like:
+
+a controlled, observable, fault-tolerant AI education platform with strict UX and data consistency guarantees
+
+NOT:
+
+a feature-rich but unpredictable prototype
+
+
+
+
+
+
+
+

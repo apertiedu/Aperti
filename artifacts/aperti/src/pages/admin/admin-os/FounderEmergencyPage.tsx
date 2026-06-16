@@ -156,8 +156,7 @@ export default function FounderEmergencyPage() {
             <button
               onClick={() => confirmAndRun(`Impersonate user ID ${impersonateId}? This will be logged.`, () => impersonateMut.mutate())}
               disabled={!impersonateId || impersonateMut.isPending}
-              className="w-full py-2 px-4 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-              className="bg-primary text-primary-foreground"
+              className="w-full py-2 px-4 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors bg-primary text-primary-foreground"
             >
               {impersonateMut.isPending ? "Generating…" : "Generate Token"}
             </button>
@@ -235,8 +234,7 @@ export default function FounderEmergencyPage() {
           <button
             onClick={() => confirmAndRun("Run enrollment repair and database cleanup?", () => repairMut.mutate())}
             disabled={repairMut.isPending}
-            className="py-2 px-6 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-            className="bg-primary text-primary-foreground"
+            className="py-2 px-6 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors bg-primary text-primary-foreground"
           >
             {repairMut.isPending ? "Running…" : "Run Repair"}
           </button>

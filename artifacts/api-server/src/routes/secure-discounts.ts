@@ -29,7 +29,7 @@ secureDiscountsRouter.post("/validate", async (req: AuthRequest, res: Response):
     );
 
     if (rows.length === 0) {
-      auditLog({ actorId: req.userId ?? null, actorRole: req.role??? "user", action: "VALIDATE_DISCOUNT", targetId: code, targetType: "coupon", ip, result: "blocked", metadata: { reason: "NOT_FOUND" } });
+      auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "VALIDATE_DISCOUNT", targetId: code, targetType: "coupon", ip, result: "blocked", metadata: { reason: "NOT_FOUND" } });
       res.status(404).json({ error: "Invalid discount code" });
       return;
     }
@@ -50,7 +50,7 @@ secureDiscountsRouter.post("/validate", async (req: AuthRequest, res: Response):
     }
 
     if (coupon.scope !== context) {
-      auditLog({ actorId: req.userId ?? null, actorRole: req.role??? "user", action: "VALIDATE_DISCOUNT_SCOPE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { couponScope: coupon.scope, requestedContext: context } });
+      auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "VALIDATE_DISCOUNT_SCOPE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { couponScope: coupon.scope, requestedContext: context } });
       res.status(403).json({ error: "This discount code cannot be used for this purchase type" });
       return;
     }
@@ -62,13 +62,13 @@ secureDiscountsRouter.post("/validate", async (req: AuthRequest, res: Response):
       }
       const courseIds: number[] = Array.isArray(coupon.course_ids) ? coupon.course_ids : (JSON.parse(coupon.course_ids ?? "[]") as number[]);
       if (!courseIds.includes(courseId)) {
-        auditLog({ actorId: req.userId ?? null, actorRole: req.role??? "user", action: "VALIDATE_DISCOUNT_COURSE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { courseId } });
+        auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "VALIDATE_DISCOUNT_COURSE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { courseId } });
         res.status(403).json({ error: "This discount code is not valid for this course" });
         return;
       }
     }
 
-    auditLog({ actorId: req.userId ?? null, actorRole: req.role??? "user", action: "VALIDATE_DISCOUNT", targetId: coupon.id, targetType: "coupon", ip, result: "success" });
+    auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "VALIDATE_DISCOUNT", targetId: coupon.id, targetType: "coupon", ip, result: "success" });
 
     res.json({
       id: coupon.id,
@@ -88,7 +88,7 @@ secureDiscountsRouter.post("/validate", async (req: AuthRequest, res: Response):
 /* ── GET /api/secure-discounts ─────────────────────────────────────────── */
 secureDiscountsRouter.get("/", requireRole("admin", "super_admin", "teacher"), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const isAdmin = req.role?=== "admin" || req.role?=== "super_admin";
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
     const { rows } = await pool.query(
       isAdmin
         ? `SELECT c.*, a.display_name AS creator_name
@@ -127,8 +127,8 @@ secureDiscountsRouter.post("/", requireRole("admin", "super_admin", "teacher"), 
       return;
     }
 
-    const isAdmin = req.role?=== "admin" || req.role?=== "super_admin";
-    const isTeacher = req.role?=== "teacher";
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+    const isTeacher = req.role === "teacher";
 
     if (isAdmin && scope === "teacher_courses") {
       res.status(400).json({ error: "Admins create platform-scoped discounts only. Use teacher account for teacher-scoped discounts." });
@@ -195,7 +195,7 @@ secureDiscountsRouter.patch("/:id/deactivate", requireRole("admin", "super_admin
   const ip = getClientIp(req as unknown as { ip?: string; headers: Record<string, string | string[] | undefined> });
   try {
     const id = parseInt(req.params.id);
-    const isAdmin = req.role?=== "admin" || req.role?=== "super_admin";
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
 
     const { rows } = await pool.query("SELECT * FROM coupons WHERE id = $1 LIMIT 1", [id]);
     if (rows.length === 0) { res.status(404).json({ error: "Discount code not found" }); return; }

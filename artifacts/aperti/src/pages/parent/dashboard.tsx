@@ -71,7 +71,7 @@ function ChildCard({ child, selected, onSelect }: { child: ChildData; selected: 
         selected ? "border-primary bg-primary/8 shadow-sm" : "border-border bg-card hover:border-primary/25"
       }`}
     >
-      <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" className="bg-primary text-primary-foreground">{initials}</div>
+      <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 bg-primary text-primary-foreground">{initials}</div>
       <div className="text-left">
         <p className={`text-sm font-semibold ${selected ? "text-primary" : "text-gray-800"}`}>{child.name}</p>
         <p className="text-[10px] text-gray-400">{child.studentCode}</p>
@@ -165,7 +165,7 @@ export default function ParentDashboard() {
             <Button variant="outline" size="sm" className="rounded-xl gap-1.5 text-xs"><MessageSquare className="h-3.5 w-3.5" /> Messages</Button>
           </Link>
           <Link href="/parent/meetings">
-            <Button size="sm" className="rounded-xl gap-1.5 text-xs text-white" className="bg-primary text-primary-foreground"><Calendar className="h-3.5 w-3.5" /> Schedule</Button>
+            <Button size="sm" className="rounded-xl gap-1.5 text-xs text-white bg-primary text-primary-foreground"><Calendar className="h-3.5 w-3.5" /> Schedule</Button>
           </Link>
         </div>
       </motion.div>

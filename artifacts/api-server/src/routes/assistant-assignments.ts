@@ -11,7 +11,7 @@ assistantAssignmentsRouter.use(authenticate);
 /* ── GET /api/assistant-assignments ────────────────────────────────────── */
 assistantAssignmentsRouter.get("/", requireRole("admin", "super_admin", "teacher"), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const isAdmin = req.role?=== "admin" || req.role?=== "super_admin";
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
     const { rows } = await pool.query(
       isAdmin
         ? `SELECT aa.*,
@@ -52,7 +52,7 @@ assistantAssignmentsRouter.post("/", requireRole("admin", "super_admin", "teache
       return;
     }
 
-    const isAdmin = req.role?=== "admin" || req.role?=== "super_admin";
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
     const effectiveTeacherId = isAdmin ? (bodyTeacherId ?? req.userId!) : req.userId!;
 
     const { rows: assistantRows } = await pool.query(
@@ -96,7 +96,7 @@ assistantAssignmentsRouter.patch("/:id/revoke", requireRole("admin", "super_admi
   const ip = getClientIp(req as unknown as { ip?: string; headers: Record<string, string | string[] | undefined> });
   try {
     const id = parseInt(req.params.id);
-    const isAdmin = req.role?=== "admin" || req.role?=== "super_admin";
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
 
     const { rows } = await pool.query("SELECT * FROM assistant_assignments WHERE id = $1 LIMIT 1", [id]);
     if (rows.length === 0) { res.status(404).json({ error: "Assignment not found" }); return; }

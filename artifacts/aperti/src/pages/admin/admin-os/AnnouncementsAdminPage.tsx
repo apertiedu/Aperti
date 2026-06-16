@@ -88,8 +88,7 @@ export default function AnnouncementsAdminPage() {
         </div>
         <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
           onClick={openCreate}
-          className="flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold rounded-xl shadow-sm hover:opacity-90 transition-opacity"
-          className="bg-primary text-primary-foreground">
+          className="flex items-center gap-2 px-4 py-2 text-white text-sm font-semibold rounded-xl shadow-sm hover:opacity-90 transition-opacity bg-primary text-primary-foreground">
           <Plus className="w-4 h-4" /> New Announcement
         </motion.button>
       </div>
@@ -155,7 +154,7 @@ export default function AnnouncementsAdminPage() {
                     <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{new Date(a.created_at).toLocaleDateString()}</span>
                     {a.expires_at && <span className="flex items-center gap-1"><Clock className="w-3 h-3" />Expires {new Date(a.expires_at).toLocaleDateString()}</span>}
                     <span>Audience: {a.audience || "all"}</span>
-                    {a.link_url && <a href={a.link_url} target="_blank" rel="noopener noreferrer" className="underline" className="text-primary">{a.link_text || "Link"}</a>}
+                    {a.link_url && <a href={a.link_url} target="_blank" rel="noopener noreferrer" className="underline text-primary">{a.link_text || "Link"}</a>}
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -247,8 +246,7 @@ export default function AnnouncementsAdminPage() {
               <div className="p-6 border-t border-gray-100 flex gap-3 justify-end">
                 <button onClick={closeModal} className="px-4 py-2 rounded-xl text-sm text-gray-600 border border-gray-200 hover:bg-gray-50">Cancel</button>
                 <button onClick={() => saveMutation.mutate()} disabled={!form.title || !form.body || saveMutation.isPending}
-                  className="px-5 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
-                  className="bg-primary text-primary-foreground">
+                  className="px-5 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity bg-primary text-primary-foreground">
                   {saveMutation.isPending ? "Saving…" : editing ? "Update" : "Create"}
                 </button>
               </div>

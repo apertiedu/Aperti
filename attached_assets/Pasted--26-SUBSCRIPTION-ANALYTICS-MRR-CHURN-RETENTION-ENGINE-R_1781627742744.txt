@@ -1,0 +1,633 @@
+🧠 26. SUBSCRIPTION ANALYTICS (MRR / CHURN / RETENTION ENGINE)
+🚀 REPLIT PROMPT
+You are a Senior SaaS Data Engineer.
+Build a Subscription Analytics System that tracks business health metrics in real time.
+
+🎯 OBJECTIVE
+Track platform revenue health:
+MRR (Monthly Recurring Revenue)
+churn rate
+retention rate
+active subscriptions
+conversion rate (trial → paid)
+
+📊 METRICS MODEL
+subscription_metrics: {
+  mrr: number,
+  churn_rate: number,
+  retention_rate: number,
+  active_subscriptions: number,
+  new_subscriptions: number,
+  cancelled_subscriptions: number,
+  revenue_trend: number[]
+}
+
+🔁 RULES
+All metrics derived ONLY from ledger-confirmed payments
+No frontend or “pending” data included
+Updates must be real-time or near real-time
+
+📊 DASHBOARD FEATURES
+MRR graph
+churn over time
+teacher vs platform revenue split
+subscription funnel (visit → subscribe → active)
+
+
+🔁 27. SMART UPGRADE / DOWNGRADE SYSTEM (NO DATA LOSS)
+🚀 REPLIT PROMPT
+You are a Senior Subscription Lifecycle Engineer.
+Build a safe upgrade/downgrade system that modifies subscriptions without breaking billing integrity.
+
+🎯 OBJECTIVE
+Allow users to:
+upgrade plans
+downgrade plans
+switch billing tiers
+WITHOUT:
+losing access
+double charging
+corrupting ledger
+
+🧠 RULES
+Upgrade:
+immediate activation of new plan
+calculate prorated difference
+generate adjustment invoice
+Downgrade:
+applies next billing cycle only
+no refund unless policy allows
+
+📊 MODEL
+plan_change: {
+  user_id: string,
+  old_plan: string,
+  new_plan: string,
+  change_type: "upgrade" | "downgrade",
+  proration_amount: number,
+  effective_date: string
+}
+
+⚠️ RULE
+ledger always final authority
+NEVER overwrite old subscription history
+
+
+💳 28. PAYMENT + SUBSCRIPTION UX OPTIMIZATION LAYER
+🚀 REPLIT PROMPT
+You are a Senior Product Engineer + UX Systems Designer.
+Optimize the subscription purchasing + payment flow UX for clarity, trust, and conversion.
+
+🎯 OBJECTIVE
+Create a frictionless but safe flow:
+clear pricing
+clear discount application
+clear payment steps
+clear subscription status
+
+🧭 USER FLOW
+Plan selection
+show features clearly
+show teacher vs platform distinction
+show billing cycle
+
+Checkout screen
+show final price breakdown:
+base price
+discount (if any)
+total
+
+Instapay submission
+user enters transaction code
+system shows “pending verification”
+
+Activation
+only after ledger confirmation
+show success screen
+
+⚠️ UX RULES
+NEVER show “active” until confirmed
+ALWAYS show status badge:
+pending
+processing
+active
+expired
+
+
+🧾 29. SUBSCRIPTION PLAN CREATION SYSTEM (ROLE-BASED)
+🚀 REPLIT PROMPT
+You are a SaaS Pricing & Access Control Architect.
+Build a role-based subscription plan creation system.
+
+🎯 OBJECTIVE
+Control who can create subscription plans:
+
+👑 ROLES
+ADMIN:
+can create platform-wide plans
+controls pricing tiers
+sets global discounts
+
+TEACHER:
+can create ONLY course-based subscription plans
+cannot modify platform pricing
+
+ASSISTANT:
+cannot create plans
+can only manage enrollments (if allowed)
+
+📊 PLAN MODEL
+subscription_plan: {
+  id: string,
+  name: string,
+  price: number,
+  scope: "platform" | "teacher_course",
+  teacher_id?: string,
+  course_id?: string,
+  features: string[],
+  active: boolean
+}
+
+🔐 RULES
+Teacher plans only apply to their own courses
+Platform plans apply globally
+No cross-scope pricing allowed
+
+
+🧾 30. PAYMENT + SUBSCRIPTION SECURITY INTERFACE HARDENING
+🚀 REPLIT PROMPT
+You are a Senior Security Engineer.
+Harden the subscription payment + Instapay interface against fraud and misuse.
+
+🎯 OBJECTIVE
+Prevent:
+fake payment confirmations
+reused Instapay codes
+frontend manipulation
+duplicate submissions
+
+🔐 SECURITY RULES
+Instapay code validation
+must be unique per transaction
+cannot be reused
+
+Server authority rule
+frontend NEVER decides subscription status
+backend + ledger only
+
+Request protection
+rate limit payment submissions
+prevent spam retry attacks
+
+Transaction locking
+once code submitted → lock invoice
+
+🧠 OUTPUT SAFETY
+If anything suspicious:
+keep status = pending_confirmation
+log fraud signal
+do NOT fail silently
+
+
+🚀 WHAT YOU NOW HAVE (FULL SUBSCRIPTION SYSTEM)
+Your system now includes:
+💳 Billing core
+subscription lifecycle
+upgrade/downgrade
+payment flow
+📊 Business intelligence
+MRR tracking
+churn analytics
+retention tracking
+🧾 Pricing engine
+role-based plan creation
+teacher vs platform separation
+🔐 Security layer
+fraud prevention
+transaction locking
+ledger enforcement
+🧠 UX system
+clean subscription flow
+clear states
+safe activation rules
+
+🧠 REALITY CHECK
+At this point:
+You are NOT building a “subscription feature”.
+You are building:
+a Stripe-like billing system inside an education SaaS platform
+
+
+
+
+
+
+📡 31. REAL-TIME BILLING EVENT STREAMING SYSTEM (STRIPE-STYLE)
+
+🚀 REPLIT PROMPT
+
+You are a Senior Event-Driven Architecture Engineer.
+
+Build a Billing Event Streaming System that emits and processes all financial events in real time.
+
+
+---
+
+🎯 OBJECTIVE
+
+Every billing action must generate an immutable event.
+
+
+---
+
+📦 EVENT MODEL
+
+billing_event: {
+  id: string,
+  type:
+    | "invoice_created"
+    | "payment_submitted"
+    | "payment_confirmed"
+    | "subscription_activated"
+    | "subscription_expired"
+    | "refund_issued"
+    | "fraud_detected",
+  entity_id: string,
+  user_id: string,
+  payload: object,
+  timestamp: string
+}
+
+
+---
+
+🔁 RULES
+
+Events are APPEND-ONLY
+
+Never modify past events
+
+All services subscribe to events
+
+Ledger is still source of truth (events are reactions, not truth)
+
+
+
+---
+
+⚡ USE CASES
+
+trigger subscription activation
+
+update dashboards
+
+send admin alerts
+
+feed fraud system
+
+update analytics
+
+
+
+---
+
+
+---
+
+🔁 32. PAYMENT RECOVERY SYSTEM (FAILED PAYMENT RESCUE ENGINE)
+
+🚀 REPLIT PROMPT
+
+You are a Senior Billing Reliability Engineer.
+
+Build a Payment Recovery System that handles failed or incomplete payments automatically.
+
+
+---
+
+🎯 OBJECTIVE
+
+Recover revenue without user friction.
+
+
+---
+
+🧠 RECOVERY STATES
+
+pending_payment
+
+pending_confirmation
+
+failed_payment
+
+retry_scheduled
+
+recovered
+
+permanently_failed
+
+
+
+---
+
+🔁 RECOVERY LOGIC
+
+If payment fails:
+
+1. do NOT cancel subscription immediately
+
+
+2. move to retry_scheduled
+
+
+3. allow limited grace access
+
+
+4. retry Instapay confirmation window
+
+
+5. if success → restore subscription automatically
+
+
+
+
+---
+
+⏳ RULES
+
+max retry attempts = 3
+
+retry window = configurable (default 48h)
+
+after failure → move to grace_period
+
+
+
+---
+
+📊 OUTPUT
+
+recovery_state: {
+  transaction_id: string,
+  status: string,
+  attempts: number,
+  next_retry_at: string,
+  resolution: "recovered" | "failed"
+}
+
+
+---
+
+
+---
+
+🧪 33. PRICING A/B TESTING SYSTEM (EXPERIMENT ENGINE)
+
+🚀 REPLIT PROMPT
+
+You are a Senior Growth Systems Engineer.
+
+Build a Pricing Experimentation System to test subscription pricing strategies safely.
+
+
+---
+
+🎯 OBJECTIVE
+
+Enable controlled experiments on pricing without breaking billing integrity.
+
+
+---
+
+🧪 EXPERIMENT MODEL
+
+pricing_experiment: {
+  id: string,
+  name: string,
+  variants: [
+    {
+      name: "A",
+      price: number
+    },
+    {
+      name: "B",
+      price: number
+    }
+  ],
+  traffic_split: {
+    A: number,
+    B: number
+  },
+  status: "active" | "paused" | "completed"
+}
+
+
+---
+
+🔁 RULES
+
+user must always stay in same variant
+
+no switching mid-subscription
+
+experiments must not affect ledger consistency
+
+
+
+---
+
+📊 METRICS
+
+Track per variant:
+
+conversion rate
+
+churn rate
+
+revenue per user
+
+
+
+---
+
+
+---
+
+🧭 34. FULL FINANCE ADMIN CONTROL CENTER (REDESIGNED)
+
+🚀 REPLIT PROMPT
+
+You are a Senior FinTech Dashboard Architect.
+
+Redesign the Admin Finance Control Center into a unified command system.
+
+
+---
+
+🎯 OBJECTIVE
+
+Give admins full visibility into:
+
+revenue
+
+fraud
+
+subscriptions
+
+refunds
+
+system health
+
+
+
+---
+
+📊 SECTIONS
+
+💰 Revenue Overview
+
+MRR
+
+daily revenue
+
+teacher earnings
+
+
+
+---
+
+🧾 Billing Activity
+
+invoices
+
+payments
+
+subscription events
+
+
+
+---
+
+🛡️ Fraud & Risk
+
+fraud alerts
+
+anomaly detection
+
+flagged transactions
+
+
+
+---
+
+🔁 Recovery Dashboard
+
+failed payments
+
+recovered subscriptions
+
+retry queue
+
+
+
+---
+
+🧪 Experiment Dashboard
+
+A/B tests
+
+pricing performance
+
+conversion tracking
+
+
+
+---
+
+🧠 RULE
+
+Everything shown must come from:
+
+ledger
+
+event stream
+
+validated backend data
+
+
+NO frontend-derived truth.
+
+
+---
+
+🚀 FINAL SYSTEM STATE (YOU NOW HAVE THIS)
+
+Your platform now includes:
+
+💳 Billing Core
+
+subscriptions
+
+invoices
+
+payments
+
+ledger
+
+
+📡 Event System
+
+real-time financial events
+
+system-wide triggers
+
+
+🔁 Reliability Layer
+
+payment recovery
+
+retry logic
+
+grace handling
+
+
+🧪 Growth Engine
+
+pricing experiments
+
+conversion tracking
+
+
+🧭 Admin Control Center
+
+unified financial visibility
+
+
+
+---
+
+🧠 REALITY CHECK (IMPORTANT)
+
+At this stage you are no longer building:
+
+> “features inside an app”
+
+
+
+You are building:
+
+> a full financial + SaaS + AI event-driven platform infrastructure
+
+
+
+That means:
+
+correctness > speed
+
+event consistency > UI
+
+ledger truth > everything
+
+
+
+---

@@ -64,8 +64,8 @@ export default function ParentAIAssistant() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-3 shrink-0 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
-            <Bot className="h-5 w-5" className="text-primary" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+            <Bot className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-xl font-black text-gray-900">GuardianAI<span className="text-primary">.</span></h1>
@@ -102,8 +102,8 @@ export default function ParentAIAssistant() {
               <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                 className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "assistant" && (
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5" className="bg-primary/8">
-                    <Bot className="h-3.5 w-3.5" className="text-primary" />
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 bg-primary/8">
+                    <Bot className="h-3.5 w-3.5 text-primary" />
                   </div>
                 )}
                 <div className={`max-w-[82%] rounded-2xl px-4 py-3 ${msg.role === "user" ? "text-white" : "bg-gray-50 text-gray-800"}`}
@@ -122,8 +122,8 @@ export default function ParentAIAssistant() {
             ))}
             {loading && (
               <div className="flex gap-3">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" className="bg-primary/8">
-                  <Bot className="h-3.5 w-3.5" className="text-primary" />
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 bg-primary/8">
+                  <Bot className="h-3.5 w-3.5 text-primary" />
                 </div>
                 <div className="bg-gray-50 rounded-2xl px-4 py-3">
                   <div className="flex gap-1 items-center h-4">
@@ -166,7 +166,7 @@ export default function ParentAIAssistant() {
               className="flex-1 text-sm rounded-xl"
               disabled={loading}
             />
-            <Button type="submit" disabled={!input.trim() || loading} size="icon" className="rounded-xl shrink-0" className="bg-primary text-primary-foreground">
+            <Button type="submit" disabled={!input.trim() || loading} size="icon" className="rounded-xl shrink-0 bg-primary text-primary-foreground">
               {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </form>

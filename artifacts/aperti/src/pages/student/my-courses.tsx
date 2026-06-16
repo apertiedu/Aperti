@@ -26,12 +26,11 @@ function EnrollmentCard({ enroll, index }: { enroll: Enrollment; index: number }
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07 }}>
       <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden flex flex-col sm:flex-row">
-        <div className="h-28 sm:h-auto sm:w-32 flex items-center justify-center shrink-0"
-          className="bg-primary">
+        <div className="h-28 sm:h-auto sm:w-32 flex items-center justify-center shrink-0 bg-primary">
           {enroll.thumbnail_url ? (
             <img src={enroll.thumbnail_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <BookOpen className="h-8 w-8" className="text-primary" />
+            <BookOpen className="h-8 w-8 text-primary" />
           )}
         </div>
         <div className="p-5 flex flex-col flex-1 min-w-0">
@@ -83,7 +82,7 @@ export default function MyCourses() {
           <p className="text-gray-500 text-sm mt-1">Courses you've enrolled in or requested.</p>
         </div>
         <Link href="/courses">
-          <Button className="gap-2 rounded-xl text-sm" className="bg-primary text-primary-foreground">
+          <Button className="gap-2 rounded-xl text-sm bg-primary text-primary-foreground">
             Browse Marketplace <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>

@@ -69,7 +69,7 @@ export default function ForgotPassword() {
               >
                 <div className="flex justify-center mb-4">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#E6F4F1" }}>
-                    <CheckCircle2 className="h-7 w-7" className="text-primary" />
+                    <CheckCircle2 className="h-7 w-7 text-primary" />
                   </div>
                 </div>
                 <h2 className="text-lg font-bold text-slate-900 mb-2">Request submitted</h2>
@@ -80,8 +80,7 @@ export default function ForgotPassword() {
                   Submitted the wrong email?{" "}
                   <button
                     onClick={() => { setSubmitted(false); setEmail(""); }}
-                    className="font-semibold hover:underline"
-                    className="text-primary"
+                    className="font-semibold hover:underline text-primary"
                   >
                     Try again
                   </button>
@@ -91,7 +90,7 @@ export default function ForgotPassword() {
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#E6F4F1" }}>
-                    <Mail className="h-4 w-4" className="text-primary" />
+                    <Mail className="h-4 w-4 text-primary" />
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 leading-tight">Forgot your password?</h2>
@@ -150,7 +149,7 @@ export default function ForgotPassword() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Remember it?{" "}
-          <Link href="/login" className="text-primary" className="font-semibold hover:underline">
+          <Link href="/login" className="text-primary font-semibold hover:underline">
             Back to sign in
           </Link>
         </p>

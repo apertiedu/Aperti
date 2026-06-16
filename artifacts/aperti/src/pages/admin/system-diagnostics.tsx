@@ -123,8 +123,8 @@ export default function SystemDiagnostics() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
-              <Terminal className="h-5 w-5" className="text-primary" />
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/8">
+              <Terminal className="h-5 w-5 text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">System Diagnostics</h1>
@@ -233,8 +233,7 @@ export default function SystemDiagnostics() {
               <div className="pt-2">
                 <Button
                   size="sm"
-                  className="w-full gap-2 text-white"
-                  className="bg-primary"
+                  className="w-full gap-2 text-white bg-primary"
                   onClick={() => runOpenAICheck()}
                   disabled={oaiPending}
                 >
@@ -376,7 +375,7 @@ export default function SystemDiagnostics() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-primary/8">
-                    <Globe className="h-4 w-4" className="text-primary" />
+                    <Globe className="h-4 w-4 text-primary" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Deployment</CardTitle>

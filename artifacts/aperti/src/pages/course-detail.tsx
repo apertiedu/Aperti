@@ -104,10 +104,10 @@ export default function CourseDetail() {
                   ) : (
                     <div className="text-center">
                       <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: `${"hsl(var(--primary))"}25` }}>
-                        <BookOpen className="h-8 w-8" className="text-primary" />
+                        <BookOpen className="h-8 w-8 text-primary" />
                       </div>
                       {course.subject && (
-                        <Badge className="rounded-full px-3 text-xs font-semibold border-0" className="bg-primary/8">
+                        <Badge className="rounded-full px-3 text-xs font-semibold border-0 bg-primary/8">
                           {course.subject}
                         </Badge>
                       )}
@@ -120,7 +120,7 @@ export default function CourseDetail() {
                     <DiscussButton contextType="course" contextId={courseId} contextTitle={course.title} size="sm" />
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                    <GraduationCap className="h-4 w-4" className="text-primary" />
+                    <GraduationCap className="h-4 w-4 text-primary" />
                     <span>by <strong className="text-gray-800">{course.teacher_name || course.teacher_username}</strong></span>
                   </div>
                   {course.description && (
@@ -139,7 +139,7 @@ export default function CourseDetail() {
                     "Attendance tracking", "Progress analytics",
                   ].map(item => (
                     <div key={item} className="flex items-center gap-2.5 text-sm text-gray-600">
-                      <CheckCircle2 className="h-4 w-4 shrink-0" className="text-primary" />
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" />
                       {item}
                     </div>
                   ))}
@@ -151,7 +151,7 @@ export default function CourseDetail() {
           {/* Right: Enroll card */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
             <div className="bg-card rounded-2xl p-6 shadow-sm border border-border sticky top-20">
-              <div className="text-3xl font-black mb-1" className="text-primary">{price}</div>
+              <div className="text-3xl font-black mb-1 text-primary">{price}</div>
               <p className="text-xs text-gray-400 mb-5">per month · cancel anytime</p>
 
               <div className="space-y-3 mb-6">
@@ -176,8 +176,7 @@ export default function CourseDetail() {
                   ✅ Enrollment requested!
                 </div>
               ) : user?.role === "student" ? (
-                <Button className="w-full h-11 rounded-xl font-semibold text-sm text-white"
-                  className="bg-primary"
+                <Button className="w-full h-11 rounded-xl font-semibold text-sm text-white bg-primary"
                   disabled={enrollMutation.isPending}
                   onClick={() => enrollMutation.mutate()}>
                   {enrollMutation.isPending ? "Requesting…" : "Request Enrollment"}
@@ -185,7 +184,7 @@ export default function CourseDetail() {
               ) : !user ? (
                 <div className="space-y-2">
                   <Link href="/login">
-                    <Button className="w-full h-11 rounded-xl font-semibold text-sm text-white" className="bg-primary">
+                    <Button className="w-full h-11 rounded-xl font-semibold text-sm text-white bg-primary">
                       <LogIn className="h-4 w-4 mr-2" /> Sign in to Enroll
                     </Button>
                   </Link>

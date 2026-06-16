@@ -68,7 +68,7 @@ export default function LinkParent() {
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-          <Link2 className="h-6 w-6" className="text-primary" />
+          <Link2 className="h-6 w-6 text-primary" />
           Link to a Parent
         </h1>
         <p className="text-gray-500 text-sm mt-1">
@@ -79,7 +79,7 @@ export default function LinkParent() {
       <Card className="border border-gray-100 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
-            <Key className="h-4 w-4" className="text-primary" />
+            <Key className="h-4 w-4 text-primary" />
             Enter Parent Pairing Code
           </CardTitle>
         </CardHeader>
@@ -98,10 +98,9 @@ export default function LinkParent() {
                 className="text-center py-8"
               >
                 <div
-                  className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4"
-                  className="bg-primary/8"
+                  className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 bg-primary/8"
                 >
-                  <CheckCircle2 className="h-7 w-7" className="text-primary" />
+                  <CheckCircle2 className="h-7 w-7 text-primary" />
                 </div>
                 <p className="font-bold text-gray-900 mb-1">Request sent!</p>
                 <p className="text-sm text-gray-500 mb-4">
@@ -129,14 +128,12 @@ export default function LinkParent() {
                   onChange={e => setCode(e.target.value.toUpperCase())}
                   placeholder="e.g. A3F7B2D1"
                   maxLength={8}
-                  className="flex-1 h-12 rounded-xl text-center font-mono text-lg font-black tracking-[0.25em] border-gray-200 uppercase"
-                  className="text-primary"
+                  className="flex-1 h-12 rounded-xl text-center font-mono text-lg font-black tracking-[0.25em] border-gray-200 uppercase text-primary"
                   disabled={linkMutation.isPending}
                 />
                 <Button
                   type="submit"
-                  className="h-12 px-6 rounded-xl font-semibold gap-2 text-white"
-                  className="bg-primary text-primary-foreground"
+                  className="h-12 px-6 rounded-xl font-semibold gap-2 text-white bg-primary text-primary-foreground"
                   disabled={linkMutation.isPending || code.length < 6}
                 >
                   {linkMutation.isPending ? (
@@ -154,7 +151,7 @@ export default function LinkParent() {
       <Card className="border border-gray-100 shadow-sm">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-bold flex items-center gap-2">
-            <Users className="h-4 w-4" className="text-primary" />
+            <Users className="h-4 w-4 text-primary" />
             My Parent Connections ({isLoading ? "…" : links.length})
           </CardTitle>
         </CardHeader>
@@ -183,8 +180,7 @@ export default function LinkParent() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                      className="bg-primary text-primary-foreground"
+                      className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 bg-primary text-primary-foreground"
                     >
                       <Users className="h-4 w-4" />
                     </div>
@@ -218,8 +214,8 @@ export default function LinkParent() {
         </CardContent>
       </Card>
 
-      <div className="rounded-2xl p-4 text-xs text-gray-500 border border-dashed border-gray-200" className="bg-primary/8">
-        <p className="font-semibold mb-1" className="text-primary">How it works</p>
+      <div className="rounded-2xl p-4 text-xs text-gray-500 border border-dashed border-gray-200 bg-primary/8">
+        <p className="font-semibold mb-1 text-primary">How it works</p>
         <ol className="space-y-1 list-decimal list-inside">
           <li>Your parent logs in and goes to <strong>Link Your Child</strong> in their portal.</li>
           <li>They share their 8-character pairing code with you.</li>

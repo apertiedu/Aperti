@@ -142,7 +142,7 @@ function TeacherWizard({ onDone }: { onDone: () => void }) {
                   style={teachType === t.id ? { background: "#f0fdfa" } : {}}>
                   <div className="flex items-center justify-between">
                     <div><p className="font-semibold text-gray-900">{t.label}</p><p className="text-sm text-gray-500 mt-0.5">{t.desc}</p></div>
-                    {teachType === t.id && <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" className="bg-primary"><Check className="w-3 h-3 text-white" /></div>}
+                    {teachType === t.id && <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-primary"><Check className="w-3 h-3 text-white" /></div>}
                   </div>
                 </button>
               ))}
@@ -162,7 +162,7 @@ function TeacherWizard({ onDone }: { onDone: () => void }) {
         {step > 1 ? <Button variant="ghost" onClick={() => setStep(s => s - 1)} className="gap-1.5 text-gray-600"><ArrowLeft className="w-4 h-4" />Back</Button> : <div />}
         <div className="flex items-center gap-3">
           <button onClick={skip} className="text-sm text-gray-400 hover:text-gray-600">Skip</button>
-          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" className="bg-primary">
+          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6 bg-primary">
             {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : step === TOTAL ? "Launch dashboard" : "Continue"}
             {!loading && step < TOTAL && <ArrowRight className="w-4 h-4" />}
           </Button>
@@ -240,7 +240,7 @@ function StudentWizard({ onDone }: { onDone: () => void }) {
         {step > 1 ? <Button variant="ghost" onClick={() => setStep(s => s - 1)} className="gap-1.5 text-gray-600"><ArrowLeft className="w-4 h-4" />Back</Button> : <div />}
         <div className="flex items-center gap-3">
           <button onClick={skip} className="text-sm text-gray-400 hover:text-gray-600">Skip</button>
-          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" className="bg-primary">
+          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6 bg-primary">
             {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : step === TOTAL ? "Go to dashboard" : "Continue"}
             {!loading && step < TOTAL && <ArrowRight className="w-4 h-4" />}
           </Button>
@@ -305,7 +305,7 @@ function ParentWizard({ onDone }: { onDone: () => void }) {
         {step > 1 ? <Button variant="ghost" onClick={() => setStep(s => s - 1)} className="gap-1.5 text-gray-600"><ArrowLeft className="w-4 h-4" />Back</Button> : <div />}
         <div className="flex items-center gap-3">
           <button onClick={skip} className="text-sm text-gray-400 hover:text-gray-600">Skip</button>
-          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" className="bg-primary">
+          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6 bg-primary">
             {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : step === TOTAL ? "Go to dashboard" : "Continue"}
             {!loading && step < TOTAL && <ArrowRight className="w-4 h-4" />}
           </Button>
@@ -329,7 +329,7 @@ export default function Onboarding() {
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
         className="relative z-10 w-full max-w-lg bg-card rounded-2xl shadow-sm border border-border p-8">
         <div className="flex items-center justify-between mb-8">
-          <span className="text-xl font-bold" className="text-primary">Aperti.</span>
+          <span className="text-xl font-bold text-primary">Aperti.</span>
           <div className="flex items-center gap-2">
             <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "#f0fdfa", color: "hsl(var(--primary))" }}>Account setup</span>
           </div>

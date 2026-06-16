@@ -122,7 +122,7 @@ export default function TrustCenter() {
       </nav>
 
       {/* Hero */}
-      <section className="py-20 px-5" className="bg-primary/8">
+      <section className="py-20 px-5 bg-primary/8">
         <div className="max-w-3xl mx-auto text-center">
           <Reveal>
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
@@ -158,8 +158,7 @@ export default function TrustCenter() {
                       whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.08)", transition: { duration: 0.2 } }}
                       className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm cursor-pointer h-full flex flex-col group">
                       <div className="flex items-start justify-between mb-4">
-                        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                          className="bg-primary/8">
+                        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary/8">
                           <Icon className="h-5 w-5" style={{ color: "hsl(var(--primary))" }} />
                         </div>
                         {item.badge && (
@@ -208,8 +207,7 @@ export default function TrustCenter() {
               return (
                 <Reveal key={pillar.title} delay={i * 0.07}>
                   <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                      className="bg-primary/8">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4 bg-primary/8">
                       <Icon className="h-5 w-5" style={{ color: "hsl(var(--primary))" }} />
                     </div>
                     <h3 className="font-bold text-gray-900 mb-2 text-sm">{pillar.title}</h3>
@@ -227,8 +225,7 @@ export default function TrustCenter() {
         <div className="max-w-2xl mx-auto text-center">
           <Reveal>
             <div className="bg-white rounded-2xl p-10 border border-gray-100 shadow-sm">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5"
-                className="bg-primary/8">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5 bg-primary/8">
                 <Mail className="h-6 w-6" style={{ color: "hsl(var(--primary))" }} />
               </div>
               <h3 className="text-xl font-extrabold text-gray-900 mb-2">Security question or concern?</h3>

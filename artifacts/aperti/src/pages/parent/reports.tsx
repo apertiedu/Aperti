@@ -86,8 +86,7 @@ export default function ParentReports() {
               <Button
                 onClick={() => generateMutation.mutate()}
                 disabled={!selectedChild || generateMutation.isPending}
-                className="gap-2 rounded-xl text-white"
-                className="bg-primary text-primary-foreground"
+                className="gap-2 rounded-xl text-white bg-primary text-primary-foreground"
               >
                 {generateMutation.isPending ? <><RefreshCw className="h-4 w-4 animate-spin" />Generating…</> : <><RefreshCw className="h-4 w-4" />Generate</>}
               </Button>
@@ -125,7 +124,7 @@ export default function ParentReports() {
       {/* Last generated report preview */}
       {lastReport && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-2 shadow-md" className="border-primary">
+          <Card className="border-2 shadow-md border-primary">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>

@@ -168,7 +168,7 @@ export default function LandingEditor() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5F5F5" }}>
-        <div className="w-6 h-6 border-2 rounded-full animate-spin" className="border-primary" />
+        <div className="w-6 h-6 border-2 rounded-full animate-spin border-primary" />
       </div>
     );
   }
@@ -177,8 +177,8 @@ export default function LandingEditor() {
     <div className="min-h-screen" style={{ background: "#F5F5F5" }}>
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
-          <Settings className="h-5 w-5" className="text-primary" />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+          <Settings className="h-5 w-5 text-primary" />
         </div>
         <div>
           <h1 className="font-extrabold text-gray-900">Landing Page Editor</h1>
@@ -200,8 +200,7 @@ export default function LandingEditor() {
           <button
             onClick={() => saveMutation.mutate()}
             disabled={!dirty || saveMutation.isPending}
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-50"
-            className="bg-primary text-primary-foreground">
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-50 bg-primary text-primary-foreground">
             <Save className="h-3.5 w-3.5" />
             {saveMutation.isPending ? "Saving…" : "Save Changes"}
           </button>
@@ -308,7 +307,7 @@ export default function LandingEditor() {
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4" className="text-primary" />
+              <Mail className="h-4 w-4 text-primary" />
               <h3 className="font-bold text-gray-800 text-sm">Contact Section</h3>
             </div>
             <div className="flex items-center gap-2">
@@ -318,8 +317,7 @@ export default function LandingEditor() {
               <button
                 onClick={() => contactMutation.mutate()}
                 disabled={!contactDirty || contactMutation.isPending}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40"
-                className="bg-primary text-primary-foreground"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40 bg-primary text-primary-foreground"
               >
                 <Save className="h-3 w-3" />
                 {contactMutation.isPending ? "Saving…" : "Save"}

@@ -158,7 +158,7 @@ export default function Settings() {
 
   if (pageLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" className="border-primary" />
+      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin border-primary" />
     </div>
   );
 
@@ -209,7 +209,7 @@ export default function Settings() {
                   <h2 className="text-base font-semibold text-gray-900">Profile information</h2>
                   {/* Avatar */}
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl font-bold text-white" className="bg-primary">
+                    <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl font-bold text-white bg-primary">
                       {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" onError={() => setAvatarUrl("")} /> : (displayName || "?")[0]?.toUpperCase()}
                     </div>
                     <div className="flex-1">
@@ -236,7 +236,7 @@ export default function Settings() {
                   </div>
                   <div className="flex items-center justify-end gap-3 pt-1">
                     <AutoSaveIndicator state={saveState} lastSaved={savedAt} />
-                    <Button onClick={saveProfile} disabled={saving} className="rounded-xl px-6 h-10" className="bg-primary">
+                    <Button onClick={saveProfile} disabled={saving} className="rounded-xl px-6 h-10 bg-primary">
                       {saving ? "Saving…" : "Save changes"}
                     </Button>
                   </div>
@@ -253,7 +253,7 @@ export default function Settings() {
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">New password</Label><Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} className="h-10 rounded-xl border-gray-200" maxLength={500} /></div>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Confirm new password</Label><Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="h-10 rounded-xl border-gray-200" maxLength={500} /></div>
                     <div className="flex justify-end">
-                      <Button onClick={changePassword} disabled={pwSaving || !currentPw || !newPw} className="rounded-xl px-6 h-10" className="bg-primary">
+                      <Button onClick={changePassword} disabled={pwSaving || !currentPw || !newPw} className="rounded-xl px-6 h-10 bg-primary">
                         {pwSaving ? "Changing…" : "Change password"}
                       </Button>
                     </div>
