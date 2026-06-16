@@ -12,8 +12,8 @@ const TOOLS = [
   {
     category: "Landing Page",
     items: [
-      { href: "/admin/os/landing-settings", icon: Layout, label: "Landing Page Editor", desc: "Edit headlines, CTAs, features, trust badges, and footer content", color: "bg-teal-50 text-teal-600", badge: "Live CMS" },
-      { href: "/admin/os/landing-cms", icon: Globe, label: "Section Manager", desc: "Add, reorder, and toggle visibility of landing page sections", color: "bg-teal-50 text-teal-600" },
+      { href: "/admin/os/landing-settings", icon: Layout, label: "Landing Page Editor", desc: "Edit headlines, CTAs, features, trust badges, and footer content", color: "bg-primary/8 text-primary", badge: "Live CMS" },
+      { href: "/admin/os/landing-cms", icon: Globe, label: "Section Manager", desc: "Add, reorder, and toggle visibility of landing page sections", color: "bg-primary/8 text-primary" },
     ],
   },
   {
@@ -43,7 +43,7 @@ const TOOLS = [
   {
     category: "Business Analytics",
     items: [
-      { href: "/admin/os/business-analytics", icon: BarChart3, label: "Business Analytics", desc: "Users, subscriptions, conversion rates, waitlist growth", color: "bg-teal-50 text-teal-600", badge: "New" },
+      { href: "/admin/os/business-analytics", icon: BarChart3, label: "Business Analytics", desc: "Users, subscriptions, conversion rates, waitlist growth", color: "bg-primary/8 text-primary", badge: "New" },
       { href: "/admin/os/analytics", icon: TrendingUp, label: "Platform Analytics", desc: "Deep-dive into platform usage, retention, and AI metrics", color: "bg-blue-50 text-blue-600" },
       { href: "/admin/os/audit", icon: FileText, label: "Audit Logs", desc: "Track all administrative actions for transparency and compliance", color: "bg-gray-50 text-gray-600" },
     ],
@@ -97,7 +97,7 @@ export default function BusinessOpsCenterPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <QuickStat label="Total Users" value={parseInt(u.total_users || 0).toLocaleString()} icon={Users} color="bg-teal-50 text-teal-600" />
+        <QuickStat label="Total Users" value={parseInt(u.total_users || 0).toLocaleString()} icon={Users} color="bg-primary/8 text-primary" />
         <QuickStat label="Active Subscriptions" value={parseInt(s.active || 0).toLocaleString()} icon={CreditCard} color="bg-blue-50 text-blue-600" />
         <QuickStat label="Waitlist Submissions" value={parseInt(waitlistStats?.total || 0).toLocaleString()} icon={Clock} color="bg-amber-50 text-amber-600" />
         <QuickStat label="Conversion Rate" value={`${bizData?.conversion_rate ?? "0"}%`} icon={TrendingUp} color="bg-green-50 text-green-600" />
@@ -125,7 +125,7 @@ export default function BusinessOpsCenterPage() {
                           <div className="flex items-center gap-2 mb-1">
                             <p className="font-semibold text-gray-900 text-sm">{item.label}</p>
                             {item.badge && (
-                              <span className="px-1.5 py-0.5 bg-teal-100 text-teal-700 text-[10px] font-bold rounded-full">{item.badge}</span>
+                              <span className="px-1.5 py-0.5 bg-primary/15 text-primary text-[10px] font-bold rounded-full">{item.badge}</span>
                             )}
                           </div>
                           <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
@@ -142,11 +142,11 @@ export default function BusinessOpsCenterPage() {
       ))}
 
       {/* Info Footer */}
-      <div className="bg-teal-50 border border-teal-100 rounded-xl p-5 flex items-start gap-4">
-        <Globe className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+      <div className="bg-primary/5 border border-primary/15 rounded-xl p-5 flex items-start gap-4">
+        <Globe className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-semibold text-teal-800">No-code platform management — Phase 15</p>
-          <p className="text-xs text-teal-700 mt-1 leading-relaxed">
+          <p className="text-sm font-semibold text-foreground">No-code platform management — Phase 15</p>
+          <p className="text-xs text-primary/80 mt-1 leading-relaxed">
             All changes made through this center take effect immediately on the live platform. 
             No code deployment, pull requests, or developer involvement required.
             Use the Audit Logs to track every administrative change made through this center.

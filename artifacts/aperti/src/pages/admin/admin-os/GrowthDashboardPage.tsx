@@ -5,13 +5,13 @@ import { TrendingUp, Users, Clock, CheckCircle2, Calendar, FileText, Rocket, Bar
 
 const STATUS_COLORS: Record<string, string> = {
   scheduled:   "bg-indigo-100 text-indigo-700",
-  coming_soon: "bg-teal-100 text-teal-700",
+  coming_soon: "bg-primary/15 text-primary",
 };
 
 const EVENT_TYPE_COLORS: Record<string, string> = {
   webinar: "bg-blue-100 text-blue-700",
   launch:  "bg-purple-100 text-purple-700",
-  training:"bg-teal-100 text-teal-700",
+  training:"bg-primary/15 text-primary",
 };
 
 export default function GrowthDashboardPage() {
@@ -24,7 +24,7 @@ export default function GrowthDashboardPage() {
   if (isLoading) return (
     <div className="flex items-center justify-center h-64">
       <div className="text-center">
-        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
         <p className="text-gray-400 text-sm">Loading growth data...</p>
       </div>
     </div>
@@ -49,7 +49,7 @@ export default function GrowthDashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             { label: "Total Users", value: u.total_users || 0, icon: Users, color: "text-gray-600", bg: "bg-gray-50" },
-            { label: "New (30d)", value: u.new_users_30d || 0, icon: TrendingUp, color: "text-teal-600", bg: "bg-teal-50" },
+            { label: "New (30d)", value: u.new_users_30d || 0, icon: TrendingUp, color: "text-primary", bg: "bg-primary/8" },
             { label: "New (7d)", value: u.new_users_7d || 0, icon: TrendingUp, color: "text-green-600", bg: "bg-green-50" },
             { label: "Teachers", value: u.teachers || 0, icon: Users, color: "text-blue-600", bg: "bg-blue-50" },
             { label: "Students", value: u.students || 0, icon: Users, color: "text-purple-600", bg: "bg-purple-50" },
@@ -71,7 +71,7 @@ export default function GrowthDashboardPage() {
             { label: "Total Features", value: f.total_features || 0, color: "bg-white text-gray-600" },
             { label: "Released", value: f.released || 0, color: "bg-green-50 text-green-700" },
             { label: "In Beta", value: f.beta || 0, color: "bg-orange-50 text-orange-700" },
-            { label: "Coming Soon", value: f.coming_soon || 0, color: "bg-teal-50 text-teal-700" },
+            { label: "Coming Soon", value: f.coming_soon || 0, color: "bg-primary/8 text-primary" },
             { label: "Scheduled", value: f.scheduled || 0, color: "bg-indigo-50 text-indigo-700" },
           ].map((s) => (
             <div key={s.label} className={`${s.color} rounded-xl p-4 border border-gray-100 shadow-sm`}>
@@ -86,7 +86,7 @@ export default function GrowthDashboardPage() {
         {/* Upcoming Launches */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-            <Rocket className="w-4 h-4 text-teal-600" />
+            <Rocket className="w-4 h-4 text-primary" />
             <h3 className="font-semibold text-gray-800 text-sm">Upcoming Launches</h3>
           </div>
           <div className="p-4 space-y-3">
@@ -170,14 +170,14 @@ export default function GrowthDashboardPage() {
 
       {/* Waitlist */}
       {growth?.waitlist && (
-        <div className="bg-gradient-to-r from-teal-500 to-teal-600 rounded-xl p-5 text-white">
+        <div className="bg-gradient-to-r bg-primary rounded-xl p-5 text-white">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
               <BarChart3 className="w-5 h-5" />
             </div>
             <div>
               <p className="text-3xl font-bold">{parseInt(growth.waitlist.total).toLocaleString()}</p>
-              <p className="text-teal-100 text-sm">Total users on feature waitlists</p>
+              <p className="text-primary-foreground/60 text-sm">Total users on feature waitlists</p>
             </div>
           </div>
         </div>

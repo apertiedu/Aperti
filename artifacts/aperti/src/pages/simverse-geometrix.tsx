@@ -62,7 +62,7 @@ function GeometryCanvas({ module, tools }: { module: any; tools: string[] }) {
 
     // Draw shapes
     shapes.forEach(shape => {
-      ctx.strokeStyle = "#0d9488"; ctx.fillStyle = "rgba(13,148,136,0.1)"; ctx.lineWidth = 2;
+      ctx.strokeStyle = "hsl(var(--primary))"; ctx.fillStyle = "hsl(var(--primary) / 0.1)"; ctx.lineWidth = 2;
       if (shape.type === "line") {
         ctx.beginPath(); ctx.moveTo(shape.x1, shape.y1); ctx.lineTo(shape.x2, shape.y2); ctx.stroke();
       } else if (shape.type === "circle") {
@@ -109,7 +109,7 @@ function GeometryCanvas({ module, tools }: { module: any; tools: string[] }) {
           const Icon = TOOL_ICONS[t] || Calculator;
           return (
             <button key={t} onClick={() => setActiveTool(t)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 border transition-all ${activeTool === t ? "bg-teal-600 text-white border-teal-600" : "bg-card text-muted-foreground border-border hover:border-teal-300"}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1 border transition-all ${activeTool === t ? "bg-primary text-white border-primary" : "bg-card text-muted-foreground border-border hover:border-primary/40"}`}>
               <Icon size={12} /> {t}
             </button>
           );
@@ -121,7 +121,7 @@ function GeometryCanvas({ module, tools }: { module: any; tools: string[] }) {
           <button onClick={clearCanvas} className="px-3 py-1.5 rounded-lg text-xs border border-border bg-card hover:bg-red-50 hover:border-red-300 transition-all">
             <RotateCcw size={12} />
           </button>
-          <Button size="sm" className="h-7 text-xs bg-teal-600 hover:bg-teal-700 text-white" onClick={() => saveSession.mutate()}>Save</Button>
+          <Button size="sm" className="h-7 text-xs bg-primary hover:bg-primary/80 text-white" onClick={() => saveSession.mutate()}>Save</Button>
         </div>
       </div>
       <div className="bg-card border-2 border-border rounded-xl overflow-hidden cursor-crosshair">
@@ -152,7 +152,7 @@ export default function SimverseGeometrix() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/simverse/labs")}><ArrowLeft size={16} /></Button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Calculator className="text-teal-600" size={28} /> Geometrix</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Calculator className="text-primary" size={28} /> Geometrix</h1>
             <p className="text-gray-500 mt-1">Interactive geometry labs — from basic shapes to advanced constructions</p>
           </div>
           <Badge className="bg-purple-100 text-purple-700 border-purple-200">Mathematics</Badge>

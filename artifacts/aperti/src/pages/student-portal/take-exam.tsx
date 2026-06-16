@@ -30,7 +30,7 @@ function TheoryAnswerEditor({ value, onChange, marks }: { value: string; onChang
     empty:     { label: "Not started",  bar: "bg-gray-200",   text: "text-gray-400" },
     "too-short": { label: "Too brief",  bar: "bg-red-400",    text: "text-red-500" },
     developing:{ label: "Developing",  bar: "bg-amber-400",  text: "text-amber-600" },
-    good:      { label: "Good length", bar: "bg-teal-500",   text: "text-teal-600" },
+    good:      { label: "Good length", bar: "bg-primary",   text: "text-primary" },
     detailed:  { label: "Detailed",    bar: "bg-green-500",  text: "text-green-600" },
   };
   const qc = qualityConfig[quality];

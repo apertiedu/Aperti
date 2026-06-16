@@ -11,8 +11,8 @@ interface SaveIndicatorProps {
 
 const CONFIG: Record<SaveStatus, { label: string; color: string; icon: any }> = {
   idle:   { label: "Unsaved changes", color: "text-amber-500",  icon: Clock },
-  saving: { label: "Saving…",         color: "text-gray-400",   icon: Loader2 },
-  saved:  { label: "Saved",           color: "text-teal-600",   icon: CheckCircle2 },
+  saving: { label: "Saving…",         color: "text-muted-foreground",   icon: Loader2 },
+  saved:  { label: "Saved",           color: "text-primary",            icon: CheckCircle2 },
   error:  { label: "Save failed",     color: "text-red-500",    icon: AlertCircle },
 };
 

@@ -125,7 +125,7 @@ export default function StudentDashboard() {
   if (overdueCount > 0)
     focusItems.push({ icon: AlertTriangle, color: "text-red-600", bg: "bg-red-50 border-red-100", text: `${overdueCount} overdue task${overdueCount > 1 ? "s" : ""} — submit now`, href: "/my-homework" });
   if (todaySessions.length > 0)
-    focusItems.push({ icon: Clock, color: "text-teal-600", bg: "bg-teal-50 border-teal-100", text: `${todaySessions.length} session${todaySessions.length > 1 ? "s" : ""} today — stay on track`, href: "/my-timetable" });
+    focusItems.push({ icon: Clock, color: "text-primary", bg: "bg-primary/8 border-primary/15", text: `${todaySessions.length} session${todaySessions.length > 1 ? "s" : ""} today — stay on track`, href: "/my-timetable" });
   if (rate < 80)
     focusItems.push({ icon: CheckSquare, color: "text-amber-600", bg: "bg-amber-50 border-amber-100", text: `Attendance at ${rate}% — aim for 90% this term`, href: "/my-attendance" });
   if (focusItems.length === 0)
@@ -395,7 +395,7 @@ export default function StudentDashboard() {
           {[
             { label: "Practice Area", desc: "Take a mock exam", icon: Target, href: "/practice", color: "from-blue-500 to-indigo-600" },
             { label: "Flashcards", desc: "Review key concepts", icon: Layers, href: "/flashcards", color: "from-violet-500 to-fuchsia-600" },
-            { label: "Recordings", desc: "Re-watch sessions", icon: Video, href: "/recordings", color: "from-emerald-500 to-teal-600" },
+            { label: "Recordings", desc: "Re-watch sessions", icon: Video, href: "/recordings", color: "from-emerald-500 to-primary/80" },
           ].map((item, i) => (
             <motion.button key={item.label} whileHover={{ scale: 1.02, x: 4 }} whileTap={{ scale: 0.98 }}
               onClick={() => navigate(item.href)}

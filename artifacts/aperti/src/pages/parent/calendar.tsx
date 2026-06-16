@@ -108,7 +108,7 @@ export default function FamilyCalendar() {
             return (
               <div key={i} className="border-b border-r border-gray-100 min-h-[80px] p-1 hover:bg-gray-50 transition-colors">
                 <div className={`text-xs font-bold mb-1 w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "text-white" : "text-gray-700"}`}
-                  style={isToday ? { background: "#0D9488" } : undefined}>
+                  style={isToday ? { background: "hsl(var(--primary))" } : undefined}>
                   {date.getDate()}
                 </div>
                 <div className="space-y-0.5">
@@ -151,9 +151,9 @@ export default function FamilyCalendar() {
           {weekDays.map((d, i) => {
             const isToday = d.toDateString() === today.toDateString();
             return (
-              <div key={i} className={`text-center py-2 ${isToday ? "bg-teal-50" : ""}`}>
+              <div key={i} className={`text-center py-2 ${isToday ? "bg-primary/8" : ""}`}>
                 <p className="text-[9px] font-bold text-gray-400 uppercase">{DAYS[i]}</p>
-                <p className={`text-sm font-black ${isToday ? "text-teal-600" : "text-gray-700"}`}>{d.getDate()}</p>
+                <p className={`text-sm font-black ${isToday ? "text-primary" : "text-gray-700"}`}>{d.getDate()}</p>
               </div>
             );
           })}
@@ -164,7 +164,7 @@ export default function FamilyCalendar() {
             const dayEvents = eventsByDay.get(key) || [];
             const isToday = d.toDateString() === today.toDateString();
             return (
-              <div key={i} className={`border-r border-gray-100 p-1.5 space-y-1.5 ${isToday ? "bg-teal-50/40" : ""}`}>
+              <div key={i} className={`border-r border-gray-100 p-1.5 space-y-1.5 ${isToday ? "bg-primary/8/40" : ""}`}>
                 {dayEvents.map(ev => (
                   <button
                     key={ev.id}
@@ -198,8 +198,8 @@ export default function FamilyCalendar() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between flex-wrap gap-3 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-teal-50">
-            <CalendarDays className="h-5 w-5 text-teal-600" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+            <CalendarDays className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-xl font-black text-gray-900">Family Calendar</h1>
@@ -228,7 +228,7 @@ export default function FamilyCalendar() {
             </div>
           ))}
           {[
-            { colour: "#0D9488", label: "Class" },
+            { colour: "hsl(var(--primary))", label: "Class" },
             { colour: "#f59e0b", label: "Homework" },
             { colour: "#6366f1", label: "Exam" },
             { colour: "#64748b", label: "Meeting" },

@@ -21,7 +21,7 @@ const FEATURE_INVENTORY = [
     { name: "Device Session Tracking", status: "live", desc: "Multi-device revocation" },
     { name: "JWT Refresh Tokens", status: "pending", desc: "Short-lived access + long-lived refresh" },
   ]},
-  { category: "Core Learning", icon: BookOpen, color: "teal", items: [
+  { category: "Core Learning", icon: BookOpen, color: "primary", items: [
     { name: "Lesson Management", status: "live", desc: "Create, schedule, and deliver lessons" },
     { name: "Assessment Hub", status: "live", desc: "Exams, quizzes, auto-grading" },
     { name: "Flashcard System (SM-2)", status: "live", desc: "Spaced repetition with confidence ratings" },
@@ -74,7 +74,7 @@ const STATUS_CFG: Record<string, { label: string; color: string; bg: string; ico
 
 const COLOR_MAP: Record<string, string> = {
   blue: "bg-blue-100 text-blue-600",
-  teal: "bg-teal-100 text-teal-600",
+  teal: "bg-primary/15 text-primary",
   purple: "bg-purple-100 text-purple-600",
   orange: "bg-orange-100 text-orange-600",
   green: "bg-green-100 text-green-600",
@@ -145,8 +145,8 @@ export default function SystemInventoryPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-teal-100 flex items-center justify-center">
-              <Database className="h-4 w-4 text-teal-600" />
+            <div className="w-7 h-7 rounded-lg bg-primary/15 flex items-center justify-center">
+              <Database className="h-4 w-4 text-primary" />
             </div>
             <h3 className="font-bold text-gray-900 text-sm">Database</h3>
           </div>
@@ -248,7 +248,7 @@ export default function SystemInventoryPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-teal-500 rounded-full"
+                      className="h-full bg-primary rounded-full"
                       style={{ width: `${(catLive / cat.items.length) * 100}%` }}
                     />
                   </div>
@@ -276,7 +276,7 @@ export default function SystemInventoryPage() {
 
       <div className="bg-white rounded-xl border border-gray-100 p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Shield className="h-4 w-4 text-teal-600" />
+          <Shield className="h-4 w-4 text-primary" />
           <h3 className="font-bold text-gray-900 text-sm">Auth Migration Status</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
@@ -303,7 +303,7 @@ export default function SystemInventoryPage() {
 
       <div className="bg-white rounded-xl border border-gray-100 p-5">
         <div className="flex items-center gap-2 mb-4">
-          <FileCode className="h-4 w-4 text-teal-600" />
+          <FileCode className="h-4 w-4 text-primary" />
           <h3 className="font-bold text-gray-900 text-sm">Architecture Summary</h3>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">

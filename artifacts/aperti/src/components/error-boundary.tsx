@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { RefreshCw, Home, Bug, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const TEAL = "#0D9488";
 
 interface Props { children: ReactNode; fallback?: ReactNode; }
 interface State { hasError: boolean; error: Error | null; errorInfo: string; reported: boolean; }
@@ -72,14 +71,13 @@ export default class ErrorBoundary extends Component<Props, State> {
             initial={{ scale: 0.6, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, type: "spring", stiffness: 260, damping: 22 }}
-            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5"
-            style={{ background: "linear-gradient(135deg, #f0fdfa, #e6fffa)" }}
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-primary/10"
           >
-            <Wifi className="w-7 h-7" style={{ color: TEAL }} />
+            <Wifi className="w-7 h-7 text-primary" />
           </motion.div>
 
-          <h2 className="text-lg font-bold text-slate-800 mb-1">We hit a small snag</h2>
-          <p className="text-sm text-slate-500 mb-6 leading-relaxed">
+          <h2 className="text-lg font-bold text-foreground mb-1">We hit a small snag</h2>
+          <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
             Something didn't load correctly. Your work is safe — please try again.
           </p>
 
@@ -87,7 +85,6 @@ export default class ErrorBoundary extends Component<Props, State> {
             <Button
               onClick={this.reset}
               className="w-full gap-2 font-medium"
-              style={{ background: TEAL, color: "white" }}
             >
               <RefreshCw className="w-4 h-4" />
               Try again

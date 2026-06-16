@@ -378,7 +378,7 @@ export default function FocusZoneV2() {
                       <XAxis dataKey="date" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
                       <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
-                      <Area type="monotone" dataKey="minutes" stroke="#0D9488" fill="#0D948820" strokeWidth={2} name="Minutes" />
+                      <Area type="monotone" dataKey="minutes" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.13)" strokeWidth={2} name="Minutes" />
                       <Area type="monotone" dataKey="productivity" stroke="#f59e0b" fill="#f59e0b10" strokeWidth={2} name="Productivity %" />
                     </AreaChart>
                   </ResponsiveContainer>

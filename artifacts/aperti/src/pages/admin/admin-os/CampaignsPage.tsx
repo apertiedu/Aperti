@@ -55,7 +55,7 @@ export default function CampaignsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Notification Campaigns</h1>
           <p className="text-sm text-gray-500 mt-0.5">Create and send targeted notifications to platform users</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+        <button onClick={openCreate} className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-colors">
           <Plus className="w-4 h-4" /> New Campaign
         </button>
       </div>
@@ -93,8 +93,8 @@ export default function CampaignsPage() {
           return (
             <motion.div key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Megaphone className="w-4 h-4 text-teal-600" />
+                <div className="w-9 h-9 bg-primary/15 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Megaphone className="w-4 h-4 text-primary" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
@@ -117,7 +117,7 @@ export default function CampaignsPage() {
               </div>
               <div className="flex gap-2 flex-shrink-0">
                 {c.status !== "sent" && (
-                  <button onClick={() => sendMutation.mutate(c.id)} disabled={sendMutation.isPending} className="flex items-center gap-1 px-3 py-1.5 bg-teal-600 text-white rounded-lg text-xs font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+                  <button onClick={() => sendMutation.mutate(c.id)} disabled={sendMutation.isPending} className="flex items-center gap-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:opacity-90 transition-colors disabled:opacity-50">
                     <Send className="w-3 h-3" /> Send Now
                   </button>
                 )}
@@ -135,27 +135,27 @@ export default function CampaignsPage() {
               <div className="px-6 py-4 border-b border-gray-100"><h2 className="text-lg font-bold text-gray-900">{editing ? "Edit Campaign" : "New Campaign"}</h2></div>
               <div className="px-6 py-4 space-y-4">
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Campaign Name *</label>
-                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                  <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Message *</label>
-                  <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" /></div>
+                  <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={4} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" /></div>
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-2">Delivery Channels</label>
                   <div className="flex flex-wrap gap-2">
                     {CHANNEL_OPTIONS.map((ch) => (
-                      <button key={ch} onClick={() => toggleChannel(ch)} className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${(form.channels || []).includes(ch) ? "bg-teal-600 text-white border-teal-600" : "bg-white text-gray-600 border-gray-200 hover:border-teal-300"}`}>{ch}</button>
+                      <button key={ch} onClick={() => toggleChannel(ch)} className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${(form.channels || []).includes(ch) ? "bg-primary text-primary-foreground border-primary" : "bg-white text-gray-600 border-gray-200 hover:border-primary/40"}`}>{ch}</button>
                     ))}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
-                    <input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="announcement" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                    <input value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} placeholder="announcement" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
                   <div><label className="block text-xs font-medium text-gray-600 mb-1">Schedule (optional)</label>
-                    <input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                    <input type="datetime-local" value={form.scheduled_at} onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
                 <button onClick={closeModal} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-                <button onClick={() => saveMutation.mutate()} disabled={!form.name || !form.message || saveMutation.isPending} className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50">
+                <button onClick={() => saveMutation.mutate()} disabled={!form.name || !form.message || saveMutation.isPending} className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50">
                   {saveMutation.isPending ? "Saving..." : editing ? "Update" : "Create"}
                 </button>
               </div>

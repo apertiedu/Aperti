@@ -51,7 +51,7 @@ export function OfflineDetector() {
               </>
             ) : (
               <>
-                <WifiOff className="h-4 w-4 text-gray-300" />
+                <WifiOff className="h-4 w-4 text-muted-foreground" />
                 You're offline — check your connection
               </>
             )}

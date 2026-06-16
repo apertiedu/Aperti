@@ -141,8 +141,8 @@ export default function PaperVaultAdmin() {
     <div className="min-h-screen bg-[#F5F5F5] p-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-[#0D9488]/10 flex items-center justify-center">
-            <Library className="h-5 w-5 text-[#0D9488]" />
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <Library className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">PaperVault Admin</h1>
@@ -248,9 +248,9 @@ export default function PaperVaultAdmin() {
               onClick={() => document.getElementById("pdf-input")?.click()}
               className={`relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all ${
                 dragOver
-                  ? "border-[#0D9488] bg-[#0D9488]/5"
+                  ? "border-primary bg-primary/5"
                   : file
-                  ? "border-[#0D9488]/40 bg-[#0D9488]/5"
+                  ? "border-primary/40 bg-primary/5"
                   : "border-gray-200 hover:border-gray-300 bg-gray-50"
               }`}
             >
@@ -263,7 +263,7 @@ export default function PaperVaultAdmin() {
               />
               {file ? (
                 <div className="flex items-center justify-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-[#0D9488]" />
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-900">{file.name}</p>
                     <p className="text-xs text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB · PDF</p>
@@ -314,7 +314,7 @@ export default function PaperVaultAdmin() {
                 </div>
                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-[#0D9488] rounded-full"
+                    className="h-full bg-primary rounded-full"
                     initial={{ width: 0 }}
                     animate={{ width: `${uploadProgress}%` }}
                     transition={{ ease: "linear" }}
@@ -327,7 +327,7 @@ export default function PaperVaultAdmin() {
           <Button
             onClick={handleUpload}
             disabled={uploadMutation.isPending}
-            className="w-full bg-[#0D9488] hover:bg-[#0B7B70] text-white h-9"
+            className="w-full bg-primary hover:opacity-90 text-white h-9"
           >
             {uploadMutation.isPending ? (
               <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Uploading…</>

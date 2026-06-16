@@ -302,7 +302,7 @@ const SECTION_COLORS: Record<SectionType, string> = {
   video: "bg-purple-100 text-purple-700",
   image: "bg-green-100 text-green-700",
   quiz: "bg-amber-100 text-amber-700",
-  simulation: "bg-teal-100 text-teal-700",
+  simulation: "bg-primary/15 text-primary",
   flashcards: "bg-pink-100 text-pink-700",
 };
 
@@ -629,7 +629,7 @@ function FullScreenEditor({
                               <Input type="number" placeholder="SimVerse simulation ID" value={s.simulationId ?? ""} onChange={e => update(idx, "simulationId", e.target.value ? Number(e.target.value) : undefined)} className="text-sm h-8" />
                             </>
                           )}
-                          {previewAll && <div className="flex items-center gap-2 py-2 text-sm text-teal-700 bg-teal-50 rounded-lg px-3"><FlaskConical className="h-4 w-4" /> Simulation #{s.simulationId || "—"}</div>}
+                          {previewAll && <div className="flex items-center gap-2 py-2 text-sm text-primary bg-primary/8 rounded-lg px-3"><FlaskConical className="h-4 w-4" /> Simulation #{s.simulationId || "—"}</div>}
                         </div>
                       )}
 
@@ -695,7 +695,7 @@ export default function ContentCraft() {
     quiz: "bg-amber-100 text-amber-700",
     heading: "bg-primary/10 text-primary",
     subheading: "bg-blue-100 text-blue-700",
-    simulation: "bg-teal-100 text-teal-700",
+    simulation: "bg-primary/15 text-primary",
     flashcards: "bg-pink-100 text-pink-700",
   };
 

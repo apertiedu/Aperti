@@ -100,14 +100,14 @@ export default function QAReadinessPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Rocket className="w-6 h-6 text-teal-600" /> Launch Readiness
+            <Rocket className="w-6 h-6 text-primary" /> Launch Readiness
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Verify platform is ready to launch</p>
         </div>
         <Button
           onClick={() => calculateScore.mutate()}
           disabled={calculateScore.isPending}
-          className="bg-teal-600 hover:bg-teal-700 gap-2"
+          className="bg-primary hover:bg-primary/80 gap-2"
         >
           <RefreshCw className={`w-4 h-4 ${calculateScore.isPending ? "animate-spin" : ""}`} />
           {calculateScore.isPending ? "Calculating…" : "Recalculate Score"}
@@ -227,7 +227,7 @@ export default function QAReadinessPage() {
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold text-gray-700 flex items-center justify-between">
             <span>Launch Checklist</span>
-            <span className="text-teal-600 font-bold">{checklistDone}/{checklistTotal} complete</span>
+            <span className="text-primary font-bold">{checklistDone}/{checklistTotal} complete</span>
           </CardTitle>
           {checklistTotal > 0 && (
             <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-2">
@@ -235,7 +235,7 @@ export default function QAReadinessPage() {
                 initial={{ width: 0 }}
                 animate={{ width: `${checklistTotal > 0 ? (checklistDone / checklistTotal) * 100 : 0}%` }}
                 transition={{ duration: 0.8 }}
-                className="h-full bg-teal-500 rounded-full"
+                className="h-full bg-primary rounded-full"
               />
             </div>
           )}
@@ -268,8 +268,8 @@ export default function QAReadinessPage() {
                           className="shrink-0"
                         >
                           {item.isCompleted
-                            ? <CheckCircle className="w-5 h-5 text-teal-600" />
-                            : <Circle className="w-5 h-5 text-gray-300 hover:text-teal-400 transition-colors" />}
+                            ? <CheckCircle className="w-5 h-5 text-primary" />
+                            : <Circle className="w-5 h-5 text-gray-300 hover:text-primary/80 transition-colors" />}
                         </button>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm ${item.isCompleted ? "line-through text-gray-400" : "text-gray-800"}`}>{item.item}</p>

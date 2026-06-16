@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Link, useLocation } from "wouter";
 import { Eye, EyeOff, AlertCircle, CheckCircle2, KeyRound } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 export default function ResetPassword() {
   const [location] = useLocation();
@@ -34,7 +33,7 @@ export default function ResetPassword() {
   })();
 
   const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"][strength];
-  const strengthColor = ["", "#ef4444", "#f59e0b", "#3b82f6", TEAL][strength];
+  const strengthColor = ["", "#ef4444", "#f59e0b", "#3b82f6", "hsl(var(--primary))"][strength];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,8 +63,8 @@ export default function ResetPassword() {
       style={{ background: "#F5F5F5", fontFamily: "Inter, sans-serif" }}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-5" style={{ background: TEAL, filter: "blur(120px)" }} />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full opacity-5" style={{ background: TEAL, filter: "blur(80px)" }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-5" style={{ background: "hsl(var(--primary))", filter: "blur(120px)" }} />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full opacity-5" style={{ background: "hsl(var(--primary))", filter: "blur(80px)" }} />
       </div>
 
       <motion.div
@@ -77,7 +76,7 @@ export default function ResetPassword() {
         <div className="text-center mb-8">
           <Link href="/">
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 cursor-pointer">
-              Aperti<span style={{ color: TEAL }}>.</span>
+              Aperti<span style={{ color: "hsl(var(--primary))" }}>.</span>
             </h1>
           </Link>
           <p className="text-slate-500 text-sm mt-1">Where every mind finds its rhythm.</p>
@@ -94,13 +93,13 @@ export default function ResetPassword() {
               >
                 <div className="flex justify-center mb-4">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#E6F4F1" }}>
-                    <CheckCircle2 className="h-7 w-7" style={{ color: TEAL }} />
+                    <CheckCircle2 className="h-7 w-7" style={{ color: "hsl(var(--primary))" }} />
                   </div>
                 </div>
                 <h2 className="text-lg font-bold text-slate-900 mb-2">Password updated!</h2>
                 <p className="text-sm text-slate-500 mb-6">Your password has been changed. You can now sign in with your new password.</p>
                 <Link href="/login">
-                  <Button className="w-full rounded-xl h-11 font-semibold text-white" style={{ background: TEAL }}>
+                  <Button className="w-full rounded-xl h-11 font-semibold text-white" style={{ background: "hsl(var(--primary))" }}>
                     Sign in
                   </Button>
                 </Link>
@@ -109,7 +108,7 @@ export default function ResetPassword() {
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#E6F4F1" }}>
-                    <KeyRound className="h-4 w-4" style={{ color: TEAL }} />
+                    <KeyRound className="h-4 w-4" style={{ color: "hsl(var(--primary))" }} />
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 leading-tight">Choose a new password</h2>
@@ -129,7 +128,7 @@ export default function ResetPassword() {
                         required
                         autoFocus
                         placeholder="At least 8 characters"
-                        className="rounded-xl border-slate-200 focus-visible:ring-teal-600 h-10 pr-10"
+                        className="rounded-xl border-slate-200 focus-visible:ring-primary/20 h-10 pr-10"
                       />
                       <button
                         type="button"
@@ -164,7 +163,7 @@ export default function ResetPassword() {
                       onChange={e => setConfirm(e.target.value)}
                       required
                       placeholder="Re-enter your password"
-                      className="rounded-xl border-slate-200 focus-visible:ring-teal-600 h-10"
+                      className="rounded-xl border-slate-200 focus-visible:ring-primary/20 h-10"
                     />
                     {confirm && password !== confirm && (
                       <p className="text-xs text-red-500">Passwords don't match</p>
@@ -189,7 +188,7 @@ export default function ResetPassword() {
                     type="submit"
                     disabled={isSubmitting || !password || !confirm || !token}
                     className="w-full rounded-xl h-11 font-semibold text-white mt-2"
-                    style={{ background: isSubmitting ? "#4DB6AC" : TEAL }}
+                    style={{ background: isSubmitting ? "#4DB6AC" : "hsl(var(--primary))" }}
                   >
                     {isSubmitting ? (
                       <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1, repeat: Infinity }}>

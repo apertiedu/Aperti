@@ -14,7 +14,7 @@ const EVENT_COLORS: Record<string, string> = {
   signup: "bg-green-100 text-green-700",
   subscription: "bg-blue-100 text-blue-700",
   waitlist_join: "bg-yellow-100 text-yellow-700",
-  feature_interest: "bg-teal-100 text-teal-700",
+  feature_interest: "bg-primary/15 text-primary",
   pricing_click: "bg-purple-100 text-purple-700",
   demo_start: "bg-orange-100 text-orange-700",
 };
@@ -46,7 +46,7 @@ export default function ConversionAnalyticsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Conversion Analytics</h1>
           <p className="text-sm text-gray-500 mt-0.5">Funnel analysis, signup trends, and feature adoption</p>
         </div>
-        <select value={days} onChange={(e) => setDays(e.target.value)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <select value={days} onChange={(e) => setDays(e.target.value)} className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
           <option value="7">Last 7 days</option>
           <option value="30">Last 30 days</option>
           <option value="90">Last 90 days</option>
@@ -80,7 +80,7 @@ export default function ConversionAnalyticsPage() {
                       <span className="text-sm font-bold text-gray-800">{parseInt(item.count).toLocaleString()}</span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8 }} className="h-full bg-teal-500 rounded-full" />
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.8 }} className="h-full bg-primary rounded-full" />
                     </div>
                   </div>
                 );
@@ -106,7 +106,7 @@ export default function ConversionAnalyticsPage() {
                   const pct = (parseInt(t.events) / maxTrend) * 100;
                   return (
                     <div key={i} className="flex-1 flex flex-col items-center justify-end gap-0.5 group" title={`${t.date}: ${t.events} events`}>
-                      <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(pct, 2)}%` }} transition={{ duration: 0.5, delay: i * 0.01 }} className="w-full bg-teal-500 rounded-t group-hover:bg-teal-600 transition-colors cursor-pointer" style={{ minHeight: 2 }} />
+                      <motion.div initial={{ height: 0 }} animate={{ height: `${Math.max(pct, 2)}%` }} transition={{ duration: 0.5, delay: i * 0.01 }} className="w-full bg-primary rounded-t group-hover:bg-primary transition-colors cursor-pointer" style={{ minHeight: 2 }} />
                     </div>
                   );
                 })}

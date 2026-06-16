@@ -13,7 +13,6 @@ interface NextItem {
   priority: number;
 }
 
-const TEAL = "#0D9488";
 
 export default function WhatNextCard() {
   const { data, isLoading } = useQuery<{ items: NextItem[] }>({
@@ -46,7 +45,7 @@ export default function WhatNextCard() {
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-4 h-4" style={{ color: TEAL }} />
+          <Sparkles className="w-4 h-4 text-primary" />
           <h3 className="text-sm font-bold text-foreground">What to do next</h3>
         </div>
         <span className="text-[10px] text-muted-foreground">{items.length} items</span>
@@ -58,14 +57,14 @@ export default function WhatNextCard() {
             <motion.div
               whileHover={{ scale: 1.01, x: 2 }}
               transition={{ duration: 0.12 }}
-              className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 hover:bg-teal-50 border border-transparent hover:border-teal-100 cursor-pointer transition-all group"
+              className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 hover:bg-primary/5 border border-transparent hover:border-primary/20 cursor-pointer transition-all group"
             >
               <span className="text-lg leading-none flex-shrink-0">{item.icon}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">{item.title}</p>
                 <p className="text-xs text-muted-foreground truncate">{item.subtitle}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-teal-500 transition-colors flex-shrink-0" />
+              <ChevronRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary transition-colors flex-shrink-0" />
             </motion.div>
           </Link>
         ))}

@@ -33,7 +33,7 @@ const TYPE_CONFIG: Record<string, { icon: typeof Sparkles; color: string; bg: st
   improve_mastery: { icon: Target, color: "text-primary", bg: "bg-primary/5", label: "Mastery" },
   weak_topic: { icon: Brain, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30", label: "Revision" },
   homework: { icon: BookOpen, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30", label: "Assignment" },
-  focus_session: { icon: Clock, color: "text-teal-600", bg: "bg-teal-50 dark:bg-teal-950/30", label: "Focus" },
+  focus_session: { icon: Clock, color: "text-primary", bg: "bg-primary/8 dark:bg-primary/10", label: "Focus" },
   simulation: { icon: FlaskConical, color: "text-orange-600", bg: "bg-orange-50 dark:bg-orange-950/30", label: "Simulation" },
   flashcard: { icon: Layers, color: "text-green-600", bg: "bg-green-50 dark:bg-green-950/30", label: "Flashcards" },
 };

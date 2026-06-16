@@ -40,7 +40,7 @@ function planIcon(name: string) {
 function Toggle({ on, onChange, label }: { on: boolean; onChange: () => void; label?: string }) {
   return (
     <button type="button" onClick={onChange} className="flex items-center gap-1.5 group">
-      <div className={`w-9 h-5 rounded-full relative transition-colors duration-200 flex-shrink-0 ${on ? "bg-teal-500" : "bg-gray-200"}`}>
+      <div className={`w-9 h-5 rounded-full relative transition-colors duration-200 flex-shrink-0 ${on ? "bg-primary" : "bg-gray-200"}`}>
         <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${on ? "translate-x-4" : "translate-x-0.5"}`} />
       </div>
       {label && <span className="text-xs text-gray-500 group-hover:text-gray-700 transition-colors">{label}</span>}
@@ -74,17 +74,17 @@ function PlanForm({
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }));
 
   return (
-    <div className="bg-teal-50 border border-teal-100 rounded-2xl p-5 space-y-4">
+    <div className="bg-primary/8 border border-primary/15 rounded-2xl p-5 space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Plan name</label>
           <input value={form.name || ""} onChange={e => set("name", e.target.value)} placeholder="e.g. Pro"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
           <select value={form.type} onChange={e => set("type", e.target.value)}
-            className="w-full border border-border rounded-xl px-3 py-2 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-teal-300">
+            className="w-full border border-border rounded-xl px-3 py-2 text-sm bg-card focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="teacher">Teacher</option>
             <option value="student">Student</option>
           </select>
@@ -92,36 +92,36 @@ function PlanForm({
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Price (EGP / mo)</label>
           <input type="number" value={form.price_egp || ""} onChange={e => set("price_egp", e.target.value)} placeholder="5000"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Badge label (optional)</label>
           <input value={form.badge || ""} onChange={e => set("badge", e.target.value)} placeholder="POPULAR"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Student limit</label>
           <input type="number" value={form.student_limit ?? ""} onChange={e => set("student_limit", e.target.value ? parseInt(e.target.value) : null)} placeholder="Unlimited"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Display order</label>
           <input type="number" value={form.display_order ?? 0} onChange={e => set("display_order", parseInt(e.target.value) || 0)} placeholder="0"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Discount % <span className="text-gray-400">(0 = no discount)</span></label>
           <input type="number" min={0} max={100} value={form.discount_pct ?? 0} onChange={e => set("discount_pct", parseInt(e.target.value) || 0)} placeholder="0"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
       </div>
       <div>
         <label className="block text-xs font-medium text-gray-600 mb-1">Features <span className="text-gray-400">(one per line)</span></label>
         <textarea value={form.featuresText || ""} onChange={e => set("featuresText", e.target.value)} rows={4}
           placeholder={"Up to 50 students\nUnlimited courses\nAI lesson generation"}
-          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300 resize-none" />
+          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
       </div>
       <div className="flex flex-wrap items-center gap-5">
         <Toggle on={!!form.visibility} onChange={() => set("visibility", !form.visibility)} label="Active (visible to users)" />
@@ -129,7 +129,7 @@ function PlanForm({
       </div>
       <div className="flex gap-2 pt-1">
         <button onClick={() => onSave(form)} disabled={isPending || !form.name || !form.price_egp}
-          className="px-5 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 disabled:opacity-50 transition-colors">
+          className="px-5 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary disabled:opacity-50 transition-colors">
           {isPending ? "Saving…" : "Save Plan"}
         </button>
         <button onClick={onCancel} className="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm hover:bg-gray-50 transition-colors">
@@ -150,10 +150,10 @@ function PlanCard({ plan, onEdit, onDelete, onToggleVisibility, onToggleLanding 
 
   return (
     <motion.div layout initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96 }}
-      className={`bg-card rounded-2xl border shadow-sm flex flex-col gap-0 transition-shadow hover:shadow-md overflow-hidden ${isPopular ? "border-teal-300 ring-1 ring-teal-100" : "border-border"} ${!plan.visibility ? "opacity-60" : ""}`}>
+      className={`bg-card rounded-2xl border shadow-sm flex flex-col gap-0 transition-shadow hover:shadow-md overflow-hidden ${isPopular ? "border-primary/30 ring-1 ring-primary/15" : "border-border"} ${!plan.visibility ? "opacity-60" : ""}`}>
 
       {isPopular && (
-        <div className="bg-teal-500 text-white text-[9px] font-extrabold text-center py-1 tracking-widest">
+        <div className="bg-primary text-white text-[9px] font-extrabold text-center py-1 tracking-widest">
           {plan.badge?.toUpperCase() || "MOST POPULAR"}
         </div>
       )}
@@ -166,7 +166,7 @@ function PlanCard({ plan, onEdit, onDelete, onToggleVisibility, onToggleLanding 
       <div className="p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isPopular ? "bg-teal-500 text-white" : "bg-teal-50 text-teal-600"}`}>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isPopular ? "bg-primary text-white" : "bg-primary/8 text-primary"}`}>
               <Icon className="w-4.5 h-4.5" />
             </div>
             <div>
@@ -194,13 +194,13 @@ function PlanCard({ plan, onEdit, onDelete, onToggleVisibility, onToggleLanding 
             <ul className="space-y-1">
               {(expanded ? plan.features : plan.features.slice(0, 3)).map((f, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-gray-500">
-                  <Check className="w-3 h-3 text-teal-500 flex-shrink-0 mt-0.5" />
+                  <Check className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
                   <span>{f}</span>
                 </li>
               ))}
             </ul>
             {plan.features.length > 3 && (
-              <button onClick={() => setExpanded(v => !v)} className="mt-1.5 flex items-center gap-0.5 text-[10px] text-teal-500 hover:text-teal-700">
+              <button onClick={() => setExpanded(v => !v)} className="mt-1.5 flex items-center gap-0.5 text-[10px] text-primary hover:text-primary">
                 {expanded ? <><ChevronUp className="w-3 h-3" /> Show less</> : <><ChevronDown className="w-3 h-3" /> +{plan.features.length - 3} more</>}
               </button>
             )}
@@ -221,7 +221,7 @@ function PlanCard({ plan, onEdit, onDelete, onToggleVisibility, onToggleLanding 
         </div>
         <div className="flex gap-2">
           <button onClick={() => onEdit(plan)}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium bg-teal-50 text-teal-700 hover:bg-teal-100 transition-colors">
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-medium bg-primary/8 text-primary hover:bg-primary/15 transition-colors">
             <Edit2 className="w-3 h-3" /> Edit
           </button>
           <button onClick={() => { if (confirm(`Archive "${plan.name}"? It will be hidden from users.`)) onDelete(plan.id); }}
@@ -301,12 +301,12 @@ export default function PlansAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Package className="w-6 h-6 text-teal-500" /> Subscription Plans
+            <Package className="w-6 h-6 text-primary" /> Subscription Plans
           </h1>
           <p className="text-sm text-gray-400 mt-0.5">Create, edit, and manage pricing plans for teachers and students</p>
         </div>
         <button onClick={() => { setShowCreate(v => !v); setEditingPlan(null); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 transition-colors shadow-sm">
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary transition-colors shadow-sm">
           {showCreate ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showCreate ? "Cancel" : "New Plan"}
         </button>
@@ -314,7 +314,7 @@ export default function PlansAdminPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard label="Total plans" value={plans.length} icon={LayoutGrid} color="bg-teal-50 text-teal-600" />
+        <StatCard label="Total plans" value={plans.length} icon={LayoutGrid} color="bg-primary/8 text-primary" />
         <StatCard label="Teacher plans" value={teacherPlans.length} icon={BookOpen} color="bg-blue-50 text-blue-600" />
         <StatCard label="Student plans" value={studentPlans.length} icon={GraduationCap} color="bg-violet-50 text-violet-600" />
         <StatCard label="Live on landing" value={landingPlans} icon={Eye} color="bg-green-50 text-green-600" />
@@ -334,7 +334,7 @@ export default function PlansAdminPage() {
         {editingPlan && (
           <motion.div key="edit-form" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
             <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700">
-              <Edit2 className="w-4 h-4 text-teal-500" /> Editing: {editingPlan.name}
+              <Edit2 className="w-4 h-4 text-primary" /> Editing: {editingPlan.name}
             </div>
             <PlanForm
               initial={{
@@ -355,7 +355,7 @@ export default function PlansAdminPage() {
       <div className="flex gap-1 bg-gray-100 p-1 rounded-xl w-fit">
         {(["all", "teacher", "student"] as const).map(f => (
           <button key={f} onClick={() => setTypeFilter(f)}
-            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${typeFilter === f ? "bg-card text-teal-700 shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
+            className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-all capitalize ${typeFilter === f ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}>
             {f === "all" ? `All (${plans.length})` : f === "teacher" ? `Teachers (${teacherPlans.length})` : `Students (${studentPlans.length})`}
           </button>
         ))}
@@ -364,7 +364,7 @@ export default function PlansAdminPage() {
       {/* Plans grid */}
       {isLoading ? (
         <div className="flex justify-center py-20">
-          <div className="w-7 h-7 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : displayed.length === 0 ? (
         <div className="text-center py-20 text-gray-400">

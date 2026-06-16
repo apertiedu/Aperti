@@ -11,7 +11,6 @@ import {
   Activity, ChevronRight, Terminal, Globe,
 } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 async function apiFetch(url: string) {
   const res = await fetch(`/api${url}`, { credentials: "include" });
@@ -31,8 +30,8 @@ function StatusBadge({ status }: { status: HealthStatus | string }) {
   const ok = status === "healthy" || status === "connected";
   const warn = status === "degraded";
   if (ok) return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-teal-100 text-teal-700 border border-teal-200">
-      <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-primary/15 text-primary border border-primary/25">
+      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
       {status}
     </span>
   );
@@ -55,7 +54,7 @@ function EnvRow({ label, present }: { label: string; present: boolean }) {
     <div className="flex items-center justify-between py-2 border-b border-border last:border-0">
       <span className="text-sm font-mono text-gray-600">{label}</span>
       {present ? (
-        <span className="inline-flex items-center gap-1 text-xs text-teal-700 font-semibold">
+        <span className="inline-flex items-center gap-1 text-xs text-primary font-semibold">
           <CheckCircle2 className="h-3.5 w-3.5" /> configured
         </span>
       ) : (
@@ -69,7 +68,7 @@ function EnvRow({ label, present }: { label: string; present: boolean }) {
 
 function LatencyBar({ ms, maxMs = 2000 }: { ms: number; maxMs?: number }) {
   const pct = Math.min(Math.round((ms / maxMs) * 100), 100);
-  const color = ms < 300 ? "#0D9488" : ms < 1000 ? "#F59E0B" : "#EF4444";
+  const color = ms < 300 ? "hsl(var(--primary))" : ms < 1000 ? "#F59E0B" : "#EF4444";
   return (
     <div className="mt-2">
       <div className="flex justify-between text-[10px] text-gray-400 mb-1">
@@ -124,8 +123,8 @@ export default function SystemDiagnostics() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}15` }}>
-              <Terminal className="h-5 w-5" style={{ color: TEAL }} />
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
+              <Terminal className="h-5 w-5" className="text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">System Diagnostics</h1>
@@ -153,13 +152,13 @@ export default function SystemDiagnostics() {
       <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="mb-6">
         <div className={`rounded-xl p-4 flex items-center gap-3 border ${
           overallOk
-            ? "bg-teal-50 border-teal-200"
+            ? "bg-primary/8 border-primary/25"
             : overallStatus === "degraded"
             ? "bg-amber-50 border-amber-200"
             : "bg-red-50 border-red-200"
         }`}>
           {overallOk
-            ? <CheckCircle2 className="h-5 w-5 text-teal-600 shrink-0" />
+            ? <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
             : overallStatus === "degraded"
             ? <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
             : <XCircle className="h-5 w-5 text-red-600 shrink-0" />
@@ -235,7 +234,7 @@ export default function SystemDiagnostics() {
                 <Button
                   size="sm"
                   className="w-full gap-2 text-white"
-                  style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}
+                  className="bg-primary"
                   onClick={() => runOpenAICheck()}
                   disabled={oaiPending}
                 >
@@ -257,7 +256,7 @@ export default function SystemDiagnostics() {
                   >
                     <div className={`p-2.5 rounded-lg border text-xs font-medium flex items-center gap-2 ${
                       openaiHealth.status === "healthy"
-                        ? "bg-teal-50 border-teal-200 text-teal-700"
+                        ? "bg-primary/8 border-primary/25 text-primary"
                         : "bg-red-50 border-red-200 text-red-700"
                     }`}>
                       {openaiHealth.status === "healthy"
@@ -314,8 +313,8 @@ export default function SystemDiagnostics() {
                     </div>
                   )}
                   {database.status === "connected" && (
-                    <div className="p-2.5 rounded-lg bg-teal-50 border border-teal-100">
-                      <p className="text-xs text-teal-700 font-medium">
+                    <div className="p-2.5 rounded-lg bg-primary/8 border border-primary/15">
+                      <p className="text-xs text-primary font-medium">
                         <CheckCircle2 className="inline h-3 w-3 mr-1" />
                         Pool responding normally
                       </p>
@@ -376,8 +375,8 @@ export default function SystemDiagnostics() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-teal-50">
-                    <Globe className="h-4 w-4" style={{ color: TEAL }} />
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center bg-primary/8">
+                    <Globe className="h-4 w-4" className="text-primary" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Deployment</CardTitle>
@@ -418,7 +417,7 @@ export default function SystemDiagnostics() {
                           style={{
                             background: deploy.memoryMB.percent > 85 ? "#EF4444"
                               : deploy.memoryMB.percent > 65 ? "#F59E0B"
-                              : TEAL,
+                              : "hsl(var(--primary))",
                           }}
                           initial={{ width: 0 }}
                           animate={{ width: `${deploy.memoryMB.percent}%` }}

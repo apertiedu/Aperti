@@ -22,7 +22,7 @@ function AssignmentCard({ hw }: { hw: any }) {
           <p className="text-[10px] text-gray-400 mt-0.5">{hw.subject_name || "General"}</p>
         </div>
         {pct !== null && (
-          <span className="text-sm font-black shrink-0" style={{ color: pct >= 70 ? "#0D9488" : pct >= 50 ? "#f59e0b" : "#ef4444" }}>{pct}%</span>
+          <span className="text-sm font-black shrink-0" style={{ color: pct >= 70 ? "hsl(var(--primary))" : pct >= 50 ? "#f59e0b" : "#ef4444" }}>{pct}%</span>
         )}
       </div>
       <div className="flex items-center gap-3 text-[10px] text-gray-400">
@@ -50,7 +50,7 @@ export default function ParentAssignments() {
 
   const tabs: { key: Tab; label: string; icon: any; color: string }[] = [
     { key: "pending", label: "Pending", icon: Clock, color: "#f59e0b" },
-    { key: "submitted", label: "Submitted", icon: CheckCircle2, color: "#0D9488" },
+    { key: "submitted", label: "Submitted", icon: CheckCircle2, color: "hsl(var(--primary))" },
     { key: "overdue", label: "Overdue", icon: AlertTriangle, color: "#ef4444" },
   ];
 

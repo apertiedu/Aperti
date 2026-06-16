@@ -48,12 +48,12 @@ export function RouteProgressBar() {
       className="fixed top-0 left-0 z-[9999] h-[2.5px] transition-all"
       style={{
         width: `${progress}%`,
-        background: "linear-gradient(90deg, #0D9488, #14b8a6, #0D9488)",
+        background: "linear-gradient(90deg, hsl(var(--primary)), #14b8a6, hsl(var(--primary)))",
         backgroundSize: "200% 100%",
         animation: "shimmer-sweep 1.2s linear infinite",
         opacity: progress >= 100 ? 0 : 1,
         transition: "width 180ms ease, opacity 280ms ease",
-        boxShadow: "0 0 8px rgba(13,148,136,0.6), 0 0 2px rgba(13,148,136,0.4)",
+        boxShadow: "0 0 8px hsl(var(--primary) / 0.6), 0 0 2px hsl(var(--primary) / 0.4)",
       }}
     />
   );

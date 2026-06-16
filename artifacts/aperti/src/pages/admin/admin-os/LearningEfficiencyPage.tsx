@@ -46,7 +46,7 @@ const ACTIVITY_LABELS: Record<string, string> = {
 };
 
 const ACTIVITY_COLORS: Record<string, string> = {
-  flashcards: "#0D9488",
+  flashcards: "hsl(var(--primary))",
   practice_questions: "#7C3AED",
   revision_packs: "#2563EB",
   assessments: "#D97706",
@@ -82,7 +82,7 @@ export default function LearningEfficiencyPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <TrendingUp className="h-6 w-6 text-teal-600" />
+            <TrendingUp className="h-6 w-6 text-primary" />
             Learning Efficiency Analytics
           </h1>
           <p className="text-sm text-gray-500 mt-1">
@@ -98,7 +98,7 @@ export default function LearningEfficiencyPage() {
       {/* Summary stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Active Students", value: summary.activeStudents ?? "—", icon: Users, color: "text-teal-600 bg-teal-50" },
+          { label: "Active Students", value: summary.activeStudents ?? "—", icon: Users, color: "text-primary bg-primary/8" },
           { label: "Avg Improvement", value: summary.avgImprovementPct != null ? `${summary.avgImprovementPct.toFixed(1)}%` : "—", icon: TrendingUp, color: "text-green-600 bg-green-50" },
           { label: "Top Activity", value: summary.topActivity ? ACTIVITY_LABELS[summary.topActivity] ?? summary.topActivity : "—", icon: Star, color: "text-violet-600 bg-violet-50" },
           { label: "Sessions This Week", value: summary.sessionsThisWeek ?? "—", icon: BarChart3, color: "text-blue-600 bg-blue-50" },
@@ -149,7 +149,7 @@ export default function LearningEfficiencyPage() {
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 10 }} unit="%" />
                 <Tooltip formatter={(v: any) => [`${v}%`, "Avg improvement"]} />
-                <Bar dataKey="improvement" fill="#0D9488" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="improvement" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -167,7 +167,7 @@ export default function LearningEfficiencyPage() {
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />
               <Legend wrapperStyle={{ fontSize: 11 }} />
-              <Line type="monotone" dataKey="flashcards" stroke="#0D9488" dot={false} name="Flashcards" />
+              <Line type="monotone" dataKey="flashcards" stroke="hsl(var(--primary))" dot={false} name="Flashcards" />
               <Line type="monotone" dataKey="practice_questions" stroke="#7C3AED" dot={false} name="Practice Qs" />
               <Line type="monotone" dataKey="assessments" stroke="#D97706" dot={false} name="Assessments" />
             </LineChart>
@@ -211,7 +211,7 @@ export default function LearningEfficiencyPage() {
                     <span className="text-xs text-gray-500">{s.avgScore.toFixed(0)}% avg · {s.studentsActive} students</span>
                   </div>
                   <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full bg-teal-500 transition-all"
+                    <div className="h-full rounded-full bg-primary transition-all"
                       style={{ width: `${Math.min(s.avgScore, 100)}%` }} />
                   </div>
                 </div>

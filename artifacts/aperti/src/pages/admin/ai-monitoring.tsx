@@ -31,12 +31,12 @@ function StatusDot({ status }: { status: "healthy" | "degraded" | "down" | strin
 }
 
 function StatCard({
-  icon: Icon, label, value, sub, color = "teal",
+  icon: Icon, label, value, sub, color = "primary",
 }: {
   icon: any; label: string; value: string | number; sub?: string; color?: string;
 }) {
   const colorMap: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-700 dark:bg-teal-950/40 dark:text-teal-400",
+    primary: "bg-primary/8 text-primary",
     blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400",
     amber: "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400",
     rose: "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-400",
@@ -52,7 +52,7 @@ function StatCard({
             <p className="text-2xl font-bold text-foreground mt-1">{value}</p>
             {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
           </div>
-          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.teal}`}>
+          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.primary}`}>
             <Icon size={18} />
           </div>
         </div>
@@ -212,7 +212,7 @@ export default function AiMonitoring() {
       </motion.div>
 
       <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard icon={Brain}       label="Total Calls (30d)"   value={total.calls?.toLocaleString() ?? "—"} color="teal" />
+        <StatCard icon={Brain}       label="Total Calls (30d)"   value={total.calls?.toLocaleString() ?? "—"} color="primary" />
         <StatCard icon={CheckCircle2} label="Success Rate"       value={total.successRate != null ? `${total.successRate}%` : "—"}
           sub="30-day window" color={total.successRate >= 95 ? "emerald" : "amber"} />
         <StatCard icon={XCircle}     label="Failures (30d)"      value={total.failures?.toLocaleString() ?? "—"} color="rose" />
@@ -220,7 +220,7 @@ export default function AiMonitoring() {
         <StatCard icon={Shield}      label="Override Rate (30d)" value={govReviews.override_rate != null ? `${govReviews.override_rate}%` : "—"}
           sub="teacher vs AI" color={parseFloat(govReviews.override_rate ?? 0) > 30 ? "amber" : "emerald"} />
         <StatCard icon={AlertTriangle} label="Pending Reviews"   value={h.pendingReviews ?? "—"}
-          sub="SnapGrade" color={h.pendingReviews > 5 ? "amber" : "teal"} />
+          sub="SnapGrade" color={h.pendingReviews > 5 ? "amber" : "primary"} />
       </motion.div>
 
       {!summary?.aiAvailable && (
@@ -246,7 +246,7 @@ export default function AiMonitoring() {
               onClick={() => setActiveTab(t.id)}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === t.id
-                  ? "border-teal-600 text-teal-600"
+                  ? "border-primary text-primary"
                   : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -261,7 +261,7 @@ export default function AiMonitoring() {
               <Card className="border border-border shadow-sm bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Activity size={15} className="text-teal-600" />
+                    <Activity size={15} className="text-primary" />
                     7-Day Reliability
                   </CardTitle>
                 </CardHeader>
@@ -290,7 +290,7 @@ export default function AiMonitoring() {
               <Card className="border border-border shadow-sm bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Shield size={15} className="text-teal-600" />
+                    <Shield size={15} className="text-primary" />
                     Teacher Override Stats (30d)
                   </CardTitle>
                   <CardDescription className="text-xs">SnapGrade AI grade review outcomes</CardDescription>
@@ -328,7 +328,7 @@ export default function AiMonitoring() {
             <Card className="border border-border shadow-sm bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <BarChart3 size={15} className="text-teal-600" />
+                  <BarChart3 size={15} className="text-primary" />
                   Daily Usage (last 30 days)
                 </CardTitle>
               </CardHeader>
@@ -397,7 +397,7 @@ export default function AiMonitoring() {
               <Card className="border border-border shadow-sm bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <BookOpen size={15} className="text-teal-600" />
+                    <BookOpen size={15} className="text-primary" />
                     Top 10 Hardest Questions
                   </CardTitle>
                   <CardDescription className="text-xs">Ranked by teacher–AI disagreement rate</CardDescription>
@@ -429,7 +429,7 @@ export default function AiMonitoring() {
               <Card className="border border-border shadow-sm bg-card">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Target size={15} className="text-teal-600" />
+                    <Target size={15} className="text-primary" />
                     Average Confidence by Subject
                   </CardTitle>
                   <CardDescription className="text-xs">Lower = more uncertain AI grading</CardDescription>
@@ -533,7 +533,7 @@ export default function AiMonitoring() {
                 <Card className="border border-border shadow-sm bg-card">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <Users size={15} className="text-teal-600" />
+                      <Users size={15} className="text-primary" />
                       All Teachers
                     </CardTitle>
                   </CardHeader>
@@ -594,8 +594,8 @@ export default function AiMonitoring() {
                 const successRate = f.calls > 0 ? Math.round(((f.calls - f.failures) / f.calls) * 100) : 100;
                 return (
                   <div key={f.feature} className="flex items-center gap-4 p-4 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors">
-                    <div className="p-2 rounded-lg bg-teal-50 dark:bg-teal-950/40">
-                      <Layers size={15} className="text-teal-600" />
+                    <div className="p-2 rounded-lg bg-primary/8 dark:bg-primary/10">
+                      <Layers size={15} className="text-primary" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate capitalize">{f.feature?.replace(/-/g, " ") ?? "unknown"}</p>

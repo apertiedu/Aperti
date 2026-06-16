@@ -16,7 +16,7 @@ const ROLES = [
     label: "Admin",
     description: "Full platform control — Admin Command Centre",
     icon: Shield,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     bg: "#E6F4F1",
   },
   {
@@ -24,7 +24,7 @@ const ROLES = [
     label: "Teacher",
     description: "CoreHub, PlanGrid, CheckIn, GradeFlow and all teaching tools",
     icon: UserCheck,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     bg: "#E0F2F1",
   },
   {
@@ -76,8 +76,8 @@ export default function QuickSwitch() {
     <div className="min-h-screen bg-[#F5F5F5] p-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="h-10 w-10 rounded-xl bg-[#0D9488]/10 flex items-center justify-center">
-            <RefreshCw className="h-5 w-5 text-[#0D9488]" />
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <RefreshCw className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">QuickSwitch</h1>
@@ -89,17 +89,17 @@ export default function QuickSwitch() {
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-[#0D9488]/10 border border-[#0D9488]/20"
+            className="mt-3 flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20"
           >
-            <Eye className="h-4 w-4 text-[#0D9488]" />
-            <span className="text-sm text-[#0D9488] font-medium">
+            <Eye className="h-4 w-4 text-primary" />
+            <span className="text-sm text-primary font-medium">
               Currently previewing as <strong>{currentOverride}</strong>
             </span>
             <Button
               size="sm"
               variant="outline"
               onClick={handleExit}
-              className="ml-auto border-[#0D9488]/30 text-[#0D9488] hover:bg-[#0D9488]/10 h-7 text-xs"
+              className="ml-auto border-primary/30 text-primary hover:bg-primary/10 h-7 text-xs"
             >
               <LogOut className="h-3 w-3 mr-1" /> Exit Preview
             </Button>
@@ -123,7 +123,7 @@ export default function QuickSwitch() {
                 onClick={() => setSelected(role.id)}
                 className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-150 bg-card shadow-sm hover:shadow-md ${
                   isSelected
-                    ? "border-[#0D9488] ring-1 ring-[#0D9488]/20"
+                    ? "border-primary ring-1 ring-primary/20"
                     : "border-gray-100 hover:border-gray-200"
                 }`}
               >
@@ -147,8 +147,8 @@ export default function QuickSwitch() {
                   </div>
                 </div>
                 {isSelected && (
-                  <div className="mt-3 h-0.5 w-full rounded-full bg-[#0D9488]/20">
-                    <div className="h-full bg-[#0D9488] rounded-full w-full" />
+                  <div className="mt-3 h-0.5 w-full rounded-full bg-primary/20">
+                    <div className="h-full bg-primary rounded-full w-full" />
                   </div>
                 )}
               </button>
@@ -160,7 +160,7 @@ export default function QuickSwitch() {
       <div className="mt-6 flex gap-3">
         <Button
           onClick={handleSwitch}
-          className="bg-[#0D9488] hover:bg-[#00695C] text-white px-6"
+          className="bg-primary hover:bg-[#00695C] text-white px-6"
         >
           <Eye className="h-4 w-4 mr-2" />
           {selected === user?.role ? "View as Myself" : `Preview as ${ROLES.find(r => r.id === selected)?.label}`}

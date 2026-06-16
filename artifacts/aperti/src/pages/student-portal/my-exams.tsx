@@ -179,7 +179,7 @@ export default function MyExams() {
                 {done.map(exam => (
                   <Card key={exam.id} className="border-border/50 opacity-75">
                     <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-primary/80 flex items-center justify-center flex-shrink-0">
                         <CheckCircle className="h-5 w-5 text-white" />
                       </div>
                       <div className="flex-1 min-w-0">

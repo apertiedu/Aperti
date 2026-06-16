@@ -91,8 +91,8 @@ export function FirstRunBanner({ role, completedItems = [], onDismiss, className
           onClick={() => setExpanded(e => !e)}
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="p-2 rounded-xl bg-teal-50 dark:bg-teal-950/30 shrink-0">
-              <Sparkles size={16} className="text-teal-600" />
+            <div className="p-2 rounded-xl bg-primary/8 shrink-0">
+              <Sparkles size={16} className="text-primary" />
             </div>
             <div className="min-w-0">
               <p className="text-sm font-semibold text-foreground leading-tight">{config.welcome}</p>
@@ -103,7 +103,7 @@ export function FirstRunBanner({ role, completedItems = [], onDismiss, className
             <div className="flex items-center gap-2">
               <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
                 <motion.div
-                  className="h-full rounded-full bg-teal-500"
+                  className="h-full rounded-full bg-primary"
                   initial={{ width: 0 }}
                   animate={{ width: `${pct}%` }}
                   transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -157,7 +157,7 @@ export function FirstRunBanner({ role, completedItems = [], onDismiss, className
                       </div>
                       {!isDone && item.href && (
                         <Link href={item.href}>
-                          <Button size="sm" variant="ghost" className="gap-1.5 text-xs h-7 shrink-0 text-teal-600 hover:text-teal-700 hover:bg-teal-50 dark:hover:bg-teal-950/30">
+                          <Button size="sm" variant="ghost" className="gap-1.5 text-xs h-7 shrink-0 text-primary hover:text-primary/80 hover:bg-primary/8">
                             {item.action}
                             <ArrowRight size={11} />
                           </Button>
@@ -196,17 +196,17 @@ export function WelcomeHero({ name, role, onGetStarted, className = "" }: Welcom
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className={`relative rounded-2xl overflow-hidden border border-teal-100 dark:border-teal-900 ${className}`}
-      style={{ background: "linear-gradient(135deg, #0D948812 0%, #0ea5e908 50%, transparent 100%)" }}
+      className={`relative rounded-2xl overflow-hidden border border-border ${className}`}
+      style={{ background: "linear-gradient(135deg, hsl(var(--primary)/0.07) 0%, hsl(var(--primary)/0.03) 50%, transparent 100%)" }}
     >
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-teal-500/5 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-teal-300/5 blur-2xl" />
+        <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-primary/3 blur-2xl" />
       </div>
       <div className="relative p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center gap-5">
           <div className="flex-1">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 dark:bg-teal-950/40 border border-teal-200 dark:border-teal-800 text-xs text-teal-700 dark:text-teal-400 font-medium mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/8 border border-primary/20 text-xs text-primary font-medium mb-3">
               <Sparkles size={11} />
               Getting started
             </div>
@@ -215,7 +215,7 @@ export function WelcomeHero({ name, role, onGetStarted, className = "" }: Welcom
           </div>
           {onGetStarted && (
             <Button
-              className="bg-teal-600 hover:bg-teal-700 text-white gap-2 shrink-0"
+              className="gap-2 shrink-0"
               onClick={onGetStarted}
             >
               Get Started

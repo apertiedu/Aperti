@@ -7,8 +7,7 @@ import {
 import { Users, TrendingUp, DollarSign, Activity, AlertTriangle, RefreshCw } from "lucide-react";
 import { SkeletonChart, SkeletonDashboardGrid } from "@/components/skeleton-layouts";
 
-const TEAL = "#0D9488";
-const COLORS = [TEAL, "#2563EB", "#7C3AED", "#D97706", "#DC2626", "#059669"];
+const COLORS = ["hsl(var(--primary))", "#2563EB", "#7C3AED", "#D97706", "#DC2626", "#059669"];
 
 function SectionCard({ title, subtitle, icon: Icon, children }: {
   title: string; subtitle?: string; icon: any; children: React.ReactNode;
@@ -16,8 +15,8 @@ function SectionCard({ title, subtitle, icon: Icon, children }: {
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div className="flex items-center gap-2.5 mb-4">
-        <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center flex-shrink-0">
-          <Icon className="w-4 h-4 text-teal-600" />
+        <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center flex-shrink-0">
+          <Icon className="w-4 h-4 text-primary" />
         </div>
         <div>
           <p className="text-sm font-bold text-gray-900">{title}</p>
@@ -94,8 +93,8 @@ export default function AnalyticsExtendedPage() {
         ].map(({ label, value, Icon, sub }) => (
           <div key={label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div className="flex items-start justify-between mb-3">
-              <div className="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
-                <Icon className="w-4 h-4 text-teal-600" />
+              <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center">
+                <Icon className="w-4 h-4 text-primary" />
               </div>
             </div>
             <p className="text-2xl font-bold text-gray-900">{value.toLocaleString()}</p>
@@ -113,15 +112,15 @@ export default function AnalyticsExtendedPage() {
               <AreaChart data={growth?.weekly ?? []} margin={{ top: 4, right: 4, bottom: 0, left: -24 }}>
                 <defs>
                   <linearGradient id="ugGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={TEAL} stopOpacity={0.15} />
-                    <stop offset="95%" stopColor={TEAL} stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="week" tick={{ fontSize: 10 }} tickFormatter={v => v?.slice(5, 10) ?? v} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={(v: any) => [`${v} users`, "New Users"]} />
-                <Area type="monotone" dataKey="new_users" stroke={TEAL} strokeWidth={2} fill="url(#ugGrad)" dot={false} />
+                <Area type="monotone" dataKey="new_users" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#ugGrad)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -141,7 +140,7 @@ export default function AnalyticsExtendedPage() {
                 <XAxis dataKey="week" tick={{ fontSize: 10 }} tickFormatter={v => v?.slice(5, 10) ?? v} />
                 <YAxis tick={{ fontSize: 10 }} />
                 <Tooltip formatter={(v: any) => [`${v}`, "Enrollments"]} />
-                <Bar dataKey="enrollments" fill={TEAL} radius={[4, 4, 0, 0]} />
+                <Bar dataKey="enrollments" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -201,7 +200,7 @@ export default function AnalyticsExtendedPage() {
                   </div>
                   <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full rounded-full bg-teal-500 transition-all duration-1000"
+                      className="h-full rounded-full bg-primary transition-all duration-1000"
                       style={{ width: `${r.pct ?? 0}%` }}
                     />
                   </div>

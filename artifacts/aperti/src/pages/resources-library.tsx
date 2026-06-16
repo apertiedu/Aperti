@@ -42,7 +42,7 @@ function ResourceCard({ resource, isAdmin, onApprove }: { resource: any; isAdmin
   const Icon = TYPE_ICONS[resource.type] || FileText;
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="bg-card border border-border rounded-xl p-5 hover:border-teal-200 hover:shadow-sm transition-all group">
+      className="bg-card border border-border rounded-xl p-5 hover:border-primary/25 hover:shadow-sm transition-all group">
       <div className="flex items-start gap-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${TYPE_COLORS[resource.type] || "bg-gray-100 text-gray-600"}`}>
           <Icon size={20} />
@@ -57,7 +57,7 @@ function ResourceCard({ resource, isAdmin, onApprove }: { resource: any; isAdmin
           {resource.description && <p className="text-xs text-gray-500 line-clamp-2 mb-3">{resource.description}</p>}
           <div className="flex flex-wrap gap-2 mb-3">
             {resource.type && <Badge className={`text-xs ${TYPE_COLORS[resource.type] || "bg-gray-100 text-gray-600"}`}>{resource.type}</Badge>}
-            {resource.subject_name && <Badge className="text-xs bg-teal-100 text-teal-700">{resource.subject_name}</Badge>}
+            {resource.subject_name && <Badge className="text-xs bg-primary/15 text-primary">{resource.subject_name}</Badge>}
             {resource.version > 1 && <Badge variant="outline" className="text-xs">v{resource.version}</Badge>}
           </div>
           <div className="flex items-center justify-between">
@@ -125,7 +125,7 @@ export default function ResourcesLibrary() {
       <div className="max-w-7xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Library className="text-teal-600" size={28} /> Resource Library</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Library className="text-primary" size={28} /> Resource Library</h1>
             <p className="text-gray-500 mt-1">Curated, approved educational resources for every subject</p>
           </div>
           {isAdmin && (
@@ -146,7 +146,7 @@ export default function ResourcesLibrary() {
         <div className="flex gap-2 flex-wrap">
           {["all", "pdf", "video", "worksheet", "notes", "presentation"].map(t => (
             <button key={t} onClick={() => setTypeFilter(t)}
-              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${typeFilter === t ? "bg-teal-600 text-white border-teal-600" : "bg-card text-muted-foreground border-border hover:border-teal-300"}`}>
+              className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${typeFilter === t ? "bg-primary text-white border-primary" : "bg-card text-muted-foreground border-border hover:border-primary/40"}`}>
               {t === "all" ? `All (${(resources || []).length})` : `${t.charAt(0).toUpperCase() + t.slice(1)} ${typeCounts[t] ? `(${typeCounts[t]})` : ""}`}
             </button>
           ))}
@@ -166,8 +166,8 @@ export default function ResourcesLibrary() {
             </SelectContent>
           </Select>
           <div className="flex border border-border rounded-lg overflow-hidden bg-card">
-            <button onClick={() => setViewMode("grid")} className={`px-3 py-2 transition-colors ${viewMode === "grid" ? "bg-teal-600 text-white" : "text-gray-500 hover:bg-gray-50"}`}><Grid size={15} /></button>
-            <button onClick={() => setViewMode("list")} className={`px-3 py-2 transition-colors ${viewMode === "list" ? "bg-teal-600 text-white" : "text-gray-500 hover:bg-gray-50"}`}><List size={15} /></button>
+            <button onClick={() => setViewMode("grid")} className={`px-3 py-2 transition-colors ${viewMode === "grid" ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-50"}`}><Grid size={15} /></button>
+            <button onClick={() => setViewMode("list")} className={`px-3 py-2 transition-colors ${viewMode === "list" ? "bg-primary text-white" : "text-gray-500 hover:bg-gray-50"}`}><List size={15} /></button>
           </div>
         </div>
 

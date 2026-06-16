@@ -6,12 +6,11 @@ import { Search, CheckCircle2, Clock, TestTube, AlertCircle, Package, ArrowRight
 import { postJSON } from "@/lib/api";
 import { toast } from "sonner";
 
-const TEAL = "#0D9488";
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   released:    { label: "Available",   color: "#059669", bg: "#ECFDF5", icon: CheckCircle2 },
   beta:        { label: "Beta",        color: "#D97706", bg: "#FFFBEB", icon: TestTube },
-  coming_soon: { label: "Coming Soon", color: "#0D9488", bg: "#F0FDFA", icon: Clock },
+  coming_soon: { label: "Coming Soon", color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)", icon: Clock },
   scheduled:   { label: "Launching",  color: "#6366F1", bg: "#EEF2FF", icon: Timer },
   internal:    { label: "Internal",   color: "#6B7280", bg: "#F9FAFB", icon: Package },
 };
@@ -43,12 +42,12 @@ function WaitlistModal({ feature, onClose }: { feature: any; onClose: () => void
       <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-card rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {done ? (
           <div className="p-8 text-center">
-            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle2 className="w-8 h-8 text-teal-600" />
+            <div className="w-16 h-16 bg-primary/15 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CheckCircle2 className="w-8 h-8 text-primary" />
             </div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">You're on the list!</h3>
             <p className="text-gray-500 text-sm mb-6">We'll notify you when <strong>{feature.name}</strong> becomes available.</p>
-            <button onClick={onClose} className="px-6 py-2.5 bg-teal-600 text-white rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors">Done</button>
+            <button onClick={onClose} className="px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-primary/80 transition-colors">Done</button>
           </div>
         ) : (
           <>
@@ -58,18 +57,18 @@ function WaitlistModal({ feature, onClose }: { feature: any; onClose: () => void
             </div>
             <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
               <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Email *</label><input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">Email *</label><input type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
                 <div><label className="block text-xs font-medium text-gray-600 mb-1">Role</label>
-                  <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                  <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                     <option value="">Select...</option><option value="teacher">Teacher</option><option value="student">Student</option><option value="admin">Admin</option><option value="parent">Parent</option>
                   </select>
                 </div>
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Organization</label><input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">Organization</label><input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20" /></div>
               </div>
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={onClose} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={!form.email || mutation.isPending} className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50" style={{ backgroundColor: TEAL }}>
+                <button type="submit" disabled={!form.email || mutation.isPending} className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50" style={{ backgroundColor: "hsl(var(--primary))" }}>
                   {mutation.isPending ? "Joining..." : "Join Waitlist"}
                 </button>
               </div>
@@ -119,7 +118,7 @@ export default function FeatureShowcasePage() {
       {/* Header */}
       <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span className="text-teal-600">.</span></Link>
+          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span className="text-primary">.</span></Link>
           <div className="flex items-center gap-4">
             <Link href="/roadmap" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Roadmap</Link>
             <Link href="/release-notes" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">What's New</Link>
@@ -131,7 +130,7 @@ export default function FeatureShowcasePage() {
       <div className="bg-background border-b border-border">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 text-center">
           <Reveal>
-            <span className="inline-flex items-center gap-2 px-3 py-1 bg-teal-50 text-teal-700 rounded-full text-xs font-medium mb-6">
+            <span className="inline-flex items-center gap-2 px-3 py-1 bg-primary/8 text-primary rounded-full text-xs font-medium mb-6">
               <Package className="w-3 h-3" /> {features.length} Features
             </span>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Platform Features</h1>
@@ -146,14 +145,14 @@ export default function FeatureShowcasePage() {
           <div className="flex flex-wrap gap-3 mb-8">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search features..." className="pl-9 pr-4 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-56" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search features..." className="pl-9 pr-4 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-56" />
             </div>
-            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
               <option value="">All Statuses</option>
               {Object.entries(STATUS_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
             </select>
             {categories.length > 0 && (
-              <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} className="px-3 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <select value={filterCat} onChange={(e) => setFilterCat(e.target.value)} className="px-3 py-2 bg-card rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20">
                 <option value="">All Categories</option>
                 {categories.map((c: any) => <option key={c} value={c}>{c}</option>)}
               </select>
@@ -163,7 +162,7 @@ export default function FeatureShowcasePage() {
 
         {isLoading ? (
           <div className="text-center text-gray-400 py-20">
-            <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <div className="w-8 h-8 border-2 border-primary/40 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
             Loading features...
           </div>
         ) : (
@@ -192,11 +191,11 @@ export default function FeatureShowcasePage() {
                     <div className="flex items-center justify-between mt-auto pt-2">
                       {feature.version && <span className="text-xs text-gray-400 font-mono">v{feature.version}</span>}
                       {(feature.status === "coming_soon" || feature.status === "scheduled") ? (
-                        <button onClick={() => setWaitlistFeature(feature)} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEAL }}>
+                        <button onClick={() => setWaitlistFeature(feature)} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: "hsl(var(--primary))" }}>
                           <Users className="w-4 h-4" /> Join Waitlist
                         </button>
                       ) : (
-                        <Link href={`/features/${feature.id}`} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: TEAL }}>
+                        <Link href={`/features/${feature.id}`} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: "hsl(var(--primary))" }}>
                           Learn More <ArrowRight className="w-4 h-4" />
                         </Link>
                       )}

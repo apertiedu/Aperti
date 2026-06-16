@@ -44,11 +44,11 @@ export default function ParentBilling() {
               <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">Active Plans</h2>
               <div className="grid gap-3 md:grid-cols-2">
                 {data.subscriptions.map((s: any, i: number) => (
-                  <Card key={i} className="border border-teal-100 shadow-sm">
+                  <Card key={i} className="border border-primary/15 shadow-sm">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <p className="text-sm font-bold text-gray-900">{s.plan_name}</p>
-                        <Badge className="bg-teal-100 text-teal-700 text-[10px] rounded-full">Active</Badge>
+                        <Badge className="bg-primary/15 text-primary text-[10px] rounded-full">Active</Badge>
                       </div>
                       <p className="text-2xl font-black text-gray-900">{s.currency || "USD"} {parseFloat(s.price || "0").toFixed(2)}<span className="text-xs font-normal text-gray-400">/mo</span></p>
                       {s.student_name && <p className="text-xs text-gray-400 mt-1">For: {s.student_name}</p>}

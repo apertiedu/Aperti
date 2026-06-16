@@ -81,7 +81,7 @@ function ActivityHeatmap() {
 
         {isLoading ? (
           <div className="flex items-center justify-center h-32">
-            <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -292,14 +292,14 @@ export default function AdminCommand() {
     : null;
 
   const highlights = [
-    { label: "Active Teachers", value: liveCounts?.activeTeachers ?? liveStats?.totalTeachers ?? "—", icon: UserCheck, color: "#0D9488" },
-    { label: "Active Students", value: liveCounts?.activeStudents ?? liveStats?.totalStudents ?? "—", icon: GraduationCap, color: "#0D9488" },
-    { label: "Active Parents", value: liveCounts?.activeParents ?? "—", icon: HeartHandshake, color: "#0D9488" },
+    { label: "Active Teachers", value: liveCounts?.activeTeachers ?? liveStats?.totalTeachers ?? "—", icon: UserCheck, color: "hsl(var(--primary))" },
+    { label: "Active Students", value: liveCounts?.activeStudents ?? liveStats?.totalStudents ?? "—", icon: GraduationCap, color: "hsl(var(--primary))" },
+    { label: "Active Parents", value: liveCounts?.activeParents ?? "—", icon: HeartHandshake, color: "hsl(var(--primary))" },
     { label: "Pending Payments", value: liveCounts?.pendingPayments ?? liveStats?.pendingInstapay ?? "—", icon: CreditCard, color: (liveCounts?.pendingPayments ?? 0) > 0 ? "#D32F2F" : "#757575" },
     { label: "Pending Enrolments", value: liveCounts?.pendingEnrollments ?? "—", icon: Users, color: (liveCounts?.pendingEnrollments ?? 0) > 0 ? "#F59E0B" : "#757575" },
     { label: "AI Calls Today", value: liveCounts?.aiCallsToday ?? "—", icon: Zap, color: "#8B5CF6" },
     { label: "Errors (24 h)", value: liveCounts?.errors24h ?? "—", icon: AlertCircle, color: (liveCounts?.errors24h ?? 0) > 0 ? "#EF4444" : "#757575" },
-    { label: "Today's Attendance", value: liveStats?.attendanceRate != null ? `${liveStats.attendanceRate}%` : "—", icon: BarChart3, color: "#0D9488" },
+    { label: "Today's Attendance", value: liveStats?.attendanceRate != null ? `${liveStats.attendanceRate}%` : "—", icon: BarChart3, color: "hsl(var(--primary))" },
   ];
 
   return (
@@ -473,7 +473,7 @@ export default function AdminCommand() {
             transition={{ delay: 0.35 + i * 0.05 }}
           >
             <Link href={mod.to}>
-              <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-gradient-to-r from-teal-600 to-emerald-600 text-white" : (mod as any).highlight2 ? "bg-gradient-to-r from-violet-600 to-purple-700 text-white" : "bg-card"}`}>
+              <Card className={`border-0 shadow-sm cursor-pointer group hover:shadow-md transition-shadow ${(mod as any).highlight ? "bg-primary text-primary-foreground" : (mod as any).highlight2 ? "bg-gradient-to-r from-violet-600 to-purple-700 text-white" : "bg-card"}`}>
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors"
                     style={{ background: (mod as any).highlight || (mod as any).highlight2 ? "rgba(255,255,255,0.2)" : "rgba(0,121,107,0.07)" }}>

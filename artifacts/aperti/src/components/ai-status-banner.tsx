@@ -121,7 +121,7 @@ export function AIStatusBanner({
           {cfg.showManual && onManual && (
             <Button
               size="sm"
-              className="gap-1.5 text-xs h-7 bg-teal-600 hover:bg-teal-700 text-white"
+              className="gap-1.5 text-xs h-7"
               onClick={onManual}
             >
               Manual Review
@@ -142,9 +142,9 @@ export function AILoadingState({ label = "Analyzing submission...", subLabel = "
   return (
     <div className="flex flex-col items-center justify-center py-10 gap-4">
       <div className="relative">
-        <div className="w-12 h-12 rounded-full border-4 border-teal-100 dark:border-teal-900" />
-        <div className="absolute inset-0 w-12 h-12 rounded-full border-4 border-teal-600 border-t-transparent animate-spin" />
-        <Brain size={16} className="absolute inset-0 m-auto text-teal-600" />
+        <div className="w-12 h-12 rounded-full border-4 border-primary/10" />
+        <div className="absolute inset-0 w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+        <Brain size={16} className="absolute inset-0 m-auto text-primary" />
       </div>
       <div className="text-center">
         <p className="text-sm font-medium text-foreground">{label}</p>
@@ -154,7 +154,7 @@ export function AILoadingState({ label = "Analyzing submission...", subLabel = "
         {["Extracting text", "Matching mark scheme", "Generating feedback"].map((step, i) => (
           <span
             key={step}
-            className="text-xs px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-400"
+            className="text-xs px-2 py-0.5 rounded-full bg-primary/8 text-primary"
             style={{ animationDelay: `${i * 0.3}s`, opacity: 0.6 + i * 0.2 }}
           >
             {step}

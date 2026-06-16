@@ -11,7 +11,6 @@ import { Settings, Bell, Globe, Users, Shield, Link2, CheckCircle2 } from "lucid
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
@@ -78,16 +77,16 @@ export default function ParentSettings() {
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border border-gray-100 shadow-sm">
               <CardContent className="p-5">
-                <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Users className="h-4 w-4 text-teal-500" />Profile</h2>
+                <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Users className="h-4 w-4 text-primary" />Profile</h2>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold" style={{ background: TEAL }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold" className="bg-primary text-primary-foreground">
                     {(user?.displayName || user?.username || "P").slice(0, 2).toUpperCase()}
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{user?.displayName || user?.username}</p>
                     <p className="text-xs text-gray-400">Parent account</p>
                   </div>
-                  <Badge className="ml-auto bg-teal-100 text-teal-700 text-[10px] rounded-full">Active</Badge>
+                  <Badge className="ml-auto bg-primary/15 text-primary text-[10px] rounded-full">Active</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -140,11 +139,11 @@ export default function ParentSettings() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
               <Card className="border border-gray-100 shadow-sm">
                 <CardContent className="p-5">
-                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Link2 className="h-4 w-4 text-teal-500" />Linked Children</h2>
+                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Link2 className="h-4 w-4 text-primary" />Linked Children</h2>
                   <div className="space-y-2">
                     {children.map((c: any) => (
                       <div key={c.studentId} className="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
-                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: TEAL }}>
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" className="bg-primary text-primary-foreground">
                           {(c.name || "S").slice(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1">
@@ -166,13 +165,13 @@ export default function ParentSettings() {
               <CardContent className="p-5">
                 <h2 className="text-sm font-bold text-gray-800 mb-2 flex items-center gap-2"><Shield className="h-4 w-4 text-gray-500" />Privacy & Data</h2>
                 <p className="text-xs text-gray-400 mb-3">Your data is stored securely and only used to improve your child's educational experience on Aperti.</p>
-                <p className="text-xs text-gray-500">To manage detailed data sharing permissions, visit <span className="text-teal-600 font-medium">/parent/link-student</span>.</p>
+                <p className="text-xs text-gray-500">To manage detailed data sharing permissions, visit <span className="text-primary font-medium">/parent/link-student</span>.</p>
               </CardContent>
             </Card>
           </motion.div>
 
           {/* Save */}
-          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="w-full rounded-xl text-white" style={{ background: TEAL }}>
+          <Button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="w-full rounded-xl text-white" className="bg-primary text-primary-foreground">
             {saveMutation.isPending ? "Saving…" : "Save Settings"}
           </Button>
         </div>

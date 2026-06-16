@@ -5,7 +5,7 @@ export default function Terms() {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-background/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/" className="font-extrabold text-xl tracking-tight" style={{ color: "#0D9488" }}>
+          <Link href="/" className="font-extrabold text-xl tracking-tight" className="text-primary">
             Aperti.
           </Link>
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

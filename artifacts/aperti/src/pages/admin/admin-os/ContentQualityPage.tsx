@@ -61,7 +61,7 @@ export default function ContentQualityPage() {
           whileTap={{ scale: 0.97 }}
           onClick={() => refreshMut.mutate()}
           disabled={refreshMut.isPending}
-          className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-60"
+          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-60"
         >
           <RefreshCw className={`w-4 h-4 ${refreshMut.isPending ? "animate-spin" : ""}`} />
           {refreshMut.isPending ? "Running scan…" : "Recalculate Quality"}
@@ -99,7 +99,7 @@ export default function ContentQualityPage() {
         {["", "question", "assessment", "lesson"].map((t) => (
           <button key={t} onClick={() => { setType(t); setPage(1); }}
             className={`px-3 py-1 rounded-lg text-xs font-medium border transition-colors ${
-              type === t ? "bg-teal-600 text-white border-teal-600" : "bg-white text-gray-600 border-gray-200 hover:border-teal-300"
+              type === t ? "bg-primary text-primary-foreground border-primary" : "bg-white text-gray-600 border-gray-200 hover:border-primary/40"
             }`}>
             {t === "" ? "All" : t.charAt(0).toUpperCase() + t.slice(1)}
           </button>

@@ -263,7 +263,7 @@ export default function ErrorLogsPage() {
             <p className="text-xs text-gray-500">{filtered.length} log{filtered.length !== 1 ? "s" : ""} shown</p>
             <button
               onClick={() => exportCSV(filtered)}
-              className="text-xs text-teal-600 hover:underline flex items-center gap-1"
+              className="text-xs text-primary hover:underline flex items-center gap-1"
             >
               <Download className="w-3 h-3" /> Download CSV
             </button>

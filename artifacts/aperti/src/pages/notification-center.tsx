@@ -26,7 +26,7 @@ type InboxData = {
 };
 
 const TYPE_META: Record<string, { icon: any; color: string; label: string }> = {
-  message:    { icon: MessageSquare, color: "text-teal-600 bg-teal-50",     label: "Messages" },
+  message:    { icon: MessageSquare, color: "text-primary bg-primary/8",     label: "Messages" },
   submission: { icon: ClipboardList, color: "text-amber-600 bg-amber-50",   label: "Submissions" },
   alert:      { icon: AlertTriangle, color: "text-red-600 bg-red-50",       label: "Alerts" },
   ticket:     { icon: Ticket,        color: "text-purple-600 bg-purple-50", label: "Tickets" },

@@ -93,7 +93,7 @@ export default function ResourceRelationshipPage() {
           <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }} animate={{ width: `${linkedPct}%` }} transition={{ duration: 0.6, ease: "easeOut" }}
-              className={`h-full rounded-full ${linkedPct === 100 ? "bg-green-500" : linkedPct >= 60 ? "bg-teal-500" : linkedPct >= 30 ? "bg-amber-400" : "bg-red-400"}`}
+              className={`h-full rounded-full ${linkedPct === 100 ? "bg-green-500" : linkedPct >= 60 ? "bg-primary" : linkedPct >= 30 ? "bg-amber-400" : "bg-red-400"}`}
             />
           </div>
           <p className="text-xs text-gray-400 mt-1">{stats.withMarkScheme} of {stats.total} questions have a linked mark scheme</p>
@@ -156,7 +156,7 @@ export default function ResourceRelationshipPage() {
                       )}
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      <RelBadge count={msCount} icon={FileText} label="mark scheme" color="bg-teal-50 text-teal-700" />
+                      <RelBadge count={msCount} icon={FileText} label="mark scheme" color="bg-primary/8 text-primary" />
                       <RelBadge count={relCount} icon={Link2} label="relationships" color="bg-violet-50 text-violet-700" />
                     </div>
                   </div>

@@ -328,7 +328,7 @@ export default function Pulse() {
                 <ScoreGauge
                   score={avgEngagement}
                   label="Avg Engagement"
-                  color="#0D9488"
+                  color="hsl(var(--primary))"
                   icon={Zap}
                   description="Attendance × 40% + Homework × 35% + Exams × 25%"
                 />
@@ -363,7 +363,7 @@ export default function Pulse() {
                           <th className="text-center p-3 font-medium text-xs text-gray-500 uppercase tracking-wide">Attendance</th>
                           <th className="text-center p-3 font-medium text-xs text-gray-500 uppercase tracking-wide">HW Done</th>
                           <th className="text-center p-3 font-medium text-xs text-gray-500 uppercase tracking-wide">
-                            <span className="flex items-center justify-center gap-1"><Zap className="h-3 w-3 text-teal-500" />Engagement</span>
+                            <span className="flex items-center justify-center gap-1"><Zap className="h-3 w-3 text-primary" />Engagement</span>
                           </th>
                           <th className="text-center p-3 font-medium text-xs text-gray-500 uppercase tracking-wide">
                             <span className="flex items-center justify-center gap-1"><ShieldAlert className="h-3 w-3 text-red-400" />Risk</span>
@@ -403,9 +403,9 @@ export default function Pulse() {
                             </td>
                             <td className="p-3 text-center">
                               <div className="flex flex-col items-center gap-1">
-                                <span className="text-sm font-bold text-teal-700">{s.engagementScore}</span>
+                                <span className="text-sm font-bold text-primary">{s.engagementScore}</span>
                                 <div className="w-12 h-1 rounded-full bg-gray-100 overflow-hidden">
-                                  <div className="h-full rounded-full bg-teal-500" style={{ width: `${s.engagementScore}%` }} />
+                                  <div className="h-full rounded-full bg-primary" style={{ width: `${s.engagementScore}%` }} />
                                 </div>
                               </div>
                             </td>

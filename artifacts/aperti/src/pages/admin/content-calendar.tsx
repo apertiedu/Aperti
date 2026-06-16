@@ -40,7 +40,7 @@ interface CalendarItem {
 const TYPE_CONFIG: Record<ContentType, { label: string; icon: React.ReactNode; color: string; bg: string }> = {
   announcement:  { label: "Announcement",       icon: <Megaphone className="h-4 w-4" />,     color: "text-blue-600",   bg: "bg-blue-50 border-blue-200" },
   testimonial:   { label: "Testimonial Spotlight", icon: <Star className="h-4 w-4" />,        color: "text-amber-600",  bg: "bg-amber-50 border-amber-200" },
-  landing_change:{ label: "Landing Page Change", icon: <LayoutTemplate className="h-4 w-4" />, color: "text-teal-600",   bg: "bg-teal-50 border-teal-200" },
+  landing_change:{ label: "Landing Page Change", icon: <LayoutTemplate className="h-4 w-4" />, color: "text-primary",   bg: "bg-primary/8 border-primary/25" },
 };
 
 const STATUS_CONFIG: Record<Status, { label: string; variant: string; icon: React.ReactNode }> = {
@@ -455,7 +455,7 @@ function MiniCalendar({
                   <div className="flex gap-0.5 mt-0.5">
                     {dots.slice(0, 3).map((it, idx) => {
                       const dotColor = it.content_type === "announcement" ? "bg-blue-500"
-                        : it.content_type === "testimonial" ? "bg-amber-500" : "bg-teal-500";
+                        : it.content_type === "testimonial" ? "bg-amber-500" : "bg-primary";
                       return <span key={idx} className={cn("h-1 w-1 rounded-full", dotColor)} />;
                     })}
                   </div>
@@ -468,7 +468,7 @@ function MiniCalendar({
           {(Object.entries(TYPE_CONFIG) as [ContentType, typeof TYPE_CONFIG[ContentType]][]).map(([k, cfg]) => (
             <div key={k} className="flex items-center gap-2 text-xs text-muted-foreground">
               <span className={cn("h-2 w-2 rounded-full",
-                k === "announcement" ? "bg-blue-500" : k === "testimonial" ? "bg-amber-500" : "bg-teal-500"
+                k === "announcement" ? "bg-blue-500" : k === "testimonial" ? "bg-amber-500" : "bg-primary"
               )} />
               {cfg.label}
             </div>

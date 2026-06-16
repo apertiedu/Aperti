@@ -12,7 +12,6 @@ import { Send, MessageSquare, Calendar, CheckCheck, Clock, ArrowLeft } from "luc
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "wouter";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
@@ -67,11 +66,11 @@ export default function GuardianLink() {
   return (
     <div className="p-4 md:p-6 max-w-6xl mx-auto h-[calc(100vh-4rem)] flex flex-col gap-4">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}15` }}>
-          <MessageSquare className="h-5 w-5" style={{ color: TEAL }} />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
+          <MessageSquare className="h-5 w-5" className="text-primary" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-gray-900">GuardianLink<span style={{ color: TEAL }}>.</span></h1>
+          <h1 className="text-xl font-black text-gray-900">GuardianLink<span className="text-primary">.</span></h1>
           <p className="text-sm text-gray-500">Direct messaging with teachers</p>
         </div>
       </motion.div>
@@ -90,14 +89,14 @@ export default function GuardianLink() {
                 <div>
                   {conversations.map(c => (
                     <button key={c.other_id} onClick={() => setSelected({ id: c.other_id, name: c.other_name })}
-                      className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b border-gray-50 last:border-0 hover:bg-gray-50 ${selected?.id === c.other_id ? "bg-teal-50" : ""}`}>
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: TEAL }}>
+                      className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors border-b border-gray-50 last:border-0 hover:bg-gray-50 ${selected?.id === c.other_id ? "bg-primary/8" : ""}`}>
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" className="bg-primary text-primary-foreground">
                         {(c.other_name || "T").slice(0, 2).toUpperCase()}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <p className="text-sm font-semibold text-gray-900 truncate">{c.other_name}</p>
-                          {c.unread_count > 0 && <Badge className="h-4 w-4 p-0 flex items-center justify-center text-[9px] shrink-0 bg-teal-500 text-white">{c.unread_count}</Badge>}
+                          {c.unread_count > 0 && <Badge className="h-4 w-4 p-0 flex items-center justify-center text-[9px] shrink-0 bg-primary text-white">{c.unread_count}</Badge>}
                         </div>
                         <p className="text-xs text-gray-400 truncate mt-0.5">{c.last_msg}</p>
                       </div>
@@ -105,7 +104,7 @@ export default function GuardianLink() {
                   ))}
                   {allTeachers.map(t => (
                     <button key={t.id} onClick={() => setSelected({ id: t.id, name: t.display_name })}
-                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b border-gray-50 last:border-0 hover:bg-gray-50 ${selected?.id === t.id ? "bg-teal-50" : ""}`}>
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors border-b border-gray-50 last:border-0 hover:bg-gray-50 ${selected?.id === t.id ? "bg-primary/8" : ""}`}>
                       <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: "#9ca3af" }}>
                         {(t.display_name || "T").slice(0, 2).toUpperCase()}
                       </div>
@@ -134,7 +133,7 @@ export default function GuardianLink() {
               {/* Header */}
               <div className="flex items-center gap-3 p-4 border-b border-gray-100 shrink-0">
                 <button onClick={() => setSelected(null)} className="md:hidden p-1 rounded-lg hover:bg-gray-100"><ArrowLeft className="h-4 w-4 text-gray-500" /></button>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style={{ background: TEAL }}>
+                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" className="bg-primary text-primary-foreground">
                   {(selected.name || "T").slice(0, 2).toUpperCase()}
                 </div>
                 <div className="flex-1">
@@ -164,12 +163,12 @@ export default function GuardianLink() {
                         <motion.div key={msg.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                           className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                           {!isMe && (
-                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold mr-2 shrink-0 mt-1" style={{ background: TEAL }}>
+                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold mr-2 shrink-0 mt-1" className="bg-primary text-primary-foreground">
                               {(msg.from_name || "T").slice(0, 2).toUpperCase()}
                             </div>
                           )}
                           <div className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 ${isMe ? "text-white" : "bg-gray-100 text-gray-800"}`}
-                            style={{ background: isMe ? TEAL : undefined }}>
+                            style={{ background: isMe ? "hsl(var(--primary))" : undefined }}>
                             <p className="text-sm leading-relaxed">{msg.message}</p>
                             <div className={`flex items-center gap-1 mt-1 text-[9px] ${isMe ? "text-white/70 justify-end" : "text-gray-400"}`}>
                               <Clock className="h-2.5 w-2.5" />
@@ -196,7 +195,7 @@ export default function GuardianLink() {
                     className="flex-1 text-sm rounded-xl"
                     disabled={sendMutation.isPending}
                   />
-                  <Button type="submit" disabled={!input.trim() || sendMutation.isPending} size="icon" className="rounded-xl" style={{ background: TEAL }}>
+                  <Button type="submit" disabled={!input.trim() || sendMutation.isPending} size="icon" className="rounded-xl" className="bg-primary text-primary-foreground">
                     <Send className="h-4 w-4" />
                   </Button>
                 </form>

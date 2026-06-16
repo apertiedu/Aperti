@@ -112,7 +112,7 @@ export default function LearningAnalyticsPage() {
                   <RadarChart data={data?.radarData ?? []}>
                     <PolarGrid stroke="hsl(var(--border))" />
                     <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
-                    <Radar name="You" dataKey="score" stroke="#0D9488" fill="#0D9488" fillOpacity={0.2} strokeWidth={2} />
+                    <Radar name="You" dataKey="score" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.2} strokeWidth={2} />
                   </RadarChart>
                 </ResponsiveContainer>
               )}
@@ -142,7 +142,7 @@ export default function LearningAnalyticsPage() {
                     <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
                     <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8 }} />
                     <Area type="monotone" dataKey="mastery" stroke="#8b5cf6" fill="#8b5cf620" strokeWidth={2} name="Mastery" />
-                    <Area type="monotone" dataKey="engagement" stroke="#0D9488" fill="#0D948820" strokeWidth={2} name="Engagement" />
+                    <Area type="monotone" dataKey="engagement" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.13)" strokeWidth={2} name="Engagement" />
                     <Area type="monotone" dataKey="grade" stroke="#f59e0b" fill="#f59e0b20" strokeWidth={2} name="Grade" />
                   </AreaChart>
                 </ResponsiveContainer>

@@ -91,7 +91,7 @@ export default function SignupWaitlistPage() {
         <StatCard label="Total Submissions" value={stats?.total} icon={Users} color="text-gray-500" />
         <StatCard label="Pending Review" value={stats?.pending} icon={Clock} color="text-yellow-500" />
         <StatCard label="Converted to Users" value={stats?.converted} icon={CheckCircle2} color="text-green-500" />
-        <StatCard label="Joined This Week" value={stats?.this_week} icon={TrendingUp} color="text-teal-500" />
+        <StatCard label="Joined This Week" value={stats?.this_week} icon={TrendingUp} color="text-primary" />
       </div>
 
       {/* Filters */}
@@ -102,7 +102,7 @@ export default function SignupWaitlistPage() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search by email or name…"
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400"
+            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/60"
           />
         </div>
         <div className="flex gap-1 bg-gray-100 rounded-xl p-1">

@@ -439,7 +439,7 @@ export default function StudyStream() {
                   const ALL_ACTIONS = [
                     { href: "/mentor", label: "The Mentor", icon: Brain, color: "text-purple-500" },
                     { href: "/my-homework", label: "Assignments", icon: BookOpen, color: "text-rose-500" },
-                    { href: "/focus-zone", label: "FocusZone", icon: Clock, color: "text-teal-500" },
+                    { href: "/focus-zone", label: "FocusZone", icon: Clock, color: "text-primary" },
                     { href: "/flashcards", label: "Flashcards", icon: Layers, color: "text-green-500" },
                     { href: "/challenges", label: "Challenges", icon: Trophy, color: "text-amber-500" },
                     { href: "/goals", label: "Goals", icon: Shield, color: "text-emerald-500" },

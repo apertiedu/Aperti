@@ -49,7 +49,7 @@ export default function ParentInterventions() {
         <div className="space-y-3">{[0,1,2].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}</div>
       ) : alerts.length === 0 ? (
         <div className="text-center py-16">
-          <ShieldCheck className="h-16 w-16 mx-auto mb-4 text-teal-200" />
+          <ShieldCheck className="h-16 w-16 mx-auto mb-4 text-primary-foreground/60" />
           <h3 className="text-lg font-bold text-gray-700 mb-1">All clear!</h3>
           <p className="text-gray-400 text-sm">No active alerts for your children right now.</p>
         </div>

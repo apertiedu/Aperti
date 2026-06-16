@@ -8,7 +8,7 @@ import {
   CheckSquare, Type, Megaphone, Layers, Plus, Trash2, GripVertical,
 } from "lucide-react";
 
-const INPUT = "w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-400 bg-white transition-colors";
+const INPUT = "w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/60 bg-white transition-colors";
 const LABEL = "block text-xs font-semibold text-gray-600 mb-1.5 uppercase tracking-wide";
 
 const SECTION_TABS = [
@@ -34,7 +34,7 @@ function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: bool
       <button
         type="button"
         onClick={() => onChange(!value)}
-        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${value ? "bg-teal-500" : "bg-gray-200"}`}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${value ? "bg-primary" : "bg-gray-200"}`}
       >
         <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${value ? "translate-x-6" : "translate-x-1"}`} />
       </button>
@@ -140,7 +140,7 @@ export default function LandingSettingsEditorPage() {
             whileTap={{ scale: 0.97 }}
             onClick={() => saveMutation.mutate(form)}
             disabled={!dirty || saveMutation.isPending}
-            className="flex items-center gap-2 px-5 py-2 bg-teal-600 text-white text-sm font-semibold rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors"
           >
             <Save className="w-4 h-4" />
             {saveMutation.isPending ? "Saving…" : "Save Changes"}
@@ -274,7 +274,7 @@ export default function LandingSettingsEditorPage() {
               ))}
               <button
                 onClick={addFeature}
-                className="flex items-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-200 text-gray-500 text-sm rounded-xl hover:border-teal-400 hover:text-teal-600 transition-colors"
+                className="flex items-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-200 text-gray-500 text-sm rounded-xl hover:border-primary/60 hover:text-primary transition-colors"
               >
                 <Plus className="w-4 h-4" /> Add Feature Card
               </button>
@@ -301,7 +301,7 @@ export default function LandingSettingsEditorPage() {
               ))}
               <button
                 onClick={addBadge}
-                className="flex items-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-200 text-gray-500 text-sm rounded-xl hover:border-teal-400 hover:text-teal-600 transition-colors"
+                className="flex items-center gap-2 w-full px-4 py-3 border-2 border-dashed border-gray-200 text-gray-500 text-sm rounded-xl hover:border-primary/60 hover:text-primary transition-colors"
               >
                 <Plus className="w-4 h-4" /> Add Trust Badge
               </button>

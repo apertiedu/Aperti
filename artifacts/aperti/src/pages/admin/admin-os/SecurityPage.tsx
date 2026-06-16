@@ -55,7 +55,7 @@ export default function SecurityPage() {
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: "Active Sessions", value: sessionList.length, color: "text-teal-600" },
+          { label: "Active Sessions", value: sessionList.length, color: "text-primary" },
           { label: "Unique Users", value: new Set(sessionList.map((s) => s.accountId)).size, color: "text-blue-600" },
           { label: "Devices", value: new Set(sessionList.map((s) => s.deviceId)).size, color: "text-purple-600" },
         ].map((s) => (
@@ -76,7 +76,7 @@ export default function SecurityPage() {
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
             <p className="text-sm font-semibold text-gray-900">{sessionList.length} active sessions</p>
-            <button onClick={() => refetch()} className="flex items-center gap-1 text-xs text-gray-500 hover:text-teal-600 transition-colors">
+            <button onClick={() => refetch()} className="flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors">
               <RefreshCw className="w-3 h-3" /> Refresh
             </button>
           </div>
@@ -135,11 +135,11 @@ export default function SecurityPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">User ID</label>
-                <input value={recoveryUserId} onChange={(e) => setRecoveryUserId(e.target.value)} placeholder="Enter user ID" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
+                <input value={recoveryUserId} onChange={(e) => setRecoveryUserId(e.target.value)} placeholder="Enter user ID" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                <input type="password" value={recoveryPassword} onChange={(e) => setRecoveryPassword(e.target.value)} placeholder="New temporary password" maxLength={500} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
+                <input type="password" value={recoveryPassword} onChange={(e) => setRecoveryPassword(e.target.value)} placeholder="New temporary password" maxLength={500} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" />
               </div>
               <button
                 onClick={() => { if (confirm("This will reset the user's password and log them out everywhere. Proceed?")) recoveryMutation.mutate(); }}

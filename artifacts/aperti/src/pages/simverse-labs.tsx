@@ -38,9 +38,9 @@ function LabCard({ lab, onLaunch }: { lab: any; onLaunch: (lab: any) => void }) 
   const Icon = LAB_ICONS[lab.id] || FlaskConical;
   return (
     <motion.div layout whileHover={{ y: -3 }} initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-      className="bg-card border border-border rounded-2xl overflow-hidden hover:border-teal-200 hover:shadow-md transition-all cursor-pointer group"
+      className="bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/25 hover:shadow-md transition-all cursor-pointer group"
       onClick={() => onLaunch(lab)}>
-      <div className={`h-2 ${lab.category === "Physics" ? "bg-gradient-to-r from-blue-400 to-blue-600" : lab.category === "Chemistry" ? "bg-gradient-to-r from-green-400 to-teal-500" : lab.category === "Biology" ? "bg-gradient-to-r from-emerald-400 to-green-500" : "bg-gradient-to-r from-purple-400 to-indigo-500"}`} />
+      <div className={`h-2 ${lab.category === "Physics" ? "bg-gradient-to-r from-blue-400 to-blue-600" : lab.category === "Chemistry" ? "bg-gradient-to-r from-green-400 to-primary/80" : lab.category === "Biology" ? "bg-gradient-to-r from-emerald-400 to-green-500" : "bg-gradient-to-r from-purple-400 to-indigo-500"}`} />
       <div className="p-5">
         <div className="flex items-start justify-between mb-3">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${CATEGORY_COLORS[lab.category] || "bg-gray-100 text-gray-600 border-gray-200"}`}>
@@ -52,7 +52,7 @@ function LabCard({ lab, onLaunch }: { lab: any; onLaunch: (lab: any) => void }) 
         <p className="text-xs text-gray-500 leading-relaxed mb-4">{lab.description}</p>
         <div className="flex items-center justify-between">
           <Badge className={`text-xs ${CATEGORY_COLORS[lab.category] || "bg-gray-100 text-gray-600"}`}>{lab.category}</Badge>
-          <Button size="sm" className="h-7 text-xs bg-teal-600 hover:bg-teal-700 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button size="sm" className="h-7 text-xs bg-primary hover:bg-primary/80 text-white opacity-0 group-hover:opacity-100 transition-opacity">
             <Play size={11} className="mr-1" /> Launch
           </Button>
         </div>
@@ -105,11 +105,11 @@ function SimulationRunner({ lab, onClose }: { lab: any; onClose: () => void }) {
                   ))}
                 </div>
               </div>
-              <div className="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200 rounded-xl p-4 space-y-2">
-                <p className="text-sm font-semibold text-teal-800">Simulation Environment</p>
-                <p className="text-xs text-teal-700">This interactive lab will open a guided simulation session. Complete observations and submit your conclusion.</p>
+              <div className="bg-gradient-to-r from-primary to-blue-50 border border-primary/25 rounded-xl p-4 space-y-2">
+                <p className="text-sm font-semibold text-foreground">Simulation Environment</p>
+                <p className="text-xs text-primary">This interactive lab will open a guided simulation session. Complete observations and submit your conclusion.</p>
               </div>
-              <Button onClick={() => startSession.mutate()} disabled={startSession.isPending} className="w-full bg-teal-600 hover:bg-teal-700 text-white h-12">
+              <Button onClick={() => startSession.mutate()} disabled={startSession.isPending} className="w-full bg-primary hover:bg-primary/80 text-white h-12">
                 <Play size={16} className="mr-2" /> {startSession.isPending ? "Starting..." : "Start Lab Session"}
               </Button>
             </>
@@ -117,7 +117,7 @@ function SimulationRunner({ lab, onClose }: { lab: any; onClose: () => void }) {
             <>
               <div className="bg-gray-900 rounded-xl h-72 flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 opacity-10">
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="w-64 h-64 border-4 border-teal-400 rounded-full absolute top-4 left-4" />
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="w-64 h-64 border-4 border-primary/60 rounded-full absolute top-4 left-4" />
                   <motion.div animate={{ rotate: -360 }} transition={{ duration: 7, repeat: Infinity, ease: "linear" }} className="w-40 h-40 border-2 border-blue-400 rounded-full absolute bottom-8 right-8" />
                 </div>
                 <div className="text-center text-white z-10">
@@ -126,7 +126,7 @@ function SimulationRunner({ lab, onClose }: { lab: any; onClose: () => void }) {
                   <p className="text-sm text-gray-400 mt-1">Interactive simulation active</p>
                   <div className="flex gap-2 justify-center mt-4 flex-wrap">
                     {(lab.tools || []).map((t: string) => (
-                      <button key={t} className="px-3 py-1 bg-teal-700 hover:bg-teal-600 text-xs text-white rounded-lg transition-colors">{t}</button>
+                      <button key={t} className="px-3 py-1 bg-primary/80 hover:bg-primary text-xs text-white rounded-lg transition-colors">{t}</button>
                     ))}
                   </div>
                 </div>
@@ -134,12 +134,12 @@ function SimulationRunner({ lab, onClose }: { lab: any; onClose: () => void }) {
               <div>
                 <label className="text-xs font-semibold text-gray-600 mb-2 block">Your Observations & Conclusion</label>
                 <textarea value={conclusion} onChange={e => setConclusion(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  className="w-full border border-gray-200 rounded-xl p-3 text-sm resize-none focus:ring-2 focus:ring-primary/30 focus:border-transparent"
                   rows={4} placeholder="Record your observations and write your conclusion here..." />
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" onClick={onClose} className="flex-1">Save & Continue Later</Button>
-                <Button onClick={() => endSession.mutate()} disabled={endSession.isPending || !conclusion.trim()} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white">
+                <Button onClick={() => endSession.mutate()} disabled={endSession.isPending || !conclusion.trim()} className="flex-1 bg-primary hover:bg-primary/80 text-white">
                   {endSession.isPending ? "Submitting..." : "Submit Lab Report"}
                 </Button>
               </div>
@@ -174,7 +174,7 @@ export default function SimverseLabs() {
       <div className="max-w-7xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><FlaskConical className="text-teal-600" size={28} /> SimVerse Labs</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><FlaskConical className="text-primary" size={28} /> SimVerse Labs</h1>
             <div className="flex gap-2">
               <Button variant="outline" size="sm" onClick={() => navigate("/simverse/geometrix")}><Calculator size={14} className="mr-1" /> Geometrix</Button>
             </div>
@@ -208,7 +208,7 @@ export default function SimverseLabs() {
           <div className="flex gap-2">
             {categories.map(c => (
               <button key={c} onClick={() => setCategory(c)}
-                className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${category === c ? "bg-teal-600 text-white border-teal-600" : "bg-card text-muted-foreground border-border hover:border-teal-300"}`}>
+                className={`px-4 py-2 rounded-full text-xs font-semibold border transition-all ${category === c ? "bg-primary text-white border-primary" : "bg-card text-muted-foreground border-border hover:border-primary/40"}`}>
                 {c}
               </button>
             ))}

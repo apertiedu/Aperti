@@ -4,7 +4,6 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "wouter";
 import { Map, CheckCircle2, FlaskConical, Pencil, Hammer, TestTube, Rocket, Lightbulb, Calendar } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; dotColor: string; icon: any }> = {
   planned:     { label: "Planned",     color: "#6B7280", bg: "#F9FAFB", dotColor: "#9CA3AF", icon: Lightbulb },
@@ -12,7 +11,7 @@ const STATUS_META: Record<string, { label: string; color: string; bg: string; do
   designing:   { label: "Designing",   color: "#7C3AED", bg: "#F5F3FF", dotColor: "#8B5CF6", icon: Pencil },
   building:    { label: "Building",    color: "#D97706", bg: "#FFFBEB", dotColor: "#F59E0B", icon: Hammer },
   testing:     { label: "Testing",     color: "#EA580C", bg: "#FFF7ED", dotColor: "#F97316", icon: TestTube },
-  beta:        { label: "Beta",        color: "#0D9488", bg: "#F0FDFA", dotColor: "#14B8A6", icon: Rocket },
+  beta:        { label: "Beta",        color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)", dotColor: "hsl(var(--primary) / 0.8)", icon: Rocket },
   released:    { label: "Released",    color: "#059669", bg: "#ECFDF5", dotColor: "#10B981", icon: CheckCircle2 },
 };
 
@@ -43,7 +42,7 @@ export default function RoadmapPublicPage() {
       {/* Nav */}
       <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
+          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: "hsl(var(--primary))" }}>.</span></Link>
           <div className="flex items-center gap-4">
             <Link href="/features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Features</Link>
             <Link href="/release-notes" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">What's New</Link>
@@ -56,8 +55,8 @@ export default function RoadmapPublicPage() {
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 text-center">
           <Reveal>
             <div className="flex items-center justify-center gap-2 mb-6">
-              <Map className="w-5 h-5" style={{ color: TEAL }} />
-              <span className="text-sm font-medium" style={{ color: TEAL }}>Public Roadmap</span>
+              <Map className="w-5 h-5" style={{ color: "hsl(var(--primary))" }} />
+              <span className="text-sm font-medium" style={{ color: "hsl(var(--primary))" }}>Public Roadmap</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">What we're building next</h1>
             <p className="text-lg text-gray-500">Our public roadmap — see what's planned, in progress, and recently shipped.</p>
@@ -68,7 +67,7 @@ export default function RoadmapPublicPage() {
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-12 space-y-10">
         {isLoading ? (
           <div className="text-center text-gray-400 py-16">
-            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
+            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: "hsl(var(--primary))", borderTopColor: "transparent" }} />
             Loading roadmap...
           </div>
         ) : groups.length === 0 ? (

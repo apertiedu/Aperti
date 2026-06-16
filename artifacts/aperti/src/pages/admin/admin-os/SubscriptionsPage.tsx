@@ -128,7 +128,7 @@ export default function SubscriptionsPage() {
       {tab === "plans" && (
         <div className="space-y-4">
           <div className="flex justify-end">
-            <button onClick={() => { setEditingPlan(null); setShowPlanModal(true); }} className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+            <button onClick={() => { setEditingPlan(null); setShowPlanModal(true); }} className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors">
               <Plus className="w-4 h-4" /> New Plan
             </button>
           </div>
@@ -137,17 +137,17 @@ export default function SubscriptionsPage() {
               <div key={plan.id} className="bg-white rounded-xl border border-gray-100 p-5">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Layers className="w-5 h-5 text-teal-600" />
+                    <Layers className="w-5 h-5 text-primary" />
                     <p className="font-semibold text-gray-900">{plan.name}</p>
                   </div>
                   <span className={`px-2 py-0.5 rounded-full text-xs ${plan.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>{plan.isActive ? "Active" : "Archived"}</span>
                 </div>
-                <p className="text-3xl font-bold text-teal-600">EGP {plan.priceEgp}</p>
+                <p className="text-3xl font-bold text-primary">EGP {plan.priceEgp}</p>
                 <p className="text-xs text-gray-400 mb-3">per month · {plan.type}</p>
                 {plan.features?.length > 0 && (
                   <ul className="space-y-1 mb-4">
                     {plan.features.slice(0, 4).map((f: string) => (
-                      <li key={f} className="text-xs text-gray-600 flex items-center gap-1"><span className="text-teal-500">✓</span> {f}</li>
+                      <li key={f} className="text-xs text-gray-600 flex items-center gap-1"><span className="text-primary">✓</span> {f}</li>
                     ))}
                   </ul>
                 )}
@@ -171,23 +171,23 @@ export default function SubscriptionsPage() {
               {[{ key: "name", label: "Plan Name" }, { key: "priceEgp", label: "Price (EGP)" }, { key: "studentLimit", label: "Student Limit (optional)" }].map((f) => (
                 <div key={f.key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
-                  <input value={(planForm as any)[f.key]} onChange={(e) => setPlanForm(p => ({ ...p, [f.key]: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
+                  <input value={(planForm as any)[f.key]} onChange={(e) => setPlanForm(p => ({ ...p, [f.key]: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" />
                 </div>
               ))}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select value={planForm.type} onChange={(e) => setPlanForm(p => ({ ...p, type: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400">
+                <select value={planForm.type} onChange={(e) => setPlanForm(p => ({ ...p, type: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60">
                   {["teacher", "student", "organization"].map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Features (comma-separated)</label>
-                <textarea value={planForm.features} onChange={(e) => setPlanForm(p => ({ ...p, features: e.target.value }))} rows={3} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" placeholder="Unlimited students, AI Mentor, Live Classes" />
+                <textarea value={planForm.features} onChange={(e) => setPlanForm(p => ({ ...p, features: e.target.value }))} rows={3} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" placeholder="Unlimited students, AI Mentor, Live Classes" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => { setShowPlanModal(false); setEditingPlan(null); }} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">Cancel</button>
-              <button onClick={() => savePlanMutation.mutate()} disabled={savePlanMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50">
+              <button onClick={() => savePlanMutation.mutate()} disabled={savePlanMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50">
                 {savePlanMutation.isPending ? "Saving…" : "Save Plan"}
               </button>
             </div>

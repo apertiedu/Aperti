@@ -48,7 +48,7 @@ async function generateQRDataUrl(text: string): Promise<string> {
   return QRCode.toDataURL(text, {
     width: 500,
     margin: 2,
-    color: { dark: "#0D9488", light: "#ffffff" },
+    color: { dark: "hsl(var(--primary))", light: "#ffffff" },
     errorCorrectionLevel: "H",
   });
 }
@@ -110,7 +110,7 @@ const ID_CARD_STYLES = `
   .page-title { text-align:center; padding:16px 0 20px; font-size:11pt; font-weight:700; color:#334155; text-transform:uppercase; letter-spacing:2px; }
   .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; padding:0 4px; }
   .card { background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,0.12); break-inside:avoid; page-break-inside:avoid; }
-  .card-header { background:linear-gradient(135deg,#0D9488 0%,#0f766e 55%,#134e4a 100%); padding:11px 13px 9px; display:flex; align-items:flex-start; justify-content:space-between; position:relative; overflow:hidden; }
+  .card-header { background:linear-gradient(135deg,hsl(var(--primary)) 0%,#0f766e 55%,#134e4a 100%); padding:11px 13px 9px; display:flex; align-items:flex-start; justify-content:space-between; position:relative; overflow:hidden; }
   .card-header::before { content:''; position:absolute; top:-20px; right:-15px; width:70px; height:70px; border-radius:50%; background:rgba(255,255,255,0.07); }
   .card-header::after { content:''; position:absolute; bottom:-25px; left:-10px; width:55px; height:55px; border-radius:50%; background:rgba(255,255,255,0.05); }
   .brand-logo { font-size:14pt; font-weight:900; color:white; letter-spacing:-0.5px; line-height:1; }
@@ -122,11 +122,11 @@ const ID_CARD_STYLES = `
   .qr-label { font-size:4.5pt; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; font-weight:600; }
   .student-info { flex:1; min-width:0; }
   .student-name { font-size:9.5pt; font-weight:800; color:#0f172a; line-height:1.2; word-break:break-word; }
-  .student-code { font-family:monospace; font-size:8pt; color:#0D9488; font-weight:700; margin-top:2px; }
+  .student-code { font-family:monospace; font-size:8pt; color:hsl(var(--primary)); font-weight:700; margin-top:2px; }
   .sessions-line { font-size:6pt; color:#64748b; margin-top:5px; line-height:1.4; }
   .issued-label { font-size:5.5pt; color:#cbd5e1; margin-top:6px; text-transform:uppercase; letter-spacing:0.5px; }
   .card-footer { border-top:1px solid #f1f5f9; padding:5px 12px; }
-  .footer-bar { height:3px; border-radius:2px; background:linear-gradient(90deg,#0D9488,#06b6d4,#8b5cf6); margin-bottom:4px; }
+  .footer-bar { height:3px; border-radius:2px; background:linear-gradient(90deg,hsl(var(--primary)),#06b6d4,#8b5cf6); margin-bottom:4px; }
   .footer-text { display:flex; justify-content:space-between; font-size:5.5pt; color:#94a3b8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
   @media print { body{background:white;} .card{box-shadow:none; border:1px solid #e2e8f0;} .no-print{display:none;} }
 `;
@@ -193,7 +193,7 @@ function QRModal({ student }: { student: StudentRecord }) {
               exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0D9488 0%, #0f766e 55%, #134e4a 100%)" }}>
+              <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, hsl(var(--primary)) 0%, #0f766e 55%, #134e4a 100%)" }}>
                 <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/5" />
                 <div className="absolute -bottom-10 -left-6 h-24 w-24 rounded-full bg-white/5" />
                 <div className="relative px-6 pt-5 pb-6">
@@ -228,7 +228,7 @@ function QRModal({ student }: { student: StudentRecord }) {
               </div>
 
               <div className="bg-card">
-                <div className="h-1" style={{ background: "linear-gradient(90deg, #0D9488, #06b6d4, #8b5cf6)" }} />
+                <div className="h-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary)), #06b6d4, #8b5cf6)" }} />
                 <div className="px-6 py-5 flex flex-col items-center gap-4">
                   <motion.div
                     initial={{ opacity: 0, scale: 0.85 }}
@@ -260,7 +260,7 @@ function QRModal({ student }: { student: StudentRecord }) {
                     </Button>
                     <Button
                       className="flex-1 gap-1.5 text-xs"
-                      style={{ background: "linear-gradient(135deg, #0D9488, #0f766e)" }}
+                      style={{ background: "linear-gradient(135deg, hsl(var(--primary)), #0f766e)" }}
                       disabled={printing}
                       onClick={handlePrint}
                     >

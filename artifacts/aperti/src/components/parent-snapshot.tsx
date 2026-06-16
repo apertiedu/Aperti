@@ -24,8 +24,8 @@ function Metric({ icon: Icon, label, value, color, alert }: {
       <div className={`w-7 h-7 rounded-lg flex items-center justify-center mb-2 ${color}`}>
         <Icon className="w-3.5 h-3.5" />
       </div>
-      <p className={`text-base font-black leading-none ${alert ? "text-red-700" : "text-gray-900"}`}>{value}</p>
-      <p className="text-[10px] text-gray-400 mt-0.5 font-medium leading-tight">{label}</p>
+      <p className={`text-base font-black leading-none ${alert ? "text-red-700" : "text-foreground"}`}>{value}</p>
+      <p className="text-[10px] text-muted-foreground mt-0.5 font-medium leading-tight">{label}</p>
     </motion.div>
   );
 }
@@ -64,7 +64,7 @@ export default function ParentSnapshot({ child }: { child: ChildData }) {
           icon={BarChart3}
           label="Avg Grade"
           value={getGradeLabel(child.avgGrade)}
-          color={gradeLow ? "bg-red-100 text-red-600" : "bg-teal-100 text-teal-600"}
+          color={gradeLow ? "bg-red-100 text-red-600" : "bg-primary/10 text-primary"}
           alert={gradeLow}
         />
         <Metric

@@ -125,7 +125,7 @@ export default function LaunchCommandPage() {
                   className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <ShieldCheck className="w-4 h-4 text-teal-600" />
+                    <ShieldCheck className="w-4 h-4 text-primary" />
                     <span className="font-medium text-gray-800">{category}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                       catPassed === catItems.length ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"
@@ -157,7 +157,7 @@ export default function LaunchCommandPage() {
                             <select
                               value={item.status}
                               onChange={(e) => toggleMut.mutate({ id: item.id, status: e.target.value })}
-                              className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                              className="text-xs border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-1 focus:ring-primary/30"
                             >
                               <option value="pass">Pass</option>
                               <option value="fail">Fail</option>

@@ -3,14 +3,13 @@ import { useRoute, Link } from "wouter";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, GraduationCap, BookOpen, Users, Shield } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 const ROLE_META: Record<string, { label: string; Icon: any; color: string }> = {
-  teacher:   { label: "Teacher",          Icon: GraduationCap, color: "#0D9488" },
+  teacher:   { label: "Teacher",          Icon: GraduationCap, color: "hsl(var(--primary))" },
   student:   { label: "Student",          Icon: BookOpen,       color: "#3b82f6" },
   parent:    { label: "Parent / Guardian",Icon: Users,          color: "#8b5cf6" },
   admin:     { label: "Administrator",    Icon: Shield,         color: "#111"    },
-  assistant: { label: "Assistant Teacher",Icon: GraduationCap, color: "#0D9488" },
+  assistant: { label: "Assistant Teacher",Icon: GraduationCap, color: "hsl(var(--primary))" },
 };
 
 export default function Profile() {
@@ -29,7 +28,7 @@ export default function Profile() {
 
   if (isLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
+      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" className="border-primary" />
     </div>
   );
 
@@ -38,7 +37,7 @@ export default function Profile() {
       <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-2xl">🔍</div>
       <p className="font-semibold text-gray-700">Profile not found</p>
       <p className="text-gray-400 text-sm">This account may not exist or is not public.</p>
-      <Link href="/" className="text-sm font-medium hover:underline" style={{ color: TEAL }}>← Go home</Link>
+      <Link href="/" className="text-sm font-medium hover:underline" className="text-primary">← Go home</Link>
     </div>
   );
 
@@ -51,7 +50,7 @@ export default function Profile() {
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
           className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
           {/* Banner */}
-          <div className="h-28 relative" style={{ background: `linear-gradient(135deg, ${TEAL} 0%, #0f766e 100%)` }}>
+          <div className="h-28 relative" style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"} 0%, #0f766e 100%)` }}>
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
           </div>
 
@@ -59,7 +58,7 @@ export default function Profile() {
             {/* Avatar */}
             <div className="-mt-10 mb-3 flex items-end justify-between">
               <div className="w-20 h-20 rounded-2xl border-4 border-white shadow-sm flex items-center justify-center text-2xl font-bold text-white overflow-hidden flex-shrink-0"
-                style={{ background: TEAL }}>
+                className="bg-primary">
                 {profile.avatar_url
                   ? <img src={profile.avatar_url} alt={profile.display_name} className="w-full h-full object-cover" onError={() => {}} />
                   : initials}
@@ -93,7 +92,7 @@ export default function Profile() {
         </motion.div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          <Link href="/" className="hover:underline" style={{ color: TEAL }}>Aperti.</Link> — The Educational Operating System
+          <Link href="/" className="hover:underline" className="text-primary">Aperti.</Link> — The Educational Operating System
         </p>
       </div>
     </div>

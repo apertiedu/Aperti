@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 const BASE_INPUT = [
   "w-full px-3.5 py-2.5 rounded-xl border text-sm",
   "transition-all duration-150 outline-none",
-  "focus:ring-2 focus:ring-teal-500/25 focus:border-teal-500",
+  "focus:ring-2 focus:ring-primary/25 focus:border-primary",
   "placeholder:text-gray-400",
   "bg-white dark:bg-gray-900",
 ].join(" ");

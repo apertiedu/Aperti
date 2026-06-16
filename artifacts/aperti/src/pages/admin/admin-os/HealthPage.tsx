@@ -92,7 +92,7 @@ export default function HealthPage() {
               <XAxis dataKey="month" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} />
               <Tooltip />
-              <Area type="monotone" dataKey="users" stroke="#0D9488" fill="#ccfbf1" strokeWidth={2} />
+              <Area type="monotone" dataKey="users" stroke="hsl(var(--primary))" fill="#ccfbf1" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -102,7 +102,7 @@ export default function HealthPage() {
       {scaling?.storage && (
         <div className="bg-white rounded-xl border border-gray-100 p-5">
           <h3 className="font-semibold text-gray-900 mb-2">Storage</h3>
-          <p className="text-3xl font-bold text-teal-600">{scaling.storage.db_size}</p>
+          <p className="text-3xl font-bold text-primary">{scaling.storage.db_size}</p>
           <p className="text-sm text-gray-500 mt-1">PostgreSQL database size</p>
         </div>
       )}

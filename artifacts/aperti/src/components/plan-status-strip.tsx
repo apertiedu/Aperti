@@ -45,32 +45,32 @@ export default function PlanStatusStrip() {
         <div className={`rounded-xl border px-4 py-3 flex items-center gap-3 mb-4 ${
           expiryWarning ? "bg-amber-50 border-amber-200" :
           nearStudentLimit ? "bg-blue-50 border-blue-200" :
-          "bg-teal-50 border-teal-200"
+          "bg-primary/5 border-primary/15"
         }`}>
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-            expiryWarning ? "bg-amber-100" : nearStudentLimit ? "bg-blue-100" : "bg-teal-100"
+            expiryWarning ? "bg-amber-100" : nearStudentLimit ? "bg-blue-100" : "bg-primary/10"
           }`}>
             {expiryWarning
               ? <AlertTriangle className="w-4 h-4 text-amber-600" />
               : nearStudentLimit
               ? <Users className="w-4 h-4 text-blue-600" />
-              : <Zap className="w-4 h-4 text-teal-600" />
+              : <Zap className="w-4 h-4 text-primary" />
             }
           </div>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className={`text-xs font-semibold ${
-                expiryWarning ? "text-amber-800" : nearStudentLimit ? "text-blue-800" : "text-teal-800"
+                expiryWarning ? "text-amber-800" : nearStudentLimit ? "text-blue-800" : "text-primary"
               }`}>
                 {data.planName}
               </span>
               {data.isTrial && (
-                <span className="text-[10px] font-bold bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full">TRIAL</span>
+                <span className="text-[10px] font-bold bg-primary/10 text-primary px-1.5 py-0.5 rounded-full">TRIAL</span>
               )}
             </div>
             <p className={`text-xs mt-0.5 ${
-              expiryWarning ? "text-amber-700" : nearStudentLimit ? "text-blue-700" : "text-teal-700"
+              expiryWarning ? "text-amber-700" : nearStudentLimit ? "text-blue-700" : "text-primary/80"
             }`}>
               {expiryWarning
                 ? `Renews in ${data.daysUntilRenewal} days — don't lose access`
@@ -100,7 +100,7 @@ export default function PlanStatusStrip() {
                   ? "bg-amber-500 text-white hover:bg-amber-600"
                   : nearStudentLimit
                   ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-teal-500 text-white hover:bg-teal-600"
+                  : "bg-primary text-primary-foreground hover:opacity-90"
               }`}
             >
               <CreditCard className="w-3 h-3" />

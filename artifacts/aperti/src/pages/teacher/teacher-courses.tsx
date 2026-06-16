@@ -35,7 +35,7 @@ async function apiFetch(url: string, opts?: RequestInit) {
 
 const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   A: { bg: "#dcfce7", text: "#16a34a", border: "#86efac" },
-  B: { bg: "#ccfbf1", text: "#0d9488", border: "#5eead4" },
+  B: { bg: "#ccfbf1", text: "hsl(var(--primary))", border: "#5eead4" },
   C: { bg: "#fef3c7", text: "#d97706", border: "#fcd34d" },
   D: { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
 };

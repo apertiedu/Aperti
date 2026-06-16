@@ -34,7 +34,7 @@ const PRESETS: Record<string, {
 }> = {
   courses: {
     icon: BookOpen,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No courses yet",
     description: "Create your first course to start teaching and enrolling students.",
     actions: [
@@ -85,7 +85,7 @@ const PRESETS: Record<string, {
   },
   homework: {
     icon: BarChart3,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No homework assigned",
     description: "Assign homework to keep students engaged between sessions.",
     actions: [
@@ -103,7 +103,7 @@ const PRESETS: Record<string, {
   },
   sessions: {
     icon: Calendar,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No sessions scheduled",
     description: "Schedule sessions to set your weekly teaching timetable.",
     actions: [
@@ -112,7 +112,7 @@ const PRESETS: Record<string, {
   },
   results: {
     icon: BarChart3,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No results yet",
     description: "Results will appear here after students complete assessments.",
     actions: [
@@ -121,7 +121,7 @@ const PRESETS: Record<string, {
   },
   attendance: {
     icon: Calendar,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No attendance records",
     description: "Start marking attendance for your sessions to track student presence.",
     actions: [
@@ -130,7 +130,7 @@ const PRESETS: Record<string, {
   },
   notes: {
     icon: FileText,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No notes yet",
     description: "Add revision notes to help students study key topics.",
     actions: [

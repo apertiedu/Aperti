@@ -148,8 +148,8 @@ export default function AssessmentQualityChecker({ questions, timeLimitMinutes, 
                     <XCircle className="w-3.5 h-3.5 text-red-500 shrink-0 mt-0.5" />
                   )}
                   <div>
-                    <p className="text-[11px] font-semibold text-gray-800 leading-none">{c.label}</p>
-                    <p className="text-[10px] text-gray-500 mt-0.5">{c.detail}</p>
+                    <p className="text-[11px] font-semibold text-foreground leading-none">{c.label}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{c.detail}</p>
                   </div>
                 </div>
               ))}

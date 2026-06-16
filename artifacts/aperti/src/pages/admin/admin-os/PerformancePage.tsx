@@ -97,16 +97,16 @@ export default function PerformancePage() {
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={timeline}>
                   <defs>
-                    <linearGradient id="tealGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0D9488" stopOpacity={0.15} />
-                      <stop offset="95%" stopColor="#0D9488" stopOpacity={0} />
+                    <linearGradient id="primaryGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis dataKey="minute" tick={{ fontSize: 10 }} tickFormatter={(v) => new Date(v).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} />
                   <YAxis tick={{ fontSize: 10 }} />
                   <Tooltip labelFormatter={(v) => new Date(v).toLocaleTimeString()} />
-                  <Area type="monotone" dataKey="requests" stroke="#0D9488" fill="url(#tealGrad)" strokeWidth={2} name="Requests" />
+                  <Area type="monotone" dataKey="requests" stroke="hsl(var(--primary))" fill="url(#primaryGrad)" strokeWidth={2} name="Requests" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -117,7 +117,7 @@ export default function PerformancePage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="px-6 py-4 border-b border-gray-100">
                 <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-teal-600" /> Endpoint Performance
+                  <Zap className="w-4 h-4 text-primary" /> Endpoint Performance
                 </h2>
               </div>
               <div className="overflow-x-auto">

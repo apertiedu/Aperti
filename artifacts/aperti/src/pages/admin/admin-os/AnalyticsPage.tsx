@@ -8,7 +8,7 @@ import { fetchJSON } from "@/lib/api";
 import { SkeletonChart, SkeletonDashboardGrid } from "@/components/skeleton-layouts";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
-const COLORS = ["#0D9488", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#10B981"];
+const COLORS = ["hsl(var(--primary))", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#10B981"];
 
 function RetentionBar({ pct, label, color }: { pct: number | null; label: string; color: string }) {
   if (pct === null) return (
@@ -75,7 +75,7 @@ export default function AnalyticsPage() {
                 { label: "Role Groups", value: userData.byRole?.length },
               ].map((s) => (
                 <div key={s.label} className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-                  <p className="text-2xl font-bold text-teal-600">{s.value ?? 0}</p>
+                  <p className="text-2xl font-bold text-primary">{s.value ?? 0}</p>
                   <p className="text-xs text-gray-500 mt-1">{s.label}</p>
                 </div>
               ))}
@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
                     <XAxis dataKey="month" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 10 }} />
                     <Tooltip />
-                    <Area type="monotone" dataKey="users" stroke="#0D9488" fill="#ccfbf1" strokeWidth={2} />
+                    <Area type="monotone" dataKey="users" stroke="hsl(var(--primary))" fill="#ccfbf1" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -205,7 +205,7 @@ export default function AnalyticsPage() {
             <div className="bg-white rounded-xl border border-gray-100 p-5">
               <h3 className="font-semibold text-gray-900 mb-4">Retention Rates</h3>
               <div className="space-y-3">
-                <RetentionBar pct={retentionData?.retention30d ?? null} label="30d" color="#0D9488" />
+                <RetentionBar pct={retentionData?.retention30d ?? null} label="30d" color="hsl(var(--primary))" />
                 <RetentionBar pct={retentionData?.retention60d ?? null} label="60d" color="#3B82F6" />
                 <RetentionBar pct={retentionData?.retention90d ?? null} label="90d" color="#8B5CF6" />
               </div>

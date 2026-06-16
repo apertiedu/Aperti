@@ -9,13 +9,12 @@ import {
   Tag, Eye, EyeOff, Box, Maximize2,
 } from "lucide-react";
 
-const TEAL = "#0D9488";
 const π = Math.PI;
 const sq = (x: number) => x * x;
 const fmt = (n: number, dp = 2) => +n.toFixed(dp);
 
 const PALETTE = [
-  "#0D9488","#1976D2","#7B1FA2","#E53935","#F9A825",
+  "hsl(var(--primary))","#1976D2","#7B1FA2","#E53935","#F9A825",
   "#388E3C","#FF6F00","#0288D1","#37474F","#AD1457",
   "#4527A0","#C62828","#2E7D32","#BF360C","#006064",
 ];
@@ -41,8 +40,8 @@ const NetFace = ({ points, fill, stroke, delay = 0 }: {
 }) => (
   <motion.polygon
     points={points}
-    fill={fill ?? `${TEAL}18`}
-    stroke={stroke ?? TEAL}
+    fill={fill ?? `${"hsl(var(--primary))"}18`}
+    stroke={stroke ?? "hsl(var(--primary))"}
     strokeWidth={1.5}
     initial={{ opacity: 0, scale: 0.85 }}
     animate={{ opacity: 1, scale: 1 }}
@@ -67,14 +66,14 @@ const CubeNet = ({ a, C }: { a: number; C: number }) => {
     { x: x0 + 3*C, y: y0 + C,   label: "Back" },
     { x: x0 + C, y: y0 + 2*C,   label: "Bottom" },
   ];
-  const fills = [`${TEAL}22`,`${TEAL}18`,`${TEAL}28`,`${TEAL}1A`,`${TEAL}14`,`${TEAL}20`];
+  const fills = [`${"hsl(var(--primary))"}22`,`${"hsl(var(--primary))"}18`,`${"hsl(var(--primary))"}28`,`${"hsl(var(--primary))"}1A`,`${"hsl(var(--primary))"}14`,`${"hsl(var(--primary))"}20`];
   return (
     <svg viewBox={`0 0 ${x0*2+4*C} ${y0*2+3*C}`} className="w-full h-full">
       {faces.map((f, i) => (
         <g key={i}>
           <NetRect x={f.x} y={f.y} w={C} h={C} fill={fills[i]} delay={i * 0.07} />
           <motion.text x={f.x + C/2} y={f.y + C/2 + 4} textAnchor="middle"
-            fontSize={10} fill={TEAL} fontWeight="600" fontFamily="Inter, sans-serif"
+            fontSize={10} fill="hsl(var(--primary))" fontWeight="600" fontFamily="Inter, sans-serif"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i*0.07 + 0.35 }}>
             {f.label}
           </motion.text>
@@ -99,13 +98,13 @@ const CylinderNet = ({ r, h }: { r: number; h: number }) => {
   return (
     <svg viewBox={`0 0 ${svgW} ${svgH}`} className="w-full h-full">
       {/* left circle */}
-      <motion.circle cx={cx1+cr} cy={cy} r={cr} fill={`${TEAL}20`} stroke={TEAL} strokeWidth={1.5}
+      <motion.circle cx={cx1+cr} cy={cy} r={cr} fill={`${"hsl(var(--primary))"}20`} stroke="hsl(var(--primary))" strokeWidth={1.5}
         initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, delay: 0 }} style={{ originX: `${cx1+cr}px`, originY: `${cy}px` }} />
       {/* rectangle */}
-      <NetRect x={rectX} y={cy - ch/2} w={cw} h={ch} fill={`${TEAL}18`} delay={0.15} />
+      <NetRect x={rectX} y={cy - ch/2} w={cw} h={ch} fill={`${"hsl(var(--primary))"}18`} delay={0.15} />
       {/* right circle */}
-      <motion.circle cx={cx2+cr} cy={cy2} r={cr} fill={`${TEAL}20`} stroke={TEAL} strokeWidth={1.5}
+      <motion.circle cx={cx2+cr} cy={cy2} r={cr} fill={`${"hsl(var(--primary))"}20`} stroke="hsl(var(--primary))" strokeWidth={1.5}
         initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, delay: 0.3 }} style={{ originX: `${cx2+cr}px`, originY: `${cy2}px` }} />
       {/* labels */}
@@ -115,7 +114,7 @@ const CylinderNet = ({ r, h }: { r: number; h: number }) => {
         { x: cx2+cr, y: cy2+4, t: "Top" },
       ].map((lb, i) => (
         <motion.text key={i} x={lb.x} y={lb.y} textAnchor="middle" fontSize={10}
-          fill={TEAL} fontWeight="600" fontFamily="Inter, sans-serif"
+          fill="hsl(var(--primary))" fontWeight="600" fontFamily="Inter, sans-serif"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
           {lb.t}
         </motion.text>
@@ -134,17 +133,17 @@ const SquarePyramidNet = ({ a, h }: { a: number; h: number }) => {
   return (
     <svg viewBox={`0 0 ${bx*2+C} ${by*2+C+th}`} className="w-full h-full">
       {/* Base */}
-      <NetRect x={bx} y={by} w={C} h={C} fill={`${TEAL}28`} delay={0} />
+      <NetRect x={bx} y={by} w={C} h={C} fill={`${"hsl(var(--primary))"}28`} delay={0} />
       {/* Top triangle */}
-      <NetTri x1={bx} y1={by} x2={bx+C} y2={by} x3={midX} y3={by-th} fill={`${TEAL}1E`} delay={0.08} />
+      <NetTri x1={bx} y1={by} x2={bx+C} y2={by} x3={midX} y3={by-th} fill={`${"hsl(var(--primary))"}1E`} delay={0.08} />
       {/* Bottom triangle */}
-      <NetTri x1={bx} y1={by+C} x2={bx+C} y2={by+C} x3={midX} y3={by+C+th} fill={`${TEAL}1E`} delay={0.16} />
+      <NetTri x1={bx} y1={by+C} x2={bx+C} y2={by+C} x3={midX} y3={by+C+th} fill={`${"hsl(var(--primary))"}1E`} delay={0.16} />
       {/* Left triangle */}
-      <NetTri x1={bx} y1={by} x2={bx} y2={by+C} x3={bx-th} y3={midY} fill={`${TEAL}1A`} delay={0.24} />
+      <NetTri x1={bx} y1={by} x2={bx} y2={by+C} x3={bx-th} y3={midY} fill={`${"hsl(var(--primary))"}1A`} delay={0.24} />
       {/* Right triangle */}
-      <NetTri x1={bx+C} y1={by} x2={bx+C} y2={by+C} x3={bx+C+th} y3={midY} fill={`${TEAL}1A`} delay={0.32} />
+      <NetTri x1={bx+C} y1={by} x2={bx+C} y2={by+C} x3={bx+C+th} y3={midY} fill={`${"hsl(var(--primary))"}1A`} delay={0.32} />
       <motion.text x={bx + C/2} y={by + C/2 + 4} textAnchor="middle" fontSize={10}
-        fill={TEAL} fontWeight="600" fontFamily="Inter, sans-serif"
+        fill="hsl(var(--primary))" fontWeight="600" fontFamily="Inter, sans-serif"
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }}>
         Base
       </motion.text>
@@ -163,7 +162,7 @@ const TetrahedronNet = ({ a }: { a: number }) => {
     [sx + 2*C, sy, sx + 3*C, sy, sx + 5*C/2, sy - h],
     [sx + C/2, sy, sx + 3*C/2, sy, sx + C, sy + h],
   ];
-  const fills = [`${TEAL}28`,`${TEAL}1E`,`${TEAL}22`,`${TEAL}18`];
+  const fills = [`${"hsl(var(--primary))"}28`,`${"hsl(var(--primary))"}1E`,`${"hsl(var(--primary))"}22`,`${"hsl(var(--primary))"}18`];
   return (
     <svg viewBox={`0 0 ${sx*2+3*C} ${sy + h + 20}`} className="w-full h-full">
       {tris.map(([x1,y1,x2,y2,x3,y3], i) => (
@@ -190,8 +189,8 @@ const TriPrismNet = ({ a, h }: { a: number; h: number }) => {
   return (
     <svg viewBox={`0 0 ${sx*2 + 3*C} ${sy + triH + ch + triH + 50}`} className="w-full h-full">
       {faces.map((f: any, i) => f.type === "rect"
-        ? <NetRect key={i} x={f.x} y={f.y} w={f.w} h={f.h} fill={i === 1 ? `${TEAL}28` : `${TEAL}1A`} delay={i*0.1} />
-        : <NetTri key={i} x1={f.x1} y1={f.y1} x2={f.x2} y2={f.y2} x3={f.x3} y3={f.y3} fill={`${TEAL}22`} delay={i*0.1} />
+        ? <NetRect key={i} x={f.x} y={f.y} w={f.w} h={f.h} fill={i === 1 ? `${"hsl(var(--primary))"}28` : `${"hsl(var(--primary))"}1A`} delay={i*0.1} />
+        : <NetTri key={i} x1={f.x1} y1={f.y1} x2={f.x2} y2={f.y2} x3={f.x3} y3={f.y3} fill={`${"hsl(var(--primary))"}22`} delay={i*0.1} />
       )}
     </svg>
   );
@@ -430,7 +429,7 @@ export default function Geometrix() {
   }>(null as any);
 
   const [shapeId,      setShapeId]      = useState("cube");
-  const [color,        setColor]        = useState(TEAL);
+  const [color,        setColor]        = useState("hsl(var(--primary))");
   const [dims,         setDims]         = useState<Rec>({});
   const [expandedCat,  setExpandedCat]  = useState("Prisms & Cylinders");
   const [showNet,      setShowNet]      = useState(false);
@@ -509,7 +508,7 @@ export default function Geometrix() {
           const sy = (-vec.y + 1) * height / 2;
           if (sx > -20 && sx < width + 20 && sy > -20 && sy < height + 20 && vec.z < 1) {
             html += `<div style="position:absolute;left:${sx}px;top:${sy}px;transform:translate(-50%,-50%);
-              background:${TEAL};color:#fff;font-size:10px;font-weight:700;padding:2px 5px;
+              background:${"hsl(var(--primary))"};color:#fff;font-size:10px;font-weight:700;padding:2px 5px;
               border-radius:4px;white-space:nowrap;pointer-events:none;font-family:Inter,sans-serif">
               ${v.label}</div>`;
           }
@@ -583,8 +582,8 @@ export default function Geometrix() {
 
       {/* ── HEADER ── */}
       <div className="bg-card border-b border-border px-5 py-3 flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}15` }}>
-          <Box className="h-5 w-5" style={{ color: TEAL }} />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
+          <Box className="h-5 w-5" className="text-primary" />
         </div>
         <div>
           <h1 className="font-black text-gray-900 text-base leading-none">Geometrix</h1>
@@ -597,7 +596,7 @@ export default function Geometrix() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 showNet ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
-              style={showNet ? { background: TEAL } : {}}>
+              style={showNet ? { background: "hsl(var(--primary))" } : {}}>
               {showNet ? <Maximize2 className="h-3.5 w-3.5" /> : <Layers className="h-3.5 w-3.5" />}
               {showNet ? "3D View" : "Show Net"}
             </button>
@@ -608,7 +607,7 @@ export default function Geometrix() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 showLabels ? "text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
-              style={showLabels ? { background: "#0D9488" } : {}}>
+              style={showLabels ? { background: "hsl(var(--primary))" } : {}}>
               {showLabels ? <EyeOff className="h-3.5 w-3.5" /> : <Tag className="h-3.5 w-3.5" />}
               Vertices
             </button>
@@ -642,7 +641,7 @@ export default function Geometrix() {
                           className={`w-full flex items-center gap-2 py-1.5 px-2.5 rounded-lg text-xs transition-all mb-0.5 ${
                             shapeId === s.id ? "font-bold text-white" : "text-gray-600 hover:bg-gray-50"
                           }`}
-                          style={shapeId === s.id ? { background: TEAL } : {}}>
+                          style={shapeId === s.id ? { background: "hsl(var(--primary))" } : {}}>
                           <span className="text-sm">{s.emoji}</span>
                           <span className="truncate">{s.name}</span>
                         </button>
@@ -724,7 +723,7 @@ export default function Geometrix() {
                 <input type="range" min={d.min} max={d.max} step={d.step}
                   value={activeDims[d.id] ?? d.def}
                   onChange={e => setDim(d.id, parseFloat(e.target.value))}
-                  className="w-20 accent-[#0D9488]" />
+                  className="w-20 accent-primary" />
                 <span className="text-xs tabular-nums text-gray-400 w-7">{fmt(activeDims[d.id] ?? d.def, 1)}</span>
               </div>
             ))}
@@ -736,7 +735,7 @@ export default function Geometrix() {
           <div className="p-4 space-y-4">
 
             {/* Shape card */}
-            <div className="text-center py-3 rounded-xl border border-gray-100" style={{ background: `${TEAL}06` }}>
+            <div className="text-center py-3 rounded-xl border border-gray-100" className="bg-primary/8">
               <p className="text-3xl mb-1">{shape.emoji}</p>
               <p className="font-extrabold text-gray-900 text-sm leading-tight">{shape.name}</p>
               <p className="text-[10px] text-gray-400 mt-0.5">{shape.category}</p>
@@ -748,7 +747,7 @@ export default function Geometrix() {
               <div className="grid grid-cols-3 gap-1.5">
                 {[{ l: "V", v: shape.vef.v }, { l: "E", v: shape.vef.e }, { l: "F", v: shape.vef.f }].map(t => (
                   <div key={t.l} className="rounded-lg border border-gray-100 p-2 text-center">
-                    <p className="text-base font-black" style={{ color: TEAL }}>{t.v}</p>
+                    <p className="text-base font-black" className="text-primary">{t.v}</p>
                     <p className="text-[9px] text-gray-400 mt-0.5">{t.l}</p>
                   </div>
                 ))}
@@ -771,7 +770,7 @@ export default function Geometrix() {
               <div className="space-y-2">
                 <div className="rounded-xl border border-gray-100 p-3">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-1">Surface Area</p>
-                  <p className="text-2xl font-black" style={{ color: TEAL }}>{saVal}</p>
+                  <p className="text-2xl font-black" className="text-primary">{saVal}</p>
                   <p className="text-[9px] text-gray-400">units²</p>
                   {showFormulas && (
                     <p className="text-[10px] text-gray-400 mt-2 font-mono border-t border-gray-50 pt-2 leading-relaxed">
@@ -781,7 +780,7 @@ export default function Geometrix() {
                 </div>
                 <div className="rounded-xl border border-gray-100 p-3">
                   <p className="text-[9px] font-bold text-gray-400 uppercase tracking-wide mb-1">Volume</p>
-                  <p className="text-2xl font-black" style={{ color: "#0D9488" }}>{volVal}</p>
+                  <p className="text-2xl font-black" style={{ color: "hsl(var(--primary))" }}>{volVal}</p>
                   <p className="text-[9px] text-gray-400">units³</p>
                   {showFormulas && (
                     <p className="text-[10px] text-gray-400 mt-2 font-mono border-t border-gray-50 pt-2 leading-relaxed">
@@ -799,7 +798,7 @@ export default function Geometrix() {
                 <div className="space-y-1">
                   {shape.keyVertices(activeDims).map(v => (
                     <div key={v.label} className="flex items-center gap-2 text-[10px]">
-                      <span className="font-bold w-4 text-center rounded px-0.5" style={{ color: TEAL, background: `${TEAL}15` }}>{v.label}</span>
+                      <span className="font-bold w-4 text-center rounded px-0.5" style={{ color: "hsl(var(--primary))", background: `${"hsl(var(--primary))"}15` }}>{v.label}</span>
                       <span className="text-gray-400 font-mono">
                         ({v.pos.map(n => fmt(n,1)).join(", ")})
                       </span>

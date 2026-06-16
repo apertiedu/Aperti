@@ -71,7 +71,7 @@ function QuestionCard({ q, onEdit, onDuplicate, onDelete }: { q: any; onEdit: ()
         {q.max_marks && <Badge variant="outline" className="text-xs">{q.max_marks}m</Badge>}
         {q.command_word && <Badge className="text-xs bg-blue-100 text-blue-700">{q.command_word}</Badge>}
         {q.topic && <Badge className="text-xs bg-purple-100 text-purple-700">{q.topic}</Badge>}
-        {q.subtopic && <Badge className="text-xs bg-teal-100 text-teal-700">{q.subtopic}</Badge>}
+        {q.subtopic && <Badge className="text-xs bg-primary/15 text-primary">{q.subtopic}</Badge>}
         {q.year && <Badge className="text-xs bg-gray-100 text-gray-600">{q.year}</Badge>}
         {q.paper && <Badge variant="outline" className="text-xs">{q.paper}</Badge>}
         {q.source === "import" && <Badge className="text-xs bg-orange-100 text-orange-700"><Upload size={10} className="mr-1" />Imported</Badge>}
@@ -80,7 +80,7 @@ function QuestionCard({ q, onEdit, onDuplicate, onDelete }: { q: any; onEdit: ()
       {q.model_answer && (
         <details className="mt-3">
           <summary className="text-xs text-gray-400 cursor-pointer hover:text-gray-600">View model answer</summary>
-          <p className="text-xs text-gray-600 mt-2 pl-3 border-l-2 border-teal-200 leading-relaxed">{q.model_answer}</p>
+          <p className="text-xs text-gray-600 mt-2 pl-3 border-l-2 border-primary/25 leading-relaxed">{q.model_answer}</p>
         </details>
       )}
     </motion.div>
@@ -145,7 +145,7 @@ function CreateQuestionDialog({ open, onClose, subjectId, onCreated }: { open: b
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader><DialogTitle className="flex items-center gap-2"><Plus size={18} className="text-teal-600" /> Create Question</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="flex items-center gap-2"><Plus size={18} className="text-primary" /> Create Question</DialogTitle></DialogHeader>
         <div className="space-y-4 py-2">
           <div>
             <label className="text-xs font-semibold text-gray-600 mb-1 block">Question Text *</label>
@@ -200,9 +200,9 @@ function CreateQuestionDialog({ open, onClose, subjectId, onCreated }: { open: b
           </div>
           <div className="flex gap-3 pt-2">
             <Button variant="outline" onClick={aiGenerate} disabled={aiLoading || !form.topic} className="flex-1">
-              <Sparkles size={14} className="mr-1 text-teal-600" /> {aiLoading ? "Generating..." : "AI Assist"}
+              <Sparkles size={14} className="mr-1 text-primary" /> {aiLoading ? "Generating..." : "AI Assist"}
             </Button>
-            <Button onClick={save} disabled={!form.questionText} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white">Save Question</Button>
+            <Button onClick={save} disabled={!form.questionText} className="flex-1 bg-primary hover:bg-primary/80 text-white">Save Question</Button>
           </div>
         </div>
       </DialogContent>
@@ -278,7 +278,7 @@ export default function QuestionStudio() {
   const totalPages = Math.ceil(total / 20);
 
   const statCards = [
-    { label: "Total Questions", value: total, color: "text-teal-600" },
+    { label: "Total Questions", value: total, color: "text-primary" },
     { label: "Easy", value: (analytics?.questions || []).find((q: any) => q.difficulty === "easy")?.total || 0, color: "text-green-600" },
     { label: "Medium", value: (analytics?.questions || []).find((q: any) => q.difficulty === "medium")?.total || 0, color: "text-amber-600" },
     { label: "Hard", value: (analytics?.questions || []).find((q: any) => q.difficulty === "hard")?.total || 0, color: "text-red-600" },
@@ -289,12 +289,12 @@ export default function QuestionStudio() {
       <div className="max-w-7xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><BookOpen className="text-teal-600" size={28} /> Question Studio</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><BookOpen className="text-primary" size={28} /> Question Studio</h1>
             <p className="text-gray-500 mt-1">Build, import, and manage your question bank</p>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => navigate("/teacher/questions/import")}><Upload size={16} className="mr-2" /> Import</Button>
-            <Button onClick={() => setShowCreate(true)} className="bg-teal-600 hover:bg-teal-700 text-white"><Plus size={16} className="mr-2" /> New Question</Button>
+            <Button onClick={() => setShowCreate(true)} className="bg-primary hover:bg-primary/80 text-white"><Plus size={16} className="mr-2" /> New Question</Button>
           </div>
         </motion.div>
 
@@ -357,12 +357,12 @@ export default function QuestionStudio() {
               <div className="space-y-3">{Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}</div>
             ) : questions.length === 0 ? (
               <div className="rounded-xl border border-border bg-card flex flex-col items-center justify-center py-16 text-center px-4">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: "#0D948815" }}>
-                  <BookOpen className="w-6 h-6" style={{ color: "#0D9488" }} />
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                  <BookOpen className="w-6 h-6" style={{ color: "hsl(var(--primary))" }} />
                 </div>
                 <p className="text-base font-semibold text-foreground mb-1">No questions found</p>
                 <p className="text-sm text-muted-foreground max-w-xs mb-5">Create your first question or adjust your search filters.</p>
-                <Button style={{ background: "#0D9488", color: "white" }} onClick={() => setShowCreate(true)}>
+                <Button style={{ background: "hsl(var(--primary))", color: "white" }} onClick={() => setShowCreate(true)}>
                   <Plus size={14} className="mr-1" /> New Question
                 </Button>
               </div>
@@ -391,7 +391,7 @@ export default function QuestionStudio() {
           <TabsContent value="ai" className="mt-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="bg-card border-0 shadow-sm">
-                <CardHeader><CardTitle className="text-base flex items-center gap-2"><Sparkles size={16} className="text-teal-600" /> AI Question Generator</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-base flex items-center gap-2"><Sparkles size={16} className="text-primary" /> AI Question Generator</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
                   <div>
                     <label className="text-xs font-semibold text-gray-600 mb-1 block">Topic *</label>
@@ -413,7 +413,7 @@ export default function QuestionStudio() {
                       </Select>
                     </div>
                   </div>
-                  <Button onClick={generateAiQuestions} disabled={aiGenLoading || !aiGenForm.topic} className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                  <Button onClick={generateAiQuestions} disabled={aiGenLoading || !aiGenForm.topic} className="w-full bg-primary hover:bg-primary/80 text-white">
                     <Sparkles size={14} className="mr-2" /> {aiGenLoading ? "Generating..." : "Generate Questions"}
                   </Button>
                 </CardContent>
@@ -423,15 +423,15 @@ export default function QuestionStudio() {
                 <AnimatePresence>
                   {aiGenResults.map((q, i) => (
                     <motion.div key={i} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ delay: i * 0.05 }}
-                      className="bg-card border border-border rounded-xl p-4 hover:border-teal-200 transition-all">
+                      className="bg-card border border-border rounded-xl p-4 hover:border-primary/25 transition-all">
                       <p className="text-sm text-gray-800 mb-2 leading-relaxed">{q.questionText}</p>
                       <div className="flex gap-2 flex-wrap mb-3">
                         {q.commandWord && <Badge className="text-xs bg-blue-100 text-blue-700">{q.commandWord}</Badge>}
                         {q.maxMarks && <Badge variant="outline" className="text-xs">{q.maxMarks}m</Badge>}
                         {q.difficulty && <Badge className="text-xs bg-amber-100 text-amber-700">{q.difficulty}</Badge>}
                       </div>
-                      {q.modelAnswer && <p className="text-xs text-gray-500 border-l-2 border-teal-300 pl-2 mb-3 leading-relaxed">{q.modelAnswer}</p>}
-                      <Button size="sm" onClick={() => saveAiQuestion(q)} className="bg-teal-600 hover:bg-teal-700 text-white text-xs h-7">Save to Bank</Button>
+                      {q.modelAnswer && <p className="text-xs text-gray-500 border-l-2 border-primary/30 pl-2 mb-3 leading-relaxed">{q.modelAnswer}</p>}
+                      <Button size="sm" onClick={() => saveAiQuestion(q)} className="bg-primary hover:bg-primary/80 text-white text-xs h-7">Save to Bank</Button>
                     </motion.div>
                   ))}
                 </AnimatePresence>

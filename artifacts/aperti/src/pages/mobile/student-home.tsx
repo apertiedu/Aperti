@@ -101,7 +101,7 @@ export default function StudentMobileHome() {
       {/* Quick Actions */}
       <div className="grid grid-cols-2 gap-3">
         {[
-          { href: "/practice", icon: Brain, label: "Quick Practice", color: "bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300" },
+          { href: "/practice", icon: Brain, label: "Quick Practice", color: "bg-primary/8 dark:bg-primary/95/30 text-primary dark:text-primary/60" },
           { href: "/flashcards", icon: Flame, label: "Flashcards", color: "bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300" },
           { href: "/mentor", icon: Target, label: "Ask Mentor", color: "bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300" },
           { href: "/revision-notes", icon: BookOpen, label: "My Notes", color: "bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-300" },

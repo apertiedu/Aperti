@@ -178,8 +178,7 @@ export default function ReportProblemModal() {
                       disabled={!description.trim() || status === "sending"}
                       whileHover={description.trim() ? { scale: 1.01 } : {}}
                       whileTap={description.trim() ? { scale: 0.99 } : {}}
-                      className="w-full h-9 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                      style={{ background: "#0D9488" }}
+                      className="w-full h-9 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold bg-primary text-primary-foreground transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90"
                     >
                       {status === "sending" ? (
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -202,8 +201,7 @@ export default function ReportProblemModal() {
         onClick={() => setOpen(o => !o)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-16 right-4 md:bottom-4 md:right-20 z-[9970] w-9 h-9 rounded-full shadow-lg flex items-center justify-center transition-colors"
-        style={{ background: open ? "#0D9488" : "#f59e0b" }}
+        className={`fixed bottom-16 right-4 md:bottom-4 md:right-20 z-[9970] w-9 h-9 rounded-full shadow-lg flex items-center justify-center transition-colors ${open ? "bg-primary" : "bg-amber-500"}`}
         title="Report a problem"
         aria-label="Report a problem"
       >

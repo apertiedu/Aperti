@@ -28,7 +28,7 @@ function StatCard({ title, value, subtitle, icon: Icon, color, href }: any) {
         </div>
       </div>
       {href && (
-        <div className="flex items-center gap-1 mt-3 text-xs text-teal-600 font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 mt-3 text-xs text-primary font-medium opacity-0 group-hover:opacity-100 transition-opacity">
           View details <ArrowUpRight className="w-3 h-3" />
         </div>
       )}
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
             </p>
           </div>
           <Link href="/admin/os/health">
-            <a className="text-xs text-teal-600 font-medium hover:underline flex items-center gap-1">
+            <a className="text-xs text-primary font-medium hover:underline flex items-center gap-1">
               Details <ArrowUpRight className="w-3 h-3" />
             </a>
           </Link>
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
 
       {/* KPI grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard title="Active Users" value={userStats?.active?.toLocaleString()} subtitle={`${userStats?.teachers} teachers · ${userStats?.students} students`} icon={Users} color="bg-teal-500" href="/admin/os/users" />
+        <StatCard title="Active Users" value={userStats?.active?.toLocaleString()} subtitle={`${userStats?.teachers} teachers · ${userStats?.students} students`} icon={Users} color="bg-primary" href="/admin/os/users" />
         <StatCard title="Active Subscriptions" value={subStats?.active?.toLocaleString()} subtitle={`${subStats?.trial} on trial`} icon={CreditCard} color="bg-blue-500" href="/admin/os/subscriptions" />
         <StatCard title="Monthly Revenue" value={`EGP ${((revenue?.mrr || 0)).toLocaleString()}`} subtitle="This month" icon={TrendingUp} color="bg-emerald-500" href="/admin/os/payments" />
         <StatCard title="Open Tickets" value={dash?.openTickets ?? "—"} subtitle="Pending support" icon={TicketCheck} color="bg-orange-500" href="/admin/os/tickets" />
@@ -153,7 +153,7 @@ export default function AdminDashboard() {
           <p className="text-xs font-bold text-gray-900 mb-3">Operational Intelligence</p>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
-              { label: "Active Sessions", value: dash?.activeSessions ?? "—", color: "text-teal-600" },
+              { label: "Active Sessions", value: dash?.activeSessions ?? "—", color: "text-primary" },
               { label: "Avg Response", value: health ? `${health.apiLatency}ms` : "—", color: "text-blue-600" },
               { label: "DB Latency", value: health ? `${health.dbLatency}ms` : "—", color: "text-indigo-600" },
               { label: "Memory", value: health ? `${health.memory?.percent}%` : "—", color: "text-purple-600" },
@@ -178,8 +178,8 @@ export default function AdminDashboard() {
           { label: "Feature Flags", href: "/admin/os/features", icon: Zap, desc: "Toggle platform features" },
         ].map((item) => (
           <Link key={item.href} href={item.href}>
-            <a className="bg-white rounded-xl border border-gray-100 p-4 hover:border-teal-200 hover:shadow-sm transition-all group">
-              <item.icon className="w-6 h-6 text-teal-600 mb-2 group-hover:scale-110 transition-transform" />
+            <a className="bg-white rounded-xl border border-gray-100 p-4 hover:border-primary/30 hover:shadow-sm transition-all group">
+              <item.icon className="w-6 h-6 text-primary mb-2 group-hover:scale-110 transition-transform" />
               <p className="text-sm font-semibold text-gray-900">{item.label}</p>
               <p className="text-xs text-gray-400 mt-0.5">{item.desc}</p>
             </a>

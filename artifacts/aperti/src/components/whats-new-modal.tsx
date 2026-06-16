@@ -54,7 +54,7 @@ export default function WhatsNewModal() {
           >
             <div className="bg-card rounded-2xl shadow-2xl max-w-lg w-full pointer-events-auto overflow-hidden">
               {/* Header */}
-              <div className="relative bg-gradient-to-br from-teal-500 to-teal-700 p-6 text-white overflow-hidden">
+              <div className="relative bg-primary p-6 text-primary-foreground overflow-hidden">
                 <div className="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full" />
                 <div className="absolute -right-2 bottom-0 w-24 h-24 bg-white/5 rounded-full" />
                 <button
@@ -65,11 +65,11 @@ export default function WhatsNewModal() {
                 </button>
                 <div className="relative">
                   <div className="flex items-center gap-2 mb-1.5">
-                    <Sparkles className="w-4 h-4 text-teal-200" />
-                    <span className="text-teal-200 text-xs font-bold uppercase tracking-widest">Phase 27</span>
+                    <Sparkles className="w-4 h-4 text-primary-foreground/60" />
+                    <span className="text-primary-foreground/60 text-xs font-bold uppercase tracking-widest">Phase 27</span>
                   </div>
                   <h2 className="text-2xl font-black leading-tight">What's New in Aperti</h2>
-                  <p className="text-teal-100 text-sm mt-1 font-medium">Premium refinements, smarter insights & more delight</p>
+                  <p className="text-primary-foreground/70 text-sm mt-1 font-medium">Premium refinements, smarter insights & more delight</p>
                 </div>
               </div>
 
@@ -97,7 +97,7 @@ export default function WhatsNewModal() {
                 <p className="text-xs text-gray-400">Aperti · Build 27 · {new Date().toLocaleDateString("en-GB", { month: "long", year: "numeric" })}</p>
                 <button
                   onClick={dismiss}
-                  className="flex items-center gap-1.5 bg-teal-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-teal-700 transition-colors"
+                  className="flex items-center gap-1.5 bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-90 transition-colors"
                 >
                   Got it <ChevronRight className="w-3.5 h-3.5" />
                 </button>

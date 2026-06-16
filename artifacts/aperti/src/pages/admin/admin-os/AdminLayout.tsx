@@ -143,7 +143,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       {/* Logo */}
       <div className={cn("flex items-center gap-3 px-4 py-5 border-b border-gray-100", collapsed && !mobile && "justify-center px-2")}>
         {collapsed && !mobile ? (
-          <span className="font-bold text-sm text-gray-900">A<span className="text-teal-600">.</span></span>
+          <span className="font-bold text-sm text-gray-900">A<span className="text-primary">.</span></span>
         ) : (
           <div>
             <p className="font-bold text-gray-900 text-sm">Admin OS</p>
@@ -170,14 +170,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 className={cn(
                   "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer",
                   active
-                    ? "bg-teal-50 text-teal-700"
+                    ? "bg-primary/8 text-primary"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                   collapsed && !mobile && "justify-center px-2"
                 )}
                 onClick={() => mobile && setMobileOpen(false)}
                 title={collapsed && !mobile ? item.label : undefined}
               >
-                <item.icon className={cn("w-4 h-4 flex-shrink-0", active ? "text-teal-600" : "text-gray-400")} />
+                <item.icon className={cn("w-4 h-4 flex-shrink-0", active ? "text-primary" : "text-gray-400")} />
                 {(!collapsed || mobile) && <span className="truncate">{item.label}</span>}
               </a>
             </Link>
@@ -194,7 +194,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             {import.meta.env.VITE_COMMIT_HASH && import.meta.env.VITE_COMMIT_HASH !== "dev" && (
               <>
                 <span className="text-gray-200">·</span>
-                <span className="font-mono text-[10px] text-teal-500 bg-teal-50 px-1.5 py-0.5 rounded">
+                <span className="font-mono text-[10px] text-primary bg-primary/8 px-1.5 py-0.5 rounded">
                   {import.meta.env.VITE_COMMIT_HASH}
                 </span>
               </>
@@ -251,7 +251,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </button>
           <div className="flex-1" />
           <Link href="/admin/command">
-            <a className="text-xs text-gray-500 hover:text-teal-600 transition-colors">← Classic Admin</a>
+            <a className="text-xs text-gray-500 hover:text-primary transition-colors">← Classic Admin</a>
           </Link>
         </div>
 

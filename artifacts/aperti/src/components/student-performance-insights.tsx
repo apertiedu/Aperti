@@ -17,11 +17,11 @@ interface StudentInsight {
 function GradeBar({ pct }: { pct: number }) {
   const color =
     pct >= 80 ? "bg-emerald-400" :
-    pct >= 60 ? "bg-teal-400" :
+    pct >= 60 ? "bg-primary/70" :
     pct >= 50 ? "bg-amber-400" :
     "bg-red-400";
   return (
-    <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: `${pct}%` }}
@@ -35,7 +35,7 @@ function GradeBar({ pct }: { pct: number }) {
 function TrendIcon({ trend }: { trend: string }) {
   if (trend === "up") return <TrendingUp className="w-3 h-3 text-emerald-500" />;
   if (trend === "down") return <TrendingDown className="w-3 h-3 text-red-500" />;
-  return <Minus className="w-3 h-3 text-gray-400" />;
+  return <Minus className="w-3 h-3 text-muted-foreground" />;
 }
 
 function igcseGrade(pct: number): string {
@@ -81,19 +81,19 @@ export default function StudentPerformanceInsights({ courseId }: { courseId?: nu
   if (students.length === 0) {
     return (
       <div className="bg-card rounded-xl border border-border p-6 text-center">
-        <Users className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-        <p className="text-sm font-semibold text-gray-700">No student data yet</p>
-        <p className="text-xs text-gray-400 mt-1">Mark attendance or grade exams to see insights here</p>
+        <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+        <p className="text-sm font-semibold text-foreground">No student data yet</p>
+        <p className="text-xs text-muted-foreground mt-1">Mark attendance or grade exams to see insights here</p>
       </div>
     );
   }
 
   return (
     <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-50">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4 text-teal-600" />
-          <p className="text-sm font-bold text-gray-900">Student Performance</p>
+          <Users className="w-4 h-4 text-primary" />
+          <p className="text-sm font-bold text-foreground">Student Performance</p>
         </div>
         <div className="flex items-center gap-2">
           {atRisk.length > 0 && (
@@ -102,25 +102,25 @@ export default function StudentPerformanceInsights({ courseId }: { courseId?: nu
               {atRisk.length} need{atRisk.length === 1 ? "s" : ""} attention
             </span>
           )}
-          <span className="text-[10px] text-gray-400">{students.length} students</span>
+          <span className="text-[10px] text-muted-foreground">{students.length} students</span>
         </div>
       </div>
 
-      <div className="divide-y divide-gray-50">
+      <div className="divide-y divide-border/40">
         {students.slice(0, 8).map((s, i) => (
           <motion.div
             key={s.studentId}
             initial={{ opacity: 0, x: -8 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.04 }}
-            className={`flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50/80 transition-colors ${s.needsAttention ? "bg-red-50/30" : ""}`}
+            className={`flex items-center gap-3 px-4 py-2.5 hover:bg-muted/30 transition-colors ${s.needsAttention ? "bg-red-50/30 dark:bg-red-950/10" : ""}`}
           >
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-[10px] font-bold shrink-0">
-              {(s.name || "S").split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase()}
+            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0">
+              {(s.name || "S").split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5 mb-1">
-                <p className="text-xs font-semibold text-gray-800 truncate">{s.name}</p>
+                <p className="text-xs font-semibold text-foreground truncate">{s.name}</p>
                 {s.needsAttention && <AlertTriangle className="w-2.5 h-2.5 text-red-500 shrink-0" />}
               </div>
               <GradeBar pct={s.avgGrade} />
@@ -128,10 +128,10 @@ export default function StudentPerformanceInsights({ courseId }: { courseId?: nu
             <div className="flex items-center gap-2 shrink-0">
               <TrendIcon trend={s.trend} />
               <div className="text-right">
-                <p className={`text-xs font-bold ${s.avgGrade >= 60 ? "text-teal-600" : "text-red-500"}`}>
+                <p className={`text-xs font-bold ${s.avgGrade >= 60 ? "text-primary" : "text-red-500"}`}>
                   {igcseGrade(s.avgGrade)}
                 </p>
-                <p className="text-[10px] text-gray-400">{s.attendanceRate}%</p>
+                <p className="text-[10px] text-muted-foreground">{s.attendanceRate}%</p>
               </div>
             </div>
           </motion.div>
@@ -140,7 +140,7 @@ export default function StudentPerformanceInsights({ courseId }: { courseId?: nu
 
       {students.length > 8 && (
         <Link href="/gradebook">
-          <div className="flex items-center justify-center gap-1 px-4 py-2.5 border-t border-gray-50 text-xs text-teal-600 font-medium hover:bg-teal-50/50 transition-colors cursor-pointer">
+          <div className="flex items-center justify-center gap-1 px-4 py-2.5 border-t border-border text-xs text-primary font-medium hover:bg-primary/5 transition-colors cursor-pointer">
             View all {students.length} students <ChevronRight className="w-3 h-3" />
           </div>
         </Link>

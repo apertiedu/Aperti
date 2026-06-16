@@ -30,13 +30,13 @@ export function ComingSoonOverlay({
   return (
     <div className="relative">
       <div className="pointer-events-none opacity-30 select-none">{children}</div>
-      <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 backdrop-blur-[2px] rounded-xl z-10">
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-[2px] rounded-xl z-10">
         <div className="flex flex-col items-center gap-2 text-center px-6">
           <span className="inline-flex items-center gap-1.5 text-sm font-semibold px-3 py-1.5 rounded-full border border-primary/30 text-primary bg-primary/5">
             <Clock className="h-3.5 w-3.5" />
             {title}
           </span>
-          <p className="text-xs text-gray-500 max-w-xs mt-1">{description}</p>
+          <p className="text-xs text-muted-foreground max-w-xs mt-1">{description}</p>
         </div>
       </div>
     </div>
@@ -49,7 +49,7 @@ export function ComingSoonBanner({ description }: { description?: string }) {
       <Clock className="h-4 w-4 text-primary shrink-0" />
       <div>
         <p className="text-sm font-semibold text-primary">Coming Soon</p>
-        {description && <p className="text-xs text-gray-500 mt-0.5">{description}</p>}
+        {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
       </div>
     </div>
   );

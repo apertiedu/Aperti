@@ -71,7 +71,7 @@ export default function MomentumScore({ compact = false }: { compact?: boolean }
     return (
       <div className={`bg-card rounded-2xl border border-border shadow-sm ${compact ? "p-4" : "p-5"}`}>
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-5 h-5 rounded-full bg-teal-100 animate-pulse" />
+          <div className="w-5 h-5 rounded-full bg-primary/20 animate-pulse" />
           <div className="h-4 w-36 bg-muted rounded animate-pulse" />
         </div>
         <div className="h-24 bg-muted/50 rounded-xl animate-pulse" />

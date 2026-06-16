@@ -25,7 +25,7 @@ interface Certificate {
 }
 
 const TEMPLATE_OPTIONS = [
-  { id: "completion",  label: "Course Completion", color: "from-teal-500 to-emerald-500" },
+  { id: "completion",  label: "Course Completion", color: "from-primary to-emerald-500" },
   { id: "excellence",  label: "Academic Excellence", color: "from-amber-400 to-yellow-500" },
   { id: "merit",       label: "Merit Award",        color: "from-violet-500 to-indigo-500" },
   { id: "distinction", label: "Distinction",        color: "from-pink-500 to-rose-500" },

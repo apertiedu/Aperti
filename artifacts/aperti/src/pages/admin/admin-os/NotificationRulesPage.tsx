@@ -18,8 +18,8 @@ function RuleCard({ rule, onEdit, onDelete }: { rule: any; onEdit: () => void; o
       className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center">
-            {rule.user_id ? <User className="w-4 h-4 text-teal-600" /> : <Globe className="w-4 h-4 text-teal-600" />}
+          <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center">
+            {rule.user_id ? <User className="w-4 h-4 text-primary" /> : <Globe className="w-4 h-4 text-primary" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export default function NotificationRulesPage() {
           <p className="text-sm text-gray-500 mt-0.5">Rate limits, digests, and delivery policies</p>
         </div>
         <button onClick={() => { setShowForm(true); setEditId(null); }}
-          className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors">
+          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> New Rule
         </button>
       </div>
@@ -108,32 +108,32 @@ export default function NotificationRulesPage() {
       <AnimatePresence>
         {showForm && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            className="bg-white rounded-xl shadow-sm border border-teal-200 p-5">
+            className="bg-white rounded-xl shadow-sm border border-primary/25 p-5">
             <h3 className="font-semibold text-gray-800 mb-4">{editId ? "Edit Rule" : "Create Rule"}</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="text-xs text-gray-500 block mb-1">Rule Type</label>
                 <select value={form.rule_type} onChange={(e) => setForm(f => ({ ...f, rule_type: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                   {RULE_TYPES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-xs text-gray-500 block mb-1">Config (JSON)</label>
                 <input value={form.config} onChange={(e) => setForm(f => ({ ...f, config: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30"
                   placeholder='{"max_per_day":5}' />
               </div>
               <div>
                 <label className="text-xs text-gray-500 block mb-1">User ID (blank = global)</label>
                 <input value={form.user_id} onChange={(e) => setForm(f => ({ ...f, user_id: e.target.value }))}
                   type="number" placeholder="Leave blank for global"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
             </div>
             <div className="flex items-center gap-2">
               <button onClick={() => createMut.mutate()} disabled={createMut.isPending}
-                className="flex items-center gap-1.5 bg-teal-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-teal-700 disabled:opacity-50">
+                className="flex items-center gap-1.5 bg-primary text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary/80 disabled:opacity-50">
                 <Check className="w-4 h-4" /> {createMut.isPending ? "Saving…" : "Save"}
               </button>
               <button onClick={() => setShowForm(false)}

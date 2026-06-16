@@ -16,7 +16,7 @@ function ArticleCard({ article, onEdit, onDelete }: any) {
         onClick={() => setExpanded(!expanded)}
       >
         <div className="flex items-center gap-3 flex-1 min-w-0">
-          <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700 flex-shrink-0`}>{article.category}</span>
+          <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-primary/15 text-primary flex-shrink-0`}>{article.category}</span>
           <p className="font-medium text-gray-900 truncate">{article.title}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -92,14 +92,14 @@ export default function KBPage() {
           <h1 className="text-2xl font-bold text-gray-900">Knowledge Base</h1>
           <p className="text-sm text-gray-500">{articleList.length} articles</p>
         </div>
-        <button onClick={() => { setEditing(null); setForm({ title: "", content: "", category: "general", language: "en" }); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+        <button onClick={() => { setEditing(null); setForm({ title: "", content: "", category: "general", language: "en" }); setShowModal(true); }} className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> New Article
         </button>
       </div>
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search articles…" className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white" />
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search articles…" className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white" />
       </div>
 
       {articleList.length === 0 ? (
@@ -122,18 +122,18 @@ export default function KBPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title <span className="text-red-500">*</span></label>
-                <input value={form.title} onChange={(e) => setForm(p => ({ ...p, title: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
+                <input value={form.title} onChange={(e) => setForm(p => ({ ...p, title: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                  <select value={form.category} onChange={(e) => setForm(p => ({ ...p, category: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400">
+                  <select value={form.category} onChange={(e) => setForm(p => ({ ...p, category: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60">
                     {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
-                  <select value={form.language} onChange={(e) => setForm(p => ({ ...p, language: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400">
+                  <select value={form.language} onChange={(e) => setForm(p => ({ ...p, language: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60">
                     <option value="en">English</option>
                     <option value="ar">Arabic</option>
                   </select>
@@ -141,12 +141,12 @@ export default function KBPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Content <span className="text-red-500">*</span></label>
-                <textarea value={form.content} onChange={(e) => setForm(p => ({ ...p, content: e.target.value }))} rows={10} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 font-mono text-xs" placeholder="Article content (Markdown supported)…" />
+                <textarea value={form.content} onChange={(e) => setForm(p => ({ ...p, content: e.target.value }))} rows={10} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 font-mono text-xs" placeholder="Article content (Markdown supported)…" />
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => { setShowModal(false); setEditing(null); }} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">Cancel</button>
-              <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50">
+              <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50">
                 {saveMutation.isPending ? "Saving…" : "Save Article"}
               </button>
             </div>

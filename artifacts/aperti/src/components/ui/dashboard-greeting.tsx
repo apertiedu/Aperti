@@ -109,8 +109,8 @@ export function QuickActionsBar({ actions, className }: QuickActionsBarProps) {
           className={cn(
             "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors",
             action.variant === "primary"
-              ? "bg-teal-600 text-white hover:bg-teal-700"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+              ? "bg-primary text-primary-foreground hover:opacity-90"
+              : "bg-muted text-muted-foreground hover:bg-muted/80",
           )}
         >
           {action.icon}

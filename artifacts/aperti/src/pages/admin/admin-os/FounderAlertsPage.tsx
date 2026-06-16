@@ -40,14 +40,14 @@ function AlertCard({ alert, onRead }: { alert: any; onRead: () => void }) {
           <div className="flex items-center gap-2 mb-1">
             <span className={`text-xs font-semibold uppercase tracking-wide ${sev.text}`}>{sev.label}</span>
             <span className="text-xs text-gray-500 capitalize">· {alert.type?.replace(/_/g, " ")}</span>
-            {!alert.is_read && <span className="w-2 h-2 rounded-full bg-teal-500 flex-shrink-0" />}
+            {!alert.is_read && <span className="w-2 h-2 rounded-full bg-primary flex-shrink-0" />}
           </div>
           <p className="text-sm text-gray-800 font-medium">{alert.message}</p>
           <p className="text-xs text-gray-400 mt-1">{new Date(alert.created_at).toLocaleString()}</p>
         </div>
         {!alert.is_read && (
           <button onClick={onRead}
-            className="flex-shrink-0 flex items-center gap-1 text-xs text-gray-500 hover:text-teal-600 transition-colors px-2 py-1 rounded-lg hover:bg-white/60">
+            className="flex-shrink-0 flex items-center gap-1 text-xs text-gray-500 hover:text-primary transition-colors px-2 py-1 rounded-lg hover:bg-white/60">
             <CheckCheck className="w-3.5 h-3.5" /> Mark read
           </button>
         )}
@@ -119,7 +119,7 @@ function NotificationSettings() {
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" checked={f.email_enabled} onChange={set("email_enabled")} className="sr-only peer" />
-            <div className="w-10 h-5 bg-gray-200 peer-checked:bg-teal-600 rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-teal-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+            <div className="w-10 h-5 bg-gray-200 peer-checked:bg-primary rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-primary/30 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
           </label>
         </div>
         <AnimatePresence>
@@ -138,7 +138,7 @@ function NotificationSettings() {
                         value={f.smtp_pass}
                         onChange={set("smtp_pass")}
                         placeholder="App password"
-                        className="w-full pr-9 pl-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white"
+                        className="w-full pr-9 pl-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white"
                       />
                       <button type="button" onClick={() => setShowPass(s => !s)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -169,7 +169,7 @@ function NotificationSettings() {
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" checked={f.webhook_enabled} onChange={set("webhook_enabled")} className="sr-only peer" />
-            <div className="w-10 h-5 bg-gray-200 peer-checked:bg-teal-600 rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-teal-300 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
+            <div className="w-10 h-5 bg-gray-200 peer-checked:bg-primary rounded-full transition-colors peer-focus:ring-2 peer-focus:ring-primary/30 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5" />
           </label>
         </div>
         <AnimatePresence>
@@ -215,7 +215,7 @@ function NotificationSettings() {
         <button
           onClick={() => saveMut.mutate(f)}
           disabled={saveMut.isPending}
-          className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 text-white text-sm font-semibold rounded-xl hover:bg-teal-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-sm font-semibold rounded-xl hover:bg-primary/80 transition-colors disabled:opacity-50"
         >
           {saveMut.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           Save Settings
@@ -243,7 +243,7 @@ function Field({ label, placeholder, value, onChange, type = "text" }: any) {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white"
+        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white"
       />
     </div>
   );
@@ -338,7 +338,7 @@ export default function FounderAlertsPage() {
                   The background worker checks every 5 min. Critical launch blockers and problem reports fire instantly.
                 </p>
                 <button onClick={() => setTab("settings")}
-                  className="mt-4 inline-flex items-center gap-1 text-sm text-teal-600 font-medium hover:underline">
+                  className="mt-4 inline-flex items-center gap-1 text-sm text-primary font-medium hover:underline">
                   Configure notifications <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>

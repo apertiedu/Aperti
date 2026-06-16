@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Bot, User, Sparkles, RefreshCw } from "lucide-react";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
@@ -65,11 +64,11 @@ export default function ParentAIAssistant() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-3 shrink-0 flex-wrap">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}20` }}>
-            <Bot className="h-5 w-5" style={{ color: TEAL }} />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
+            <Bot className="h-5 w-5" className="text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-black text-gray-900">GuardianAI<span style={{ color: TEAL }}>.</span></h1>
+            <h1 className="text-xl font-black text-gray-900">GuardianAI<span className="text-primary">.</span></h1>
             <p className="text-sm text-gray-500">Your educational assistant</p>
           </div>
         </div>
@@ -79,15 +78,15 @@ export default function ParentAIAssistant() {
             <div className="flex gap-1.5">
               <button
                 onClick={() => setSelectedChild(null)}
-                className={`text-xs px-2.5 py-1 rounded-full border transition-all ${!selectedChild ? "text-white border-teal-500" : "border-gray-200 text-gray-500"}`}
-                style={!selectedChild ? { background: TEAL } : undefined}
+                className={`text-xs px-2.5 py-1 rounded-full border transition-all ${!selectedChild ? "text-white border-primary" : "border-gray-200 text-gray-500"}`}
+                className={!selectedChild ? "bg-primary" : ""}
               >General</button>
               {children.slice(0, 3).map((c: any) => (
                 <button
                   key={c.studentId}
                   onClick={() => setSelectedChild(c.studentId)}
-                  className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selectedChild === c.studentId ? "text-white border-teal-500" : "border-gray-200 text-gray-500"}`}
-                  style={selectedChild === c.studentId ? { background: TEAL } : undefined}
+                  className={`text-xs px-2.5 py-1 rounded-full border transition-all ${selectedChild === c.studentId ? "text-white border-primary" : "border-gray-200 text-gray-500"}`}
+                  className={selectedChild === c.studentId ? "bg-primary" : ""}
                 >{c.name.split(" ")[0]}</button>
               ))}
             </div>
@@ -103,12 +102,12 @@ export default function ParentAIAssistant() {
               <motion.div key={i} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                 className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                 {msg.role === "assistant" && (
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: `${TEAL}20` }}>
-                    <Bot className="h-3.5 w-3.5" style={{ color: TEAL }} />
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5" className="bg-primary/8">
+                    <Bot className="h-3.5 w-3.5" className="text-primary" />
                   </div>
                 )}
                 <div className={`max-w-[82%] rounded-2xl px-4 py-3 ${msg.role === "user" ? "text-white" : "bg-gray-50 text-gray-800"}`}
-                  style={{ background: msg.role === "user" ? TEAL : undefined }}>
+                  className={msg.role === "user" ? "bg-primary text-primary-foreground" : ""}>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                   <p className={`text-[9px] mt-1.5 ${msg.role === "user" ? "text-white/60 text-right" : "text-gray-400"}`}>
                     {new Date(msg.ts).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
@@ -123,8 +122,8 @@ export default function ParentAIAssistant() {
             ))}
             {loading && (
               <div className="flex gap-3">
-                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: `${TEAL}20` }}>
-                  <Bot className="h-3.5 w-3.5" style={{ color: TEAL }} />
+                <div className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" className="bg-primary/8">
+                  <Bot className="h-3.5 w-3.5" className="text-primary" />
                 </div>
                 <div className="bg-gray-50 rounded-2xl px-4 py-3">
                   <div className="flex gap-1 items-center h-4">
@@ -149,7 +148,7 @@ export default function ParentAIAssistant() {
             <div className="grid grid-cols-2 gap-1.5">
               {QUICK_QUESTIONS.map((q, i) => (
                 <button key={i} onClick={() => send(q)}
-                  className="text-[11px] px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-teal-300 hover:text-teal-700 hover:bg-teal-50 transition-all text-left leading-snug">
+                  className="text-[11px] px-3 py-2 rounded-xl border border-gray-200 text-gray-600 hover:border-primary/50 hover:text-primary hover:bg-primary/8 transition-all text-left leading-snug">
                   {q}
                 </button>
               ))}
@@ -167,7 +166,7 @@ export default function ParentAIAssistant() {
               className="flex-1 text-sm rounded-xl"
               disabled={loading}
             />
-            <Button type="submit" disabled={!input.trim() || loading} size="icon" className="rounded-xl shrink-0" style={{ background: TEAL }}>
+            <Button type="submit" disabled={!input.trim() || loading} size="icon" className="rounded-xl shrink-0" className="bg-primary text-primary-foreground">
               {loading ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </Button>
           </form>

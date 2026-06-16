@@ -7,7 +7,6 @@ import { useAuth } from "@/context/auth";
 import { apiFetch } from "@/lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 
-const TEAL = "#0D9488";
 
 interface TestCase {
   id: string;
@@ -182,7 +181,7 @@ const GROUPS = Array.from(new Set(TESTS.map((t) => t.group)));
 function statusIcon(s: TestResult["status"]) {
   if (s === "pass") return <CheckCircle2 className="h-4 w-4 text-emerald-500" />;
   if (s === "fail") return <XCircle className="h-4 w-4 text-red-500" />;
-  if (s === "running") return <Loader2 className="h-4 w-4 animate-spin text-teal-600" />;
+  if (s === "running") return <Loader2 className="h-4 w-4 animate-spin text-primary" />;
   if (s === "skip") return <AlertTriangle className="h-4 w-4 text-amber-400" />;
   return <div className="h-4 w-4 rounded-full border-2 border-gray-200" />;
 }
@@ -191,7 +190,7 @@ function statusBadge(s: TestResult["status"]) {
   const map: Record<string, string> = {
     pass: "bg-emerald-50 text-emerald-700",
     fail: "bg-red-50 text-red-600",
-    running: "bg-teal-50 text-teal-700",
+    running: "bg-primary/8 text-primary",
     skip: "bg-amber-50 text-amber-700",
     idle: "bg-gray-50 text-gray-400",
   };
@@ -273,7 +272,7 @@ export default function TestRunner() {
           onClick={runAll}
           disabled={running}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold text-sm text-white transition-opacity disabled:opacity-60"
-          style={{ background: TEAL }}
+          className="bg-primary text-primary-foreground"
         >
           {running ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
           {running ? "Running…" : "Run All Tests"}
@@ -299,7 +298,7 @@ export default function TestRunner() {
         <div className="h-2 rounded-full bg-gray-100 mb-6 overflow-hidden">
           <motion.div
             className="h-full rounded-full"
-            style={{ background: failed > 0 ? "#EF4444" : TEAL }}
+            style={{ background: failed > 0 ? "#EF4444" : "hsl(var(--primary))" }}
             initial={{ width: 0 }}
             animate={{ width: `${(done / total) * 100}%` }}
             transition={{ duration: 0.4 }}

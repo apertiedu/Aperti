@@ -9,11 +9,10 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 import { GraduationCap, Target, Calendar, TrendingUp } from "lucide-react";
 import ParentChildSwitcher from "@/components/parent-child-switcher";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 function getReadinessColor(pct: number) {
-  if (pct >= 75) return "#0D9488";
+  if (pct >= 75) return "hsl(var(--primary))";
   if (pct >= 50) return "#f59e0b";
   return "#ef4444";
 }
@@ -65,8 +64,8 @@ export default function ParentExamReadiness() {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-teal-50">
-          <GraduationCap className="h-5 w-5 text-teal-600" />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+          <GraduationCap className="h-5 w-5 text-primary" />
         </div>
         <div>
           <h1 className="text-xl font-black text-gray-900">Exam Readiness</h1>
@@ -98,7 +97,7 @@ export default function ParentExamReadiness() {
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
                 <Card className="border border-gray-100 shadow-sm">
                   <CardContent className="p-6 flex flex-col items-center justify-center h-full">
-                    <Calendar className="h-8 w-8 text-teal-500 mb-3" />
+                    <Calendar className="h-8 w-8 text-primary mb-3" />
                     <p className="text-4xl font-black text-gray-900">{daysToExam}</p>
                     <p className="text-sm text-gray-500 mt-1">days to next exam</p>
                     {data.nextExam && (
@@ -118,7 +117,7 @@ export default function ParentExamReadiness() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
               <Card className="border border-gray-100 shadow-sm">
                 <CardContent className="p-5">
-                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Target className="h-4 w-4 text-teal-500" />Subject Readiness</h2>
+                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Target className="h-4 w-4 text-primary" />Subject Readiness</h2>
                   <div className="space-y-3">
                     {data.subjectReadiness.map((s: any, i: number) => {
                       const pct = parseFloat(s.readiness_pct || "0");
@@ -145,13 +144,13 @@ export default function ParentExamReadiness() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <Card className="border border-gray-100 shadow-sm">
                 <CardContent className="p-5">
-                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-teal-500" />Assessment History</h2>
+                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />Assessment History</h2>
                   <ResponsiveContainer width="100%" height={160}>
                     <LineChart data={mockHistory}>
                       <XAxis dataKey="label" tick={{ fontSize: 9 }} />
                       <YAxis domain={[0, 100]} tick={{ fontSize: 9 }} tickFormatter={(v) => `${v}%`} />
                       <Tooltip formatter={(v: any, _: any, props: any) => [`${v}%`, props?.payload?.subject || "Score"]} />
-                      <Line type="monotone" dataKey="score" stroke={TEAL} strokeWidth={2.5} dot={{ fill: TEAL, r: 3 }} />
+                      <Line type="monotone" dataKey="score" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>

@@ -11,8 +11,6 @@ import {
   Rocket, Map, FileText, Activity, Check, Minus, Building2, Lock,
 } from "lucide-react";
 
-const TEAL = "#0D9488";
-const TEAL_LIGHT = "#E6F4F1";
 
 /* ─────────────────────────── CMS types ─────────────────────────── */
 interface LandingSection {
@@ -69,7 +67,7 @@ function Reveal({ children, delay = 0, y = 28 }: { children: React.ReactNode; de
 
 /* ─────────────────────────── 3D Tilt Feature Card ─────────────────────────── */
 const ICON_THEMES = [
-  { bg: "#0D948812", color: "#0D9488" },
+  { bg: "hsl(var(--primary) / 0.07)", color: "hsl(var(--primary))" },
   { bg: "#7C3AED12", color: "#7C3AED" },
   { bg: "#0891B212", color: "#0891B2" },
   { bg: "#D9770612", color: "#D97706" },
@@ -162,8 +160,8 @@ function AbstractGeometry() {
     <svg viewBox="0 0 600 400" className="w-full max-w-2xl" style={{ height: 360 }} aria-hidden>
       <defs>
         <radialGradient id="geoGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor={TEAL} stopOpacity="0.15" />
-          <stop offset="100%" stopColor={TEAL} stopOpacity="0" />
+          <stop offset="0%" stopColor={"hsl(var(--primary))"} stopOpacity="0.15" />
+          <stop offset="100%" stopColor={"hsl(var(--primary))"} stopOpacity="0" />
         </radialGradient>
         <filter id="softGlow">
           <feGaussianBlur stdDeviation="3" result="blur" />
@@ -172,36 +170,36 @@ function AbstractGeometry() {
       </defs>
       <circle cx={270} cy={190} r={180} fill="url(#geoGlow)" />
       {Array.from({ length: 8 }, (_, row) => Array.from({ length: 10 }, (_, col) => (
-        <circle key={`${row}-${col}`} cx={50 + col * 56} cy={30 + row * 50} r={1.2} fill={TEAL} opacity={0.08} />
+        <circle key={`${row}-${col}`} cx={50 + col * 56} cy={30 + row * 50} r={1.2} fill={"hsl(var(--primary))"} opacity={0.08} />
       )))}
-      <polygon points={topFace}   fill={TEAL} opacity={0.13} />
-      <polygon points={rightFace} fill={TEAL} opacity={0.08} />
-      <polygon points={leftFace}  fill={TEAL} opacity={0.05} />
+      <polygon points={topFace}   fill={"hsl(var(--primary))"} opacity={0.13} />
+      <polygon points={rightFace} fill={"hsl(var(--primary))"} opacity={0.08} />
+      <polygon points={leftFace}  fill={"hsl(var(--primary))"} opacity={0.05} />
       {edges.map(([a, b], i) => (
         <motion.line key={i} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]}
-          stroke={TEAL} strokeWidth={1.6} strokeOpacity={0.55}
+          stroke={"hsl(var(--primary))"} strokeWidth={1.6} strokeOpacity={0.55}
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: 1, opacity: 1 }}
           transition={{ duration: 1.2, delay: 0.2 + i * 0.08, ease: "easeOut" }} />
       ))}
       <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}>
-        <line x1={490} y1={90} x2={450} y2={195} stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.38} />
-        <line x1={490} y1={90} x2={530} y2={195} stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.38} />
-        <line x1={450} y1={195} x2={530} y2={195} stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.38} />
-        <line x1={490} y1={90} x2={490} y2={195} stroke={TEAL} strokeWidth={1} strokeOpacity={0.2} strokeDasharray="4 3" />
+        <line x1={490} y1={90} x2={450} y2={195} stroke={"hsl(var(--primary))"} strokeWidth={1.2} strokeOpacity={0.38} />
+        <line x1={490} y1={90} x2={530} y2={195} stroke={"hsl(var(--primary))"} strokeWidth={1.2} strokeOpacity={0.38} />
+        <line x1={450} y1={195} x2={530} y2={195} stroke={"hsl(var(--primary))"} strokeWidth={1.2} strokeOpacity={0.38} />
+        <line x1={490} y1={90} x2={490} y2={195} stroke={"hsl(var(--primary))"} strokeWidth={1} strokeOpacity={0.2} strokeDasharray="4 3" />
       </motion.g>
       <motion.g filter="url(#softGlow)" initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.9, type: "spring", bounce: 0.3 }} style={{ originX: "100px", originY: "310px" }}>
-        <circle cx={100} cy={310} r={52} fill="none" stroke={TEAL} strokeWidth={1.4} strokeOpacity={0.35} />
-        <ellipse cx={100} cy={310} rx={52} ry={14} fill="none" stroke={TEAL} strokeWidth={1} strokeOpacity={0.22} strokeDasharray="5 3" />
-        <line x1={100} y1={258} x2={100} y2={362} stroke={TEAL} strokeWidth={0.8} strokeOpacity={0.18} strokeDasharray="4 3" />
+        <circle cx={100} cy={310} r={52} fill="none" stroke={"hsl(var(--primary))"} strokeWidth={1.4} strokeOpacity={0.35} />
+        <ellipse cx={100} cy={310} rx={52} ry={14} fill="none" stroke={"hsl(var(--primary))"} strokeWidth={1} strokeOpacity={0.22} strokeDasharray="5 3" />
+        <line x1={100} y1={258} x2={100} y2={362} stroke={"hsl(var(--primary))"} strokeWidth={0.8} strokeOpacity={0.18} strokeDasharray="4 3" />
       </motion.g>
       <motion.g initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}>
-        <ellipse cx={510} cy={320} rx={45} ry={18} fill="none" stroke={TEAL} strokeWidth={1.2} strokeOpacity={0.3} />
-        <ellipse cx={510} cy={320} rx={22} ry={9}  fill="none" stroke={TEAL} strokeWidth={1}   strokeOpacity={0.2} />
+        <ellipse cx={510} cy={320} rx={45} ry={18} fill="none" stroke={"hsl(var(--primary))"} strokeWidth={1.2} strokeOpacity={0.3} />
+        <ellipse cx={510} cy={320} rx={22} ry={9}  fill="none" stroke={"hsl(var(--primary))"} strokeWidth={1}   strokeOpacity={0.2} />
       </motion.g>
       {particles.map((p, i) => (
-        <motion.circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={TEAL} opacity={0.4}
+        <motion.circle key={i} cx={p.cx} cy={p.cy} r={p.r} fill={"hsl(var(--primary))"} opacity={0.4}
           animate={{ y: [-5, 5, -5], opacity: [0.4, 0.65, 0.4] }}
           transition={{ duration: 3 + i * 0.7, delay: p.delay, repeat: Infinity, ease: "easeInOut" }} />
       ))}
@@ -238,7 +236,7 @@ function Nav() {
             whileHover={{ scale: 1.02 }}
             className="text-xl font-extrabold tracking-tight cursor-pointer select-none"
             style={{ color: "#121212" }}>
-            Aperti<span style={{ color: TEAL }}>.</span>
+            Aperti<span style={{ color: "hsl(var(--primary))" }}>.</span>
           </motion.span>
         </Link>
 
@@ -267,10 +265,10 @@ function Nav() {
           </Link>
           <Link href="/login">
             <motion.button
-              whileHover={{ scale: 1.02, boxShadow: `0 6px 20px ${TEAL}40` }}
+              whileHover={{ scale: 1.02, boxShadow: `0 6px 20px ${"hsl(var(--primary))"}40` }}
               whileTap={{ scale: 0.97 }}
               className="text-sm font-semibold px-4 py-2 rounded-xl text-white transition-all"
-              style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)`, boxShadow: `0 4px 12px ${TEAL}30` }}>
+              style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}, #00897B)`, boxShadow: `0 4px 12px ${"hsl(var(--primary))"}30` }}>
               Sign In
             </motion.button>
           </Link>
@@ -318,7 +316,7 @@ function Nav() {
                 </Link>
                 <Link href="/login" className="flex-1">
                   <button className="w-full text-sm font-semibold px-4 py-2.5 rounded-xl text-white transition-all"
-                    style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}>
+                    style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}, #00897B)` }}>
                     Sign In
                   </button>
                 </Link>
@@ -337,9 +335,9 @@ const SUBJECT_PALETTE: Record<string, string> = {
   Chemistry: "#6A1B9A", Biology: "#00838F", English: "#C62828",
   History: "#4E342E", Geography: "#006064", Economics: "#E65100",
   "Computer Science": "#4527A0", CS: "#4527A0", Arabic: "#AD1457",
-  Science: "#0D9488",
+  Science: "hsl(var(--primary))",
 };
-const subjectColor = (s?: string | null) => SUBJECT_PALETTE[s ?? ""] ?? TEAL;
+const subjectColor = (s?: string | null) => SUBJECT_PALETTE[s ?? ""] ?? "hsl(var(--primary))";
 
 interface PublicCourse {
   id: number; title: string; description: string | null; subject: string | null;
@@ -383,12 +381,12 @@ function FeaturedCoursesSection() {
       transition={{ duration: 0.5 }} className="text-center py-20 bg-white rounded-2xl border border-gray-100 shadow-sm">
       <motion.div animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center shadow-lg"
-        style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}>
+        style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}, #00897B)` }}>
         <BookOpen className="h-8 w-8 text-white" />
       </motion.div>
       <p className="font-extrabold text-gray-900 text-lg mb-2">Courses launching soon</p>
       <p className="text-sm text-gray-400 max-w-xs mx-auto">Our educators are preparing exclusive content. Be the first to enroll.</p>
-      <Link href="/courses"><button className="mt-6 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-shadow" style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}>Visit Marketplace</button></Link>
+      <Link href="/courses"><button className="mt-6 px-6 py-3 rounded-xl text-sm font-semibold text-white shadow-sm hover:shadow-md transition-shadow" style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}, #00897B)` }}>Visit Marketplace</button></Link>
     </motion.div>
   );
 
@@ -420,7 +418,7 @@ function FeaturedCoursesSection() {
                 <div className="p-5 flex flex-col flex-1">
                   <div className="flex items-start justify-between gap-2 mb-1.5">
                     <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 flex-1">{c.title}</h3>
-                    {c.price_egp != null && <span className="text-xs font-black whitespace-nowrap ml-1" style={{ color: TEAL }}>{c.price_egp} EGP</span>}
+                    {c.price_egp != null && <span className="text-xs font-black whitespace-nowrap ml-1" style={{ color: "hsl(var(--primary))" }}>{c.price_egp} EGP</span>}
                   </div>
                   {c.teacher_name && <p className="text-xs text-gray-400 mb-2 flex items-center gap-1"><GraduationCap className="h-3 w-3" />{c.teacher_name}</p>}
                   {c.description && <p className="text-xs text-gray-500 leading-relaxed line-clamp-2 mb-3 flex-1">{c.description}</p>}
@@ -479,7 +477,7 @@ function StatItem({ value, suffix = "", label, delay }: { value: number; suffix?
   return (
     <Reveal delay={delay}>
       <div ref={ref} className="text-center">
-        <p className="text-3xl font-black mb-1" style={{ color: TEAL }}>{count.toLocaleString()}{suffix}</p>
+        <p className="text-3xl font-black mb-1" style={{ color: "hsl(var(--primary))" }}>{count.toLocaleString()}{suffix}</p>
         <p className="text-xs text-gray-400 font-medium">{label}</p>
       </div>
     </Reveal>
@@ -515,7 +513,7 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
   });
 
   const hasRealData = (stats?.students ?? 0) > 0 || (stats?.teachers ?? 0) > 0;
-  const teal = TEAL;
+  const teal = "hsl(var(--primary))";
 
   const PLATFORM_CAPABILITIES = [
     { label: "5×", sublabel: "Faster grading than manual marking", icon: Zap },
@@ -607,7 +605,7 @@ function MarqueeStrip() {
 
   return (
     <div className="relative overflow-hidden py-3.5"
-      style={{ background: `linear-gradient(90deg, #0A4A44 0%, #0D9488 50%, #0A4A44 100%)` }}>
+      style={{ background: `linear-gradient(90deg, #0A4A44 0%, hsl(var(--primary)) 50%, #0A4A44 100%)` }}>
       <div className="absolute inset-y-0 left-0 w-20 z-10 pointer-events-none"
         style={{ background: "linear-gradient(to right, #0A4A44, transparent)" }} />
       <div className="absolute inset-y-0 right-0 w-20 z-10 pointer-events-none"
@@ -636,7 +634,7 @@ function MarqueeStrip() {
 }
 
 /* ─────────────────────────── Pricing ─────────────────────────── */
-const TEACHER_COLORS = [TEAL, "#00897B", "#00695C", "#004D40"];
+const TEACHER_COLORS = ["hsl(var(--primary))", "#00897B", "#00695C", "#004D40"];
 const STUDENT_COLORS = ["#0277BD", "#0288D1", "#01579B"];
 
 const PLAN_ICONS: Record<string, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
@@ -747,7 +745,7 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
   return (
     <section className="py-24 px-5 relative overflow-hidden" style={{ background: "#F5F5F5" }}>
       <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundImage: `radial-gradient(circle at 20% 80%, ${TEAL}06 0%, transparent 50%), radial-gradient(circle at 80% 20%, #818CF808 0%, transparent 50%)` }} />
+        style={{ backgroundImage: `radial-gradient(circle at 20% 80%, ${"hsl(var(--primary))"}06 0%, transparent 50%), radial-gradient(circle at 80% 20%, #818CF808 0%, transparent 50%)` }} />
       <div className="max-w-7xl mx-auto relative z-10">
         <Reveal>
           <div className="text-center mb-16">
@@ -755,7 +753,7 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
               <Star className="h-3 w-3" />Trusted by educators
             </span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-              What teachers are <span style={{ color: TEAL }}>saying.</span>
+              What teachers are <span style={{ color: "hsl(var(--primary))" }}>saying.</span>
             </h2>
             <p className="text-gray-500 max-w-lg mx-auto">Real results from real educators using Aperti every day.</p>
           </div>
@@ -764,14 +762,14 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
           {display.slice(0, 6).map((t, i) => (
             <Reveal key={t.id} delay={i * 0.08}>
               <motion.div
-                whileHover={{ y: -5, boxShadow: `0 20px 48px rgba(0,0,0,0.1), 0 4px 12px ${TEAL}12` }}
+                whileHover={{ y: -5, boxShadow: `0 20px 48px rgba(0,0,0,0.1), 0 4px 12px ${"hsl(var(--primary))"}12` }}
                 transition={{ duration: 0.25, ease: [0.22,1,0.36,1] }}
                 className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full flex flex-col group">
                 <div className="flex items-start justify-between mb-4">
-                  <Quote className="h-6 w-6 opacity-30" style={{ color: TEAL }} />
+                  <Quote className="h-6 w-6 opacity-30" style={{ color: "hsl(var(--primary))" }} />
                   {t.is_verified && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full"
-                      style={{ background: TEAL_LIGHT, color: TEAL, border: `1px solid ${TEAL}25` }}>
+                      style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", border: `1px solid ${"hsl(var(--primary))"}25` }}>
                       <Shield className="h-2.5 w-2.5" />Verified
                     </span>
                   )}
@@ -779,7 +777,7 @@ function TestimonialsSection({ testimonials }: { testimonials: VerifiedTestimoni
                 <p className="text-sm text-gray-600 leading-relaxed flex-1 mb-5 italic">"{t.quote}"</p>
                 <div className="flex items-center gap-3 pt-4 border-t border-gray-50">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                    style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)` }}>
+                    style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}, #00897B)` }}>
                     {t.name.charAt(0)}
                   </div>
                   <div>
@@ -815,7 +813,7 @@ function GetStartedSteps({ teal }: { teal: string }) {
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-14">
           <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-            style={{ background: "#E6F4F1", color: teal, borderColor: `${teal}25` }}>
+            style={{ background: "hsl(var(--primary) / 0.08)", color: teal, borderColor: `${teal}25` }}>
             <Rocket className="h-3 w-3" />Up and running in minutes
           </span>
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
@@ -881,7 +879,7 @@ function ComparisonSection({ teal }: { teal: string }) {
 
   const Cell = ({ val }: { val: boolean | "partial" }) => (
     <td className="py-3 px-4 text-center">
-      {val === true  ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-100"><Check size={13} style={{ color: teal }} strokeWidth={3} /></span>
+      {val === true  ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/15"><Check size={13} style={{ color: teal }} strokeWidth={3} /></span>
        : val === "partial" ? <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-100"><Minus size={13} className="text-amber-600" strokeWidth={3} /></span>
        : <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100"><X size={13} className="text-gray-300" strokeWidth={3} /></span>}
     </td>
@@ -933,7 +931,7 @@ function ComparisonSection({ teal }: { teal: string }) {
             </tbody>
           </table>
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-100 flex items-center gap-4 text-xs text-gray-400">
-            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-full bg-teal-100 inline-flex items-center justify-center"><Check size={9} style={{ color: teal }} /></span>Full support</span>
+            <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-full bg-primary/15 inline-flex items-center justify-center"><Check size={9} style={{ color: teal }} /></span>Full support</span>
             <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-full bg-amber-100 inline-flex items-center justify-center"><Minus size={9} className="text-amber-600" /></span>Partial / workaround</span>
             <span className="flex items-center gap-1"><span className="w-4 h-4 rounded-full bg-gray-100 inline-flex items-center justify-center"><X size={9} className="text-gray-300" /></span>Not available</span>
           </div>
@@ -953,11 +951,11 @@ function FAQSection({ faqs }: { faqs: CMSFAQ[] }) {
         <Reveal>
           <div className="text-center mb-16">
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-              style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+              style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: `${"hsl(var(--primary))"}25` }}>
               FAQ
             </span>
             <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight mb-4">
-              Frequently asked <span style={{ color: TEAL }}>questions.</span>
+              Frequently asked <span style={{ color: "hsl(var(--primary))" }}>questions.</span>
             </h2>
           </div>
         </Reveal>
@@ -1028,8 +1026,8 @@ function EarlyAccessForm({ ctaText, email, dark = false }: { ctaText?: string; e
     <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
       className="rounded-2xl p-10 text-center max-w-lg mx-auto"
       style={{ background: cardBg, border: `1px solid ${cardBorder}`, backdropFilter: "blur(12px)" }}>
-      <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: `${TEAL}20` }}>
-        <CheckCircle2 className="h-7 w-7" style={{ color: TEAL }} />
+      <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: `${"hsl(var(--primary))"}20` }}>
+        <CheckCircle2 className="h-7 w-7" style={{ color: "hsl(var(--primary))" }} />
       </div>
       <h3 className="text-xl font-extrabold mb-2" style={{ color: dark ? "#ffffff" : "#111827" }}>Application received!</h3>
       <p className="text-sm" style={{ color: dark ? "rgba(255,255,255,0.5)" : "#6B7280" }}>
@@ -1052,7 +1050,7 @@ function EarlyAccessForm({ ctaText, email, dark = false }: { ctaText?: string; e
             <label className="block text-xs font-semibold mb-1.5" style={{ color: labelColor }}>{field.label}</label>
             <input required={field.required} type={field.type} value={form[field.key as keyof typeof form]}
               onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
-              className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 transition-all"
+              className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
               style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: inputColor }}
               placeholder={field.placeholder} />
           </div>
@@ -1061,20 +1059,20 @@ function EarlyAccessForm({ ctaText, email, dark = false }: { ctaText?: string; e
       <div className="mb-5">
         <label className="block text-xs font-semibold mb-1.5" style={{ color: labelColor }}>Tell us about your school</label>
         <textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} rows={3}
-          className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none transition-all"
+          className="w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none transition-all"
           style={{ background: inputBg, border: `1px solid ${inputBorder}`, color: inputColor }}
           placeholder="Tell us about your teaching setup, current challenges, and what you hope Aperti can do for your students…" />
       </div>
       <button type="submit" disabled={loading}
         className="w-full py-3.5 rounded-xl text-white font-bold text-sm transition-all hover:opacity-90 flex items-center justify-center gap-2"
-        style={{ background: `linear-gradient(135deg, ${TEAL}, #00897B)`, boxShadow: `0 8px 24px ${TEAL}35` }}>
+        style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}, #00897B)`, boxShadow: `0 8px 24px ${"hsl(var(--primary))"}35` }}>
         {loading
           ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting…</>
           : <>{ctaText ?? "Get Started Free"} <ArrowRight className="h-4 w-4" /></>}
       </button>
       {email && (
         <p className="text-center text-xs mt-4" style={{ color: dark ? "rgba(255,255,255,0.3)" : "#9CA3AF" }}>
-          Or email us at <a href={`mailto:${email}`} className="underline" style={{ color: TEAL }}>{email}</a>
+          Or email us at <a href={`mailto:${email}`} className="underline" style={{ color: "hsl(var(--primary))" }}>{email}</a>
         </p>
       )}
     </form>
@@ -1292,11 +1290,11 @@ const DASHBOARD_SLIDES = [
   {
     role: "Teacher",
     label: "For Teachers",
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     badge: "CoreHub",
     title: "Your class at a glance",
     widgets: [
-      { title: "Active Students", value: "34", sub: "2 need attention", icon: Users, color: "#0D9488", bg: "#E6F4F1" },
+      { title: "Active Students", value: "34", sub: "2 need attention", icon: Users, color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)" },
       { title: "Avg. Score", value: "78%", sub: "↑ 6% this week", icon: BarChart3, color: "#7C3AED", bg: "#F3F0FF" },
       { title: "Homework Rate", value: "91%", sub: "29/32 submitted", icon: CheckCircle2, color: "#059669", bg: "#D1FAE5" },
     ],
@@ -1309,7 +1307,7 @@ const DASHBOARD_SLIDES = [
     badge: "StudyStream",
     title: "Your study session",
     widgets: [
-      { title: "Today's Tasks", value: "4", sub: "2 completed", icon: CheckCircle2, color: "#0D9488", bg: "#E6F4F1" },
+      { title: "Today's Tasks", value: "4", sub: "2 completed", icon: CheckCircle2, color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)" },
       { title: "Streak", value: "12 days", sub: "Keep it up!", icon: Zap, color: "#DC2626", bg: "#FEF2F2" },
       { title: "Next Exam", value: "6 days", sub: "Physics Paper 2", icon: Target, color: "#D97706", bg: "#FEF3C7" },
     ],
@@ -1335,7 +1333,7 @@ const DASHBOARD_SLIDES = [
     badge: "CommandCenter",
     title: "Centre operations",
     widgets: [
-      { title: "Total Students", value: "248", sub: "↑ 12 this month", icon: Users, color: "#0D9488", bg: "#E6F4F1" },
+      { title: "Total Students", value: "248", sub: "↑ 12 this month", icon: Users, color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)" },
       { title: "Revenue", value: "EGP 42K", sub: "On track for target", icon: BarChart3, color: "#DC2626", bg: "#FEF2F2" },
       { title: "AI Usage", value: "3.2K", sub: "queries this week", icon: Brain, color: "#7C3AED", bg: "#F3F0FF" },
     ],
@@ -1446,7 +1444,7 @@ const DEMO_STEPS = [
   {
     role: "Teacher",
     icon: GraduationCap,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     step: "Create an assessment",
     desc: "Choose your question bank, set a time limit, and publish. Students receive it instantly.",
     visual: { title: "New Assessment", items: ["Topic: Forces & Motion", "Questions: 12 (auto-selected)", "Time limit: 45 min", "Due: Tomorrow 5 PM"] },
@@ -1494,7 +1492,7 @@ function InteractiveDemo({ teal }: { teal: string }) {
         <Reveal>
           <div className="text-center mb-14">
             <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-              style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+              style={{ background: "hsl(var(--primary) / 0.08)", color: teal, borderColor: `${teal}25` }}>
               <Activity className="h-3 w-3" />See it in action
             </span>
             <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
@@ -1616,7 +1614,7 @@ function PricingVisual({ teal }: { teal: string }) {
 
   return (
     <div ref={ref} className="mt-12 overflow-hidden rounded-2xl relative" style={{
-      background: "linear-gradient(135deg, #0D9488 0%, #0F766E 40%, #0C4A6E 100%)",
+      background: "linear-gradient(135deg, hsl(var(--primary)) 0%, #0F766E 40%, #0C4A6E 100%)",
       minHeight: 200,
     }}>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -1795,7 +1793,7 @@ export default function Landing() {
     const s = allPlans.filter(p => p.type === "student");
     return s.length > 0 ? s : FALLBACK_STUDENT_PLANS;
   }, [allPlans]);
-  const teal = cms?.branding?.primary_color ?? TEAL;
+  const teal = cms?.branding?.primary_color ?? "hsl(var(--primary))";
 
   const hero     = getSection(sections, "hero");
   const featureS = getSection(sections, "features");
@@ -2028,7 +2026,7 @@ export default function Landing() {
           <div className="max-w-3xl mx-auto text-center">
             <Reveal>
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-                style={{ background: TEAL_LIGHT, color: teal, borderColor: `${teal}25` }}>
+                style={{ background: "hsl(var(--primary) / 0.08)", color: teal, borderColor: `${teal}25` }}>
                 <Map className="h-3 w-3" />What's coming
               </span>
               <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">

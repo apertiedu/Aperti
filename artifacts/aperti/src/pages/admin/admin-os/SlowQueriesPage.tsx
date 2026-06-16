@@ -49,7 +49,7 @@ export default function SlowQueriesPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
           { label: "Total (24h)", value: stats.total ?? 0, icon: Database, color: "text-blue-600" },
-          { label: "Avg Duration", value: stats.avg_ms ? `${stats.avg_ms}ms` : "—", icon: Clock, color: "text-teal-600" },
+          { label: "Avg Duration", value: stats.avg_ms ? `${stats.avg_ms}ms` : "—", icon: Clock, color: "text-primary" },
           { label: "Slowest", value: stats.max_ms ? `${stats.max_ms}ms` : "—", icon: Zap, color: "text-orange-600" },
           { label: "Critical (>2s)", value: stats.critical_count ?? 0, icon: AlertTriangle, color: "text-red-600" },
         ].map((s, i) => (

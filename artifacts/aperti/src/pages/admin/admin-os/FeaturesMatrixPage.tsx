@@ -54,40 +54,40 @@ function FeatureForm({ initial, onSubmit, onCancel }: any) {
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-medium text-gray-600">Feature Key *</label>
-          <input value={form.featureKey} onChange={e => setForm({ ...form, featureKey: e.target.value })} placeholder="e.g. ai_mentor" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input value={form.featureKey} onChange={e => setForm({ ...form, featureKey: e.target.value })} placeholder="e.g. ai_mentor" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600">Feature Name *</label>
-          <input value={form.featureName} onChange={e => setForm({ ...form, featureName: e.target.value })} placeholder="e.g. AI Mentor" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input value={form.featureName} onChange={e => setForm({ ...form, featureName: e.target.value })} placeholder="e.g. AI Mentor" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600">Visibility State</label>
-          <select value={form.visibilityState} onChange={e => setForm({ ...form, visibilityState: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <select value={form.visibilityState} onChange={e => setForm({ ...form, visibilityState: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
             {VISIBILITY_STATES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600">Required Role</label>
-          <select value={form.requiredRole} onChange={e => setForm({ ...form, requiredRole: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <select value={form.requiredRole} onChange={e => setForm({ ...form, requiredRole: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">Any</option>
             {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600">Required Plan</label>
-          <select value={form.requiredPlan} onChange={e => setForm({ ...form, requiredPlan: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <select value={form.requiredPlan} onChange={e => setForm({ ...form, requiredPlan: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">Any</option>
             {PLANS.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600">Description</label>
-          <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
       </div>
       <div className="flex justify-end gap-2">
         <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
-        <button onClick={() => onSubmit(form)} className="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 flex items-center gap-2"><Save className="w-3.5 h-3.5" />Save</button>
+        <button onClick={() => onSubmit(form)} className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 flex items-center gap-2"><Save className="w-3.5 h-3.5" />Save</button>
       </div>
     </div>
   );
@@ -124,7 +124,7 @@ function SubscriptionGridTab() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white text-sm rounded-xl hover:bg-teal-700">
+        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-xl hover:bg-primary/80">
           <Plus className="w-4 h-4" />Add Entry
         </button>
       </div>
@@ -134,25 +134,25 @@ function SubscriptionGridTab() {
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="text-xs font-medium text-gray-600">Plan Name</label>
-                <select value={form.planName} onChange={e => setForm({ ...form, planName: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <select value={form.planName} onChange={e => setForm({ ...form, planName: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
                   <option value="">Choose...</option>
                   {PLANS.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-600">Feature Key</label>
-                <input value={form.featureKey} onChange={e => setForm({ ...form, featureKey: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input value={form.featureKey} onChange={e => setForm({ ...form, featureKey: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-600">Access Level</label>
-                <select value={form.accessLevel} onChange={e => setForm({ ...form, accessLevel: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <select value={form.accessLevel} onChange={e => setForm({ ...form, accessLevel: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
                   {ACCESS_LEVELS.map(a => <option key={a} value={a}>{a}</option>)}
                 </select>
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-3">
               <button onClick={() => setShowCreate(false)} className="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700">Create</button>
+              <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80">Create</button>
             </div>
           </motion.div>
         )}
@@ -160,7 +160,7 @@ function SubscriptionGridTab() {
       {Object.entries(byPlan).map(([plan, planItems]: any) => (
         <div key={plan} className="bg-white rounded-xl border border-gray-100 overflow-hidden">
           <div className="px-5 py-3 border-b border-gray-100 bg-gray-50 flex items-center gap-2">
-            <CreditCard className="w-4 h-4 text-teal-600" />
+            <CreditCard className="w-4 h-4 text-primary" />
             <p className="font-semibold text-gray-800 text-sm capitalize">{plan} plan</p>
             <span className="text-xs text-gray-400 ml-auto">{planItems.length} feature(s)</span>
           </div>
@@ -201,7 +201,7 @@ function AiAccessTab() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white text-sm rounded-xl hover:bg-teal-700">
+        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-xl hover:bg-primary/80">
           <Plus className="w-4 h-4" />Add Rule
         </button>
       </div>
@@ -211,7 +211,7 @@ function AiAccessTab() {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div>
                 <label className="text-xs font-medium text-gray-600">Feature Key</label>
-                <select value={form.featureKey} onChange={e => setForm({ ...form, featureKey: e.target.value, featureName: e.target.value.replace(/_/g, " ") })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <select value={form.featureKey} onChange={e => setForm({ ...form, featureKey: e.target.value, featureName: e.target.value.replace(/_/g, " ") })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
                   <option value="">Choose...</option>
                   {AI_FEATURES.map(f => <option key={f} value={f}>{f}</option>)}
                 </select>
@@ -241,7 +241,7 @@ function AiAccessTab() {
             </div>
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowCreate(false)} className="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg">Cancel</button>
-              <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-teal-600 text-white rounded-lg">Create</button>
+              <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-primary text-white rounded-lg">Create</button>
             </div>
           </motion.div>
         )}
@@ -262,7 +262,7 @@ function AiAccessTab() {
               <tr key={r.id} className="border-b border-gray-50 hover:bg-gray-50/50">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <Bot className="w-4 h-4 text-teal-500" />
+                    <Bot className="w-4 h-4 text-primary" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">{r.feature_name || r.feature_key}</p>
                       <code className="text-[11px] text-gray-400">{r.feature_key}</code>
@@ -274,7 +274,7 @@ function AiAccessTab() {
                 <td className="px-4 py-3 text-xs text-gray-600">{r.daily_limit ?? "∞"}</td>
                 <td className="px-4 py-3 text-xs text-gray-600">{r.monthly_limit ?? "∞"}</td>
                 <td className="px-4 py-3">
-                  <button onClick={() => updateMut.mutate({ id: r.id, enabled: !r.enabled })} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${r.enabled ? "bg-teal-500" : "bg-gray-200"}`}>
+                  <button onClick={() => updateMut.mutate({ id: r.id, enabled: !r.enabled })} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${r.enabled ? "bg-primary" : "bg-gray-200"}`}>
                     <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${r.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
                   </button>
                 </td>
@@ -306,7 +306,7 @@ function CommPermissionsTab() {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white text-sm rounded-xl hover:bg-teal-700">
+        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-xl hover:bg-primary/80">
           <Plus className="w-4 h-4" />Add Rule
         </button>
       </div>
@@ -337,12 +337,12 @@ function CommPermissionsTab() {
             </div>
             <div className="flex items-center gap-3 mt-3">
               <label className="flex items-center gap-2 text-sm text-gray-600">
-                <input type="checkbox" checked={form.allowed} onChange={e => setForm({ ...form, allowed: e.target.checked })} className="rounded border-gray-300 text-teal-600 focus:ring-teal-500" />
+                <input type="checkbox" checked={form.allowed} onChange={e => setForm({ ...form, allowed: e.target.checked })} className="rounded border-gray-300 text-primary focus:ring-primary/30" />
                 Allowed
               </label>
               <div className="flex justify-end gap-2 ml-auto">
                 <button onClick={() => setShowCreate(false)} className="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg">Cancel</button>
-                <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-teal-600 text-white rounded-lg">Create</button>
+                <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-primary text-white rounded-lg">Create</button>
               </div>
             </div>
           </motion.div>
@@ -366,7 +366,7 @@ function CommPermissionsTab() {
                 <td className="px-4 py-3 text-sm text-gray-600 capitalize">{r.to_role}</td>
                 <td className="px-4 py-3 text-xs text-gray-500">{r.channel_type}</td>
                 <td className="px-4 py-3">
-                  <button onClick={() => updateMut.mutate({ id: r.id, allowed: !r.allowed })} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${r.allowed ? "bg-teal-500" : "bg-red-400"}`}>
+                  <button onClick={() => updateMut.mutate({ id: r.id, allowed: !r.allowed })} className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${r.allowed ? "bg-primary" : "bg-red-400"}`}>
                     <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${r.allowed ? "translate-x-5" : "translate-x-0.5"}`} />
                   </button>
                 </td>
@@ -414,7 +414,7 @@ export default function FeaturesMatrixPage() {
           <p className="text-sm text-gray-500 mt-0.5">Control feature visibility, role gates, plan gates, and AI access limits</p>
         </div>
         {tab === TABS[0] && (
-          <button onClick={() => { setShowCreate(true); setEditing(null); }} className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors shadow-sm">
+          <button onClick={() => { setShowCreate(true); setEditing(null); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 transition-colors shadow-sm">
             <Plus className="w-4 h-4" />New Feature
           </button>
         )}

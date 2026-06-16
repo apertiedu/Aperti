@@ -44,7 +44,7 @@ export default function PlatformStatusPage() {
           <h1 className="text-2xl font-bold text-gray-900">Platform Status</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage and communicate platform operational status</p>
         </div>
-        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+        <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> Update Status
         </button>
       </div>
@@ -118,12 +118,12 @@ export default function PlatformStatusPage() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1">Status Message</label>
-                <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={3} placeholder="Describe the current status to users..." className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
+                <textarea value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} rows={3} placeholder="Describe the current status to users..." className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
               </div>
             </div>
             <div className="flex gap-3 mt-5">
               <button onClick={() => setShowModal(false)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-              <button onClick={() => createMutation.mutate()} disabled={createMutation.isPending} className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50">
+              <button onClick={() => createMutation.mutate()} disabled={createMutation.isPending} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 disabled:opacity-50">
                 {createMutation.isPending ? "Updating..." : "Update Status"}
               </button>
             </div>

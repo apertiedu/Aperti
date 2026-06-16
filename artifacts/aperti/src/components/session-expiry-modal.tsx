@@ -42,15 +42,14 @@ export default function SessionExpiryModal({ open, onDismiss }: Props) {
                 <Clock className="w-8 h-8 text-amber-500" />
               </motion.div>
 
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Session Expired</h2>
-              <p className="text-sm text-gray-500 mb-7 leading-relaxed">
+              <h2 className="text-xl font-bold text-foreground mb-2">Session Expired</h2>
+              <p className="text-sm text-muted-foreground mb-7 leading-relaxed">
                 Your session has timed out for security. Please sign in again to continue — your work is safe.
               </p>
 
               <button
                 onClick={handleLogin}
-                className="w-full h-10 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
-                style={{ background: "#0D9488" }}
+                className="w-full h-10 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold bg-primary text-primary-foreground transition-all hover:opacity-90 active:scale-[0.98]"
               >
                 <LogIn className="w-4 h-4" />
                 Sign in again

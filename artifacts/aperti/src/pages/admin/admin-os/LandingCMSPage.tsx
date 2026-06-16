@@ -36,11 +36,11 @@ function SectionEditor({ section, onSave, onClose }: { section: any; onSave: (da
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Slug (unique ID)</label>
-          <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="hero, features-1..." className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="hero, features-1..." className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div>
           <label className="block text-xs font-medium text-gray-600 mb-1">Section Type</label>
-          <select value={type} onChange={(e) => setType(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <select value={type} onChange={(e) => setType(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
             {SECTION_TYPES.map((t) => <option key={t} value={t}>{TYPE_ICONS[t]} {t.charAt(0).toUpperCase() + t.slice(1)}</option>)}
           </select>
         </div>
@@ -50,7 +50,7 @@ function SectionEditor({ section, onSave, onClose }: { section: any; onSave: (da
           <label className="text-xs font-medium text-gray-600">Content (JSON)</label>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-400">Published</span>
-            <button onClick={() => setIsPublished(!isPublished)} className={`transition-colors ${isPublished ? "text-teal-600" : "text-gray-300"}`}>
+            <button onClick={() => setIsPublished(!isPublished)} className={`transition-colors ${isPublished ? "text-primary" : "text-gray-300"}`}>
               {isPublished ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
             </button>
           </div>
@@ -59,14 +59,14 @@ function SectionEditor({ section, onSave, onClose }: { section: any; onSave: (da
           value={content}
           onChange={(e) => { setContent(e.target.value); setJsonError(""); }}
           rows={12}
-          className={`w-full px-3 py-2 border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none ${jsonError ? "border-red-300" : "border-gray-200"}`}
+          className={`w-full px-3 py-2 border rounded-lg text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none ${jsonError ? "border-red-300" : "border-gray-200"}`}
         />
         {jsonError && <p className="text-xs text-red-500 mt-1">{jsonError}</p>}
         <p className="text-xs text-gray-400 mt-1">All section content is stored as JSON. Each section type has its own content schema.</p>
       </div>
       <div className="flex gap-3 justify-end pt-2">
         <button onClick={onClose} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-        <button onClick={handleSave} className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">Save Section</button>
+        <button onClick={handleSave} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">Save Section</button>
       </div>
     </div>
   );
@@ -128,18 +128,18 @@ export default function LandingCMSPage() {
           <a href="/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition-colors">
             <Eye className="w-4 h-4" /> Preview
           </a>
-          <button onClick={() => { setEditing(null); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+          <button onClick={() => { setEditing(null); setShowModal(true); }} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">
             <Plus className="w-4 h-4" /> Add Section
           </button>
         </div>
       </div>
 
       {/* Info Banner */}
-      <div className="bg-teal-50 border border-teal-200 rounded-xl p-4 flex items-start gap-3">
-        <Globe className="w-5 h-5 text-teal-600 flex-shrink-0 mt-0.5" />
+      <div className="bg-primary/8 border border-primary/25 rounded-xl p-4 flex items-start gap-3">
+        <Globe className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-sm font-medium text-teal-800">Live CMS — changes appear instantly on the landing page</p>
-          <p className="text-xs text-teal-600 mt-0.5">The landing page reads all section content from this database. Toggle visibility or reorder sections without any code deployment.</p>
+          <p className="text-sm font-medium text-foreground">Live CMS — changes appear instantly on the landing page</p>
+          <p className="text-xs text-primary mt-0.5">The landing page reads all section content from this database. Toggle visibility or reorder sections without any code deployment.</p>
         </div>
       </div>
 
@@ -180,7 +180,7 @@ export default function LandingCMSPage() {
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => togglePublish.mutate({ id: section.id, val: !section.is_published })}
-                    className={`transition-colors ${section.is_published ? "text-teal-600" : "text-gray-300"}`}
+                    className={`transition-colors ${section.is_published ? "text-primary" : "text-gray-300"}`}
                     title={section.is_published ? "Hide section" : "Show section"}
                   >
                     {section.is_published ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}

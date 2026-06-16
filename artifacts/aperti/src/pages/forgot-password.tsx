@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { Mail, AlertCircle, CheckCircle2 } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -40,8 +39,8 @@ export default function ForgotPassword() {
       style={{ background: "#F5F5F5", fontFamily: "Inter, sans-serif" }}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-5" style={{ background: TEAL, filter: "blur(120px)" }} />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full opacity-5" style={{ background: TEAL, filter: "blur(80px)" }} />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-5" style={{ background: "hsl(var(--primary))", filter: "blur(120px)" }} />
+        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 rounded-full opacity-5" style={{ background: "hsl(var(--primary))", filter: "blur(80px)" }} />
       </div>
 
       <motion.div
@@ -53,7 +52,7 @@ export default function ForgotPassword() {
         <div className="text-center mb-8">
           <Link href="/">
             <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 cursor-pointer">
-              Aperti<span style={{ color: TEAL }}>.</span>
+              Aperti<span className="text-primary">.</span>
             </h1>
           </Link>
           <p className="text-slate-500 text-sm mt-1">Where every mind finds its rhythm.</p>
@@ -70,7 +69,7 @@ export default function ForgotPassword() {
               >
                 <div className="flex justify-center mb-4">
                   <div className="w-14 h-14 rounded-full flex items-center justify-center" style={{ background: "#E6F4F1" }}>
-                    <CheckCircle2 className="h-7 w-7" style={{ color: TEAL }} />
+                    <CheckCircle2 className="h-7 w-7" className="text-primary" />
                   </div>
                 </div>
                 <h2 className="text-lg font-bold text-slate-900 mb-2">Request submitted</h2>
@@ -82,7 +81,7 @@ export default function ForgotPassword() {
                   <button
                     onClick={() => { setSubmitted(false); setEmail(""); }}
                     className="font-semibold hover:underline"
-                    style={{ color: TEAL }}
+                    className="text-primary"
                   >
                     Try again
                   </button>
@@ -92,7 +91,7 @@ export default function ForgotPassword() {
               <motion.div key="form" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#E6F4F1" }}>
-                    <Mail className="h-4 w-4" style={{ color: TEAL }} />
+                    <Mail className="h-4 w-4" className="text-primary" />
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 leading-tight">Forgot your password?</h2>
@@ -111,7 +110,7 @@ export default function ForgotPassword() {
                       required
                       autoFocus
                       placeholder="you@example.com"
-                      className="rounded-xl border-slate-200 focus-visible:ring-teal-600 h-10"
+                      className="rounded-xl border-slate-200 focus-visible:ring-primary/30 h-10"
                     />
                   </div>
 
@@ -133,7 +132,7 @@ export default function ForgotPassword() {
                     type="submit"
                     disabled={isSubmitting || !email}
                     className="w-full rounded-xl h-11 font-semibold text-white mt-2"
-                    style={{ background: isSubmitting ? "#4DB6AC" : TEAL }}
+                    style={{ background: isSubmitting ? "#4DB6AC" : "hsl(var(--primary))" }}
                   >
                     {isSubmitting ? (
                       <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ duration: 1, repeat: Infinity }}>
@@ -151,7 +150,7 @@ export default function ForgotPassword() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           Remember it?{" "}
-          <Link href="/login" style={{ color: TEAL }} className="font-semibold hover:underline">
+          <Link href="/login" className="text-primary" className="font-semibold hover:underline">
             Back to sign in
           </Link>
         </p>

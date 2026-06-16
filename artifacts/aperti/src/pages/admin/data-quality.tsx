@@ -152,7 +152,7 @@ export default function DataQualityPage() {
                     { label: "Missing Student Code", value: stats.studentsWithoutCode, icon: <ClipboardList className="h-4 w-4 text-orange-500" />, warn: stats.studentsWithoutCode > 0 },
                     { label: "Duplicate Attendance", value: stats.duplicateAttendance, icon: <CalendarCheck className="h-4 w-4 text-red-500" />, warn: stats.duplicateAttendance > 0 },
                     { label: "Orphaned Enrolments", value: stats.orphanedEnrollments, icon: <BookOpen className="h-4 w-4 text-purple-500" />, warn: stats.orphanedEnrollments > 0 },
-                    { label: "Subjects w/o Teacher", value: stats.subjectsWithoutTeacher, icon: <Users className="h-4 w-4 text-teal-500" />, warn: stats.subjectsWithoutTeacher > 0 },
+                    { label: "Subjects w/o Teacher", value: stats.subjectsWithoutTeacher, icon: <Users className="h-4 w-4 text-primary" />, warn: stats.subjectsWithoutTeacher > 0 },
                   ].map(({ label, value, icon, warn }) => (
                     <div key={label} className={`p-3 rounded-xl ${warn ? "bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800" : "bg-muted/40"}`}>
                       <div className="flex items-center gap-1.5 mb-1">{icon}<span className="text-xs text-muted-foreground">{label}</span></div>

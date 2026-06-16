@@ -24,7 +24,7 @@ type LeaderboardEntry = {
 
 const LEVEL_COLORS = [
   "", "from-slate-400 to-gray-500",
-  "from-emerald-400 to-teal-500",
+  "from-emerald-400 to-primary/80",
   "from-sky-400 to-blue-500",
   "from-violet-400 to-purple-500",
   "from-amber-400 to-orange-500",
@@ -45,7 +45,7 @@ function useConfetti() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const COLORS = ["#0D9488","#14B8A6","#F59E0B","#8B5CF6","#EF4444","#3B82F6","#10B981"];
+    const COLORS = ["hsl(var(--primary))","#14B8A6","#F59E0B","#8B5CF6","#EF4444","#3B82F6","#10B981"];
     const particles: {
       x: number; y: number; vx: number; vy: number;
       color: string; r: number; alpha: number; rot: number; rSpeed: number;
@@ -250,7 +250,7 @@ export default function AchievementsPage() {
 
       {/* XP Card */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <Card className={`border-0 bg-gradient-to-br ${levelGrad || "from-teal-400 to-teal-600"} text-white shadow-lg overflow-hidden`}>
+        <Card className={`border-0 bg-gradient-to-br ${levelGrad || "from-primary to-primary/80"} text-white shadow-lg overflow-hidden`}>
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
               <div>

@@ -10,7 +10,7 @@ const STATUS_STYLES: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
   rejected: "bg-red-100 text-red-600",
   removed: "bg-gray-100 text-gray-500",
-  approved: "bg-teal-100 text-teal-700",
+  approved: "bg-primary/15 text-primary",
 };
 
 function EnrollmentRow({ enrollment: e, onApprove, onReject, onRemove }: any) {
@@ -126,7 +126,7 @@ export default function EnrollmentsPage() {
             <RefreshCw className={`w-4 h-4 ${scanning ? "animate-spin" : ""}`} />
             {scanning ? "Scanning..." : "Conflict Scan"}
           </button>
-          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors shadow-sm">
+          <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 transition-colors shadow-sm">
             <Plus className="w-4 h-4" />Enroll Student
           </button>
         </div>
@@ -170,28 +170,28 @@ export default function EnrollmentsPage() {
             <div className="grid md:grid-cols-3 gap-4">
               <div>
                 <label className="text-xs font-medium text-gray-600">Student ID *</label>
-                <input type="number" value={createForm.studentId} onChange={e => setCreateForm({ ...createForm, studentId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input type="number" value={createForm.studentId} onChange={e => setCreateForm({ ...createForm, studentId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-600">Course ID *</label>
-                <input type="number" value={createForm.courseId} onChange={e => setCreateForm({ ...createForm, courseId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input type="number" value={createForm.courseId} onChange={e => setCreateForm({ ...createForm, courseId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-600">Course Name</label>
-                <input value={createForm.courseName} onChange={e => setCreateForm({ ...createForm, courseName: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input value={createForm.courseName} onChange={e => setCreateForm({ ...createForm, courseName: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-600">Teacher ID</label>
-                <input type="number" value={createForm.teacherId} onChange={e => setCreateForm({ ...createForm, teacherId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input type="number" value={createForm.teacherId} onChange={e => setCreateForm({ ...createForm, teacherId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div className="md:col-span-2">
                 <label className="text-xs font-medium text-gray-600">Notes</label>
-                <input value={createForm.notes} onChange={e => setCreateForm({ ...createForm, notes: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input value={createForm.notes} onChange={e => setCreateForm({ ...createForm, notes: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
             </div>
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowCreate(false)} className="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={() => createMut.mutate(createForm)} className="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700">Create</button>
+              <button onClick={() => createMut.mutate(createForm)} className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80">Create</button>
             </div>
           </motion.div>
         )}
@@ -201,12 +201,12 @@ export default function EnrollmentsPage() {
       <div className="flex items-center gap-3">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search student or course..." className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white" />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search student or course..." className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white" />
         </div>
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-gray-400" />
           {["", "active", "pending", "rejected", "removed"].map(s => (
-            <button key={s || "all"} onClick={() => { setStatusFilter(s); setPage(1); }} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${statusFilter === s ? "bg-teal-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+            <button key={s || "all"} onClick={() => { setStatusFilter(s); setPage(1); }} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${statusFilter === s ? "bg-primary text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
               {s || "All"}
             </button>
           ))}

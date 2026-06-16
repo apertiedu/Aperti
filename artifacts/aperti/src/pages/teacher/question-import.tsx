@@ -90,7 +90,7 @@ export default function QuestionImport() {
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-4">
           <Button variant="ghost" size="sm" onClick={() => navigate("/teacher/question-studio")}><ArrowLeft size={16} /></Button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Upload className="text-teal-600" size={22} /> Question Import</h1>
+            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Upload className="text-primary" size={22} /> Question Import</h1>
             <p className="text-gray-500 text-sm">AI-powered extraction from PDFs and documents</p>
           </div>
         </motion.div>
@@ -99,10 +99,10 @@ export default function QuestionImport() {
         <div className="flex items-center gap-2">
           {STEPS.map((s, i) => (
             <div key={i} className="flex items-center gap-2">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i < step ? "bg-green-500 text-white" : i === step ? "bg-teal-600 text-white" : "bg-gray-200 text-gray-500"}`}>
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${i < step ? "bg-green-500 text-white" : i === step ? "bg-primary text-white" : "bg-gray-200 text-gray-500"}`}>
                 {i < step ? <CheckCircle size={14} /> : i + 1}
               </div>
-              <span className={`text-sm font-medium ${i === step ? "text-teal-700" : "text-gray-500"}`}>{s}</span>
+              <span className={`text-sm font-medium ${i === step ? "text-primary" : "text-gray-500"}`}>{s}</span>
               {i < STEPS.length - 1 && <ChevronRight size={16} className="text-gray-300 mx-2" />}
             </div>
           ))}
@@ -119,7 +119,7 @@ export default function QuestionImport() {
                     <div className="grid grid-cols-4 gap-2">
                       {["pdf","past_paper","worksheet","textbook"].map(t => (
                         <button key={t} onClick={() => setSourceType(t)}
-                          className={`p-3 rounded-xl border-2 text-xs font-medium transition-all ${sourceType === t ? "border-teal-400 bg-teal-50 text-teal-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                          className={`p-3 rounded-xl border-2 text-xs font-medium transition-all ${sourceType === t ? "border-primary/60 bg-primary/8 text-primary" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
                           <FileText size={18} className="mx-auto mb-1" />
                           {t.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase())}
                         </button>
@@ -131,14 +131,14 @@ export default function QuestionImport() {
                     <Input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://..." className="text-sm" />
                     <p className="text-xs text-gray-400 mt-1">Paste a public URL to a PDF, past paper, or document</p>
                   </div>
-                  <div className="flex items-start gap-3 p-4 bg-teal-50 border border-teal-200 rounded-xl">
-                    <Sparkles size={16} className="text-teal-600 mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-3 p-4 bg-primary/8 border border-primary/25 rounded-xl">
+                    <Sparkles size={16} className="text-primary mt-0.5 shrink-0" />
                     <div>
-                      <p className="text-sm font-semibold text-teal-800">AI Extraction</p>
-                      <p className="text-xs text-teal-700 mt-1">Our AI will analyse the document, extract all questions, identify topics, difficulty levels, command words, and model answers automatically.</p>
+                      <p className="text-sm font-semibold text-foreground">AI Extraction</p>
+                      <p className="text-xs text-primary mt-1">Our AI will analyse the document, extract all questions, identify topics, difficulty levels, command words, and model answers automatically.</p>
                     </div>
                   </div>
-                  <Button onClick={() => uploadMutation.mutate()} disabled={uploadMutation.isPending || !url.trim()} className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+                  <Button onClick={() => uploadMutation.mutate()} disabled={uploadMutation.isPending || !url.trim()} className="w-full bg-primary hover:bg-primary/80 text-white">
                     {uploadMutation.isPending ? <><Loader2 size={14} className="mr-2 animate-spin" /> Extracting questions...</> : <><Sparkles size={14} className="mr-2" /> Extract Questions</>}
                   </Button>
                   {uploadMutation.isError && (
@@ -175,7 +175,7 @@ export default function QuestionImport() {
                         <Input value={String(editForm.maxMarks || q.maxMarks || 4)} onChange={e => setEditForm((p: any) => ({ ...p, maxMarks: parseInt(e.target.value) }))} placeholder="Marks" type="number" className="h-7 text-xs" />
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" className="h-7 bg-teal-600 text-white text-xs" onClick={() => { extractedQuestions[i] = { ...q, ...editForm }; setEditingQ(null); setEditForm({}); }}>Save</Button>
+                        <Button size="sm" className="h-7 bg-primary text-white text-xs" onClick={() => { extractedQuestions[i] = { ...q, ...editForm }; setEditingQ(null); setEditForm({}); }}>Save</Button>
                         <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setEditingQ(null)}>Cancel</Button>
                       </div>
                     </div>
@@ -189,7 +189,7 @@ export default function QuestionImport() {
                         {q.topic && <Badge className="text-xs bg-purple-100 text-purple-700">{q.topic}</Badge>}
                         {q.questionType && <Badge className="text-xs bg-gray-100 text-gray-600">{q.questionType}</Badge>}
                       </div>
-                      {q.modelAnswer && <p className="text-xs text-gray-500 border-l-2 border-teal-200 pl-2 mb-3">{q.modelAnswer}</p>}
+                      {q.modelAnswer && <p className="text-xs text-gray-500 border-l-2 border-primary/25 pl-2 mb-3">{q.modelAnswer}</p>}
                       <div className="flex gap-2">
                         <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditingQ(i); setEditForm({}); }}><Edit size={11} className="mr-1" /> Edit</Button>
                         <Button size="sm" onClick={() => toggleApprove(i)} className={`h-7 text-xs ${approved.has(i) ? "bg-green-600 hover:bg-green-700 text-white" : "border border-green-300 text-green-700"}`}>
@@ -206,7 +206,7 @@ export default function QuestionImport() {
 
               <div className="flex gap-3">
                 <Button variant="outline" onClick={() => setStep(0)}>Back</Button>
-                <Button onClick={handleImport} disabled={importing || approved.size === 0} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white">
+                <Button onClick={handleImport} disabled={importing || approved.size === 0} className="flex-1 bg-primary hover:bg-primary/80 text-white">
                   {importing ? <><Loader2 size={14} className="mr-2 animate-spin" /> Importing...</> : <><Database size={14} className="mr-2" /> Import {approved.size} Questions</>}
                 </Button>
               </div>
@@ -224,7 +224,7 @@ export default function QuestionImport() {
                   <p className="text-gray-500">{importResult.imported} questions added to your question bank</p>
                   <div className="flex gap-4 justify-center pt-4">
                     <Button variant="outline" onClick={() => { setStep(0); setUrl(""); setExtractedQuestions([]); }}>Import More</Button>
-                    <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => navigate("/teacher/question-studio")}>View Question Bank</Button>
+                    <Button className="bg-primary hover:bg-primary/80 text-white" onClick={() => navigate("/teacher/question-studio")}>View Question Bank</Button>
                   </div>
                 </CardContent>
               </Card>

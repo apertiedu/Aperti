@@ -22,7 +22,7 @@ interface StatusButtonProps {
 }
 
 const VARIANT_CLASSES: Record<string, string> = {
-  primary:     "bg-teal-600 text-white hover:bg-teal-700 focus-visible:ring-teal-500",
+  primary:     "bg-primary text-primary-foreground hover:opacity-90 focus-visible:ring-primary",
   secondary:   "bg-gray-100 text-gray-800 hover:bg-gray-200 focus-visible:ring-gray-400",
   destructive: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
   outline:     "border border-gray-200 text-gray-700 bg-white hover:bg-gray-50 focus-visible:ring-gray-400",

@@ -35,7 +35,7 @@ async function fetchJSON(url: string, opts?: RequestInit) {
 
 const BLOCK_CATEGORIES = [
   { id: "content",   label: "Content",   color: "text-gray-600" },
-  { id: "education", label: "Education", color: "text-teal-600" },
+  { id: "education", label: "Education", color: "text-primary" },
   { id: "media",     label: "Media",     color: "text-blue-600" },
 ];
 
@@ -60,7 +60,7 @@ const BLOCK_TYPES = [
 ];
 
 const CALLOUT_VARIANTS = {
-  info:    "border-l-4 border-teal-400 bg-teal-50",
+  info:    "border-l-4 border-primary/60 bg-primary/8",
   warning: "border-l-4 border-amber-400 bg-amber-50",
   success: "border-l-4 border-green-400 bg-green-50",
   danger:  "border-l-4 border-red-400 bg-red-50",
@@ -126,10 +126,10 @@ function SlashCommandPalette({
                     key={bt.id}
                     whileHover={{ backgroundColor: "#f0fdfa" }}
                     onClick={() => onSelect(bt.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${globalIdx === activeIndex ? "bg-teal-50 border border-teal-200" : "hover:bg-gray-50"}`}
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${globalIdx === activeIndex ? "bg-primary/8 border border-primary/25" : "hover:bg-gray-50"}`}
                   >
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${group.id === "education" ? "bg-teal-100" : group.id === "media" ? "bg-blue-100" : "bg-gray-100"}`}>
-                      <bt.icon size={14} className={group.id === "education" ? "text-teal-600" : group.id === "media" ? "text-blue-600" : "text-gray-600"} />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${group.id === "education" ? "bg-primary/15" : group.id === "media" ? "bg-blue-100" : "bg-gray-100"}`}>
+                      <bt.icon size={14} className={group.id === "education" ? "text-primary" : group.id === "media" ? "text-blue-600" : "text-gray-600"} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-800">{bt.label}</p>
@@ -190,8 +190,8 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
         return (
           <div className="grid grid-cols-1 gap-2">
             {(localContent.terms || []).map((t: any, i: number) => (
-              <div key={i} className="flex gap-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
-                <span className="font-semibold text-teal-700 min-w-[120px]">{t.term}</span>
+              <div key={i} className="flex gap-3 p-3 bg-primary/8 rounded-lg border border-primary/15">
+                <span className="font-semibold text-primary min-w-[120px]">{t.term}</span>
                 <span className="text-gray-600 text-sm">{t.definition}</span>
               </div>
             ))}
@@ -287,7 +287,7 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
                 animate={{ rotateY: flipped ? 180 : 0 }}
                 transition={{ duration: 0.45, ease: "easeInOut" }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex flex-col items-center justify-center p-4 text-white" style={{ backfaceVisibility: "hidden" }}>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex flex-col items-center justify-center p-4 text-white" style={{ backfaceVisibility: "hidden" }}>
                   <p className="text-[10px] uppercase tracking-widest opacity-70 mb-1">Front</p>
                   <p className="font-bold text-center">{localContent.front || "Front side"}</p>
                   <p className="text-xs opacity-60 mt-3">Click to flip</p>
@@ -310,11 +310,11 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
       case "timeline":
         return (
           <div className="relative pl-6 space-y-4">
-            <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-teal-200" />
+            <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-primary/25" />
             {(localContent.events || []).map((ev: any, i: number) => (
               <div key={i} className="relative">
-                <div className="absolute -left-4 top-1 w-3 h-3 rounded-full bg-teal-500 border-2 border-white shadow" />
-                <p className="text-xs font-bold text-teal-700 mb-0.5">{ev.date || "Date"}</p>
+                <div className="absolute -left-4 top-1 w-3 h-3 rounded-full bg-primary border-2 border-white shadow" />
+                <p className="text-xs font-bold text-primary mb-0.5">{ev.date || "Date"}</p>
                 <p className="text-sm font-semibold text-gray-800">{ev.title || "Event"}</p>
                 {ev.desc && <p className="text-xs text-gray-500 mt-0.5">{ev.desc}</p>}
               </div>
@@ -482,7 +482,7 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
   };
 
   const bt = BLOCK_TYPES.find(b => b.id === block.block_type);
-  const categoryColor = bt?.category === "education" ? "bg-teal-100 text-teal-600" : bt?.category === "media" ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500";
+  const categoryColor = bt?.category === "education" ? "bg-primary/15 text-primary" : bt?.category === "media" ? "bg-blue-100 text-blue-600" : "bg-gray-100 text-gray-500";
 
   return (
     <motion.div
@@ -490,7 +490,7 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className={`group relative bg-card rounded-xl border-2 transition-all duration-200 ${selected ? "border-teal-400 shadow-md" : "border-gray-100 hover:border-gray-200"}`}
+      className={`group relative bg-card rounded-xl border-2 transition-all duration-200 ${selected ? "border-primary/60 shadow-md" : "border-gray-100 hover:border-gray-200"}`}
       onClick={() => onSelect(block.id)}
     >
       {bt && (
@@ -507,7 +507,7 @@ function BlockRenderer({ block, onUpdate, onDelete, onDuplicate, selected, onSel
             <div className="space-y-3">
               {renderEditor()}
               <div className="flex gap-2">
-                <Button size="sm" onClick={save} className="bg-teal-600 hover:bg-teal-700 text-white"><Save size={14} className="mr-1" /> Save</Button>
+                <Button size="sm" onClick={save} className="bg-primary hover:bg-primary/80 text-white"><Save size={14} className="mr-1" /> Save</Button>
                 <Button size="sm" variant="ghost" onClick={() => { setLocalContent(block.content || {}); setEditing(false); }}>Cancel</Button>
               </div>
             </div>
@@ -642,10 +642,10 @@ export default function ContentCraftStudio() {
         <div className="max-w-6xl mx-auto space-y-6">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Layout className="text-teal-600" size={28} /> ContentCraft Studio</h1>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Layout className="text-primary" size={28} /> ContentCraft Studio</h1>
               <p className="text-gray-500 mt-1">Block-based lesson & content page editor · Press <kbd className="px-1.5 py-0.5 bg-gray-200 rounded text-xs font-mono">/</kbd> in editor to add blocks</p>
             </div>
-            <Button onClick={() => createPage.mutate({ title: "New Page", template: "blank" })} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button onClick={() => createPage.mutate({ title: "New Page", template: "blank" })} className="bg-primary hover:bg-primary/80 text-white">
               <Plus size={16} className="mr-2" /> New Page
             </Button>
           </motion.div>
@@ -657,8 +657,8 @@ export default function ContentCraftStudio() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {(templates.builtin || []).map((t: any) => (
                     <motion.button key={t.id} whileHover={{ scale: 1.02 }} onClick={() => generateFromTemplate.mutate({ templateId: t.id, title: `New ${t.name}` })}
-                      className="p-4 border-2 border-gray-200 hover:border-teal-400 rounded-xl text-left transition-all">
-                      <Layout size={20} className="text-teal-600 mb-2" />
+                      className="p-4 border-2 border-gray-200 hover:border-primary/60 rounded-xl text-left transition-all">
+                      <Layout size={20} className="text-primary mb-2" />
                       <p className="font-semibold text-sm">{t.name}</p>
                       <p className="text-xs text-gray-500 mt-1">{t.description}</p>
                     </motion.button>
@@ -682,14 +682,14 @@ export default function ContentCraftStudio() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {(pages || []).map((p: any) => (
                     <motion.div key={p.id} whileHover={{ y: -2 }} onClick={() => navigate(`/teacher/contentcraft/${p.id}`)}
-                      className="p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-teal-400 hover:shadow-sm transition-all">
+                      className="p-4 border border-gray-200 rounded-xl cursor-pointer hover:border-primary/60 hover:shadow-sm transition-all">
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-semibold text-gray-800 text-sm line-clamp-2">{p.title}</h3>
                         <Badge variant="outline" className="text-xs shrink-0 ml-2">{p.block_count || 0} blocks</Badge>
                       </div>
                       {p.description && <p className="text-xs text-gray-500 line-clamp-2 mb-2">{p.description}</p>}
                       <div className="flex items-center gap-2 flex-wrap">
-                        {p.board && <Badge className="text-xs bg-teal-100 text-teal-700">{p.board}</Badge>}
+                        {p.board && <Badge className="text-xs bg-primary/15 text-primary">{p.board}</Badge>}
                         {p.subject && <Badge className="text-xs bg-blue-100 text-blue-700">{p.subject}</Badge>}
                         {p.topic && <Badge className="text-xs bg-purple-100 text-purple-700">{p.topic}</Badge>}
                       </div>
@@ -752,11 +752,11 @@ export default function ContentCraftStudio() {
               <motion.button
                 whileHover={{ scale: 1.005 }}
                 onClick={openSlashMenu}
-                className="w-full border-2 border-dashed border-gray-200 hover:border-teal-400 rounded-xl py-4 flex items-center justify-center gap-2 text-gray-400 hover:text-teal-600 transition-all group"
+                className="w-full border-2 border-dashed border-gray-200 hover:border-primary/60 rounded-xl py-4 flex items-center justify-center gap-2 text-gray-400 hover:text-primary transition-all group"
               >
                 <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 rounded-md bg-gray-100 group-hover:bg-teal-100 flex items-center justify-center transition-colors">
-                    <Plus size={14} className="group-hover:text-teal-600 transition-colors" />
+                  <div className="w-6 h-6 rounded-md bg-gray-100 group-hover:bg-primary/15 flex items-center justify-center transition-colors">
+                    <Plus size={14} className="group-hover:text-primary transition-colors" />
                   </div>
                   <span className="text-sm font-medium">Add Block</span>
                   <span className="text-xs opacity-60">or press <kbd className="px-1 bg-gray-100 rounded font-mono">/</kbd></span>
@@ -799,9 +799,9 @@ export default function ContentCraftStudio() {
                                     return (
                                       <motion.button key={bt.id} whileHover={{ backgroundColor: "#f0fdfa" }}
                                         onClick={() => handleSlashSelect(bt.id)}
-                                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${globalIdx === slashIndex ? "bg-teal-50 border border-teal-200" : "hover:bg-gray-50"}`}>
-                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cat.id === "education" ? "bg-teal-100" : cat.id === "media" ? "bg-blue-100" : "bg-gray-100"}`}>
-                                          <bt.icon size={14} className={cat.id === "education" ? "text-teal-600" : cat.id === "media" ? "text-blue-600" : "text-gray-600"} />
+                                        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left transition-colors ${globalIdx === slashIndex ? "bg-primary/8 border border-primary/25" : "hover:bg-gray-50"}`}>
+                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${cat.id === "education" ? "bg-primary/15" : cat.id === "media" ? "bg-blue-100" : "bg-gray-100"}`}>
+                                          <bt.icon size={14} className={cat.id === "education" ? "text-primary" : cat.id === "media" ? "text-blue-600" : "text-gray-600"} />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                           <p className="text-sm font-semibold text-gray-800">{bt.label}</p>
@@ -820,7 +820,7 @@ export default function ContentCraftStudio() {
                           )}
                         </div>
                         <div className="border-t border-gray-100 p-2">
-                          <Button size="sm" variant="ghost" className="w-full text-xs gap-1.5 text-teal-600 hover:text-teal-700" onClick={() => handleAiGenerateBlock("text")} disabled={aiLoading}>
+                          <Button size="sm" variant="ghost" className="w-full text-xs gap-1.5 text-primary hover:text-primary" onClick={() => handleAiGenerateBlock("text")} disabled={aiLoading}>
                             <Sparkles size={13} /> {aiLoading ? "Generating..." : "AI Generate Block"}
                           </Button>
                         </div>

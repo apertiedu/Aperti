@@ -35,11 +35,11 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-50/60 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-primary/60 to-white">
       {/* Hero */}
       <div className="max-w-6xl mx-auto px-6 pt-16 pb-10 text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <span className="inline-flex items-center gap-1.5 bg-teal-100 text-teal-700 text-xs font-semibold px-3 py-1 rounded-full mb-4">
+          <span className="inline-flex items-center gap-1.5 bg-primary/15 text-primary text-xs font-semibold px-3 py-1 rounded-full mb-4">
             <Zap className="w-3 h-3" /> Simple, transparent pricing in EGP
           </span>
           <h1 className="text-4xl font-bold text-gray-900 mb-3">Choose your plan</h1>
@@ -52,7 +52,7 @@ export default function PricingPage() {
       <div className="max-w-6xl mx-auto px-6 pb-20">
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <div className="w-7 h-7 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+            <div className="w-7 h-7 border-2 border-primary/40 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <>
@@ -83,7 +83,7 @@ export default function PricingPage() {
             {(teacherPlans.length === 0 && studentPlans.length === 0) && (
               <div className="text-center py-20 text-gray-400">
                 <p className="text-lg">Plans coming soon.</p>
-                <Link href="/" className="mt-4 inline-block text-teal-600 hover:underline text-sm">← Back to dashboard</Link>
+                <Link href="/" className="mt-4 inline-block text-primary hover:underline text-sm">← Back to dashboard</Link>
               </div>
             )}
           </>
@@ -127,15 +127,15 @@ function PlanCard({ plan, index, onSelect }: { plan: any; index: number; onSelec
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.08 }}
-      className={`relative bg-card rounded-2xl border shadow-sm p-6 flex flex-col gap-4 hover:shadow-md transition-shadow ${isPopular ? "border-teal-400 ring-1 ring-teal-200" : "border-border"}`}
+      className={`relative bg-card rounded-2xl border shadow-sm p-6 flex flex-col gap-4 hover:shadow-md transition-shadow ${isPopular ? "border-primary/40 ring-1 ring-primary/20" : "border-border"}`}
     >
       {isPopular && (
-        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-teal-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-full">
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-white text-[10px] font-bold px-3 py-0.5 rounded-full">
           Most Popular
         </span>
       )}
       <div className="flex items-center gap-3">
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isPopular ? "bg-teal-500 text-white" : "bg-teal-50 text-teal-600"}`}>
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${isPopular ? "bg-primary text-white" : "bg-primary/8 text-primary"}`}>
           <Icon className="w-4.5 h-4.5" />
         </div>
         <div>
@@ -175,7 +175,7 @@ function PlanCard({ plan, index, onSelect }: { plan: any; index: number; onSelec
         <ul className="space-y-1.5 flex-1">
           {features.slice(0, 6).map((f: string, i: number) => (
             <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
-              <Check className="w-3.5 h-3.5 text-teal-500 shrink-0 mt-0.5" />
+              <Check className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
               <span>{f}</span>
             </li>
           ))}
@@ -184,7 +184,7 @@ function PlanCard({ plan, index, onSelect }: { plan: any; index: number; onSelec
 
       <button
         onClick={onSelect}
-        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${isPopular ? "bg-teal-500 text-white hover:bg-teal-600" : "bg-teal-50 text-teal-700 hover:bg-teal-100"}`}
+        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${isPopular ? "bg-primary text-white hover:bg-primary" : "bg-primary/8 text-primary hover:bg-primary/15"}`}
       >
         Get Started
       </button>

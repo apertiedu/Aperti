@@ -244,7 +244,7 @@ export default function AdminModeration() {
                 { label: "Total Reports", value: stats?.total_reports ?? 0, icon: <AlertTriangle className="w-5 h-5" />, color: "text-amber-600 bg-amber-50" },
                 { label: "Pending", value: stats?.pending ?? 0, icon: <Clock className="w-5 h-5" />, color: "text-blue-600 bg-blue-50" },
                 { label: "Resolved", value: stats?.resolved ?? 0, icon: <CheckCircle className="w-5 h-5" />, color: "text-green-600 bg-green-50" },
-                { label: "Avg Response", value: `${Math.round(stats?.avg_response_hours ?? 0)}h`, icon: <TrendingUp className="w-5 h-5" />, color: "text-teal-600 bg-teal-50" },
+                { label: "Avg Response", value: `${Math.round(stats?.avg_response_hours ?? 0)}h`, icon: <TrendingUp className="w-5 h-5" />, color: "text-primary bg-primary/8" },
               ].map((card) => (
                 <div key={card.label} className="bg-card rounded-2xl border border-border shadow-sm p-4">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 ${card.color}`}>

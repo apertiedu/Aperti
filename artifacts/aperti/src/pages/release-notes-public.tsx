@@ -4,14 +4,13 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "wouter";
 import { FileText, Shield, Zap, Megaphone, AlertCircle } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 const TYPE_META: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   major:        { label: "Major Release", color: "#7C3AED", bg: "#F5F3FF", icon: Zap },
   minor:        { label: "Update",        color: "#2563EB", bg: "#EFF6FF", icon: FileText },
   bugfix:       { label: "Bug Fix",       color: "#D97706", bg: "#FFFBEB", icon: AlertCircle },
   security:     { label: "Security",      color: "#DC2626", bg: "#FEF2F2", icon: Shield },
-  announcement: { label: "Announcement",  color: "#0D9488", bg: "#F0FDFA", icon: Megaphone },
+  announcement: { label: "Announcement",  color: "hsl(var(--primary))", bg: "hsl(var(--primary) / 0.08)", icon: Megaphone },
 };
 
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
@@ -44,7 +43,7 @@ export default function ReleaseNotesPublicPage() {
     <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
+          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: "hsl(var(--primary))" }}>.</span></Link>
           <div className="flex items-center gap-4">
             <Link href="/features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Features</Link>
             <Link href="/roadmap" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Roadmap</Link>
@@ -56,8 +55,8 @@ export default function ReleaseNotesPublicPage() {
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-16 text-center">
           <Reveal>
             <div className="flex items-center justify-center gap-2 mb-6">
-              <FileText className="w-5 h-5" style={{ color: TEAL }} />
-              <span className="text-sm font-medium" style={{ color: TEAL }}>Changelog</span>
+              <FileText className="w-5 h-5" style={{ color: "hsl(var(--primary))" }} />
+              <span className="text-sm font-medium" style={{ color: "hsl(var(--primary))" }}>Changelog</span>
             </div>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">What's New</h1>
             <p className="text-lg text-gray-500">Every update, improvement, and new feature — all in one place.</p>
@@ -68,7 +67,7 @@ export default function ReleaseNotesPublicPage() {
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-12 space-y-6">
         {isLoading ? (
           <div className="text-center text-gray-400 py-16">
-            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
+            <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: "hsl(var(--primary))", borderTopColor: "transparent" }} />
             Release notes loading
           </div>
         ) : notes.length === 0 ? (

@@ -70,11 +70,11 @@ export default function QABugsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Bug className="w-6 h-6 text-teal-600" /> Bug Tracker
+            <Bug className="w-6 h-6 text-primary" /> Bug Tracker
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Track and manage platform issues</p>
         </div>
-        <Button onClick={() => setShowNew(true)} className="bg-teal-600 hover:bg-teal-700 gap-2">
+        <Button onClick={() => setShowNew(true)} className="bg-primary hover:bg-primary/80 gap-2">
           <Plus className="w-4 h-4" /> Report Bug
         </Button>
       </div>
@@ -178,7 +178,7 @@ export default function QABugsPage() {
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
-                  <Bug className="w-4 h-4 text-teal-600" />
+                  <Bug className="w-4 h-4 text-primary" />
                   Bug #{selectedBug.id}
                 </DialogTitle>
               </DialogHeader>
@@ -224,7 +224,7 @@ export default function QABugsPage() {
                   <Button
                     onClick={() => updateBug.mutate({ id: selectedBug.id, status: editStatus })}
                     disabled={updateBug.isPending}
-                    className="bg-teal-600 hover:bg-teal-700 flex-1"
+                    className="bg-primary hover:bg-primary/80 flex-1"
                   >
                     {updateBug.isPending ? "Saving…" : "Save Changes"}
                   </Button>
@@ -281,7 +281,7 @@ export default function QABugsPage() {
                   <Button
                     onClick={() => createBug.mutate(form)}
                     disabled={!form.title || createBug.isPending}
-                    className="bg-teal-600 hover:bg-teal-700 flex-1"
+                    className="bg-primary hover:bg-primary/80 flex-1"
                   >
                     {createBug.isPending ? "Submitting…" : "Submit Bug"}
                   </Button>

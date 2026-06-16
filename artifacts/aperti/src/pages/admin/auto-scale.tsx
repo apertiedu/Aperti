@@ -95,7 +95,7 @@ export default function AutoScale() {
             <MetricCard icon={Cpu}      label="CPU Usage"   value={cpu}     unit="%" color="text-blue-600"    warn={cpuWarn} />
             <MetricCard icon={HardDrive}label="Memory"      value={memPct}  unit="%" color="text-purple-600"  warn={memWarn} />
             <MetricCard icon={HardDrive}label="Disk"        value={diskPct} unit="%" color="text-orange-600"  warn={diskWarn} />
-            <MetricCard icon={Activity} label="Load Avg"    value={loadAvg.toFixed(2)} color="text-teal-600" />
+            <MetricCard icon={Activity} label="Load Avg"    value={loadAvg.toFixed(2)} color="text-primary" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -119,7 +119,7 @@ export default function AutoScale() {
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
-                <Wifi className="h-8 w-8 text-teal-500" />
+                <Wifi className="h-8 w-8 text-primary" />
                 <div>
                   <p className="font-semibold text-sm">Memory Usage</p>
                   <p className="text-xs text-muted-foreground">{usedMB} MB / {totalMB} MB</p>

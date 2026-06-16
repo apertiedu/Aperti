@@ -91,7 +91,7 @@ export default function RouteHealthPage() {
         <button
           onClick={runCrawl}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 disabled:opacity-60 transition-colors"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           {loading ? "Crawling…" : "Run Health Check"}
@@ -134,7 +134,7 @@ export default function RouteHealthPage() {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${filter === f ? "bg-teal-50 text-teal-700" : "text-gray-500 hover:bg-gray-50"}`}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium transition-colors ${filter === f ? "bg-primary/8 text-primary" : "text-gray-500 hover:bg-gray-50"}`}
                 >
                   {f === "all" ? `All (${report.results.length})` :
                    f === "pass" ? `✅ Pass (${report.summary.passed})` :
@@ -219,7 +219,7 @@ export default function RouteHealthPage() {
           <button
             onClick={runCrawl}
             disabled={loading}
-            className="mt-4 px-5 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-60 transition-colors"
+            className="mt-4 px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 disabled:opacity-60 transition-colors"
           >
             {loading ? "Crawling…" : "Run Now"}
           </button>

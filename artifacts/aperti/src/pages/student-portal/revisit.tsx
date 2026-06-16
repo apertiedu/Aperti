@@ -51,13 +51,13 @@ function PlanCard({ item, idx }: { item: PlanItem; idx: number }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.05 }}
-      className={`bg-card rounded-2xl border shadow-sm p-4 ${isToday ? "border-teal-200 ring-1 ring-teal-100" : "border-gray-100"}`}
+      className={`bg-card rounded-2xl border shadow-sm p-4 ${isToday ? "border-primary/25 ring-1 ring-primary/30" : "border-gray-100"}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             {isToday && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-600 text-white">TODAY</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-white">TODAY</span>
             )}
             <p className="text-[11px] text-gray-400 font-medium">
               {new Date(item.date + "T12:00:00").toLocaleDateString("en-US", {
@@ -87,7 +87,7 @@ function PlanCard({ item, idx }: { item: PlanItem; idx: number }) {
           <Button
             size="sm"
             className="shrink-0 h-8 px-3 text-xs rounded-xl"
-            style={{ background: isToday ? "#0D9488" : undefined }}
+            style={{ background: isToday ? "hsl(var(--primary))" : undefined }}
             variant={isToday ? "default" : "outline"}
           >
             Start <ChevronRight className="h-3 w-3 ml-1" />
@@ -113,19 +113,19 @@ function WeeklyCalendar({ items }: { items: PlanItem[] }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.04 }}
             className={`rounded-xl p-2 text-center border transition-all cursor-default ${
-              isToday ? "bg-teal-600 text-white border-teal-600 shadow-md" : "bg-card border-border hover:border-teal-100"
+              isToday ? "bg-primary text-white border-primary shadow-md" : "bg-card border-border hover:border-primary/15"
             }`}
           >
-            <p className={`text-[9px] font-bold uppercase mb-1 ${isToday ? "text-teal-100" : "text-gray-400"}`}>
+            <p className={`text-[9px] font-bold uppercase mb-1 ${isToday ? "text-primary-foreground/60" : "text-gray-400"}`}>
               {d.toLocaleDateString("en-US", { weekday: "short" })}
             </p>
             <p className={`text-base font-black ${isToday ? "text-white" : "text-gray-900"}`}>
               {d.getDate()}
             </p>
-            <p className={`text-[9px] mt-1 leading-tight line-clamp-2 ${isToday ? "text-teal-100" : "text-gray-500"}`}>
+            <p className={`text-[9px] mt-1 leading-tight line-clamp-2 ${isToday ? "text-primary-foreground/60" : "text-gray-500"}`}>
               {item.topic}
             </p>
-            <p className={`text-[8px] mt-1 ${isToday ? "text-teal-200" : "text-gray-400"}`}>
+            <p className={`text-[8px] mt-1 ${isToday ? "text-primary-foreground/70" : "text-gray-400"}`}>
               {item.durationMinutes}m
             </p>
           </motion.div>
@@ -154,8 +154,8 @@ export default function Revisit() {
     <div className="min-h-screen bg-[#F8FAFB] px-4 py-6 max-w-3xl mx-auto" style={{ fontFamily: "Inter, sans-serif" }}>
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="flex items-center gap-3 mb-1">
-          <div className="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center">
-            <Target className="h-4.5 w-4.5 text-teal-600" style={{ width: 18, height: 18 }} />
+          <div className="h-9 w-9 rounded-xl bg-primary/8 flex items-center justify-center">
+            <Target className="h-4.5 w-4.5 text-primary" style={{ width: 18, height: 18 }} />
           </div>
           <div>
             <h1 className="text-xl font-black text-gray-900">Revisit</h1>
@@ -214,7 +214,7 @@ export default function Revisit() {
       {data?.upcomingExams && data.upcomingExams.length > 0 && (
         <div className="mb-4 bg-card rounded-xl border border-border shadow-sm p-4">
           <p className="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5 text-teal-600" /> Upcoming Exams
+            <Calendar className="h-3.5 w-3.5 text-primary" /> Upcoming Exams
           </p>
           <div className="flex flex-wrap gap-2">
             {data.upcomingExams.map((e) => (
@@ -232,8 +232,8 @@ export default function Revisit() {
       {/* ── AI Revision Modes ── */}
       <div className="mb-5 bg-card rounded-2xl border border-border shadow-sm p-4">
         <div className="flex items-center gap-2 mb-3">
-          <div className="w-7 h-7 rounded-lg bg-teal-50 flex items-center justify-center">
-            <Brain className="w-4 h-4 text-teal-600" />
+          <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center">
+            <Brain className="w-4 h-4 text-primary" />
           </div>
           <div>
             <p className="text-sm font-bold text-gray-900">AI Revision Modes</p>
@@ -247,7 +247,7 @@ export default function Revisit() {
               <input
                 type="text"
                 placeholder="e.g. Photosynthesis, Quadratic equations…"
-                className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-teal-400 transition-colors bg-gray-50"
+                className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-primary/60 transition-colors bg-gray-50"
                 onKeyDown={e => {
                   if (e.key === "Enter" && (e.target as HTMLInputElement).value.trim()) {
                     setRevisionTopic({ name: (e.target as HTMLInputElement).value.trim(), subject: "General" });
@@ -255,7 +255,7 @@ export default function Revisit() {
                 }}
               />
               <button
-                className="text-xs px-3 py-2 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-colors"
+                className="text-xs px-3 py-2 bg-primary text-white rounded-xl font-semibold hover:bg-primary/80 transition-colors"
                 onClick={(e) => {
                   const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
                   if (input?.value.trim()) setRevisionTopic({ name: input.value.trim(), subject: "General" });
@@ -270,7 +270,7 @@ export default function Revisit() {
                   <button
                     key={item.date}
                     onClick={() => setRevisionTopic({ name: item.topic, subject: "Subject" })}
-                    className="text-[11px] px-2.5 py-1 rounded-lg bg-teal-50 text-teal-700 border border-teal-100 hover:bg-teal-100 transition-colors font-medium"
+                    className="text-[11px] px-2.5 py-1 rounded-lg bg-primary/8 text-primary border border-primary/15 hover:bg-primary/15 transition-colors font-medium"
                   >
                     {item.topic}
                   </button>

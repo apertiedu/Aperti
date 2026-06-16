@@ -48,7 +48,7 @@ function ParentCodeSection() {
 
   return (
     <Card className="border border-gray-100 shadow-sm overflow-hidden">
-      <div className="h-1" style={{ background: "linear-gradient(90deg, #0D9488, #06b6d4, #8b5cf6)" }} />
+      <div className="h-1" style={{ background: "linear-gradient(90deg, hsl(var(--primary)), #06b6d4, #8b5cf6)" }} />
       <CardHeader className="pb-3 pt-5">
         <CardTitle className="text-sm font-bold flex items-center gap-2">
           <Key className="h-4 w-4 text-primary" /> Your Parent Pairing Code
@@ -65,7 +65,7 @@ function ParentCodeSection() {
           <div className="flex items-center gap-2">
             <div
               className="flex-1 font-mono text-3xl font-black tracking-[0.35em] text-center py-4 px-5 rounded-2xl border-2 border-dashed select-all cursor-text"
-              style={{ borderColor: "#0D948840", color: "#0D9488", background: "#0D948806" }}
+              style={{ borderColor: "hsl(var(--primary) / 0.25)", color: "hsl(var(--primary))", background: "hsl(var(--primary) / 0.04)" }}
             >
               {codeData?.pairingCode || "--------"}
             </div>
@@ -96,8 +96,8 @@ function ParentCodeSection() {
           </div>
         )}
 
-        <div className="rounded-xl bg-teal-50 border border-teal-100 p-3">
-          <p className="text-xs font-semibold text-teal-700 mb-2">How to connect</p>
+        <div className="rounded-xl bg-primary/8 border border-primary/15 p-3">
+          <p className="text-xs font-semibold text-primary mb-2">How to connect</p>
           <div className="space-y-1.5">
             {[
               "Copy the code above and send it to your child",
@@ -106,10 +106,10 @@ function ParentCodeSection() {
               "You approve the request below — done!",
             ].map((step, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="w-4 h-4 rounded-full bg-teal-600 text-white text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                <span className="w-4 h-4 rounded-full bg-primary text-white text-[9px] font-bold flex items-center justify-center shrink-0 mt-0.5">
                   {i + 1}
                 </span>
-                <p className="text-xs text-teal-700">{step}</p>
+                <p className="text-xs text-primary">{step}</p>
               </div>
             ))}
           </div>
@@ -170,7 +170,7 @@ function LinkedStudentsSection() {
                 <div className={`flex items-center gap-3 p-3.5 rounded-xl border ${link.status === "pending" ? "border-amber-200 bg-amber-50/50" : "border-gray-100 bg-gray-50/50"}`}>
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                    style={{ background: link.status === "active" ? "#0D9488" : link.status === "pending" ? "#f59e0b" : "#94a3b8" }}
+                    style={{ background: link.status === "active" ? "hsl(var(--primary))" : link.status === "pending" ? "#f59e0b" : "#94a3b8" }}
                   >
                     {(link.student_display_name || link.student_name).slice(0, 2).toUpperCase()}
                   </div>

@@ -44,7 +44,7 @@ export default function BackupsPage() {
           <button
             onClick={() => runMutation.mutate()}
             disabled={runMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-60"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-60"
           >
             <Play className="w-4 h-4" /> {runMutation.isPending ? "Running…" : "Run Backup Now"}
           </button>
@@ -54,8 +54,8 @@ export default function BackupsPage() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-          <div className="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center mb-3">
-            <Database className="w-5 h-5 text-teal-600" />
+          <div className="w-10 h-10 bg-primary/8 rounded-lg flex items-center justify-center mb-3">
+            <Database className="w-5 h-5 text-primary" />
           </div>
           <p className="text-2xl font-bold text-gray-900">{backupList.length}</p>
           <p className="text-sm text-gray-500">Total Backups</p>
@@ -77,12 +77,12 @@ export default function BackupsPage() {
       </div>
 
       {/* Schedule Info */}
-      <div className="bg-teal-50 border border-teal-100 rounded-xl p-5 flex items-start gap-4">
-        <Clock className="w-5 h-5 text-teal-600 mt-0.5 flex-shrink-0" />
+      <div className="bg-primary/5 border border-primary/15 rounded-xl p-5 flex items-start gap-4">
+        <Clock className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
         <div>
-          <p className="font-semibold text-teal-900">Automatic Backup Schedule</p>
-          <p className="text-sm text-teal-700 mt-0.5">PostgreSQL database is automatically backed up daily at <strong>02:00 UTC</strong> using pg_dump. Up to 10 backups are retained on disk.</p>
-          <p className="text-xs text-teal-600 mt-2">Backups are stored in the <code className="bg-teal-100 px-1 rounded">/backups</code> directory on the server. Set <code className="bg-teal-100 px-1 rounded">CDN_URL</code> to upload to cloud storage.</p>
+          <p className="font-semibold text-foreground">Automatic Backup Schedule</p>
+          <p className="text-sm text-primary/80 mt-0.5">PostgreSQL database is automatically backed up daily at <strong>02:00 UTC</strong> using pg_dump. Up to 10 backups are retained on disk.</p>
+          <p className="text-xs text-primary/70 mt-2">Backups are stored in the <code className="bg-primary/15 px-1 rounded">/backups</code> directory on the server. Set <code className="bg-primary/15 px-1 rounded">CDN_URL</code> to upload to cloud storage.</p>
         </div>
       </div>
 
@@ -90,7 +90,7 @@ export default function BackupsPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-            <HardDrive className="w-4 h-4 text-teal-600" /> Backup History
+            <HardDrive className="w-4 h-4 text-primary" /> Backup History
           </h2>
           <span className="text-xs text-gray-400">{backupList.length} records</span>
         </div>

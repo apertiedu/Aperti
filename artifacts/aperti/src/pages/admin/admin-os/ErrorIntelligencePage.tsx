@@ -9,9 +9,9 @@ import {
 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 
-function StatCard({ label, value, sub, icon: Icon, color = "teal", urgent = false }: any) {
+function StatCard({ label, value, sub, icon: Icon, color = "primary", urgent = false }: any) {
   const colors: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-600",
+    teal: "bg-primary/8 text-primary",
     red: "bg-red-50 text-red-600",
     amber: "bg-amber-50 text-amber-600",
     green: "bg-green-50 text-green-600",
@@ -175,8 +175,8 @@ export default function ErrorIntelligencePage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard label="Errors (last 1h)" value={stats.last1h ?? "—"} icon={Bug} color={stats.last1h > 0 ? "red" : "green"} urgent={stats.last1h > 5} />
         <StatCard label="Errors (24h)" value={stats.last24h ?? "—"} icon={AlertTriangle} color="amber" />
-        <StatCard label="Failed Logins (24h)" value={stats.failedLogins24h ?? "—"} icon={ShieldAlert} color={stats.failedLogins24h > 10 ? "red" : "teal"} urgent={stats.failedLogins24h > 20} />
-        <StatCard label="Total Errors Logged" value={stats.totalErrors ?? "—"} icon={Activity} color="teal" />
+        <StatCard label="Failed Logins (24h)" value={stats.failedLogins24h ?? "—"} icon={ShieldAlert} color={stats.failedLogins24h > 10 ? "red" : "primary"} urgent={stats.failedLogins24h > 20} />
+        <StatCard label="Total Errors Logged" value={stats.totalErrors ?? "—"} icon={Activity} color="primary" />
       </div>
 
       {/* Tabs */}
@@ -195,7 +195,7 @@ export default function ErrorIntelligencePage() {
           {trendHours.length > 0 ? (
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
               <p className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-teal-600" /> Error trend · last 48h
+                <TrendingUp className="h-4 w-4 text-primary" /> Error trend · last 48h
               </p>
               <ResponsiveContainer width="100%" height={180}>
                 <AreaChart data={trendHours}>
@@ -331,7 +331,7 @@ export default function ErrorIntelligencePage() {
             <button
               onClick={() => runTests.mutate()}
               disabled={runTests.isPending}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold transition-colors disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary/80 text-white text-sm font-semibold transition-colors disabled:opacity-60"
             >
               <Play className="h-4 w-4" />
               {runTests.isPending ? "Running tests…" : "Run Route Test"}

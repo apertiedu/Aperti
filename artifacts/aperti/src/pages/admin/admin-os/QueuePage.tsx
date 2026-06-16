@@ -62,7 +62,7 @@ export default function QueuePage() {
           <button
             onClick={() => testMutation.mutate()}
             disabled={testMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-60"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-white bg-primary rounded-lg hover:bg-primary/80 disabled:opacity-60"
           >
             <Play className="w-4 h-4" /> Test Job
           </button>
@@ -86,7 +86,7 @@ export default function QueuePage() {
         ].map((q) => (
           <div key={q.name} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
             <div className="flex items-center gap-3 mb-2">
-              <q.icon className="w-4 h-4 text-teal-600" />
+              <q.icon className="w-4 h-4 text-primary" />
               <p className="font-semibold text-gray-900 text-sm">{q.name}</p>
             </div>
             <p className="text-xs text-gray-500">{q.desc}</p>
@@ -102,7 +102,7 @@ export default function QueuePage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
           <h2 className="font-semibold text-gray-900 flex items-center gap-2">
-            <ListTodo className="w-4 h-4 text-teal-600" /> Recent Jobs
+            <ListTodo className="w-4 h-4 text-primary" /> Recent Jobs
           </h2>
           <span className="text-xs text-gray-400">{jobList.length} jobs</span>
         </div>

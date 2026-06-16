@@ -7,7 +7,6 @@ import {
 import { Link } from "wouter";
 import { apiFetch } from "@/lib/api";
 
-const TEAL = "#0D9488";
 
 interface FocusData {
   dayOfWeek: string;
@@ -36,7 +35,7 @@ function FocusItem({
 }) {
   const colors = {
     high: { bg: "bg-red-50", border: "border-red-100", text: "text-red-600", icon: "text-red-500" },
-    normal: { bg: "bg-teal-50", border: "border-teal-100", text: "text-teal-700", icon: "text-teal-500" },
+    normal: { bg: "bg-primary/8", border: "border-primary/20", text: "text-primary", icon: "text-primary" },
     low: { bg: "bg-slate-50", border: "border-slate-100", text: "text-slate-600", icon: "text-slate-400" },
   };
   const c = colors[urgency];
@@ -73,7 +72,7 @@ export default function TeacherDailyFocus() {
     return (
       <div className="bg-card rounded-2xl border border-border p-5 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-5 h-5 rounded-full bg-teal-100 animate-pulse" />
+          <div className="w-5 h-5 rounded-full bg-primary/20 animate-pulse" />
           <div className="h-4 w-32 bg-muted rounded animate-pulse" />
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -112,7 +111,7 @@ export default function TeacherDailyFocus() {
       <div className="flex items-start justify-between mb-4">
         <div>
           <div className="flex items-center gap-2 mb-0.5">
-            <Zap className="w-4 h-4" style={{ color: TEAL }} />
+            <Zap className="w-4 h-4 text-primary" />
             <h2 className="text-sm font-bold text-foreground">Daily Focus</h2>
             {data.priorityScore > 10 && (
               <span className="text-[10px] font-semibold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
@@ -123,7 +122,7 @@ export default function TeacherDailyFocus() {
           <p className="text-xs text-muted-foreground">{getTimeGreeting()} — {data.dayOfWeek}</p>
         </div>
         <Link href="/analytics">
-          <span className="text-xs text-teal-600 hover:underline cursor-pointer">Full report →</span>
+          <span className="text-xs text-primary hover:underline cursor-pointer">Full report →</span>
         </Link>
       </div>
 
@@ -133,7 +132,7 @@ export default function TeacherDailyFocus() {
           animate={{ opacity: 1, scale: 1 }}
           className="text-center py-4"
         >
-          <CheckCircle2 className="w-8 h-8 mx-auto mb-2" style={{ color: TEAL }} />
+          <CheckCircle2 className="w-8 h-8 mx-auto mb-2 text-primary" />
           <p className="text-sm font-semibold text-foreground">All clear for today!</p>
           <p className="text-xs text-muted-foreground mt-0.5">No urgent items require your attention.</p>
         </motion.div>

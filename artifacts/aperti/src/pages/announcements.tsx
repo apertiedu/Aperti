@@ -24,7 +24,7 @@ type Announcement = {
 
 const AUDIENCE_COLORS: Record<string, string> = {
   class: "bg-blue-100 text-blue-700",
-  course: "bg-teal-100 text-teal-700",
+  course: "bg-primary/15 text-primary",
   parent: "bg-purple-100 text-purple-700",
   all: "bg-amber-100 text-amber-700",
 };
@@ -88,14 +88,14 @@ export default function Announcements() {
           <div className="flex gap-1">
             {["all", "delivered", "scheduled", "draft"].map((s) => (
               <button key={s} onClick={() => setFilterStatus(s)}
-                className={`px-2.5 py-1 text-xs rounded-full transition-colors ${filterStatus === s ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                className={`px-2.5 py-1 text-xs rounded-full transition-colors ${filterStatus === s ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
                 {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
           </div>
           {isTeacher && (
             <button onClick={() => setShowCreate(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 text-white text-sm rounded-xl hover:bg-teal-700 transition-colors">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-sm rounded-xl hover:bg-primary/80 transition-colors">
               <Plus className="w-4 h-4" /> New
             </button>
           )}
@@ -122,7 +122,7 @@ export default function Announcements() {
         <div className="space-y-3">
           {filtered.map((ann) => (
             <motion.div key={ann.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-              className={`bg-card rounded-2xl shadow-sm border p-5 ${!ann.is_read && !isTeacher ? "border-l-4 border-l-teal-500" : "border-border"}`}>
+              className={`bg-card rounded-2xl shadow-sm border p-5 ${!ann.is_read && !isTeacher ? "border-l-4 border-l-primary" : "border-border"}`}>
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -133,7 +133,7 @@ export default function Announcements() {
                       {ann.status}
                     </span>
                     {!ann.is_read && !isTeacher && (
-                      <span className="text-xs bg-teal-600 text-white px-2 py-0.5 rounded-full">New</span>
+                      <span className="text-xs bg-primary text-white px-2 py-0.5 rounded-full">New</span>
                     )}
                   </div>
                   <h3 className="font-semibold text-gray-900 mb-1">{ann.title}</h3>
@@ -156,7 +156,7 @@ export default function Announcements() {
                 <div className="flex items-center gap-1 flex-shrink-0">
                   {!isTeacher && !ann.is_read && (
                     <button onClick={() => readMutation.mutate(ann.id)}
-                      className="p-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors" title="Mark as read">
+                      className="p-2 text-primary hover:bg-primary/8 rounded-lg transition-colors" title="Mark as read">
                       <CheckCircle className="w-4 h-4" />
                     </button>
                   )}
@@ -189,20 +189,20 @@ export default function Announcements() {
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Title *</label>
                   <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })}
                     placeholder="Announcement title"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Message *</label>
                   <textarea value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })}
                     placeholder="Write your announcement…"
                     rows={4}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30 resize-none" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-gray-600 mb-1 block">Audience</label>
                     <select value={form.audience_type} onChange={(e) => setForm({ ...form, audience_type: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30">
                       <option value="class">Class</option>
                       <option value="course">Course</option>
                       <option value="parent">Parents</option>
@@ -213,12 +213,12 @@ export default function Announcements() {
                     <label className="text-xs font-medium text-gray-600 mb-1 block">Schedule (optional)</label>
                     <input type="datetime-local" value={form.scheduled_at}
                       onChange={(e) => setForm({ ...form, scheduled_at: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
                   </div>
                 </div>
                 <button onClick={() => createMutation.mutate()}
                   disabled={!form.title || !form.body || createMutation.isPending}
-                  className="w-full py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
                   {form.scheduled_at ? "Schedule Announcement" : "Publish Now"}
                 </button>
               </div>

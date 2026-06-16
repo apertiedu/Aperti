@@ -24,7 +24,7 @@ const TYPE_META: Record<string, { label: string; icon: React.ReactNode; color: s
   quiz:           { label: "Quiz",             icon: <Zap className="w-3.5 h-3.5" />,          color: "bg-amber-500/10 text-amber-600" },
   topic_test:     { label: "Topic Test",       icon: <FileText className="w-3.5 h-3.5" />,     color: "bg-violet-500/10 text-violet-600" },
   unit_test:      { label: "Unit Test",        icon: <Layers className="w-3.5 h-3.5" />,       color: "bg-orange-500/10 text-orange-600" },
-  progress_test:  { label: "Progress Test",    icon: <BarChart3 className="w-3.5 h-3.5" />,    color: "bg-teal-500/10 text-teal-600" },
+  progress_test:  { label: "Progress Test",    icon: <BarChart3 className="w-3.5 h-3.5" />,    color: "bg-primary/10 text-primary" },
   mock_exam:      { label: "Mock Exam",        icon: <ClipboardList className="w-3.5 h-3.5" />,color: "bg-red-500/10 text-red-600" },
   practical:      { label: "Practical",        icon: <Zap className="w-3.5 h-3.5" />,          color: "bg-green-500/10 text-green-600" },
   coursework:     { label: "Coursework",       icon: <Edit3 className="w-3.5 h-3.5" />,        color: "bg-indigo-500/10 text-indigo-600" },

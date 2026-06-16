@@ -9,7 +9,6 @@ import { Progress } from "@/components/ui/progress";
 import { Link } from "wouter";
 import { BarChart3, ClipboardList, BookOpen, GraduationCap, Brain, ArrowLeft, User, Flame } from "lucide-react";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 const TABS = ["Overview", "Performance", "Revision"];
@@ -39,7 +38,7 @@ export default function ChildProfile() {
     return (
       <div className="p-6 text-center text-gray-400">
         <p>Student not found or not linked to your account.</p>
-        <Link href="/"><span className="text-teal-600 text-sm mt-2 block cursor-pointer">← Back to Dashboard</span></Link>
+        <Link href="/"><span className="text-primary text-sm mt-2 block cursor-pointer">← Back to Dashboard</span></Link>
       </div>
     );
   }
@@ -59,7 +58,7 @@ export default function ChildProfile() {
             <ArrowLeft className="h-4 w-4" />
           </button>
         </Link>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" style={{ background: TEAL }}>
+        <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold" className="bg-primary text-primary-foreground">
           {(student.name || "S").slice(0, 2).toUpperCase()}
         </div>
         <div>
@@ -83,7 +82,7 @@ export default function ChildProfile() {
           {/* Stat row */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: ClipboardList, label: "Attendance", value: `${attRate}%`, color: "#0D9488", href: `/parent/attendance?child=${studentId}` },
+              { icon: ClipboardList, label: "Attendance", value: `${attRate}%`, color: "hsl(var(--primary))", href: `/parent/attendance?child=${studentId}` },
               { icon: BarChart3, label: "Avg Grade", value: assessments?.length > 0 ? `${Math.round(assessments.reduce((a: number, e: any) => a + (parseFloat(e.scored || "0") / Math.max(parseFloat(e.possible || "1"), 1)) * 100, 0) / assessments.length)}%` : "—", color: "#6366f1", href: `/parent/grades?child=${studentId}` },
               { icon: BookOpen, label: "Submitted HW", value: assignmentOverview?.submitted || 0, color: "#f59e0b", href: `/parent/assignments?child=${studentId}` },
               { icon: Flame, label: "Streak", value: ascend?.streak || 0, color: "#ef4444", href: "/" },
@@ -104,10 +103,10 @@ export default function ChildProfile() {
           {student.subjects?.length > 0 && (
             <Card className="border border-gray-100 shadow-sm">
               <CardContent className="p-5">
-                <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2"><GraduationCap className="h-4 w-4 text-teal-500" />Enrolled Subjects</h2>
+                <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2"><GraduationCap className="h-4 w-4 text-primary" />Enrolled Subjects</h2>
                 <div className="flex flex-wrap gap-2">
                   {student.subjects.map((s: any) => (
-                    <Badge key={s.id} className="bg-teal-50 text-teal-700 border border-teal-100 rounded-full text-xs">{s.subject_name}</Badge>
+                    <Badge key={s.id} className="bg-primary/8 text-primary border border-primary/15 rounded-full text-xs">{s.subject_name}</Badge>
                   ))}
                 </div>
               </CardContent>
@@ -141,10 +140,10 @@ export default function ChildProfile() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
               { href: `/parent/grades?child=${studentId}`, icon: BarChart3, label: "Grades", color: "bg-indigo-50 text-indigo-600" },
-              { href: `/parent/attendance?child=${studentId}`, icon: ClipboardList, label: "Attendance", color: "bg-teal-50 text-teal-600" },
+              { href: `/parent/attendance?child=${studentId}`, icon: ClipboardList, label: "Attendance", color: "bg-primary/8 text-primary" },
               { href: `/parent/assignments?child=${studentId}`, icon: BookOpen, label: "Assignments", color: "bg-amber-50 text-amber-600" },
               { href: `/parent/revision?child=${studentId}`, icon: Brain, label: "Revision", color: "bg-purple-50 text-purple-600" },
-              { href: `/parent/exams?child=${studentId}`, icon: GraduationCap, label: "Exam Readiness", color: "bg-teal-50 text-teal-600" },
+              { href: `/parent/exams?child=${studentId}`, icon: GraduationCap, label: "Exam Readiness", color: "bg-primary/8 text-primary" },
               { href: "/parent/messages", icon: User, label: "Message Teacher", color: "bg-gray-50 text-gray-600" },
             ].map((l, i) => (
               <Link key={i} href={l.href}>
@@ -174,7 +173,7 @@ export default function ChildProfile() {
                           <p className="text-[10px] text-gray-400">{a.date ? new Date(a.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }) : "No date"}</p>
                         </div>
                         <div className="ml-auto text-right">
-                          <p className="text-sm font-black" style={{ color: pct >= 70 ? "#0D9488" : pct >= 50 ? "#f59e0b" : "#ef4444" }}>{pct}%</p>
+                          <p className="text-sm font-black" style={{ color: pct >= 70 ? "hsl(var(--primary))" : pct >= 50 ? "#f59e0b" : "#ef4444" }}>{pct}%</p>
                           <p className="text-[10px] text-gray-400">{a.scored}/{a.possible}</p>
                         </div>
                       </div>
@@ -203,7 +202,7 @@ export default function ChildProfile() {
                       const key = d.toISOString().split("T")[0];
                       const mins = (map.get(key) as number) || 0;
                       const opacity = mins === 0 ? 0 : Math.min(1, 0.2 + (mins / 120) * 0.8);
-                      return <div key={i} className="w-3.5 h-3.5 rounded-sm" style={{ background: mins > 0 ? `rgba(13,148,136,${opacity})` : "#f0f0f0" }} title={`${Math.round(mins)}min`} />;
+                      return <div key={i} className="w-3.5 h-3.5 rounded-sm" style={{ background: mins > 0 ? `hsl(var(--primary) / ${opacity})` : "#f0f0f0" }} title={`${Math.round(mins)}min`} />;
                     });
                   })()}
                 </div>

@@ -25,7 +25,7 @@ type Message = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  direct: "bg-teal-100 text-teal-700",
+  direct: "bg-primary/15 text-primary",
   class: "bg-blue-100 text-blue-700",
   parent: "bg-purple-100 text-purple-700",
   group: "bg-amber-100 text-amber-700",
@@ -120,10 +120,10 @@ export default function UnifiedInbox() {
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <MessageSquare className="w-5 h-5 text-teal-600" /> Inbox
+              <MessageSquare className="w-5 h-5 text-primary" /> Inbox
             </h1>
             <button onClick={() => setShowCompose(true)}
-              className="p-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+              className="p-1.5 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors">
               <Plus className="w-4 h-4" />
             </button>
           </div>
@@ -131,12 +131,12 @@ export default function UnifiedInbox() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Search messages…"
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
           </div>
           <div className="flex gap-1 overflow-x-auto pb-1">
             {["all", "direct", "class", "parent", "group"].map((f) => (
               <button key={f} onClick={() => setFilter(f)}
-                className={`px-2.5 py-1 text-xs rounded-full whitespace-nowrap transition-colors ${filter === f ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                className={`px-2.5 py-1 text-xs rounded-full whitespace-nowrap transition-colors ${filter === f ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
                 {f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
@@ -154,16 +154,16 @@ export default function UnifiedInbox() {
             filtered.map((thread) => (
               <motion.button key={thread.id} onClick={() => { setSelectedThread(thread); setSummary(null); }}
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className={`w-full p-3 text-left border-b border-gray-50 hover:bg-gray-50 transition-colors ${selectedThread?.id === thread.id ? "bg-teal-50 border-l-2 border-l-teal-500" : ""}`}>
+                className={`w-full p-3 text-left border-b border-gray-50 hover:bg-gray-50 transition-colors ${selectedThread?.id === thread.id ? "bg-primary/8 border-l-2 border-l-primary" : ""}`}>
                 <div className="flex items-start gap-2">
-                  <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <span className="text-xs font-semibold text-teal-700">{threadLabel(thread)[0]?.toUpperCase()}</span>
+                  <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-semibold text-primary">{threadLabel(thread)[0]?.toUpperCase()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-900 truncate">{threadLabel(thread)}</span>
                       {thread.unread_count > 0 && (
-                        <span className="ml-1 flex-shrink-0 bg-teal-600 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5">
+                        <span className="ml-1 flex-shrink-0 bg-primary text-white text-[10px] font-bold rounded-full px-1.5 py-0.5">
                           {thread.unread_count}
                         </span>
                       )}
@@ -235,7 +235,7 @@ export default function UnifiedInbox() {
                         <span className="text-xs text-gray-500 px-1">{msg.sender_name} · {msg.sender_role}</span>
                       )}
                       <div className={`px-4 py-2.5 rounded-2xl text-sm ${isMe
-                        ? "bg-teal-600 text-white rounded-tr-sm"
+                        ? "bg-primary text-white rounded-tr-sm"
                         : "bg-card border border-border text-foreground rounded-tl-sm shadow-sm"}`}>
                         {msg.ai_generated && (
                           <div className="flex items-center gap-1 text-xs opacity-70 mb-1">
@@ -268,11 +268,11 @@ export default function UnifiedInbox() {
                     onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (compose.trim()) sendMutation.mutate(); } }}
                     placeholder="Type a message… (Enter to send)"
                     rows={2}
-                    className="w-full px-4 py-3 pr-10 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none" />
+                    className="w-full px-4 py-3 pr-10 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30/30 resize-none" />
                 </div>
                 <button onClick={() => { if (compose.trim()) sendMutation.mutate(); }}
                   disabled={!compose.trim() || sendMutation.isPending}
-                  className="p-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors flex-shrink-0">
+                  className="p-3 bg-primary text-white rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors flex-shrink-0">
                   <Send className="w-4 h-4" />
                 </button>
               </div>
@@ -294,12 +294,12 @@ export default function UnifiedInbox() {
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Context</h3>
 
           {selectedThread.context_type && (
-            <div className="bg-teal-50 rounded-xl p-3 mb-3">
+            <div className="bg-primary/8 rounded-xl p-3 mb-3">
               <div className="flex items-center gap-2 mb-1">
-                <BookOpen className="w-4 h-4 text-teal-600" />
-                <span className="text-xs font-medium text-teal-700 capitalize">{selectedThread.context_type}</span>
+                <BookOpen className="w-4 h-4 text-primary" />
+                <span className="text-xs font-medium text-primary capitalize">{selectedThread.context_type}</span>
               </div>
-              <p className="text-xs text-teal-600">ID: {selectedThread.context_id}</p>
+              <p className="text-xs text-primary">ID: {selectedThread.context_id}</p>
             </div>
           )}
 
@@ -353,17 +353,17 @@ export default function UnifiedInbox() {
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Recipient User IDs (comma separated)</label>
                   <input value={newRecipients} onChange={(e) => setNewRecipients(e.target.value)}
                     placeholder="e.g. 12, 34, 56"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Title (optional)</label>
                   <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="Conversation title"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
                 </div>
                 <button onClick={() => createThreadMutation.mutate()}
                   disabled={!newRecipients.trim() || createThreadMutation.isPending}
-                  className="w-full py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
                   Start Conversation
                 </button>
               </div>

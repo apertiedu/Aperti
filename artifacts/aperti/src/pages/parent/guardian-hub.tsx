@@ -12,8 +12,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
-const TEAL_LIGHT = "#E6F4F1";
 
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {
@@ -64,12 +62,12 @@ function LinkedChildCard({ link }: { link: GuardianLink }) {
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
       <Card className="border border-gray-100 shadow-sm overflow-hidden">
-        <div className="h-1.5 w-full" style={{ background: TEAL }} />
+        <div className="h-1.5 w-full" className="bg-primary text-primary-foreground" />
         <CardHeader className="pb-3 pt-5">
           <div className="flex items-center gap-3">
             <div
               className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
             >
               {initials}
             </div>
@@ -105,7 +103,7 @@ function LinkedChildCard({ link }: { link: GuardianLink }) {
               <div>
                 <div className="flex items-center justify-between text-sm mb-1.5">
                   <span className="flex items-center gap-1.5 text-gray-500 font-medium">
-                    <CheckCircle2 className="h-3.5 w-3.5" style={{ color: TEAL }} />
+                    <CheckCircle2 className="h-3.5 w-3.5" className="text-primary" />
                     Attendance
                   </span>
                   <span className="font-bold text-gray-900">{stats.attendanceRate}%</span>
@@ -117,9 +115,9 @@ function LinkedChildCard({ link }: { link: GuardianLink }) {
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl p-3 border border-gray-100" style={{ background: `${TEAL}06` }}>
+                <div className="rounded-xl p-3 border border-gray-100" className="bg-primary/8">
                   <p className="text-[10px] text-gray-400 mb-1 font-medium uppercase tracking-wide">Homework done</p>
-                  <p className="text-xl font-black" style={{ color: TEAL }}>{stats.homeworkSubmitted}</p>
+                  <p className="text-xl font-black" className="text-primary">{stats.homeworkSubmitted}</p>
                 </div>
                 <div className="rounded-xl p-3 border border-amber-100 bg-amber-50">
                   <p className="text-[10px] text-amber-500 mb-1 font-medium uppercase tracking-wide">Pending</p>
@@ -151,7 +149,7 @@ function PendingCard({ link, onAction }: { link: GuardianLink; onAction: (id: nu
       animate={{ opacity: 1, y: 0 }}
       className="flex items-center gap-4 p-4 bg-amber-50 border border-amber-200 rounded-2xl"
     >
-      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" style={{ background: TEAL }}>
+      <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0" className="bg-primary text-primary-foreground">
         {name.slice(0, 2).toUpperCase()}
       </div>
       <div className="flex-1 min-w-0">
@@ -210,14 +208,14 @@ export default function GuardianHub() {
         <div className="flex items-center justify-between flex-wrap gap-4 mb-1">
           <div>
             <h1 className="text-2xl font-black text-gray-900">
-              GuardianHub<span style={{ color: TEAL }}>.</span>
+              GuardianHub<span className="text-primary">.</span>
             </h1>
             <p className="text-gray-500 text-sm mt-0.5">Your children's learning, at a glance.</p>
           </div>
           <Link href="/parent/link-student">
             <Button
               className="gap-2 rounded-xl text-sm"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
             >
               <Key className="h-4 w-4" /> Manage Pairing Code
             </Button>
@@ -240,15 +238,15 @@ export default function GuardianHub() {
       ) : links.length === 0 ? (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="bg-card rounded-2xl border border-dashed border-border p-16 text-center">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: TEAL_LIGHT }}>
-            <Users className="h-8 w-8" style={{ color: TEAL }} />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" className="bg-primary/8">
+            <Users className="h-8 w-8" className="text-primary" />
           </div>
           <h3 className="text-lg font-extrabold text-gray-900 mb-2">No children linked yet</h3>
           <p className="text-gray-400 text-sm max-w-xs mx-auto mb-6">
             Get your pairing code and share it with your child so they can link their account to your parent portal.
           </p>
           <Link href="/parent/link-student">
-            <Button className="gap-2 rounded-xl" style={{ background: TEAL }}>
+            <Button className="gap-2 rounded-xl" className="bg-primary text-primary-foreground">
               <Key className="h-4 w-4" /> Get Pairing Code <ChevronRight className="h-4 w-4" />
             </Button>
           </Link>
@@ -290,12 +288,12 @@ export default function GuardianHub() {
       )}
 
       <div className="rounded-2xl p-4 text-xs text-gray-500 border border-dashed border-border bg-card">
-        <p className="font-semibold mb-1 flex items-center gap-1.5" style={{ color: TEAL }}>
+        <p className="font-semibold mb-1 flex items-center gap-1.5" className="text-primary">
           <BookOpen className="h-3.5 w-3.5" /> Quick tip
         </p>
         <p>
-          Go to <Link href="/parent/guardian-link"><span className="underline font-semibold cursor-pointer" style={{ color: TEAL }}>GuardianLink</span></Link> to message your child's teachers directly.
-          Use <Link href="/parent/link-student"><span className="underline font-semibold cursor-pointer" style={{ color: TEAL }}>Link Your Child</span></Link> to manage your pairing code.
+          Go to <Link href="/parent/guardian-link"><span className="underline font-semibold cursor-pointer" className="text-primary">GuardianLink</span></Link> to message your child's teachers directly.
+          Use <Link href="/parent/link-student"><span className="underline font-semibold cursor-pointer" className="text-primary">Link Your Child</span></Link> to manage your pairing code.
         </p>
       </div>
     </div>

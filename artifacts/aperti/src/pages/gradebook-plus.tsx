@@ -19,7 +19,7 @@ const GRADE_COLOR: Record<string, string> = {
   "A*": "text-yellow-500 bg-yellow-500/10",
   "A":  "text-emerald-500 bg-emerald-500/10",
   "B":  "text-green-500 bg-green-500/10",
-  "C":  "text-teal-500 bg-teal-500/10",
+  "C":  "text-primary bg-primary/10",
   "D":  "text-blue-500 bg-blue-500/10",
   "E":  "text-orange-500 bg-orange-500/10",
   "F":  "text-amber-500 bg-amber-500/10",
@@ -181,7 +181,7 @@ export default function GradebookPlus() {
           { label: "Class Average",  value: `${avgClass}%`,    icon: <TrendingUp className="w-4 h-4" />, color: "text-emerald-500" },
           { label: "Pass Rate",
             value: totalSubmissions > 0 ? `${Math.round((totalPassed / (totalPassed + totalFailed)) * 100)}%` : "—",
-            icon: <CheckCircle2 className="w-4 h-4" />, color: "text-teal-500" },
+            icon: <CheckCircle2 className="w-4 h-4" />, color: "text-primary" },
         ].map(s => (
           <div key={s.label} className="bg-card border border-border rounded-xl p-3">
             <div className="flex items-center gap-1.5 text-muted-foreground mb-1">{s.icon}<span className="text-xs">{s.label}</span></div>

@@ -10,7 +10,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-const TEAL = "#0D9488";
 
 interface LiveSnapshot {
   ts: string;
@@ -36,7 +35,7 @@ interface DebugStats {
   systemHealth: { dbConnected: boolean; aiConfigured: boolean; sessionCount: number };
 }
 
-function StatCard({ icon: Icon, label, value, sub, color = TEAL, pulse = false }: {
+function StatCard({ icon: Icon, label, value, sub, color = "hsl(var(--primary))", pulse = false }: {
   icon: React.ComponentType<any>; label: string;
   value: string | number; sub?: string; color?: string; pulse?: boolean;
 }) {
@@ -130,7 +129,7 @@ export default function AdminDebugPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Terminal className="w-5 h-5" style={{ color: TEAL }} />
+            <Terminal className="w-5 h-5" className="text-primary" />
             Live Debug Dashboard
           </h1>
           <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-3">
@@ -160,13 +159,13 @@ export default function AdminDebugPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatCard icon={XCircle} label="Errors (1h)" value={live.errors.count1h}
                 sub={live.errors.hotRoutes?.split(",")[0] || undefined}
-                color={live.errors.count1h > 10 ? "#ef4444" : TEAL} pulse={live.errors.count1h > 10} />
+                color={live.errors.count1h > 10 ? "#ef4444" : "hsl(var(--primary))"} pulse={live.errors.count1h > 10} />
               <StatCard icon={Bot} label="AI Calls (1h)" value={live.ai.calls1h}
-                sub={`$${live.ai.cost1h} est.`} color={TEAL} />
+                sub={`$${live.ai.cost1h} est.`} color={"hsl(var(--primary))"} />
               <StatCard icon={Activity} label="Active Sessions" value={live.sessions} color="#8b5cf6" />
               <StatCard icon={Cpu} label="Heap Usage" value={`${live.memory.heapUsedMb} MB`}
                 sub={`RSS: ${live.memory.rssMb} MB`}
-                color={live.memory.heapUsedMb > 400 ? "#f59e0b" : TEAL} />
+                color={live.memory.heapUsedMb > 400 ? "#f59e0b" : "hsl(var(--primary))"} />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -214,9 +213,9 @@ export default function AdminDebugPage() {
       {/* Historical stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={XCircle} label="API Failures (24h)" value={failedApi.length} color="#ef4444" />
-        <StatCard icon={Bot} label="AI Calls (24h)" value={aiStats.length} color={TEAL} />
+        <StatCard icon={Bot} label="AI Calls (24h)" value={aiStats.length} color={"hsl(var(--primary))"} />
         <StatCard icon={AlertTriangle} label="AI Fail Rate" value={`${aiFailRate}%`}
-          color={aiFailRate > 20 ? "#f59e0b" : TEAL} />
+          color={aiFailRate > 20 ? "#f59e0b" : "hsl(var(--primary))"} />
         <StatCard icon={Shield} label="403 Errors" value={permErrors.reduce((s, e) => s + e.count, 0)} color="#8b5cf6" />
       </div>
 
@@ -224,7 +223,7 @@ export default function AdminDebugPage() {
       {data?.systemHealth && (
         <div className="bg-card rounded-xl border border-border shadow-sm p-4">
           <h2 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-            <Activity className="w-4 h-4" style={{ color: TEAL }} /> System Health
+            <Activity className="w-4 h-4" className="text-primary" /> System Health
           </h2>
           <div className="flex flex-wrap gap-3">
             <div className="flex items-center gap-2 text-sm">
@@ -269,13 +268,13 @@ export default function AdminDebugPage() {
           ] as const).map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`flex-1 px-4 py-3 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                tab === t.key ? "border-b-2 text-teal-600" : "text-slate-500 hover:text-slate-700"
+                tab === t.key ? "border-b-2 text-primary" : "text-slate-500 hover:text-slate-700"
               }`}
-              style={tab === t.key ? { borderBottomColor: TEAL } : {}}>
+              style={tab === t.key ? { borderBottomColor: "hsl(var(--primary))" } : {}}>
               {t.label}
               {t.count > 0 && (
                 <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                  tab === t.key ? "bg-teal-100 text-teal-700" : "bg-slate-100 text-slate-500"
+                  tab === t.key ? "bg-primary/15 text-primary" : "bg-slate-100 text-slate-500"
                 }`}>{t.count}</span>
               )}
             </button>

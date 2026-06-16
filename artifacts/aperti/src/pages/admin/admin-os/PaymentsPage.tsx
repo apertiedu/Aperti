@@ -43,7 +43,7 @@ function VerifyModal({ tx, onClose, onVerify, onReject }: any) {
           )}
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">Notes (optional)</label>
-            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" placeholder="Add verification notes…" />
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" placeholder="Add verification notes…" />
           </div>
         </div>
         <div className="flex gap-3">
@@ -102,7 +102,7 @@ export default function PaymentsPage() {
       {revenue && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Revenue", value: `EGP ${parseFloat(revenue.totalRevenue || 0).toLocaleString()}`, icon: DollarSign, color: "bg-teal-500" },
+            { label: "Total Revenue", value: `EGP ${parseFloat(revenue.totalRevenue || 0).toLocaleString()}`, icon: DollarSign, color: "bg-primary" },
             { label: "MRR", value: `EGP ${parseFloat(revenue.mrr || 0).toLocaleString()}`, icon: TrendingUp, color: "bg-blue-500" },
             { label: "ARR (Est.)", value: `EGP ${parseFloat(revenue.arr || 0).toLocaleString()}`, icon: BarChart2, color: "bg-emerald-500" },
             { label: "Verified Txns", value: revenue.verifiedTransactions, icon: CheckCircle, color: "bg-green-500" },
@@ -133,7 +133,7 @@ export default function PaymentsPage() {
         <>
           <div className="flex gap-2">
             {["pending", "verified", "rejected", ""].map((s) => (
-              <button key={s} onClick={() => setStatusFilter(s)} className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${statusFilter === s ? "bg-teal-600 text-white border-teal-600" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+              <button key={s} onClick={() => setStatusFilter(s)} className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${statusFilter === s ? "bg-primary text-white border-primary" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
                 {s || "All"}
               </button>
             ))}
@@ -170,7 +170,7 @@ export default function PaymentsPage() {
                       <td className="px-4 py-3 text-gray-500 text-xs">{new Date(tx.createdAt).toLocaleDateString()}</td>
                       <td className="px-4 py-3">
                         {tx.status === "pending" ? (
-                          <button onClick={() => setReviewing(tx)} className="flex items-center gap-1 px-3 py-1 text-xs bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors">
+                          <button onClick={() => setReviewing(tx)} className="flex items-center gap-1 px-3 py-1 text-xs bg-primary/8 text-primary rounded-lg hover:bg-primary/15 transition-colors">
                             <Eye className="w-3 h-3" /> Review
                           </button>
                         ) : (
@@ -196,7 +196,7 @@ export default function PaymentsPage() {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(v: any) => [`EGP ${v}`, "Revenue"]} />
-                <Area type="monotone" dataKey="revenue" stroke="#0D9488" fill="#ccfbf1" strokeWidth={2} />
+                <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="#ccfbf1" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

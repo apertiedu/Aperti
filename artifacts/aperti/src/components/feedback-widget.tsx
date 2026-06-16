@@ -111,9 +111,9 @@ export default function FeedbackWidget({ feature, trigger = "auto", delayMs = 30
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                  className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3"
+                  className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3"
                 >
-                  <ThumbsUp className="w-5 h-5 text-teal-600" />
+                  <ThumbsUp className="w-5 h-5 text-primary" />
                 </motion.div>
                 <p className="text-sm font-semibold text-foreground">Thanks for the feedback!</p>
                 <p className="text-xs text-muted-foreground mt-1">Your input helps improve Aperti.</p>
@@ -156,7 +156,7 @@ export default function FeedbackWidget({ feature, trigger = "auto", delayMs = 30
                         onChange={e => setComment(e.target.value)}
                         placeholder="Tell us what could be better…"
                         rows={2}
-                        className="w-full text-xs rounded-lg border border-border bg-muted/40 px-3 py-2 outline-none focus:border-teal-400 resize-none transition-colors"
+                        className="w-full text-xs rounded-lg border border-border bg-muted/40 px-3 py-2 outline-none focus:border-primary/50 resize-none transition-colors"
                       />
                     </motion.div>
                   )}
@@ -171,8 +171,7 @@ export default function FeedbackWidget({ feature, trigger = "auto", delayMs = 30
                       whileTap={{ scale: 0.98 }}
                       onClick={handleSubmit}
                       disabled={submitting}
-                      className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg text-xs font-semibold text-white transition-colors disabled:opacity-50"
-                      style={{ background: "#0D9488" }}
+                      className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-colors disabled:opacity-50"
                     >
                       <Send className="w-3 h-3" />
                       {submitting ? "Sending…" : "Submit"}

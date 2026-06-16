@@ -10,12 +10,12 @@ async function fetchJSON(url: string) {
   return r.json();
 }
 
-function MetricCard({ label, value, sub, icon: Icon, color = "teal", delay = 0 }: {
+function MetricCard({ label, value, sub, icon: Icon, color = "primary", delay = 0 }: {
   label: string; value: string | number; sub?: string;
   icon: React.ComponentType<any>; color?: string; delay?: number;
 }) {
   const colors: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-600", green: "bg-green-50 text-green-600",
+    primary: "bg-primary/8 text-primary", green: "bg-green-50 text-green-600",
     blue: "bg-blue-50 text-blue-600", amber: "bg-amber-50 text-amber-600",
     purple: "bg-purple-50 text-purple-600", red: "bg-red-50 text-red-600",
   };
@@ -51,7 +51,7 @@ export default function ExecutiveDashboardPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="w-8 h-8 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-primary/60 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -68,14 +68,14 @@ export default function ExecutiveDashboardPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <BarChart3 className="w-6 h-6 text-teal-500" /> Executive Dashboard
+          <BarChart3 className="w-6 h-6 text-primary" /> Executive Dashboard
         </h1>
         <p className="text-sm text-gray-400 mt-0.5">Real-time business intelligence</p>
       </div>
 
       {/* KPI row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-        <MetricCard label="MRR"                  value={fmtEgp(d.mrr)}               icon={DollarSign} color="teal"   delay={0.00} />
+        <MetricCard label="MRR"                  value={fmtEgp(d.mrr)}               icon={DollarSign} color="primary"   delay={0.00} />
         <MetricCard label="ARR"                  value={fmtEgp(d.arr)}               icon={TrendingUp}  color="green"  delay={0.05} />
         <MetricCard label="Active Subscriptions" value={fmt(d.activeSubscriptions)}   icon={CreditCard}  color="blue"   delay={0.10} />
         <MetricCard label="Active Users"         value={fmt(d.activeUsers)}           icon={Users}       color="purple" delay={0.15} />
@@ -104,7 +104,7 @@ export default function ExecutiveDashboardPage() {
                       <span className="text-gray-500">{plan.subscribers} subscribers · {Number(plan.price_egp).toLocaleString()} EGP/mo</span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div className="h-full bg-teal-400 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                      <div className="h-full bg-primary/70 rounded-full transition-all" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
                 );

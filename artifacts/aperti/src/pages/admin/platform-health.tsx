@@ -11,7 +11,6 @@ import {
   AlertCircle, Eye, BarChart2,
 } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 
 async function apiFetch(url: string) {
@@ -25,7 +24,7 @@ function MetricCard({ label, value, sub, status, icon: Icon }: {
   status?: "ok" | "warn" | "error" | "neutral"; icon?: any;
 }) {
   const colors = {
-    ok:      "text-teal-600  bg-teal-50",
+    ok:      "text-primary  bg-primary/8",
     warn:    "text-amber-600 bg-amber-50",
     error:   "text-red-600   bg-red-50",
     neutral: "text-gray-500  bg-gray-100",
@@ -101,8 +100,8 @@ export default function PlatformHealth() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}15` }}>
-              <Activity className="h-5 w-5" style={{ color: TEAL }} />
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
+              <Activity className="h-5 w-5" className="text-primary" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Platform Health</h1>
@@ -118,10 +117,10 @@ export default function PlatformHealth() {
 
       {/* Overall status banner */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
-        <Card className={`border-0 shadow-sm mb-6 ${errorCount24h === 0 ? "bg-teal-50" : "bg-amber-50"}`}>
+        <Card className={`border-0 shadow-sm mb-6 ${errorCount24h === 0 ? "bg-primary/8" : "bg-amber-50"}`}>
           <CardContent className="p-4 flex items-center gap-3">
             {errorCount24h === 0
-              ? <CheckCircle2 className="h-5 w-5 text-teal-600 shrink-0" />
+              ? <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
               : <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
             }
             <div>
@@ -165,7 +164,7 @@ export default function PlatformHealth() {
               <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-10 rounded-lg" />)}</div>
             ) : topErrors.length === 0 ? (
               <div className="flex items-center gap-2 py-6 justify-center text-sm text-gray-400">
-                <CheckCircle2 className="h-4 w-4 text-teal-500" />
+                <CheckCircle2 className="h-4 w-4 text-primary" />
                 No errors logged in the last 24 hours
               </div>
             ) : (
@@ -195,7 +194,7 @@ export default function PlatformHealth() {
               <div className="space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-10 rounded-lg" />)}</div>
             ) : slowEndpoints.length === 0 ? (
               <div className="flex items-center gap-2 py-6 justify-center text-sm text-gray-400">
-                <Zap className="h-4 w-4 text-teal-500" />
+                <Zap className="h-4 w-4 text-primary" />
                 No slow endpoints detected
               </div>
             ) : (
@@ -227,7 +226,7 @@ export default function PlatformHealth() {
           <CardContent>
             {failedLoginsList.length === 0 ? (
               <div className="flex items-center gap-2 py-6 justify-center text-sm text-gray-400">
-                <CheckCircle2 className="h-4 w-4 text-teal-500" />
+                <CheckCircle2 className="h-4 w-4 text-primary" />
                 No failed login attempts
               </div>
             ) : (
@@ -251,7 +250,7 @@ export default function PlatformHealth() {
         <Card className="border-0 shadow-sm bg-card">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <BarChart2 className="h-4 w-4" style={{ color: TEAL }} />
+              <BarChart2 className="h-4 w-4" className="text-primary" />
               <CardTitle className="text-base">Database Overview</CardTitle>
             </div>
             <CardDescription className="text-xs">Storage, connections, and growth</CardDescription>

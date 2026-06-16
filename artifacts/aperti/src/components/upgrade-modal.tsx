@@ -15,9 +15,9 @@ const HIGHLIGHT_PLANS = [
     name: "Plus",
     priceEgp: 299,
     features: ["15 courses", "300 students", "AI tools", "2,000 questions", "50 revision packs"],
-    color: "border-teal-400 bg-teal-50",
+    color: "border-primary/40 bg-primary/8",
     badge: "Most Popular",
-    badgeColor: "bg-teal-500",
+    badgeColor: "bg-primary",
   },
   {
     name: "Pro",
@@ -54,7 +54,7 @@ export default function UpgradeModal({ open, onClose, resource, message, current
             className="relative z-10 bg-card rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
           >
             {/* Header gradient */}
-            <div className="bg-gradient-to-r from-teal-500 to-emerald-500 px-6 pt-6 pb-8 text-white relative">
+            <div className="bg-primary px-6 pt-6 pb-8 text-primary-foreground relative">
               <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/20 transition-colors">
                 <X className="w-4 h-4" />
               </button>
@@ -63,14 +63,14 @@ export default function UpgradeModal({ open, onClose, resource, message, current
               </div>
               <h2 className="text-xl font-bold mb-1">Upgrade Your Plan</h2>
               {message ? (
-                <p className="text-teal-100 text-sm">{message}</p>
+                <p className="text-primary-foreground/70 text-sm">{message}</p>
               ) : resource ? (
-                <p className="text-teal-100 text-sm">You've reached your <strong className="text-white">{resource.replace(/_/g, " ")}</strong> limit on your current plan.</p>
+                <p className="text-primary-foreground/70 text-sm">You've reached your <strong className="text-primary-foreground">{resource.replace(/_/g, " ")}</strong> limit on your current plan.</p>
               ) : (
-                <p className="text-teal-100 text-sm">Unlock more features, students and AI-powered tools.</p>
+                <p className="text-primary-foreground/70 text-sm">Unlock more features, students and AI-powered tools.</p>
               )}
               {currentPlan && (
-                <p className="text-teal-200 text-xs mt-2">Current plan: <span className="font-semibold text-white capitalize">{currentPlan}</span></p>
+                <p className="text-primary-foreground/60 text-xs mt-2">Current plan: <span className="font-semibold text-primary-foreground capitalize">{currentPlan}</span></p>
               )}
             </div>
 
@@ -89,7 +89,7 @@ export default function UpgradeModal({ open, onClose, resource, message, current
                   <ul className="mt-3 space-y-1.5">
                     {plan.features.map((f, i) => (
                       <li key={i} className="flex items-center gap-1.5 text-xs text-gray-600">
-                        <Check className="w-3 h-3 text-teal-500 shrink-0" /> {f}
+                        <Check className="w-3 h-3 text-primary shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
@@ -106,7 +106,7 @@ export default function UpgradeModal({ open, onClose, resource, message, current
             <div className="px-5 pb-5">
               <button
                 onClick={() => { onClose(); navigate("/pricing"); }}
-                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-teal-600 hover:text-teal-800 border border-teal-200 rounded-xl hover:bg-teal-50 transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 text-sm text-primary hover:text-primary/80 border border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
               >
                 View all plans <ArrowRight className="w-3.5 h-3.5" />
               </button>

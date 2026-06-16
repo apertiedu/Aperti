@@ -4,7 +4,6 @@ import { motion, useInView } from "framer-motion";
 import { Link } from "wouter";
 import { CheckCircle2, AlertTriangle, XCircle, Wrench, Activity, Clock } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string; dotColor: string; icon: any }> = {
   operational: { label: "All Systems Operational", color: "#059669", bg: "#ECFDF5", border: "#BBF7D0", dotColor: "#10B981", icon: CheckCircle2 },
@@ -45,7 +44,7 @@ export default function StatusPublicPage() {
     <div className="min-h-screen bg-background" style={{ fontFamily: "Inter, sans-serif" }}>
       <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
+          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: "hsl(var(--primary))" }}>.</span></Link>
           <div className="flex items-center gap-4">
             <Link href="/features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Features</Link>
             <Link href="/roadmap" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Roadmap</Link>

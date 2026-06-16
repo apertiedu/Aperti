@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
@@ -67,7 +66,7 @@ export default function StudentApprovals() {
               <Card className="border border-gray-100 shadow-sm">
                 <CardContent className="p-4 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
-                    style={{ background: TEAL }}>
+                    className="bg-primary">
                     {(student.display_name || student.username).slice(0,2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">

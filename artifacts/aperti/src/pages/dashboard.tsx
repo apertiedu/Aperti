@@ -116,7 +116,7 @@ export default function Dashboard() {
     { href: "/attendance", label: "Mark Attendance", icon: Scan, color: "from-primary to-indigo-600" },
     { href: "/students", label: "Students", icon: Users, color: "from-blue-500 to-blue-700" },
     { href: "/exams", label: "Exams & Marks", icon: ClipboardList, color: "from-violet-500 to-purple-700" },
-    { href: "/analytics", label: "Analytics", icon: BarChart3, color: "from-emerald-500 to-teal-600" },
+    { href: "/analytics", label: "Analytics", icon: BarChart3, color: "from-emerald-500 to-primary/80" },
   ];
 
   const attendanceWarning = (summary?.attendanceRate ?? 100) < 80;

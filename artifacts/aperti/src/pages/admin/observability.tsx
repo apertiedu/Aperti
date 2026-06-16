@@ -15,11 +15,11 @@ import { useStaggerEntrance } from "@/lib/anime-utils";
 type Tab = "database" | "api" | "ai";
 type LucideIcon = React.FC<{ size?: number; className?: string }>;
 
-function StatCard({ label, value, sub, color = "teal", Icon }: {
+function StatCard({ label, value, sub, color = "primary", Icon }: {
   label: string; value: string | number; sub?: string; color?: string; Icon: LucideIcon;
 }) {
   const colorMap: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-700",
+    primary: "bg-primary/8 text-primary",
     blue: "bg-blue-50 text-blue-700",
     amber: "bg-amber-50 text-amber-700",
     violet: "bg-violet-50 text-violet-700",
@@ -34,7 +34,7 @@ function StatCard({ label, value, sub, color = "teal", Icon }: {
             <p className="text-2xl font-bold text-slate-800 mt-1">{value}</p>
             {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
           </div>
-          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.teal}`}>
+          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.primary}`}>
             <Icon size={18} />
           </div>
         </div>
@@ -49,7 +49,7 @@ function TabButton({ tab, current, label, Icon, onClick }: { tab: Tab; current: 
       onClick={() => onClick(tab)}
       className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all ${
         tab === current
-          ? "bg-teal-600 text-white shadow-sm"
+          ? "bg-primary text-white shadow-sm"
           : "text-slate-600 hover:bg-slate-100"
       }`}
     >
@@ -71,10 +71,10 @@ function DatabaseTab({ data, isLoading }: { data: any; isLoading: boolean }) {
   return (
     <div ref={ref} className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="DB Size" value={data.dbSize ?? "—"} Icon={Database} color="teal" />
+        <StatCard label="DB Size" value={data.dbSize ?? "—"} Icon={Database} color="primary" />
         <StatCard label="Total Connections" value={conn.total ?? "—"} sub="pg_stat_activity" Icon={Server} color="blue" />
         <StatCard label="Active" value={conn.active ?? "—"} Icon={Activity} color="amber" />
-        <StatCard label="Idle" value={conn.idle ?? "—"} Icon={CheckCircle2} color="teal" />
+        <StatCard label="Idle" value={conn.idle ?? "—"} Icon={CheckCircle2} color="primary" />
       </div>
 
       {data.tables?.length > 0 && (
@@ -169,7 +169,7 @@ function ApiTab() {
   return (
     <div ref={ref} className="space-y-6">
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <StatCard label="Total Requests" value={totalHits.toLocaleString()} sub="tracked routes" Icon={Activity} color="teal" />
+        <StatCard label="Total Requests" value={totalHits.toLocaleString()} sub="tracked routes" Icon={Activity} color="primary" />
         <StatCard label="Avg Latency" value={`${avgMs}ms`} Icon={Clock} color="blue" />
         <StatCard label="Routes Tracked" value={routeArr.length} Icon={BarChart3} color="violet" />
       </div>
@@ -227,7 +227,7 @@ function AiTab({ data, isLoading }: { data: any; isLoading: boolean }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Total Calls" value={(total.calls ?? 0).toLocaleString()} sub="last 30 days" Icon={Brain} color="violet" />
         <StatCard label="Tokens Used" value={(total.tokens ?? 0).toLocaleString()} Icon={Zap} color="amber" />
-        <StatCard label="Est. Cost" value={`$${total.estimatedCostUSD ?? "0.00"}`} sub="30-day estimate" Icon={DollarSign} color="teal" />
+        <StatCard label="Est. Cost" value={`$${total.estimatedCostUSD ?? "0.00"}`} sub="30-day estimate" Icon={DollarSign} color="primary" />
         <StatCard label="Types Active" value={data.byType?.length ?? 0} Icon={BarChart3} color="blue" />
       </div>
 
@@ -235,7 +235,7 @@ function AiTab({ data, isLoading }: { data: any; isLoading: boolean }) {
         <Card className="border border-slate-100 shadow-sm" data-s>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <Users size={14} className="text-teal-600" />
+              <Users size={14} className="text-primary" />
               Usage by Role
             </CardTitle>
           </CardHeader>
@@ -251,7 +251,7 @@ function AiTab({ data, isLoading }: { data: any; isLoading: boolean }) {
                     <span className="text-slate-500">{r.calls} calls</span>
                   </div>
                   <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-teal-500 rounded-full transition-all" style={{ width: `${(r.calls / maxCalls) * 100}%` }} />
+                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(r.calls / maxCalls) * 100}%` }} />
                   </div>
                 </div>
               );
@@ -262,7 +262,7 @@ function AiTab({ data, isLoading }: { data: any; isLoading: boolean }) {
         <Card className="border border-slate-100 shadow-sm" data-s>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-              <Activity size={14} className="text-teal-600" />
+              <Activity size={14} className="text-primary" />
               Top Interaction Types
             </CardTitle>
           </CardHeader>
@@ -310,7 +310,7 @@ export default function ObservabilityPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Server className="text-teal-600" size={24} />
+            <Server className="text-primary" size={24} />
             Observability
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">Database · API · AI — platform-wide health metrics</p>
@@ -331,7 +331,7 @@ export default function ObservabilityPage() {
             key={t}
             onClick={() => setTab(t)}
             className={`flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all ${
-              tab === t ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:bg-card"
+              tab === t ? "bg-primary text-white shadow-sm" : "text-slate-600 hover:bg-card"
             }`}
           >
             <Icon size={15} />

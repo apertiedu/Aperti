@@ -27,7 +27,7 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; b
   rejected: { label: "Rejected",         icon: XCircle,      color: "#991B1B", bg: "#FEF2F2" },
 };
 
-const SUBJECT_COLORS = ["#0D9488", "#2563EB", "#7C3AED", "#DB2777", "#D97706"];
+const SUBJECT_COLORS = ["hsl(var(--primary))", "#2563EB", "#7C3AED", "#DB2777", "#D97706"];
 
 function CourseCard({ enroll, idx, onClick }: { enroll: Enrollment; idx: number; onClick: () => void }) {
   const cfg = STATUS_CONFIG[enroll.status] || STATUS_CONFIG.pending;
@@ -169,7 +169,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
                   </Link>
                 ))}
                 <Link href="/my-homework">
-                  <Button variant="ghost" size="sm" className="w-full text-xs text-teal-600 mt-2">
+                  <Button variant="ghost" size="sm" className="w-full text-xs text-primary mt-2">
                     View all assignments <ArrowRight className="h-3 w-3 ml-1" />
                   </Button>
                 </Link>
@@ -213,7 +213,7 @@ function CourseDetail({ enroll, onBack }: { enroll: Enrollment; onBack: () => vo
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="bg-card rounded-2xl border border-border shadow-sm p-5">
             <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <ExternalLink className="h-4 w-4 text-teal-600" /> Learning Resources
+              <ExternalLink className="h-4 w-4 text-primary" /> Learning Resources
             </h3>
             <div className="space-y-2">
               {[
@@ -271,8 +271,8 @@ export default function CourseHub() {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center">
-              <GraduationCap className="h-4.5 w-4.5 text-teal-600" style={{ width: 18, height: 18 }} />
+            <div className="h-9 w-9 rounded-xl bg-primary/8 flex items-center justify-center">
+              <GraduationCap className="h-4.5 w-4.5 text-primary" style={{ width: 18, height: 18 }} />
             </div>
             <div>
               <h1 className="text-xl font-black text-gray-900">Course Hub</h1>
@@ -280,7 +280,7 @@ export default function CourseHub() {
             </div>
           </div>
           <Link href="/courses">
-            <Button size="sm" className="gap-1.5 rounded-xl text-xs h-8" style={{ background: "#0D9488" }}>
+            <Button size="sm" className="gap-1.5 rounded-xl text-xs h-8" style={{ background: "hsl(var(--primary))" }}>
               Browse <ArrowRight className="h-3 w-3" />
             </Button>
           </Link>
@@ -295,7 +295,7 @@ export default function CourseHub() {
           <h3 className="font-bold text-gray-700 mb-2">No courses yet</h3>
           <p className="text-sm text-gray-400 mb-5">Browse the marketplace and enroll.</p>
           <Link href="/courses">
-            <Button className="rounded-xl" style={{ background: "#0D9488" }}>Browse Courses</Button>
+            <Button className="rounded-xl" style={{ background: "hsl(var(--primary))" }}>Browse Courses</Button>
           </Link>
         </div>
       ) : (

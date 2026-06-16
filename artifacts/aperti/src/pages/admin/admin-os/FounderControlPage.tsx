@@ -46,13 +46,13 @@ function ScoreRing({ score, color }: { score: number; color: string }) {
 }
 
 function StatCard({
-  label, value, sub, icon: Icon, color = "teal", trend, onClick,
+  label, value, sub, icon: Icon, color = "primary", trend, onClick,
 }: {
   label: string; value: string | number; sub?: string;
   icon: any; color?: string; trend?: number; onClick?: () => void;
 }) {
   const colors: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-600",
+    primary: "bg-primary/8 text-primary",
     blue: "bg-blue-50 text-blue-600",
     purple: "bg-purple-50 text-purple-600",
     amber: "bg-amber-50 text-amber-600",
@@ -85,7 +85,7 @@ function StatCard({
 }
 
 const SCORE_META: Record<string, { icon: any; color: string; ring: string }> = {
-  growth:           { icon: TrendingUp,  color: "text-teal-600",   ring: "#0D9488" },
+  growth:           { icon: TrendingUp,  color: "text-primary",   ring: "hsl(var(--primary))" },
   happiness:        { icon: Heart,       color: "text-rose-600",   ring: "#e11d48" },
   adoption:         { icon: Puzzle,      color: "text-blue-600",   ring: "#2563eb" },
   supportBurden:    { icon: Headphones,  color: "text-purple-600", ring: "#9333ea" },
@@ -156,7 +156,7 @@ function PlatformStabilitySection() {
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Platform Stability Goal</h2>
         <button onClick={() => refetch()} disabled={isFetching}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 transition-colors">
+          className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors">
           <RefreshCw className={`w-3 h-3 ${isFetching ? "animate-spin" : ""}`} /> Refresh
         </button>
       </div>
@@ -368,7 +368,7 @@ export default function FounderControlPage() {
           <div>
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Users</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <StatCard label="Active Students" value={users.students ?? 0} icon={Users} color="teal" sub={`+${users.new7d ?? 0} this week`} />
+              <StatCard label="Active Students" value={users.students ?? 0} icon={Users} color="primary" sub={`+${users.new7d ?? 0} this week`} />
               <StatCard label="Active Teachers" value={users.teachers ?? 0} icon={Users} color="blue" />
               <StatCard label="Active Parents" value={users.parents ?? 0} icon={Users} color="purple" />
               <StatCard label="New (30d)" value={users.new30d ?? 0} icon={TrendingUp} color="green" />
@@ -379,7 +379,7 @@ export default function FounderControlPage() {
           <div>
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Engagement (Active Users)</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <StatCard label="Daily Active (DAU)" value={activityMetrics?.dau ?? "—"} icon={Activity} color="teal"
+              <StatCard label="Daily Active (DAU)" value={activityMetrics?.dau ?? "—"} icon={Activity} color="primary"
                 sub="Unique logins today" />
               <StatCard label="Weekly Active (WAU)" value={activityMetrics?.wau ?? "—"} icon={TrendingUp} color="blue"
                 sub="Last 7 days" />
@@ -408,7 +408,7 @@ export default function FounderControlPage() {
           <div>
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Content & Platform</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <StatCard label="Courses" value={content.courses ?? 0} icon={BookOpen} color="teal" />
+              <StatCard label="Courses" value={content.courses ?? 0} icon={BookOpen} color="primary" />
               <StatCard label="Questions" value={(content.questions ?? 0).toLocaleString()} icon={BarChart3} color="purple" />
               <StatCard label="Assessments" value={content.assessments ?? 0} icon={Activity} color="blue" />
               <StatCard label="Readiness" value={`${readiness ?? "—"}%`} icon={ShieldCheck} color="green" />
@@ -421,7 +421,7 @@ export default function FounderControlPage() {
               <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Platform Health Scores</h2>
               <button
                 onClick={() => refetchScores()}
-                className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 transition-colors"
+                className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors"
               >
                 <RefreshCw className="w-3 h-3" /> Refresh
               </button>
@@ -451,12 +451,12 @@ export default function FounderControlPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                      <Gauge className="w-4 h-4 text-teal-600" /> Platform Quality Score
+                      <Gauge className="w-4 h-4 text-primary" /> Platform Quality Score
                     </h3>
                     <p className="text-xs text-gray-400 mt-0.5">Composite score: error rate, performance, accessibility, open bugs</p>
                   </div>
                   <button onClick={() => nav("/admin/os/qa/readiness")}
-                    className="text-xs text-teal-600 hover:underline flex items-center gap-1">
+                    className="text-xs text-primary hover:underline flex items-center gap-1">
                     QA Details <ArrowUpRight className="w-3 h-3" />
                   </button>
                 </div>
@@ -511,11 +511,11 @@ export default function FounderControlPage() {
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Launch Readiness</h2>
           <div className="flex items-center gap-2">
             <button onClick={() => refetchLaunchScore()}
-              className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 transition-colors">
+              className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors">
               <RefreshCw className="w-3 h-3" /> Refresh
             </button>
             <button onClick={() => nav("/admin/repair")}
-              className="text-xs text-teal-600 hover:underline flex items-center gap-1">
+              className="text-xs text-primary hover:underline flex items-center gap-1">
               Repair Panel <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
@@ -578,7 +578,7 @@ export default function FounderControlPage() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-gray-800">Revenue Trend (6mo)</h3>
             <button onClick={() => nav("/admin/os/founder-revenue")}
-              className="text-xs text-teal-600 hover:underline flex items-center gap-1">
+              className="text-xs text-primary hover:underline flex items-center gap-1">
               Full report <ArrowUpRight className="w-3 h-3" />
             </button>
           </div>
@@ -590,7 +590,7 @@ export default function FounderControlPage() {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: any) => [`EGP ${parseFloat(v).toLocaleString()}`, "Revenue"]} />
-                <Bar dataKey="revenue" fill="#0D9488" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -607,16 +607,16 @@ export default function FounderControlPage() {
               { label: "Content Quality", href: "/admin/os/content-quality", icon: BookOpen, color: "text-purple-600 bg-purple-50" },
               { label: "AI Costs", href: "/admin/os/ai-costs", icon: Zap, color: "text-amber-600 bg-amber-50" },
               { label: "Founder Alerts", href: "/admin/os/founder-alerts", icon: AlertCircle, color: "text-rose-600 bg-rose-50" },
-              { label: "Launch Command", href: "/admin/os/launch-command", icon: ShieldCheck, color: "text-teal-600 bg-teal-50" },
+              { label: "Launch Command", href: "/admin/os/launch-command", icon: ShieldCheck, color: "text-primary bg-primary/8" },
               { label: "Emergency Tools", href: "/admin/os/emergency", icon: AlertCircle, color: "text-red-600 bg-red-50" },
               { label: "Platform Health", href: "/admin/os/platform-health", icon: Activity, color: "text-indigo-600 bg-indigo-50" },
             ].map((link) => (
               <button key={link.href} onClick={() => nav(link.href)}
-                className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all text-left group">
+                className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-primary/25 hover:bg-primary/8/30 transition-all text-left group">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${link.color}`}>
                   <link.icon className="w-4 h-4" />
                 </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-teal-700">{link.label}</span>
+                <span className="text-sm font-medium text-gray-700 group-hover:text-primary">{link.label}</span>
               </button>
             ))}
           </div>

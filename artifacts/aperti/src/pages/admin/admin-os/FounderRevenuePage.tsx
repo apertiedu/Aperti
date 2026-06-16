@@ -7,11 +7,11 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 
-const COLORS = ["#0D9488", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#10B981"];
+const COLORS = ["hsl(var(--primary))", "#3B82F6", "#8B5CF6", "#F59E0B", "#EF4444", "#10B981"];
 
-function KPI({ label, value, sub, icon: Icon, trend, color = "teal" }: any) {
+function KPI({ label, value, sub, icon: Icon, trend, color = "primary" }: any) {
   const bg: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-600", green: "bg-green-50 text-green-600",
+    primary: "bg-primary/8 text-primary", green: "bg-green-50 text-green-600",
     blue: "bg-blue-50 text-blue-600", amber: "bg-amber-50 text-amber-600",
   };
   return (
@@ -62,7 +62,7 @@ export default function FounderRevenuePage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KPI label="MRR" value={fmt(totals.mrr)} icon={DollarSign} color="teal" />
+          <KPI label="MRR" value={fmt(totals.mrr)} icon={DollarSign} color="primary" />
           <KPI label="ARR (projected)" value={fmt(totals.arr)} icon={TrendingUp} color="green" trend={totals.growthRate} />
           <KPI label="YTD Revenue" value={fmt(totals.ytd)} icon={DollarSign} color="blue" />
           <KPI label="All-Time Revenue" value={fmt(totals.allTime)} icon={DollarSign} color="amber" />
@@ -108,7 +108,7 @@ export default function FounderRevenuePage() {
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} tickFormatter={(v) => v.slice(5)} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(v: any) => [fmt(v), "Revenue"]} />
-                <Line type="monotone" dataKey="revenue" stroke="#0D9488" strokeWidth={2.5} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ r: 3 }} />
               </LineChart>
             </ResponsiveContainer>
           )}

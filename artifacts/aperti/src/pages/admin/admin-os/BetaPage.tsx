@@ -98,7 +98,7 @@ export default function BetaPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setEnrollModal(b)} className="flex items-center gap-1 px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-xs font-medium hover:bg-teal-100 transition-colors">
+                <button onClick={() => setEnrollModal(b)} className="flex items-center gap-1 px-3 py-1.5 bg-primary/8 text-primary rounded-lg text-xs font-medium hover:bg-primary/15 transition-colors">
                   <Plus className="w-3 h-3" /> Enroll Users
                 </button>
                 <button onClick={() => setExpanded(expanded === b.id ? null : b.id)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors">
@@ -160,10 +160,10 @@ export default function BetaPage() {
             <h3 className="font-bold text-gray-900 mb-1">Enroll Beta Testers</h3>
             <p className="text-xs text-gray-500 mb-4">{enrollModal.name}</p>
             <label className="block text-xs font-medium text-gray-600 mb-1">User IDs (comma-separated)</label>
-            <input value={userIds} onChange={(e) => setUserIds(e.target.value)} placeholder="1, 5, 12, 34" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4" />
+            <input value={userIds} onChange={(e) => setUserIds(e.target.value)} placeholder="1, 5, 12, 34" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary mb-4" />
             <div className="flex gap-3">
               <button onClick={() => { setEnrollModal(null); setUserIds(""); }} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-              <button onClick={() => enrollMutation.mutate()} disabled={!userIds || enrollMutation.isPending} className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+              <button onClick={() => enrollMutation.mutate()} disabled={!userIds || enrollMutation.isPending} className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-50">
                 {enrollMutation.isPending ? "Enrolling..." : "Enroll"}
               </button>
             </div>

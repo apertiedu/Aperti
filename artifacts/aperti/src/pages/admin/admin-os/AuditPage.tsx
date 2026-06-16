@@ -7,7 +7,7 @@ const ACTION_COLORS: Record<string, string> = {
   create:        "bg-green-100 text-green-700",
   update:        "bg-blue-100 text-blue-700",
   delete:        "bg-red-100 text-red-700",
-  login:         "bg-teal-100 text-teal-700",
+  login:         "bg-primary/15 text-primary",
   login_failed:  "bg-orange-100 text-orange-700",
   logout:        "bg-gray-100 text-gray-600",
   access_denied: "bg-red-100 text-red-700",
@@ -112,13 +112,13 @@ export default function AuditPage() {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search actions…"
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white"
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary bg-white"
           />
         </div>
         <select
           value={action}
           onChange={(e) => { setAction(e.target.value); setPage(1); }}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white text-gray-700"
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary bg-white text-gray-700"
         >
           <option value="">All actions</option>
           <option value="login">login</option>
@@ -134,7 +134,7 @@ export default function AuditPage() {
         <select
           value={severity}
           onChange={(e) => { setSeverity(e.target.value); setPage(1); }}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white text-gray-700"
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary bg-white text-gray-700"
         >
           <option value="">All severities</option>
           <option value="info">Info</option>
@@ -145,12 +145,12 @@ export default function AuditPage() {
         <input
           type="date" value={from}
           onChange={(e) => setFrom(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white text-gray-700"
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary bg-white text-gray-700"
         />
         <input
           type="date" value={to}
           onChange={(e) => setTo(e.target.value)}
-          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white text-gray-700"
+          className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary bg-white text-gray-700"
         />
       </div>
 

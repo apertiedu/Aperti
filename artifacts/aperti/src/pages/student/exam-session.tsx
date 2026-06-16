@@ -117,7 +117,7 @@ export default function StudentExamSession({ params }: { params: { id: string } 
     const ctx = canvas.getContext("2d")!;
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    const COLORS = ["#0D9488","#14B8A6","#F59E0B","#8B5CF6","#EF4444","#3B82F6","#10B981"];
+    const COLORS = ["hsl(var(--primary))","#14B8A6","#F59E0B","#8B5CF6","#EF4444","#3B82F6","#10B981"];
     const particles = Array.from({ length: 100 }, () => ({
       x: canvas.width / 2 + (Math.random() - 0.5) * 300,
       y: canvas.height * 0.4,

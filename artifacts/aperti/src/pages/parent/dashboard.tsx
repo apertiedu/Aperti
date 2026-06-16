@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
@@ -69,12 +68,12 @@ function ChildCard({ child, selected, onSelect }: { child: ChildData; selected: 
     <button
       onClick={onSelect}
       className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border transition-all ${
-        selected ? "border-teal-500 bg-teal-50 shadow-sm" : "border-border bg-card hover:border-teal-200"
+        selected ? "border-primary bg-primary/8 shadow-sm" : "border-border bg-card hover:border-primary/25"
       }`}
     >
-      <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" style={{ background: TEAL }}>{initials}</div>
+      <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0" className="bg-primary text-primary-foreground">{initials}</div>
       <div className="text-left">
-        <p className={`text-sm font-semibold ${selected ? "text-teal-700" : "text-gray-800"}`}>{child.name}</p>
+        <p className={`text-sm font-semibold ${selected ? "text-primary" : "text-gray-800"}`}>{child.name}</p>
         <p className="text-[10px] text-gray-400">{child.studentCode}</p>
       </div>
       {child.interventionAlerts.length > 0 && (
@@ -166,7 +165,7 @@ export default function ParentDashboard() {
             <Button variant="outline" size="sm" className="rounded-xl gap-1.5 text-xs"><MessageSquare className="h-3.5 w-3.5" /> Messages</Button>
           </Link>
           <Link href="/parent/meetings">
-            <Button size="sm" className="rounded-xl gap-1.5 text-xs text-white" style={{ background: TEAL }}><Calendar className="h-3.5 w-3.5" /> Schedule</Button>
+            <Button size="sm" className="rounded-xl gap-1.5 text-xs text-white" className="bg-primary text-primary-foreground"><Calendar className="h-3.5 w-3.5" /> Schedule</Button>
           </Link>
         </div>
       </motion.div>
@@ -190,7 +189,7 @@ export default function ParentDashboard() {
           {/* Top stat row (desktop) */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}
             className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={CheckCircle2} label="Attendance" value={`${child.attendanceRate}%`} sub="This term" color="#0D9488" />
+            <StatCard icon={CheckCircle2} label="Attendance" value={`${child.attendanceRate}%`} sub="This term" color="hsl(var(--primary))" />
             <StatCard icon={BarChart3} label="Avg Grade" value={child.avgGrade ? `${child.avgGrade}%` : "—"} sub={child.avgGrade ? getGradeLabel(child.avgGrade) : "No data"} color="#6366f1" />
             <StatCard icon={BookOpen} label="Upcoming Tasks" value={child.upcomingDeadlines.length} sub="Due this week" color="#f59e0b" />
             <StatCard icon={Flame} label="Streak" value={child.ascend?.streak ?? 0} sub={`Level ${child.ascend?.level ?? 1} · ${child.ascend?.rank ?? "Bronze"}`} color="#ef4444" />
@@ -212,7 +211,7 @@ export default function ParentDashboard() {
             return (
               <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.07 }}>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Zap className="w-3.5 h-3.5 text-teal-600" />
+                  <Zap className="w-3.5 h-3.5 text-primary" />
                   <p className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">What's Important</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -253,7 +252,7 @@ export default function ParentDashboard() {
                       </div>
                     </div>
                     <Link href={`/parent/child/${child.studentId}`}>
-                      <Button variant="ghost" size="sm" className="text-xs gap-1 text-teal-600">
+                      <Button variant="ghost" size="sm" className="text-xs gap-1 text-primary">
                         Full Profile <ChevronRight className="h-3 w-3" />
                       </Button>
                     </Link>

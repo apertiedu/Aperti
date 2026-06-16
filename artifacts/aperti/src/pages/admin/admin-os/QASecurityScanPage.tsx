@@ -38,14 +38,14 @@ export default function QASecurityScanPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Shield className="w-6 h-6 text-teal-600" /> Security Route Scan
+            <Shield className="w-6 h-6 text-primary" /> Security Route Scan
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Verify all admin endpoints require authentication</p>
         </div>
         <Button
           onClick={() => runScan.mutate()}
           disabled={runScan.isPending}
-          className="bg-teal-600 hover:bg-teal-700 gap-2"
+          className="bg-primary hover:bg-primary/80 gap-2"
         >
           <RefreshCw className={`w-4 h-4 ${runScan.isPending ? "animate-spin" : ""}`} />
           {runScan.isPending ? "Scanning…" : "Run Security Scan"}
@@ -56,8 +56,8 @@ export default function QASecurityScanPage() {
       {!scanData && !runScan.isPending && (
         <Card className="border-0 shadow-sm">
           <CardContent className="py-16 flex flex-col items-center justify-center gap-4 text-center">
-            <div className="w-16 h-16 bg-teal-50 rounded-full flex items-center justify-center">
-              <Shield className="w-8 h-8 text-teal-400" />
+            <div className="w-16 h-16 bg-primary/8 rounded-full flex items-center justify-center">
+              <Shield className="w-8 h-8 text-primary" />
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-700">No scan has been run yet</p>
@@ -72,7 +72,7 @@ export default function QASecurityScanPage() {
         <Card className="border-0 shadow-sm">
           <CardContent className="py-12 text-center">
             <div className="flex items-center justify-center gap-3">
-              <RefreshCw className="w-5 h-5 text-teal-500 animate-spin" />
+              <RefreshCw className="w-5 h-5 text-primary animate-spin" />
               <p className="text-sm text-gray-600">Probing {13} endpoints without authentication…</p>
             </div>
           </CardContent>

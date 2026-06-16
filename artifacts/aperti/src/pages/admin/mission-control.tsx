@@ -33,11 +33,11 @@ function LevelBadge({ level }: { level: string }) {
   );
 }
 
-function StatCard({ label, value, sub, color = "teal", Icon }: {
+function StatCard({ label, value, sub, color = "primary", Icon }: {
   label: string; value: number | string; sub?: string; color?: string; Icon: LucideIcon;
 }) {
   const colorMap: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-700",
+    primary: "bg-primary/8 text-primary",
     rose: "bg-rose-50 text-rose-700",
     amber: "bg-amber-50 text-amber-700",
     blue: "bg-blue-50 text-blue-700",
@@ -52,7 +52,7 @@ function StatCard({ label, value, sub, color = "teal", Icon }: {
             <p className="text-2xl font-bold text-slate-800 mt-1">{value}</p>
             {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
           </div>
-          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.teal}`}>
+          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.primary}`}>
             <Icon size={18} />
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function MissionControlPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Activity className="text-teal-600" size={24} />
+            <Activity className="text-primary" size={24} />
             Mission Control
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">Real-time error intelligence — auto-refreshes every 15s</p>
@@ -142,7 +142,7 @@ export default function MissionControlPage() {
                 <div className="p-6 text-center text-sm text-slate-400">Loading errors...</div>
               ) : errors.length === 0 ? (
                 <div className="p-10 text-center text-slate-400">
-                  <CheckCircle2 className="mx-auto mb-3 text-teal-400" size={32} />
+                  <CheckCircle2 className="mx-auto mb-3 text-primary" size={32} />
                   <p className="font-medium">No errors found</p>
                   <p className="text-xs mt-1">The system is running clean for the selected filter.</p>
                 </div>
@@ -201,7 +201,7 @@ export default function MissionControlPage() {
           <Card className="border border-slate-100 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Route size={14} className="text-teal-600" />
+                <Route size={14} className="text-primary" />
                 Top Error Routes (24h)
               </CardTitle>
             </CardHeader>
@@ -220,7 +220,7 @@ export default function MissionControlPage() {
           <Card className="border border-slate-100 shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Activity size={14} className="text-teal-600" />
+                <Activity size={14} className="text-primary" />
                 Errors by Level (7d)
               </CardTitle>
             </CardHeader>

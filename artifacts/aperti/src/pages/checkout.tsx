@@ -5,11 +5,10 @@ import { CheckCircle2, Tag, ArrowRight, Loader2, Upload, AlertCircle, Lock, Chev
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/api";
 
-const TEAL = "#0D9488";
 
 const STUDENT_PLANS = [
   { id: "free",     name: "Free",      price: 0,   color: "#757575", features: ["Past paper access", "AI Mentor (5/day)", "Basic flashcards", "Public course library"] },
-  { id: "essential",name: "Essential", price: 79,  color: TEAL,      features: ["All Free features", "Unlimited AI Mentor", "Full flashcard engine", "Revision schedules"] },
+  { id: "essential",name: "Essential", price: 79,  color: "hsl(var(--primary))",      features: ["All Free features", "Unlimited AI Mentor", "Full flashcard engine", "Revision schedules"] },
   { id: "plus",     name: "Plus",      price: 149, color: "#00897B", features: ["All Essential features", "Revision Notes", "SimVerse labs", "Peer review access"] },
   { id: "pro",      name: "Pro",       price: 249, color: "#00695C", features: ["All Plus features", "Priority AI tutor", "Practice exam library", "Progress analytics"] },
   { id: "elite",    name: "Elite",     price: 399, color: "#004D40", features: ["All Pro features", "Premium content access", "Dedicated support", "Custom learning path"] },
@@ -142,7 +141,7 @@ export default function CheckoutPage() {
           <ChevronLeft className="h-5 w-5" />
         </button>
         <span className="text-xl font-extrabold tracking-tight" style={{ color: "#121212" }}>
-          Aperti<span style={{ color: TEAL }}>.</span>
+          Aperti<span className="text-primary">.</span>
         </span>
         <span className="text-sm text-gray-400 ml-1">Checkout</span>
         <div className="ml-auto flex items-center gap-1.5 text-xs text-gray-400">
@@ -170,7 +169,7 @@ export default function CheckoutPage() {
               {selectedPlan.price > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-8">
                   <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
-                    <Tag className="h-4 w-4" style={{ color: TEAL }} /> Have a coupon code?
+                    <Tag className="h-4 w-4" className="text-primary" /> Have a coupon code?
                   </p>
                   <div className="flex gap-2">
                     <input
@@ -178,14 +177,14 @@ export default function CheckoutPage() {
                       onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCoupon(null); setCouponError(""); }}
                       placeholder="ENTER CODE"
                       className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 transition-all"
-                      style={{ "--ring-color": TEAL } as any}
+                      style={{ "--ring-color": "hsl(var(--primary))" } as any}
                       onKeyDown={e => e.key === "Enter" && validateCoupon()}
                     />
                     <button
                       onClick={validateCoupon}
                       disabled={validatingCoupon || !couponCode.trim()}
                       className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50"
-                      style={{ background: TEAL }}>
+                      className="bg-primary">
                       {validatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                     </button>
                   </div>
@@ -195,7 +194,7 @@ export default function CheckoutPage() {
                   {coupon && (
                     <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
                       className="text-xs font-semibold mt-2 flex items-center gap-1.5"
-                      style={{ color: TEAL }}>
+                      className="text-primary">
                       <CheckCircle2 className="h-3.5 w-3.5" />
                       {coupon.discountPercent}% off applied — saving EGP {discountAmt}
                     </motion.p>
@@ -208,7 +207,7 @@ export default function CheckoutPage() {
                 <h3 className="font-bold text-gray-900 mb-4">Order Summary</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between"><span className="text-gray-500">{selectedPlan.name} Plan</span><span className="font-medium">EGP {basePrice}</span></div>
-                  {coupon && <div className="flex justify-between"><span style={{ color: TEAL }}>Coupon ({coupon.code})</span><span style={{ color: TEAL }}>−EGP {discountAmt}</span></div>}
+                  {coupon && <div className="flex justify-between"><span className="text-primary">Coupon ({coupon.code})</span><span className="text-primary">−EGP {discountAmt}</span></div>}
                   <div className="border-t pt-2 flex justify-between font-bold text-gray-900">
                     <span>Total</span>
                     <span style={{ color: selectedPlan.color }}>{finalPrice === 0 ? "Free" : `EGP ${finalPrice}/month`}</span>
@@ -246,7 +245,7 @@ export default function CheckoutPage() {
                     <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">1.</span>Open your bank's mobile app and go to InstaPay.</li>
                     <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">2.</span>Send <strong>EGP {finalPrice}</strong> to the Aperti InstaPay ID:</li>
                     <li>
-                      <code className="block bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm font-bold text-center" style={{ color: TEAL }}>
+                      <code className="block bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm font-bold text-center" className="text-primary">
                         aperti@instapay.eg
                       </code>
                     </li>
@@ -259,12 +258,12 @@ export default function CheckoutPage() {
                     value={instaPayCode}
                     onChange={e => setInstaPayCode(e.target.value)}
                     placeholder="e.g. TXN-2024-XXXXXXXX"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-[#0D9488] transition-all mb-3"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-primary transition-all mb-3"
                   />
 
                   <label className="block text-xs font-bold text-gray-700 mb-1.5">Upload Screenshot (optional)</label>
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-[#0D9488]/40 transition-colors group">
-                    <Upload className="h-5 w-5 text-gray-300 group-hover:text-[#0D9488] transition-colors mb-1" />
+                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-primary/40 transition-colors group">
+                    <Upload className="h-5 w-5 text-gray-300 group-hover:text-primary transition-colors mb-1" />
                     <span className="text-xs text-gray-400">{screenshot ? screenshot.name : "PNG or JPG, max 5MB"}</span>
                     <input type="file" accept="image/*" className="hidden" onChange={e => setScreenshot(e.target.files?.[0] ?? null)} />
                   </label>
@@ -281,7 +280,7 @@ export default function CheckoutPage() {
                     <h3 className="font-bold text-gray-900 mb-4">Order Summary</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between"><span className="text-gray-500">{selectedPlan.name} Plan</span><span>EGP {basePrice}</span></div>
-                      {coupon && <div className="flex justify-between"><span style={{ color: TEAL }}>Coupon ({coupon.code})</span><span style={{ color: TEAL }}>−EGP {discountAmt}</span></div>}
+                      {coupon && <div className="flex justify-between"><span className="text-primary">Coupon ({coupon.code})</span><span className="text-primary">−EGP {discountAmt}</span></div>}
                       <div className="border-t pt-2 flex justify-between font-bold text-lg">
                         <span>Total</span>
                         <span style={{ color: selectedPlan.color }}>EGP {finalPrice}<span className="text-xs font-normal text-gray-400">/mo</span></span>

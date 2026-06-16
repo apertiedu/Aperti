@@ -179,7 +179,7 @@ export default function MyCardStack() {
             <div className="grid grid-cols-4 gap-2 mb-2">
               {[
                 { label: "Total Cards", value: smartStats.stats.total_cards ?? 0, color: "#6366F1" },
-                { label: "Mastery", value: `${smartStats.stats.mastery_pct ?? 0}%`, color: "#0D9488" },
+                { label: "Mastery", value: `${smartStats.stats.mastery_pct ?? 0}%`, color: "hsl(var(--primary))" },
                 { label: "Due Review", value: smartStats.stats.due_review ?? 0, color: "#F59E0B" },
                 { label: "Weak Cards", value: smartStats.stats.weak_cards ?? 0, color: "#EF4444" },
               ].map(({ label, value, color }) => (
@@ -218,12 +218,12 @@ export default function MyCardStack() {
                   <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
                     <BookOpen className="h-5 w-5 text-blue-600" />
                   </div>
-                  <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-teal-600 transition-colors" />
+                  <ChevronRight className="h-4 w-4 text-gray-300 group-hover:text-primary transition-colors" />
                 </div>
                 <h3 className="font-bold text-gray-900 text-sm mb-1 line-clamp-1">{deck.title}</h3>
                 <p className="text-xs text-gray-400 line-clamp-2 mb-3">{deck.description || "No description"}</p>
                 <div className="flex items-center gap-2">
-                  <Button size="sm" className="h-8 text-xs rounded-xl gap-1.5 flex-1" style={{ background: "#0D9488" }}
+                  <Button size="sm" className="h-8 text-xs rounded-xl gap-1.5 flex-1" style={{ background: "hsl(var(--primary))" }}
                     onClick={(e) => { e.stopPropagation(); openDeck(deck); }}>
                     <Zap className="h-3 w-3" /> Study
                   </Button>
@@ -307,16 +307,16 @@ export default function MyCardStack() {
               </div>
             </motion.div>
             <div className={`min-h-[260px] rounded-2xl border shadow-sm flex flex-col items-center justify-center p-8 text-center transition-colors ${
-              showBack ? "bg-teal-50 border-teal-100" : "bg-card border-border"
+              showBack ? "bg-primary/8 border-primary/15" : "bg-card border-border"
             }`}>
               <div className="mb-3">
                 {showBack ? (
-                  <span className="text-[10px] font-bold text-teal-600 uppercase tracking-wider px-2 py-0.5 bg-teal-100 rounded-full">Answer</span>
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider px-2 py-0.5 bg-primary/15 rounded-full">Answer</span>
                 ) : (
                   <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider px-2 py-0.5 bg-gray-100 rounded-full">Question</span>
                 )}
               </div>
-              <div className={`text-lg font-bold leading-relaxed ${showBack ? "text-teal-800" : "text-gray-900"}`}>
+              <div className={`text-lg font-bold leading-relaxed ${showBack ? "text-foreground" : "text-gray-900"}`}>
                 <MathRenderer content={showBack ? currentCard.back : currentCard.front} />
               </div>
               {currentCard.difficulty && (
@@ -329,7 +329,7 @@ export default function MyCardStack() {
                 <p className="text-[11px] text-gray-300 mt-4">Tap to reveal · swipe to rate</p>
               )}
               {showBack && (
-                <p className="text-[11px] text-teal-400 mt-4">← Again &nbsp;·&nbsp; Easy →</p>
+                <p className="text-[11px] text-primary mt-4">← Again &nbsp;·&nbsp; Easy →</p>
               )}
             </div>
           </motion.div>
@@ -382,13 +382,13 @@ export default function MyCardStack() {
               className="bg-card rounded-2xl shadow-xl p-6 w-full max-w-md mb-16">
               <div className="flex items-center justify-between mb-5">
                 <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4 text-teal-600" /> Session Analytics
+                  <BarChart3 className="h-4 w-4 text-primary" /> Session Analytics
                 </h3>
                 <button onClick={() => setView("study")} className="text-gray-400 hover:text-gray-700">✕</button>
               </div>
               <div className="grid grid-cols-3 gap-3 mb-5">
                 {[
-                  { label: "Reviewed", value: reviewedCount, color: "#0D9488" },
+                  { label: "Reviewed", value: reviewedCount, color: "hsl(var(--primary))" },
                   { label: "Mastered", value: masteredCount, color: "#059669" },
                   { label: "Retry", value: strugglingCount, color: "#EF4444" },
                 ].map(({ label, value, color }) => (
@@ -406,7 +406,7 @@ export default function MyCardStack() {
                 <Progress value={totalCards ? (reviewedCount / totalCards) * 100 : 0} className="h-3 rounded-full" />
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-xl p-3">
-                <TrendingUp className="h-4 w-4 text-teal-600 shrink-0" />
+                <TrendingUp className="h-4 w-4 text-primary shrink-0" />
                 <span>Spaced repetition schedules your next review automatically.</span>
               </div>
             </motion.div>

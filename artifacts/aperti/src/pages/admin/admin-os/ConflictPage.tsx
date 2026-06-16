@@ -43,7 +43,7 @@ function ConflictCard({ conflict: c, onResolve }: any) {
           {c.resolver_username && <p className="text-xs text-gray-400">Resolved by {c.resolver_username}</p>}
         </div>
         {c.status !== "resolved" && (
-          <button onClick={() => setResolving(!resolving)} className="flex-shrink-0 px-3 py-1.5 text-xs font-medium border border-teal-200 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors">
+          <button onClick={() => setResolving(!resolving)} className="flex-shrink-0 px-3 py-1.5 text-xs font-medium border border-primary/30 text-primary hover:bg-primary/5 rounded-lg transition-colors">
             {resolving ? "Cancel" : "Resolve"}
           </button>
         )}
@@ -58,10 +58,10 @@ function ConflictCard({ conflict: c, onResolve }: any) {
                 value={customRes}
                 onChange={e => setCustomRes(e.target.value)}
                 rows={2}
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"
+                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
               />
               <div className="flex justify-end">
-                <button onClick={() => onResolve(c.id, customRes)} className="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 flex items-center gap-2">
+                <button onClick={() => onResolve(c.id, customRes)} className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 flex items-center gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5" />Mark Resolved
                 </button>
               </div>
@@ -118,7 +118,7 @@ export default function ConflictPage() {
             {lastScan ? `Last scan: ${lastScan}` : "Detect and resolve governance conflicts across the platform"}
           </p>
         </div>
-        <button onClick={runScan} disabled={scanning} className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-70">
+        <button onClick={runScan} disabled={scanning} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 transition-colors shadow-sm disabled:opacity-70">
           <RefreshCw className={`w-4 h-4 ${scanning ? "animate-spin" : ""}`} />
           {scanning ? "Scanning..." : "Run System Scan"}
         </button>
@@ -151,7 +151,7 @@ export default function ConflictPage() {
           { label: "Resolved", val: "resolved" },
           { label: "All", val: "" },
         ].map(({ label, val }) => (
-          <button key={val || "all"} onClick={() => setStatusFilter(val)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${statusFilter === val ? "bg-teal-600 text-white" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+          <button key={val || "all"} onClick={() => setStatusFilter(val)} className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${statusFilter === val ? "bg-primary text-primary-foreground" : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
             {label}
           </button>
         ))}

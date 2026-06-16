@@ -49,7 +49,7 @@ export default function FAQsAdminPage() {
           <h1 className="text-2xl font-bold text-gray-900">FAQs</h1>
           <p className="text-sm text-gray-500 mt-0.5">{faqs.filter((f: any) => f.is_published).length} published · {faqs.length} total</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+        <button onClick={openCreate} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> Add FAQ
         </button>
       </div>
@@ -79,7 +79,7 @@ export default function FAQsAdminPage() {
                     {expandedId === faq.id ? <ChevronUp className="w-4 h-4 text-gray-400 flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-gray-400 flex-shrink-0" />}
                   </button>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => togglePublish.mutate({ id: faq.id, val: !faq.is_published })} className={`transition-colors ${faq.is_published ? "text-teal-600" : "text-gray-300"}`}>
+                    <button onClick={() => togglePublish.mutate({ id: faq.id, val: !faq.is_published })} className={`transition-colors ${faq.is_published ? "text-primary" : "text-gray-300"}`}>
                       {faq.is_published ? <ToggleRight className="w-5 h-5" /> : <ToggleLeft className="w-5 h-5" />}
                     </button>
                     <button onClick={() => openEdit(faq)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors"><Edit2 className="w-4 h-4" /></button>
@@ -106,21 +106,21 @@ export default function FAQsAdminPage() {
                 <h2 className="text-lg font-bold text-gray-900">{editing ? "Edit FAQ" : "Add FAQ"}</h2>
               </div>
               <div className="px-6 py-4 space-y-4">
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Question *</label><input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Answer *</label><textarea value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} rows={5} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">Question *</label><input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">Answer *</label><textarea value={form.answer} onChange={(e) => setForm({ ...form, answer: e.target.value })} rows={5} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
-                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                       <option value="">Select...</option>{CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
-                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Order</label><input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Order</label><input type="number" value={form.order} onChange={(e) => setForm({ ...form, order: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
                 </div>
-                <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} className="w-4 h-4 rounded text-teal-600" /><span className="text-sm text-gray-700">Published on landing page</span></label>
+                <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} className="w-4 h-4 rounded text-primary" /><span className="text-sm text-gray-700">Published on landing page</span></label>
               </div>
               <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
                 <button onClick={closeModal} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-                <button onClick={() => saveMutation.mutate()} disabled={!form.question || !form.answer || saveMutation.isPending} className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50">
+                <button onClick={() => saveMutation.mutate()} disabled={!form.question || !form.answer || saveMutation.isPending} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 disabled:opacity-50">
                   {saveMutation.isPending ? "Saving..." : editing ? "Update" : "Add FAQ"}
                 </button>
               </div>

@@ -133,12 +133,12 @@ export default function DiscussButton({
     <>
       <button
         onClick={handleOpen}
-        className={`inline-flex items-center ${btnSize} font-medium rounded-xl bg-teal-50 text-teal-700 hover:bg-teal-100 border border-teal-200 transition-colors`}
+        className={`inline-flex items-center ${btnSize} font-medium rounded-xl bg-primary/8 text-primary hover:bg-primary/15 border border-primary/20 transition-colors`}
       >
         <MessageSquare className={size === "sm" ? "w-3 h-3" : "w-3.5 h-3.5"} />
         Discuss
         {variant === "inline" && messages.length > 0 && (
-          <span className="bg-teal-600 text-white rounded-full text-[10px] px-1.5 py-0.5 leading-none">
+          <span className="bg-primary text-primary-foreground rounded-full text-[10px] px-1.5 py-0.5 leading-none">
             {messages.length}
           </span>
         )}
@@ -163,24 +163,24 @@ export default function DiscussButton({
               style={{ maxHeight: "480px" }}
             >
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-3 bg-teal-600 text-white">
+              <div className="flex items-center justify-between px-4 py-3 bg-primary text-primary-foreground">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4" />
                   <div>
                     <p className="text-sm font-semibold">
                       {contextTitle ? `Discuss: ${contextTitle}` : `Discuss ${contextType} #${contextId}`}
                     </p>
-                    <p className="text-[10px] text-teal-100 capitalize">{contextType} thread</p>
+                    <p className="text-[10px] text-primary-foreground/70 capitalize">{contextType} thread</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { setOpen(false); navigate("/inbox"); }}
-                    className="text-[10px] text-teal-100 hover:text-white flex items-center gap-0.5 transition-colors"
+                    className="text-[10px] text-primary-foreground/70 hover:text-primary-foreground flex items-center gap-0.5 transition-colors"
                   >
                     Open in Inbox <ChevronRight className="w-3 h-3" />
                   </button>
-                  <button onClick={() => setOpen(false)} className="text-teal-100 hover:text-white transition-colors">
+                  <button onClick={() => setOpen(false)} className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -198,34 +198,34 @@ export default function DiscussButton({
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {lookingUp || createMutation.isPending ? (
                   <div className="flex justify-center py-8">
-                    <Loader2 className="w-5 h-5 text-teal-500 animate-spin" />
+                    <Loader2 className="w-5 h-5 text-primary animate-spin" />
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="text-center py-8">
-                    <MessageSquare className="w-8 h-8 text-gray-200 mx-auto mb-2" />
-                    <p className="text-xs text-gray-400">No messages yet.</p>
-                    <p className="text-xs text-gray-400">Start the discussion!</p>
+                    <MessageSquare className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                    <p className="text-xs text-muted-foreground">No messages yet.</p>
+                    <p className="text-xs text-muted-foreground">Start the discussion!</p>
                   </div>
                 ) : (
                   messages.map((msg) => {
                     const isMe = msg.sender_id === user?.id;
                     return (
                       <div key={msg.id} className={`flex gap-2 ${isMe ? "flex-row-reverse" : ""}`}>
-                        <div className="w-6 h-6 rounded-full bg-teal-100 flex-shrink-0 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center">
                           {msg.ai_generated ? (
                             <Sparkles className="w-3 h-3 text-purple-600" />
                           ) : (
-                            <span className="text-[9px] font-bold text-teal-700">{msg.sender_name[0]}</span>
+                            <span className="text-[9px] font-bold text-primary">{msg.sender_name[0]}</span>
                           )}
                         </div>
                         <div className={`max-w-[75%] flex flex-col gap-0.5 ${isMe ? "items-end" : "items-start"}`}>
                           {!isMe && (
-                            <span className="text-[10px] text-gray-400">{msg.sender_name}</span>
+                            <span className="text-[10px] text-muted-foreground/60">{msg.sender_name}</span>
                           )}
-                          <div className={`px-3 py-2 rounded-xl text-xs shadow-sm ${isMe ? "bg-teal-600 text-white" : msg.ai_generated ? "bg-purple-50 text-purple-900 border border-purple-100" : "bg-gray-100 text-gray-800"}`}>
+                          <div className={`px-3 py-2 rounded-xl text-xs shadow-sm ${isMe ? "bg-primary text-primary-foreground" : msg.ai_generated ? "bg-purple-50 dark:bg-purple-950/30 text-purple-900 dark:text-purple-300 border border-purple-100 dark:border-purple-800" : "bg-muted text-foreground"}`}>
                             {msg.content}
                           </div>
-                          <span className="text-[9px] text-gray-300">
+                          <span className="text-[9px] text-muted-foreground/40">
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         </div>
@@ -236,13 +236,13 @@ export default function DiscussButton({
               </div>
 
               {/* Compose */}
-              <div className="px-3 pb-3 pt-2 border-t border-gray-100">
+              <div className="px-3 pb-3 pt-2 border-t border-border">
                 <div className="flex gap-2 items-end">
                   <button
                     onClick={handleAiHint}
                     disabled={aiLoading}
                     title="Get AI hint"
-                    className="p-2 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors flex-shrink-0 disabled:opacity-50"
+                    className="p-2 rounded-xl bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-colors flex-shrink-0 disabled:opacity-50"
                   >
                     {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
                   </button>
@@ -251,12 +251,12 @@ export default function DiscussButton({
                     onChange={(e) => setCompose(e.target.value)}
                     onKeyDown={(e) => { if (e.key === "Enter") handleSend(); }}
                     placeholder="Ask a question or share a thought…"
-                    className="flex-1 text-xs px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30"
+                    className="flex-1 text-xs px-3 py-2 border border-border bg-background text-foreground rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 placeholder:text-muted-foreground"
                   />
                   <button
                     onClick={handleSend}
                     disabled={!compose.trim() || !activeThreadId || sendMutation.isPending}
-                    className="p-2 rounded-xl bg-teal-600 text-white hover:bg-teal-700 disabled:opacity-50 transition-colors flex-shrink-0"
+                    className="p-2 rounded-xl bg-primary text-primary-foreground hover:opacity-90 disabled:opacity-50 transition-all flex-shrink-0"
                   >
                     <Send className="w-3.5 h-3.5" />
                   </button>

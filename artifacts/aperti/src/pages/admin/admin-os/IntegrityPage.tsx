@@ -53,7 +53,7 @@ export default function IntegrityPage() {
           <h1 className="text-2xl font-bold text-gray-900">Integrity Validation</h1>
           <p className="text-sm text-gray-500 mt-0.5">Full platform governance health check</p>
         </div>
-        <button onClick={() => setRunKey(k => k + 1)} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors shadow-sm disabled:opacity-70">
+        <button onClick={() => setRunKey(k => k + 1)} disabled={loading} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 transition-colors shadow-sm disabled:opacity-70">
           <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
           {loading ? "Validating..." : "Re-run Validation"}
         </button>
@@ -61,7 +61,7 @@ export default function IntegrityPage() {
 
       {loading && checks.length === 0 ? (
         <div className="text-center py-20">
-          <RefreshCw className="w-10 h-10 text-teal-400 animate-spin mx-auto mb-4" />
+          <RefreshCw className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
           <p className="text-gray-500 text-sm">Running integrity checks...</p>
         </div>
       ) : (

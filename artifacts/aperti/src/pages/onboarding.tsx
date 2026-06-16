@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, ArrowLeft, ArrowRight } from "lucide-react";
 
-const TEAL = "#0D9488";
 
 const SUBJECTS = ["Mathematics","Physics","Chemistry","Biology","English Language","English Literature","Arabic","History","Geography","Computer Science","Economics","Business Studies","Statistics","Further Mathematics","ICT"];
 const BOARDS = ["CAIE (Cambridge A-Level / IGCSE)","Edexcel / Pearson","IB (International Baccalaureate)","AQA","OCR","Egyptian National Curriculum","American Curriculum","Other"];
@@ -25,7 +24,7 @@ function StepDots({ total, current }: { total: number; current: number }) {
     <div className="flex items-center gap-1.5">
       {Array.from({ length: total }).map((_, i) => (
         <div key={i} className={`rounded-full transition-all duration-300 ${i + 1 < current ? "w-6 h-2" : i + 1 === current ? "w-8 h-2" : "w-2 h-2"}`}
-          style={{ background: i + 1 <= current ? TEAL : "#e5e7eb" }} />
+          style={{ background: i + 1 <= current ? "hsl(var(--primary))" : "#e5e7eb" }} />
       ))}
     </div>
   );
@@ -36,7 +35,7 @@ function ChipSelect({ options, selected, onSelect }: { options: string[]; select
     <div className="flex flex-wrap gap-2">
       {options.map(o => (
         <button key={o} type="button" onClick={() => onSelect(o)}
-          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${selected.includes(o) ? "border-teal-600 text-teal-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
+          className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${selected.includes(o) ? "border-primary text-primary" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
           style={selected.includes(o) ? { background: "#f0fdfa" } : {}}>
           {o}
         </button>
@@ -54,7 +53,7 @@ function Toggle({ value, onChange, label, desc }: { value: boolean; onChange: (v
       </div>
       <button type="button" onClick={() => onChange(!value)}
         className="w-11 h-6 rounded-full relative transition-all duration-200 flex-shrink-0"
-        style={{ background: value ? TEAL : "#d1d5db" }}>
+        style={{ background: value ? "hsl(var(--primary))" : "#d1d5db" }}>
         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${value ? "left-6" : "left-1"}`} />
       </button>
     </div>
@@ -109,15 +108,15 @@ function TeacherWizard({ onDone }: { onDone: () => void }) {
           <motion.div key="t1" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} className="space-y-4">
             <div><h2 className="text-xl font-bold text-gray-900 mb-1">Set up your profile</h2><p className="text-gray-500 text-sm">Let students know who you are.</p></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Short bio</Label>
-              <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="e.g. Cambridge-qualified Maths tutor with 8 years of experience..." className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600" /></div>
+              <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="e.g. Cambridge-qualified Maths tutor with 8 years of experience..." className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30" /></div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20..." className="h-10 rounded-xl border-gray-200" /></div>
               <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-                <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
+                <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-primary bg-card">
                   <option value="">Select…</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
             </div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Years of experience</Label>
-              <select value={exp} onChange={e => setExp(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
+              <select value={exp} onChange={e => setExp(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-primary bg-card">
                 <option value="">Select…</option><option>Less than 1 year</option><option>1–3 years</option><option>3–5 years</option><option>5–10 years</option><option>10+ years</option></select></div>
           </motion.div>
         )}
@@ -139,11 +138,11 @@ function TeacherWizard({ onDone }: { onDone: () => void }) {
             <div className="space-y-3">
               {TEACHING_TYPES.map(t => (
                 <button key={t.id} type="button" onClick={() => setTeachType(t.id)}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${teachType === t.id ? "border-teal-600" : "border-gray-200 hover:border-gray-300"}`}
+                  className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${teachType === t.id ? "border-primary" : "border-gray-200 hover:border-gray-300"}`}
                   style={teachType === t.id ? { background: "#f0fdfa" } : {}}>
                   <div className="flex items-center justify-between">
                     <div><p className="font-semibold text-gray-900">{t.label}</p><p className="text-sm text-gray-500 mt-0.5">{t.desc}</p></div>
-                    {teachType === t.id && <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: TEAL }}><Check className="w-3 h-3 text-white" /></div>}
+                    {teachType === t.id && <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" className="bg-primary"><Check className="w-3 h-3 text-white" /></div>}
                   </div>
                 </button>
               ))}
@@ -163,7 +162,7 @@ function TeacherWizard({ onDone }: { onDone: () => void }) {
         {step > 1 ? <Button variant="ghost" onClick={() => setStep(s => s - 1)} className="gap-1.5 text-gray-600"><ArrowLeft className="w-4 h-4" />Back</Button> : <div />}
         <div className="flex items-center gap-3">
           <button onClick={skip} className="text-sm text-gray-400 hover:text-gray-600">Skip</button>
-          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" style={{ background: TEAL }}>
+          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" className="bg-primary">
             {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : step === TOTAL ? "Launch dashboard" : "Continue"}
             {!loading && step < TOTAL && <ArrowRight className="w-4 h-4" />}
           </Button>
@@ -206,9 +205,9 @@ function StudentWizard({ onDone }: { onDone: () => void }) {
           <motion.div key="s1" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -24 }} className="space-y-4">
             <div><h2 className="text-xl font-bold text-gray-900 mb-1">Tell us about yourself</h2><p className="text-gray-500 text-sm">This helps personalise your learning experience.</p></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Short bio (optional)</Label>
-              <textarea value={bio} onChange={e => setBio(e.target.value)} rows={2} placeholder="e.g. Year 12 student preparing for Cambridge A-Levels..." className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-teal-600" /></div>
+              <textarea value={bio} onChange={e => setBio(e.target.value)} rows={2} placeholder="e.g. Year 12 student preparing for Cambridge A-Levels..." className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary" /></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
+              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-primary bg-card">
                 <option value="">Select country</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
           </motion.div>
         )}
@@ -224,7 +223,7 @@ function StudentWizard({ onDone }: { onDone: () => void }) {
             <div className="space-y-2">
               {EXAM_SESSIONS.map(s => (
                 <button key={s} type="button" onClick={() => setSession(s)}
-                  className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${session === s ? "border-teal-600 text-teal-700" : "border-gray-200 text-gray-700 hover:border-gray-300"}`}
+                  className={`w-full text-left px-4 py-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium ${session === s ? "border-primary text-primary" : "border-gray-200 text-gray-700 hover:border-gray-300"}`}
                   style={session === s ? { background: "#f0fdfa" } : {}}>{s}</button>
               ))}
             </div>
@@ -241,7 +240,7 @@ function StudentWizard({ onDone }: { onDone: () => void }) {
         {step > 1 ? <Button variant="ghost" onClick={() => setStep(s => s - 1)} className="gap-1.5 text-gray-600"><ArrowLeft className="w-4 h-4" />Back</Button> : <div />}
         <div className="flex items-center gap-3">
           <button onClick={skip} className="text-sm text-gray-400 hover:text-gray-600">Skip</button>
-          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" style={{ background: TEAL }}>
+          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" className="bg-primary">
             {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : step === TOTAL ? "Go to dashboard" : "Continue"}
             {!loading && step < TOTAL && <ArrowRight className="w-4 h-4" />}
           </Button>
@@ -282,7 +281,7 @@ function ParentWizard({ onDone }: { onDone: () => void }) {
             <div><h2 className="text-xl font-bold text-gray-900 mb-1">Your profile</h2><p className="text-gray-500 text-sm">A few quick details to personalise your experience.</p></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Phone (optional)</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20..." className="h-10 rounded-xl border-gray-200" /></div>
             <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
+              <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-border px-3 text-sm focus:outline-none focus:border-primary bg-card">
                 <option value="">Select country</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
           </motion.div>
         )}
@@ -306,7 +305,7 @@ function ParentWizard({ onDone }: { onDone: () => void }) {
         {step > 1 ? <Button variant="ghost" onClick={() => setStep(s => s - 1)} className="gap-1.5 text-gray-600"><ArrowLeft className="w-4 h-4" />Back</Button> : <div />}
         <div className="flex items-center gap-3">
           <button onClick={skip} className="text-sm text-gray-400 hover:text-gray-600">Skip</button>
-          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" style={{ background: TEAL }}>
+          <Button onClick={next} disabled={loading} className="gap-1.5 rounded-xl px-6" className="bg-primary">
             {loading ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : step === TOTAL ? "Go to dashboard" : "Continue"}
             {!loading && step < TOTAL && <ArrowRight className="w-4 h-4" />}
           </Button>
@@ -324,15 +323,15 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "#F5F5F5", fontFamily: "Inter, sans-serif" }}>
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full opacity-5" style={{ background: TEAL, filter: "blur(120px)" }} />
-        <div className="absolute bottom-1/3 left-1/4 w-64 h-64 rounded-full opacity-5" style={{ background: TEAL, filter: "blur(80px)" }} />
+        <div className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full opacity-5" style={{ background: "hsl(var(--primary))", filter: "blur(120px)" }} />
+        <div className="absolute bottom-1/3 left-1/4 w-64 h-64 rounded-full opacity-5" style={{ background: "hsl(var(--primary))", filter: "blur(80px)" }} />
       </div>
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
         className="relative z-10 w-full max-w-lg bg-card rounded-2xl shadow-sm border border-border p-8">
         <div className="flex items-center justify-between mb-8">
-          <span className="text-xl font-bold" style={{ color: TEAL }}>Aperti.</span>
+          <span className="text-xl font-bold" className="text-primary">Aperti.</span>
           <div className="flex items-center gap-2">
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "#f0fdfa", color: TEAL }}>Account setup</span>
+            <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "#f0fdfa", color: "hsl(var(--primary))" }}>Account setup</span>
           </div>
         </div>
         {user?.role === "teacher" || user?.role === "admin" || user?.role === "assistant" ? (

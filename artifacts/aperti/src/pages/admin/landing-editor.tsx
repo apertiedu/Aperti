@@ -4,7 +4,6 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Settings, Eye, Save, RotateCcw, Plus, Trash2, GripVertical, Check, X, ExternalLink, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(url, {
@@ -53,7 +52,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
 function TextField({ label, value, onChange, multiline = false }: {
   label: string; value: string; onChange: (v: string) => void; multiline?: boolean;
 }) {
-  const cls = "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0D9488]/30 focus:border-[#0D9488] transition-all";
+  const cls = "w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all";
   return (
     <div>
       <label className="block text-xs font-semibold text-gray-600 mb-1.5">{label}</label>
@@ -169,7 +168,7 @@ export default function LandingEditor() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5F5F5" }}>
-        <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
+        <div className="w-6 h-6 border-2 rounded-full animate-spin" className="border-primary" />
       </div>
     );
   }
@@ -178,8 +177,8 @@ export default function LandingEditor() {
     <div className="min-h-screen" style={{ background: "#F5F5F5" }}>
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4 sticky top-0 z-10">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}15` }}>
-          <Settings className="h-5 w-5" style={{ color: TEAL }} />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" className="bg-primary/8">
+          <Settings className="h-5 w-5" className="text-primary" />
         </div>
         <div>
           <h1 className="font-extrabold text-gray-900">Landing Page Editor</h1>
@@ -202,7 +201,7 @@ export default function LandingEditor() {
             onClick={() => saveMutation.mutate()}
             disabled={!dirty || saveMutation.isPending}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-50"
-            style={{ background: TEAL }}>
+            className="bg-primary text-primary-foreground">
             <Save className="h-3.5 w-3.5" />
             {saveMutation.isPending ? "Saving…" : "Save Changes"}
           </button>
@@ -236,7 +235,7 @@ export default function LandingEditor() {
                     badges[i] = e.target.value;
                     setField("trust_badges", badges);
                   }}
-                  className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#0D9488] transition-all"
+                  className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-primary transition-all"
                 />
                 <button
                   onClick={() => {
@@ -250,7 +249,7 @@ export default function LandingEditor() {
             ))}
             <button
               onClick={() => setField("trust_badges", [...(merged.trust_badges ?? []), "New badge"])}
-              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-dashed border-gray-300 text-gray-400 hover:border-[#0D9488] hover:text-[#0D9488] transition-all w-full justify-center">
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl border border-dashed border-gray-300 text-gray-400 hover:border-primary hover:text-primary transition-all w-full justify-center">
               <Plus className="h-3.5 w-3.5" /> Add Badge
             </button>
           </div>
@@ -269,7 +268,7 @@ export default function LandingEditor() {
                     setField("features", features);
                   }}
                   placeholder="Feature title"
-                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#0D9488] transition-all"
+                  className="border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-primary transition-all"
                 />
                 <input
                   value={feat.desc}
@@ -279,7 +278,7 @@ export default function LandingEditor() {
                     setField("features", features);
                   }}
                   placeholder="Description"
-                  className="col-span-2 border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-[#0D9488] transition-all"
+                  className="col-span-2 border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:border-primary transition-all"
                 />
               </div>
             ))}
@@ -296,7 +295,7 @@ export default function LandingEditor() {
                   <span className="text-sm text-gray-700 font-medium">{label}</span>
                   <button
                     onClick={() => setField(key as keyof Settings, !val as any)}
-                    className={`relative w-10 h-6 rounded-full transition-all ${val ? "bg-[#0D9488]" : "bg-gray-200"}`}>
+                    className={`relative w-10 h-6 rounded-full transition-all ${val ? "bg-primary" : "bg-gray-200"}`}>
                     <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${val ? "left-5" : "left-1"}`} />
                   </button>
                 </div>
@@ -309,7 +308,7 @@ export default function LandingEditor() {
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
           <div className="px-5 py-3.5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Mail className="h-4 w-4" style={{ color: TEAL }} />
+              <Mail className="h-4 w-4" className="text-primary" />
               <h3 className="font-bold text-gray-800 text-sm">Contact Section</h3>
             </div>
             <div className="flex items-center gap-2">
@@ -320,7 +319,7 @@ export default function LandingEditor() {
                 onClick={() => contactMutation.mutate()}
                 disabled={!contactDirty || contactMutation.isPending}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all disabled:opacity-40"
-                style={{ background: TEAL }}
+                className="bg-primary text-primary-foreground"
               >
                 <Save className="h-3 w-3" />
                 {contactMutation.isPending ? "Saving…" : "Save"}
@@ -333,7 +332,7 @@ export default function LandingEditor() {
                 Support Email <span className="text-gray-400 font-normal">(shown on landing page &amp; contact page)</span>
               </label>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-[#0D9488]/30 focus-within:border-[#0D9488] transition-all">
+                <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2 focus-within:ring-2 focus-within:ring-primary/30 focus-within:border-primary transition-all">
                   <Mail className="h-3.5 w-3.5 text-gray-400 shrink-0" />
                   <input
                     type="email"

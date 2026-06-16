@@ -101,7 +101,7 @@ export default function CompliancePage() {
         <div className="space-y-4">
           <div className="flex justify-between items-center">
             <p className="text-sm text-gray-600">{backupList.length} backups recorded</p>
-            <button onClick={() => triggerBackupMutation.mutate()} disabled={triggerBackupMutation.isPending} className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors">
+            <button onClick={() => triggerBackupMutation.mutate()} disabled={triggerBackupMutation.isPending} className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors">
               {triggerBackupMutation.isPending ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Database className="w-4 h-4" />}
               {triggerBackupMutation.isPending ? "Running…" : "Trigger Backup"}
             </button>
@@ -157,7 +157,7 @@ export default function CompliancePage() {
                   {f.type === "toggle" ? (
                     <button
                       onClick={() => setSettings(p => ({ ...p, [f.key]: !p[f.key] }))}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings[f.key] ? "bg-teal-500" : "bg-gray-200"}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings[f.key] ? "bg-primary" : "bg-gray-200"}`}
                     >
                       <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${settings[f.key] ? "translate-x-6" : "translate-x-1"}`} />
                     </button>
@@ -165,13 +165,13 @@ export default function CompliancePage() {
                     <input
                       value={settings[f.key] || ""}
                       onChange={(e) => setSettings(p => ({ ...p, [f.key]: e.target.value }))}
-                      className="w-48 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400"
+                      className="w-48 px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
                     />
                   )}
                 </div>
               ))}
             </div>
-            <button onClick={() => saveSettingsMutation.mutate()} disabled={saveSettingsMutation.isPending} className="w-full mt-5 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors">
+            <button onClick={() => saveSettingsMutation.mutate()} disabled={saveSettingsMutation.isPending} className="w-full mt-5 px-4 py-2 text-sm bg-primary text-primary-foreground rounded-lg hover:opacity-90 disabled:opacity-50 transition-colors">
               {saveSettingsMutation.isPending ? "Saving…" : "Save Settings"}
             </button>
           </div>

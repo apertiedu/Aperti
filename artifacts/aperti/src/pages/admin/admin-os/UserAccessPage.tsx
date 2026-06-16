@@ -34,8 +34,8 @@ function UserAccessPanel({ userId, onClose }: { userId: number; onClose: () => v
     <div className="bg-white rounded-xl border border-gray-200 shadow-lg">
       <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center">
-            <Users className="w-4 h-4 text-teal-600" />
+          <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center">
+            <Users className="w-4 h-4 text-primary" />
           </div>
           <div>
             {isLoading ? (
@@ -59,7 +59,7 @@ function UserAccessPanel({ userId, onClose }: { userId: number; onClose: () => v
         {user && (
           <div>
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">System Role</p>
-            <span className="px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-sm font-medium border border-teal-100">{user.role}</span>
+            <span className="px-3 py-1.5 bg-primary/8 text-primary rounded-lg text-sm font-medium border border-primary/15">{user.role}</span>
           </div>
         )}
 
@@ -67,18 +67,18 @@ function UserAccessPanel({ userId, onClose }: { userId: number; onClose: () => v
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Governance Roles</p>
-            <button onClick={() => setAddingRole(!addingRole)} className="text-xs text-teal-600 hover:text-teal-700 flex items-center gap-1">
+            <button onClick={() => setAddingRole(!addingRole)} className="text-xs text-primary hover:text-primary flex items-center gap-1">
               <Plus className="w-3 h-3" />Add
             </button>
           </div>
 
           {addingRole && (
             <div className="flex gap-2 mb-3">
-              <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+              <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)} className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
                 <option value="">Select role...</option>
                 {allRoles.map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
               </select>
-              <button onClick={() => selectedRole && addRoleMut.mutate(parseInt(selectedRole))} className="px-3 py-2 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700">Assign</button>
+              <button onClick={() => selectedRole && addRoleMut.mutate(parseInt(selectedRole))} className="px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/80">Assign</button>
               <button onClick={() => setAddingRole(false)} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600">Cancel</button>
             </div>
           )}
@@ -123,7 +123,7 @@ export default function UserAccessPage() {
 
   const ROLE_COLORS: Record<string, string> = {
     admin: "bg-red-100 text-red-700",
-    teacher: "bg-teal-100 text-teal-700",
+    teacher: "bg-primary/15 text-primary",
     student: "bg-blue-100 text-blue-700",
     parent: "bg-purple-100 text-purple-700",
     assistant: "bg-orange-100 text-orange-700",
@@ -147,7 +147,7 @@ export default function UserAccessPage() {
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1); }}
               placeholder="Search users..."
-              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+              className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
             />
           </div>
 
@@ -165,7 +165,7 @@ export default function UserAccessPage() {
                   <button
                     key={u.id}
                     onClick={() => setSelectedUser(selectedUser === u.id ? null : u.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left ${selectedUser === u.id ? "bg-teal-50" : ""}`}
+                    className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors text-left ${selectedUser === u.id ? "bg-primary/8" : ""}`}
                   >
                     <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
                       <span className="text-sm font-semibold text-gray-500">{(u.display_name || u.username || "?")[0].toUpperCase()}</span>
@@ -174,10 +174,10 @@ export default function UserAccessPage() {
                       <p className="text-sm font-medium text-gray-900 truncate">{u.display_name || u.username}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${ROLE_COLORS[u.role] || "bg-gray-100 text-gray-600"}`}>{u.role}</span>
-                        {u.gov_role_count > 0 && <span className="text-[10px] text-teal-600">+{u.gov_role_count} gov</span>}
+                        {u.gov_role_count > 0 && <span className="text-[10px] text-primary">+{u.gov_role_count} gov</span>}
                       </div>
                     </div>
-                    <ChevronRight className={`w-4 h-4 text-gray-300 flex-shrink-0 transition-transform ${selectedUser === u.id ? "rotate-90 text-teal-500" : ""}`} />
+                    <ChevronRight className={`w-4 h-4 text-gray-300 flex-shrink-0 transition-transform ${selectedUser === u.id ? "rotate-90 text-primary" : ""}`} />
                   </button>
                 ))}
               </div>

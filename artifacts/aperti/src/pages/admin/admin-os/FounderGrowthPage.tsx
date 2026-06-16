@@ -8,12 +8,12 @@ import {
 } from "recharts";
 
 const ROLE_COLORS: Record<string, string> = {
-  student: "#0D9488",
+  student: "hsl(var(--primary))",
   teacher: "#3B82F6",
   parent: "#8B5CF6",
   admin: "#F59E0B",
 };
-const PIE_COLORS = ["#0D9488", "#3B82F6", "#8B5CF6", "#F59E0B", "#10B981"];
+const PIE_COLORS = ["hsl(var(--primary))", "#3B82F6", "#8B5CF6", "#F59E0B", "#10B981"];
 
 export default function FounderGrowthPage() {
   const { data, isLoading } = useQuery({
@@ -39,7 +39,7 @@ export default function FounderGrowthPage() {
           <h3 className="font-semibold text-gray-800 mb-4">Conversion Funnel (last 30 days)</h3>
           <div className="flex items-center gap-2 overflow-x-auto pb-2">
             {[
-              { label: "Registrations", value: funnel.registrations ?? 0, color: "bg-teal-100 text-teal-700 border-teal-200" },
+              { label: "Registrations", value: funnel.registrations ?? 0, color: "bg-primary/15 text-primary border-primary/25" },
               { label: "Active Users", value: funnel.activeUsers ?? 0, color: "bg-blue-100 text-blue-700 border-blue-200" },
               { label: "Subscribers", value: funnel.subscribers ?? 0, color: "bg-purple-100 text-purple-700 border-purple-200" },
             ].map((step, i, arr) => (
@@ -80,7 +80,7 @@ export default function FounderGrowthPage() {
                 <XAxis dataKey="day" tick={{ fontSize: 10 }} tickFormatter={(v) => v.slice(5)} interval="preserveStartEnd" />
                 <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
                 <Tooltip labelFormatter={(v) => `Date: ${v}`} formatter={(v: any) => [v, "Signups"]} />
-                <Area type="monotone" dataKey="signups" stroke="#0D9488" fill="#ccfbf1" strokeWidth={2} />
+                <Area type="monotone" dataKey="signups" stroke="hsl(var(--primary))" fill="#ccfbf1" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           )}

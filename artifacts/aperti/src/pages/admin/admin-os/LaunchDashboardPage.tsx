@@ -25,11 +25,11 @@ interface DbIntegrityResult {
   checkedAt: string;
 }
 
-function StatCard({ icon, label, value, sub, color = "teal", href }: {
+function StatCard({ icon, label, value, sub, color = "primary", href }: {
   icon: React.ReactNode; label: string; value: string | number; sub?: string; color?: string; href?: string;
 }) {
   const colors: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-600",
+    primary: "bg-primary/8 text-primary",
     blue: "bg-blue-50 text-blue-600",
     amber: "bg-amber-50 text-amber-600",
     red: "bg-red-50 text-red-600",
@@ -38,7 +38,7 @@ function StatCard({ icon, label, value, sub, color = "teal", href }: {
   };
   const inner = (
     <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow h-full">
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${colors[color] || colors.teal}`}>
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${colors[color] || colors.primary}`}>
         {icon}
       </div>
       <p className="text-2xl font-black text-gray-900">{value}</p>
@@ -113,12 +113,12 @@ function PendingApprovals({ payments, enrollments }: { payments: number; enrollm
         <Link href="/admin/os/payments">
           <a className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors group">
             <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-teal-500" />
+              <CreditCard className="w-4 h-4 text-primary" />
               <span className="text-sm text-gray-700">Payment Approvals</span>
             </div>
             <div className="flex items-center gap-2">
               {payments > 0 && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">{payments}</span>}
-              <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-teal-500 transition-colors" />
+              <ArrowRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-primary transition-colors" />
             </div>
           </a>
         </Link>
@@ -160,7 +160,7 @@ function DbIntegrityWidget({ token }: { token: string | null }) {
     <div className="bg-white border border-gray-100 rounded-xl p-5 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-bold text-gray-900">Database Integrity</h3>
-        <button onClick={check} disabled={loading} className="text-xs text-teal-600 hover:text-teal-700 flex items-center gap-1">
+        <button onClick={check} disabled={loading} className="text-xs text-primary hover:text-primary flex items-center gap-1">
           <RefreshCw className={`w-3 h-3 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </button>
@@ -235,7 +235,7 @@ export default function LaunchDashboardPage() {
           <button
             onClick={load}
             disabled={loading}
-            className="flex items-center gap-2 px-3 py-1.5 text-sm text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50 disabled:opacity-60 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-primary border border-primary/25 rounded-lg hover:bg-primary/8 disabled:opacity-60 transition-colors"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
             Refresh
@@ -247,7 +247,7 @@ export default function LaunchDashboardPage() {
         <>
           {/* KPI Row */}
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={<Users className="w-4 h-4" />} label="Active Users (24h)" value={data.users.activeToday} sub={`${data.users.newToday} new today`} color="teal" />
+            <StatCard icon={<Users className="w-4 h-4" />} label="Active Users (24h)" value={data.users.activeToday} sub={`${data.users.newToday} new today`} color="primary" />
             <StatCard icon={<DollarSign className="w-4 h-4" />} label="Revenue This Month" value={`EGP ${data.revenue.thisMonth.toLocaleString()}`} sub={`EGP ${data.revenue.today} today`} color="green" href="/admin/os/founder-revenue" />
             <StatCard icon={<TrendingUp className="w-4 h-4" />} label="Active Subscriptions" value={data.subscriptions.active} sub={`${data.students.total} total students`} color="blue" href="/admin/os/subscriptions" />
             <StatCard icon={<Bell className="w-4 h-4" />} label="Pending Approvals" value={data.pendingApprovals.total} sub="payments + enrollments" color={data.pendingApprovals.total > 0 ? "amber" : "green"} />
@@ -278,14 +278,14 @@ export default function LaunchDashboardPage() {
             <h3 className="text-sm font-bold text-gray-900 mb-3">Quick Actions</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {[
-                { label: "Approve Payments", href: "/admin/os/payments", icon: CreditCard, color: "text-teal-600" },
+                { label: "Approve Payments", href: "/admin/os/payments", icon: CreditCard, color: "text-primary" },
                 { label: "User Management", href: "/admin/os/users", icon: Users, color: "text-blue-600" },
                 { label: "Route Health", href: "/admin/os/route-health", icon: Activity, color: "text-emerald-600" },
                 { label: "Security Audit", href: "/admin/os/security", icon: Shield, color: "text-purple-600" },
                 { label: "Launch Certification", href: "/admin/os/launch-certification", icon: CheckCircle2, color: "text-amber-600" },
                 { label: "Error Intelligence", href: "/admin/os/error-intelligence", icon: AlertTriangle, color: "text-red-600" },
                 { label: "Performance", href: "/admin/os/performance", icon: Zap, color: "text-orange-500" },
-                { label: "Founder Analytics", href: "/admin/os/founder-revenue", icon: TrendingUp, color: "text-teal-600" },
+                { label: "Founder Analytics", href: "/admin/os/founder-revenue", icon: TrendingUp, color: "text-primary" },
               ].map(item => (
                 <Link key={item.href} href={item.href}>
                   <a className="flex items-center gap-2 p-2.5 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors group">

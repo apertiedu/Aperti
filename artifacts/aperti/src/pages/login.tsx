@@ -6,8 +6,6 @@ import { useAuth } from "@/context/auth";
 import { useLocation, Link } from "wouter";
 import { Eye, EyeOff, AlertCircle, ShieldCheck, RefreshCw, ArrowRight, Ban, Smartphone, Clock } from "lucide-react";
 
-const TEAL = "#0D9488";
-const TEAL_LIGHT = "#E6F4F1";
 
 function generateCaptcha() {
   const ops = ["+", "-"] as const;
@@ -21,7 +19,7 @@ function FloatingOrb({ x, y, size, delay, duration }: { x: string; y: string; si
   return (
     <motion.div
       className="absolute rounded-full pointer-events-none"
-      style={{ left: x, top: y, width: size, height: size, background: `radial-gradient(circle, ${TEAL}22, transparent 70%)` }}
+      style={{ left: x, top: y, width: size, height: size, background: `radial-gradient(circle, ${"hsl(var(--primary))"}22, transparent 70%)` }}
       animate={{ y: [0, -30, 0], x: [0, 15, 0], scale: [1, 1.1, 1] }}
       transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
     />
@@ -60,14 +58,14 @@ function FloatField({
           maxLength={type === "password" ? 500 : 200}
           className="w-full h-11 px-4 rounded-xl text-sm text-slate-900 bg-white outline-none transition-all duration-200 border disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            borderColor: disabled ? "#e2e8f0" : focused ? TEAL : filled ? "#94a3b8" : "#e2e8f0",
-            boxShadow: focused && !disabled ? `0 0 0 3px ${TEAL}18` : "none",
+            borderColor: disabled ? "#e2e8f0" : focused ? "hsl(var(--primary))" : filled ? "#94a3b8" : "#e2e8f0",
+            boxShadow: focused && !disabled ? `0 0 0 3px ${"hsl(var(--primary))"}18` : "none",
           }}
         />
         {children}
         <motion.div
           className="absolute bottom-0 left-4 right-4 h-px rounded-full pointer-events-none"
-          style={{ background: TEAL }}
+          style={{ background: "hsl(var(--primary))" }}
           animate={{ scaleX: focused && !disabled ? 1 : 0, opacity: focused && !disabled ? 1 : 0 }}
           transition={{ duration: 0.2 }}
           initial={{ scaleX: 0, opacity: 0 }}
@@ -158,7 +156,7 @@ function SuspendedScreen() {
         <Link
           href="/"
           className="text-sm font-medium hover:underline transition-colors"
-          style={{ color: TEAL }}
+          style={{ color: "hsl(var(--primary))" }}
         >
           ← Return to home
         </Link>
@@ -203,7 +201,7 @@ function RateLimitedScreen({ secondsLeft }: { secondsLeft: number }) {
       </div>
       <p className="text-xs text-slate-400">
         If you've forgotten your password,{" "}
-        <Link href="/forgot-password" className="hover:underline" style={{ color: TEAL }}>
+        <Link href="/forgot-password" className="hover:underline" style={{ color: "hsl(var(--primary))" }}>
           reset it here
         </Link>
         .
@@ -300,7 +298,7 @@ export default function Login() {
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: `radial-gradient(circle, ${TEAL}0a 1px, transparent 1px)`,
+          backgroundImage: `radial-gradient(circle, ${"hsl(var(--primary))"}0a 1px, transparent 1px)`,
           backgroundSize: "28px 28px",
         }}
       />
@@ -320,7 +318,7 @@ export default function Login() {
           <Link href="/">
             <span className="text-2xl font-extrabold tracking-tight text-slate-900 cursor-pointer select-none">
               Aperti<motion.span
-                style={{ color: suspended ? "#dc2626" : rateLimited ? "#d97706" : TEAL }}
+                style={{ color: suspended ? "#dc2626" : rateLimited ? "#d97706" : "hsl(var(--primary))" }}
                 animate={{ opacity: [1, 0.6, 1] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               >.</motion.span>
@@ -330,7 +328,7 @@ export default function Login() {
         </motion.div>
 
         <motion.div
-          className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white shadow-xl shadow-teal-900/5 p-8"
+          className="bg-white/80 backdrop-blur-xl rounded-2xl border border-white shadow-xl shadow-primary/10 p-8"
           style={{ borderColor: suspended ? "rgba(220,38,38,0.18)" : rateLimited ? "rgba(217,119,6,0.18)" : "rgba(0,121,107,0.12)" }}
           whileHover={{ boxShadow: "0 20px 60px rgba(0,121,107,0.10)" }}
           transition={{ duration: 0.3 }}
@@ -377,7 +375,7 @@ export default function Login() {
                     >
                       <div className="flex items-center justify-between">
                         <Label className="text-slate-600 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
-                          <ShieldCheck className="h-3.5 w-3.5" style={{ color: TEAL }} />
+                          <ShieldCheck className="h-3.5 w-3.5" style={{ color: "hsl(var(--primary))" }} />
                           Security check
                         </Label>
                         <motion.button
@@ -397,7 +395,7 @@ export default function Login() {
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ type: "spring", stiffness: 300, damping: 20 }}
                           className="flex-shrink-0 rounded-xl px-4 py-2.5 text-sm font-mono font-bold select-none"
-                          style={{ background: TEAL_LIGHT, color: TEAL, letterSpacing: "0.12em" }}
+                          style={{ background: TEAL_LIGHT, color: "hsl(var(--primary))", letterSpacing: "0.12em" }}
                         >
                           {captcha.a} {captcha.op} {captcha.b} = ?
                         </motion.div>
@@ -408,8 +406,8 @@ export default function Login() {
                           placeholder="?"
                           className="h-11 w-20 text-center rounded-xl border text-sm font-semibold outline-none transition-all duration-200"
                           style={{
-                            borderColor: captchaInput ? (captchaValid ? TEAL : "#f87171") : "#e2e8f0",
-                            boxShadow: captchaInput ? (captchaValid ? `0 0 0 3px ${TEAL}18` : "0 0 0 3px #f8717118") : "none",
+                            borderColor: captchaInput ? (captchaValid ? "hsl(var(--primary))" : "#f87171") : "#e2e8f0",
+                            boxShadow: captchaInput ? (captchaValid ? `0 0 0 3px ${"hsl(var(--primary))"}18` : "0 0 0 3px #f8717118") : "none",
                           }}
                         />
                         <AnimatePresence mode="wait">
@@ -467,7 +465,7 @@ export default function Login() {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.35 }}
                     >
-                      <Link href="/forgot-password" className="text-xs hover:underline transition-colors" style={{ color: TEAL }}>
+                      <Link href="/forgot-password" className="text-xs hover:underline transition-colors" style={{ color: "hsl(var(--primary))" }}>
                         Forgot password?
                       </Link>
                     </motion.div>
@@ -482,10 +480,10 @@ export default function Login() {
                         disabled={!canSubmit}
                         className="w-full h-11 rounded-xl font-semibold text-white text-sm relative overflow-hidden flex items-center justify-center gap-2"
                         style={{
-                          background: canSubmit ? TEAL : "#94a3b8",
+                          background: canSubmit ? "hsl(var(--primary))" : "#94a3b8",
                           cursor: canSubmit ? "pointer" : "not-allowed",
                         }}
-                        whileHover={canSubmit ? { scale: 1.015, boxShadow: `0 8px 24px ${TEAL}40` } : {}}
+                        whileHover={canSubmit ? { scale: 1.015, boxShadow: `0 8px 24px ${"hsl(var(--primary))"}40` } : {}}
                         whileTap={canSubmit ? { scale: 0.98 } : {}}
                         transition={{ duration: 0.15 }}
                       >
@@ -522,7 +520,7 @@ export default function Login() {
                       className="mt-3 text-center text-xs text-amber-600"
                     >
                       Multiple failed attempts. Please double-check your credentials or{" "}
-                      <Link href="/forgot-password" className="underline" style={{ color: TEAL }}>reset your password</Link>.
+                      <Link href="/forgot-password" className="underline" style={{ color: "hsl(var(--primary))" }}>reset your password</Link>.
                     </motion.p>
                   )}
                 </AnimatePresence>
@@ -540,7 +538,7 @@ export default function Login() {
               transition={{ delay: 0.5 }}
             >
               Don't have an account?{" "}
-              <Link href="/register" className="font-semibold hover:underline" style={{ color: TEAL }}>
+              <Link href="/register" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>
                 Create one free
               </Link>
             </motion.p>

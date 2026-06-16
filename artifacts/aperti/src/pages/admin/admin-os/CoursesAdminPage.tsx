@@ -57,7 +57,7 @@ export default function CoursesAdminPage() {
 
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search courses…" className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white" />
+        <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search courses…" className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary bg-white" />
       </div>
 
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -79,8 +79,8 @@ export default function CoursesAdminPage() {
                 <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <BookOpen className="w-4 h-4 text-teal-600" />
+                      <div className="w-8 h-8 bg-primary/15 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <BookOpen className="w-4 h-4 text-primary" />
                       </div>
                       <div>
                         <p className="font-medium text-gray-900 truncate max-w-40">{c.name}</p>
@@ -104,7 +104,7 @@ export default function CoursesAdminPage() {
                           <EyeOff className="w-3 h-3" /> Unpublish
                         </button>
                       ) : (
-                        <button onClick={() => toggleMutation.mutate({ id: c.id, visibility: "published" })} className="flex items-center gap-1 px-2 py-1 text-xs text-teal-600 border border-teal-200 rounded hover:bg-teal-50">
+                        <button onClick={() => toggleMutation.mutate({ id: c.id, visibility: "published" })} className="flex items-center gap-1 px-2 py-1 text-xs text-primary border border-primary/30 rounded hover:bg-primary/5">
                           <Eye className="w-3 h-3" /> Publish
                         </button>
                       )}

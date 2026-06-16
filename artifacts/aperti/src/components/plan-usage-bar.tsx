@@ -27,19 +27,19 @@ export default function PlanUsageBar({ resource, label }: PlanUsageBarProps) {
     ? "#EF4444"
     : isWarning
     ? "#F59E0B"
-    : "#0D9488";
+    : "hsl(var(--primary))";
 
   const bgColor = atLimit
     ? "bg-red-50 border-red-100"
     : isWarning
     ? "bg-amber-50 border-amber-100"
-    : "bg-teal-50/60 border-teal-100/60";
+    : "bg-primary/5 border-primary/15";
 
   const textColor = atLimit
     ? "text-red-700"
     : isWarning
     ? "text-amber-700"
-    : "text-teal-700";
+    : "text-primary";
 
   return (
     <motion.div
@@ -72,7 +72,7 @@ export default function PlanUsageBar({ resource, label }: PlanUsageBarProps) {
             {remaining} remaining — consider upgrading soon.
           </p>
         ) : (
-          <p className="text-[11px] mt-1.5 text-teal-600">
+          <p className="text-[11px] mt-1.5 text-primary">
             {remaining} slot{remaining !== 1 ? "s" : ""} remaining on your current plan.
           </p>
         )}

@@ -470,7 +470,7 @@ export default function TeacherSchedulePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <CalendarDays className="text-teal-600" size={24} />
+            <CalendarDays className="text-primary" size={24} />
             My Schedule
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">
@@ -485,18 +485,18 @@ export default function TeacherSchedulePage() {
             key={t}
             onClick={() => setTab(t)}
             className={`flex items-center gap-2 px-5 py-2 text-sm font-medium rounded-lg transition-all capitalize ${
-              tab === t ? "bg-teal-600 text-white shadow-sm" : "text-slate-600 hover:bg-card"
+              tab === t ? "bg-primary text-white shadow-sm" : "text-slate-600 hover:bg-card"
             }`}
           >
             {t === "lessons" ? <BookOpen size={15} /> : <Clock size={15} />}
             {t === "lessons" ? "Lessons" : "Session Slots"}
             {t === "lessons" && lessons.length > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${tab === t ? "bg-teal-500 text-white" : "bg-slate-200 text-slate-600"}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${tab === t ? "bg-primary text-white" : "bg-slate-200 text-slate-600"}`}>
                 {lessons.length}
               </span>
             )}
             {t === "slots" && activeSlots.length > 0 && (
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${tab === t ? "bg-teal-500 text-white" : "bg-slate-200 text-slate-600"}`}>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${tab === t ? "bg-primary text-white" : "bg-slate-200 text-slate-600"}`}>
                 {activeSlots.length}
               </span>
             )}
@@ -518,7 +518,7 @@ export default function TeacherSchedulePage() {
               </p>
               <Dialog open={createLessonOpen} onOpenChange={setCreateLessonOpen}>
                 <DialogTrigger asChild>
-                  <Button className="gap-2 bg-teal-600 hover:bg-teal-700">
+                  <Button className="gap-2 bg-primary hover:bg-primary/80">
                     <Plus size={16} />
                     New Lesson
                   </Button>
@@ -562,8 +562,8 @@ export default function TeacherSchedulePage() {
                         <CardContent className="p-4">
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                              <div className="w-11 h-11 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
-                                <span className="text-teal-700 font-bold text-sm">{lesson.lessonNumber}</span>
+                              <div className="w-11 h-11 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                                <span className="text-primary font-bold text-sm">{lesson.lessonNumber}</span>
                               </div>
                               <div className="min-w-0">
                                 <div className="flex items-center gap-2 flex-wrap">
@@ -598,7 +598,7 @@ export default function TeacherSchedulePage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-xs text-slate-500 gap-1 hover:text-teal-600"
+                                className="text-xs text-slate-500 gap-1 hover:text-primary"
                                 onClick={() => { setTab("slots"); setCreateSlotOpen(true); }}
                               >
                                 <Plus size={12} />
@@ -633,7 +633,7 @@ export default function TeacherSchedulePage() {
 
                 <button
                   onClick={() => setTab("slots")}
-                  className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-teal-200 text-sm text-teal-600 hover:bg-teal-50 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-primary/25 text-sm text-primary hover:bg-primary/8 transition-colors"
                 >
                   Manage session slots
                   <ChevronRight size={14} />
@@ -671,7 +671,7 @@ export default function TeacherSchedulePage() {
                   </p>
                   <Dialog open={createSlotOpen} onOpenChange={setCreateSlotOpen}>
                     <DialogTrigger asChild>
-                      <Button className="gap-2 bg-teal-600 hover:bg-teal-700">
+                      <Button className="gap-2 bg-primary hover:bg-primary/80">
                         <Plus size={16} />
                         New Slot
                       </Button>
@@ -709,7 +709,7 @@ export default function TeacherSchedulePage() {
                         <Card key={lesson.id} className="border border-slate-100 shadow-sm">
                           <CardHeader className="pb-2">
                             <CardTitle className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                              <CalendarDays size={14} className="text-teal-600" />
+                              <CalendarDays size={14} className="text-primary" />
                               Lesson {lesson.lessonNumber}
                               <span className="text-slate-400 font-normal">— {lesson.dayOfWeek} {lesson.startTime}</span>
                               <Badge variant="secondary" className="text-[10px] ml-auto">{lessonSlots.length}</Badge>

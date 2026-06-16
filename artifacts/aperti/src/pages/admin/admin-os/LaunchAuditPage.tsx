@@ -62,7 +62,7 @@ export default function LaunchAuditPage() {
     <div className="p-6 space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Rocket className="text-teal-600" size={24} /> Launch Readiness Audit</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Rocket className="text-primary" size={24} /> Launch Readiness Audit</h1>
           <p className="text-sm text-gray-500 mt-1">Automated and manual checks confirming Aperti is ready for production launch.</p>
         </div>
         <button onClick={() => refetch()} className="flex items-center gap-2 px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">
@@ -121,7 +121,7 @@ export default function LaunchAuditPage() {
               <div key={cat} className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-100">
                   <div className="flex items-center gap-2">
-                    <CatIcon size={15} className="text-teal-600" />
+                    <CatIcon size={15} className="text-primary" />
                     <span className="text-sm font-semibold text-gray-700">{CATEGORY_LABELS[cat] ?? cat}</span>
                   </div>
                   <span className="text-xs text-gray-400">{passed}/{catItems.length} passed</span>
@@ -150,7 +150,7 @@ export default function LaunchAuditPage() {
                                 const sel = document.getElementById(`status-${item.key}`) as HTMLSelectElement;
                                 updateItem.mutate({ key: item.key, status: sel?.value ?? "pass", notes: editNotes });
                               }}
-                              className="px-3 py-1 bg-teal-600 text-white rounded text-xs hover:bg-teal-700">Save</button>
+                              className="px-3 py-1 bg-primary text-white rounded text-xs hover:bg-primary/80">Save</button>
                             <button onClick={() => setEditingKey(null)} className="px-3 py-1 border border-gray-200 rounded text-xs text-gray-500 hover:bg-gray-50">Cancel</button>
                           </div>
                         </div>
@@ -167,10 +167,10 @@ export default function LaunchAuditPage() {
                               <span className="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">Manual</span>
                             )}
                             {item.checked_manually && (
-                              <span className="text-xs px-1.5 py-0.5 bg-teal-50 text-teal-600 rounded">Verified</span>
+                              <span className="text-xs px-1.5 py-0.5 bg-primary/8 text-primary rounded">Verified</span>
                             )}
                             <button onClick={() => { setEditingKey(item.key); setEditNotes(item.notes ?? ""); }}
-                              className="text-xs text-gray-400 hover:text-teal-600 transition-colors px-2 py-1 rounded hover:bg-gray-50">
+                              className="text-xs text-gray-400 hover:text-primary transition-colors px-2 py-1 rounded hover:bg-gray-50">
                               Update
                             </button>
                           </div>

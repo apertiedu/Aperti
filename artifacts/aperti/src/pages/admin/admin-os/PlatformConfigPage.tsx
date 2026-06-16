@@ -22,12 +22,12 @@ interface ConfigSection {
 function SectionCard({ section }: { section: ConfigSection }) {
   return (
     <Link href={section.href}>
-      <a className="block bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-teal-200 transition-all group">
+      <a className="block bg-white border border-gray-100 rounded-xl p-5 shadow-sm hover:shadow-md hover:border-primary/25 transition-all group">
         <div className="flex items-start justify-between">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${section.color}`}>
             <section.icon className="w-5 h-5" />
           </div>
-          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-teal-500 transition-colors mt-1" />
+          <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-primary transition-colors mt-1" />
         </div>
         <h3 className="text-sm font-bold text-gray-900">{section.label}</h3>
         <p className="text-xs text-gray-500 mt-1">{section.description}</p>
@@ -56,7 +56,7 @@ function QuickToggle({ label, description, value, onToggle, loading }: {
         className={`flex-shrink-0 transition-colors ${loading ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
       >
         {value
-          ? <ToggleRight className="w-7 h-7 text-teal-500" />
+          ? <ToggleRight className="w-7 h-7 text-primary" />
           : <ToggleLeft className="w-7 h-7 text-gray-300" />
         }
       </button>
@@ -114,7 +114,7 @@ export default function PlatformConfigPage() {
   };
 
   const sections: ConfigSection[] = [
-    { id: "plans", label: "Subscription Plans", icon: DollarSign, description: "Manage pricing tiers, limits, and trial periods", href: "/admin/os/plans", color: "bg-teal-50 text-teal-600" },
+    { id: "plans", label: "Subscription Plans", icon: DollarSign, description: "Manage pricing tiers, limits, and trial periods", href: "/admin/os/plans", color: "bg-primary/8 text-primary" },
     { id: "payments", label: "Payment Approvals", icon: CreditCard, description: "Review and approve InstaPay screenshot submissions", href: "/admin/os/payments", color: "bg-emerald-50 text-emerald-600", badgeCount: pendingPayments },
     { id: "users", label: "User Management", icon: Users, description: "Manage accounts, roles, and access permissions", href: "/admin/os/users", color: "bg-blue-50 text-blue-600" },
     { id: "features-matrix", label: "Feature Visibility", icon: Zap, description: "Control which features are visible to which roles", href: "/admin/os/features-matrix", color: "bg-purple-50 text-purple-600" },
@@ -155,7 +155,7 @@ export default function PlatformConfigPage() {
             <p className="text-xs text-gray-400 mt-0.5">Enable or disable major platform features instantly</p>
           </div>
           <Link href="/admin/os/features-matrix">
-            <a className="text-xs text-teal-600 hover:text-teal-700 flex items-center gap-1">
+            <a className="text-xs text-primary hover:text-primary flex items-center gap-1">
               Full Matrix <ExternalLink className="w-3 h-3" />
             </a>
           </Link>
@@ -185,7 +185,7 @@ export default function PlatformConfigPage() {
             { label: "Error Intelligence", href: "/admin/os/error-intelligence" },
           ].map(l => (
             <Link key={l.href} href={l.href}>
-              <a className="flex items-center gap-2 p-2.5 rounded-lg border border-teal-100 bg-teal-50/50 text-teal-700 text-xs font-medium hover:bg-teal-50 transition-colors">
+              <a className="flex items-center gap-2 p-2.5 rounded-lg border border-primary/15 bg-primary/8/50 text-primary text-xs font-medium hover:bg-primary/8 transition-colors">
                 <ChevronRight className="w-3.5 h-3.5" />
                 {l.label}
               </a>

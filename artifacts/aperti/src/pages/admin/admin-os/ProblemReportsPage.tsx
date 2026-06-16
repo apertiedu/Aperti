@@ -96,7 +96,7 @@ function ReportRow({ report, onUpdate }: { report: any; onUpdate: (id: number, d
                   {report.page_url && (
                     <div>
                       <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Page URL</p>
-                      <p className="text-sm text-teal-600 break-all">{report.page_url}</p>
+                      <p className="text-sm text-primary break-all">{report.page_url}</p>
                     </div>
                   )}
                   {report.user_agent && (
@@ -123,7 +123,7 @@ function ReportRow({ report, onUpdate }: { report: any; onUpdate: (id: number, d
                   <select
                     value={status}
                     onChange={e => setStatus(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white"
                   >
                     {Object.entries(STATUS_META).map(([k, v]) => (
                       <option key={k} value={k}>{v.label}</option>
@@ -137,7 +137,7 @@ function ReportRow({ report, onUpdate }: { report: any; onUpdate: (id: number, d
                     onChange={e => setNotes(e.target.value)}
                     rows={2}
                     placeholder="Add internal notes…"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 resize-none"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 resize-none"
                   />
                 </div>
               </div>
@@ -146,7 +146,7 @@ function ReportRow({ report, onUpdate }: { report: any; onUpdate: (id: number, d
                 <button
                   onClick={save}
                   disabled={saving}
-                  className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50"
                 >
                   {saving ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
                   Save Changes
@@ -236,7 +236,7 @@ export default function ProblemReportsPage() {
 
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <div className="w-7 h-7 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">

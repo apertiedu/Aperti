@@ -35,7 +35,6 @@ interface RepairLogEntry {
   auto_fixed: boolean;
 }
 
-const TEAL = "#0D9488";
 
 const ORPHAN_LABELS: Record<string, { label: string; description: string }> = {
   enrollments_no_student:    { label: "Enrollments without student", description: "Enrollment records pointing to deleted students" },
@@ -51,7 +50,7 @@ function ScoreGauge({ score, size = 80 }: { score: number; size?: number }) {
   const r = size * 0.38;
   const circ = 2 * Math.PI * r;
   const dash = (score / 100) * circ;
-  const color = score >= 95 ? "#16a34a" : score >= 80 ? "#0D9488" : score >= 60 ? "#d97706" : "#dc2626";
+  const color = score >= 95 ? "#16a34a" : score >= 80 ? "hsl(var(--primary))" : score >= 60 ? "#d97706" : "#dc2626";
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#e5e7eb" strokeWidth={size * 0.08} />
@@ -133,7 +132,7 @@ export default function RepairPanelPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#E6F4F1" }}>
-              <Wrench className="w-4 h-4" style={{ color: TEAL }} />
+              <Wrench className="w-4 h-4" className="text-primary" />
             </div>
             <h1 className="text-xl font-bold text-slate-900">System Repair Panel</h1>
           </div>
@@ -144,7 +143,7 @@ export default function RepairPanelPage() {
         <div className="flex gap-2">
           <button
             onClick={() => { refetchOrphans(); refetchScore(); }}
-            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-teal-600 border border-gray-200 rounded-lg px-3 py-1.5 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-primary border border-gray-200 rounded-lg px-3 py-1.5 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" /> Refresh All
           </button>
@@ -153,7 +152,7 @@ export default function RepairPanelPage() {
               onClick={handleFixAll}
               disabled={fixMutation.isPending}
               className="flex items-center gap-1.5 text-xs text-white rounded-lg px-3 py-1.5 font-semibold transition-colors"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
             >
               <Hammer className="w-3.5 h-3.5" /> Fix All Fixable
             </button>
@@ -165,7 +164,7 @@ export default function RepairPanelPage() {
       <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide">Launch Readiness Score</h2>
-          <button onClick={() => refetchScore()} className="text-xs text-slate-400 hover:text-teal-600">
+          <button onClick={() => refetchScore()} className="text-xs text-slate-400 hover:text-primary">
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -221,7 +220,7 @@ export default function RepairPanelPage() {
               </span>
             )}
           </div>
-          <button onClick={() => refetchOrphans()} className="text-xs text-slate-400 hover:text-teal-600">
+          <button onClick={() => refetchOrphans()} className="text-xs text-slate-400 hover:text-primary">
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -272,7 +271,7 @@ export default function RepairPanelPage() {
                         onClick={() => handleFix(orphan.type)}
                         disabled={fixMutation.isPending}
                         className="flex items-center gap-1.5 text-xs font-semibold text-white px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
-                        style={{ background: isFixing ? "#9CA3AF" : "#0D9488" }}
+                        style={{ background: isFixing ? "#9CA3AF" : "hsl(var(--primary))" }}
                       >
                         {isFixing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Hammer className="w-3 h-3" />}
                         {isFixing ? "Fixing…" : "Fix"}

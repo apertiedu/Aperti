@@ -25,11 +25,11 @@ import {
   ReferenceLine,
 } from "recharts";
 
-function StatCard({ icon: Icon, label, value, sub, color = "teal" }: {
+function StatCard({ icon: Icon, label, value, sub, color = "primary" }: {
   icon: any; label: string; value: string | number; sub?: string; color?: string;
 }) {
   const colorMap: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-700",
+    primary: "bg-primary/8 text-primary",
     blue: "bg-blue-50 text-blue-700",
     amber: "bg-amber-50 text-amber-700",
     rose: "bg-rose-50 text-rose-700",
@@ -44,7 +44,7 @@ function StatCard({ icon: Icon, label, value, sub, color = "teal" }: {
             <p className="text-2xl font-bold text-slate-800 mt-1">{value}</p>
             {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
           </div>
-          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.teal}`}>
+          <div className={`p-2.5 rounded-xl ${colorMap[color] ?? colorMap.primary}`}>
             <Icon size={18} />
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function AiAnalytics() {
       <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Brain size={22} className="text-teal-600" />
+            <Brain size={22} className="text-primary" />
             <h1 className="text-2xl font-bold text-slate-800">AI Analytics</h1>
           </div>
           <p className="text-sm text-slate-500">Monitor AI usage, performance, and impact across Aperti</p>
@@ -120,7 +120,7 @@ export default function AiAnalytics() {
       <section>
         <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Usage Metrics</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={Activity} label="Total AI Calls" value={isLoading ? "—" : stats?.totalCalls ?? 0} color="teal" />
+          <StatCard icon={Activity} label="Total AI Calls" value={isLoading ? "—" : stats?.totalCalls ?? 0} color="primary" />
           <StatCard icon={Zap} label="Last 7 Days" value={isLoading ? "—" : stats?.recentCallsLast7Days ?? 0} color="blue" />
           <StatCard icon={DollarSign} label="Est. Cost (USD)" value={isLoading ? "—" : `$${stats?.estimatedCostUSD ?? "0.00"}`} sub={`${stats?.totalTokens ?? 0} tokens`} color="amber" />
           <StatCard icon={TrendingUp} label="Avg Confidence" value={isLoading ? "—" : `${Math.round((stats?.avgConfidence ?? 0) * 100)}%`} color="violet" />
@@ -140,7 +140,7 @@ export default function AiAnalytics() {
                   return (
                     <div key={day.date} className="flex-1 flex flex-col items-center gap-1 group relative">
                       <div
-                        className="w-full rounded-t bg-teal-400 group-hover:bg-teal-500 transition-all cursor-default"
+                        className="w-full rounded-t bg-primary group-hover:bg-primary transition-all cursor-default"
                         style={{ height: h }}
                       />
                       <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-slate-800 text-white text-xs px-1.5 py-0.5 rounded whitespace-nowrap pointer-events-none">
@@ -166,7 +166,7 @@ export default function AiAnalytics() {
       <section>
         <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Accuracy & Acceptance</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={CheckCircle2} label="Accepted" value={isLoading ? "—" : stats?.totalAccepted ?? 0} color="teal" />
+          <StatCard icon={CheckCircle2} label="Accepted" value={isLoading ? "—" : stats?.totalAccepted ?? 0} color="primary" />
           <StatCard icon={XCircle} label="Rejected" value={isLoading ? "—" : stats?.totalRejected ?? 0} color="rose" />
           <StatCard icon={Clock} label="Pending Review" value={isLoading ? "—" : stats?.totalPending ?? 0} color="amber" />
           <StatCard icon={BarChart3} label="Acceptance Rate" value={isLoading ? "—" : `${stats?.overallAcceptanceRate ?? 0}%`} color="blue" />
@@ -208,7 +208,7 @@ export default function AiAnalytics() {
           <StatCard icon={Network} label="Total Nodes" value={weaveLoading ? "—" : weaveHealth?.nodeCount ?? 0} color="violet" />
           <StatCard icon={Activity} label="Total Edges" value={weaveLoading ? "—" : weaveHealth?.edgeCount ?? 0} color="blue" />
           <StatCard icon={AlertCircle} label="Disconnected" value={weaveLoading ? "—" : weaveHealth?.disconnectedNodes ?? 0} sub="nodes with no edges" color="amber" />
-          <StatCard icon={Brain} label="Node Types" value={weaveLoading ? "—" : Object.keys(weaveHealth?.nodesByType ?? {}).length} color="teal" />
+          <StatCard icon={Brain} label="Node Types" value={weaveLoading ? "—" : Object.keys(weaveHealth?.nodesByType ?? {}).length} color="primary" />
         </div>
         {weaveHealth?.nodesByType && Object.keys(weaveHealth.nodesByType).length > 0 && (
           <Card className="border border-slate-100 shadow-sm mt-4">
@@ -327,7 +327,7 @@ function ConfidenceTrendChart() {
     <section>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide flex items-center gap-2">
-          <TrendingUp size={15} className="text-teal-600" />
+          <TrendingUp size={15} className="text-primary" />
           AI Confidence Trend
         </h2>
         <div className="flex items-center gap-2">
@@ -336,7 +336,7 @@ function ConfidenceTrendChart() {
               <button
                 key={v}
                 onClick={() => setView(v)}
-                className={`px-2.5 py-1 transition-colors ${view === v ? "bg-teal-600 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}
+                className={`px-2.5 py-1 transition-colors ${view === v ? "bg-primary text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}
               >
                 {v === "overall" ? "Overall" : "By Module"}
               </button>
@@ -347,7 +347,7 @@ function ConfidenceTrendChart() {
               <button
                 key={d}
                 onClick={() => setWindowDays(d)}
-                className={`px-2.5 py-1 transition-colors ${windowDays === d ? "bg-teal-600 text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}
+                className={`px-2.5 py-1 transition-colors ${windowDays === d ? "bg-primary text-white" : "bg-white text-slate-500 hover:bg-slate-50"}`}
               >
                 {d}d
               </button>
@@ -371,7 +371,7 @@ function ConfidenceTrendChart() {
             <div className="flex flex-col items-center justify-center py-12 text-slate-400">
               <AlertCircle size={28} className="mb-2 text-rose-400" />
               <p className="text-sm text-slate-500">Failed to load confidence trend</p>
-              <button onClick={() => refetch()} className="mt-2 text-xs text-teal-600 underline">Retry</button>
+              <button onClick={() => refetch()} className="mt-2 text-xs text-primary underline">Retry</button>
             </div>
           )}
 
@@ -394,9 +394,9 @@ function ConfidenceTrendChart() {
                   const delta = latest != null && earliest != null ? Math.round((latest - earliest) * 10) / 10 : null;
                   return (
                     <>
-                      <div className="bg-teal-50 rounded-xl p-3 border border-teal-100">
-                        <p className="text-xl font-bold text-teal-700">{latest != null ? `${latest}%` : "—"}</p>
-                        <p className="text-xs text-teal-600 mt-0.5">Latest</p>
+                      <div className="bg-primary/8 rounded-xl p-3 border border-primary/15">
+                        <p className="text-xl font-bold text-primary">{latest != null ? `${latest}%` : "—"}</p>
+                        <p className="text-xs text-primary mt-0.5">Latest</p>
                       </div>
                       <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
                         <p className="text-xl font-bold text-slate-700">{avg != null ? `${avg}%` : "—"}</p>
@@ -439,7 +439,7 @@ function ConfidenceTrendChart() {
               </ResponsiveContainer>
 
               <div className="flex items-center gap-4 text-xs text-slate-400 pt-1 border-t border-slate-50">
-                <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-teal-500 inline-block rounded" /> Avg Confidence</span>
+                <span className="flex items-center gap-1.5"><span className="w-3 h-0.5 bg-primary inline-block rounded" /> Avg Confidence</span>
                 <span className="flex items-center gap-1.5"><span className="w-3 h-px bg-violet-500 inline-block rounded border-dashed border-t border-violet-500" style={{ borderStyle: "dashed" }} /> Acceptance Rate</span>
                 <span className="ml-auto">Green line = 80% target · Amber = 60% warning</span>
               </div>
@@ -533,9 +533,9 @@ function ImpactPanel() {
               {/* Comparison grid */}
               {impact.impactDelta !== null && (
                 <div className="grid grid-cols-3 gap-4 pt-1">
-                  <div className="text-center p-3 bg-teal-50 rounded-xl border border-teal-100">
-                    <p className="text-xl font-bold text-teal-700">{impact.mentorAvgGrade}%</p>
-                    <p className="text-xs text-teal-600 mt-0.5">Mentor Users</p>
+                  <div className="text-center p-3 bg-primary/8 rounded-xl border border-primary/15">
+                    <p className="text-xl font-bold text-primary">{impact.mentorAvgGrade}%</p>
+                    <p className="text-xs text-primary mt-0.5">Mentor Users</p>
                     <p className="text-xs text-slate-400">{impact.mentorCount} students</p>
                   </div>
                   <div className="text-center p-3 bg-slate-50 rounded-xl border border-slate-100 flex flex-col items-center justify-center">

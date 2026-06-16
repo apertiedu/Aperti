@@ -8,7 +8,7 @@ import { Plus, Calendar, Video, BookOpen, Trophy, Wrench, Edit2, ExternalLink } 
 const TYPE_META: Record<string, { label: string; icon: any; color: string }> = {
   webinar:     { label: "Webinar",     icon: Video,     color: "bg-blue-100 text-blue-700" },
   launch:      { label: "Launch",      icon: Trophy,    color: "bg-purple-100 text-purple-700" },
-  training:    { label: "Training",    icon: BookOpen,  color: "bg-teal-100 text-teal-700" },
+  training:    { label: "Training",    icon: BookOpen,  color: "bg-primary/15 text-primary" },
   competition: { label: "Competition", icon: Trophy,    color: "bg-yellow-100 text-yellow-700" },
   workshop:    { label: "Workshop",    icon: Wrench,    color: "bg-orange-100 text-orange-700" },
 };
@@ -45,7 +45,7 @@ export default function EventsAdminPage() {
           <h1 className="text-2xl font-bold text-gray-900">Events</h1>
           <p className="text-sm text-gray-500 mt-0.5">{upcoming.length} upcoming · {events.length} total</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+        <button onClick={openCreate} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> New Event
         </button>
       </div>
@@ -86,7 +86,7 @@ export default function EventsAdminPage() {
                 {event.capacity && <p>Capacity: {event.capacity}</p>}
               </div>
               {event.registration_url && (
-                <a href={event.registration_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-teal-600 hover:text-teal-700 transition-colors">
+                <a href={event.registration_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-primary hover:text-primary transition-colors">
                   <ExternalLink className="w-3 h-3" /> Registration Link
                 </a>
               )}
@@ -102,23 +102,23 @@ export default function EventsAdminPage() {
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
               <div className="px-6 py-4 border-b border-gray-100"><h2 className="text-lg font-bold text-gray-900">{editing ? "Edit Event" : "New Event"}</h2></div>
               <div className="px-6 py-4 space-y-4">
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Title *</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                <div><label className="block text-xs font-medium text-gray-600 mb-1">Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">Title *</label><input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+                <div><label className="block text-xs font-medium text-gray-600 mb-1">Description</label><textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div><label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
-                    <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                       {Object.entries(TYPE_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                     </select>
                   </div>
-                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Date & Time</label><input type="datetime-local" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Capacity</label><input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Registration URL</label><input value={form.registration_url} onChange={(e) => setForm({ ...form, registration_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Date & Time</label><input type="datetime-local" value={form.event_date} onChange={(e) => setForm({ ...form, event_date: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Capacity</label><input type="number" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Registration URL</label><input value={form.registration_url} onChange={(e) => setForm({ ...form, registration_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
                 </div>
-                <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} className="w-4 h-4 rounded text-teal-600" /><span className="text-sm text-gray-700">Published publicly</span></label>
+                <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm({ ...form, is_published: e.target.checked })} className="w-4 h-4 rounded text-primary" /><span className="text-sm text-gray-700">Published publicly</span></label>
               </div>
               <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
                 <button onClick={closeModal} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50">Cancel</button>
-                <button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending} className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 disabled:opacity-50">
+                <button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 disabled:opacity-50">
                   {saveMutation.isPending ? "Saving..." : editing ? "Update" : "Create Event"}
                 </button>
               </div>

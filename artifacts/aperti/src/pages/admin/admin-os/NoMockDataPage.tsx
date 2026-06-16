@@ -15,7 +15,7 @@ function AuditItem({ check, index }: { check: any; index: number }) {
   const cfg = statusMap[check.status as string] || { icon: Loader2, color: "text-gray-400", bg: "bg-gray-50", border: "border-gray-100", label: "…" };
   const Icon = cfg.icon;
   const sourceColors: Record<string, string> = {
-    database: "bg-teal-50 text-teal-700",
+    database: "bg-primary/8 text-primary",
     demo_preview: "bg-blue-50 text-blue-600",
     unknown: "bg-gray-100 text-gray-500",
     error: "bg-red-50 text-red-600",
@@ -68,7 +68,7 @@ export default function NoMockDataPage() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <DatabaseZap className="w-6 h-6 text-teal-600" />
+            <DatabaseZap className="w-6 h-6 text-primary" />
             No Mock Data Certification
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -78,7 +78,7 @@ export default function NoMockDataPage() {
         <button
           onClick={() => { qc.invalidateQueries({ queryKey: ["no-mock-data-audit"] }); refetch(); }}
           disabled={isFetching}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/80 disabled:opacity-60 transition-colors"
         >
           <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
           {isFetching ? "Auditing…" : "Run Audit"}
@@ -104,21 +104,21 @@ export default function NoMockDataPage() {
           <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
             className="h-32 bg-gray-50 rounded-xl border border-gray-100 flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
-              <div className="w-7 h-7 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-sm text-gray-400">Auditing data sources…</p>
             </div>
           </motion.div>
         ) : allReal && failCount === 0 ? (
           <motion.div key="certified"
             initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50 border-2 border-teal-200"
+            className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r bg-primary/5 from-primary/5 to-emerald-50 border-2 border-primary/25"
           >
-            <div className="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center flex-shrink-0">
-              <ShieldCheck className="w-6 h-6 text-teal-600" />
+            <div className="w-12 h-12 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+              <ShieldCheck className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-lg font-black text-teal-800">Certified — No Mock Data ✅</p>
-              <p className="text-sm text-teal-700 mt-0.5">{data?.summary}</p>
+              <p className="text-lg font-black text-foreground">Certified — No Mock Data ✅</p>
+              <p className="text-sm text-primary mt-0.5">{data?.summary}</p>
             </div>
           </motion.div>
         ) : (
@@ -151,7 +151,7 @@ export default function NoMockDataPage() {
               initial={{ width: 0 }}
               animate={{ width: `${(passCount / checks.length) * 100}%` }}
               transition={{ duration: 0.8 }}
-              className={`h-full rounded-full ${failCount === 0 ? "bg-teal-500" : "bg-amber-500"}`}
+              className={`h-full rounded-full ${failCount === 0 ? "bg-primary" : "bg-amber-500"}`}
             />
           </div>
         </div>

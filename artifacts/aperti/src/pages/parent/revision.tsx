@@ -9,7 +9,6 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 import { Brain, Target, Clock, CheckCircle2, Flame, Layers } from "lucide-react";
 import ParentChildSwitcher from "@/components/parent-child-switcher";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 function HeatmapCell({ minutes }: { minutes: number }) {
@@ -17,7 +16,7 @@ function HeatmapCell({ minutes }: { minutes: number }) {
   return (
     <div
       className="w-3.5 h-3.5 rounded-sm"
-      style={{ background: minutes > 0 ? `rgba(13, 148, 136, ${opacity})` : "#f0f0f0" }}
+      style={{ background: minutes > 0 ? `hsl(var(--primary) / ${opacity})` : "#f0f0f0" }}
       title={`${Math.round(minutes)} min`}
     />
   );
@@ -65,9 +64,9 @@ export default function ParentRevision() {
           {/* Stat row */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: Clock, label: "Total Hours", value: `${totalHours}h`, color: TEAL },
+              { icon: Clock, label: "Total Hours", value: `${totalHours}h`, color: "hsl(var(--primary))" },
               { icon: Target, label: "Sessions", value: data?.totals?.total_sessions || 0, color: "#6366f1" },
-              { icon: CheckCircle2, label: "Goals Done", value: data?.totals?.completed || 0, color: "#0D9488" },
+              { icon: CheckCircle2, label: "Goals Done", value: data?.totals?.completed || 0, color: "hsl(var(--primary))" },
               { icon: Flame, label: "Consistency", value: `${data?.consistencyScore || 0}%`, color: "#f59e0b" },
             ].map((s, i) => (
               <Card key={i} className="border border-gray-100 shadow-sm">
@@ -101,7 +100,7 @@ export default function ParentRevision() {
                   </div>
                   <div className="flex items-center gap-2 mt-2 text-[10px] text-gray-400">
                     <div className="flex gap-1 items-center"><div className="w-3 h-3 rounded-sm bg-gray-100" />Less</div>
-                    <div className="flex gap-1 items-center"><div className="w-3 h-3 rounded-sm" style={{ background: "rgba(13,148,136,0.6)" }} />More</div>
+                    <div className="flex gap-1 items-center"><div className="w-3 h-3 rounded-sm" style={{ background: "hsl(var(--primary) / 0.6)" }} />More</div>
                   </div>
                 </CardContent>
               </Card>
@@ -119,7 +118,7 @@ export default function ParentRevision() {
                       <XAxis dataKey="label" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `${v}h`} />
                       <Tooltip formatter={(v: any) => [`${v}h`, "Hours"]} />
-                      <Bar dataKey="hours" fill={TEAL} radius={4} />
+                      <Bar dataKey="hours" fill="hsl(var(--primary))" radius={4} />
                     </BarChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -132,7 +131,7 @@ export default function ParentRevision() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <Card className="border border-gray-100 shadow-sm">
                 <CardContent className="p-5">
-                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Target className="h-4 w-4 text-teal-500" />Recent Goals</h2>
+                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><Target className="h-4 w-4 text-primary" />Recent Goals</h2>
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {data.goals.map((g: any, i: number) => (
                       <div key={i} className="flex items-center gap-3 p-2.5 rounded-lg bg-gray-50">

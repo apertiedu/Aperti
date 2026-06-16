@@ -15,8 +15,6 @@ interface State {
   retrying: boolean;
 }
 
-const TEAL = "#0D9488";
-
 export class AIErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -87,17 +85,14 @@ export class AIErrorBoundary extends Component<Props, State> {
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-dashed border-gray-200 bg-gray-50/60 text-center"
+        className="flex flex-col items-center justify-center gap-4 p-8 rounded-2xl border border-dashed border-border bg-muted/30 text-center"
       >
-        <div
-          className="h-12 w-12 rounded-2xl flex items-center justify-center"
-          style={{ background: `${TEAL}12` }}
-        >
-          <Icon className="h-6 w-6" style={{ color: TEAL }} />
+        <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+          <Icon className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <p className="font-semibold text-sm text-gray-800 mb-1">{title}</p>
-          <p className="text-xs text-gray-500 max-w-xs mx-auto leading-relaxed">{desc}</p>
+          <p className="font-semibold text-sm text-foreground mb-1">{title}</p>
+          <p className="text-xs text-muted-foreground max-w-xs mx-auto leading-relaxed">{desc}</p>
         </div>
         <Button
           size="sm"
@@ -114,15 +109,4 @@ export class AIErrorBoundary extends Component<Props, State> {
   }
 }
 
-export function withAIErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
-  featureName?: string,
-) {
-  return function WrappedWithAI(props: P) {
-    return (
-      <AIErrorBoundary featureName={featureName}>
-        <Component {...props} />
-      </AIErrorBoundary>
-    );
-  };
-}
+export default AIErrorBoundary;

@@ -52,12 +52,12 @@ export default function AdminCommercePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <DollarSign className="w-6 h-6 text-teal-500" /> Commerce Admin
+            <DollarSign className="w-6 h-6 text-primary" /> Commerce Admin
           </h1>
           <p className="text-sm text-gray-400 mt-0.5">Manage subscriptions, plans & billing</p>
         </div>
         <Link href="/admin/executive">
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-teal-50 text-teal-700 border border-teal-200 rounded-xl text-sm font-semibold hover:bg-teal-100 transition-colors">
+          <button className="flex items-center gap-1.5 px-4 py-2 bg-primary/8 text-primary border border-primary/20 rounded-xl text-sm font-semibold hover:bg-primary/15 transition-colors">
             <BarChart3 className="w-3.5 h-3.5" /> Executive View
           </button>
         </Link>
@@ -71,7 +71,7 @@ export default function AdminCommercePage() {
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-card text-teal-700 shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${tab === t.id ? "bg-card text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"}`}
             >
               <Icon className="w-3.5 h-3.5" /> {t.label}
             </button>
@@ -129,7 +129,7 @@ function PaymentRequestsPanel({ qc, toast }: { qc: any; toast: any }) {
                     <span className="text-xs text-gray-400">@{pr.username}</span>
                   </div>
                   <p className="text-sm text-gray-600">{pr.plan_name}</p>
-                  <p className="text-xs font-mono text-teal-600 mt-1">{pr.reference_code}</p>
+                  <p className="text-xs font-mono text-primary mt-1">{pr.reference_code}</p>
                   {pr.proof_url && (
                     <a href={pr.proof_url} target="_blank" rel="noopener noreferrer"
                       className="text-xs text-blue-500 hover:underline flex items-center gap-1 mt-1">
@@ -218,7 +218,7 @@ function SubscriptionsPanel() {
       <div className="flex gap-2">
         {["active","pending_review","cancelled","trial"].map(s => (
           <button key={s} onClick={() => setFilter(s)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filter === s ? "bg-teal-500 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${filter === s ? "bg-primary text-primary-foreground" : "bg-gray-100 text-gray-500 hover:bg-gray-200"}`}>
             {s.replace("_", " ")}
           </button>
         ))}
@@ -310,7 +310,7 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <button onClick={() => { setShowForm(v => !v); setEditing(null); }}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-colors">
           <Plus className="w-4 h-4" /> Add Plan
         </button>
         <p className="text-xs text-gray-400">Toggle "On Landing" to show a plan on the public pricing page</p>
@@ -318,35 +318,35 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
 
       {showForm && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }}
-          className="bg-teal-50 border border-teal-100 rounded-2xl p-5 space-y-3">
+          className="bg-primary/5 border border-primary/15 rounded-2xl p-5 space-y-3">
           <h3 className="font-bold text-gray-800">New Plan</h3>
           <div className="grid sm:grid-cols-3 gap-3">
             <input placeholder="Name (e.g. Plus)" value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <select value={form.type} onChange={e => setForm(f => ({...f, type: e.target.value}))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300">
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
               <option value="teacher">Teacher</option><option value="student">Student</option><option value="admin">Admin</option>
             </select>
             <input placeholder="Price EGP/mo" type="number" value={form.priceEgp} onChange={e => setForm(f => ({...f, priceEgp: e.target.value}))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
           <div className="grid sm:grid-cols-2 gap-3">
             <input placeholder="Badge label (e.g. POPULAR)" value={form.badge} onChange={e => setForm(f => ({...f, badge: e.target.value}))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="Display order (0 = first)" type="number" value={form.display_order} onChange={e => setForm(f => ({...f, display_order: parseInt(e.target.value) || 0}))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
           <textarea placeholder="Features (one per line)" value={form.features} onChange={e => setForm(f => ({...f, features: e.target.value}))} rows={4}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <div onClick={() => setForm(f => ({...f, is_visible_landing: !f.is_visible_landing}))}
-              className={`w-9 h-5 rounded-full transition-colors relative ${form.is_visible_landing ? "bg-teal-500" : "bg-gray-200"}`}>
+              className={`w-9 h-5 rounded-full transition-colors relative ${form.is_visible_landing ? "bg-primary" : "bg-gray-200"}`}>
               <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.is_visible_landing ? "translate-x-4" : "translate-x-0.5"}`} />
             </div>
             <span className="text-sm text-gray-600">Show on landing page pricing section</span>
           </label>
           <button onClick={() => createMut.mutate()} disabled={createMut.isPending || !form.name || !form.priceEgp}
-            className="px-5 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-colors">
             {createMut.isPending ? "Creating…" : "Create Plan"}
           </button>
         </motion.div>
@@ -358,25 +358,25 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
             {editing === plan.id && editForm ? (
               <div className="space-y-2">
                 <input value={editForm.name} onChange={e => setEditForm((f: any) => ({...f, name: e.target.value}))} placeholder="Name"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                 <div className="grid grid-cols-2 gap-2">
                   <input type="number" value={editForm.priceEgp} onChange={e => setEditForm((f: any) => ({...f, priceEgp: e.target.value}))} placeholder="Price EGP"
-                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   <input value={editForm.badge} onChange={e => setEditForm((f: any) => ({...f, badge: e.target.value}))} placeholder="Badge (e.g. POPULAR)"
-                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                    className="border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                 </div>
                 <textarea value={editForm.features} onChange={e => setEditForm((f: any) => ({...f, features: e.target.value}))} rows={4} placeholder="Features (one per line)"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <div onClick={() => setEditForm((f: any) => ({...f, is_visible_landing: !f.is_visible_landing}))}
-                    className={`w-9 h-5 rounded-full transition-colors relative flex-shrink-0 ${editForm.is_visible_landing ? "bg-teal-500" : "bg-gray-200"}`}>
+                    className={`w-9 h-5 rounded-full transition-colors relative flex-shrink-0 ${editForm.is_visible_landing ? "bg-primary" : "bg-gray-200"}`}>
                     <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editForm.is_visible_landing ? "translate-x-4" : "translate-x-0.5"}`} />
                   </div>
                   <span className="text-xs text-gray-600">Show on landing page</span>
                 </label>
                 <div className="flex gap-2 pt-1">
                   <button onClick={() => updateMut.mutate(editForm)} disabled={updateMut.isPending}
-                    className="flex-1 px-3 py-1.5 bg-teal-500 text-white rounded-lg text-xs font-semibold hover:bg-teal-600 disabled:opacity-50 transition-colors">
+                    className="flex-1 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition-colors">
                     {updateMut.isPending ? "Saving…" : "Save"}
                   </button>
                   <button onClick={() => { setEditing(null); setEditForm(null); }}
@@ -389,7 +389,7 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="font-bold text-gray-900">{plan.name}</p>
-                      {plan.badge && <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-teal-100 text-teal-700 tracking-wide">{plan.badge}</span>}
+                      {plan.badge && <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-primary/15 text-primary tracking-wide">{plan.badge}</span>}
                     </div>
                     <p className="text-xs text-gray-400 capitalize">{plan.type}</p>
                   </div>
@@ -397,7 +397,7 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
                     {plan.visibility ? "LIVE" : "HIDDEN"}
                   </span>
                 </div>
-                <p className="text-2xl font-bold text-teal-600 mb-3">{Number(plan.price_egp).toLocaleString()} <span className="text-sm font-normal text-gray-400">EGP/mo</span></p>
+                <p className="text-2xl font-bold text-primary mb-3">{Number(plan.price_egp).toLocaleString()} <span className="text-sm font-normal text-gray-400">EGP/mo</span></p>
                 {Array.isArray(plan.features) && (
                   <ul className="text-xs text-gray-500 space-y-1 mb-4">
                     {plan.features.slice(0, 4).map((f: string, i: number) => <li key={i}>• {f}</li>)}
@@ -407,13 +407,13 @@ function PlansPanel({ qc, toast }: { qc: any; toast: any }) {
                 <div className="flex items-center justify-between pt-3 border-t border-gray-50">
                   <label className="flex items-center gap-1.5 cursor-pointer select-none" title="Show on landing page pricing section">
                     <div onClick={() => toggleLandingMut.mutate({ id: plan.id, val: !plan.is_visible_landing })}
-                      className={`w-8 h-4 rounded-full transition-colors relative ${plan.is_visible_landing ? "bg-teal-500" : "bg-gray-200"}`}>
+                      className={`w-8 h-4 rounded-full transition-colors relative ${plan.is_visible_landing ? "bg-primary" : "bg-gray-200"}`}>
                       <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white shadow transition-transform ${plan.is_visible_landing ? "translate-x-4" : "translate-x-0.5"}`} />
                     </div>
                     <span className="text-[10px] text-gray-500">On landing</span>
                   </label>
                   <div className="flex gap-3">
-                    <button onClick={() => openEdit(plan)} className="text-xs text-teal-500 hover:text-teal-700 transition-colors font-medium">Edit</button>
+                    <button onClick={() => openEdit(plan)} className="text-xs text-primary hover:text-primary/70 transition-colors font-medium">Edit</button>
                     <button onClick={() => { if (confirm(`Archive plan ${plan.name}?`)) deleteMut.mutate(plan.id); }}
                       className="text-xs text-red-400 hover:text-red-600 transition-colors">Archive</button>
                   </div>
@@ -480,25 +480,25 @@ function ComingSoonPanel({ qc, toast }: { qc: any; toast: any }) {
   return (
     <div className="space-y-4">
       <button onClick={() => setShowForm(v => !v)}
-        className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 transition-colors">
+        className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 transition-colors">
         <Plus className="w-4 h-4" /> Add Item
       </button>
 
       {showForm && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="bg-teal-50 border border-teal-100 rounded-2xl p-5 space-y-3">
+          className="bg-primary/5 border border-primary/15 rounded-2xl p-5 space-y-3">
           <input placeholder="Feature Name" value={form.featureName} onChange={e => setForm(f => ({...f, featureName: e.target.value}))}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <textarea placeholder="Description" value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} rows={3}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <div className="grid sm:grid-cols-2 gap-3">
             <input placeholder="Release Window (e.g. Q3 2026)" value={form.releaseWindow} onChange={e => setForm(f => ({...f, releaseWindow: e.target.value}))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <input placeholder="Display Order" type="number" value={form.displayOrder} onChange={e => setForm(f => ({...f, displayOrder: parseInt(e.target.value)}))}
-              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-300" />
+              className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
           <button onClick={() => createMut.mutate()} disabled={createMut.isPending || !form.featureName}
-            className="px-5 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 disabled:opacity-50 transition-colors">
+            className="px-5 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:opacity-90 disabled:opacity-50 transition-colors">
             {createMut.isPending ? "Creating…" : "Create"}
           </button>
         </motion.div>
@@ -524,7 +524,7 @@ function ComingSoonPanel({ qc, toast }: { qc: any; toast: any }) {
 }
 
 /* ─── ANALYTICS ──────────────────────────────────────────────────────────── */
-const PLAN_COLORS = ["#0D9488","#6366F1","#F59E0B","#EC4899","#10B981","#3B82F6"];
+const PLAN_COLORS = ["hsl(var(--primary))","#6366F1","#F59E0B","#EC4899","#10B981","#3B82F6"];
 
 function KpiCard({ label, value, sub, icon: Icon, trend }: {
   label: string; value: string; sub?: string;
@@ -532,8 +532,8 @@ function KpiCard({ label, value, sub, icon: Icon, trend }: {
 }) {
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border p-5 flex items-start gap-4">
-      <div className="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
-        <Icon className="w-5 h-5 text-teal-600" />
+      <div className="w-10 h-10 bg-primary/8 rounded-xl flex items-center justify-center shrink-0">
+        <Icon className="w-5 h-5 text-primary" />
       </div>
       <div className="min-w-0">
         <p className="text-xs text-gray-500 mb-0.5">{label}</p>
@@ -605,7 +605,7 @@ function AnalyticsPanel() {
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip formatter={(v: any) => [`${Number(v).toLocaleString()} EGP`, "Revenue"]} />
-              <Bar dataKey="revenue" fill="#0D9488" radius={[4,4,0,0]} />
+              <Bar dataKey="revenue" fill="hsl(var(--primary))" radius={[4,4,0,0]} />
             </BarChart>
           </ResponsiveContainer>
         )}

@@ -9,7 +9,6 @@ import { User, Shield, Bell, Palette, Monitor, Eye, EyeOff, LogOut, Accessibilit
 import { useAuth } from "@/context/auth";
 import { AutoSaveIndicator } from "@/components/ui/trust-signals";
 
-const TEAL = "#0D9488";
 
 const TABS = [
   { id: "profile",       label: "Profile",        icon: User },
@@ -28,7 +27,7 @@ function Toggle({ value, onChange }: { value: boolean; onChange: () => void }) {
   return (
     <button type="button" onClick={onChange}
       className="w-11 h-6 rounded-full relative transition-all duration-200 flex-shrink-0"
-      style={{ background: value ? TEAL : "#d1d5db" }}>
+      style={{ background: value ? "hsl(var(--primary))" : "#d1d5db" }}>
       <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200 ${value ? "left-6" : "left-1"}`} />
     </button>
   );
@@ -159,7 +158,7 @@ export default function Settings() {
 
   if (pageLoading) return (
     <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
+      <div className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin" className="border-primary" />
     </div>
   );
 
@@ -174,8 +173,8 @@ export default function Settings() {
         <div className="flex gap-1 overflow-x-auto pb-2 mb-4 md:hidden scrollbar-hide">
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${tab === t.id ? "bg-teal-50" : "text-gray-600 hover:bg-gray-100"}`}
-              style={tab === t.id ? { color: TEAL } : {}}>
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-150 ${tab === t.id ? "bg-primary/8" : "text-gray-600 hover:bg-gray-100"}`}
+              style={tab === t.id ? { color: "hsl(var(--primary))" } : {}}>
               <t.icon className="w-3.5 h-3.5 flex-shrink-0" />{t.label}
             </button>
           ))}
@@ -189,8 +188,8 @@ export default function Settings() {
           <nav className="hidden md:block w-44 flex-shrink-0 space-y-1">
             {TABS.map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
-                className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center gap-2.5 text-sm font-medium transition-all duration-150 ${tab === t.id ? "bg-teal-50" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
-                style={tab === t.id ? { color: TEAL } : {}}>
+                className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center gap-2.5 text-sm font-medium transition-all duration-150 ${tab === t.id ? "bg-primary/8" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
+                style={tab === t.id ? { color: "hsl(var(--primary))" } : {}}>
                 <t.icon className="w-4 h-4 flex-shrink-0" />{t.label}
               </button>
             ))}
@@ -210,7 +209,7 @@ export default function Settings() {
                   <h2 className="text-base font-semibold text-gray-900">Profile information</h2>
                   {/* Avatar */}
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl font-bold text-white" style={{ background: TEAL }}>
+                    <div className="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl font-bold text-white" className="bg-primary">
                       {avatarUrl ? <img src={avatarUrl} alt="" className="w-full h-full object-cover" onError={() => setAvatarUrl("")} /> : (displayName || "?")[0]?.toUpperCase()}
                     </div>
                     <div className="flex-1">
@@ -228,16 +227,16 @@ export default function Settings() {
                     <p className="text-xs text-gray-400 mt-1">Contact support to change your email.</p></div>
                   <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Bio</Label>
                     <textarea value={bio} onChange={e => setBio(e.target.value)} rows={3} placeholder="Tell us a bit about yourself..."
-                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600" /></div>
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm resize-none focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30" /></div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Phone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+20..." className="h-10 rounded-xl border-gray-200" /></div>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Country</Label>
-                      <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
+                      <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-10 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-primary bg-card">
                         <option value="">Select…</option>{COUNTRIES.map(c => <option key={c}>{c}</option>)}</select></div>
                   </div>
                   <div className="flex items-center justify-end gap-3 pt-1">
                     <AutoSaveIndicator state={saveState} lastSaved={savedAt} />
-                    <Button onClick={saveProfile} disabled={saving} className="rounded-xl px-6 h-10" style={{ background: TEAL }}>
+                    <Button onClick={saveProfile} disabled={saving} className="rounded-xl px-6 h-10" className="bg-primary">
                       {saving ? "Saving…" : "Save changes"}
                     </Button>
                   </div>
@@ -254,7 +253,7 @@ export default function Settings() {
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">New password</Label><Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} className="h-10 rounded-xl border-gray-200" maxLength={500} /></div>
                     <div><Label className="text-sm font-medium text-gray-700 mb-1.5 block">Confirm new password</Label><Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="h-10 rounded-xl border-gray-200" maxLength={500} /></div>
                     <div className="flex justify-end">
-                      <Button onClick={changePassword} disabled={pwSaving || !currentPw || !newPw} className="rounded-xl px-6 h-10" style={{ background: TEAL }}>
+                      <Button onClick={changePassword} disabled={pwSaving || !currentPw || !newPw} className="rounded-xl px-6 h-10" className="bg-primary">
                         {pwSaving ? "Changing…" : "Change password"}
                       </Button>
                     </div>
@@ -299,7 +298,7 @@ export default function Settings() {
                   <div className="flex items-center justify-between py-3">
                     <div><p className="text-sm font-medium text-gray-900">Interface language</p><p className="text-xs text-gray-400 mt-0.5">Choose your preferred language</p></div>
                     <select value={settingsMap["language"] || "en"} onChange={e => saveSetting("language", e.target.value)}
-                      className="h-9 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-teal-600 bg-card">
+                      className="h-9 rounded-xl border border-gray-200 px-3 text-sm focus:outline-none focus:border-primary bg-card">
                       <option value="en">English</option>
                       <option value="ar" disabled>العربية (Coming Soon)</option>
                     </select>
@@ -345,7 +344,7 @@ export default function Settings() {
                               <div className="flex items-center gap-2">
                                 <p className="text-sm font-medium text-gray-900 truncate">{label}</p>
                                 {idx === 0 && (
-                                  <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "#0D948812", color: "#0D9488" }}>Current</span>
+                                  <span className="shrink-0 text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: "hsl(var(--primary) / 0.07)", color: "hsl(var(--primary))" }}>Current</span>
                                 )}
                               </div>
                               <p className="text-xs text-gray-500 mt-0.5">
@@ -387,10 +386,10 @@ export default function Settings() {
                           <button key={size} onClick={() => saveSetting("font_size", size)}
                             className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all capitalize ${
                               (settingsMap["font_size"] || "medium") === size
-                                ? "border-teal-600 text-teal-700 bg-teal-50"
+                                ? "border-primary text-primary bg-primary/8"
                                 : "border-gray-200 text-gray-600 hover:border-gray-300"
                             }`}
-                            style={(settingsMap["font_size"] || "medium") === size ? { borderColor: TEAL, color: TEAL } : {}}>
+                            style={(settingsMap["font_size"] || "medium") === size ? { borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))" } : {}}>
                             {size}
                           </button>
                         ))}
@@ -459,10 +458,10 @@ export default function Settings() {
                           <button key={id} onClick={() => saveSetting("color_blindness", id)}
                             className={`px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
                               (settingsMap["color_blindness"] || "none") === id
-                                ? "border-teal-600 text-teal-700 bg-teal-50"
+                                ? "border-primary text-primary bg-primary/8"
                                 : "border-gray-200 text-gray-600 hover:border-gray-300"
                             }`}
-                            style={(settingsMap["color_blindness"] || "none") === id ? { borderColor: TEAL, color: TEAL } : {}}>
+                            style={(settingsMap["color_blindness"] || "none") === id ? { borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))" } : {}}>
                             {label}
                           </button>
                         ))}
@@ -522,10 +521,10 @@ export default function Settings() {
                           <button key={id} onClick={() => saveSetting("ai_explanation_style", id)}
                             className={`p-3 rounded-xl border text-left transition-all ${
                               (settingsMap["ai_explanation_style"] || "conceptual") === id
-                                ? "border-teal-600 bg-teal-50"
+                                ? "border-primary bg-primary/8"
                                 : "border-gray-200 hover:border-gray-300"
                             }`}
-                            style={(settingsMap["ai_explanation_style"] || "conceptual") === id ? { borderColor: TEAL } : {}}>
+                            style={(settingsMap["ai_explanation_style"] || "conceptual") === id ? { borderColor: "hsl(var(--primary))" } : {}}>
                             <p className="text-xs font-semibold text-gray-900">{label}</p>
                             <p className="text-[10px] text-gray-400 mt-0.5">{desc}</p>
                           </button>
@@ -542,10 +541,10 @@ export default function Settings() {
                           <button key={level} onClick={() => saveSetting("ai_detail_level", level)}
                             className={`flex-1 py-2 rounded-xl border text-xs font-medium capitalize transition-all ${
                               (settingsMap["ai_detail_level"] || "balanced") === level
-                                ? "border-teal-600 text-teal-700 bg-teal-50"
+                                ? "border-primary text-primary bg-primary/8"
                                 : "border-gray-200 text-gray-600"
                             }`}
-                            style={(settingsMap["ai_detail_level"] || "balanced") === level ? { borderColor: TEAL, color: TEAL } : {}}>
+                            style={(settingsMap["ai_detail_level"] || "balanced") === level ? { borderColor: "hsl(var(--primary))", color: "hsl(var(--primary))" } : {}}>
                             {level}
                           </button>
                         ))}
@@ -589,8 +588,8 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  <div className="bg-teal-50 border border-teal-100 rounded-2xl p-4">
-                    <p className="text-xs text-teal-700 font-medium">
+                  <div className="bg-primary/8 border border-primary/15 rounded-2xl p-4">
+                    <p className="text-xs text-primary font-medium">
                       🤖 These preferences personalise how your AI Mentor interacts with you. Changes take effect on your next conversation.
                     </p>
                   </div>

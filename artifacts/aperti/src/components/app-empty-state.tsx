@@ -112,7 +112,7 @@ const PRESETS: Record<EmptyStateType, {
   variant?: EmptyStateVariant;
 }> = {
   courses: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No courses yet",
     description: "Create your first course to manage students, assignments, and attendance in one place.",
     actions: [{ label: "Create Course", href: "/my-courses", primary: true, icon: Plus }],
@@ -153,7 +153,7 @@ const PRESETS: Record<EmptyStateType, {
     ],
   },
   homework: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No assignments yet",
     description: "Your teacher hasn't published any assignments yet. You'll be notified as soon as new work becomes available.",
     actions: [{ label: "Browse Resources", href: "/student-resources", primary: true, icon: BookOpen }],
@@ -165,7 +165,7 @@ const PRESETS: Record<EmptyStateType, {
     actions: [{ label: "Start a Conversation", href: "/messages", primary: true, icon: MessageSquare }],
   },
   sessions: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No sessions scheduled",
     description: "Add your first lesson session to get started with scheduling and attendance.",
     actions: [{ label: "Add Session", href: "/my-courses", primary: true, icon: Plus }],
@@ -188,7 +188,7 @@ const PRESETS: Record<EmptyStateType, {
     actions: [{ label: "Create Note", primary: true, icon: Plus }],
   },
   resources: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No resources yet",
     description: "Add links, notes, videos, and PDFs to build a library your students can access any time.",
     actions: [{ label: "Add Resource", primary: true, icon: Plus }],
@@ -199,7 +199,7 @@ const PRESETS: Record<EmptyStateType, {
     description: "Insights will appear as students begin interacting with your classes, submitting work, and sitting assessments.",
   },
   notifications: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "You're all caught up",
     description: "New activity, assignment deadlines, and updates will appear here automatically.",
     variant: "celebration",
@@ -211,7 +211,7 @@ const PRESETS: Record<EmptyStateType, {
     actions: [{ label: "Post Announcement", primary: true, icon: Plus }],
   },
   gradebook: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No grades recorded yet",
     description: "Grades will appear here once assessments are marked and published.",
     actions: [{ label: "View Assessments", href: "/assessment-hub", primary: true, icon: ClipboardList }],
@@ -223,7 +223,7 @@ const PRESETS: Record<EmptyStateType, {
     actions: [{ label: "Generate Report", primary: true, icon: FileText }],
   },
   billing: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No billing history",
     description: "Your subscription details and invoices will appear here.",
     actions: [{ label: "View Plans", href: "/subscribe", primary: true, icon: Zap }],
@@ -246,7 +246,7 @@ const PRESETS: Record<EmptyStateType, {
     actions: [{ label: "Set a Goal", primary: true, icon: Plus }],
   },
   tickets: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "No support tickets",
     description: "All open tickets will appear here. Everything is running smoothly.",
     variant: "celebration",
@@ -321,7 +321,7 @@ const PRESETS: Record<EmptyStateType, {
     description: "You don't have permission to view this section. Contact your administrator if you believe this is a mistake.",
   },
   "first-run-teacher": {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "Welcome to your teaching hub",
     description: "You're all set up. Create your first course to start teaching, or explore the platform.",
     actions: [
@@ -330,7 +330,7 @@ const PRESETS: Record<EmptyStateType, {
     ],
   },
   "first-run-student": {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "Welcome to Aperti",
     description: "Your learning dashboard is ready. Browse your courses or explore study tools to get started.",
     actions: [
@@ -339,7 +339,7 @@ const PRESETS: Record<EmptyStateType, {
     ],
   },
   "first-run-parent": {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "Welcome to your parent portal",
     description: "Link your child's account to track their progress, attendance, and grades.",
     actions: [
@@ -347,7 +347,7 @@ const PRESETS: Record<EmptyStateType, {
     ],
   },
   "first-run-admin": {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "Platform ready",
     description: "Your Aperti instance is configured. Start by inviting teachers or reviewing platform settings.",
     actions: [
@@ -356,7 +356,7 @@ const PRESETS: Record<EmptyStateType, {
     ],
   },
   generic: {
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
     title: "Nothing here yet",
     description: "Content will appear here as you start using this feature.",
   },
@@ -447,7 +447,7 @@ export function AppEmptyState({
                 key={i}
                 size={size === "sm" ? "sm" : "default"}
                 variant={action.primary ? "default" : "outline"}
-                className={action.primary ? "bg-teal-600 hover:bg-teal-700 text-white gap-2" : "gap-2"}
+                className={action.primary ? "gap-2" : "gap-2"}
                 onClick={action.onClick}
               >
                 {Icon && <Icon size={15} />}
@@ -538,7 +538,7 @@ export function SearchEmptyState({ query, suggestions, onSuggestion }: { query: 
               <button
                 key={s}
                 onClick={() => onSuggestion?.(s)}
-                className="text-xs px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 dark:bg-teal-950/30 dark:text-teal-400 dark:border-teal-800 transition-colors"
+                className="text-xs px-2.5 py-1 rounded-full bg-primary/8 text-primary border border-primary/20 hover:bg-primary/15 transition-colors"
               >
                 {s}
               </button>

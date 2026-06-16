@@ -42,7 +42,7 @@ const UNLOCKABLES = [
   { id: 6, name: "Top Scholar", type: "badge", xpRequired: 5000, icon: "🎓" },
 ];
 
-const SUBJECT_COLORS = ["#0D9488", "#2563EB", "#7C3AED", "#DB2777", "#D97706", "#059669"];
+const SUBJECT_COLORS = ["hsl(var(--primary))", "#2563EB", "#7C3AED", "#DB2777", "#D97706", "#059669"];
 
 function XpBar({ xp, level }: { xp: number; level: number }) {
   const prevLevelXp = Math.pow(level - 1 > 0 ? level - 1 : 0, 2) * 100;
@@ -62,7 +62,7 @@ function XpBar({ xp, level }: { xp: number; level: number }) {
           animate={{ width: `${Math.min(progress, 100)}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
           className="h-full rounded-full"
-          style={{ background: "linear-gradient(90deg, #0D9488, #14B8A6)" }}
+          style={{ background: "linear-gradient(90deg, hsl(var(--primary)), #14B8A6)" }}
         />
       </div>
     </div>
@@ -134,7 +134,7 @@ export default function Ascend() {
               <div className="flex items-center gap-4 mb-5">
                 <div className="relative">
                   <div className="h-16 w-16 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-md"
-                    style={{ background: "linear-gradient(135deg, #0D9488, #0F766E)" }}>
+                    style={{ background: "linear-gradient(135deg, hsl(var(--primary)), #0F766E)" }}>
                     {level}
                   </div>
                   <div className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full flex items-center justify-center border-2 border-white shadow-sm"
@@ -163,12 +163,12 @@ export default function Ascend() {
                   </div>
                   <p className="text-[10px] text-orange-600 font-medium">Day streak</p>
                 </div>
-                <div className="bg-teal-50 rounded-xl p-3 text-center">
+                <div className="bg-primary/8 rounded-xl p-3 text-center">
                   <div className="flex items-center justify-center gap-1 mb-1">
-                    <Zap className="h-3.5 w-3.5 text-teal-600" />
-                    <span className="text-lg font-black text-teal-700">{xp.toLocaleString()}</span>
+                    <Zap className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-lg font-black text-primary">{xp.toLocaleString()}</span>
                   </div>
-                  <p className="text-[10px] text-teal-600 font-medium">Total XP</p>
+                  <p className="text-[10px] text-primary font-medium">Total XP</p>
                 </div>
               </div>
 
@@ -203,7 +203,7 @@ export default function Ascend() {
                   <motion.div key="quests" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     className="bg-card rounded-2xl border border-border shadow-sm p-5">
                     <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                      <Target className="h-4 w-4 text-teal-600" /> Today's Quests
+                      <Target className="h-4 w-4 text-primary" /> Today's Quests
                     </h3>
                     {!quests || quests.length === 0 ? (
                       <div className="text-center py-10">
@@ -221,7 +221,7 @@ export default function Ascend() {
                               {q.description && <p className="text-xs text-gray-500 mt-0.5 truncate">{q.description}</p>}
                             </div>
                             <div className="flex items-center gap-2 ml-3">
-                              <Badge className="text-xs bg-teal-50 text-teal-700 border-teal-100 border-0">+{q.xpReward} XP</Badge>
+                              <Badge className="text-xs bg-primary/8 text-primary border-primary/15 border-0">+{q.xpReward} XP</Badge>
                               <Button size="sm" variant="outline" className="h-7 text-xs rounded-lg"
                                 onClick={() => earnXpMutation.mutate("manual")}>
                                 Claim
@@ -242,7 +242,7 @@ export default function Ascend() {
                           <Button key={source} variant="outline" size="sm" className="text-xs h-8 gap-1.5 rounded-xl"
                             onClick={() => earnXpMutation.mutate(source)}
                             disabled={earnXpMutation.isPending}>
-                            <Zap className="h-3 w-3 text-teal-600" /> {label} (+{xpAmt})
+                            <Zap className="h-3 w-3 text-primary" /> {label} (+{xpAmt})
                           </Button>
                         ))}
                       </div>
@@ -255,7 +255,7 @@ export default function Ascend() {
                 <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                   className="bg-card rounded-2xl border border-border shadow-sm p-5">
                   <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-teal-600" /> Subject XP Progress
+                    <TrendingUp className="h-4 w-4 text-primary" /> Subject XP Progress
                   </h3>
                   {Object.keys(subjectXp).length === 0 ? (
                     <div className="text-center py-10">
@@ -300,7 +300,7 @@ export default function Ascend() {
                         leaderboard.leaderboard.map((p: any, idx: number) => (
                           <motion.div key={idx} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.04 }}
-                            className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${p.isYou ? "bg-teal-50 border border-teal-100" : "hover:bg-gray-50"}`}>
+                            className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${p.isYou ? "bg-primary/8 border border-primary/15" : "hover:bg-gray-50"}`}>
                             <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
                               idx === 0 ? "bg-yellow-400 text-yellow-900" :
                               idx === 1 ? "bg-gray-300 text-gray-700" :
@@ -310,8 +310,8 @@ export default function Ascend() {
                               {p.rank}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-sm font-semibold truncate ${p.isYou ? "text-teal-700" : "text-gray-800"}`}>
-                                {p.isYou ? "You" : `Student`} {p.isYou && <span className="text-xs ml-1 text-teal-500">(You)</span>}
+                              <p className={`text-sm font-semibold truncate ${p.isYou ? "text-primary" : "text-gray-800"}`}>
+                                {p.isYou ? "You" : `Student`} {p.isYou && <span className="text-xs ml-1 text-primary">(You)</span>}
                               </p>
                               <p className="text-xs text-gray-400">Level {p.level} · {p.displayRank}</p>
                             </div>
@@ -339,13 +339,13 @@ export default function Ascend() {
                       return (
                         <motion.div key={item.id} whileHover={unlocked ? { y: -2 } : {}}
                           className={`p-3 rounded-xl border text-center transition-all ${
-                            unlocked ? "bg-teal-50 border-teal-100" : "bg-gray-50 border-gray-100 opacity-60"
+                            unlocked ? "bg-primary/8 border-primary/15" : "bg-gray-50 border-gray-100 opacity-60"
                           }`}>
                           <div className="text-2xl mb-2">{item.icon}</div>
-                          <p className={`text-xs font-bold ${unlocked ? "text-teal-800" : "text-gray-500"}`}>{item.name}</p>
+                          <p className={`text-xs font-bold ${unlocked ? "text-foreground" : "text-gray-500"}`}>{item.name}</p>
                           <p className="text-[10px] text-gray-400 capitalize mt-0.5">{item.type}</p>
                           {unlocked ? (
-                            <span className="text-[10px] text-teal-600 font-semibold mt-1 block">✓ Unlocked</span>
+                            <span className="text-[10px] text-primary font-semibold mt-1 block">✓ Unlocked</span>
                           ) : (
                             <div className="flex items-center justify-center gap-1 mt-1.5">
                               <Lock className="h-2.5 w-2.5 text-gray-400" />

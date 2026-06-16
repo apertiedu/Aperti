@@ -126,7 +126,7 @@ export default function WaitlistPage() {
                           <td className="px-4 py-2.5 text-gray-500 hidden md:table-cell">{e.role || "—"}</td>
                           <td className="px-4 py-2.5 hidden md:table-cell">
                             <div className="flex gap-0.5">{Array.from({ length: 10 }, (_, i) => (
-                              <div key={i} className={`w-1.5 h-3 rounded-sm ${i < (e.interest_level || 5) ? "bg-teal-500" : "bg-gray-200"}`} />
+                              <div key={i} className={`w-1.5 h-3 rounded-sm ${i < (e.interest_level || 5) ? "bg-primary" : "bg-gray-200"}`} />
                             ))}</div>
                           </td>
                           <td className="px-4 py-2.5">

@@ -48,8 +48,8 @@ export default function ParentAttendance() {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-5xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-teal-50">
-          <ClipboardList className="h-5 w-5 text-teal-600" />
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+          <ClipboardList className="h-5 w-5 text-primary" />
         </div>
         <div>
           <h1 className="text-xl font-black text-gray-900">Attendance</h1>
@@ -68,8 +68,8 @@ export default function ParentAttendance() {
           {/* Summary cards */}
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: ClipboardList, label: "Overall Rate", value: `${rate}%`, color: rate >= 90 ? "#0D9488" : rate >= 75 ? "#f59e0b" : "#ef4444" },
-              { icon: CheckCircle2, label: "Present", value: present, color: "#0D9488" },
+              { icon: ClipboardList, label: "Overall Rate", value: `${rate}%`, color: rate >= 90 ? "hsl(var(--primary))" : rate >= 75 ? "#f59e0b" : "#ef4444" },
+              { icon: CheckCircle2, label: "Present", value: present, color: "hsl(var(--primary))" },
               { icon: XCircle, label: "Absent", value: absent, color: "#ef4444" },
               { icon: Clock, label: "Late", value: late, color: "#f59e0b" },
             ].map((s, i) => (
@@ -92,7 +92,7 @@ export default function ParentAttendance() {
                     <h2 className="text-sm font-bold text-gray-800">Attendance Rate</h2>
                     <div className="flex bg-gray-100 rounded-lg p-0.5">
                       {(["weekly","monthly"] as const).map(v => (
-                        <button key={v} onClick={() => setView(v)} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${view === v ? "bg-card shadow text-teal-600" : "text-gray-500"}`}>{v}</button>
+                        <button key={v} onClick={() => setView(v)} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${view === v ? "bg-card shadow text-primary" : "text-gray-500"}`}>{v}</button>
                       ))}
                     </div>
                   </div>
@@ -103,7 +103,7 @@ export default function ParentAttendance() {
                       <Tooltip formatter={(v: any) => [`${v}%`, "Rate"]} />
                       <Bar dataKey="rate" radius={4}>
                         {chartData.map((entry: any, i: number) => (
-                          <Cell key={i} fill={entry.rate >= 90 ? "#0D9488" : entry.rate >= 75 ? "#f59e0b" : "#ef4444"} />
+                          <Cell key={i} fill={entry.rate >= 90 ? "hsl(var(--primary))" : entry.rate >= 75 ? "#f59e0b" : "#ef4444"} />
                         ))}
                       </Bar>
                     </BarChart>

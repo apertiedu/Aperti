@@ -64,7 +64,7 @@ export default function QATestCasesPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <FlaskConical className="w-6 h-6 text-teal-600" /> Test Cases
+            <FlaskConical className="w-6 h-6 text-primary" /> Test Cases
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage and execute test suites</p>
         </div>
@@ -75,7 +75,7 @@ export default function QATestCasesPage() {
           <Button
             onClick={() => runSanity.mutate()}
             disabled={runSanity.isPending}
-            className="bg-teal-600 hover:bg-teal-700 gap-2"
+            className="bg-primary hover:bg-primary/80 gap-2"
           >
             <Play className="w-4 h-4" />
             {runSanity.isPending ? "Running…" : "Run Sanity Tests"}
@@ -110,10 +110,10 @@ export default function QATestCasesPage() {
       {/* Sanity test results */}
       {sanityResult && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-teal-200 bg-teal-50 shadow-sm">
+          <Card className="border-primary/25 bg-primary/8 shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between mb-3">
-                <p className="font-semibold text-teal-800">Sanity Test Results</p>
+                <p className="font-semibold text-foreground">Sanity Test Results</p>
                 <div className="flex gap-3 text-sm">
                   <span className="text-green-700 font-medium">✓ {sanityResult.passed} passed</span>
                   <span className="text-red-700 font-medium">✗ {sanityResult.failed} failed</span>
@@ -238,7 +238,7 @@ export default function QATestCasesPage() {
               </div>
             </div>
             <div className="flex gap-2 pt-2">
-              <Button onClick={() => createCase.mutate(newForm)} disabled={!newForm.title || createCase.isPending} className="bg-teal-600 hover:bg-teal-700 flex-1">
+              <Button onClick={() => createCase.mutate(newForm)} disabled={!newForm.title || createCase.isPending} className="bg-primary hover:bg-primary/80 flex-1">
                 {createCase.isPending ? "Adding…" : "Add Test Case"}
               </Button>
               <Button variant="outline" onClick={() => setShowNew(false)} className="flex-1">Cancel</Button>

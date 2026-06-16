@@ -56,7 +56,7 @@ export function KeyboardShortcutsHelp() {
       <button
         onClick={() => setOpen(true)}
         title="Keyboard shortcuts (?)"
-        className="fixed bottom-5 right-5 z-40 w-9 h-9 rounded-full bg-gray-800/80 hover:bg-gray-800 text-white flex items-center justify-center shadow-lg transition-all hover:scale-105 backdrop-blur-sm"
+        className="fixed bottom-5 right-5 z-40 w-9 h-9 rounded-full bg-foreground/80 hover:bg-foreground text-background flex items-center justify-center shadow-lg transition-all hover:scale-105 backdrop-blur-sm"
         aria-label="Keyboard shortcuts"
       >
         <Keyboard size={15} />
@@ -78,31 +78,31 @@ export function KeyboardShortcutsHelp() {
               className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
             >
               <div className="pointer-events-auto w-full max-w-lg bg-card rounded-2xl shadow-2xl overflow-hidden border border-border">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
-                      <Keyboard size={15} className="text-white" />
+                    <div className="w-8 h-8 rounded-lg bg-foreground flex items-center justify-center">
+                      <Keyboard size={15} className="text-background" />
                     </div>
                     <div>
-                      <h2 className="font-bold text-gray-900 text-sm">Keyboard Shortcuts</h2>
-                      <p className="text-xs text-gray-500">Press <kbd className="px-1 py-0.5 bg-gray-100 rounded font-mono">?</kbd> to toggle</p>
+                      <h2 className="font-bold text-foreground text-sm">Keyboard Shortcuts</h2>
+                      <p className="text-xs text-muted-foreground">Press <kbd className="px-1 py-0.5 bg-muted rounded font-mono border border-border">?</kbd> to toggle</p>
                     </div>
                   </div>
-                  <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-700 transition-colors">
+                  <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded hover:bg-muted">
                     <X size={18} />
                   </button>
                 </div>
                 <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-6 max-h-[70vh] overflow-y-auto">
                   {SHORTCUTS.map(group => (
                     <div key={group.group}>
-                      <p className="text-[10px] font-bold text-teal-600 uppercase tracking-widest mb-3">{group.group}</p>
+                      <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-3">{group.group}</p>
                       <div className="space-y-2">
                         {group.items.map((item, i) => (
                           <div key={i} className="flex items-center justify-between gap-4">
-                            <span className="text-xs text-gray-600">{item.label}</span>
+                            <span className="text-xs text-muted-foreground">{item.label}</span>
                             <div className="flex items-center gap-1 shrink-0">
                               {item.keys.map((k, ki) => (
-                                <kbd key={ki} className="px-2 py-1 bg-gray-100 border border-gray-200 rounded text-[11px] font-mono font-semibold text-gray-700 shadow-sm">
+                                <kbd key={ki} className="px-2 py-1 bg-muted border border-border rounded text-[11px] font-mono font-semibold text-foreground shadow-sm">
                                   {k}
                                 </kbd>
                               ))}
@@ -113,8 +113,8 @@ export function KeyboardShortcutsHelp() {
                     </div>
                   ))}
                 </div>
-                <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-                  <p className="text-[11px] text-gray-400 text-center">Shortcuts work when not focused on an input field</p>
+                <div className="px-6 py-3 bg-muted/40 border-t border-border">
+                  <p className="text-[11px] text-muted-foreground text-center">Shortcuts work when not focused on an input field</p>
                 </div>
               </div>
             </motion.div>

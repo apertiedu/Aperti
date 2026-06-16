@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 
 interface ExtractedQuestion {
   id: string;
@@ -75,7 +74,7 @@ function QuestionCard({
       className={`bg-card rounded-xl border transition-all ${
         q.status === "approved" ? "border-green-300 bg-green-50/20" :
         q.status === "rejected" ? "border-red-200 bg-red-50/10 opacity-50" :
-        selected ? "border-teal-500 bg-teal-50/20" :
+        selected ? "border-primary bg-primary/8/20" :
         "border-gray-200 hover:border-gray-300"
       }`}
     >
@@ -83,7 +82,7 @@ function QuestionCard({
         <div className="flex items-start gap-3">
           {q.status === "pending" && (
             <input type="checkbox" checked={selected} onChange={onToggle}
-              className="mt-0.5 shrink-0 w-4 h-4 rounded accent-teal-600 cursor-pointer" />
+              className="mt-0.5 shrink-0 w-4 h-4 rounded accent-primary cursor-pointer" />
           )}
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-center gap-1.5 mb-2">
@@ -175,11 +174,11 @@ function FileDropZone({ label, accept, file, onFile, onClear }: {
 
   if (file) {
     return (
-      <div className="flex items-center gap-3 px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl">
-        <FileText className="h-4 w-4 text-teal-600 shrink-0" />
-        <span className="text-sm font-medium text-teal-800 flex-1 truncate">{file.name}</span>
-        <span className="text-xs text-teal-600">{(file.size / 1024).toFixed(0)} KB</span>
-        <button onClick={onClear} className="p-1 rounded-md hover:bg-teal-100 text-teal-600">
+      <div className="flex items-center gap-3 px-4 py-3 bg-primary/8 border border-primary/25 rounded-xl">
+        <FileText className="h-4 w-4 text-primary shrink-0" />
+        <span className="text-sm font-medium text-foreground flex-1 truncate">{file.name}</span>
+        <span className="text-xs text-primary">{(file.size / 1024).toFixed(0)} KB</span>
+        <button onClick={onClear} className="p-1 rounded-md hover:bg-primary/15 text-primary">
           <X className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -191,10 +190,10 @@ function FileDropZone({ label, accept, file, onFile, onClear }: {
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onClick={() => inputRef.current?.click()}
-      className="border-2 border-dashed border-gray-200 hover:border-teal-400 rounded-xl p-4 text-center cursor-pointer transition-colors group"
+      className="border-2 border-dashed border-gray-200 hover:border-primary/60 rounded-xl p-4 text-center cursor-pointer transition-colors group"
     >
-      <FileUp className="h-6 w-6 mx-auto text-gray-300 group-hover:text-teal-500 transition-colors mb-1.5" />
-      <p className="text-xs font-semibold text-gray-500 group-hover:text-teal-700">{label}</p>
+      <FileUp className="h-6 w-6 mx-auto text-gray-300 group-hover:text-primary transition-colors mb-1.5" />
+      <p className="text-xs font-semibold text-gray-500 group-hover:text-primary">{label}</p>
       <p className="text-[10px] text-gray-400 mt-0.5">Drag & drop or click · PDF, max 10MB</p>
       <input ref={inputRef} type="file" accept={accept} className="hidden" onChange={e => {
         const f = e.target.files?.[0];
@@ -298,7 +297,7 @@ export default function QuestionExtractionPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-          <Brain className="h-6 w-6" style={{ color: TEAL }} />
+          <Brain className="h-6 w-6" className="text-primary" />
           AI Question Extraction 2.0
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -330,12 +329,12 @@ export default function QuestionExtractionPage() {
                 <label className="text-xs font-semibold text-muted-foreground block mb-1.5">Subject</label>
                 <input value={subject} onChange={e => setSubject(e.target.value)}
                   placeholder="e.g. Physics, Maths"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20" />
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground block mb-1.5">Paper Type</label>
                 <select value={paperType} onChange={e => setPaperType(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-teal-600/20">
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary/30">
                   <option value="structured">Structured (written)</option>
                   <option value="mcq">Multiple Choice</option>
                   <option value="data_response">Data Response</option>
@@ -356,7 +355,7 @@ export default function QuestionExtractionPage() {
                     onChange={e => setText(e.target.value)}
                     rows={10}
                     placeholder="Paste the full exam paper text here. AI will identify and extract individual questions, mark allocations, command words, and topics automatically…"
-                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20 resize-y font-mono"
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-y font-mono"
                   />
                   <p className="text-[10px] text-muted-foreground mt-1">{text.length} characters</p>
                 </motion.div>
@@ -364,7 +363,7 @@ export default function QuestionExtractionPage() {
                 <motion.div key="pdf" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground block mb-1.5 flex items-center gap-1">
-                      <FileText className="h-3.5 w-3.5 text-teal-600" /> Question Paper PDF <span className="text-red-500">*</span>
+                      <FileText className="h-3.5 w-3.5 text-primary" /> Question Paper PDF <span className="text-red-500">*</span>
                     </label>
                     <FileDropZone
                       label="Upload question paper PDF"
@@ -401,7 +400,7 @@ export default function QuestionExtractionPage() {
               onClick={() => startExtraction.mutate()}
               disabled={!canExtract || startExtraction.isPending}
               className="gap-2 text-white"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
             >
               {startExtraction.isPending ? (
                 <><Loader2 className="h-4 w-4 animate-spin" />Starting…</>
@@ -418,8 +417,8 @@ export default function QuestionExtractionPage() {
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
                 {job?.status === "processing" || job?.status === "pending" ? (
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: `${TEAL}15` }}>
-                    <Loader2 className="h-4 w-4 animate-spin" style={{ color: TEAL }} />
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" className="bg-primary/8">
+                    <Loader2 className="h-4 w-4 animate-spin" className="text-primary" />
                   </div>
                 ) : job?.status === "done" ? (
                   <div className="w-8 h-8 rounded-full flex items-center justify-center bg-green-100">
@@ -455,8 +454,8 @@ export default function QuestionExtractionPage() {
           {/* Batch actions */}
           {selectedIds.size > 0 && (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-teal-50 border border-teal-200 rounded-xl p-3 flex items-center justify-between">
-              <span className="text-sm font-semibold text-teal-800">{selectedIds.size} selected</span>
+              className="bg-primary/8 border border-primary/25 rounded-xl p-3 flex items-center justify-between">
+              <span className="text-sm font-semibold text-foreground">{selectedIds.size} selected</span>
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => batchAction.mutate({ ids: Array.from(selectedIds), action: "approve" })}
                   disabled={batchAction.isPending} className="text-green-700 border-green-300 hover:bg-green-50 gap-1.5">
@@ -474,7 +473,7 @@ export default function QuestionExtractionPage() {
           {pending.length > 0 && job?.status === "done" && (
             <div className="flex items-center gap-2">
               <Button size="sm" variant="outline" onClick={() => batchAction.mutate({ ids: pending.map(q => q.id), action: "approve" })}
-                disabled={batchAction.isPending} className="gap-1.5 text-teal-700 border-teal-300 hover:bg-teal-50">
+                disabled={batchAction.isPending} className="gap-1.5 text-primary border-primary/30 hover:bg-primary/8">
                 <Zap className="h-3.5 w-3.5" />Approve All {pending.length} Pending
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set(pending.map(q => q.id)))}
@@ -501,7 +500,7 @@ export default function QuestionExtractionPage() {
 
           {(job?.status === "pending" || job?.status === "processing") && questions.length === 0 && (
             <div className="text-center py-10">
-              <Loader2 className="h-8 w-8 mx-auto animate-spin mb-3" style={{ color: TEAL }} />
+              <Loader2 className="h-8 w-8 mx-auto animate-spin mb-3" className="text-primary" />
               <p className="text-sm text-muted-foreground">AI is reading the paper and extracting questions…</p>
             </div>
           )}

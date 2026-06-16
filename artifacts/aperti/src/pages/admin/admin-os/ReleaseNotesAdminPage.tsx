@@ -10,7 +10,7 @@ const TYPE_META: Record<string, { label: string; color: string; icon: any }> = {
   minor:        { label: "Minor",        color: "bg-blue-100 text-blue-700",     icon: FileText },
   bugfix:       { label: "Bugfix",       color: "bg-orange-100 text-orange-700", icon: FileText },
   security:     { label: "Security",     color: "bg-red-100 text-red-700",       icon: Shield },
-  announcement: { label: "Announcement", color: "bg-teal-100 text-teal-700",     icon: Megaphone },
+  announcement: { label: "Announcement", color: "bg-primary/15 text-primary",     icon: Megaphone },
 };
 
 const EMPTY = { title: "", summary: "", content: "", type: "minor", version: "", status: "draft", feature_id: "" };
@@ -48,7 +48,7 @@ export default function ReleaseNotesAdminPage() {
           <h1 className="text-2xl font-bold text-gray-900">Release Notes</h1>
           <p className="text-sm text-gray-500 mt-0.5">Create and publish release notes and changelogs</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+        <button onClick={openCreate} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> New Release Note
         </button>
       </div>
@@ -112,25 +112,25 @@ export default function ReleaseNotesAdminPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Title *</label>
-                    <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Summary</label>
-                    <input value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Type</label>
-                    <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                       {Object.entries(TYPE_META).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Version</label>
-                    <input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} placeholder="12.0.0" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} placeholder="12.0.0" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                    <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                       <option value="draft">Draft</option>
                       <option value="published">Published</option>
                       <option value="scheduled">Scheduled</option>
@@ -138,17 +138,17 @@ export default function ReleaseNotesAdminPage() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Linked Feature ID</label>
-                    <input value={form.feature_id} onChange={(e) => setForm({ ...form, feature_id: e.target.value })} placeholder="Optional" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.feature_id} onChange={(e) => setForm({ ...form, feature_id: e.target.value })} placeholder="Optional" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Content (Markdown)</label>
-                    <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={8} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none font-mono" placeholder="## What's New&#10;&#10;- Feature A&#10;- Feature B" />
+                    <textarea value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} rows={8} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none font-mono" placeholder="## What's New&#10;&#10;- Feature A&#10;- Feature B" />
                   </div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
                 <button onClick={closeModal} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-                <button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending} className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+                <button onClick={() => saveMutation.mutate()} disabled={!form.title || saveMutation.isPending} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors disabled:opacity-50">
                   {saveMutation.isPending ? "Saving..." : editing ? "Update" : "Create"}
                 </button>
               </div>

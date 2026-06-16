@@ -11,13 +11,13 @@ import {
 
 const IGCSE_COLOR: Record<string, string> = {
   "A*": "text-yellow-500", "A": "text-emerald-500", "B": "text-green-500",
-  "C": "text-teal-500", "D": "text-blue-500", "E": "text-orange-500",
+  "C": "text-primary", "D": "text-blue-500", "E": "text-orange-500",
   "F": "text-amber-500", "G": "text-red-400", "U": "text-red-600",
 };
 
 function ReadinessGauge({ score }: { score: number }) {
   const clamp = Math.min(100, Math.max(0, score));
-  const color = clamp >= 75 ? "#10b981" : clamp >= 50 ? "#0d9488" : clamp >= 30 ? "#f59e0b" : "#ef4444";
+  const color = clamp >= 75 ? "#10b981" : clamp >= 50 ? "hsl(var(--primary))" : clamp >= 30 ? "#f59e0b" : "#ef4444";
   const circumference = 2 * Math.PI * 54;
   const dash = (clamp / 100) * circumference;
 

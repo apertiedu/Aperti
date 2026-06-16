@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const TEAL = "#0D9488";
 
 const SUBJECTS = ["All Subjects","Physics","Math","Chemistry","Biology","English","Computer Science","Economics","History","Geography"];
 
@@ -27,13 +26,13 @@ interface Course {
 }
 
 const SUBJECT_COLORS: Record<string, string> = {
-  Physics: "#0D9488", Math: "#0D9488", Chemistry: "#0D9488",
-  Biology: "#0D9488", English: "#0D9488", "Computer Science": "#0D9488",
-  Economics: "#0D9488", History: "#0D9488", Geography: "#0D9488",
+  Physics: "hsl(var(--primary))", Math: "hsl(var(--primary))", Chemistry: "hsl(var(--primary))",
+  Biology: "hsl(var(--primary))", English: "hsl(var(--primary))", "Computer Science": "hsl(var(--primary))",
+  Economics: "hsl(var(--primary))", History: "hsl(var(--primary))", Geography: "hsl(var(--primary))",
 };
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
-  const color = SUBJECT_COLORS[course.subject || ""] || TEAL;
+  const color = SUBJECT_COLORS[course.subject || ""] || "hsl(var(--primary))";
   const price = course.price_egp ? `${parseFloat(course.price_egp).toLocaleString()} EGP` : "Free";
 
   return (
@@ -69,7 +68,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
           <div className="p-5 flex flex-col flex-1">
             <div className="flex items-start justify-between gap-2 mb-2">
               <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 flex-1">{course.title}</h3>
-              <span className="font-bold text-sm shrink-0 whitespace-nowrap" style={{ color: TEAL }}>{price}</span>
+              <span className="font-bold text-sm shrink-0 whitespace-nowrap" className="text-primary">{price}</span>
             </div>
 
             {course.description && (
@@ -139,7 +138,7 @@ export default function Courses() {
       <div className="bg-background border-b border-border">
         <div className="max-w-6xl mx-auto px-5 py-8">
           <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}>
-            <Badge className="mb-3 rounded-full px-3 py-1 text-xs border-0" style={{ background: "#E6F4F1", color: TEAL }}>
+            <Badge className="mb-3 rounded-full px-3 py-1 text-xs border-0" style={{ background: "#E6F4F1", color: "hsl(var(--primary))" }}>
               Course Marketplace
             </Badge>
             <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Find your next course.</h1>
@@ -176,8 +175,8 @@ export default function Courses() {
           </div>
         ) : !courses?.length ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24 max-w-sm mx-auto">
-            <div className="w-20 h-20 rounded-2xl bg-teal-50 flex items-center justify-center mx-auto mb-5">
-              <BookOpen className="h-10 w-10 text-teal-300" />
+            <div className="w-20 h-20 rounded-2xl bg-primary/8 flex items-center justify-center mx-auto mb-5">
+              <BookOpen className="h-10 w-10 text-primary/60" />
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">No courses available yet</h3>
             <p className="text-sm text-gray-400 mb-1">Courses published by your teachers will appear here.</p>

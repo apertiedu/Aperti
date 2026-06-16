@@ -30,12 +30,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
-const TEAL_LIGHT = "#E0F2F1";
 
 const GRADE_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   A: { bg: "#dcfce7", text: "#16a34a", border: "#86efac" },
-  B: { bg: "#E0F2F1", text: "#0D9488", border: "#5eead4" },
+  B: { bg: "#E0F2F1", text: "hsl(var(--primary))", border: "#5eead4" },
   C: { bg: "#fef3c7", text: "#d97706", border: "#fcd34d" },
   D: { bg: "#fee2e2", text: "#dc2626", border: "#fca5a5" },
 };
@@ -287,7 +285,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
                 key={dt}
                 type="button"
                 onClick={() => f("deliveryType", dt)}
-                className={`flex-1 text-xs font-semibold transition-colors ${form.deliveryType === dt ? "bg-[#0D9488] text-white" : "bg-card text-muted-foreground hover:bg-muted"}`}
+                className={`flex-1 text-xs font-semibold transition-colors ${form.deliveryType === dt ? "bg-primary text-white" : "bg-card text-muted-foreground hover:bg-muted"}`}
               >
                 {dt}
               </button>
@@ -305,7 +303,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
               key={pm.value}
               type="button"
               onClick={() => f("paymentModel", pm.value)}
-              className={`text-xs text-left px-3 py-2 rounded-xl border transition-all font-medium ${form.paymentModel === pm.value ? "border-[#0D9488] bg-[#E0F2F1] text-[#0D9488]" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
+              className={`text-xs text-left px-3 py-2 rounded-xl border transition-all font-medium ${form.paymentModel === pm.value ? "border-primary bg-[#E0F2F1] text-primary" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}
             >
               {pm.label}
             </button>
@@ -347,7 +345,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
           <button
             type="button"
             onClick={() => f("recordingsIncluded", !form.recordingsIncluded)}
-            className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.recordingsIncluded ? "bg-[#0D9488]" : "bg-gray-200"}`}
+            className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.recordingsIncluded ? "bg-primary" : "bg-gray-200"}`}
           >
             <span
               className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform"
@@ -392,7 +390,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
         <button
           type="button"
           onClick={() => f("isPublished", !form.isPublished)}
-          className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.isPublished ? "bg-[#0D9488]" : "bg-gray-200"}`}
+          className={`relative w-10 h-6 rounded-full transition-colors shrink-0 ${form.isPublished ? "bg-primary" : "bg-gray-200"}`}
         >
           <span
             className="absolute top-0.5 w-[18px] h-[18px] rounded-full bg-white shadow-sm transition-transform"
@@ -407,7 +405,7 @@ function CourseForm({ course, onClose, onLimitExceeded }: { course?: Course | nu
       <Button
         type="submit"
         className="w-full h-10 rounded-xl font-semibold text-white"
-        style={{ background: TEAL }}
+        className="bg-primary text-primary-foreground"
         disabled={mutation.isPending}
       >
         {mutation.isPending ? "Saving…" : course ? "Save Changes" : "Create Course"}
@@ -428,7 +426,7 @@ function EnrollmentRow({ e, onAction }: {
         <CardContent className="p-4 flex items-center gap-4">
           <div
             className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold"
-            style={{ background: TEAL }}
+            className="bg-primary text-primary-foreground"
           >
             {initials}
           </div>
@@ -453,7 +451,7 @@ function EnrollmentRow({ e, onAction }: {
                 <Button
                   size="sm"
                   className="h-7 px-3 rounded-lg gap-1 text-xs text-white"
-                  style={{ background: TEAL }}
+                  className="bg-primary text-primary-foreground"
                   onClick={() => onAction(e.id, "approved")}
                 >
                   <CheckCircle2 className="h-3 w-3" /> Approve
@@ -471,7 +469,7 @@ function EnrollmentRow({ e, onAction }: {
               <Badge
                 className={`text-[10px] rounded-full px-2 ${
                   e.status === "approved"
-                    ? "bg-[#E0F2F1] text-[#0D9488]"
+                    ? "bg-[#E0F2F1] text-primary"
                     : "bg-red-50 text-red-600"
                 }`}
                 variant="outline"
@@ -597,7 +595,7 @@ export default function MyCourses() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <BookOpen className="h-6 w-6" style={{ color: TEAL }} /> My Courses
+            <BookOpen className="h-6 w-6" className="text-primary" /> My Courses
           </h1>
           <p className="text-gray-500 text-sm mt-1">
             Create, manage and publish your courses to the student marketplace.
@@ -607,7 +605,7 @@ export default function MyCourses() {
           <DialogTrigger asChild>
             <Button
               className="gap-2 rounded-xl text-white shrink-0"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
               onClick={() => { setEditing(null); setDialogOpen(true); }}
             >
               <Plus className="h-4 w-4" /> New Course
@@ -634,8 +632,8 @@ export default function MyCourses() {
         ].map(({ label, value, icon: Icon }) => (
           <Card key={label} className="border border-gray-100 shadow-sm">
             <CardContent className="p-4 flex items-center gap-3">
-              <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: TEAL_LIGHT }}>
-                <Icon className="h-4.5 w-4.5" style={{ color: TEAL }} />
+              <div className="h-9 w-9 rounded-xl flex items-center justify-center shrink-0" className="bg-primary/8">
+                <Icon className="h-4.5 w-4.5" className="text-primary" />
               </div>
               <div>
                 <p className="text-xl font-black text-gray-900">{value}</p>
@@ -658,7 +656,7 @@ export default function MyCourses() {
               {pending.length > 0 && (
                 <Badge
                   className="ml-1.5 text-white text-[10px] px-1.5 py-0 rounded-full h-4 min-w-4"
-                  style={{ background: TEAL }}
+                  className="bg-primary text-primary-foreground"
                 >
                   {pending.length}
                 </Badge>
@@ -718,7 +716,7 @@ export default function MyCourses() {
                         <div
                           className="w-28 h-24 shrink-0 flex items-center justify-center"
                           style={{
-                            background: c.thumbnail_url ? undefined : TEAL_LIGHT,
+                            
                           }}
                         >
                           {c.thumbnail_url ? (
@@ -728,11 +726,11 @@ export default function MyCourses() {
                               className="w-full h-full object-cover"
                               onError={e => {
                                 e.currentTarget.style.display = "none";
-                                e.currentTarget.parentElement!.style.background = TEAL_LIGHT;
+                                
                               }}
                             />
                           ) : (
-                            <ImageIcon className="h-6 w-6" style={{ color: TEAL, opacity: 0.4 }} />
+                            <ImageIcon className="h-6 w-6" style={{ color: "hsl(var(--primary))", opacity: 0.4 }} />
                           )}
                         </div>
 
@@ -744,7 +742,7 @@ export default function MyCourses() {
                               <Badge
                                 className={`text-[10px] px-2 rounded-full shrink-0 ${
                                   c.is_published
-                                    ? "bg-[#E0F2F1] text-[#0D9488]"
+                                    ? "bg-[#E0F2F1] text-primary"
                                     : "bg-gray-100 text-gray-500"
                                 }`}
                                 variant="outline"
@@ -763,7 +761,7 @@ export default function MyCourses() {
                             <div className="flex items-center gap-3 mt-1.5 text-xs">
                               <button
                                 onClick={() => setStudentsFor(c)}
-                                className="flex items-center gap-1 text-gray-500 hover:text-[#0D9488] transition-colors"
+                                className="flex items-center gap-1 text-gray-500 hover:text-primary transition-colors"
                               >
                                 <Users className="h-3 w-3" />
                                 <span className="font-semibold">{c.approved_count}</span> enrolled
@@ -959,7 +957,7 @@ export default function MyCourses() {
                 <div key={e.id} className="flex items-center gap-3 p-3 rounded-xl border border-gray-100">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-white text-xs font-bold"
-                    style={{ background: TEAL }}
+                    className="bg-primary text-primary-foreground"
                   >
                     {(e.student_name || e.student_username).slice(0, 2).toUpperCase()}
                   </div>
@@ -979,9 +977,9 @@ export default function MyCourses() {
             )}
           </div>
           {courseStudents.length > 0 && (
-            <div className="mt-4 p-3 rounded-xl flex items-center gap-2" style={{ background: TEAL_LIGHT }}>
-              <TrendingUp className="h-4 w-4 shrink-0" style={{ color: TEAL }} />
-              <p className="text-xs font-semibold" style={{ color: TEAL }}>
+            <div className="mt-4 p-3 rounded-xl flex items-center gap-2" className="bg-primary/8">
+              <TrendingUp className="h-4 w-4 shrink-0" className="text-primary" />
+              <p className="text-xs font-semibold" className="text-primary">
                 {courseStudents.length} student{courseStudents.length !== 1 ? "s" : ""} enrolled
               </p>
             </div>

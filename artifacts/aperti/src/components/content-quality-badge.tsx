@@ -15,7 +15,7 @@ const THRESHOLDS = {
 
 function getLevel(score: number) {
   if (score >= THRESHOLDS.excellent) return { label: "Excellent", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 };
-  if (score >= THRESHOLDS.good) return { label: "Good", color: "bg-teal-100 text-teal-700 border-teal-200", icon: CheckCircle2 };
+  if (score >= THRESHOLDS.good) return { label: "Good", color: "bg-primary/10 text-primary border-primary/20", icon: CheckCircle2 };
   if (score >= THRESHOLDS.fair) return { label: "Fair", color: "bg-amber-100 text-amber-700 border-amber-200", icon: AlertTriangle };
   return { label: "Needs Work", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle };
 }
@@ -60,7 +60,7 @@ export default function ContentQualityBadge({ score, showDetails = false, size =
             fill="none"
             stroke="currentColor"
             strokeWidth={strokeWidth}
-            className="text-gray-100"
+            className="text-border"
           />
           <motion.circle
             cx={ringSize / 2}
@@ -72,11 +72,11 @@ export default function ContentQualityBadge({ score, showDetails = false, size =
             initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset: circumference - progress }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            stroke={score >= 65 ? "#0D9488" : score >= 40 ? "#f59e0b" : "#ef4444"}
+            stroke={score >= 65 ? "hsl(var(--primary))" : score >= 40 ? "#f59e0b" : "#ef4444"}
             strokeDasharray={circumference}
           />
         </svg>
-        <span className={`absolute text-[8px] font-black ${score >= 65 ? "text-teal-700" : score >= 40 ? "text-amber-700" : "text-red-600"}`}>
+        <span className={`absolute text-[8px] font-black ${score >= 65 ? "text-primary" : score >= 40 ? "text-amber-700" : "text-red-600"}`}>
           {score}
         </span>
       </div>

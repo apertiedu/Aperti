@@ -175,8 +175,8 @@ export default function TheMentor() {
     <div className="min-h-screen bg-[#F8FAFB] flex flex-col" style={{ fontFamily: "Inter, sans-serif" }}>
       {/* Header */}
       <div className="border-b border-border bg-card px-6 py-4 flex items-center gap-3">
-        <div className="h-9 w-9 rounded-xl bg-teal-50 flex items-center justify-center">
-          <Sparkles className="h-4.5 w-4.5 text-teal-600" style={{ width: 18, height: 18 }} />
+        <div className="h-9 w-9 rounded-xl bg-primary/8 flex items-center justify-center">
+          <Sparkles className="h-4.5 w-4.5 text-primary" style={{ width: 18, height: 18 }} />
         </div>
         <div>
           <h1 className="text-lg font-bold text-gray-900">The Mentor</h1>
@@ -202,7 +202,7 @@ export default function TheMentor() {
               {/* Echo Memory */}
               <div className="bg-card rounded-xl border border-border shadow-sm p-4">
                 <div className="flex items-center gap-2 mb-3">
-                  <Brain className="h-4 w-4 text-teal-600" />
+                  <Brain className="h-4 w-4 text-primary" />
                   <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wide">Your Learning Profile</h3>
                 </div>
                 {echoLoading ? (
@@ -214,7 +214,7 @@ export default function TheMentor() {
                   <div className="space-y-3">
                     <div>
                       <p className="text-[10px] font-semibold text-gray-500 uppercase mb-1.5">Learning Style</p>
-                      <Badge variant="secondary" className="text-xs capitalize bg-teal-50 text-teal-700 border-0">
+                      <Badge variant="secondary" className="text-xs capitalize bg-primary/8 text-primary border-0">
                         {echo?.preferredStyle || "Conceptual"}
                       </Badge>
                     </div>
@@ -248,7 +248,7 @@ export default function TheMentor() {
                             <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
                               <div
                                 className="h-full rounded-full transition-all"
-                                style={{ width: `${score}%`, background: score >= 70 ? "#0D9488" : score >= 40 ? "#F59E0B" : "#EF4444" }}
+                                style={{ width: `${score}%`, background: score >= 70 ? "hsl(var(--primary))" : score >= 40 ? "#F59E0B" : "#EF4444" }}
                               />
                             </div>
                           </div>
@@ -295,16 +295,16 @@ export default function TheMentor() {
                       className={`flex gap-3 ${msg.role === "user" ? "justify-end" : ""}`}
                     >
                       {msg.role === "assistant" && (
-                        <Avatar className="h-8 w-8 shrink-0 bg-teal-50 border-0">
-                          <AvatarFallback className="bg-teal-50">
-                            <Sparkles className="h-4 w-4 text-teal-600" />
+                        <Avatar className="h-8 w-8 shrink-0 bg-primary/8 border-0">
+                          <AvatarFallback className="bg-primary/8">
+                            <Sparkles className="h-4 w-4 text-primary" />
                           </AvatarFallback>
                         </Avatar>
                       )}
                       <div
                         className={`rounded-2xl px-4 py-2.5 max-w-[80%] text-sm leading-relaxed ${
                           msg.role === "user"
-                            ? "bg-teal-600 text-white"
+                            ? "bg-primary text-white"
                             : "bg-gray-50 text-gray-800 border border-gray-100"
                         }`}
                       >
@@ -319,7 +319,7 @@ export default function TheMentor() {
                             {[0, 150, 300].map((delay) => (
                               <span
                                 key={delay}
-                                className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-bounce"
+                                className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-bounce"
                                 style={{ animationDelay: `${delay}ms` }}
                               />
                             ))}
@@ -327,8 +327,8 @@ export default function TheMentor() {
                         )}
                       </div>
                       {msg.role === "user" && (
-                        <Avatar className="h-8 w-8 shrink-0 bg-teal-100 border-0">
-                          <AvatarFallback className="bg-teal-100 text-teal-700 text-xs font-bold">{initials}</AvatarFallback>
+                        <Avatar className="h-8 w-8 shrink-0 bg-primary/15 border-0">
+                          <AvatarFallback className="bg-primary/15 text-primary text-xs font-bold">{initials}</AvatarFallback>
                         </Avatar>
                       )}
                     </motion.div>
@@ -348,7 +348,7 @@ export default function TheMentor() {
                           key={label}
                           onClick={() => handleQuickChip(prompt)}
                           disabled={streaming}
-                          className="text-xs px-2.5 py-1 rounded-full bg-gray-50 border border-gray-200 text-gray-600 hover:bg-teal-50 hover:border-teal-200 hover:text-teal-700 transition-all disabled:opacity-50 whitespace-nowrap"
+                          className="text-xs px-2.5 py-1 rounded-full bg-gray-50 border border-gray-200 text-gray-600 hover:bg-primary/8 hover:border-primary/25 hover:text-primary transition-all disabled:opacity-50 whitespace-nowrap"
                         >
                           {label}
                         </button>
@@ -369,7 +369,7 @@ export default function TheMentor() {
                       type="submit"
                       disabled={streaming || !input.trim()}
                       className="h-10 w-10 p-0 rounded-xl shrink-0"
-                      style={{ background: "#0D9488" }}
+                      style={{ background: "hsl(var(--primary))" }}
                     >
                       <Send className="h-4 w-4" />
                     </Button>

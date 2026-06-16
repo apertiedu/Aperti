@@ -45,8 +45,8 @@ export default function CommunicationAnalytics() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-            <BarChart2 className="w-5 h-5 text-teal-600" />
+          <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center">
+            <BarChart2 className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Communication Analytics</h1>
@@ -70,7 +70,7 @@ export default function CommunicationAnalytics() {
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             {[
-              { label: "Total Messages", value: summary?.total_messages ?? 0, icon: <MessageSquare className="w-5 h-5" />, color: "text-teal-600 bg-teal-50" },
+              { label: "Total Messages", value: summary?.total_messages ?? 0, icon: <MessageSquare className="w-5 h-5" />, color: "text-primary bg-primary/8" },
               { label: "Active Rooms", value: summary?.active_rooms ?? 0, icon: <Users className="w-5 h-5" />, color: "text-blue-600 bg-blue-50" },
               { label: "Announcements", value: summary?.total_announcements ?? 0, icon: <Megaphone className="w-5 h-5" />, color: "text-purple-600 bg-purple-50" },
               { label: "Open Tickets", value: summary?.open_tickets ?? 0, icon: <Ticket className="w-5 h-5" />, color: "text-red-600 bg-red-50" },
@@ -107,7 +107,7 @@ export default function CommunicationAnalytics() {
                         </div>
                         <motion.div initial={{ height: 0 }} animate={{ height: `${height}%` }}
                           transition={{ delay: i * 0.01 }}
-                          className="w-full bg-teal-400 rounded-t-sm min-h-[4px] hover:bg-teal-500 transition-colors" />
+                          className="w-full bg-primary/70 rounded-t-sm min-h-[4px] hover:bg-primary transition-colors" />
                       </div>
                     );
                   })}
@@ -165,13 +165,13 @@ export default function CommunicationAnalytics() {
                     const roleColors: Record<string, string> = {
                       admin: "bg-red-100 text-red-700",
                       teacher: "bg-blue-100 text-blue-700",
-                      student: "bg-teal-100 text-teal-700",
+                      student: "bg-primary/15 text-primary",
                     };
                     return (
                       <div key={i} className="flex items-center gap-3">
                         <span className="text-xs text-gray-400 w-4">{i + 1}</span>
-                        <div className="w-7 h-7 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
-                          <span className="text-[10px] font-semibold text-teal-700">{u.name[0]}</span>
+                        <div className="w-7 h-7 rounded-full bg-primary/15 flex items-center justify-center flex-shrink-0">
+                          <span className="text-[10px] font-semibold text-primary">{u.name[0]}</span>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-1.5 mb-0.5">
@@ -180,7 +180,7 @@ export default function CommunicationAnalytics() {
                           </div>
                           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
-                              className="h-full bg-teal-400 rounded-full" />
+                              className="h-full bg-primary/70 rounded-full" />
                           </div>
                         </div>
                         <span className="text-xs text-gray-500 flex-shrink-0">{u.message_count}</span>

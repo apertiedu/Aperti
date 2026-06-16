@@ -20,7 +20,6 @@ interface EmptyStateProps {
   size?: "sm" | "md" | "lg";
 }
 
-const TEAL = "#0D9488";
 
 export function EmptyState({
   icon: Icon,
@@ -49,10 +48,9 @@ export function EmptyState({
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
-          className={cn("rounded-2xl flex items-center justify-center mb-4", iconSize)}
-          style={{ background: `${TEAL}15` }}
+          className={cn("rounded-2xl flex items-center justify-center mb-4 bg-primary/8", iconSize)}
         >
-          <Icon className={iconInner} style={{ color: TEAL }} />
+          <Icon className={cn(iconInner, "text-primary")} />
         </motion.div>
       )}
       <h3 className={cn("text-foreground mb-1", titleClass)}>{title}</h3>
@@ -66,7 +64,6 @@ export function EmptyState({
               size={size === "sm" ? "sm" : "default"}
               onClick={action.onClick}
               className="gap-1.5 font-medium"
-              style={{ background: TEAL, color: "white" }}
             >
               {action.icon && <action.icon className="w-3.5 h-3.5" />}
               {action.label}

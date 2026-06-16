@@ -462,7 +462,7 @@ export default function PracticeExams() {
         {[
           { title: "Quick 10",       desc: "10 questions, no time limit",         count: 10,  timed: false, sim: false, icon: BookMarked, color: "from-blue-500 to-indigo-600" },
           { title: "Timed Challenge", desc: "20 questions with a countdown",      count: 20,  timed: true,  sim: false, icon: Clock,      color: "from-orange-500 to-amber-600" },
-          { title: "Full Practice",  desc: "All questions, no limit",             count: 999, timed: false, sim: false, icon: Target,     color: "from-emerald-500 to-teal-600" },
+          { title: "Full Practice",  desc: "All questions, no limit",             count: 999, timed: false, sim: false, icon: Target,     color: "from-emerald-500 to-primary/80" },
           { title: "Sprint (5)",     desc: "5 questions, quick drill",            count: 5,   timed: false, sim: false, icon: Zap,        color: "from-violet-500 to-purple-600" },
         ].map(m => (
           <button key={m.title} onClick={() => startQuiz(Math.min(m.count, questions.length), m.timed, m.sim)}

@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { Home, ArrowLeft, RefreshCw, AlertTriangle, Bug } from "lucide-react";
 import { useState } from "react";
 
-const TEAL = "#0D9488";
 
 export default function ServerError() {
   const [reporting, setReporting] = useState(false);
@@ -31,13 +30,13 @@ export default function ServerError() {
         <svg className="absolute inset-0 w-full h-full">
           <defs>
             <pattern id="se-dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-              <circle cx="1" cy="1" r="1" fill={TEAL} opacity="0.06" />
+              <circle cx="1" cy="1" r="1" fill="hsl(var(--primary))" opacity="0.06" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#se-dots)" />
         </svg>
         <div className="absolute rounded-full blur-3xl" style={{ width: 400, height: 400, background: "#EF4444", opacity: 0.04, top: "-15%", right: "-8%" }} />
-        <div className="absolute rounded-full blur-3xl" style={{ width: 300, height: 300, background: TEAL, opacity: 0.03, bottom: "-10%", left: "-8%" }} />
+        <div className="absolute rounded-full blur-3xl" style={{ width: 300, height: 300, background: "hsl(var(--primary))", opacity: 0.03, bottom: "-10%", left: "-8%" }} />
       </div>
 
       <div className="relative z-10 text-center px-6 max-w-md mx-auto w-full">
@@ -78,7 +77,7 @@ export default function ServerError() {
           <button
             onClick={() => window.location.reload()}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shadow-sm"
-            style={{ background: TEAL }}
+            className="bg-primary"
           >
             <RefreshCw className="h-4 w-4" />
             Try Again
@@ -118,7 +117,7 @@ export default function ServerError() {
         <motion.div className="mt-10" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
           <Link href="/">
             <span className="text-lg font-extrabold cursor-pointer tracking-tight" style={{ color: "#121212" }}>
-              Aperti<span style={{ color: TEAL }}>.</span>
+              Aperti<span className="text-primary">.</span>
             </span>
           </Link>
         </motion.div>

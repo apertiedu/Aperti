@@ -12,7 +12,7 @@ import { Link } from "wouter";
 import { useState } from "react";
 
 const MODULE_COLORS: Record<string, string> = {
-  mentor: "bg-teal-100 text-teal-700",
+  mentor: "bg-primary/15 text-primary",
   grading: "bg-indigo-100 text-indigo-700",
   coremind: "bg-amber-100 text-amber-700",
   "trial-vault": "bg-emerald-100 text-emerald-700",

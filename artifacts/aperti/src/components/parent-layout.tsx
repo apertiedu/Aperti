@@ -14,7 +14,6 @@ import { useTheme } from "@/context/theme";
 import { io as SocketIO, Socket } from "socket.io-client";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, {
@@ -146,24 +145,24 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
   const initials = (user?.displayName || user?.username || "P").slice(0, 2).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
+    <div className="min-h-screen bg-background flex">
       <a href="#main-content" className="skip-link">Skip to main content</a>
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-all duration-300 shrink-0 ${collapsed ? "w-14" : "w-56"}`}
+        className={`hidden md:flex flex-col border-r border-border bg-card transition-all duration-300 shrink-0 ${collapsed ? "w-14" : "w-56"}`}
         aria-label="Sidebar navigation"
       >
         {/* Logo */}
-        <div className={`h-14 flex items-center border-b border-gray-100 dark:border-gray-800 ${collapsed ? "justify-center px-2" : "px-4 gap-2"}`}>
+        <div className={`h-14 flex items-center border-b border-border ${collapsed ? "justify-center px-2" : "px-4 gap-2"}`}>
           {!collapsed && (
             <>
-              <span className="font-black text-base text-gray-900 dark:text-white">Aperti<span style={{ color: TEAL }}>.</span></span>
-              <span className="text-xs text-gray-400 ml-1">Parent</span>
+              <span className="font-black text-base text-foreground">Aperti<span className="text-primary">.</span></span>
+              <span className="text-xs text-muted-foreground ml-1">Parent</span>
             </>
           )}
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className={`ml-auto p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 transition-colors ${collapsed ? "ml-0" : ""}`}
+            className={`ml-auto p-1 rounded-lg hover:bg-muted text-muted-foreground transition-colors ${collapsed ? "ml-0" : ""}`}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight className="h-3.5 w-3.5" /> : <ChevronLeft className="h-3.5 w-3.5" />}
@@ -175,7 +174,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
           {sidebarSections.map(section => (
             <div key={section.title}>
               {!collapsed && (
-                <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 px-2 mb-1">{section.title}</p>
+                <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2 mb-1">{section.title}</p>
               )}
               <div className="space-y-0.5">
                 {section.items.map(item => {
@@ -185,10 +184,10 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
                       <div
                         className={`flex items-center gap-2.5 px-2 py-2 rounded-lg text-sm transition-all cursor-pointer ${
                           active
-                            ? "text-white font-semibold"
-                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
+                            ? "bg-primary text-primary-foreground font-semibold"
+                            : "text-muted-foreground hover:bg-muted hover:text-foreground"
                         }`}
-                        style={active ? { background: TEAL } : undefined}
+                        style={undefined}
                         aria-current={active ? "page" : undefined}
                         title={collapsed ? item.label : undefined}
                       >
@@ -207,10 +206,10 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
         </nav>
 
         {/* Footer */}
-        <div className={`border-t border-gray-100 dark:border-gray-800 p-2 space-y-1`}>
+        <div className={`border-t border-border p-2 space-y-1`}>
           <button
             onClick={toggleDark}
-            className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-xs text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${collapsed ? "justify-center" : ""}`}
+            className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-xs text-muted-foreground hover:bg-muted transition-colors ${collapsed ? "justify-center" : ""}`}
             aria-label="Toggle dark mode"
           >
             {dark ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
@@ -230,20 +229,19 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
-        <header className="md:hidden sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 h-12 flex items-center px-4 justify-between shrink-0">
-          <span className="font-black text-base text-gray-900 dark:text-white">Aperti<span style={{ color: TEAL }}>.</span></span>
+        <header className="md:hidden sticky top-0 z-40 bg-card border-b border-border h-12 flex items-center px-4 justify-between shrink-0">
+          <span className="font-black text-base text-foreground">Aperti<span className="text-primary">.</span></span>
           <div className="flex items-center gap-2">
             {unreadCount > 0 && (
               <Link href="/parent/notifications">
                 <div className="relative">
-                  <Bell className="h-5 w-5 text-gray-500" />
+                  <Bell className="h-5 w-5 text-muted-foreground" />
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[9px] rounded-full flex items-center justify-center font-bold">{unreadCount}</span>
                 </div>
               </Link>
             )}
             <div
-              className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[10px] font-bold"
-              style={{ background: TEAL }}
+              className="w-7 h-7 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold"
             >
               {initials}
             </div>
@@ -267,7 +265,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
 
       {/* Mobile bottom nav */}
       <nav
-        className="fixed bottom-0 left-0 right-0 md:hidden border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-50"
+        className="fixed bottom-0 left-0 right-0 md:hidden border-t border-border bg-card z-50"
         aria-label="Mobile navigation"
       >
         <div className="flex justify-around items-center h-14 max-w-lg mx-auto px-1">
@@ -277,7 +275,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
                 <Sheet key="more" open={sheetOpen} onOpenChange={setSheetOpen}>
                   <SheetTrigger asChild>
                     <button
-                      className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-gray-400 rounded-lg"
+                      className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-muted-foreground rounded-lg"
                       aria-label="More options"
                     >
                       <MoreHorizontal className="h-5 w-5" />
@@ -295,7 +293,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
                           <Link key={item.href} href={item.href} onClick={() => setSheetOpen(false)}>
                             <div
                               className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-colors ${
-                                active ? "border-teal-200 bg-teal-50 text-teal-700" : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                                active ? "border-primary/30 bg-primary/8 text-primary" : "border-border hover:border-border hover:bg-muted/50 text-foreground"
                               }`}
                             >
                               <item.icon className="h-5 w-5" />
@@ -318,7 +316,7 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
               <Link key={item.href} href={item.href}>
                 <button
                   className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors relative ${
-                    active ? "text-teal-600" : "text-gray-400"
+                    active ? "text-primary" : "text-muted-foreground"
                   }`}
                   aria-label={item.label}
                   aria-current={active ? "page" : undefined}

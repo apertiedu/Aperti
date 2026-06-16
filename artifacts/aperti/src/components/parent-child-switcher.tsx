@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 interface Child { linkId: number; studentId: number; name: string; studentCode: string; }
@@ -28,11 +27,11 @@ export default function ParentChildSwitcher({ selected, onSelect }: { selected: 
 
   if (children.length === 1) {
     return (
-      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-50 border border-teal-100 w-fit">
-        <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold" style={{ background: TEAL }}>
+      <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/8 border border-primary/20 w-fit">
+        <div className="w-6 h-6 rounded-full flex items-center justify-center bg-primary text-primary-foreground text-[9px] font-bold">
           {(current.name || "S").slice(0, 2).toUpperCase()}
         </div>
-        <span className="text-sm font-semibold text-teal-700">{current.name}</span>
+        <span className="text-sm font-semibold text-primary">{current.name}</span>
       </div>
     );
   }
@@ -41,13 +40,13 @@ export default function ParentChildSwitcher({ selected, onSelect }: { selected: 
     <div className="relative w-fit">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-teal-50 border border-teal-100 hover:border-teal-300 transition-colors"
+        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/8 border border-primary/20 hover:border-primary/40 transition-colors"
       >
-        <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[9px] font-bold" style={{ background: TEAL }}>
+        <div className="w-6 h-6 rounded-full flex items-center justify-center bg-primary text-primary-foreground text-[9px] font-bold">
           {(current?.name || "S").slice(0, 2).toUpperCase()}
         </div>
-        <span className="text-sm font-semibold text-teal-700">{current?.name || "Select child"}</span>
-        <ChevronDown className={`h-3.5 w-3.5 text-teal-500 transition-transform ${open ? "rotate-180" : ""}`} />
+        <span className="text-sm font-semibold text-primary">{current?.name || "Select child"}</span>
+        <ChevronDown className={`h-3.5 w-3.5 text-primary/60 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
 
       {open && (
@@ -56,14 +55,14 @@ export default function ParentChildSwitcher({ selected, onSelect }: { selected: 
             <button
               key={c.studentId}
               onClick={() => { onSelect(c.studentId); setOpen(false); }}
-              className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors ${c.studentId === selected ? "bg-teal-50" : ""}`}
+              className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-muted/50 transition-colors ${c.studentId === selected ? "bg-primary/8" : ""}`}
             >
-              <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0" style={{ background: TEAL }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center bg-primary text-primary-foreground text-[9px] font-bold shrink-0">
                 {(c.name || "S").slice(0, 2).toUpperCase()}
               </div>
               <div>
-                <p className={`text-sm font-medium ${c.studentId === selected ? "text-teal-700" : "text-gray-800"}`}>{c.name}</p>
-                <p className="text-[9px] text-gray-400">{c.studentCode}</p>
+                <p className={`text-sm font-medium ${c.studentId === selected ? "text-primary" : "text-foreground"}`}>{c.name}</p>
+                <p className="text-[9px] text-muted-foreground">{c.studentCode}</p>
               </div>
             </button>
           ))}

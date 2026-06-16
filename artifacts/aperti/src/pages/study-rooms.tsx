@@ -80,8 +80,8 @@ export default function StudyRooms() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-            <Users className="w-5 h-5 text-teal-600" />
+          <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center">
+            <Users className="w-5 h-5 text-primary" />
           </div>
           <div>
             <h1 className="text-xl font-semibold text-gray-900">Collaboration Rooms</h1>
@@ -89,7 +89,7 @@ export default function StudyRooms() {
           </div>
         </div>
         <button onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> Create Room
         </button>
       </div>
@@ -100,12 +100,12 @@ export default function StudyRooms() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Search rooms…"
-            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
         </div>
         <div className="flex gap-1">
           {["all", "study_group", "revision", "exam_prep", "peer_tutoring"].map((t) => (
             <button key={t} onClick={() => setTypeFilter(t)}
-              className={`px-3 py-1.5 text-xs rounded-full whitespace-nowrap transition-colors ${typeFilter === t ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+              className={`px-3 py-1.5 text-xs rounded-full whitespace-nowrap transition-colors ${typeFilter === t ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
               {t === "all" ? "All" : TYPE_META[t]?.label}
             </button>
           ))}
@@ -164,14 +164,14 @@ export default function StudyRooms() {
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Room Name *</label>
                   <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="e.g. Physics Revision Group"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Type</label>
                   <div className="grid grid-cols-2 gap-2">
                     {Object.entries(TYPE_META).map(([key, meta]) => (
                       <button key={key} onClick={() => setForm({ ...form, type: key })}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-colors ${form.type === key ? "border-teal-500 bg-teal-50 text-teal-700" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-colors ${form.type === key ? "border-primary bg-primary/8 text-primary" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
                         {meta.icon} {meta.label}
                       </button>
                     ))}
@@ -179,14 +179,14 @@ export default function StudyRooms() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button onClick={() => setForm({ ...form, is_public: !form.is_public })}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-colors ${form.is_public ? "border-teal-500 bg-teal-50 text-teal-700" : "border-gray-200 text-gray-600"}`}>
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-colors ${form.is_public ? "border-primary bg-primary/8 text-primary" : "border-gray-200 text-gray-600"}`}>
                     {form.is_public ? <><Globe className="w-3.5 h-3.5" /> Public</> : <><Lock className="w-3.5 h-3.5" /> Private</>}
                   </button>
                   <span className="text-xs text-gray-400">{form.is_public ? "Anyone can discover and join" : "Invite only"}</span>
                 </div>
                 <button onClick={() => createMutation.mutate()}
                   disabled={!form.name.trim() || createMutation.isPending}
-                  className="w-full py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
                   Create & Open Room
                 </button>
               </div>
@@ -216,7 +216,7 @@ function RoomCard({ room, onOpen, onJoin, isJoined }: { room: Room; onOpen: () =
       </div>
       {isJoined ? (
         <button onClick={onOpen}
-          className="w-full flex items-center justify-center gap-2 py-2 bg-teal-600 text-white text-xs font-medium rounded-xl hover:bg-teal-700 transition-colors">
+          className="w-full flex items-center justify-center gap-2 py-2 bg-primary text-white text-xs font-medium rounded-xl hover:bg-primary/80 transition-colors">
           Open Room <ChevronRight className="w-3.5 h-3.5" />
         </button>
       ) : (

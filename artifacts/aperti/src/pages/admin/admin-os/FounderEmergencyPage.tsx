@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { fetchJSON, postJSON } from "@/lib/api";
 
-const TEAL = "#0D9488";
 
 function ToolCard({
   icon: Icon, title, description, color, children,
@@ -45,7 +44,7 @@ function UserIdInput({
         value={value}
         onChange={e => onChange(e.target.value)}
         placeholder="Enter user ID (number)"
-        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-gray-50"
+        className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-gray-50"
       />
     </div>
   );
@@ -158,7 +157,7 @@ export default function FounderEmergencyPage() {
               onClick={() => confirmAndRun(`Impersonate user ID ${impersonateId}? This will be logged.`, () => impersonateMut.mutate())}
               disabled={!impersonateId || impersonateMut.isPending}
               className="w-full py-2 px-4 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
             >
               {impersonateMut.isPending ? "Generating…" : "Generate Token"}
             </button>
@@ -166,7 +165,7 @@ export default function FounderEmergencyPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-500">@{impersonateToken.username} ({impersonateToken.role}) · 1h token</span>
-                  <button onClick={copyToken} className="flex items-center gap-1 text-xs text-teal-600 font-medium hover:text-teal-700">
+                  <button onClick={copyToken} className="flex items-center gap-1 text-xs text-primary font-medium hover:text-primary">
                     {copiedToken ? <><CheckCircle2 className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
                   </button>
                 </div>
@@ -227,7 +226,7 @@ export default function FounderEmergencyPage() {
         </ToolCard>
       </div>
 
-      <ToolCard icon={Wrench} title="Repair Enrollments & Clean Up" description="Fix orphaned records, expired tokens, and stale device sessions" color="bg-teal-50 text-teal-600">
+      <ToolCard icon={Wrench} title="Repair Enrollments & Clean Up" description="Fix orphaned records, expired tokens, and stale device sessions" color="bg-primary/8 text-primary">
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
             Scans for orphaned student enrollments, courses without subjects, expired password tokens, and
@@ -237,7 +236,7 @@ export default function FounderEmergencyPage() {
             onClick={() => confirmAndRun("Run enrollment repair and database cleanup?", () => repairMut.mutate())}
             disabled={repairMut.isPending}
             className="py-2 px-6 text-sm font-medium text-white rounded-lg disabled:opacity-50 transition-colors"
-            style={{ background: TEAL }}
+            className="bg-primary text-primary-foreground"
           >
             {repairMut.isPending ? "Running…" : "Run Repair"}
           </button>
@@ -265,7 +264,7 @@ export default function FounderEmergencyPage() {
             <p className="text-sm font-semibold text-gray-900">Emergency Action Audit Trail</p>
           </div>
           <button onClick={() => refetchTrail()} disabled={trailFetching}
-            className="flex items-center gap-1 text-xs text-gray-400 hover:text-teal-600 transition-colors">
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-primary transition-colors">
             <RefreshCw className={`w-3 h-3 ${trailFetching ? "animate-spin" : ""}`} /> Refresh
           </button>
         </div>

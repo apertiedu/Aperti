@@ -4,14 +4,11 @@ import { Link, useLocation } from "wouter";
 import { Eye, EyeOff, Check, ArrowLeft, ArrowRight, Globe, User, GraduationCap, Users } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
-const TEAL = "#0D9488";
-const TEAL_MID = "#0D9488";
-const TEAL_LIGHT = "#E6F4F1";
 
 const ROLES = [
-  { id: "teacher", title: "Teacher / Tutor", description: "Create courses, manage students, assessments, and analytics.", icon: GraduationCap, gradient: "from-teal-50 to-cyan-50" },
-  { id: "student", title: "Student / Learner", description: "Access courses, assignments, revision tools, and AI tutoring.", icon: User, gradient: "from-teal-50 to-emerald-50" },
-  { id: "parent", title: "Parent / Guardian", description: "Monitor your child's progress, attendance, and reports.", icon: Users, gradient: "from-teal-50 to-sky-50" },
+  { id: "teacher", title: "Teacher / Tutor", description: "Create courses, manage students, assessments, and analytics.", icon: GraduationCap, gradient: "from-primary to-cyan-50" },
+  { id: "student", title: "Student / Learner", description: "Access courses, assignments, revision tools, and AI tutoring.", icon: User, gradient: "from-primary to-emerald-50" },
+  { id: "parent", title: "Parent / Guardian", description: "Monitor your child's progress, attendance, and reports.", icon: Users, gradient: "from-primary to-sky-50" },
 ];
 
 const COUNTRIES = ["Egypt","Saudi Arabia","UAE","United Kingdom","United States","Canada","Australia","Germany","France","Other"];
@@ -47,7 +44,7 @@ function PasswordStrength({ password }: { password: string }) {
 function Orb({ x, y, size, delay, duration }: { x: string; y: string; size: number; delay: number; duration: number }) {
   return (
     <motion.div className="absolute rounded-full pointer-events-none"
-      style={{ left: x, top: y, width: size, height: size, background: `radial-gradient(circle, ${TEAL}1a, transparent 70%)` }}
+      style={{ left: x, top: y, width: size, height: size, background: `radial-gradient(circle, ${"hsl(var(--primary))"}1a, transparent 70%)` }}
       animate={{ y: [0, -25, 0], x: [0, 12, 0], scale: [1, 1.08, 1] }}
       transition={{ duration, delay, repeat: Infinity, ease: "easeInOut" }}
     />
@@ -73,8 +70,8 @@ function Field({ label, type = "text", value, onChange, placeholder, children, e
           placeholder={placeholder}
           className="w-full h-11 px-4 rounded-xl text-sm text-slate-900 bg-white outline-none transition-all duration-200 border"
           style={{
-            borderColor: error ? "#f87171" : focused ? TEAL : value ? "#94a3b8" : "#e2e8f0",
-            boxShadow: focused ? `0 0 0 3px ${error ? "#f8717118" : TEAL + "18"}` : "none",
+            borderColor: error ? "#f87171" : focused ? "hsl(var(--primary))" : value ? "#94a3b8" : "#e2e8f0",
+            boxShadow: focused ? `0 0 0 3px ${error ? "#f8717118" : "hsl(var(--primary))" + "18"}` : "none",
           }}
         />
         {children}
@@ -104,7 +101,7 @@ function StepBar({ step }: { step: number }) {
               <motion.div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
                 animate={{
-                  background: done || active ? TEAL : "#e5e7eb",
+                  background: done || active ? "hsl(var(--primary))" : "#e5e7eb",
                   color: done || active ? "#fff" : "#94a3b8",
                   scale: active ? 1.1 : 1,
                 }}
@@ -120,11 +117,11 @@ function StepBar({ step }: { step: number }) {
                   )}
                 </AnimatePresence>
               </motion.div>
-              <span className="text-[10px] font-medium" style={{ color: active ? TEAL : "#94a3b8" }}>{label}</span>
+              <span className="text-[10px] font-medium" style={{ color: active ? "hsl(var(--primary))" : "#94a3b8" }}>{label}</span>
             </div>
             {s < 3 && (
               <div className="w-10 h-px mx-2 mb-4 rounded-full overflow-hidden bg-gray-200">
-                <motion.div className="h-full rounded-full" style={{ background: TEAL }}
+                <motion.div className="h-full rounded-full" style={{ background: "hsl(var(--primary))" }}
                   animate={{ width: step > s ? "100%" : "0%" }}
                   transition={{ duration: 0.4, ease: "easeOut" }}
                 />
@@ -212,7 +209,7 @@ export default function Register() {
 
       {/* Grid dots */}
       <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundImage: `radial-gradient(circle, ${TEAL}0a 1px, transparent 1px)`, backgroundSize: "28px 28px" }}
+        style={{ backgroundImage: `radial-gradient(circle, ${"hsl(var(--primary))"}0a 1px, transparent 1px)`, backgroundSize: "28px 28px" }}
       />
 
       <motion.div
@@ -223,12 +220,12 @@ export default function Register() {
       >
         {/* Card */}
         <div
-          className="bg-white/85 backdrop-blur-xl rounded-2xl border shadow-xl shadow-teal-900/5 overflow-hidden"
+          className="bg-white/85 backdrop-blur-xl rounded-2xl border shadow-xl shadow-primary/10 overflow-hidden"
           style={{ borderColor: "rgba(0,121,107,0.12)" }}
         >
           {/* Header */}
           <div className="px-8 pt-8 pb-6 border-b" style={{ borderColor: "#f0fdfa" }}>
-            <Link href="/" className="text-xl font-extrabold block mb-5 select-none" style={{ color: TEAL }}>
+            <Link href="/" className="text-xl font-extrabold block mb-5 select-none" style={{ color: "hsl(var(--primary))" }}>
               Aperti<span className="opacity-60">.</span>
             </Link>
             <StepBar step={step} />
@@ -273,17 +270,17 @@ export default function Register() {
                         onClick={() => { setRole(r.id); setError(""); }}
                         className={`w-full text-left p-4 rounded-xl border-2 flex items-start gap-4 transition-colors`}
                         style={{
-                          borderColor: selected ? TEAL : "#e5e7eb",
+                          borderColor: selected ? "hsl(var(--primary))" : "#e5e7eb",
                           background: selected ? TEAL_LIGHT : "#fafafa",
                         }}
                         initial={{ opacity: 0, x: 24 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.07, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        whileHover={{ scale: 1.01, boxShadow: selected ? `0 4px 20px ${TEAL}22` : "0 2px 12px rgba(0,0,0,0.06)" }}
+                        whileHover={{ scale: 1.01, boxShadow: selected ? `0 4px 20px ${"hsl(var(--primary))"}22` : "0 2px 12px rgba(0,0,0,0.06)" }}
                         whileTap={{ scale: 0.99 }}
                       >
                         <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                          style={{ background: selected ? TEAL : "#e5e7eb" }}>
+                          style={{ background: selected ? "hsl(var(--primary))" : "#e5e7eb" }}>
                           <Icon className="w-5 h-5" style={{ color: selected ? "#fff" : "#64748b" }} />
                         </div>
                         <div className="flex-1">
@@ -296,7 +293,7 @@ export default function Register() {
                               initial={{ scale: 0, rotate: -90 }} animate={{ scale: 1, rotate: 0 }} exit={{ scale: 0 }}
                               transition={{ type: "spring", stiffness: 400, damping: 20 }}
                               className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                              style={{ background: TEAL }}
+                              style={{ background: "hsl(var(--primary))" }}
                             >
                               <Check className="w-3.5 h-3.5 text-white" />
                             </motion.div>
@@ -349,7 +346,7 @@ export default function Register() {
                     <select value={form.country} onChange={e => set("country", e.target.value)}
                       className="w-full h-11 rounded-xl border border-gray-200 px-3 text-sm text-gray-900 focus:outline-none bg-white transition-all duration-200"
                       style={{ borderColor: form.country ? "#94a3b8" : "#e2e8f0" }}
-                      onFocus={e => (e.target.style.boxShadow = `0 0 0 3px ${TEAL}18`, e.target.style.borderColor = TEAL)}
+                      onFocus={e => (e.target.style.boxShadow = `0 0 0 3px ${"hsl(var(--primary))"}18`, e.target.style.borderColor = "hsl(var(--primary))")}
                       onBlur={e => (e.target.style.boxShadow = "none", e.target.style.borderColor = form.country ? "#94a3b8" : "#e2e8f0")}
                     >
                       <option value="">Select country</option>
@@ -368,12 +365,12 @@ export default function Register() {
                   {/* Summary card */}
                   <motion.div
                     className="rounded-xl p-4 border space-y-3"
-                    style={{ background: TEAL_LIGHT, borderColor: `${TEAL}22` }}
+                    style={{ background: TEAL_LIGHT, borderColor: `${"hsl(var(--primary))"}22` }}
                     initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: TEAL }}>Account summary</p>
+                    <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "hsl(var(--primary))" }}>Account summary</p>
                     <div className="grid grid-cols-2 gap-y-2 text-sm">
                       {[
                         ["Name", `${form.firstName} ${form.lastName}`],
@@ -402,7 +399,7 @@ export default function Register() {
                     <motion.div
                       onClick={() => setAgreed(!agreed)}
                       className="w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-all duration-200"
-                      style={agreed ? { background: TEAL, borderColor: TEAL } : { borderColor: "#d1d5db" }}
+                      style={agreed ? { background: "hsl(var(--primary))", borderColor: "hsl(var(--primary))" } : { borderColor: "#d1d5db" }}
                       whileTap={{ scale: 0.9 }}
                     >
                       <AnimatePresence>
@@ -415,9 +412,9 @@ export default function Register() {
                     </motion.div>
                     <span className="text-sm text-gray-500 leading-relaxed">
                       I agree to the{" "}
-                      <Link href="/terms" className="font-semibold hover:underline" style={{ color: TEAL }}>Terms of Service</Link>
+                      <Link href="/terms" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>Terms of Service</Link>
                       {" "}and{" "}
-                      <Link href="/privacy" className="font-semibold hover:underline" style={{ color: TEAL }}>Privacy Policy</Link>
+                      <Link href="/privacy" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>Privacy Policy</Link>
                     </span>
                   </motion.label>
 
@@ -459,8 +456,8 @@ export default function Register() {
                 <motion.button
                   onClick={handleNext}
                   className="flex items-center gap-1.5 text-sm font-semibold text-white px-5 py-2.5 rounded-xl relative overflow-hidden"
-                  style={{ background: TEAL }}
-                  whileHover={{ scale: 1.03, boxShadow: `0 6px 20px ${TEAL}40` }}
+                  style={{ background: "hsl(var(--primary))" }}
+                  whileHover={{ scale: 1.03, boxShadow: `0 6px 20px ${"hsl(var(--primary))"}40` }}
                   whileTap={{ scale: 0.97 }}
                 >
                   <motion.div
@@ -476,8 +473,8 @@ export default function Register() {
                   onClick={handleSubmit}
                   disabled={submitting || !agreed}
                   className="flex items-center gap-2 text-sm font-semibold text-white px-6 py-2.5 rounded-xl min-w-[150px] justify-center relative overflow-hidden"
-                  style={{ background: agreed ? TEAL : "#94a3b8", cursor: agreed ? "pointer" : "not-allowed" }}
-                  whileHover={agreed ? { scale: 1.03, boxShadow: `0 6px 20px ${TEAL}40` } : {}}
+                  style={{ background: agreed ? "hsl(var(--primary))" : "#94a3b8", cursor: agreed ? "pointer" : "not-allowed" }}
+                  whileHover={agreed ? { scale: 1.03, boxShadow: `0 6px 20px ${"hsl(var(--primary))"}40` } : {}}
                   whileTap={agreed ? { scale: 0.97 } : {}}
                 >
                   <AnimatePresence mode="wait">
@@ -501,7 +498,7 @@ export default function Register() {
 
           <p className="text-center text-sm text-gray-400 pb-6">
             Already have an account?{" "}
-            <Link href="/login" className="font-semibold hover:underline" style={{ color: TEAL }}>Sign in</Link>
+            <Link href="/login" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>Sign in</Link>
           </p>
         </div>
       </motion.div>

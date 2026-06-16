@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 const ROLE_COLORS: Record<string, string> = {
   admin: "bg-red-100 text-red-700",
-  teacher: "bg-teal-100 text-teal-700",
+  teacher: "bg-primary/15 text-primary",
   student: "bg-blue-100 text-blue-700",
   parent: "bg-purple-100 text-purple-700",
   assistant: "bg-orange-100 text-orange-700",
@@ -33,7 +33,7 @@ function UserDetailPanel({ user, onClose, onAction }: any) {
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">×</button>
         </div>
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xl font-bold">
+          <div className="w-14 h-14 bg-primary/15 rounded-full flex items-center justify-center text-primary text-xl font-bold">
             {user.displayName?.[0]?.toUpperCase() || user.username?.[0]?.toUpperCase()}
           </div>
           <div>
@@ -79,7 +79,7 @@ function UserDetailPanel({ user, onClose, onAction }: any) {
           <button onClick={() => onAction("force-logout", user.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
             <LogOut className="w-4 h-4" /> Force Logout
           </button>
-          <button onClick={() => onAction("impersonate", user.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-teal-600 border border-teal-200 rounded-lg hover:bg-teal-50 transition-colors">
+          <button onClick={() => onAction("impersonate", user.id)} className="w-full flex items-center gap-2 px-4 py-2 text-sm text-primary border border-primary/25 rounded-lg hover:bg-primary/8 transition-colors">
             <Eye className="w-4 h-4" /> Impersonate User
           </button>
         </div>
@@ -197,7 +197,7 @@ export default function UsersPage() {
           <a href="/api/admin/users/export/csv" className="flex items-center gap-2 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">
             <Download className="w-4 h-4" /> Export All
           </a>
-          <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+          <button onClick={() => setShowCreate(true)} className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors">
             <Plus className="w-4 h-4" /> Add User
           </button>
         </div>
@@ -211,10 +211,10 @@ export default function UsersPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="flex items-center gap-3 px-4 py-3 bg-teal-50 border border-teal-200 rounded-xl"
+            className="flex items-center gap-3 px-4 py-3 bg-primary/8 border border-primary/25 rounded-xl"
           >
-            <CheckSquare className="w-4 h-4 text-teal-600 shrink-0" />
-            <span className="text-sm font-semibold text-teal-700">{checkedIds.size} user{checkedIds.size > 1 ? "s" : ""} selected</span>
+            <CheckSquare className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-sm font-semibold text-primary">{checkedIds.size} user{checkedIds.size > 1 ? "s" : ""} selected</span>
             <div className="flex gap-2 ml-2 flex-wrap">
               <button onClick={() => bulkMutate.mutate({ action: "suspend", ids: [...checkedIds] })} disabled={bulkMutate.isPending}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50">
@@ -229,7 +229,7 @@ export default function UsersPage() {
                 <Download className="w-3.5 h-3.5" /> Export
               </button>
             </div>
-            <button onClick={() => setCheckedIds(new Set())} className="ml-auto p-1.5 hover:bg-teal-100 rounded-lg transition-colors text-teal-500">
+            <button onClick={() => setCheckedIds(new Set())} className="ml-auto p-1.5 hover:bg-primary/15 rounded-lg transition-colors text-primary">
               <XIcon className="w-3.5 h-3.5" />
             </button>
           </motion.div>
@@ -242,7 +242,7 @@ export default function UsersPage() {
           {[
             { label: "Total", value: stats.total, color: "text-gray-900" },
             { label: "Active", value: stats.active, color: "text-green-600" },
-            { label: "Teachers", value: stats.teachers, color: "text-teal-600" },
+            { label: "Teachers", value: stats.teachers, color: "text-primary" },
             { label: "Students", value: stats.students, color: "text-blue-600" },
             { label: "Admins", value: stats.admins, color: "text-red-600" },
             { label: "Suspended", value: stats.suspended, color: "text-orange-600" },
@@ -259,13 +259,13 @@ export default function UsersPage() {
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-48">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search users…" className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white" />
+          <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search users…" className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white" />
         </div>
-        <select value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }} className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white text-gray-700">
+        <select value={role} onChange={(e) => { setRole(e.target.value); setPage(1); }} className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white text-gray-700">
           <option value="">All Roles</option>
           {["admin", "teacher", "student", "parent", "assistant"].map((r) => <option key={r} value={r}>{r}</option>)}
         </select>
-        <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white text-gray-700">
+        <select value={status} onChange={(e) => { setStatus(e.target.value); setPage(1); }} className="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white text-gray-700">
           <option value="">All Status</option>
           {["active", "suspended", "pending", "archived"].map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
@@ -279,7 +279,7 @@ export default function UsersPage() {
               <tr className="border-b border-gray-100 bg-gray-50">
                 <th className="px-4 py-3 w-8">
                   <button onClick={toggleAll} className="text-gray-400 hover:text-gray-600 transition-colors">
-                    {allChecked ? <CheckSquare className="w-4 h-4 text-teal-600" /> : someChecked ? <AlertTriangle className="w-4 h-4 text-amber-400" /> : <Square className="w-4 h-4" />}
+                    {allChecked ? <CheckSquare className="w-4 h-4 text-primary" /> : someChecked ? <AlertTriangle className="w-4 h-4 text-amber-400" /> : <Square className="w-4 h-4" />}
                   </button>
                 </th>
                 <th className="text-left px-4 py-3 font-semibold text-gray-600">User</th>
@@ -297,15 +297,15 @@ export default function UsersPage() {
               ) : users.length === 0 ? (
                 <tr><td colSpan={8} className="text-center py-12 text-gray-400">No users found</td></tr>
               ) : users.map((u: any) => (
-                <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${checkedIds.has(u.id) ? "bg-teal-50/50" : ""}`}>
+                <tr key={u.id} className={`border-b border-gray-50 hover:bg-gray-50 transition-colors ${checkedIds.has(u.id) ? "bg-primary/8/50" : ""}`}>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleOne(u.id)} className="text-gray-300 hover:text-teal-500 transition-colors">
-                      {checkedIds.has(u.id) ? <CheckSquare className="w-4 h-4 text-teal-600" /> : <Square className="w-4 h-4" />}
+                    <button onClick={() => toggleOne(u.id)} className="text-gray-300 hover:text-primary transition-colors">
+                      {checkedIds.has(u.id) ? <CheckSquare className="w-4 h-4 text-primary" /> : <Square className="w-4 h-4" />}
                     </button>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 text-xs font-bold flex-shrink-0">
+                      <div className="w-8 h-8 bg-primary/15 rounded-full flex items-center justify-center text-primary text-xs font-bold flex-shrink-0">
                         {(u.displayName || u.username)?.[0]?.toUpperCase()}
                       </div>
                       <div>
@@ -324,7 +324,7 @@ export default function UsersPage() {
                   <td className="px-4 py-3 text-gray-500 text-xs">{u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString() : "Never"}</td>
                   <td className="px-4 py-3 text-gray-500 text-xs">{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-3 text-center">
-                    <button onClick={() => setSelected(u)} className="text-gray-400 hover:text-teal-600 transition-colors p-1 rounded-lg hover:bg-teal-50">
+                    <button onClick={() => setSelected(u)} className="text-gray-400 hover:text-primary transition-colors p-1 rounded-lg hover:bg-primary/8">
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
                   </td>
@@ -375,7 +375,7 @@ export default function UsersPage() {
               onChange={(e) => setResetPwdValue(e.target.value)}
               placeholder="New password…"
               maxLength={128}
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 mb-5"
+              className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 mb-5"
             />
             <div className="flex gap-3">
               <button onClick={() => { setResetPwdTarget(null); setResetPwdValue(""); }} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">Cancel</button>
@@ -419,20 +419,20 @@ export default function UsersPage() {
                     type={f.type}
                     value={(newUser as any)[f.key]}
                     onChange={(e) => setNewUser(prev => ({ ...prev, [f.key]: e.target.value }))}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60"
                   />
                 </div>
               ))}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                <select value={newUser.role} onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400">
+                <select value={newUser.role} onChange={(e) => setNewUser(prev => ({ ...prev, role: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60">
                   {["admin", "teacher", "student", "parent", "assistant"].map((r) => <option key={r} value={r}>{r}</option>)}
                 </select>
               </div>
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowCreate(false)} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700 transition-colors">Cancel</button>
-              <button onClick={() => createMutation.mutate()} disabled={createMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors disabled:opacity-50">
+              <button onClick={() => createMutation.mutate()} disabled={createMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors disabled:opacity-50">
                 {createMutation.isPending ? "Creating…" : "Create User"}
               </button>
             </div>

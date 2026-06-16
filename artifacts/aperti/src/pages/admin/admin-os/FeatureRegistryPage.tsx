@@ -15,7 +15,7 @@ const STATUS_META: Record<string, { label: string; color: string; icon: any }> =
   development: { label: "Dev",         color: "bg-blue-100 text-blue-700",   icon: RefreshCw },
   testing:     { label: "Testing",     color: "bg-yellow-100 text-yellow-700",icon: TestTube },
   beta:        { label: "Beta",        color: "bg-orange-100 text-orange-700",icon: AlertCircle },
-  coming_soon: { label: "Coming Soon", color: "bg-teal-100 text-teal-700",   icon: Clock },
+  coming_soon: { label: "Coming Soon", color: "bg-primary/15 text-primary",   icon: Clock },
   scheduled:   { label: "Scheduled",  color: "bg-indigo-100 text-indigo-700",icon: Calendar },
   released:    { label: "Released",   color: "bg-green-100 text-green-700",  icon: CheckCircle2 },
   deprecated:  { label: "Deprecated", color: "bg-red-100 text-red-700",     icon: XCircle },
@@ -87,7 +87,7 @@ export default function FeatureRegistryPage() {
           <h1 className="text-2xl font-bold text-gray-900">Feature Registry</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage platform features, launch schedules, and visibility</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+        <button onClick={openCreate} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> New Feature
         </button>
       </div>
@@ -98,7 +98,7 @@ export default function FeatureRegistryPage() {
           { label: "Total Features", value: stats.total, icon: Package, color: "text-gray-600" },
           { label: "Released", value: stats.released, icon: CheckCircle2, color: "text-green-600" },
           { label: "In Beta", value: stats.beta, icon: TestTube, color: "text-orange-600" },
-          { label: "Coming Soon", value: stats.coming, icon: Clock, color: "text-teal-600" },
+          { label: "Coming Soon", value: stats.coming, icon: Clock, color: "text-primary" },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <s.icon className={`w-5 h-5 ${s.color} mb-2`} />
@@ -112,9 +112,9 @@ export default function FeatureRegistryPage() {
       <div className="flex gap-3 flex-wrap">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search features..." className="pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 w-56" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search features..." className="pl-9 pr-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 w-56" />
         </div>
-        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="px-3 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
           <option value="">All Statuses</option>
           {STATUSES.map((s) => <option key={s} value={s}>{STATUS_META[s].label}</option>)}
         </select>
@@ -166,7 +166,7 @@ export default function FeatureRegistryPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1 justify-end">
-                        <button onClick={() => setScheduleModal(f)} title="Schedule launch" className="p-1.5 text-gray-400 hover:text-teal-600 rounded transition-colors"><Calendar className="w-4 h-4" /></button>
+                        <button onClick={() => setScheduleModal(f)} title="Schedule launch" className="p-1.5 text-gray-400 hover:text-primary rounded transition-colors"><Calendar className="w-4 h-4" /></button>
                         <button onClick={() => openEdit(f)} className="p-1.5 text-gray-400 hover:text-blue-600 rounded transition-colors"><Edit2 className="w-4 h-4" /></button>
                         <button onClick={() => archiveMutation.mutate(f.id)} className="p-1.5 text-gray-400 hover:text-red-500 rounded transition-colors"><Trash2 className="w-4 h-4" /></button>
                       </div>
@@ -191,50 +191,50 @@ export default function FeatureRegistryPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Feature Name *</label>
-                    <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Description</label>
-                    <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" />
+                    <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Category</label>
-                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                       <option value="">Select...</option>
                       {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Status</label>
-                    <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                       {STATUSES.map((s) => <option key={s} value={s}>{STATUS_META[s].label}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Version</label>
-                    <input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} placeholder="1.0.0" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.version} onChange={(e) => setForm({ ...form, version: e.target.value })} placeholder="1.0.0" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Owner</label>
-                    <input value={form.owner} onChange={(e) => setForm({ ...form, owner: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.owner} onChange={(e) => setForm({ ...form, owner: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Release Date</label>
-                    <input type="datetime-local" value={form.release_date || ""} onChange={(e) => setForm({ ...form, release_date: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input type="datetime-local" value={form.release_date || ""} onChange={(e) => setForm({ ...form, release_date: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Documentation URL</label>
-                    <input value={form.documentation_url} onChange={(e) => setForm({ ...form, documentation_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.documentation_url} onChange={(e) => setForm({ ...form, documentation_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Dependency Feature IDs (comma-separated)</label>
-                    <input value={form.dependencies} onChange={(e) => setForm({ ...form, dependencies: e.target.value })} placeholder="1, 3, 7" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                    <input value={form.dependencies} onChange={(e) => setForm({ ...form, dependencies: e.target.value })} placeholder="1, 3, 7" className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
                 </div>
               </div>
               <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
                 <button onClick={closeModal} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-                <button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending} className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+                <button onClick={() => saveMutation.mutate()} disabled={!form.name || saveMutation.isPending} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors disabled:opacity-50">
                   {saveMutation.isPending ? "Saving..." : editing ? "Update Feature" : "Create Feature"}
                 </button>
               </div>
@@ -249,8 +249,8 @@ export default function FeatureRegistryPage() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
-                  <Rocket className="w-5 h-5 text-teal-600" />
+                <div className="w-10 h-10 bg-primary/15 rounded-full flex items-center justify-center">
+                  <Rocket className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900">Schedule Launch</h3>
@@ -258,10 +258,10 @@ export default function FeatureRegistryPage() {
                 </div>
               </div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Launch Date & Time</label>
-              <input type="datetime-local" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 mb-4" />
+              <input type="datetime-local" value={scheduleDate} onChange={(e) => setScheduleDate(e.target.value)} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 mb-4" />
               <div className="flex gap-3">
                 <button onClick={() => setScheduleModal(null)} className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-                <button onClick={() => scheduleMutation.mutate({ id: scheduleModal.id, date: scheduleDate })} disabled={!scheduleDate || scheduleMutation.isPending} className="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+                <button onClick={() => scheduleMutation.mutate({ id: scheduleModal.id, date: scheduleDate })} disabled={!scheduleDate || scheduleMutation.isPending} className="flex-1 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors disabled:opacity-50">
                   {scheduleMutation.isPending ? "Scheduling..." : "Schedule"}
                 </button>
               </div>

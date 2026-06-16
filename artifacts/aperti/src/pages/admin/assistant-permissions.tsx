@@ -8,7 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Shield, User, ChevronDown, ChevronUp, Check, AlertCircle, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 
 async function fetchJSON(url: string, opts?: RequestInit) {
   const res = await fetch(`/api${url}`, {
@@ -80,7 +79,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
         onClick={() => setExpanded(e => !e)}
         className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-gray-50 transition-colors">
         <div className="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-white text-sm shrink-0"
-          style={{ background: `linear-gradient(135deg, ${TEAL}, #00acc1)` }}>
+          className="bg-primary">
           {assistant.displayName[0]?.toUpperCase()}
         </div>
         <div className="flex-1 min-w-0">
@@ -115,11 +114,11 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
                       onClick={() => togglePerm(perm)}
                       className={`flex items-start gap-2.5 p-3 rounded-xl border transition-all text-left ${
                         enabled
-                          ? "border-[#0D9488] bg-[#0D9488]/5"
+                          ? "border-primary bg-primary/5"
                           : "border-border hover:border-border bg-card"
                       }`}>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                        enabled ? "bg-[#0D9488] border-[#0D9488]" : "border-gray-300"
+                        enabled ? "bg-primary border-primary" : "border-gray-300"
                       }`}>
                         {enabled && <Check className="h-3 w-3 text-white" />}
                       </div>
@@ -135,7 +134,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
               <div className="flex items-center justify-between">
                 <div className="flex gap-2">
                   <button onClick={() => { setLocalPerms(allPerms); setDirty(true); }}
-                    className="text-xs text-[#0D9488] font-semibold hover:underline">Grant all</button>
+                    className="text-xs text-primary font-semibold hover:underline">Grant all</button>
                   <span className="text-gray-300">·</span>
                   <button onClick={() => { setLocalPerms([]); setDirty(true); }}
                     className="text-xs text-red-400 font-semibold hover:underline">Revoke all</button>
@@ -150,7 +149,7 @@ function AssistantCard({ assistant, allPerms }: { assistant: Assistant; allPerms
                       onClick={() => saveMutation.mutate()}
                       disabled={saveMutation.isPending}
                       className="h-7 text-xs px-3 text-white"
-                      style={{ background: TEAL }}>
+                      className="bg-primary text-primary-foreground">
                       {saveMutation.isPending ? "Saving…" : "Save Permissions"}
                     </Button>
                   </div>
@@ -183,8 +182,8 @@ export default function AssistantPermissionsPage() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}18` }}>
-            <Shield className="h-5 w-5" style={{ color: TEAL }} />
+          <div className="h-10 w-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
+            <Shield className="h-5 w-5" className="text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Assistant Permissions</h1>
@@ -209,7 +208,7 @@ export default function AssistantPermissionsPage() {
             </p>
             <Button
               className="mt-4 text-white text-sm"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
               onClick={() => window.location.href = "/admin/command"}>
               Go to Account Management
             </Button>

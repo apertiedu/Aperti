@@ -9,7 +9,6 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, 
 import { BarChart3, TrendingUp, TrendingDown, BookOpen, MessageSquare } from "lucide-react";
 import ParentChildSwitcher from "@/components/parent-child-switcher";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string) => fetch(url, { credentials: "include" });
 
 function getGradeLabel(pct: number) {
@@ -21,7 +20,7 @@ function getGradeLabel(pct: number) {
   return "E";
 }
 function getGradeColor(pct: number) {
-  if (pct >= 80) return "#0D9488";
+  if (pct >= 80) return "hsl(var(--primary))";
   if (pct >= 60) return "#f59e0b";
   return "#ef4444";
 }
@@ -64,13 +63,13 @@ export default function ParentGrades() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <Card className="border border-gray-100 shadow-sm">
                 <CardContent className="p-5">
-                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-teal-500" />Grade Trend (Last 12 Assessments)</h2>
+                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />Grade Trend (Last 12 Assessments)</h2>
                   <ResponsiveContainer width="100%" height={180}>
                     <LineChart data={data.trend}>
                       <XAxis dataKey="title" tick={{ fontSize: 9 }} tickFormatter={(v) => v.length > 12 ? v.slice(0, 12) + "…" : v} />
                       <YAxis domain={[0, 100]} tick={{ fontSize: 9 }} tickFormatter={(v) => `${v}%`} />
                       <Tooltip formatter={(v: any) => [`${v}%`, "Score"]} labelFormatter={(l) => l} />
-                      <Line type="monotone" dataKey="pct" stroke={TEAL} strokeWidth={2.5} dot={{ fill: TEAL, r: 3 }} />
+                      <Line type="monotone" dataKey="pct" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 3 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -123,7 +122,7 @@ export default function ParentGrades() {
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
               <Card className="border border-gray-100 shadow-sm">
                 <CardContent className="p-5">
-                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><MessageSquare className="h-4 w-4 text-teal-500" />Recent Teacher Feedback</h2>
+                  <h2 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2"><MessageSquare className="h-4 w-4 text-primary" />Recent Teacher Feedback</h2>
                   <div className="space-y-3">
                     {data.hwFeedback.map((f: any, i: number) => (
                       <div key={i} className="p-3 rounded-xl border border-border bg-card">

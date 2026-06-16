@@ -19,7 +19,7 @@ async function generateQRDataUrl(text: string): Promise<string> {
   return QRCode.toDataURL(text, {
     width: 700,
     margin: 2,
-    color: { dark: "#0D9488", light: "#ffffff" },
+    color: { dark: "hsl(var(--primary))", light: "#ffffff" },
     errorCorrectionLevel: "H",
   });
 }
@@ -50,10 +50,10 @@ const ID_CARD_HTML = (name: string, code: string, qrDataUrl: string) => `
       background: white;
       border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 24px 64px rgba(13, 148, 136, 0.18), 0 4px 16px rgba(0,0,0,0.08);
+      box-shadow: 0 24px 64px hsl(var(--primary) / 0.18), 0 4px 16px rgba(0,0,0,0.08);
     }
     .card-header {
-      background: linear-gradient(135deg, #0D9488 0%, #0f766e 55%, #134e4a 100%);
+      background: linear-gradient(135deg, hsl(175 84% 32%) 0%, #0f766e 55%, #134e4a 100%);
       padding: 22px 24px 20px;
       position: relative;
       overflow: hidden;
@@ -131,9 +131,9 @@ const ID_CARD_HTML = (name: string, code: string, qrDataUrl: string) => `
     .info-row { margin-bottom: 10px; }
     .info-label { font-size: 7px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; margin-bottom: 2px; }
     .info-value { font-size: 13px; font-weight: 800; color: #0f172a; }
-    .info-value-code { font-family: monospace; font-size: 12px; color: #0D9488; font-weight: 700; }
+    .info-value-code { font-family: monospace; font-size: 12px; color: hsl(175 84% 32%); font-weight: 700; }
     .id-number { font-size: 8px; color: #cbd5e1; margin-top: 12px; letter-spacing: 0.5px; text-transform: uppercase; }
-    .card-rainbow { height: 4px; background: linear-gradient(90deg, #0D9488 0%, #06b6d4 33%, #8b5cf6 66%, #ec4899 100%); }
+    .card-rainbow { height: 4px; background: linear-gradient(90deg, hsl(175 84% 32%) 0%, #06b6d4 33%, #8b5cf6 66%, #ec4899 100%); }
     .card-footer {
       background: #f8fafc;
       border-top: 1px solid #f1f5f9;
@@ -143,7 +143,7 @@ const ID_CARD_HTML = (name: string, code: string, qrDataUrl: string) => `
       align-items: center;
     }
     .footer-left { font-size: 8px; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-    .footer-right { font-size: 8px; color: #0D9488; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .footer-right { font-size: 8px; color: hsl(175 84% 32%); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .print-hint { font-size: 11px; color: #64748b; text-align: center; max-width: 340px; }
     @media print {
       body { background: white; padding: 0; }
@@ -265,7 +265,7 @@ export default function MyQRPage() {
       </div>
 
       <Card className="shadow-sm overflow-hidden">
-        <div className="h-1.5" style={{ background: "linear-gradient(90deg, #0D9488, #06b6d4, #8b5cf6, #ec4899)" }} />
+        <div className="h-1.5" style={{ background: "linear-gradient(90deg, hsl(175 84% 32%), #06b6d4, #8b5cf6, #ec4899)" }} />
         <CardContent className="p-8">
           {isLoading || generating ? (
             <div className="flex flex-col items-center gap-5">
@@ -276,14 +276,14 @@ export default function MyQRPage() {
           ) : qrDataUrl ? (
             <div className="flex flex-col items-center gap-5">
               <div className="relative">
-                <div className="absolute inset-0 rounded-3xl blur-2xl opacity-20" style={{ background: "radial-gradient(circle, #0D9488, transparent)" }} />
-                <div className="relative p-4 rounded-3xl border-2 bg-card shadow-lg" style={{ borderColor: "#0D9488" }}>
+                <div className="absolute inset-0 rounded-3xl blur-2xl opacity-20" style={{ background: "radial-gradient(circle, hsl(175 84% 32%), transparent)" }} />
+                <div className="relative p-4 rounded-3xl border-2 bg-card shadow-lg" style={{ borderColor: "hsl(var(--primary))" }}>
                   <img src={qrDataUrl} alt="Attendance QR Code" className="w-56 h-56 rounded-xl" />
                 </div>
               </div>
               <div className="text-center space-y-1">
                 <p className="font-bold text-lg text-foreground">{studentName}</p>
-                <p className="font-mono text-sm font-semibold" style={{ color: "#0D9488" }}>ID: {studentCode}</p>
+                <p className="font-mono text-sm font-semibold" style={{ color: "hsl(var(--primary))" }}>ID: {studentCode}</p>
                 <p className="text-xs text-muted-foreground">Academic Year {new Date().getFullYear()}–{new Date().getFullYear() + 1}</p>
               </div>
               <div className="flex flex-wrap gap-2 justify-center mt-1">
@@ -297,7 +297,7 @@ export default function MyQRPage() {
                   onClick={handlePrintIDCard}
                   size="sm"
                   className="gap-2 text-white"
-                  style={{ background: "linear-gradient(135deg, #0D9488, #0f766e)" }}
+                  style={{ background: "linear-gradient(135deg, hsl(175 84% 32%), #0f766e)" }}
                 >
                   <Printer className="h-4 w-4" />Print ID Card
                 </Button>
@@ -319,8 +319,8 @@ export default function MyQRPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {[
           {
-            icon: <QrCode className="h-5 w-5" style={{ color: "#0D9488" }} />,
-            color: "#0D9488",
+            icon: <QrCode className="h-5 w-5" style={{ color: "hsl(var(--primary))" }} />,
+            color: "hsl(var(--primary))",
             title: "Your Unique Code",
             desc: "Every student has a unique QR linked to their ID that cannot be duplicated.",
           },

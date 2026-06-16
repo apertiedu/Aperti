@@ -25,7 +25,7 @@ type TabId = "pending" | "submitted" | "overdue" | "returned" | "resubmission";
 
 const TAB_CONFIG: { id: TabId; label: string; color: string }[] = [
   { id: "pending",      label: "Pending",      color: "text-blue-600" },
-  { id: "submitted",    label: "Submitted",    color: "text-teal-600" },
+  { id: "submitted",    label: "Submitted",    color: "text-primary" },
   { id: "overdue",      label: "Overdue",      color: "text-red-600" },
   { id: "returned",     label: "Returned",     color: "text-emerald-600" },
   { id: "resubmission", label: "Resubmission", color: "text-orange-600" },
@@ -108,7 +108,7 @@ function AssignmentCard({ hw, today, expanded, onToggle, onSubmit, draft, onDraf
       role="article" aria-label={`Assignment: ${hw.title}`}>
       <button className="w-full flex items-start gap-4 p-5 text-left hover:bg-gray-50/50 transition-colors"
         onClick={onToggle} aria-expanded={expanded}>
-        <div className={`w-1 self-stretch rounded-full shrink-0 ${isOverdue ? "bg-red-400" : status === "graded" ? "bg-emerald-400" : status === "submitted" ? "bg-teal-400" : "bg-primary/40"}`} />
+        <div className={`w-1 self-stretch rounded-full shrink-0 ${isOverdue ? "bg-red-400" : status === "graded" ? "bg-emerald-400" : status === "submitted" ? "bg-primary/70" : "bg-primary/40"}`} />
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-3">
             <p className="font-bold text-gray-900 text-sm">{hw.title}</p>
@@ -117,13 +117,13 @@ function AssignmentCard({ hw, today, expanded, onToggle, onSubmit, draft, onDraf
                 <span className="text-xs font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">{hw.marksAwarded}/{hw.totalMarks}</span>
               )}
               {isOverdue && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-red-100 text-red-700">Overdue</span>}
-              {!isOverdue && status === "submitted" && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-teal-100 text-teal-700">Submitted</span>}
+              {!isOverdue && status === "submitted" && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-primary/15 text-primary">Submitted</span>}
               {!isOverdue && status === "graded" && <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-700">Graded</span>}
               {expanded ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-gray-400">
-            {hw.subjectName && <span className="text-teal-600 font-medium">{hw.subjectName}</span>}
+            {hw.subjectName && <span className="text-primary font-medium">{hw.subjectName}</span>}
             {hw.dueDate && (
               <span className={`flex items-center gap-1 ${isOverdue ? "text-red-500 font-medium" : ""}`}>
                 <Clock className="h-3 w-3" />
@@ -200,7 +200,7 @@ function AssignmentCard({ hw, today, expanded, onToggle, onSubmit, draft, onDraf
                       onClick={() => onSubmit(true)}>
                       <Edit3 className="h-3 w-3" /> Save Draft
                     </Button>
-                    <Button size="sm" className="gap-2 text-xs" style={{ background: "#0D9488" }}
+                    <Button size="sm" className="gap-2 text-xs" style={{ background: "hsl(var(--primary))" }}
                       disabled={submitting || (!draft?.trim() && !attachments?.length)}
                       onClick={() => onSubmit(false)}>
                       <Send className="h-3 w-3" />{submitting ? "Submitting…" : "Submit"}
@@ -287,7 +287,7 @@ export default function AssignmentCenter() {
         <div className="grid grid-cols-4 gap-2 mb-5">
           {[
             { label: "Pending", count: tabData.pending.length, color: "text-blue-700", bg: "bg-blue-50" },
-            { label: "Submitted", count: tabData.submitted.length, color: "text-teal-700", bg: "bg-teal-50" },
+            { label: "Submitted", count: tabData.submitted.length, color: "text-primary", bg: "bg-primary/8" },
             { label: "Overdue", count: tabData.overdue.length, color: "text-red-700", bg: "bg-red-50" },
             { label: "Returned", count: tabData.returned.length, color: "text-emerald-700", bg: "bg-emerald-50" },
           ].map(({ label, count, color, bg }) => (

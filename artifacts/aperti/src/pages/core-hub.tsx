@@ -641,12 +641,12 @@ function RecentlyUsedSection() {
               <button
                 key={item.href}
                 onClick={() => nav(item.href)}
-                className="flex flex-col items-start p-3 rounded-lg border border-gray-100 hover:border-teal-200 hover:bg-teal-50/30 transition-all text-left group"
+                className="flex flex-col items-start p-3 rounded-lg border border-gray-100 hover:border-primary/25 hover:bg-primary/8/30 transition-all text-left group"
               >
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                   {new Date(item.visitedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
-                <span className="text-xs font-medium text-gray-800 line-clamp-2 leading-snug group-hover:text-teal-700">
+                <span className="text-xs font-medium text-gray-800 line-clamp-2 leading-snug group-hover:text-primary">
                   {item.label}
                 </span>
               </button>

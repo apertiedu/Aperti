@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, RotateCcw, CheckCircle2, XCircle, AlertTriangle, Lock, Unlock, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 
 interface MatrixData {
   roles: { id: string; name: string; description: string; color: string }[];
@@ -28,7 +27,7 @@ function PermissionCell({ role, permission, granted, isOverridden, onToggle, isA
         relative w-7 h-7 rounded-md flex items-center justify-center transition-all duration-150
         ${isLocked ? "cursor-not-allowed opacity-70" : "cursor-pointer hover:scale-110"}
         ${granted
-          ? isOverridden ? "bg-blue-100 border-2 border-blue-400" : "bg-teal-100 border border-teal-300"
+          ? isOverridden ? "bg-blue-100 border-2 border-blue-400" : "bg-primary/15 border border-primary/30"
           : isOverridden ? "bg-red-100 border-2 border-red-400" : "bg-gray-100 border border-gray-200"
         }
       `}
@@ -37,7 +36,7 @@ function PermissionCell({ role, permission, granted, isOverridden, onToggle, isA
       {isLocked ? (
         <Lock className="w-3 h-3 text-gray-400" />
       ) : granted ? (
-        <CheckCircle2 className="w-3.5 h-3.5" style={{ color: isOverridden ? "#2563EB" : TEAL }} />
+        <CheckCircle2 className="w-3.5 h-3.5" style={{ color: isOverridden ? "#2563EB" : "hsl(var(--primary))" }} />
       ) : (
         <XCircle className="w-3.5 h-3.5" style={{ color: isOverridden ? "#DC2626" : "#D1D5DB" }} />
       )}
@@ -98,7 +97,7 @@ export default function RolesMatrixPage() {
     return (
       <div className="p-8 flex items-center justify-center min-h-96">
         <div className="text-center space-y-3">
-          <div className="w-8 h-8 rounded-full border-2 border-teal-600 border-t-transparent animate-spin mx-auto" />
+          <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin mx-auto" />
           <p className="text-sm text-slate-500">Loading permission matrix…</p>
         </div>
       </div>
@@ -130,7 +129,7 @@ export default function RolesMatrixPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "#E6F4F1" }}>
-              <Shield className="w-4 h-4" style={{ color: TEAL }} />
+              <Shield className="w-4 h-4" className="text-primary" />
             </div>
             <h1 className="text-xl font-bold text-slate-900">Role & Permission Matrix</h1>
           </div>
@@ -141,7 +140,7 @@ export default function RolesMatrixPage() {
         </div>
         <div className="flex items-center gap-3 text-xs text-slate-500">
           <span className="flex items-center gap-1.5">
-            <span className="w-4 h-4 rounded bg-teal-100 border border-teal-300 inline-block" /> Default granted
+            <span className="w-4 h-4 rounded bg-primary/15 border border-primary/30 inline-block" /> Default granted
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-4 h-4 rounded bg-blue-100 border-2 border-blue-400 inline-block" /> Custom override

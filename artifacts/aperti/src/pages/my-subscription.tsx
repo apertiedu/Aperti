@@ -37,7 +37,7 @@ export default function MySubscriptionPage() {
   });
 
   if (isLoading) {
-    return <div className="flex justify-center py-20"><div className="w-7 h-7 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" /></div>;
+    return <div className="flex justify-center py-20"><div className="w-7 h-7 border-2 border-primary/60 border-t-transparent rounded-full animate-spin" /></div>;
   }
 
   const sub = data?.subscription;
@@ -58,10 +58,10 @@ export default function MySubscriptionPage() {
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <CreditCard className="w-6 h-6 text-teal-500" /> My Subscription
+          <CreditCard className="w-6 h-6 text-primary" /> My Subscription
         </h1>
         <Link href="/pricing">
-          <button className="flex items-center gap-1.5 px-4 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 transition-colors">
+          <button className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary transition-colors">
             <ArrowUpRight className="w-3.5 h-3.5" /> Upgrade
           </button>
         </Link>
@@ -103,7 +103,7 @@ export default function MySubscriptionPage() {
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all ${isOver ? "bg-red-400" : pct > 80 ? "bg-amber-400" : "bg-teal-400"}`}
+                          className={`h-full rounded-full transition-all ${isOver ? "bg-red-400" : pct > 80 ? "bg-amber-400" : "bg-primary/70"}`}
                           style={{ width: `${pct}%` }}
                         />
                       </div>
@@ -128,7 +128,7 @@ export default function MySubscriptionPage() {
             <AlertCircle className="w-10 h-10 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 text-sm mb-4">No active subscription</p>
             <Link href="/pricing">
-              <button className="px-5 py-2 bg-teal-500 text-white rounded-xl text-sm font-semibold hover:bg-teal-600 transition-colors">
+              <button className="px-5 py-2 bg-primary text-white rounded-xl text-sm font-semibold hover:bg-primary transition-colors">
                 View Plans
               </button>
             </Link>

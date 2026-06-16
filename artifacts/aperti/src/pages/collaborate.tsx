@@ -36,7 +36,7 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
 const RESOURCE_ICONS: Record<string, React.ReactNode> = {
   note: <FileText className="w-4 h-4 text-blue-500" />,
   flashcard: <Zap className="w-4 h-4 text-amber-500" />,
-  quiz: <BookOpen className="w-4 h-4 text-teal-500" />,
+  quiz: <BookOpen className="w-4 h-4 text-primary" />,
   whiteboard: <Palette className="w-4 h-4 text-purple-500" />,
 };
 
@@ -110,7 +110,7 @@ export default function CollaborateRoom() {
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64 font-[Inter,sans-serif]">
-      <div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
@@ -118,7 +118,7 @@ export default function CollaborateRoom() {
     <div className="max-w-md mx-auto mt-16 text-center font-[Inter,sans-serif]">
       <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
       <h2 className="font-semibold text-gray-700 mb-2">Room not found</h2>
-      <button onClick={() => navigate("/rooms")} className="text-teal-600 text-sm hover:underline">Back to Rooms</button>
+      <button onClick={() => navigate("/rooms")} className="text-primary text-sm hover:underline">Back to Rooms</button>
     </div>
   );
 
@@ -130,8 +130,8 @@ export default function CollaborateRoom() {
           <ChevronLeft className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-3 flex-1">
-          <div className="w-8 h-8 bg-teal-100 rounded-lg flex items-center justify-center">
-            <Users className="w-4 h-4 text-teal-600" />
+          <div className="w-8 h-8 bg-primary/15 rounded-lg flex items-center justify-center">
+            <Users className="w-4 h-4 text-primary" />
           </div>
           <div>
             <h1 className="font-semibold text-gray-900">{room.name}</h1>
@@ -141,7 +141,7 @@ export default function CollaborateRoom() {
         <div className="flex items-center gap-2">
           {["chat", "members", "resources", "ai"].map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab as typeof activeTab)}
-              className={`px-3 py-1.5 text-xs rounded-full transition-colors ${activeTab === tab ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+              className={`px-3 py-1.5 text-xs rounded-full transition-colors ${activeTab === tab ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
               {tab === "ai" ? "AI Assistant" : tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
@@ -166,12 +166,12 @@ export default function CollaborateRoom() {
                       return (
                         <motion.div key={msg.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                           className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}>
-                          <div className="w-8 h-8 rounded-full bg-teal-100 flex-shrink-0 flex items-center justify-center">
-                            <span className="text-xs font-semibold text-teal-700">{msg.sender_name[0]}</span>
+                          <div className="w-8 h-8 rounded-full bg-primary/15 flex-shrink-0 flex items-center justify-center">
+                            <span className="text-xs font-semibold text-primary">{msg.sender_name[0]}</span>
                           </div>
                           <div className={`max-w-[70%] flex flex-col gap-1 ${isMe ? "items-end" : "items-start"}`}>
                             {!isMe && <span className="text-xs text-gray-500 px-1">{msg.sender_name}</span>}
-                            <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm ${isMe ? "bg-teal-600 text-white rounded-tr-sm" : "bg-card border border-border text-foreground rounded-tl-sm"}`}>
+                            <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm ${isMe ? "bg-primary text-white rounded-tr-sm" : "bg-card border border-border text-foreground rounded-tl-sm"}`}>
                               {msg.content}
                             </div>
                             <span className="text-[10px] text-gray-400 px-1">
@@ -191,7 +191,7 @@ export default function CollaborateRoom() {
                         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (compose.trim()) sendMutation.mutate(); } }}
                         placeholder="Send a message to the room…"
                         rows={2}
-                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none" />
+                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30/30 resize-none" />
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setShowShare(true)}
@@ -200,7 +200,7 @@ export default function CollaborateRoom() {
                       </button>
                       <button onClick={() => { if (compose.trim()) sendMutation.mutate(); }}
                         disabled={!compose.trim() || sendMutation.isPending}
-                        className="p-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                        className="p-3 bg-primary text-white rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
                         <Send className="w-4 h-4" />
                       </button>
                     </div>
@@ -215,8 +215,8 @@ export default function CollaborateRoom() {
                 <div className="space-y-3">
                   {members.map((m) => (
                     <div key={m.id} className="bg-card rounded-xl border border-border p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
-                        <span className="text-sm font-semibold text-teal-700">{m.name[0]}</span>
+                      <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center">
+                        <span className="text-sm font-semibold text-primary">{m.name[0]}</span>
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center gap-1.5">
@@ -239,7 +239,7 @@ export default function CollaborateRoom() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">Shared Resources</h2>
                   <button onClick={() => setShowShare(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-teal-600 text-white text-xs rounded-lg hover:bg-teal-700 transition-colors">
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs rounded-lg hover:bg-primary/80 transition-colors">
                     <Plus className="w-3.5 h-3.5" /> Share
                   </button>
                 </div>
@@ -332,7 +332,7 @@ export default function CollaborateRoom() {
                   <div className="grid grid-cols-2 gap-2">
                     {["note", "flashcard", "quiz", "whiteboard"].map((type) => (
                       <button key={type} onClick={() => setShareForm({ ...shareForm, resource_type: type })}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-colors ${shareForm.resource_type === type ? "border-teal-500 bg-teal-50 text-teal-700" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border transition-colors ${shareForm.resource_type === type ? "border-primary bg-primary/8 text-primary" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
                         {RESOURCE_ICONS[type]} {type.charAt(0).toUpperCase() + type.slice(1)}
                       </button>
                     ))}
@@ -342,11 +342,11 @@ export default function CollaborateRoom() {
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Title (optional)</label>
                   <input value={shareForm.title} onChange={(e) => setShareForm({ ...shareForm, title: e.target.value })}
                     placeholder="Resource title"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
                 </div>
                 <button onClick={() => shareMutation.mutate()}
                   disabled={shareMutation.isPending}
-                  className="w-full py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
                   Share to Room
                 </button>
               </div>

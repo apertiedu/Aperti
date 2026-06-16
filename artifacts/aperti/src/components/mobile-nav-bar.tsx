@@ -59,21 +59,21 @@ export default function MobileNavBar() {
               <motion.button
                 whileTap={{ scale: 0.9 }}
                 className={`flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] px-3 py-2 rounded-xl transition-colors ${
-                  active ? "text-teal-600" : "text-gray-400 hover:text-gray-600"
+                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <div className={`w-6 h-6 flex items-center justify-center rounded-lg transition-all ${
-                  active ? "bg-teal-50" : ""
+                  active ? "bg-primary/8" : ""
                 }`}>
                   <Icon className="w-4.5 h-4.5" style={{ width: 18, height: 18 }} />
                 </div>
-                <span className={`text-[10px] font-semibold leading-none ${active ? "text-teal-600" : "text-gray-400"}`}>
+                <span className={`text-[10px] font-semibold leading-none ${active ? "text-primary" : "text-muted-foreground"}`}>
                   {item.label}
                 </span>
                 {active && (
                   <motion.div
                     layoutId="mobile-nav-indicator"
-                    className="absolute bottom-1 w-1 h-1 rounded-full bg-teal-500"
+                    className="absolute bottom-1 w-1 h-1 rounded-full bg-primary"
                     style={{ bottom: 2 }}
                   />
                 )}

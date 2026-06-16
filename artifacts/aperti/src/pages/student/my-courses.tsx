@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const TEAL = "#0D9488";
 
 interface Enrollment {
   id: number; course_id: number; course_title: string; subject: string | null;
@@ -17,7 +16,7 @@ interface Enrollment {
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
   pending:  { label: "Pending Approval", icon: Hourglass,     color: "#757575", bg: "#F5F5F5" },
-  approved: { label: "Enrolled",         icon: CheckCircle2,  color: "#0D9488", bg: "#E0F2F1" },
+  approved: { label: "Enrolled",         icon: CheckCircle2,  color: "hsl(var(--primary))", bg: "#E0F2F1" },
   rejected: { label: "Rejected",         icon: XCircle,       color: "#B71C1C", bg: "#FFEBEE" },
 };
 
@@ -28,11 +27,11 @@ function EnrollmentCard({ enroll, index }: { enroll: Enrollment; index: number }
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.07 }}>
       <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden flex flex-col sm:flex-row">
         <div className="h-28 sm:h-auto sm:w-32 flex items-center justify-center shrink-0"
-          style={{ background: `linear-gradient(135deg, ${TEAL}12, ${TEAL}25)` }}>
+          className="bg-primary">
           {enroll.thumbnail_url ? (
             <img src={enroll.thumbnail_url} alt="" className="w-full h-full object-cover" />
           ) : (
-            <BookOpen className="h-8 w-8" style={{ color: TEAL }} />
+            <BookOpen className="h-8 w-8" className="text-primary" />
           )}
         </div>
         <div className="p-5 flex flex-col flex-1 min-w-0">
@@ -84,7 +83,7 @@ export default function MyCourses() {
           <p className="text-gray-500 text-sm mt-1">Courses you've enrolled in or requested.</p>
         </div>
         <Link href="/courses">
-          <Button className="gap-2 rounded-xl text-sm" style={{ background: TEAL }}>
+          <Button className="gap-2 rounded-xl text-sm" className="bg-primary text-primary-foreground">
             Browse Marketplace <ArrowRight className="h-3.5 w-3.5" />
           </Button>
         </Link>

@@ -191,7 +191,7 @@ export default function DebugCenterPage() {
           <Card className="border-0 shadow-sm h-full">
             <CardHeader className="pb-3 border-b">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Activity className="h-4 w-4 text-[#0D9488]" />
+                <Activity className="h-4 w-4 text-primary" />
                 Frontend Errors
               </CardTitle>
             </CardHeader>
@@ -405,7 +405,7 @@ export default function DebugCenterPage() {
             <a
               key={l.href}
               href={l.href}
-              className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-[#0D9488]/30 hover:text-[#0D9488] transition-colors"
+              className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:border-primary/30 hover:text-primary transition-colors"
             >
               {l.label}
             </a>

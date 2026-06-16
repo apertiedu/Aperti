@@ -8,9 +8,9 @@ import {
 } from "lucide-react";
 import { SkeletonPage } from "@/components/skeleton-layouts";
 
-function StatChip({ label, value, color = "teal" }: { label: string; value: string | number; color?: string }) {
+function StatChip({ label, value, color = "primary" }: { label: string; value: string | number; color?: string }) {
   const cfg: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-700 border-teal-100",
+    primary: "bg-primary/8 text-primary border-primary/20",
     amber: "bg-amber-50 text-amber-700 border-amber-100",
     rose: "bg-rose-50 text-rose-700 border-rose-100",
     blue: "bg-blue-50 text-blue-700 border-blue-100",
@@ -67,7 +67,7 @@ export default function DBHealthPage() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Database className="w-6 h-6 text-teal-600" />
+            <Database className="w-6 h-6 text-primary" />
             Database Health
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">
@@ -86,7 +86,7 @@ export default function DBHealthPage() {
           <button
             onClick={handleVacuum}
             disabled={vacuuming}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-60 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/80 disabled:opacity-60 transition-colors"
           >
             {vacuuming ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4" />}
             {vacuuming ? "Running…" : "Run VACUUM ANALYZE"}
@@ -96,7 +96,7 @@ export default function DBHealthPage() {
 
       {vacuumMsg && (
         <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
-          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium ${vacuumMsg.includes("failed") ? "bg-rose-50 text-rose-700 border border-rose-100" : "bg-teal-50 text-teal-700 border border-teal-100"}`}>
+          className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium ${vacuumMsg.includes("failed") ? "bg-rose-50 text-rose-700 border border-rose-100" : "bg-primary/8 text-primary border border-primary/20"}`}>
           {vacuumMsg.includes("failed") ? <AlertTriangle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
           {vacuumMsg}
         </motion.div>
@@ -104,7 +104,7 @@ export default function DBHealthPage() {
 
       {/* Summary chips */}
       <div className="flex flex-wrap gap-3">
-        <StatChip label="Total DB Size" value={data?.dbSize ?? "—"} color="teal" />
+        <StatChip label="Total DB Size" value={data?.dbSize ?? "—"} color="primary" />
         <StatChip label="Tables" value={tables.length} color="blue" />
         <StatChip label="Connections" value={conns.total ?? "—"} color="gray" />
         <StatChip label="Active Connections" value={conns.active ?? "—"} color={parseInt(conns.active) > 10 ? "amber" : "gray"} />
@@ -135,7 +135,7 @@ export default function DBHealthPage() {
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
-            <HardDrive className="w-4 h-4 text-teal-600" />
+            <HardDrive className="w-4 h-4 text-primary" />
             <p className="text-sm font-bold text-gray-900">Table Sizes (Top 20)</p>
           </div>
           <p className="text-xs text-gray-400">Sorted by total size</p>
@@ -159,7 +159,7 @@ export default function DBHealthPage() {
                   <td className="px-5 py-2.5 font-mono text-gray-800 font-medium">{t.table_name}</td>
                   <td className="px-4 py-2.5 text-right text-gray-600">{parseInt(t.row_count ?? 0).toLocaleString()}</td>
                   <td className="px-4 py-2.5 text-right">
-                    <span className="text-teal-700 font-semibold">{t.total_size}</span>
+                    <span className="text-primary font-semibold">{t.total_size}</span>
                   </td>
                   <td className="px-4 py-2.5 text-right text-gray-400">
                     {t.last_autovacuum ? new Date(t.last_autovacuum).toLocaleDateString() : "—"}
@@ -174,13 +174,13 @@ export default function DBHealthPage() {
       {/* Connection health */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Activity className="w-4 h-4 text-teal-600" />
+          <Activity className="w-4 h-4 text-primary" />
           <p className="text-sm font-bold text-gray-900">Connection Pool</p>
         </div>
         <div className="grid grid-cols-3 gap-4">
           {[
             { label: "Total", value: conns.total ?? "—", color: "bg-gray-100 text-gray-700" },
-            { label: "Active", value: conns.active ?? "—", color: "bg-teal-100 text-teal-700" },
+            { label: "Active", value: conns.active ?? "—", color: "bg-primary/15 text-primary" },
             { label: "Idle", value: conns.idle ?? "—", color: "bg-gray-100 text-gray-500" },
           ].map(c => (
             <div key={c.label} className={`rounded-xl p-4 text-center ${c.color}`}>

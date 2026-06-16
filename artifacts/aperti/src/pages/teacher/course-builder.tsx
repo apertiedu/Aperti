@@ -51,7 +51,7 @@ function LessonItem({ lesson, onUpdate, onDelete }: { lesson: any; onUpdate: (up
         <>
           <Input value={local.title} onChange={e => setLocal((p: any) => ({ ...p, title: e.target.value }))} className="flex-1 h-7 text-sm" autoFocus />
           <Input value={String(local.duration_min || 60)} onChange={e => setLocal((p: any) => ({ ...p, duration_min: parseInt(e.target.value) || 60 }))} className="w-20 h-7 text-sm" type="number" />
-          <Button size="sm" className="h-7 bg-teal-600 text-white" onClick={() => { onUpdate(local); setEditing(false); }}><Save size={12} /></Button>
+          <Button size="sm" className="h-7 bg-primary text-white" onClick={() => { onUpdate(local); setEditing(false); }}><Save size={12} /></Button>
         </>
       ) : (
         <>
@@ -229,8 +229,8 @@ export default function CourseBuilder() {
         </div>
         <div className="flex items-center gap-3">
           {saved && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-green-600 flex items-center gap-1"><Save size={12} /> Saved</motion.span>}
-          <Button variant="outline" size="sm" onClick={() => setAiDialog(true)}><Sparkles size={14} className="mr-1 text-teal-600" /> AI Structure</Button>
-          <Button size="sm" onClick={() => saveStructure.mutate()} className="bg-teal-600 hover:bg-teal-700 text-white" disabled={saveStructure.isPending}>
+          <Button variant="outline" size="sm" onClick={() => setAiDialog(true)}><Sparkles size={14} className="mr-1 text-primary" /> AI Structure</Button>
+          <Button size="sm" onClick={() => saveStructure.mutate()} className="bg-primary hover:bg-primary/80 text-white" disabled={saveStructure.isPending}>
             {saveStructure.isPending ? "Saving..." : "Save Structure"}
           </Button>
         </div>
@@ -246,12 +246,12 @@ export default function CourseBuilder() {
                 <motion.div key={unit.id || ui} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }}>
                   <Card className="overflow-hidden border-2 border-gray-100 hover:border-gray-200 transition-all">
                     <div
-                      className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-teal-50 to-white cursor-pointer"
+                      className="flex items-center gap-3 px-5 py-4 bg-gradient-to-r from-primary to-white cursor-pointer"
                       onClick={() => setExpandedUnits(prev => { const s = new Set(prev); s.has(ui) ? s.delete(ui) : s.add(ui); return s; })}
                     >
                       <GripVertical size={16} className="text-gray-300 cursor-grab" />
-                      <motion.div animate={{ rotate: expandedUnits.has(ui) ? 90 : 0 }}><ChevronRight size={16} className="text-teal-600" /></motion.div>
-                      <div className="w-8 h-8 bg-teal-600 text-white rounded-lg flex items-center justify-center text-sm font-bold">{ui + 1}</div>
+                      <motion.div animate={{ rotate: expandedUnits.has(ui) ? 90 : 0 }}><ChevronRight size={16} className="text-primary" /></motion.div>
+                      <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center text-sm font-bold">{ui + 1}</div>
                       <Input
                         value={unit.title}
                         onChange={e => updateUnit(ui, { title: e.target.value })}
@@ -280,7 +280,7 @@ export default function CourseBuilder() {
                 </motion.div>
               ))}
             </AnimatePresence>
-            <Button onClick={addUnit} variant="outline" className="w-full border-dashed border-2 border-gray-300 hover:border-teal-400 h-14 text-gray-500 hover:text-teal-600">
+            <Button onClick={addUnit} variant="outline" className="w-full border-dashed border-2 border-gray-300 hover:border-primary/60 h-14 text-gray-500 hover:text-primary">
               <Plus size={18} className="mr-2" /> Add Unit
             </Button>
           </>
@@ -289,7 +289,7 @@ export default function CourseBuilder() {
 
       <Dialog open={aiDialog} onOpenChange={setAiDialog}>
         <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><Sparkles size={18} className="text-teal-600" /> AI Course Structure Generator</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><Sparkles size={18} className="text-primary" /> AI Course Structure Generator</DialogTitle></DialogHeader>
           {!aiResult ? (
             <div className="space-y-4 py-2">
               <p className="text-sm text-gray-500">Upload your syllabus PDF and our AI will extract the course structure automatically.</p>
@@ -311,7 +311,7 @@ export default function CourseBuilder() {
                 <label className="text-xs font-medium text-gray-600 mb-1 block">Syllabus URL (optional)</label>
                 <Input value={aiForm.fileUrl} onChange={e => setAiForm(p => ({ ...p, fileUrl: e.target.value }))} placeholder="https://..." />
               </div>
-              <Button onClick={aiExtract} disabled={aiLoading || !aiForm.subject} className="w-full bg-teal-600 hover:bg-teal-700 text-white">
+              <Button onClick={aiExtract} disabled={aiLoading || !aiForm.subject} className="w-full bg-primary hover:bg-primary/80 text-white">
                 <Sparkles size={14} className="mr-2" /> {aiLoading ? "Extracting structure..." : "Generate Structure"}
               </Button>
             </div>
@@ -333,7 +333,7 @@ export default function CourseBuilder() {
               </div>
               <div className="flex gap-3">
                 <Button variant="outline" className="flex-1" onClick={() => setAiResult(null)}>Re-generate</Button>
-                <Button className="flex-1 bg-teal-600 hover:bg-teal-700 text-white" onClick={confirmAiStructure}>Apply to Course</Button>
+                <Button className="flex-1 bg-primary hover:bg-primary/80 text-white" onClick={confirmAiStructure}>Apply to Course</Button>
               </div>
             </div>
           )}

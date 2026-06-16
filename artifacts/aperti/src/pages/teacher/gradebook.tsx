@@ -16,7 +16,7 @@ const IGCSE_COLOR: Record<string, string> = {
   "A*": "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400",
   "A":  "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
   "B":  "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400",
-  "C":  "bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400",
+  "C":  "bg-primary/15 text-primary dark:bg-primary/10 dark:text-primary",
   "D":  "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
   "E":  "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
   "F":  "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",

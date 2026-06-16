@@ -45,7 +45,7 @@ export function ContextLoader({ context = "default", className, size = "md" }: C
     >
       <div className="relative">
         <div className={cn("border-2 border-gray-100 rounded-full", spinnerSize)} />
-        <div className={cn("border-2 border-teal-500 border-t-transparent rounded-full animate-spin absolute inset-0", spinnerSize)} />
+        <div className={cn("border-2 border-primary border-t-transparent rounded-full animate-spin absolute inset-0", spinnerSize)} />
       </div>
       <p className={cn("text-gray-400 font-medium animate-pulse", textSize)}>{message}</p>
     </motion.div>

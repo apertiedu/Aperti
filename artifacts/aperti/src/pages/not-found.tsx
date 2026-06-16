@@ -3,7 +3,6 @@ import { Link } from "wouter";
 import { Home, ArrowLeft, Search } from "lucide-react";
 import { useState, KeyboardEvent } from "react";
 
-const TEAL = "#0D9488";
 
 function OrbitRing({ radius, duration, delay, opacity }: { radius: number; duration: number; delay: number; opacity: number }) {
   return (
@@ -12,7 +11,7 @@ function OrbitRing({ radius, duration, delay, opacity }: { radius: number; durat
       style={{
         width: radius * 2,
         height: radius * 2,
-        borderColor: `${TEAL}${Math.round(opacity * 255).toString(16).padStart(2, "0")}`,
+        borderColor: `${"hsl(var(--primary))"}${Math.round(opacity * 255).toString(16).padStart(2, "0")}`,
         left: "50%",
         top: "50%",
         marginLeft: -radius,
@@ -28,7 +27,7 @@ function FloatingDot({ x, y, delay, size }: { x: string; y: string; delay: numbe
   return (
     <motion.div
       className="absolute rounded-full"
-      style={{ left: x, top: y, width: size, height: size, background: TEAL }}
+      style={{ left: x, top: y, width: size, height: size, background: "hsl(var(--primary))" }}
       animate={{ y: [0, -12, 0], opacity: [0.35, 0.7, 0.35] }}
       transition={{ duration: 3.5, delay, repeat: Infinity, ease: "easeInOut" }}
     />
@@ -58,7 +57,7 @@ export default function NotFound() {
         <svg className="absolute inset-0 w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <pattern id="nf-dots" x="0" y="0" width="30" height="30" patternUnits="userSpaceOnUse">
-              <circle cx="1" cy="1" r="1" fill={TEAL} opacity="0.07" />
+              <circle cx="1" cy="1" r="1" fill="hsl(var(--primary))" opacity="0.07" />
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#nf-dots)" />
@@ -67,11 +66,11 @@ export default function NotFound() {
         {/* Large ambient blobs */}
         <div
           className="absolute rounded-full blur-3xl"
-          style={{ width: 500, height: 500, background: TEAL, opacity: 0.03, top: "-20%", right: "-10%" }}
+          style={{ width: 500, height: 500, background: "hsl(var(--primary))", opacity: 0.03, top: "-20%", right: "-10%" }}
         />
         <div
           className="absolute rounded-full blur-3xl"
-          style={{ width: 350, height: 350, background: TEAL, opacity: 0.025, bottom: "-10%", left: "-8%" }}
+          style={{ width: 350, height: 350, background: "hsl(var(--primary))", opacity: 0.025, bottom: "-10%", left: "-8%" }}
         />
       </div>
 
@@ -101,7 +100,7 @@ export default function NotFound() {
           >
             <div
               className="text-[96px] font-black leading-none tracking-tighter"
-              style={{ color: "transparent", WebkitTextStroke: `2px ${TEAL}` }}
+              style={{ color: "transparent", WebkitTextStroke: `2px ${"hsl(var(--primary))"}` }}
               aria-label="Error 404"
             >
               404
@@ -131,7 +130,7 @@ export default function NotFound() {
           <Link href="/">
             <button
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95 shadow-sm"
-              style={{ background: TEAL, boxShadow: `0 4px 18px ${TEAL}30` }}
+              style={{ background: "hsl(var(--primary))", boxShadow: `0 4px 18px ${"hsl(var(--primary))"}30` }}
             >
               <Home className="h-4 w-4" />
               Go Home
@@ -167,7 +166,7 @@ export default function NotFound() {
               <button
                 onClick={handleSearch}
                 className="text-xs font-semibold px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
-                style={{ background: TEAL }}
+                className="bg-primary"
               >
                 Search
               </button>
@@ -205,7 +204,7 @@ export default function NotFound() {
         >
           <Link href="/">
             <span className="text-lg font-extrabold cursor-pointer tracking-tight" style={{ color: "#121212" }}>
-              Aperti<span style={{ color: TEAL }}>.</span>
+              Aperti<span className="text-primary">.</span>
             </span>
           </Link>
         </motion.div>

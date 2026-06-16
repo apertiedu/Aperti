@@ -5,16 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Bell, CheckCheck, BookOpen, ClipboardList, MessageSquare, FileText, AlertTriangle, GraduationCap } from "lucide-react";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
 function typeIcon(type: string) {
   switch (type) {
-    case "attendance": return <ClipboardList className="h-4 w-4 text-teal-500" />;
+    case "attendance": return <ClipboardList className="h-4 w-4 text-primary" />;
     case "grade": return <GraduationCap className="h-4 w-4 text-indigo-500" />;
     case "assignment": return <BookOpen className="h-4 w-4 text-amber-500" />;
-    case "message": return <MessageSquare className="h-4 w-4 text-teal-500" />;
+    case "message": return <MessageSquare className="h-4 w-4 text-primary" />;
     case "report": return <FileText className="h-4 w-4 text-gray-500" />;
     case "alert": return <AlertTriangle className="h-4 w-4 text-red-500" />;
     default: return <Bell className="h-4 w-4 text-gray-400" />;
@@ -23,10 +22,10 @@ function typeIcon(type: string) {
 
 function typeColor(type: string) {
   switch (type) {
-    case "attendance": return "bg-teal-50";
+    case "attendance": return "bg-primary/8";
     case "grade": return "bg-indigo-50";
     case "assignment": return "bg-amber-50";
-    case "message": return "bg-teal-50";
+    case "message": return "bg-primary/8";
     case "alert": return "bg-red-50";
     default: return "bg-gray-50";
   }
@@ -108,7 +107,7 @@ export default function ParentNotifications() {
                     <p className={`text-sm ${n.is_read ? "font-medium text-gray-600" : "font-semibold text-gray-900"}`}>{n.title}</p>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-[10px] text-gray-400">{timeAgo(n.created_at)}</span>
-                      {!n.is_read && <div className="w-2 h-2 rounded-full" style={{ background: TEAL }} />}
+                      {!n.is_read && <div className="w-2 h-2 rounded-full" className="bg-primary text-primary-foreground" />}
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.message}</p>

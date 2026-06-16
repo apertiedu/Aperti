@@ -30,7 +30,7 @@ const QUALITY_BTNS = [
 const DECK_COLORS = [
   "from-violet-500 to-purple-600",
   "from-sky-500 to-blue-600",
-  "from-emerald-500 to-teal-600",
+  "from-emerald-500 to-primary/80",
   "from-amber-500 to-orange-600",
   "from-rose-500 to-pink-600",
   "from-indigo-500 to-blue-700",
@@ -297,7 +297,7 @@ export default function MyFlashcards() {
               <span className="text-sm font-bold text-emerald-600">{masteryPct}%</span>
             </div>
             <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-              <motion.div className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full"
+              <motion.div className="h-full bg-gradient-to-r from-emerald-400 to-primary/80 rounded-full"
                 initial={{ width: 0 }} animate={{ width: `${masteryPct}%` }}
                 transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }} />
             </div>

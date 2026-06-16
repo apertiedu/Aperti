@@ -48,7 +48,7 @@ export default function TestimonialsAdminPage() {
           <h1 className="text-2xl font-bold text-gray-900">Testimonials</h1>
           <p className="text-sm text-gray-500 mt-0.5">{approved} approved · {items.length - approved} pending review</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors">
+        <button onClick={openCreate} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> Add Testimonial
         </button>
       </div>
@@ -68,7 +68,7 @@ export default function TestimonialsAdminPage() {
                 {t.photo_url ? (
                   <img src={t.photo_url} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
                 ) : (
-                  <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center text-teal-700 font-bold text-sm">
+                  <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center text-primary font-bold text-sm">
                     {t.name?.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -115,25 +115,25 @@ export default function TestimonialsAdminPage() {
               </div>
               <div className="px-6 py-4 space-y-4">
                 <div className="grid grid-cols-2 gap-3">
-                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Role</label><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Organization</label><input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
+                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Name *</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Role</label><input value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+                  <div><label className="block text-xs font-medium text-gray-600 mb-1">Organization</label><input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
                   <div><label className="block text-xs font-medium text-gray-600 mb-1">Rating</label>
-                    <select value={form.rating} onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+                    <select value={form.rating} onChange={(e) => setForm({ ...form, rating: parseInt(e.target.value) })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
                       {[5,4,3,2,1].map(n => <option key={n} value={n}>{"⭐".repeat(n)} ({n})</option>)}
                     </select>
                   </div>
-                  <div className="col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Photo URL</label><input value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500" /></div>
-                  <div className="col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Quote *</label><textarea value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} rows={4} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" /></div>
+                  <div className="col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Photo URL</label><input value={form.photo_url} onChange={(e) => setForm({ ...form, photo_url: e.target.value })} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" /></div>
+                  <div className="col-span-2"><label className="block text-xs font-medium text-gray-600 mb-1">Quote *</label><textarea value={form.quote} onChange={(e) => setForm({ ...form, quote: e.target.value })} rows={4} className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none" /></div>
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" checked={form.is_approved} onChange={(e) => setForm({ ...form, is_approved: e.target.checked })} className="w-4 h-4 rounded text-teal-600 focus:ring-teal-500" />
+                  <input type="checkbox" checked={form.is_approved} onChange={(e) => setForm({ ...form, is_approved: e.target.checked })} className="w-4 h-4 rounded text-primary focus:ring-primary/30" />
                   <span className="text-sm text-gray-700">Approve and show on landing page</span>
                 </label>
               </div>
               <div className="px-6 py-4 border-t border-gray-100 flex gap-3 justify-end">
                 <button onClick={closeModal} className="px-4 py-2 border border-gray-200 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-                <button onClick={() => saveMutation.mutate()} disabled={!form.name || !form.quote || saveMutation.isPending} className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+                <button onClick={() => saveMutation.mutate()} disabled={!form.name || !form.quote || saveMutation.isPending} className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/80 transition-colors disabled:opacity-50">
                   {saveMutation.isPending ? "Saving..." : editing ? "Update" : "Add"}
                 </button>
               </div>

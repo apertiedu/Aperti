@@ -9,7 +9,6 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, RefreshCw, Download, CheckCircle2, BarChart3, ClipboardList, BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
@@ -88,7 +87,7 @@ export default function ParentReports() {
                 onClick={() => generateMutation.mutate()}
                 disabled={!selectedChild || generateMutation.isPending}
                 className="gap-2 rounded-xl text-white"
-                style={{ background: TEAL }}
+                className="bg-primary text-primary-foreground"
               >
                 {generateMutation.isPending ? <><RefreshCw className="h-4 w-4 animate-spin" />Generating…</> : <><RefreshCw className="h-4 w-4" />Generate</>}
               </Button>
@@ -126,19 +125,19 @@ export default function ParentReports() {
       {/* Last generated report preview */}
       {lastReport && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-          <Card className="border-2 shadow-md" style={{ borderColor: TEAL }}>
+          <Card className="border-2 shadow-md" className="border-primary">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-sm font-bold text-gray-900">📄 {lastReport.frequency.charAt(0).toUpperCase() + lastReport.frequency.slice(1)} Report — {lastReport.studentName}</h2>
                   <p className="text-[10px] text-gray-400 mt-0.5">Generated {new Date(lastReport.generatedAt).toLocaleString("en-GB")}</p>
                 </div>
-                <Badge className="bg-teal-100 text-teal-700 text-[10px] rounded-full"><CheckCircle2 className="h-3 w-3 mr-1" />Ready</Badge>
+                <Badge className="bg-primary/15 text-primary text-[10px] rounded-full"><CheckCircle2 className="h-3 w-3 mr-1" />Ready</Badge>
               </div>
               <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-teal-50 rounded-xl">
-                  <ClipboardList className="h-5 w-5 text-teal-600 mx-auto mb-1" />
-                  <p className="text-lg font-black text-teal-700">{lastReport.attendanceRate}%</p>
+                <div className="text-center p-3 bg-primary/8 rounded-xl">
+                  <ClipboardList className="h-5 w-5 text-primary mx-auto mb-1" />
+                  <p className="text-lg font-black text-primary">{lastReport.attendanceRate}%</p>
                   <p className="text-[10px] text-gray-500">Attendance</p>
                 </div>
                 <div className="text-center p-3 bg-indigo-50 rounded-xl">

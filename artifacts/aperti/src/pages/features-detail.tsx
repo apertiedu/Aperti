@@ -7,13 +7,11 @@ import {
   Users, Star, ExternalLink, GitBranch, Calendar, Package, X, ChevronRight,
 } from "lucide-react";
 
-const TEAL = "#0D9488";
-const TEAL_LIGHT = "#E6F4F1";
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; icon: React.ComponentType<any> }> = {
   released:    { label: "Available",   color: "text-green-700",  bg: "bg-green-50 border-green-200",  icon: CheckCircle2 },
   beta:        { label: "Beta",        color: "text-orange-700", bg: "bg-orange-50 border-orange-200",icon: TestTube },
-  coming_soon: { label: "Coming Soon", color: "text-teal-700",   bg: "bg-teal-50 border-teal-200",   icon: Clock },
+  coming_soon: { label: "Coming Soon", color: "text-primary",   bg: "bg-primary/8 border-primary/40",   icon: Clock },
   scheduled:   { label: "Scheduled",  color: "text-indigo-700", bg: "bg-indigo-50 border-indigo-200",icon: Calendar },
   development: { label: "In Dev",     color: "text-blue-700",   bg: "bg-blue-50 border-blue-200",    icon: Package },
   draft:       { label: "Draft",      color: "text-gray-600",   bg: "bg-gray-50 border-gray-200",    icon: Package },
@@ -37,7 +35,7 @@ function CountdownTimer({ seconds }: { seconds: number }) {
     <div className="flex items-center gap-2">
       {[{ v: days, l: "days" }, { v: hours, l: "hrs" }, { v: minutes, l: "min" }, { v: secs, l: "sec" }].map(({ v, l }) => (
         <div key={l} className="text-center">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black text-white" style={{ background: TEAL }}>
+          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black text-white" style={{ background: "hsl(var(--primary))" }}>
             {String(v).padStart(2, "0")}
           </div>
           <p className="text-[10px] text-gray-400 mt-1">{l}</p>
@@ -74,11 +72,11 @@ function WaitlistModal({ featureId, featureName, onClose }: { featureId: number;
         {done ? (
           <div className="text-center py-4">
             <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: TEAL_LIGHT }}>
-              <CheckCircle2 className="w-7 h-7" style={{ color: TEAL }} />
+              <CheckCircle2 className="w-7 h-7" style={{ color: "hsl(var(--primary))" }} />
             </div>
             <h3 className="text-lg font-bold text-gray-900 mb-2">You're on the list!</h3>
             <p className="text-sm text-gray-500">We'll notify you the moment <strong>{featureName}</strong> is ready for you.</p>
-            <button onClick={onClose} className="mt-6 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: TEAL }}>Done</button>
+            <button onClick={onClose} className="mt-6 px-5 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: "hsl(var(--primary))" }}>Done</button>
           </div>
         ) : (
           <>
@@ -93,13 +91,13 @@ function WaitlistModal({ featureId, featureName, onClose }: { featureId: number;
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">Your Name</label>
                 <input value={name} onChange={e => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20/20"
                   placeholder="Dr. Ahmed Hassan" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-600 mb-1.5">Email Address *</label>
                 <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20/20"
                   placeholder="you@school.com" />
               </div>
             </div>
@@ -107,7 +105,7 @@ function WaitlistModal({ featureId, featureName, onClose }: { featureId: number;
               <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm border border-gray-200 text-gray-600 hover:bg-gray-50">Cancel</button>
               <button onClick={() => mutation.mutate()} disabled={!email || mutation.isPending}
                 className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90 transition-opacity"
-                style={{ background: TEAL }}>
+                style={{ background: "hsl(var(--primary))" }}>
                 {mutation.isPending ? "Joining…" : "Join Waitlist"}
               </button>
             </div>
@@ -147,7 +145,7 @@ export default function FeatureDetailPage() {
       {/* Nav */}
       <div className="bg-background/95 border-b border-border sticky top-0 z-40 backdrop-blur">
         <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: TEAL }}>.</span></Link>
+          <Link href="/" className="font-bold text-lg text-gray-900">Aperti<span style={{ color: "hsl(var(--primary))" }}>.</span></Link>
           <div className="flex items-center gap-4">
             <Link href="/features" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">All Features</Link>
             <Link href="/roadmap" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Roadmap</Link>
@@ -173,7 +171,7 @@ export default function FeatureDetailPage() {
           <div className="text-center py-20">
             <AlertCircle className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h2 className="text-lg font-bold text-gray-700 mb-2">Feature not found</h2>
-            <Link href="/features" className="text-sm font-semibold" style={{ color: TEAL }}>Browse all features</Link>
+            <Link href="/features" className="text-sm font-semibold" style={{ color: "hsl(var(--primary))" }}>Browse all features</Link>
           </div>
         )}
 
@@ -184,7 +182,7 @@ export default function FeatureDetailPage() {
               className="bg-card rounded-2xl border border-border shadow-sm p-8">
               <div className="flex flex-col md:flex-row md:items-start gap-6">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ background: TEAL_LIGHT }}>
-                  <Rocket className="w-7 h-7" style={{ color: TEAL }} />
+                  <Rocket className="w-7 h-7" style={{ color: "hsl(var(--primary))" }} />
                 </div>
                 <div className="flex-1">
                   <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -210,7 +208,7 @@ export default function FeatureDetailPage() {
               {feature.launch_countdown_seconds != null && feature.launch_countdown_seconds > 0 && (
                 <div className="mt-6 pt-6 border-t border-gray-100">
                   <p className="text-sm font-semibold text-gray-600 mb-3 flex items-center gap-1.5">
-                    <Clock className="w-4 h-4" style={{ color: TEAL }} />Launching in
+                    <Clock className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />Launching in
                   </p>
                   <CountdownTimer seconds={feature.launch_countdown_seconds} />
                 </div>
@@ -230,7 +228,7 @@ export default function FeatureDetailPage() {
                   <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     onClick={() => setShowWaitlist(true)}
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-                    style={{ background: TEAL }}>
+                    style={{ background: "hsl(var(--primary))" }}>
                     <Users className="w-4 h-4" />Join Waitlist
                     {feature.waitlist_count > 0 && <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded text-xs">{feature.waitlist_count}</span>}
                   </motion.button>
@@ -256,7 +254,7 @@ export default function FeatureDetailPage() {
                   <Link href="/login">
                     <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                       className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
-                      style={{ background: TEAL }}>
+                      style={{ background: "hsl(var(--primary))" }}>
                       <CheckCircle2 className="w-4 h-4" />Use This Feature
                     </motion.button>
                   </Link>
@@ -270,7 +268,7 @@ export default function FeatureDetailPage() {
                 className="grid grid-cols-2 gap-4">
                 {feature.waitlist_count > 0 && (
                   <div className="bg-card rounded-xl border border-border p-5 text-center shadow-sm">
-                    <Users className="w-5 h-5 mx-auto mb-2" style={{ color: TEAL }} />
+                    <Users className="w-5 h-5 mx-auto mb-2" style={{ color: "hsl(var(--primary))" }} />
                     <p className="text-2xl font-black text-gray-900">{feature.waitlist_count}</p>
                     <p className="text-xs text-gray-500 mt-1">on the waitlist</p>
                   </div>
@@ -290,7 +288,7 @@ export default function FeatureDetailPage() {
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
                 className="bg-card rounded-2xl border border-border shadow-sm p-6">
                 <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <GitBranch className="w-4 h-4" style={{ color: TEAL }} />Dependencies
+                  <GitBranch className="w-4 h-4" style={{ color: "hsl(var(--primary))" }} />Dependencies
                 </h2>
                 <div className="space-y-2">
                   {feature.dependencies.map((dep: any) => {
@@ -319,7 +317,7 @@ export default function FeatureDetailPage() {
 
             {/* Browse more */}
             <div className="text-center py-4">
-              <Link href="/features" className="inline-flex items-center gap-1.5 text-sm font-semibold hover:opacity-80 transition-opacity" style={{ color: TEAL }}>
+              <Link href="/features" className="inline-flex items-center gap-1.5 text-sm font-semibold hover:opacity-80 transition-opacity" style={{ color: "hsl(var(--primary))" }}>
                 <Star className="w-4 h-4" />Browse all features
               </Link>
             </div>

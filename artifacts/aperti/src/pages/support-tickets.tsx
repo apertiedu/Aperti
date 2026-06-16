@@ -96,17 +96,17 @@ export default function SupportTickets() {
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center justify-between mb-3">
             <h1 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              <Ticket className="w-5 h-5 text-teal-600" /> Support
+              <Ticket className="w-5 h-5 text-primary" /> Support
             </h1>
             <button onClick={() => setShowCreate(true)}
-              className="p-1.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+              className="p-1.5 bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors">
               <Plus className="w-4 h-4" />
             </button>
           </div>
           <div className="flex gap-1 flex-wrap">
             {["all", "open", "in_progress", "resolved"].map((s) => (
               <button key={s} onClick={() => setFilterStatus(s)}
-                className={`px-2.5 py-1 text-xs rounded-full transition-colors ${filterStatus === s ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+                className={`px-2.5 py-1 text-xs rounded-full transition-colors ${filterStatus === s ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
                 {s === "in_progress" ? "In Progress" : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
@@ -129,7 +129,7 @@ export default function SupportTickets() {
               const ss = STATUS_STYLES[ticket.status] ?? STATUS_STYLES.open;
               return (
                 <button key={ticket.id} onClick={() => setSelectedTicket(ticket)}
-                  className={`w-full p-3 text-left border-b border-gray-50 hover:bg-gray-50 transition-colors ${selectedTicket?.id === ticket.id ? "bg-teal-50 border-l-2 border-l-teal-500" : ""}`}>
+                  className={`w-full p-3 text-left border-b border-gray-50 hover:bg-gray-50 transition-colors ${selectedTicket?.id === ticket.id ? "bg-primary/8 border-l-2 border-l-primary" : ""}`}>
                   <div className="flex items-start justify-between gap-2 mb-1">
                     <span className="text-sm font-medium text-gray-900 line-clamp-1">{ticket.subject}</span>
                     <span className={`flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 ${ss.cls}`}>
@@ -213,15 +213,15 @@ export default function SupportTickets() {
               {/* Responses */}
               {responses.map((r) => (
                 <motion.div key={r.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                  className={`bg-card rounded-2xl border p-4 ${r.responder_role === "admin" || r.responder_role === "teacher" ? "border-teal-100" : "border-gray-100"}`}>
+                  className={`bg-card rounded-2xl border p-4 ${r.responder_role === "admin" || r.responder_role === "teacher" ? "border-primary/15" : "border-gray-100"}`}>
                   <div className="flex items-center gap-2 mb-2">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center ${r.responder_role === "admin" || r.responder_role === "teacher" ? "bg-teal-100" : "bg-gray-100"}`}>
-                      <span className="text-xs font-semibold text-teal-700">{r.responder_name[0]}</span>
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center ${r.responder_role === "admin" || r.responder_role === "teacher" ? "bg-primary/15" : "bg-gray-100"}`}>
+                      <span className="text-xs font-semibold text-primary">{r.responder_name[0]}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-medium text-gray-900">{r.responder_name}</span>
                       {(r.responder_role === "admin" || r.responder_role === "teacher") && (
-                        <span className="text-[10px] bg-teal-100 text-teal-700 px-1.5 py-0.5 rounded-full capitalize font-medium">{r.responder_role}</span>
+                        <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full capitalize font-medium">{r.responder_role}</span>
                       )}
                       <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleString()}</span>
                     </div>
@@ -238,10 +238,10 @@ export default function SupportTickets() {
                   <textarea value={replyText} onChange={(e) => setReplyText(e.target.value)}
                     placeholder="Write a reply…"
                     rows={2}
-                    className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none" />
+                    className="flex-1 px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30/30 resize-none" />
                   <button onClick={() => { if (replyText.trim()) replyMutation.mutate(); }}
                     disabled={!replyText.trim() || replyMutation.isPending}
-                    className="p-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                    className="p-3 bg-primary text-white rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
                     <Send className="w-4 h-4" />
                   </button>
                 </div>
@@ -274,20 +274,20 @@ export default function SupportTickets() {
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Subject *</label>
                   <input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}
                     placeholder="Brief description of the issue"
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Description *</label>
                   <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })}
                     placeholder="Describe your issue in detail…"
                     rows={4}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30 resize-none" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-medium text-gray-600 mb-1 block">Category</label>
                     <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30">
                       {["technical", "academic", "payment", "account", "exam"].map((t) => (
                         <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
                       ))}
@@ -296,7 +296,7 @@ export default function SupportTickets() {
                   <div>
                     <label className="text-xs font-medium text-gray-600 mb-1 block">Priority</label>
                     <select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value })}
-                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500/30">
+                      className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30/30">
                       {["low", "normal", "high", "urgent"].map((p) => (
                         <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
                       ))}
@@ -309,7 +309,7 @@ export default function SupportTickets() {
                 </div>
                 <button onClick={() => createMutation.mutate()}
                   disabled={!form.subject || !form.description || createMutation.isPending}
-                  className="w-full py-2.5 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+                  className="w-full py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
                   Submit Ticket
                 </button>
               </div>

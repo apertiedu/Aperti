@@ -69,7 +69,7 @@ export default function HandwrittenSubmit() {
           <Button variant="ghost" size="sm" onClick={() => navigate(-1 as any)}><ArrowLeft size={16} /></Button>
           <div>
             <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="text-teal-600" size={22} /> Handwritten Submission
+              <FileText className="text-primary" size={22} /> Handwritten Submission
             </h1>
             <p className="text-gray-500 text-sm">Submit handwritten work — AI extracts text, equations and diagrams</p>
           </div>
@@ -80,12 +80,12 @@ export default function HandwrittenSubmit() {
           {(["upload","processing","review","done"] as Step[]).map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                s === step ? "bg-teal-600 text-white scale-110" :
+                s === step ? "bg-primary text-white scale-110" :
                 (["upload","processing","review","done"].indexOf(step) > i) ? "bg-green-500 text-white" :
                 "bg-gray-200 text-gray-500"}`}>
                 {(["upload","processing","review","done"].indexOf(step) > i) ? <CheckCircle size={12} /> : i + 1}
               </div>
-              <span className={`text-xs font-medium capitalize ${s === step ? "text-teal-700" : "text-gray-400"}`}>{s}</span>
+              <span className={`text-xs font-medium capitalize ${s === step ? "text-primary" : "text-gray-400"}`}>{s}</span>
               {i < 3 && <div className="w-6 h-px bg-gray-200 mx-1" />}
             </div>
           ))}
@@ -106,9 +106,9 @@ export default function HandwrittenSubmit() {
                   {/* Mobile-first capture buttons */}
                   <div className="grid grid-cols-2 gap-3">
                     <button onClick={() => cameraRef.current?.click()}
-                      className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-teal-200 bg-teal-50 hover:bg-teal-100 transition-colors min-h-[80px]">
-                      <Camera size={22} className="text-teal-600" />
-                      <span className="text-xs font-semibold text-teal-700">Take Photo</span>
+                      className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-primary/25 bg-primary/8 hover:bg-primary/15 transition-colors min-h-[80px]">
+                      <Camera size={22} className="text-primary" />
+                      <span className="text-xs font-semibold text-primary">Take Photo</span>
                     </button>
                     <button onClick={() => galleryRef.current?.click()}
                       className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors min-h-[80px]">
@@ -129,7 +129,7 @@ export default function HandwrittenSubmit() {
 
                   {/* Process button */}
                   {imageUrl && (
-                    <Button onClick={handleProcess} className="w-full bg-teal-600 hover:bg-teal-700 text-white h-11">
+                    <Button onClick={handleProcess} className="w-full bg-primary hover:bg-primary/80 text-white h-11">
                       <Zap size={14} className="mr-2" /> Analyse with AI
                     </Button>
                   )}
@@ -156,7 +156,7 @@ export default function HandwrittenSubmit() {
                       { icon: ListOrdered, label: "Step Recognition", desc: "Working steps identified and scored" },
                     ].map(({ icon: Icon, label, desc }) => (
                       <div key={label} className="flex gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
-                        <Icon size={16} className="text-teal-600 shrink-0 mt-0.5" />
+                        <Icon size={16} className="text-primary shrink-0 mt-0.5" />
                         <div><p className="text-xs font-semibold text-gray-700">{label}</p><p className="text-xs text-gray-500">{desc}</p></div>
                       </div>
                     ))}
@@ -172,9 +172,9 @@ export default function HandwrittenSubmit() {
                 <CardContent className="py-16 text-center space-y-6">
                   <div className="relative w-24 h-24 mx-auto">
                     <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                      className="w-24 h-24 border-4 border-teal-100 border-t-teal-600 rounded-full absolute" />
+                      className="w-24 h-24 border-4 border-primary/15 border-t-primary rounded-full absolute" />
                     <div className="w-24 h-24 flex items-center justify-center">
-                      <Zap size={28} className="text-teal-600" />
+                      <Zap size={28} className="text-primary" />
                     </div>
                   </div>
                   <div>
@@ -186,7 +186,7 @@ export default function HandwrittenSubmit() {
                       <motion.div key={msg} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.4 }}
                         className="flex items-center gap-2 text-sm text-gray-600">
                         <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ delay: i * 0.4, duration: 0.3 }}>
-                          <CheckCircle size={14} className="text-teal-500" />
+                          <CheckCircle size={14} className="text-primary" />
                         </motion.div>
                         {msg}
                       </motion.div>
@@ -218,7 +218,7 @@ export default function HandwrittenSubmit() {
               {/* Extracted text */}
               {result.processed_text && (
                 <Card className="bg-card border-0 shadow-sm">
-                  <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><FileText size={14} className="text-teal-600" /> Extracted Text</CardTitle></CardHeader>
+                  <CardHeader className="pb-3"><CardTitle className="text-sm flex items-center gap-2"><FileText size={14} className="text-primary" /> Extracted Text</CardTitle></CardHeader>
                   <CardContent>
                     <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-700 leading-relaxed font-mono whitespace-pre-wrap border border-gray-100">
                       {result.processed_text}
@@ -280,7 +280,7 @@ export default function HandwrittenSubmit() {
 
               <div className="flex gap-3 pt-2">
                 <Button variant="outline" onClick={() => setStep("upload")}>Upload Another</Button>
-                <Button className="flex-1 bg-teal-600 hover:bg-teal-700 text-white" onClick={() => setStep("done")}>
+                <Button className="flex-1 bg-primary hover:bg-primary/80 text-white" onClick={() => setStep("done")}>
                   <CheckCircle size={14} className="mr-2" /> Submit Work
                 </Button>
               </div>
@@ -298,12 +298,12 @@ export default function HandwrittenSubmit() {
                   <p className="text-gray-500">Your handwritten work has been processed and submitted.</p>
                   {result && (
                     <div className="grid grid-cols-3 gap-4 py-4 max-w-xs mx-auto">
-                      <div><p className="text-xl font-bold text-teal-600">{Math.round(parseFloat(result.confidence_score || "0") * 100)}%</p><p className="text-xs text-gray-500">Confidence</p></div>
+                      <div><p className="text-xl font-bold text-primary">{Math.round(parseFloat(result.confidence_score || "0") * 100)}%</p><p className="text-xs text-gray-500">Confidence</p></div>
                       <div><p className="text-xl font-bold text-blue-600">{equations.length}</p><p className="text-xs text-gray-500">Equations</p></div>
                       <div><p className="text-xl font-bold text-purple-600">{steps.length}</p><p className="text-xs text-gray-500">Steps</p></div>
                     </div>
                   )}
-                  <Button className="bg-teal-600 hover:bg-teal-700 text-white" onClick={() => navigate(-1 as any)}>
+                  <Button className="bg-primary hover:bg-primary/80 text-white" onClick={() => navigate(-1 as any)}>
                     <ArrowLeft size={14} className="mr-2" /> Back to Assignments
                   </Button>
                 </CardContent>

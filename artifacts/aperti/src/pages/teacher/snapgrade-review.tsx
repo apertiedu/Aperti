@@ -116,7 +116,7 @@ export default function SnapGradeReview() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Brain size={32} className="text-teal-500 animate-pulse" />
+          <Brain size={32} className="text-primary animate-pulse" />
           <p className="text-sm text-muted-foreground">Loading submission...</p>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function SnapGradeReview() {
         <Card className="border border-border shadow-sm bg-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <User size={14} className="text-teal-600" />
+              <User size={14} className="text-primary" />
               Student
             </CardTitle>
           </CardHeader>
@@ -238,7 +238,7 @@ export default function SnapGradeReview() {
         <Card className="border border-border shadow-sm bg-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <Brain size={14} className="text-teal-600" />
+              <Brain size={14} className="text-primary" />
               AI Result
             </CardTitle>
           </CardHeader>
@@ -264,7 +264,7 @@ export default function SnapGradeReview() {
             onClick={() => setShowReasoning(v => !v)}
           >
             <span className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Sparkles size={14} className="text-teal-600" />
+              <Sparkles size={14} className="text-primary" />
               AI Reasoning & Uncertainty
             </span>
             {showReasoning ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
@@ -308,7 +308,7 @@ export default function SnapGradeReview() {
                             <span className="text-foreground">{Math.round((v as number) * 100)}%</span>
                           </div>
                           <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full bg-teal-500" style={{ width: `${(v as number) * 100}%` }} />
+                            <div className="h-full rounded-full bg-primary" style={{ width: `${(v as number) * 100}%` }} />
                           </div>
                         </div>
                       ))}
@@ -326,7 +326,7 @@ export default function SnapGradeReview() {
           <Card className="border border-border shadow-sm bg-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <BookOpen size={14} className="text-teal-600" />
+                <BookOpen size={14} className="text-primary" />
                 Assignment: {s.homework_title}
               </CardTitle>
             </CardHeader>
@@ -393,7 +393,7 @@ export default function SnapGradeReview() {
           <Card className="border border-border shadow-sm bg-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Edit3 size={14} className="text-teal-600" />
+                <Edit3 size={14} className="text-primary" />
                 Teacher Decision
               </CardTitle>
             </CardHeader>
@@ -430,7 +430,7 @@ export default function SnapGradeReview() {
                         onClick={() => setOverrideReason(r === overrideReason ? "" : r)}
                         className={`text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
                           overrideReason === r
-                            ? "bg-teal-600 text-white border-teal-600"
+                            ? "bg-primary text-white border-primary"
                             : "border-border text-muted-foreground hover:bg-muted/50"
                         }`}
                       >
@@ -450,7 +450,7 @@ export default function SnapGradeReview() {
                     </div>
                     <div>
                       <p className="text-xs text-muted-foreground">Your Grade</p>
-                      <p className="text-xl font-bold text-teal-600">{overrideGrade || "?"}</p>
+                      <p className="text-xl font-bold text-primary">{overrideGrade || "?"}</p>
                     </div>
                   </div>
                   <div className="space-y-1.5">
@@ -508,7 +508,7 @@ export default function SnapGradeReview() {
                 </div>
                 <Button
                   size="sm"
-                  className="bg-teal-600 hover:bg-teal-700 text-white gap-1.5"
+                  className="bg-primary hover:bg-primary/80 text-white gap-1.5"
                   disabled={!decision || reviewMutation.isPending}
                   onClick={handleSubmit}
                 >

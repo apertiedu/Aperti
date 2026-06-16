@@ -276,8 +276,8 @@ export default function CardStack() {
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center py-10"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-teal-50 flex items-center justify-center mx-auto mb-4">
-                      <TrendingUp className="w-8 h-8 text-teal-600" />
+                    <div className="w-16 h-16 rounded-2xl bg-primary/8 flex items-center justify-center mx-auto mb-4">
+                      <TrendingUp className="w-8 h-8 text-primary" />
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-1">Session complete!</h3>
                     <p className="text-sm text-gray-500 mb-6">You reviewed {studyCards.length} cards in this session.</p>
@@ -298,9 +298,9 @@ export default function CardStack() {
                     <div className="mb-6">
                       <p className="text-xs text-gray-400 mb-1.5">Mastery this session</p>
                       <div className="w-full bg-gray-100 rounded-full h-3 max-w-xs mx-auto">
-                        <div className="h-3 rounded-full bg-teal-500 transition-all" style={{ width: `${masteryPct}%` }} />
+                        <div className="h-3 rounded-full bg-primary transition-all" style={{ width: `${masteryPct}%` }} />
                       </div>
-                      <p className="text-sm font-semibold text-teal-600 mt-1">{masteryPct}% mastered</p>
+                      <p className="text-sm font-semibold text-primary mt-1">{masteryPct}% mastered</p>
                     </div>
 
                     <div className="flex gap-3 justify-center">

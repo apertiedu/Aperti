@@ -48,7 +48,7 @@ export default function OrgsPage() {
           <h1 className="text-2xl font-bold text-gray-900">Organizations</h1>
           <p className="text-sm text-gray-500">{orgs.length} organizations</p>
         </div>
-        <button onClick={() => { setEditing(null); setShowCreate(true); }} className="flex items-center gap-2 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">
+        <button onClick={() => { setEditing(null); setShowCreate(true); }} className="flex items-center gap-2 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" /> Add Organization
         </button>
       </div>
@@ -58,8 +58,8 @@ export default function OrgsPage() {
           <motion.div key={org.id} layout className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center">
-                  <Building2 className="w-5 h-5 text-teal-600" />
+                <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <p className="font-semibold text-gray-900">{org.name}</p>
@@ -92,7 +92,7 @@ export default function OrgsPage() {
         <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
           <Building2 className="w-10 h-10 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">No organizations yet</p>
-          <button onClick={() => setShowCreate(true)} className="mt-3 text-teal-600 text-sm font-medium hover:underline">Create first organization</button>
+          <button onClick={() => setShowCreate(true)} className="mt-3 text-primary text-sm font-medium hover:underline">Create first organization</button>
         </div>
       )}
 
@@ -108,12 +108,12 @@ export default function OrgsPage() {
               ].map((f) => (
                 <div key={f.key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{f.label} {f.required && <span className="text-red-500">*</span>}</label>
-                  <input value={(form as any)[f.key]} onChange={(e) => setForm(p => ({ ...p, [f.key]: e.target.value }))} disabled={f.key === "slug" && !!editing} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 disabled:bg-gray-50" />
+                  <input value={(form as any)[f.key]} onChange={(e) => setForm(p => ({ ...p, [f.key]: e.target.value }))} disabled={f.key === "slug" && !!editing} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 disabled:bg-gray-50" />
                 </div>
               ))}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select value={form.type} onChange={(e) => setForm(p => ({ ...p, type: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400">
+                <select value={form.type} onChange={(e) => setForm(p => ({ ...p, type: e.target.value }))} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60">
                   {ORG_TYPES.map((t) => <option key={t} value={t}>{t.replace(/_/g, " ")}</option>)}
                 </select>
               </div>
@@ -124,13 +124,13 @@ export default function OrgsPage() {
               ].map((f) => (
                 <div key={f.key}>
                   <label className="block text-sm font-medium text-gray-700 mb-1">{f.label}</label>
-                  <input value={(form as any)[f.key]} onChange={(e) => setForm(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.placeholder} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
+                  <input value={(form as any)[f.key]} onChange={(e) => setForm(p => ({ ...p, [f.key]: e.target.value }))} placeholder={f.placeholder} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" />
                 </div>
               ))}
             </div>
             <div className="flex gap-3 mt-6">
               <button onClick={() => { setShowCreate(false); setEditing(null); }} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">Cancel</button>
-              <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50">
+              <button onClick={() => saveMutation.mutate()} disabled={saveMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50">
                 {saveMutation.isPending ? "Saving…" : "Save"}
               </button>
             </div>

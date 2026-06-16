@@ -35,7 +35,7 @@ function PasswordStrength({ password }: { password: string }) {
     <div className="space-y-1.5 mt-2">
       <div className="flex gap-1">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? level.color : "bg-gray-200"}`} />
+          <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i < score ? level.color : "bg-border"}`} />
         ))}
       </div>
       <p className={`text-xs font-medium ${level.textColor}`}>{level.label}</p>

@@ -350,8 +350,8 @@ export default function SubPilot() {
                 <div className="p-6 space-y-2">{[1,2,3].map(i => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}</div>
               ) : studentsPhones.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center mb-3" style={{ background: "#0D948815" }}>
-                    <Users className="w-5 h-5" style={{ color: "#0D9488" }} />
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center mb-3" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+                    <Users className="w-5 h-5" style={{ color: "hsl(var(--primary))" }} />
                   </div>
                   <p className="text-sm font-medium text-foreground mb-1">No students yet</p>
                   <p className="text-xs text-muted-foreground max-w-xs">Add students via ClassForge first, then return here to send them messages.</p>

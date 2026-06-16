@@ -57,7 +57,7 @@ export default function ClassChannel() {
 
   if (isLoading) return (
     <div className="flex items-center justify-center h-64 text-gray-400 font-[Inter,sans-serif]">
-      <div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
@@ -69,7 +69,7 @@ export default function ClassChannel() {
       {isTeacher && (
         <button
           onClick={() => postJSON("/api/channels", { course_id: courseId, name: `Course ${courseId} Channel` }).then(() => qc.invalidateQueries({ queryKey: ["channel", courseId] }))}
-          className="mt-4 px-4 py-2 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700 transition-colors">
+          className="mt-4 px-4 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/80 transition-colors">
           Create Channel
         </button>
       )}
@@ -132,8 +132,8 @@ export default function ClassChannel() {
             return (
               <motion.div key={msg.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
                 className={`flex gap-3 ${isMe ? "flex-row-reverse" : ""}`}>
-                <div className="w-8 h-8 rounded-full bg-teal-100 flex-shrink-0 flex items-center justify-center">
-                  <span className="text-xs font-semibold text-teal-700">{msg.sender_name[0]}</span>
+                <div className="w-8 h-8 rounded-full bg-primary/15 flex-shrink-0 flex items-center justify-center">
+                  <span className="text-xs font-semibold text-primary">{msg.sender_name[0]}</span>
                 </div>
                 <div className={`max-w-[70%] ${isMe ? "items-end" : "items-start"} flex flex-col gap-1`}>
                   <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export default function ClassChannel() {
                     {msg.is_pinned && <Pin className="w-3 h-3 text-amber-500" />}
                   </div>
                   <div className={`px-4 py-2.5 rounded-2xl text-sm shadow-sm ${isMe
-                    ? "bg-teal-600 text-white rounded-tr-sm"
+                    ? "bg-primary text-white rounded-tr-sm"
                     : "bg-card border border-border text-foreground rounded-tl-sm"}`}>
                     {msg.content}
                   </div>
@@ -176,11 +176,11 @@ export default function ClassChannel() {
                 onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (compose.trim()) sendMutation.mutate(); } }}
                 placeholder={`Message #${channel.name}…`}
                 rows={2}
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500/30 resize-none" />
+                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30/30 resize-none" />
             </div>
             <button onClick={() => { if (compose.trim()) sendMutation.mutate(); }}
               disabled={!compose.trim() || sendMutation.isPending}
-              className="p-3 bg-teal-600 text-white rounded-xl hover:bg-teal-700 disabled:opacity-50 transition-colors">
+              className="p-3 bg-primary text-white rounded-xl hover:bg-primary/80 disabled:opacity-50 transition-colors">
               <Send className="w-4 h-4" />
             </button>
           </div>

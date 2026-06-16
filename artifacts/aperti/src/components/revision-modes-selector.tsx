@@ -22,8 +22,8 @@ const MODES: { id: RevisionMode; label: string; icon: React.ComponentType<{ clas
     icon: Zap,
     desc: "Key facts, definitions & formulas",
     time: "15 min",
-    color: "#0D9488",
-    bg: "#E0F2F1",
+    color: "hsl(var(--primary))",
+    bg: "hsl(var(--primary)/.1)",
   },
   {
     id: "deep",
@@ -50,11 +50,11 @@ function QuickContent({ content }: { content: any }) {
     <div className="space-y-4">
       {content.keyFacts?.length > 0 && (
         <div>
-          <p className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-2 flex items-center gap-1"><Star className="w-3 h-3" /> Key Facts</p>
+          <p className="text-xs font-bold text-primary uppercase tracking-wide mb-2 flex items-center gap-1"><Star className="w-3 h-3" /> Key Facts</p>
           <ul className="space-y-1.5">
             {content.keyFacts.map((f: string, i: number) => (
               <li key={i} className="flex items-start gap-2 text-sm text-foreground">
-                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-teal-500" />
+                <CheckCircle2 className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-primary" />
                 {f}
               </li>
             ))}
@@ -63,12 +63,12 @@ function QuickContent({ content }: { content: any }) {
       )}
       {content.definitions?.length > 0 && (
         <div>
-          <p className="text-xs font-bold text-teal-700 uppercase tracking-wide mb-2 flex items-center gap-1"><Lightbulb className="w-3 h-3" /> Definitions</p>
+          <p className="text-xs font-bold text-primary uppercase tracking-wide mb-2 flex items-center gap-1"><Lightbulb className="w-3 h-3" /> Definitions</p>
           <div className="space-y-1.5">
             {content.definitions.map((d: any, i: number) => (
-              <div key={i} className="bg-teal-50 rounded-lg px-3 py-2 text-sm">
-                <span className="font-semibold text-teal-800">{typeof d === "string" ? d : d.term}</span>
-                {typeof d !== "string" && d.definition && <span className="text-teal-700">: {d.definition}</span>}
+              <div key={i} className="bg-primary/5 rounded-lg px-3 py-2 text-sm">
+                <span className="font-semibold text-foreground">{typeof d === "string" ? d : d.term}</span>
+                {typeof d !== "string" && d.definition && <span className="text-muted-foreground">: {d.definition}</span>}
               </div>
             ))}
           </div>

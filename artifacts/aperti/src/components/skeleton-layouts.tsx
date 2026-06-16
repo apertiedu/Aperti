@@ -39,14 +39,14 @@ export function SkeletonTable({ rows = 5, cols = 4, className }: { rows?: number
   return (
     <div className={cn("bg-card rounded-xl border border-border shadow-sm overflow-hidden", className)}>
       {/* Header */}
-      <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+      <div className="flex items-center gap-4 px-4 py-3 border-b border-border bg-muted/30">
         {Array.from({ length: cols }).map((_, i) => (
           <Skeleton key={i} className={`h-3 rounded ${i === 0 ? "w-32" : i === cols - 1 ? "w-20 ml-auto" : "w-24"}`} />
         ))}
       </div>
       {/* Rows */}
       {Array.from({ length: rows }).map((_, rowIdx) => (
-        <div key={rowIdx} className="flex items-center gap-4 px-4 py-3.5 border-b border-gray-50 last:border-0">
+        <div key={rowIdx} className="flex items-center gap-4 px-4 py-3.5 border-b border-border/40 last:border-0">
           <div className="flex items-center gap-2.5">
             <Skeleton className="w-8 h-8 rounded-full flex-shrink-0" />
             <div className="space-y-1.5">

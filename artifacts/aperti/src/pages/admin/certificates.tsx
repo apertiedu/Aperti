@@ -12,7 +12,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 const TEMPLATES = [
-  { id: "completion",  label: "Completion",  gradient: "from-teal-400 to-emerald-500" },
+  { id: "completion",  label: "Completion",  gradient: "from-primary/80 to-emerald-500" },
   { id: "excellence",  label: "Excellence",  gradient: "from-amber-400 to-yellow-500" },
   { id: "merit",       label: "Merit",       gradient: "from-violet-500 to-purple-600" },
   { id: "distinction", label: "Distinction", gradient: "from-pink-500 to-rose-600" },
@@ -184,7 +184,7 @@ export default function AdminCertificates() {
         <div className="space-y-3">
           {certs.map((c: any) => (
             <div key={c.id} className={`bg-card border rounded-xl p-4 flex items-center gap-4 ${c.status === "revoked" ? "opacity-60 border-border/40" : "border-border"}`}>
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${TEMPLATES.find(t => t.id === c.template?.type)?.gradient ?? "from-teal-400 to-emerald-500"} flex items-center justify-center shrink-0`}>
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${TEMPLATES.find(t => t.id === c.template?.type)?.gradient ?? "from-primary/80 to-emerald-500"} flex items-center justify-center shrink-0`}>
                 <Award className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1 min-w-0">

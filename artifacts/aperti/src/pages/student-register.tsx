@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const TEAL = "#0D9488";
-const TEAL_LIGHT = "#E6F4F1";
 
 interface Teacher {
   id: number;
@@ -74,14 +72,14 @@ export default function StudentRegister() {
           className="bg-card rounded-2xl shadow-sm border border-border p-10 max-w-md w-full text-center mx-4"
         >
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: TEAL_LIGHT }}>
-            <CheckCircle2 className="h-8 w-8" style={{ color: TEAL }} />
+            <CheckCircle2 className="h-8 w-8" style={{ color: "hsl(var(--primary))" }} />
           </div>
           <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Registration Submitted!</h2>
           <p className="text-gray-500 text-sm leading-relaxed mb-6">
             Your account is now <strong>pending approval</strong> from your teacher. You will be able to log in once they approve your request.
           </p>
           <Link href="/login">
-            <Button className="w-full h-11 rounded-xl" style={{ background: TEAL }}>
+            <Button className="w-full h-11 rounded-xl" style={{ background: "hsl(var(--primary))" }}>
               Back to Sign In
             </Button>
           </Link>
@@ -93,7 +91,7 @@ export default function StudentRegister() {
   return (
     <div className="min-h-screen flex" style={{ background: "#F5F5F5" }}>
       {/* Left side */}
-      <div className="hidden lg:flex flex-col justify-center px-12 flex-1 max-w-lg" style={{ background: TEAL }}>
+      <div className="hidden lg:flex flex-col justify-center px-12 flex-1 max-w-lg" style={{ background: "hsl(var(--primary))" }}>
         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
           <Link href="/">
             <div className="flex items-center gap-2 mb-12 cursor-pointer">
@@ -212,7 +210,7 @@ export default function StudentRegister() {
                 )}
               </AnimatePresence>
 
-              <Button type="submit" className="w-full h-11 rounded-xl font-semibold mt-2" style={{ background: TEAL }}
+              <Button type="submit" className="w-full h-11 rounded-xl font-semibold mt-2" style={{ background: "hsl(var(--primary))" }}
                 disabled={submitting}>
                 {submitting ? "Creating account…" : "Create Account"}
               </Button>
@@ -220,7 +218,7 @@ export default function StudentRegister() {
 
             <p className="text-center text-xs text-gray-400 mt-5">
               Already have an account?{" "}
-              <Link href="/login" className="font-semibold hover:underline" style={{ color: TEAL }}>Sign in</Link>
+              <Link href="/login" className="font-semibold hover:underline" style={{ color: "hsl(var(--primary))" }}>Sign in</Link>
             </p>
           </div>
         </motion.div>

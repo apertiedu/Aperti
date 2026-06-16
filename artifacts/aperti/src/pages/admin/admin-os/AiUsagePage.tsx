@@ -5,9 +5,9 @@ import { fetchJSON, putJSON } from "@/lib/api";
 
 const COST_PER_1K = 0.002;
 
-function StatCard({ icon: Icon, label, value, sub, color = "teal" }: any) {
+function StatCard({ icon: Icon, label, value, sub, color = "primary" }: any) {
   const colors: Record<string, string> = {
-    teal: "bg-teal-50 text-teal-600",
+    primary: "bg-primary/8 text-primary",
     blue: "bg-blue-50 text-blue-600",
     amber: "bg-amber-50 text-amber-600",
     purple: "bg-purple-50 text-purple-600",
@@ -63,7 +63,7 @@ export default function AiUsagePage() {
     <div className="p-6 space-y-6 max-w-6xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Brain className="text-teal-600" size={24} /> AI Usage Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2"><Brain className="text-primary" size={24} /> AI Usage Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">Monitor AI API calls, token consumption, and estimated cost for the last 30 days.</p>
         </div>
         <div className="flex items-center gap-2">
@@ -76,7 +76,7 @@ export default function AiUsagePage() {
             <RefreshCw size={14} /> Refresh
           </button>
           <button onClick={() => { setThresholdVal(String(threshold)); setShowThresholdEdit(true); }}
-            className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700">
+            className="flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg text-sm hover:opacity-90">
             <Settings size={14} /> Set Threshold
           </button>
         </div>
@@ -100,7 +100,7 @@ export default function AiUsagePage() {
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={Zap} label="Total API Calls (30d)" value={total.calls.toLocaleString()} sub="All AI endpoints" color="teal" />
+          <StatCard icon={Zap} label="Total API Calls (30d)" value={total.calls.toLocaleString()} sub="All AI endpoints" color="primary" />
           <StatCard icon={Brain} label="Tokens Used (30d)" value={total.tokens.toLocaleString()} sub="prompt + completion" color="blue" />
           <StatCard icon={DollarSign} label="Est. Cost (30d)" value={`$${total.estimatedCostUSD?.toFixed(4)}`} sub="at $0.002 / 1K tokens" color="amber" />
           <StatCard icon={TrendingUp} label="Today's Cost" value={`$${todayCost.toFixed(4)}`} sub={`Threshold: $${threshold}/day`} color={overThreshold ? "amber" : "purple"} />
@@ -110,7 +110,7 @@ export default function AiUsagePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily calls chart */}
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-          <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><BarChart3 size={16} className="text-teal-600" /> Daily API Calls (Last 30 days)</h2>
+          <h2 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2"><BarChart3 size={16} className="text-primary" /> Daily API Calls (Last 30 days)</h2>
           {daily.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-8">No AI interactions recorded yet.</p>
           ) : (
@@ -119,7 +119,7 @@ export default function AiUsagePage() {
                 <div key={d.day} className="flex items-center gap-3">
                   <span className="text-xs text-gray-400 w-20 shrink-0">{d.day?.slice(5, 10)}</span>
                   <div className="flex-1 bg-gray-100 rounded-full h-2">
-                    <div className="bg-teal-500 h-2 rounded-full transition-all"
+                    <div className="bg-primary h-2 rounded-full transition-all"
                       style={{ width: `${Math.round((d.calls / maxCalls) * 100)}%` }} />
                   </div>
                   <span className="text-xs text-gray-600 w-12 text-right">{d.calls.toLocaleString()}</span>

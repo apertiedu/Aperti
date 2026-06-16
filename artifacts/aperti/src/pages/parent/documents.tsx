@@ -8,14 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Folder, Download, FileText, Award, CreditCard, Filter } from "lucide-react";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string) =>
   fetch(url, { credentials: "include" });
 
 const typeConfig: Record<string, { icon: any; colour: string; bg: string }> = {
   report:      { icon: FileText, colour: "#6366f1", bg: "bg-indigo-50" },
   certificate: { icon: Award,    colour: "#f59e0b", bg: "bg-amber-50"  },
-  invoice:     { icon: CreditCard, colour: "#0D9488", bg: "bg-teal-50"  },
+  invoice:     { icon: CreditCard, colour: "hsl(var(--primary))", bg: "bg-primary/8"  },
 };
 
 function typeLabel(t: string) {

@@ -3,12 +3,12 @@ import { FlaskConical, ArrowLeft, Beaker, Atom, Dna, Triangle } from "lucide-rea
 import { Button } from "@/components/ui/button";
 
 const LAB_META: Record<string, { name: string; desc: string; icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; color: string }> = {
-  "forge-field":   { name: "ForgeField",   desc: "Electromagnetic field simulator — visualise field lines, forces, and interactions in real time.", icon: Atom,        color: "#0D9488" },
+  "forge-field":   { name: "ForgeField",   desc: "Electromagnetic field simulator — visualise field lines, forces, and interactions in real time.", icon: Atom,        color: "hsl(var(--primary))" },
   "react-sphere":  { name: "ReactSphere",  desc: "Chemical reaction sandbox — build molecules, run virtual reactions, and observe energy changes.", icon: Beaker,       color: "#7C3AED" },
   "geometrix":     { name: "Geometrix",    desc: "3-D geometry explorer — construct, transform, and measure geometric solids interactively.",      icon: Triangle,     color: "#D97706" },
   "biosphere":     { name: "BioSphere",    desc: "Ecosystem simulation — model populations, food webs, and environmental pressures over time.",     icon: Dna,          color: "#059669" },
-  "lab-builder":   { name: "Lab Builder",  desc: "Design and deploy your own virtual lab experiments for students.",                               icon: FlaskConical,  color: "#0D9488" },
-  "simverse":      { name: "SimVerse",     desc: "The full suite of interactive science simulations — labs, experiments, and 3-D models.",         icon: FlaskConical,  color: "#0D9488" },
+  "lab-builder":   { name: "Lab Builder",  desc: "Design and deploy your own virtual lab experiments for students.",                               icon: FlaskConical,  color: "hsl(var(--primary))" },
+  "simverse":      { name: "SimVerse",     desc: "The full suite of interactive science simulations — labs, experiments, and 3-D models.",         icon: FlaskConical,  color: "hsl(var(--primary))" },
 };
 
 function slug(path: string) {
@@ -23,12 +23,12 @@ export default function LabsComingSoon() {
     name: "Interactive Lab",
     desc: "Hands-on virtual experiments are on the way.",
     icon: FlaskConical,
-    color: "#0D9488",
+    color: "hsl(var(--primary))",
   };
   const Icon = meta.icon;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-teal-50/30 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-primary/80/30 flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <div
           className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
@@ -50,9 +50,9 @@ export default function LabsComingSoon() {
         <div className="bg-card rounded-xl border border-border shadow-sm p-5 text-left mb-8 space-y-3">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">What to expect</p>
           <ul className="space-y-2 text-sm text-gray-600">
-            <li className="flex items-start gap-2"><span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />Real-time interactive simulations built for IGCSE learners</li>
-            <li className="flex items-start gap-2"><span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />Progress tracking and auto-marked lab reports</li>
-            <li className="flex items-start gap-2"><span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-teal-500 shrink-0" />Linked directly to your syllabus and question bank</li>
+            <li className="flex items-start gap-2"><span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />Real-time interactive simulations built for IGCSE learners</li>
+            <li className="flex items-start gap-2"><span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />Progress tracking and auto-marked lab reports</li>
+            <li className="flex items-start gap-2"><span className="mt-0.5 w-1.5 h-1.5 rounded-full bg-primary shrink-0" />Linked directly to your syllabus and question bank</li>
           </ul>
         </div>
 

@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 
 interface RevisionTask {
   type: "flashcards" | "questions" | "revision" | "simulation";
@@ -43,7 +42,7 @@ const TASK_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
 const TASK_COLORS: Record<string, string> = {
   flashcards: "#7C3AED",
   questions: "#DC2626",
-  revision: "#0D9488",
+  revision: "hsl(var(--primary))",
   simulation: "#D97706",
 };
 
@@ -126,7 +125,7 @@ export default function RevisionPlanPage() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-            <Calendar className="h-6 w-6" style={{ color: TEAL }} />
+            <Calendar className="h-6 w-6" className="text-primary" />
             Smart Revision Plan
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -135,7 +134,7 @@ export default function RevisionPlanPage() {
         </div>
         {plan && (
           <Badge variant="outline" className="gap-1 shrink-0">
-            {aiGenerated && <Sparkles className="h-3 w-3" style={{ color: TEAL }} />}
+            {aiGenerated && <Sparkles className="h-3 w-3" className="text-primary" />}
             {aiGenerated ? "AI Plan" : "Smart Plan"}
           </Badge>
         )}
@@ -148,7 +147,7 @@ export default function RevisionPlanPage() {
         className="bg-card rounded-2xl border border-border shadow-sm p-5"
       >
         <h2 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Sparkles className="h-4 w-4" style={{ color: TEAL }} />
+          <Sparkles className="h-4 w-4" className="text-primary" />
           Configure Your Plan
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
@@ -159,7 +158,7 @@ export default function RevisionPlanPage() {
               value={form.examDate}
               min={new Date().toISOString().split("T")[0]}
               onChange={e => setForm(f => ({ ...f, examDate: e.target.value }))}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
           <div>
@@ -167,7 +166,7 @@ export default function RevisionPlanPage() {
             <select
               value={form.mode}
               onChange={e => setForm(f => ({ ...f, mode: e.target.value as PlanForm["mode"] }))}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20 bg-white"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
             >
               <option value="balanced">Balanced (all topics)</option>
               <option value="weak">Weak areas first</option>
@@ -181,7 +180,7 @@ export default function RevisionPlanPage() {
               placeholder="e.g. Physics, Maths"
               value={form.subject}
               onChange={e => setForm(f => ({ ...f, subject: e.target.value }))}
-              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600/20"
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
         </div>
@@ -189,7 +188,7 @@ export default function RevisionPlanPage() {
           onClick={() => generate.mutate()}
           disabled={generate.isPending}
           className="gap-2 text-white"
-          style={{ background: TEAL }}
+          className="bg-primary text-primary-foreground"
         >
           {generate.isPending ? (
             <><Loader2 className="h-4 w-4 animate-spin" />Generating…</>
@@ -222,7 +221,7 @@ export default function RevisionPlanPage() {
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full rounded-full"
-                  style={{ background: TEAL }}
+                  className="bg-primary text-primary-foreground"
                   animate={{ width: `${(completedCount / Math.max(totalTasks, 1)) * 100}%` }}
                   transition={{ duration: 0.4 }}
                 />
@@ -260,7 +259,7 @@ export default function RevisionPlanPage() {
                     layout
                     onClick={() => setExpandedDay(isExpanded ? null : globalDi)}
                     className={`bg-card rounded-xl border cursor-pointer transition-all ${
-                      isToday ? "border-teal-500 shadow-md" : dayCompleted ? "border-green-300 bg-green-50/30" : "border-gray-100 shadow-sm"
+                      isToday ? "border-primary shadow-md" : dayCompleted ? "border-green-300 bg-green-50/30" : "border-gray-100 shadow-sm"
                     }`}
                     whileHover={{ y: -2 }}
                   >
@@ -274,7 +273,7 @@ export default function RevisionPlanPage() {
                         </div>
                         {dayCompleted && <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />}
                         {isToday && !dayCompleted && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: TEAL }}>TODAY</span>
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white" className="bg-primary text-primary-foreground">TODAY</span>
                         )}
                       </div>
                       <div className="flex items-center gap-1 flex-wrap">
@@ -363,8 +362,8 @@ export default function RevisionPlanPage() {
           animate={{ opacity: 1 }}
           className="text-center py-16"
         >
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ background: `${TEAL}12` }}>
-            <Calendar className="h-8 w-8" style={{ color: TEAL }} />
+          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4" className="bg-primary/8">
+            <Calendar className="h-8 w-8" className="text-primary" />
           </div>
           <h3 className="font-bold text-gray-800 mb-2">Generate Your Revision Plan</h3>
           <p className="text-sm text-muted-foreground max-w-sm mx-auto">

@@ -25,7 +25,7 @@ const ACTION_META: Record<string, { label: string; color: string; icon: any }> =
   withdrawn:        { label: "Withdrawn",        color: "bg-red-100 text-red-700",         icon: UserMinus },
   transferred:      { label: "Transferred",      color: "bg-blue-100 text-blue-700",       icon: ArrowRightLeft },
   suspended:        { label: "Suspended",        color: "bg-amber-100 text-amber-700",     icon: UserMinus },
-  "re-enrolled":    { label: "Re-enrolled",      color: "bg-teal-100 text-teal-700",       icon: UserPlus },
+  "re-enrolled":    { label: "Re-enrolled",      color: "bg-primary/15 text-primary",       icon: UserPlus },
   lesson_changed:   { label: "Lesson Changed",   color: "bg-purple-100 text-purple-700",   icon: ArrowRightLeft },
   subject_added:    { label: "Subject Added",    color: "bg-sky-100 text-sky-700",         icon: BookOpen },
   subject_removed:  { label: "Subject Removed",  color: "bg-orange-100 text-orange-700",   icon: BookOpen },

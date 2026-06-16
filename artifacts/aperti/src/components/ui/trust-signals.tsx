@@ -143,7 +143,7 @@ export function LastUpdated({ date, label = "Updated", className }: LastUpdatedP
 export function SecurePaymentBadge({ className }: { className?: string }) {
   return (
     <div className={cn("inline-flex items-center gap-1.5 text-xs text-gray-500", className)}>
-      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 text-teal-600 fill-current flex-shrink-0">
+      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 text-primary fill-current flex-shrink-0">
         <path d="M8 1L2 4v4c0 3.31 2.5 6.41 6 7 3.5-.59 6-3.69 6-7V4L8 1zm-1 9.59L4.41 8 5.83 6.58 7 7.75l3.17-3.17 1.42 1.42L7 10.59z"/>
       </svg>
       256-bit SSL · Payments secured

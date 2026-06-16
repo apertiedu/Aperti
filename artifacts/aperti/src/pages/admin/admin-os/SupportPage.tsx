@@ -74,7 +74,7 @@ export default function SupportPage() {
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
         {["open", "in_progress", "resolved", ""].map((s) => (
-          <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }} className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${statusFilter === s ? "bg-teal-600 text-white border-teal-600" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
+          <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }} className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${statusFilter === s ? "bg-primary text-white border-primary" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>
             {s || "All"}
           </button>
         ))}
@@ -114,7 +114,7 @@ export default function SupportPage() {
                   <td className="px-4 py-3 text-xs text-gray-500">{new Date(t.created_at).toLocaleDateString()}</td>
                   <td className="px-4 py-3">
                     {t.status !== "resolved" && (
-                      <button onClick={() => setResolving(t)} className="px-3 py-1 text-xs bg-teal-50 text-teal-700 rounded-lg hover:bg-teal-100 transition-colors">Resolve</button>
+                      <button onClick={() => setResolving(t)} className="px-3 py-1 text-xs bg-primary/8 text-primary rounded-lg hover:bg-primary/15 transition-colors">Resolve</button>
                     )}
                   </td>
                 </tr>
@@ -138,10 +138,10 @@ export default function SupportPage() {
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Resolve Ticket #{resolving.id}</h2>
             <p className="text-sm text-gray-600 mb-4">{resolving.subject || resolving.title}</p>
-            <textarea value={resolution} onChange={(e) => setResolution(e.target.value)} rows={4} placeholder="Resolution notes…" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400" />
+            <textarea value={resolution} onChange={(e) => setResolution(e.target.value)} rows={4} placeholder="Resolution notes…" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60" />
             <div className="flex gap-3 mt-4">
               <button onClick={() => setResolving(null)} className="flex-1 px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-700">Cancel</button>
-              <button onClick={() => resolveMutation.mutate({ id: resolving.id, resolution })} disabled={resolveMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50">
+              <button onClick={() => resolveMutation.mutate({ id: resolving.id, resolution })} disabled={resolveMutation.isPending} className="flex-1 px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50">
                 {resolveMutation.isPending ? "Resolving…" : "Mark Resolved"}
               </button>
             </div>

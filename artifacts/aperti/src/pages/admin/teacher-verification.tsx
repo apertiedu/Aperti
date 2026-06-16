@@ -112,7 +112,7 @@ export default function TeacherVerification() {
                       <TableCell>
                         <Button
                           size="sm"
-                          className="h-8 bg-[#0D9488] text-white hover:bg-[#0B7B70] gap-1.5 text-xs"
+                          className="h-8 bg-primary text-white hover:opacity-90 gap-1.5 text-xs"
                           onClick={() => approveMutation.mutate(t.id)}
                           disabled={processing === t.id}
                         >

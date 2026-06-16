@@ -92,7 +92,7 @@ function BlockerCard({ b, onUpdate }: { b: any; onUpdate: (id: number, patch: an
                   <select
                     value={newStatus}
                     onChange={e => setNewStatus(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60"
                   >
                     {Object.entries(STAT).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                   </select>
@@ -102,7 +102,7 @@ function BlockerCard({ b, onUpdate }: { b: any; onUpdate: (id: number, patch: an
                   <input
                     value={notes}
                     onChange={e => setNotes(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400"
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60"
                     placeholder="Add or update description…"
                   />
                 </div>
@@ -114,7 +114,7 @@ function BlockerCard({ b, onUpdate }: { b: any; onUpdate: (id: number, patch: an
                 <button
                   onClick={save}
                   disabled={saving}
-                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary/80 disabled:opacity-50 transition-colors"
                 >
                   {saving ? <RefreshCw className="w-3 h-3 animate-spin" /> : <CheckCircle2 className="w-3 h-3" />}
                   Save
@@ -148,7 +148,7 @@ function AddBlockerForm({ onAdd }: { onAdd: (data: any) => void }) {
       {!open ? (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors"
         >
           <Plus className="w-4 h-4" /> Add Blocker
         </button>
@@ -165,15 +165,15 @@ function AddBlockerForm({ onAdd }: { onAdd: (data: any) => void }) {
             onChange={e => setTitle(e.target.value)}
             placeholder="Blocker title…"
             required
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white"
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white"
           />
           <div className="grid grid-cols-2 gap-3">
-            <select value={severity} onChange={e => setSeverity(e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white">
+            <select value={severity} onChange={e => setSeverity(e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white">
               <option value="critical">Critical</option>
               <option value="major">Major</option>
               <option value="minor">Minor</option>
             </select>
-            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 bg-white">
+            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 bg-white">
               {["general","authentication","database","ui","performance","reliability","security","payments"].map(c => (
                 <option key={c} value={c}>{c.charAt(0).toUpperCase() + c.slice(1)}</option>
               ))}
@@ -184,11 +184,11 @@ function AddBlockerForm({ onAdd }: { onAdd: (data: any) => void }) {
             onChange={e => setDescription(e.target.value)}
             placeholder="Description (optional)…"
             rows={2}
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-teal-400 resize-none bg-white"
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-primary/60 resize-none bg-white"
           />
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => setOpen(false)} className="px-3 py-1.5 text-xs text-gray-500 rounded-lg hover:bg-gray-100 border border-gray-200">Cancel</button>
-            <button type="submit" className="px-4 py-1.5 text-xs font-semibold bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors">Add Blocker</button>
+            <button type="submit" className="px-4 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors">Add Blocker</button>
           </div>
         </motion.form>
       )}
@@ -326,7 +326,7 @@ export default function LaunchBlockersPage() {
 
       {isLoading ? (
         <div className="flex justify-center py-16">
-          <div className="w-7 h-7 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-7 h-7 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400">

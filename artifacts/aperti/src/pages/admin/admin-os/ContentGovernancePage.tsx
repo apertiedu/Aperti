@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Edit2, Check, X, ExternalLink, Clock, Tag, User, Shield } from "lucide-react";
 
-const TEAL = "#0D9488";
+
 
 interface GovernanceEntry {
   id: number;
@@ -68,7 +68,7 @@ function EditModal({ entry, onClose }: { entry: GovernanceEntry; onClose: () => 
             <input
               value={form.version}
               onChange={e => setForm(f => ({ ...f, version: e.target.value }))}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 bg-gray-50/50"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50"
               placeholder="e.g. 1.0, 2.1" />
           </div>
           <div>
@@ -77,7 +77,7 @@ function EditModal({ entry, onClose }: { entry: GovernanceEntry; onClose: () => 
               type="date"
               value={form.approval_date}
               onChange={e => setForm(f => ({ ...f, approval_date: e.target.value }))}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 bg-gray-50/50" />
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Notes</label>
@@ -85,7 +85,7 @@ function EditModal({ entry, onClose }: { entry: GovernanceEntry; onClose: () => 
               value={form.notes}
               onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
               rows={3}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 bg-gray-50/50 resize-none"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50 resize-none"
               placeholder="Any notes about this page's content status..." />
           </div>
         </div>
@@ -98,7 +98,7 @@ function EditModal({ entry, onClose }: { entry: GovernanceEntry; onClose: () => 
             onClick={() => save.mutate(form)}
             disabled={save.isPending}
             className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-            style={{ background: TEAL }}>
+            className="bg-primary text-primary-foreground">
             {save.isPending ? "Saving…" : "Save Changes"}
           </button>
         </div>
@@ -149,8 +149,8 @@ export default function ContentGovernancePage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${TEAL}15` }}>
-            <Shield className="h-5 w-5" style={{ color: TEAL }} />
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" className="bg-primary/8">
+            <Shield className="h-5 w-5" className="text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-gray-900">Content Governance</h1>
@@ -162,7 +162,7 @@ export default function ContentGovernancePage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: "Total Pages", value: stats.total, icon: FileText, color: TEAL },
+          { label: "Total Pages", value: stats.total, icon: FileText, color: "hsl(var(--primary))" },
           { label: "Reviewed", value: stats.reviewed, icon: Check, color: "#22C55E" },
           { label: "Current (< 30d)", value: stats.current, icon: Clock, color: "#3B82F6" },
           { label: "Needs Review", value: stats.overdue, icon: X, color: "#EF4444" },
@@ -189,7 +189,7 @@ export default function ContentGovernancePage() {
           value={search}
           onChange={e => setSearch(e.target.value)}
           placeholder="Search pages…"
-          className="w-full max-w-sm px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500/20 bg-gray-50/50" />
+          className="w-full max-w-sm px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-gray-50/50" />
       </div>
 
       {/* Table */}
@@ -213,8 +213,8 @@ export default function ContentGovernancePage() {
                     <tr key={entry.id} className="hover:bg-gray-50/50 transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${TEAL}12` }}>
-                            <FileText className="h-3.5 w-3.5" style={{ color: TEAL }} />
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" className="bg-primary/8">
+                            <FileText className="h-3.5 w-3.5" className="text-primary" />
                           </div>
                           <span className="font-semibold text-gray-900 text-xs">{entry.page_name}</span>
                         </div>
@@ -227,7 +227,7 @@ export default function ContentGovernancePage() {
                       </td>
                       <td className="px-4 py-3">
                         <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                          style={{ background: `${TEAL}12`, color: TEAL }}>
+                          style={{ className="bg-primary/8 text-primary" }}>
                           v{entry.version}
                         </span>
                       </td>
@@ -235,7 +235,7 @@ export default function ContentGovernancePage() {
                         {entry.owner_name ? (
                           <div className="flex items-center gap-1.5">
                             <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold shrink-0"
-                              style={{ background: TEAL }}>
+                              className="bg-primary text-primary-foreground">
                               {entry.owner_name.charAt(0)}
                             </div>
                             <span className="text-xs text-gray-600">{entry.owner_name}</span>
@@ -283,7 +283,7 @@ export default function ContentGovernancePage() {
       {/* Notes section */}
       <div className="mt-6 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Tag className="h-4 w-4" style={{ color: TEAL }} />
+          <Tag className="h-4 w-4" className="text-primary" />
           <h3 className="text-sm font-bold text-gray-900">Review Policy</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-gray-500">

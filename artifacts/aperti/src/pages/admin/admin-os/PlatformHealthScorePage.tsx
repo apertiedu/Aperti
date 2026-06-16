@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Shield, Zap, Activity, Database, RefreshCw, TrendingUp } from "lucide-react";
 import { fetchJSON } from "@/lib/api";
 
-const TEAL = "#0D9488";
 
 const DIM_ICONS: Record<string, any> = {
   security: Shield,
@@ -13,7 +12,7 @@ const DIM_ICONS: Record<string, any> = {
 };
 
 function ScoreArc({ score }: { score: number }) {
-  const color = score >= 90 ? "#22c55e" : score >= 75 ? TEAL : score >= 50 ? "#f59e0b" : "#ef4444";
+  const color = score >= 90 ? "#22c55e" : score >= 75 ? "hsl(var(--primary))" : score >= 50 ? "#f59e0b" : "#ef4444";
   const r = 56;
   const circ = Math.PI * r;
   const dash = (score / 100) * circ;
@@ -29,8 +28,8 @@ function ScoreArc({ score }: { score: number }) {
 
 function DimCard({ id, dim }: { id: string; dim: any }) {
   const Icon = DIM_ICONS[id] ?? Activity;
-  const color = dim.score >= 90 ? "text-green-600 bg-green-50" : dim.score >= 70 ? "text-teal-600 bg-teal-50" : dim.score >= 50 ? "text-amber-600 bg-amber-50" : "text-red-600 bg-red-50";
-  const scoreColor = dim.score >= 90 ? "#22c55e" : dim.score >= 70 ? TEAL : dim.score >= 50 ? "#f59e0b" : "#ef4444";
+  const color = dim.score >= 90 ? "text-green-600 bg-green-50" : dim.score >= 70 ? "text-primary bg-primary/8" : dim.score >= 50 ? "text-amber-600 bg-amber-50" : "text-red-600 bg-red-50";
+  const scoreColor = dim.score >= 90 ? "#22c55e" : dim.score >= 70 ? "hsl(var(--primary))" : dim.score >= 50 ? "#f59e0b" : "#ef4444";
   const r = 16; const circ = 2 * Math.PI * r; const dash = (dim.score / 100) * circ;
   return (
     <motion.div
@@ -63,14 +62,14 @@ export default function PlatformHealthScorePage() {
   });
 
   const score: number = data?.composite ?? 0;
-  const scoreColor = score >= 90 ? "#22c55e" : score >= 75 ? TEAL : score >= 50 ? "#f59e0b" : "#ef4444";
+  const scoreColor = score >= 90 ? "#22c55e" : score >= 75 ? "hsl(var(--primary))" : score >= 50 ? "#f59e0b" : "#ef4444";
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-teal-600" />
+            <TrendingUp className="w-6 h-6 text-primary" />
             Platform Health Score
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">Composite 0–100 score across security, performance, reliability, and database</p>
@@ -79,7 +78,7 @@ export default function PlatformHealthScorePage() {
           onClick={() => refetch()}
           disabled={isFetching}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg disabled:opacity-60 transition-colors"
-          style={{ background: TEAL }}
+          className="bg-primary text-primary-foreground"
         >
           <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
           {isFetching ? "Refreshing…" : "Refresh"}
@@ -88,7 +87,7 @@ export default function PlatformHealthScorePage() {
 
       {isLoading ? (
         <div className="h-48 bg-gray-50 rounded-2xl border border-gray-100 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
         <>

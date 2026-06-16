@@ -5,8 +5,6 @@ import {
   ArrowRight, ChevronRight, Eye, KeyRound, Users, Database,
 } from "lucide-react";
 
-const TEAL = "#0D9488";
-const TEAL_LIGHT = "#F0FDFA";
 
 function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   return (
@@ -112,7 +110,7 @@ export default function TrustCenter() {
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
           <Link href="/">
             <span className="text-lg font-extrabold cursor-pointer tracking-tight">
-              Aperti<span style={{ color: TEAL }}>.</span>
+              Aperti<span style={{ color: "hsl(var(--primary))" }}>.</span>
             </span>
           </Link>
           <Link href="/">
@@ -124,11 +122,11 @@ export default function TrustCenter() {
       </nav>
 
       {/* Hero */}
-      <section className="py-20 px-5" style={{ background: TEAL_LIGHT }}>
+      <section className="py-20 px-5" className="bg-primary/8">
         <div className="max-w-3xl mx-auto text-center">
           <Reveal>
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${TEAL}, #0F766E)` }}>
+              style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}, #0F766E)` }}>
               <ShieldCheck className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-4" style={{ color: "#121212" }}>
@@ -161,8 +159,8 @@ export default function TrustCenter() {
                       className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm cursor-pointer h-full flex flex-col group">
                       <div className="flex items-start justify-between mb-4">
                         <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
-                          style={{ background: TEAL_LIGHT }}>
-                          <Icon className="h-5 w-5" style={{ color: TEAL }} />
+                          className="bg-primary/8">
+                          <Icon className="h-5 w-5" style={{ color: "hsl(var(--primary))" }} />
                         </div>
                         {item.badge && (
                           <span className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
@@ -174,7 +172,7 @@ export default function TrustCenter() {
                       <h3 className="font-bold text-gray-900 mb-2 text-sm">{item.title}</h3>
                       <p className="text-xs text-gray-500 leading-relaxed flex-1">{item.description}</p>
                       <div className="flex items-center gap-1 mt-4 text-xs font-semibold transition-colors group-hover:opacity-80"
-                        style={{ color: TEAL }}>
+                        style={{ color: "hsl(var(--primary))" }}>
                         View <ChevronRight className="h-3 w-3" />
                       </div>
                     </motion.div>
@@ -192,7 +190,7 @@ export default function TrustCenter() {
           <Reveal>
             <div className="text-center mb-14">
               <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold border mb-5"
-                style={{ background: TEAL_LIGHT, color: TEAL, borderColor: `${TEAL}25` }}>
+                style={{ background: "hsl(var(--primary) / 0.08)", color: "hsl(var(--primary))", borderColor: `${"hsl(var(--primary))"}25` }}>
                 <Lock className="h-3 w-3" /> Security Architecture
               </span>
               <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight mb-3">
@@ -211,8 +209,8 @@ export default function TrustCenter() {
                 <Reveal key={pillar.title} delay={i * 0.07}>
                   <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm h-full">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                      style={{ background: TEAL_LIGHT }}>
-                      <Icon className="h-5 w-5" style={{ color: TEAL }} />
+                      className="bg-primary/8">
+                      <Icon className="h-5 w-5" style={{ color: "hsl(var(--primary))" }} />
                     </div>
                     <h3 className="font-bold text-gray-900 mb-2 text-sm">{pillar.title}</h3>
                     <p className="text-xs text-gray-500 leading-relaxed">{pillar.description}</p>
@@ -230,8 +228,8 @@ export default function TrustCenter() {
           <Reveal>
             <div className="bg-white rounded-2xl p-10 border border-gray-100 shadow-sm">
               <div className="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-5"
-                style={{ background: TEAL_LIGHT }}>
-                <Mail className="h-6 w-6" style={{ color: TEAL }} />
+                className="bg-primary/8">
+                <Mail className="h-6 w-6" style={{ color: "hsl(var(--primary))" }} />
               </div>
               <h3 className="text-xl font-extrabold text-gray-900 mb-2">Security question or concern?</h3>
               <p className="text-sm text-gray-500 mb-6 leading-relaxed">
@@ -243,7 +241,7 @@ export default function TrustCenter() {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-white font-semibold text-sm shadow-sm"
-                  style={{ background: TEAL }}>
+                  style={{ background: "hsl(var(--primary))" }}>
                   Contact Security Team <ArrowRight className="h-4 w-4" />
                 </motion.button>
               </Link>

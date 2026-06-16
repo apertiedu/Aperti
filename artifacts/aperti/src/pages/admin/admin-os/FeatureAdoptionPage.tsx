@@ -5,12 +5,11 @@ import { BarChart3, Users, TrendingUp, Package, CheckCircle2, Clock, Zap, Activi
 import { useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-const TEAL = "#0D9488";
 
 const STATUS_COLORS: Record<string, string> = {
   released:    "bg-green-100 text-green-700",
   beta:        "bg-orange-100 text-orange-700",
-  coming_soon: "bg-teal-100 text-teal-700",
+  coming_soon: "bg-primary/15 text-primary",
   scheduled:   "bg-indigo-100 text-indigo-700",
   draft:       "bg-gray-100 text-gray-600",
   deprecated:  "bg-red-100 text-red-600",
@@ -52,7 +51,7 @@ export default function FeatureAdoptionPage() {
         {[
           { label: "Features tracked", value: adoption.length,          icon: Package,      color: "text-gray-600",   bg: "bg-gray-50" },
           { label: "Released",         value: released,                  icon: CheckCircle2, color: "text-green-600",  bg: "bg-green-50" },
-          { label: "Waitlist signups", value: totalWaitlist,             icon: Users,        color: "text-teal-600",   bg: "bg-teal-50" },
+          { label: "Waitlist signups", value: totalWaitlist,             icon: Users,        color: "text-primary",   bg: "bg-primary/8" },
           { label: "Live events (30d)", value: liveUsage?.totalEvents ?? 0, icon: Activity, color: "text-blue-600",   bg: "bg-blue-50" },
         ].map(s => (
           <motion.div key={s.label} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={`${s.bg} rounded-xl p-4`}>
@@ -68,7 +67,7 @@ export default function FeatureAdoptionPage() {
           <TabsTrigger value="registry">Feature Registry</TabsTrigger>
           <TabsTrigger value="live">
             Live Usage
-            {heatmap.length > 0 && <span className="ml-1.5 bg-teal-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{heatmap.length}</span>}
+            {heatmap.length > 0 && <span className="ml-1.5 bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full">{heatmap.length}</span>}
           </TabsTrigger>
           <TabsTrigger value="users">Power Users</TabsTrigger>
         </TabsList>
@@ -138,7 +137,7 @@ export default function FeatureAdoptionPage() {
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-2 justify-end">
                               <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                <div className="h-full rounded-full transition-all" style={{ width: `${barPct}%`, background: TEAL }} />
+                                <div className="h-full rounded-full transition-all" className="bg-primary h-full rounded-full transition-all" style={{ width: `${barPct}%` }} />
                               </div>
                               <span className="text-xs font-semibold text-gray-700 w-6 text-right">{score}</span>
                             </div>
@@ -170,7 +169,7 @@ export default function FeatureAdoptionPage() {
               {/* Usage heatmap */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-teal-500" />
+                  <Zap className="w-4 h-4 text-primary" />
                   <h3 className="font-semibold text-gray-800">Feature Usage Heatmap (30d)</h3>
                   <span className="ml-auto text-xs text-gray-400">{liveUsage?.totalEvents?.toLocaleString()} total events</span>
                 </div>
@@ -186,7 +185,7 @@ export default function FeatureAdoptionPage() {
                           <p className="text-[10px] text-gray-400">{f.feature_category}</p>
                         </div>
                         <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                          <motion.div className="h-full rounded-full" style={{ background: TEAL }}
+                          <motion.div className="h-full rounded-full" className="bg-primary text-primary-foreground"
                             initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: i * 0.03 }} />
                         </div>
                         <div className="text-right shrink-0 w-24">
@@ -204,7 +203,7 @@ export default function FeatureAdoptionPage() {
               {timeline.length > 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
                   <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-teal-500" /> Daily Activity (30d)
+                    <TrendingUp className="w-4 h-4 text-primary" /> Daily Activity (30d)
                   </h3>
                   <div className="flex items-end gap-1 h-20">
                     {timeline.map((d: any, i: number) => {
@@ -212,7 +211,7 @@ export default function FeatureAdoptionPage() {
                       const h = Math.max(Math.round((parseInt(d.events) / maxEvents) * 100), 4);
                       return (
                         <div key={d.day} className="flex-1 flex flex-col items-center gap-1" title={`${d.day}: ${d.events} events`}>
-                          <div className="w-full rounded-sm transition-all" style={{ height: `${h}%`, background: TEAL, opacity: 0.7 + (i / timeline.length) * 0.3 }} />
+                          <div className="w-full rounded-sm transition-all" className="bg-primary w-full rounded-sm transition-all" />
                         </div>
                       );
                     })}
@@ -246,10 +245,10 @@ export default function FeatureAdoptionPage() {
                 {topUsers.map((u: any, i: number) => (
                   <div key={u.username} className="px-5 py-3.5 flex items-center gap-4">
                     <span className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shrink-0"
-                      style={{ background: i < 3 ? TEAL : "#94a3b8" }}>
+                      className={i < 3 ? "bg-primary" : "bg-slate-400"}>
                       {i + 1}
                     </span>
-                    <div className="w-8 h-8 rounded-full bg-teal-50 flex items-center justify-center text-xs font-bold text-teal-600 shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-primary/8 flex items-center justify-center text-xs font-bold text-primary shrink-0">
                       {(u.display_name || u.username)?.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -260,7 +259,7 @@ export default function FeatureAdoptionPage() {
                       <p className="text-sm font-bold text-gray-900">{parseInt(u.total_events).toLocaleString()}</p>
                       <p className="text-[10px] text-gray-400">{u.distinct_features} features</p>
                     </div>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+                    <ArrowUpRight className="w-3.5 h-3.5 text-primary shrink-0" />
                   </div>
                 ))}
               </div>

@@ -57,7 +57,7 @@ export default function DocsPage() {
           <button
             key={s}
             onClick={() => setActiveSection(s)}
-            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all capitalize ${activeSection === s ? "bg-white text-teal-700 shadow-sm" : "text-gray-600 hover:text-gray-900"}`}
+            className={`px-4 py-1.5 text-sm font-medium rounded-md transition-all capitalize ${activeSection === s ? "bg-white text-primary shadow-sm" : "text-gray-600 hover:text-gray-900"}`}
           >
             {s === "env" ? "Environment" : s === "api" ? "API Reference" : s}
           </button>
@@ -72,8 +72,8 @@ export default function DocsPage() {
               className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-teal-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <mod.icon className="w-5 h-5 text-teal-600" />
+                  <div className="w-10 h-10 bg-primary/8 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <mod.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
@@ -111,7 +111,7 @@ export default function DocsPage() {
               <tbody className="divide-y divide-gray-50">
                 {ENV_VARS.map((v) => (
                   <tr key={v.key} className="hover:bg-gray-50">
-                    <td className="px-6 py-3 font-mono text-teal-700 text-xs">{v.key}</td>
+                    <td className="px-6 py-3 font-mono text-primary text-xs">{v.key}</td>
                     <td className="px-6 py-3 text-gray-600">{v.desc}</td>
                     <td className="px-6 py-3">
                       {v.required
@@ -195,7 +195,7 @@ export default function DocsPage() {
               { step: "6", title: "Backups", content: "Backups run automatically daily at 02:00 UTC via node-cron. Ensure pg_dump is available in your production environment." },
             ].map((item) => (
               <div key={item.step} className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-teal-600 text-white flex items-center justify-center flex-shrink-0 text-sm font-bold">{item.step}</div>
+                <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center flex-shrink-0 text-sm font-bold">{item.step}</div>
                 <div>
                   <h3 className="font-semibold text-gray-900">{item.title}</h3>
                   <p className="text-sm text-gray-600 mt-0.5">{item.content}</p>

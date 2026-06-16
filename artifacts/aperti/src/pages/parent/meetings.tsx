@@ -11,7 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, Plus, Clock, CheckCircle2, XCircle, AlertCircle, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-const TEAL = "#0D9488";
 const authFetch = (url: string, opts?: RequestInit) =>
   fetch(url, { ...opts, credentials: "include", headers: { "Content-Type": "application/json", ...(opts?.headers || {}) } });
 
@@ -62,15 +61,15 @@ export default function ParentMeetings() {
     <div className="p-4 md:p-6 space-y-6 max-w-4xl mx-auto">
       <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-teal-50">
-            <Calendar className="h-5 w-5 text-teal-600" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary/8">
+            <Calendar className="h-5 w-5 text-primary" />
           </div>
           <div>
             <h1 className="text-xl font-black text-gray-900">Meetings</h1>
             <p className="text-sm text-gray-500">Schedule & manage teacher meetings</p>
           </div>
         </div>
-        <Button onClick={() => setShowNew(true)} className="gap-2 rounded-xl text-sm text-white" style={{ background: TEAL }}>
+        <Button onClick={() => setShowNew(true)} className="gap-2 rounded-xl text-sm text-white" className="bg-primary text-primary-foreground">
           <Plus className="h-4 w-4" /> Request Meeting
         </Button>
       </motion.div>
@@ -92,8 +91,8 @@ export default function ParentMeetings() {
                         <CardContent className="p-4">
                           <div className="flex items-start justify-between gap-3">
                             <div className="flex items-start gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
-                                <Calendar className="h-4.5 w-4.5 text-teal-600" />
+                              <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center shrink-0">
+                                <Calendar className="h-4.5 w-4.5 text-primary" />
                               </div>
                               <div>
                                 <p className="text-sm font-semibold text-gray-900">{m.title}</p>
@@ -147,7 +146,7 @@ export default function ParentMeetings() {
             <div className="text-center py-16">
               <Calendar className="h-12 w-12 mx-auto mb-3 text-gray-200" />
               <p className="text-gray-400 text-sm">No meetings scheduled yet</p>
-              <Button onClick={() => setShowNew(true)} className="mt-4 gap-2 rounded-xl text-white" style={{ background: TEAL }}>
+              <Button onClick={() => setShowNew(true)} className="mt-4 gap-2 rounded-xl text-white" className="bg-primary text-primary-foreground">
                 <Plus className="h-4 w-4" /> Request your first meeting
               </Button>
             </div>
@@ -193,7 +192,7 @@ export default function ParentMeetings() {
               onClick={() => createMutation.mutate()}
               disabled={!form.teacherId || !form.title || !form.date || !form.time || createMutation.isPending}
               className="w-full rounded-xl text-white"
-              style={{ background: TEAL }}
+              className="bg-primary text-primary-foreground"
             >
               {createMutation.isPending ? "Requesting…" : "Request Meeting"}
             </Button>

@@ -20,7 +20,7 @@ const CHECK_META: Record<string, { icon: any; link?: string; color: string }> = 
   device_management_works:  { icon: Monitor,          link: "/admin/os/user-access",     color: "text-cyan-600"   },
   enrollment_flows_tested:  { icon: GraduationCap,    link: "/admin/os/enrollments",     color: "text-orange-600" },
   assessments_graded:       { icon: ClipboardCheck,   link: "/admin/os/analytics",       color: "text-amber-600"  },
-  question_extraction_valid:{ icon: FileSearch,        link: "/admin/os/content-quality", color: "text-teal-600"   },
+  question_extraction_valid:{ icon: FileSearch,        link: "/admin/os/content-quality", color: "text-primary"   },
   payments_verified:        { icon: CreditCard,        link: "/admin/os/payments",        color: "text-emerald-600"},
   mobile_approved:          { icon: Smartphone,        color: "text-pink-600"             },
   analytics_real_data:      { icon: BarChart3,         link: "/admin/os/analytics",       color: "text-violet-600" },
@@ -116,7 +116,7 @@ export default function LaunchCertificationPage() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <Rocket className="w-6 h-6 text-teal-600" />
+            <Rocket className="w-6 h-6 text-primary" />
             Launch Certification
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">All 12 systems must pass before Aperti can launch</p>
@@ -124,7 +124,7 @@ export default function LaunchCertificationPage() {
         <button
           onClick={handleRerun}
           disabled={isFetching}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 disabled:opacity-60 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/80 disabled:opacity-60 transition-colors"
         >
           <RefreshCw className={`w-4 h-4 ${isFetching ? "animate-spin" : ""}`} />
           {isFetching ? "Checking…" : "Re-run Checks"}
@@ -168,7 +168,7 @@ export default function LaunchCertificationPage() {
             className="h-40 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center"
           >
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-sm text-gray-400">Running system checks…</p>
             </div>
           </motion.div>
@@ -179,7 +179,7 @@ export default function LaunchCertificationPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 p-8"
+            className="relative overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 via-emerald-50 to-emerald-50 p-8"
           >
             <div className="absolute inset-0 pointer-events-none">
               {[...Array(8)].map((_, i) => (

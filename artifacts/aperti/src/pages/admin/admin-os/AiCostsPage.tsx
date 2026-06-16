@@ -8,7 +8,7 @@ import {
 } from "recharts";
 
 const TYPE_COLORS: Record<string, string> = {
-  tutor: "#0D9488", revision: "#3B82F6", assessment: "#8B5CF6",
+  tutor: "hsl(var(--primary))", revision: "#3B82F6", assessment: "#8B5CF6",
   flashcard: "#F59E0B", weave: "#EF4444", default: "#6B7280",
 };
 
@@ -71,12 +71,12 @@ export default function AiCostsPage() {
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign className="w-4 h-4 text-teal-600" />
+            <DollarSign className="w-4 h-4 text-primary" />
             <span className="text-sm text-gray-500">MTD Cost</span>
           </div>
           <p className="text-2xl font-bold text-gray-900">${totalCost.toFixed(4)}</p>
           <div className="mt-2 bg-gray-100 rounded-full h-2">
-            <div className="bg-teal-500 h-2 rounded-full transition-all"
+            <div className="bg-primary h-2 rounded-full transition-all"
               style={{ width: `${budgetPct}%` }} />
           </div>
           <p className="text-xs text-gray-400 mt-1">{budgetPct.toFixed(1)}% of ${budget} budget</p>
@@ -115,7 +115,7 @@ export default function AiCostsPage() {
                 <XAxis dataKey="day" tick={{ fontSize: 10 }} tickFormatter={(v) => v.slice(5)} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v.toFixed(3)}`} />
                 <Tooltip formatter={(v: any) => [`$${parseFloat(v).toFixed(4)}`, "Cost"]} />
-                <Bar dataKey="cost" fill="#0D9488" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="cost" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -161,12 +161,12 @@ export default function AiCostsPage() {
               placeholder={String(budget)}
               value={cap}
               onChange={(e) => setCap(e.target.value)}
-              className="w-36 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/30 focus:border-teal-500"
+              className="w-36 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
           </div>
           <div className="mt-5">
             <button onClick={() => saveMut.mutate()} disabled={!cap || saveMut.isPending}
-              className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-teal-700 transition-colors disabled:opacity-50">
+              className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-medium hover:opacity-90 transition-colors disabled:opacity-50">
               <Save className="w-4 h-4" />
               {saveMut.isPending ? "Saving…" : "Save"}
             </button>

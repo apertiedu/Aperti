@@ -20,7 +20,7 @@ const TYPES = [
   { id: "homework",     label: "Homework",       icon: BookOpen,     desc: "Take-home assignment",   color: "border-blue-200 bg-blue-50 text-blue-700" },
   { id: "topic_test",   label: "Topic Test",     icon: FileText,     desc: "End-of-topic assessment",color: "border-violet-200 bg-violet-50 text-violet-700" },
   { id: "unit_test",    label: "Unit Test",      icon: Layers,       desc: "Full unit evaluation",   color: "border-orange-200 bg-orange-50 text-orange-700" },
-  { id: "progress_test",label: "Progress Test",  icon: BarChart3,    desc: "Mid-course check",       color: "border-teal-200 bg-teal-50 text-teal-700" },
+  { id: "progress_test",label: "Progress Test",  icon: BarChart3,    desc: "Mid-course check",       color: "border-primary/25 bg-primary/8 text-primary" },
   { id: "mock_exam",    label: "Mock Exam",      icon: GraduationCap,desc: "Exam practice paper",    color: "border-red-200 bg-red-50 text-red-700" },
   { id: "practical",    label: "Practical",      icon: Zap,          desc: "Lab / hands-on work",    color: "border-green-200 bg-green-50 text-green-700" },
   { id: "coursework",   label: "Coursework",     icon: Edit3,        desc: "Extended project",       color: "border-indigo-200 bg-indigo-50 text-indigo-700" },

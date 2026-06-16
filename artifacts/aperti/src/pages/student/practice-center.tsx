@@ -114,14 +114,14 @@ export default function PracticeCenter() {
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-5xl mx-auto space-y-6">
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Brain className="text-teal-600" size={28} /> Practice Center</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><Brain className="text-primary" size={28} /> Practice Center</h1>
             <p className="text-gray-500 mt-1">Adaptive practice questions tailored to your learning gaps</p>
           </motion.div>
 
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { icon: Target, label: "Questions Answered", value: "—", color: "text-teal-600" },
+              { icon: Target, label: "Questions Answered", value: "—", color: "text-primary" },
               { icon: TrendingUp, label: "Avg Accuracy", value: "—%", color: "text-blue-600" },
               { icon: Award, label: "Sessions Done", value: "—", color: "text-purple-600" },
             ].map((s, i) => (
@@ -156,7 +156,7 @@ export default function PracticeCenter() {
                         <p className="text-xs text-gray-700 line-clamp-2 mb-2">{q.question_text}</p>
                         <div className="flex gap-2 flex-wrap">
                           {q.difficulty && <Badge className={`text-xs ${diffColors[q.difficulty] || "bg-gray-100"}`}>{q.difficulty}</Badge>}
-                          {q.topic && <Badge className="text-xs bg-teal-100 text-teal-700">{q.topic}</Badge>}
+                          {q.topic && <Badge className="text-xs bg-primary/15 text-primary">{q.topic}</Badge>}
                           {q.max_marks && <Badge variant="outline" className="text-xs">{q.max_marks}m</Badge>}
                         </div>
                       </div>
@@ -171,7 +171,7 @@ export default function PracticeCenter() {
                   <Button
                     onClick={() => startSession.mutate({ subject: subject !== "all" ? subject : undefined, topics: [] })}
                     disabled={startSession.isPending || (recommended?.recommended || []).length === 0}
-                    className="w-full bg-teal-600 hover:bg-teal-700 text-white h-12 text-base"
+                    className="w-full bg-primary hover:bg-primary/80 text-white h-12 text-base"
                   >
                     <Play size={18} className="mr-2" /> {startSession.isPending ? "Starting..." : `Start Session (${Math.min((recommended?.recommended || []).length, 10)} questions)`}
                   </Button>
@@ -197,7 +197,7 @@ export default function PracticeCenter() {
               </div>
               <h2 className="text-2xl font-bold text-gray-800">{score >= 80 ? "Excellent!" : score >= 60 ? "Good work!" : "Keep practising!"}</h2>
               <div className="grid grid-cols-3 gap-4 py-4">
-                <div><p className="text-2xl font-bold text-teal-600">{sessionResults.correct}</p><p className="text-xs text-gray-500">Correct</p></div>
+                <div><p className="text-2xl font-bold text-primary">{sessionResults.correct}</p><p className="text-xs text-gray-500">Correct</p></div>
                 <div><p className="text-2xl font-bold text-red-500">{sessionResults.questions_answered - sessionResults.correct}</p><p className="text-xs text-gray-500">Incorrect</p></div>
                 <div><p className="text-2xl font-bold text-gray-700">{formatTime(timeSpent)}</p><p className="text-xs text-gray-500">Time</p></div>
               </div>
@@ -205,7 +205,7 @@ export default function PracticeCenter() {
                 <Button variant="outline" className="flex-1" onClick={() => { setMode("home"); setSessionId(null); }}>
                   <RefreshCw size={14} className="mr-1" /> New Session
                 </Button>
-                <Button className="flex-1 bg-teal-600 hover:bg-teal-700 text-white" onClick={() => setMode("home")}>Done</Button>
+                <Button className="flex-1 bg-primary hover:bg-primary/80 text-white" onClick={() => setMode("home")}>Done</Button>
               </div>
             </CardContent>
           </Card>
@@ -225,7 +225,7 @@ export default function PracticeCenter() {
             <div className="flex items-center gap-3">
               <Badge variant="outline">{qIdx + 1} / {questions.length}</Badge>
               {currentQ.difficulty && <Badge className={`text-xs ${diffColors[currentQ.difficulty] || "bg-gray-100"}`}>{currentQ.difficulty}</Badge>}
-              {currentQ.topic && <Badge className="text-xs bg-teal-100 text-teal-700">{currentQ.topic}</Badge>}
+              {currentQ.topic && <Badge className="text-xs bg-primary/15 text-primary">{currentQ.topic}</Badge>}
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Timer size={14} /> {formatTime(timeSpent)}
@@ -244,8 +244,8 @@ export default function PracticeCenter() {
                 <AnimatePresence>
                   {showAnswer && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-                      className="border-l-4 border-teal-400 bg-teal-50 rounded-r-xl p-4">
-                      <p className="text-xs font-semibold text-teal-700 mb-1">Model Answer</p>
+                      className="border-l-4 border-primary/60 bg-primary/8 rounded-r-xl p-4">
+                      <p className="text-xs font-semibold text-primary mb-1">Model Answer</p>
                       <p className="text-sm text-gray-700 leading-relaxed">{currentQ.model_answer || "No model answer available."}</p>
                     </motion.div>
                   )}
@@ -268,7 +268,7 @@ export default function PracticeCenter() {
                     </>
                   )}
                   {currentAnswer && (
-                    <Button onClick={nextQuestion} className="flex-1 bg-teal-600 hover:bg-teal-700 text-white">
+                    <Button onClick={nextQuestion} className="flex-1 bg-primary hover:bg-primary/80 text-white">
                       {qIdx < questions.length - 1 ? <><ChevronRight size={14} className="mr-1" /> Next Question</> : "Finish Session"}
                     </Button>
                   )}

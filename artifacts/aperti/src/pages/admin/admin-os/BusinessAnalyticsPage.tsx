@@ -6,8 +6,8 @@ import {
 } from "recharts";
 import { Users, TrendingUp, CreditCard, Clock, UserCheck, BookOpen, Heart, Activity } from "lucide-react";
 
-const TEAL = "#0D9488";
-const COLORS = ["#0D9488", "#3B82F6", "#8B5CF6", "#F59E0B"];
+
+const COLORS = [""hsl(var(--primary))"", "#3B82F6", "#8B5CF6", "#F59E0B"];
 
 function MetricCard({
   label, value, sub, icon: Icon, color = "text-gray-600", bg = "bg-gray-50",
@@ -73,7 +73,7 @@ export default function BusinessAnalyticsPage() {
       {/* Core KPIs */}
       <Section title="Key Performance Indicators">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricCard label="Total Users" value={parseInt(u.total_users || 0).toLocaleString()} icon={Users} color="text-teal-600" bg="bg-teal-50" />
+          <MetricCard label="Total Users" value={parseInt(u.total_users || 0).toLocaleString()} icon={Users} color="text-primary" bg="bg-primary/8" />
           <MetricCard label="Active Subscriptions" value={parseInt(s.active || 0).toLocaleString()} icon={CreditCard} color="text-blue-600" bg="bg-blue-50" />
           <MetricCard label="Conversion Rate" value={`${conversionRate}%`} icon={TrendingUp} color="text-purple-600" bg="bg-purple-50" />
           <MetricCard label="Waitlist Total" value={parseInt(w.total || 0).toLocaleString()} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
@@ -83,7 +83,7 @@ export default function BusinessAnalyticsPage() {
       {/* Activity Metrics */}
       <Section title="User Activity">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <MetricCard label="Daily Active Users" value={parseInt(u.dau || 0).toLocaleString()} sub="Logged in today" icon={Activity} color="text-teal-600" />
+          <MetricCard label="Daily Active Users" value={parseInt(u.dau || 0).toLocaleString()} sub="Logged in today" icon={Activity} color="text-primary" />
           <MetricCard label="Weekly Active Users" value={parseInt(u.wau || 0).toLocaleString()} sub="Active past 7 days" icon={UserCheck} color="text-blue-600" />
           <MetricCard label="New This Week" value={parseInt(u.new_this_week || 0).toLocaleString()} sub="Accounts created" icon={Users} color="text-green-600" />
           <MetricCard label="New This Month" value={parseInt(u.new_this_month || 0).toLocaleString()} sub="Accounts created" icon={TrendingUp} color="text-indigo-600" />
@@ -105,15 +105,15 @@ export default function BusinessAnalyticsPage() {
               <AreaChart data={growth} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="userGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%"  stopColor={TEAL} stopOpacity={0.15} />
-                    <stop offset="95%" stopColor={TEAL} stopOpacity={0} />
+                    <stop offset="5%"  stopColor="hsl(var(--primary))" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
                 <XAxis dataKey="day" tick={{ fontSize: 10 }} tickFormatter={(v) => new Date(v).toLocaleDateString("en", { month: "short", day: "numeric" })} />
                 <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
                 <Tooltip labelFormatter={(v) => new Date(v).toLocaleDateString()} formatter={(v: any) => [`${v} users`, "New Users"]} />
-                <Area type="monotone" dataKey="users" stroke={TEAL} strokeWidth={2} fill="url(#userGradient)" dot={false} />
+                <Area type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#userGradient)" dot={false} />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -173,8 +173,8 @@ export default function BusinessAnalyticsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-9 h-9 bg-teal-50 rounded-xl flex items-center justify-center">
-                <BookOpen className="w-4 h-4 text-teal-600" />
+              <div className="w-9 h-9 bg-primary/8 rounded-xl flex items-center justify-center">
+                <BookOpen className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="font-semibold text-gray-900">Teacher Adoption</p>
@@ -250,7 +250,7 @@ export default function BusinessAnalyticsPage() {
               <p className="text-xs text-gray-500 mb-2">Conversion rate from waitlist</p>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-teal-500 rounded-full transition-all"
+                  className="h-full bg-primary rounded-full transition-all"
                   style={{ width: `${Math.min(100, (parseInt(w.converted) / parseInt(w.total)) * 100)}%` }}
                 />
               </div>

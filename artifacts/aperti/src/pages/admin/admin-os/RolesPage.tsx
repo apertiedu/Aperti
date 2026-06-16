@@ -17,7 +17,7 @@ const STATE_STYLES: Record<string, string> = {
   disabled: "bg-gray-100 text-gray-500",
 };
 
-const ROLE_COLORS = ["#0D9488", "#2563EB", "#7C3AED", "#DC2626", "#D97706", "#059669", "#DB2777"];
+const ROLE_COLORS = ["hsl(var(--primary))", "#2563EB", "#7C3AED", "#DC2626", "#D97706", "#059669", "#DB2777"];
 
 function RoleCard({ role, onEdit, onDelete, onViewPerms }: any) {
   return (
@@ -27,18 +27,18 @@ function RoleCard({ role, onEdit, onDelete, onViewPerms }: any) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <p className="font-semibold text-gray-900 text-sm truncate">{role.name}</p>
-            {role.is_system && <span className="px-1.5 py-0.5 bg-teal-50 text-teal-600 rounded text-[10px] font-medium">System</span>}
+            {role.is_system && <span className="px-1.5 py-0.5 bg-primary/8 text-primary rounded text-[10px] font-medium">System</span>}
             <span className="ml-auto text-xs text-gray-400">L{role.hierarchy_level}</span>
           </div>
           <p className="text-xs text-gray-500 truncate mt-0.5">{role.description || "No description"}</p>
           <div className="flex items-center gap-3 mt-1.5 text-xs text-gray-400">
             <span className="flex items-center gap-1"><Lock className="w-3 h-3" />{role.permission_count} perms</span>
             <span className="flex items-center gap-1"><Users className="w-3 h-3" />{role.user_count} users</span>
-            {role.parent_name && <span className="text-teal-500">↑ {role.parent_name}</span>}
+            {role.parent_name && <span className="text-primary">↑ {role.parent_name}</span>}
           </div>
         </div>
         <div className="flex items-center gap-1 flex-shrink-0 ml-2">
-          <button onClick={() => onViewPerms(role)} className="p-1.5 hover:bg-teal-50 rounded-lg text-gray-400 hover:text-teal-600 transition-colors" title="View permissions"><Eye className="w-3.5 h-3.5" /></button>
+          <button onClick={() => onViewPerms(role)} className="p-1.5 hover:bg-primary/8 rounded-lg text-gray-400 hover:text-primary transition-colors" title="View permissions"><Eye className="w-3.5 h-3.5" /></button>
           <button onClick={() => onEdit(role)} className="p-1.5 hover:bg-blue-50 rounded-lg text-gray-400 hover:text-blue-600 transition-colors" title="Edit"><Edit2 className="w-3.5 h-3.5" /></button>
           {!role.is_system && <button onClick={() => onDelete(role.id)} className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors" title="Delete"><Trash2 className="w-3.5 h-3.5" /></button>}
         </div>
@@ -49,7 +49,7 @@ function RoleCard({ role, onEdit, onDelete, onViewPerms }: any) {
 
 function RoleForm({ initial, onSubmit, onCancel }: any) {
   const { data: allRoles } = useQuery({ queryKey: ["gov-roles"], queryFn: () => fetchJSON("/api/admin/governance/roles") });
-  const [form, setForm] = useState(initial || { name: "", description: "", hierarchyLevel: 10, parentRoleId: "", color: "#0D9488", isSystem: false });
+  const [form, setForm] = useState(initial || { name: "", description: "", hierarchyLevel: 10, parentRoleId: "", color: "hsl(var(--primary))", isSystem: false });
   const roles: any[] = (allRoles as any[]) || [];
 
   return (
@@ -58,19 +58,19 @@ function RoleForm({ initial, onSubmit, onCancel }: any) {
       <div className="grid md:grid-cols-2 gap-4">
         <div>
           <label className="text-xs font-medium text-gray-600">Role Name *</label>
-          <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="e.g. Content Moderator" />
+          <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="e.g. Content Moderator" />
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600">Hierarchy Level</label>
-          <input type="number" value={form.hierarchyLevel} onChange={e => setForm({ ...form, hierarchyLevel: parseInt(e.target.value) })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+          <input type="number" value={form.hierarchyLevel} onChange={e => setForm({ ...form, hierarchyLevel: parseInt(e.target.value) })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
         <div className="md:col-span-2">
           <label className="text-xs font-medium text-gray-600">Description</label>
-          <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="What this role can do" />
+          <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" placeholder="What this role can do" />
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600">Parent Role</label>
-          <select value={form.parentRoleId} onChange={e => setForm({ ...form, parentRoleId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          <select value={form.parentRoleId} onChange={e => setForm({ ...form, parentRoleId: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
             <option value="">None</option>
             {roles.filter((r: any) => r.id !== initial?.id).map((r: any) => (
               <option key={r.id} value={r.id}>{r.name}</option>
@@ -87,7 +87,7 @@ function RoleForm({ initial, onSubmit, onCancel }: any) {
       </div>
       <div className="flex justify-end gap-2 pt-2">
         <button onClick={onCancel} className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
-        <button onClick={() => onSubmit(form)} className="px-4 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2"><Save className="w-3.5 h-3.5" />Save Role</button>
+        <button onClick={() => onSubmit(form)} className="px-4 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80 transition-colors flex items-center gap-2"><Save className="w-3.5 h-3.5" />Save Role</button>
       </div>
     </div>
   );
@@ -157,10 +157,10 @@ function PermissionsPanel({ role, onClose }: any) {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{resource}</p>
                 <div className="flex flex-wrap gap-2">
                   {rperms.map((p: any) => (
-                    <div key={p.id} className="flex items-center gap-1.5 bg-teal-50 border border-teal-100 rounded-lg px-2.5 py-1 text-xs text-teal-700 font-medium">
+                    <div key={p.id} className="flex items-center gap-1.5 bg-primary/8 border border-primary/15 rounded-lg px-2.5 py-1 text-xs text-primary font-medium">
                       <span>{p.action}</span>
-                      {p.scope_override && <span className="text-teal-400">({p.scope_override})</span>}
-                      <button onClick={() => removeMut.mutate(p.id)} className="ml-1 text-teal-400 hover:text-red-500"><X className="w-3 h-3" /></button>
+                      {p.scope_override && <span className="text-primary">({p.scope_override})</span>}
+                      <button onClick={() => removeMut.mutate(p.id)} className="ml-1 text-primary hover:text-red-500"><X className="w-3 h-3" /></button>
                     </div>
                   ))}
                 </div>
@@ -184,17 +184,17 @@ function PermissionsPanel({ role, onClose }: any) {
         {/* Add permission */}
         {addingPerm ? (
           <div className="flex gap-2">
-            <select value={selectedPerm} onChange={e => setSelectedPerm(e.target.value)} className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <select value={selectedPerm} onChange={e => setSelectedPerm(e.target.value)} className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
               <option value="">Select permission...</option>
               {available.map((p: any) => (
                 <option key={p.id} value={p.id}>{p.resource}:{p.action}</option>
               ))}
             </select>
-            <button onClick={() => selectedPerm && assignMut.mutate(parseInt(selectedPerm))} className="px-3 py-2 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700 transition-colors">Assign</button>
+            <button onClick={() => selectedPerm && assignMut.mutate(parseInt(selectedPerm))} className="px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/80 transition-colors">Assign</button>
             <button onClick={() => setAddingPerm(false)} className="px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600 transition-colors">Cancel</button>
           </div>
         ) : (
-          <button onClick={() => setAddingPerm(true)} className="w-full flex items-center justify-center gap-2 py-2 border border-dashed border-gray-200 rounded-lg text-sm text-gray-500 hover:border-teal-300 hover:text-teal-600 transition-colors">
+          <button onClick={() => setAddingPerm(true)} className="w-full flex items-center justify-center gap-2 py-2 border border-dashed border-gray-200 rounded-lg text-sm text-gray-500 hover:border-primary/50 hover:text-primary transition-colors">
             <Plus className="w-4 h-4" />Assign Permission
           </button>
         )}
@@ -281,7 +281,7 @@ function PermMatrixTab() {
                         <td key={role.id} className="text-center px-3 py-2">
                           <button
                             onClick={() => toggleMut.mutate({ roleId: role.id, permId: perm.id, has })}
-                            className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto transition-all ${has ? "bg-teal-500 border-teal-500" : "border-gray-200 hover:border-teal-300"}`}
+                            className={`w-5 h-5 rounded border-2 flex items-center justify-center mx-auto transition-all ${has ? "bg-primary border-primary" : "border-gray-200 hover:border-primary/50"}`}
                           >
                             {has && <Check className="w-3 h-3 text-white" />}
                           </button>
@@ -325,7 +325,7 @@ function PermissionsTab() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">{permList.length} permissions defined</p>
-        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-teal-600 text-white text-sm rounded-lg hover:bg-teal-700 transition-colors">
+        <button onClick={() => setShowCreate(!showCreate)} className="flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:bg-primary/80 transition-colors">
           <Plus className="w-4 h-4" />New Permission
         </button>
       </div>
@@ -336,23 +336,23 @@ function PermissionsTab() {
             <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="text-xs font-medium text-gray-600">Resource</label>
-                <input value={form.resource} onChange={e => setForm({ ...form, resource: e.target.value })} placeholder="e.g. courses" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input value={form.resource} onChange={e => setForm({ ...form, resource: e.target.value })} placeholder="e.g. courses" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-600">Action</label>
-                <input value={form.action} onChange={e => setForm({ ...form, action: e.target.value })} placeholder="e.g. view" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <input value={form.action} onChange={e => setForm({ ...form, action: e.target.value })} placeholder="e.g. view" className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
               </div>
               <div>
                 <label className="text-xs font-medium text-gray-600">Scope</label>
-                <select value={form.scope} onChange={e => setForm({ ...form, scope: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+                <select value={form.scope} onChange={e => setForm({ ...form, scope: e.target.value })} className="mt-1 w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30">
                   {["self", "organization", "global", "owned"].map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
             </div>
-            <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Description (optional)" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500" />
+            <input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Description (optional)" className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30" />
             <div className="flex justify-end gap-2">
               <button onClick={() => setShowCreate(false)} className="px-3 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancel</button>
-              <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-teal-600 text-white rounded-lg hover:bg-teal-700">Create</button>
+              <button onClick={() => createMut.mutate(form)} className="px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary/80">Create</button>
             </div>
           </motion.div>
         )}
@@ -367,7 +367,7 @@ function PermissionsTab() {
             {rperms.map((p: any) => (
               <div key={p.id} className="flex items-center gap-3 px-4 py-2.5">
                 <code className="text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded font-mono">{p.resource}:{p.action}</code>
-                <span className="text-xs text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded">{p.scope}</span>
+                <span className="text-xs text-primary bg-primary/8 px-1.5 py-0.5 rounded">{p.scope}</span>
                 {p.description && <span className="text-xs text-gray-400 flex-1">{p.description}</span>}
                 <span className="text-xs text-gray-400 ml-auto">{p.role_count} roles</span>
               </div>
@@ -425,7 +425,7 @@ export default function RolesPage() {
           <h1 className="text-2xl font-bold text-gray-900">Role & Permission Center</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage role hierarchy, permissions, and access governance</p>
         </div>
-        <button onClick={() => { setShowCreate(true); setEditing(null); }} className="flex items-center gap-2 px-4 py-2 bg-teal-600 text-white text-sm font-medium rounded-xl hover:bg-teal-700 transition-colors shadow-sm">
+        <button onClick={() => { setShowCreate(true); setEditing(null); }} className="flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-xl hover:bg-primary/80 transition-colors shadow-sm">
           <Plus className="w-4 h-4" />New Role
         </button>
       </div>
@@ -433,7 +433,7 @@ export default function RolesPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "Roles", value: s.roles || roleList.length, icon: Shield, color: "teal" },
+          { label: "Roles", value: s.roles || roleList.length, icon: Shield, color: "primary" },
           { label: "Permissions", value: s.permissions || 0, icon: Lock, color: "blue" },
           { label: "Role Assignments", value: (s.enrollments || []).length, icon: Users, color: "purple" },
           { label: "Open Conflicts", value: (s.conflicts || []).filter((c: any) => c.status === "open").reduce((a: number, c: any) => a + c.count, 0), icon: Settings2, color: "red" },

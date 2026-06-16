@@ -33,7 +33,7 @@ export function NetworkStatusBanner() {
           exit={{ y: -48, opacity: 0 }}
           transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
           className="fixed top-0 left-0 right-0 z-[9998] flex items-center justify-center gap-2 py-2 text-xs font-semibold text-white"
-          style={{ background: isOnline ? "#0D9488" : "#dc2626" }}
+          style={{ background: isOnline ? "hsl(var(--primary))" : "#dc2626" }}
         >
           {isOnline ? (
             <>

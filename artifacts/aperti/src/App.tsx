@@ -373,7 +373,7 @@ function RoleOverrideBanner({ originalRole }: { originalRole: string }) {
         left: 0,
         right: 0,
         zIndex: 9999,
-        background: "#0D9488",
+        background: "hsl(var(--primary))",
         color: "white",
         textAlign: "center",
         padding: "6px 12px",

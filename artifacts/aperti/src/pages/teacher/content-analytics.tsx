@@ -102,7 +102,7 @@ export default function ContentAnalytics() {
       <div className="max-w-7xl mx-auto space-y-6">
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><BarChart3 className="text-teal-600" size={28} /> Content Analytics</h1>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3"><BarChart3 className="text-primary" size={28} /> Content Analytics</h1>
             <p className="text-gray-500 mt-1">Educational content performance and engagement insights</p>
           </div>
           <Button variant="outline" size="sm"><RefreshCw size={14} className="mr-1" /> Refresh</Button>
@@ -114,7 +114,7 @@ export default function ContentAnalytics() {
           <>
             {/* Summary stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard icon={BookOpen} label="Total Questions" value={totalQuestions} color="bg-teal-100 text-teal-600" />
+              <StatCard icon={BookOpen} label="Total Questions" value={totalQuestions} color="bg-primary/15 text-primary" />
               <StatCard icon={FileText} label="Total Lessons" value={totalLessons} sub={`${recentLessons} this week`} color="bg-blue-100 text-blue-600" />
               <StatCard icon={Target} label="Avg Practice Accuracy" value={`${avgAccuracy}%`} color="bg-green-100 text-green-600" />
               <StatCard icon={Users} label="Practice Sessions" value={practiceSessions} sub="last 30 days" color="bg-purple-100 text-purple-600" />
@@ -167,7 +167,7 @@ export default function ContentAnalytics() {
                               </div>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm font-bold text-teal-600">{l.recent}</p>
+                              <p className="text-sm font-bold text-primary">{l.recent}</p>
                               <p className="text-xs text-gray-400">this week</p>
                             </div>
                           </div>
@@ -185,7 +185,7 @@ export default function ContentAnalytics() {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
-                    { icon: Zap, title: "Quick Action", desc: "Generate 10 practice questions", action: "Generate", color: "bg-teal-50 border-teal-200" },
+                    { icon: Zap, title: "Quick Action", desc: "Generate 10 practice questions", action: "Generate", color: "bg-primary/8 border-primary/25" },
                     { icon: Brain, title: "AI Insight", desc: "Your question bank is missing hard-difficulty questions", action: "View", color: "bg-amber-50 border-amber-200" },
                     { icon: TrendingUp, title: "Trend", desc: `${avgAccuracy}% average student accuracy this month`, action: "Analyse", color: "bg-green-50 border-green-200" },
                   ].map(({ icon: Icon, title, desc, action, color }) => (
@@ -219,7 +219,7 @@ export default function ContentAnalytics() {
                         ].map(({ label, value }) => (
                           <div key={label} className="flex justify-between items-center py-2 border-b border-gray-100 text-sm">
                             <span className="text-gray-600">{label}</span>
-                            <span className="font-bold text-teal-600">{value}</span>
+                            <span className="font-bold text-primary">{value}</span>
                           </div>
                         ))}
                       </div>
@@ -239,7 +239,7 @@ export default function ContentAnalytics() {
                             <Badge className={`${l.status === "published" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}`}>{l.status || "unknown"}</Badge>
                             <span className="text-sm font-medium text-gray-800">{l.total} pages</span>
                           </div>
-                          <div className="text-sm text-teal-600 font-semibold">{l.recent} recent</div>
+                          <div className="text-sm text-primary font-semibold">{l.recent} recent</div>
                         </div>
                       ))}
                       {lessons.length === 0 && (
@@ -267,14 +267,14 @@ export default function ContentAnalytics() {
                         {(topContent || []).slice(0, 10).map((item: any, i: number) => (
                           <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                             <div className="flex items-center gap-3">
-                              <span className="w-7 h-7 bg-teal-100 text-teal-700 rounded-lg flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                              <span className="w-7 h-7 bg-primary/15 text-primary rounded-lg flex items-center justify-center text-xs font-bold">{i + 1}</span>
                               <div>
                                 <p className="text-sm font-medium capitalize">{item.content_type} #{item.content_id}</p>
                                 <p className="text-xs text-gray-500">{item.view_count} views</p>
                               </div>
                             </div>
                             <div className="h-2 w-24 bg-gray-200 rounded-full overflow-hidden">
-                              <div className="h-full bg-teal-500 rounded-full" style={{ width: `${Math.min((item.view_count / ((topContent[0] || {}).view_count || 1)) * 100, 100)}%` }} />
+                              <div className="h-full bg-primary rounded-full" style={{ width: `${Math.min((item.view_count / ((topContent[0] || {}).view_count || 1)) * 100, 100)}%` }} />
                             </div>
                           </div>
                         ))}
@@ -288,7 +288,7 @@ export default function ContentAnalytics() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-base flex items-center gap-2"><Sparkles size={16} className="text-teal-500" /> AI Intervention Suggestions</CardTitle>
+                        <CardTitle className="text-base flex items-center gap-2"><Sparkles size={16} className="text-primary" /> AI Intervention Suggestions</CardTitle>
                         <p className="text-xs text-gray-500 mt-1">AI-generated actionable teaching strategies based on class performance data.</p>
                       </div>
                       <Button
@@ -317,13 +317,13 @@ export default function ContentAnalytics() {
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.08 }}
-                            className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-teal-50 to-white border border-teal-100"
+                            className="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-r from-primary to-white border border-primary/15"
                           >
-                            <div className="w-6 h-6 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                            <div className="w-6 h-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                               {i + 1}
                             </div>
                             <p className="text-sm text-gray-700 leading-relaxed flex-1">{suggestion}</p>
-                            <ChevronRight size={14} className="text-teal-300 shrink-0 mt-1" />
+                            <ChevronRight size={14} className="text-primary shrink-0 mt-1" />
                           </motion.div>
                         ))}
                       </div>
