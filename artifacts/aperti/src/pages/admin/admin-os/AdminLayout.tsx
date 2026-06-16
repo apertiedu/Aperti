@@ -108,6 +108,12 @@ const NAV = [
   { label: "Route Health",         icon: Activity,    href: "/admin/os/route-health" },
   { label: "Platform Config",      icon: Settings,    href: "/admin/os/platform-config" },
 
+  { label: "— FinTech", header: true },
+  { label: "Fraud Monitor",        icon: ShieldAlert, href: "/admin/fraud-monitor" },
+  { label: "Refund Engine",        icon: FileText,    href: "/admin/os/refunds" },
+  { label: "Revenue Analytics",    icon: TrendingUp,  href: "/admin/os/revenue-analytics" },
+  { label: "Subscription Lifecycle", icon: Activity,  href: "/admin/os/subscription-lifecycle" },
+
   { label: "— Business Operations", header: true },
   { label: "Biz Ops Center",       icon: DollarSign,  href: "/admin/os/biz-ops" },
   { label: "Landing Page Editor",  icon: Layout,      href: "/admin/os/landing-settings" },

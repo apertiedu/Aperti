@@ -224,6 +224,8 @@ const ModerationCenter = lazy(() => import("@/pages/teacher/moderation"));
 const SnapGradeReview = lazy(() => import("@/pages/teacher/snapgrade-review"));
 const ExamArchives = lazy(() => import("@/pages/teacher/archives"));
 const TeacherSchedulePage = lazy(() => import("@/pages/teacher/schedule"));
+const TeacherRevenueDashboard = lazy(() => import("@/pages/teacher/revenue-dashboard"));
+const FraudMonitorPage = lazy(() => import("@/pages/admin/fraud-monitor"));
 const AdminCertificates = lazy(() => import("@/pages/admin/certificates"));
 const StudentExamSession = lazy(() => import("@/pages/student/exam-session"));
 const ExamResults = lazy(() => import("@/pages/student/exam-results"));
@@ -587,6 +589,8 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/questions/import" component={QuestionImport} />
     <Route path="/teacher/questions/extract" component={QuestionExtractionPage} />
     <Route path="/teacher/analytics/content" component={ContentAnalytics} />
+    <Route path="/teacher/revenue" component={TeacherRevenueDashboard} />
+    <Route path="/admin/fraud-monitor" component={FraudMonitorPage} />
     <Route path="/resources/library" component={ResourcesLibrary} />
     <Route path="/simverse/labs" component={LabsComingSoon} />
     <Route path="/simverse/geometrix" component={LabsComingSoon} />

@@ -1233,14 +1233,73 @@ export async function runMigrations(): Promise<void> {
     }
   }
 
+  for (const sql of PHASE52_MIGRATIONS) {
+    try {
+      await pool.query(sql);
+    } catch {
+      // already applied or non-critical — continue
+    }
+  }
+
   // Log migration run
   await pool.query(
     `INSERT INTO migrations_log (name) VALUES ($1) ON CONFLICT (name) DO NOTHING`,
     [`phase34-${new Date().toISOString().split("T")[0]}`],
   ).catch(() => {});
 
-  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-34 + Phase-47 + Phase-48 migrations applied");
+  console.log("[migrate] Phase-2 + Phase-10 + Phase-15 + Phase-16 + Phase-17 + Phase-18 + Phase-19 + Phase-20 + Phase-21 + Phase-33 + Phase-34 + Phase-47 + Phase-48 + Phase-52 migrations applied");
 }
+
+const PHASE52_MIGRATIONS: string[] = [
+  `CREATE TABLE IF NOT EXISTS fraud_audit_log (
+    id                SERIAL PRIMARY KEY,
+    transaction_id    INTEGER REFERENCES payment_transactions(id) ON DELETE CASCADE,
+    fraud_risk_score  NUMERIC(4,3) NOT NULL DEFAULT 0,
+    risk_level        TEXT NOT NULL DEFAULT 'low' CHECK (risk_level IN ('low','medium','high')),
+    flags             JSONB NOT NULL DEFAULT '[]',
+    recommended_action TEXT NOT NULL DEFAULT 'approve',
+    analyzed_by       INTEGER REFERENCES accounts(id),
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (transaction_id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_fal2_risk_level  ON fraud_audit_log(risk_level, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_fal2_score       ON fraud_audit_log(fraud_risk_score DESC)`,
+  `CREATE TABLE IF NOT EXISTS refund_requests (
+    id              SERIAL PRIMARY KEY,
+    transaction_id  INTEGER NOT NULL REFERENCES payment_transactions(id) ON DELETE CASCADE,
+    requested_by    INTEGER NOT NULL REFERENCES accounts(id),
+    status          TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','partial','rejected')),
+    refund_amount   NUMERIC(10,2) DEFAULT 0,
+    reason          TEXT,
+    rules_triggered JSONB NOT NULL DEFAULT '[]',
+    decided_by      INTEGER REFERENCES accounts(id),
+    decided_at      TIMESTAMPTZ,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_rr_transaction ON refund_requests(transaction_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_rr_status      ON refund_requests(status, created_at DESC)`,
+  `CREATE TABLE IF NOT EXISTS refund_rules (
+    id              SERIAL PRIMARY KEY,
+    name            TEXT NOT NULL UNIQUE,
+    condition_type  TEXT NOT NULL,
+    condition_value TEXT NOT NULL,
+    action          TEXT NOT NULL CHECK (action IN ('full','partial','reject')),
+    refund_percent  INTEGER NOT NULL DEFAULT 100 CHECK (refund_percent BETWEEN 0 AND 100),
+    priority        INTEGER NOT NULL DEFAULT 0,
+    is_active       BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `INSERT INTO refund_rules (name, condition_type, condition_value, action, refund_percent, priority)
+   VALUES
+     ('Within 24 hours — full refund',       'hours_since_payment_lt',  '24',  'full',    100, 100),
+     ('Course not yet accessed — 70% back',  'course_not_accessed',     'true','partial',  70,  80),
+     ('Course already accessed — 50% back',  'course_accessed',         'true','partial',  50,  60),
+     ('After 7 days — no refund',            'hours_since_payment_gte', '168', 'reject',    0,  50)
+   ON CONFLICT (name) DO NOTHING`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN NOT NULL DEFAULT FALSE`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS grace_period_days INTEGER NOT NULL DEFAULT 3`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS renewal_attempted_at TIMESTAMPTZ`,
+];
 
 const PHASE21_MIGRATIONS: string[] = [
   `CREATE TABLE IF NOT EXISTS password_reset_tokens (

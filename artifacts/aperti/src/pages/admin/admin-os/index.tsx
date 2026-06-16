@@ -91,6 +91,10 @@ import BusinessOpsCenterPage from "./BusinessOpsCenterPage";
 import LandingSettingsEditorPage from "./LandingSettingsEditorPage";
 import SignupWaitlistPage from "./SignupWaitlistPage";
 import BusinessAnalyticsPage from "./BusinessAnalyticsPage";
+// Phase 52 — FinTech
+import RefundManagementPage from "./RefundManagementPage";
+import PlatformRevenuePage from "./PlatformRevenuePage";
+import SubscriptionLifecyclePage from "./SubscriptionLifecyclePage";
 
 export default function AdminOS() {
   return (
@@ -214,6 +218,11 @@ export default function AdminOS() {
 
         {/* Phase 44 — Production Hardening */}
         <Route path="/admin/os/system-inventory" component={SystemInventoryPage} />
+
+        {/* Phase 52 — FinTech: Refunds, Revenue, Subscription Lifecycle */}
+        <Route path="/admin/os/refunds" component={RefundManagementPage} />
+        <Route path="/admin/os/revenue-analytics" component={PlatformRevenuePage} />
+        <Route path="/admin/os/subscription-lifecycle" component={SubscriptionLifecyclePage} />
 
         {/* Phase 15 — Business Operations & No-Code Admin Control Center */}
         <Route path="/admin/os/biz-ops" component={BusinessOpsCenterPage} />
