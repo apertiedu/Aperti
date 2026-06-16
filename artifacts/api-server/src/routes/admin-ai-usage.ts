@@ -15,7 +15,7 @@ adminAiUsageRouter.get("/summary", async (_req: Request, res: Response) => {
         SELECT date_trunc('day', created_at)::text as day,
                COUNT(*)::int as calls,
                SUM(COALESCE(tokens_used, 0))::int as tokens,
-               COUNT(CASE WHEN success = false THEN 1 END)::int as failures
+               COUNT(CASE WHEN status = 'error' THEN 1 END)::int as failures
         FROM ai_interactions
         WHERE created_at >= NOW() - INTERVAL '30 days'
         GROUP BY 1 ORDER BY 1
@@ -31,7 +31,7 @@ adminAiUsageRouter.get("/summary", async (_req: Request, res: Response) => {
         SELECT COALESCE(interaction_type, module, 'unknown') as feature,
                COUNT(*)::int as calls,
                SUM(COALESCE(tokens_used, 0))::int as tokens,
-               COUNT(CASE WHEN success = false THEN 1 END)::int as failures,
+               COUNT(CASE WHEN status = 'error' THEN 1 END)::int as failures,
                ROUND(AVG(latency_ms)::numeric, 0)::int as avg_latency_ms
         FROM ai_interactions
         WHERE created_at >= NOW() - INTERVAL '30 days'
@@ -40,7 +40,7 @@ adminAiUsageRouter.get("/summary", async (_req: Request, res: Response) => {
       pool.query(`
         SELECT COUNT(*)::int as total_calls,
                SUM(COALESCE(tokens_used, 0))::int as total_tokens,
-               COUNT(CASE WHEN success = false THEN 1 END)::int as total_failures,
+               COUNT(CASE WHEN status = 'error' THEN 1 END)::int as total_failures,
                ROUND(AVG(CASE WHEN latency_ms > 0 THEN latency_ms END)::numeric, 0)::int as avg_latency_ms,
                SUM(COALESCE(estimated_cost_usd, 0))::numeric(12,6) as total_cost_usd
         FROM ai_interactions
@@ -49,9 +49,9 @@ adminAiUsageRouter.get("/summary", async (_req: Request, res: Response) => {
       pool.query(`
         SELECT
           COUNT(*)::int as total_calls,
-          COUNT(CASE WHEN success = false THEN 1 END)::int as failures,
+          COUNT(CASE WHEN status = 'error' THEN 1 END)::int as failures,
           ROUND(
-            (COUNT(CASE WHEN success = true THEN 1 END)::numeric / NULLIF(COUNT(*), 0)) * 100,
+            (COUNT(CASE WHEN status != 'error' THEN 1 END)::numeric / NULLIF(COUNT(*), 0)) * 100,
             1
           ) AS success_rate_pct,
           ROUND(AVG(latency_ms)::numeric, 0)::int as avg_latency_ms,
@@ -109,7 +109,7 @@ adminAiUsageRouter.get("/health", async (_req: Request, res: Response) => {
       pool.query(`
         SELECT
           COUNT(*)::int AS calls,
-          COUNT(CASE WHEN success = false THEN 1 END)::int AS failures,
+          COUNT(CASE WHEN status = 'error' THEN 1 END)::int AS failures,
           ROUND(AVG(latency_ms)::numeric, 0)::int AS avg_latency_ms,
           MAX(created_at) AS last_call_at
         FROM ai_interactions

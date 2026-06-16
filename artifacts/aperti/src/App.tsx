@@ -89,6 +89,7 @@ const GuardianPulseAdmin = lazy(() => import("@/pages/admin/guardian-pulse-admin
 const TeacherVerification = lazy(() => import("@/pages/admin/teacher-verification"));
 const AiAnalytics = lazy(() => import("@/pages/admin/ai-analytics"));
 const AiSafety = lazy(() => import("@/pages/admin/ai-safety"));
+const AiMonitoring = lazy(() => import("@/pages/admin/ai-monitoring"));
 
 // Student Portal
 const PastPaperLibrary = lazy(() => import("@/pages/student-portal/past-paper-library"));
@@ -219,6 +220,7 @@ const AssessmentBuilder = lazy(() => import("@/pages/teacher/assessment-builder"
 const AssessmentMonitor = lazy(() => import("@/pages/teacher/assessment-monitor"));
 const TeacherGradebook = lazy(() => import("@/pages/teacher/gradebook"));
 const ModerationCenter = lazy(() => import("@/pages/teacher/moderation"));
+const SnapGradeReview = lazy(() => import("@/pages/teacher/snapgrade-review"));
 const ExamArchives = lazy(() => import("@/pages/teacher/archives"));
 const TeacherSchedulePage = lazy(() => import("@/pages/teacher/schedule"));
 const AdminCertificates = lazy(() => import("@/pages/admin/certificates"));
@@ -556,6 +558,7 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/assessments/:id/monitor" component={AssessmentMonitor} />
     <Route path="/teacher/gradebook"><Redirect to="/gradebook-plus" /></Route>
     <Route path="/teacher/moderation" component={ModerationCenter} />
+    <Route path="/teacher/snapgrade/:id/review" component={SnapGradeReview} />
     <Route path="/teacher/archives" component={ExamArchives} />
     <Route path="/teacher/schedule" component={TeacherSchedulePage} />
     {/* Phase 7 — Communication */}
@@ -610,6 +613,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/assistant-permissions" component={AssistantPermissions} />
     <Route path="/admin/teacher-verification" component={TeacherVerification} />
     <Route path="/admin/ai-analytics" component={AiAnalytics} />
+    <Route path="/admin/ai-monitoring" component={AiMonitoring} />
     <Route path="/admin/ai-safety" component={AiSafety} />
     <Route path="/admin/subpilot-settings" component={SubpilotSettings} />
     {/* Phase 7 — Admin Communication */}

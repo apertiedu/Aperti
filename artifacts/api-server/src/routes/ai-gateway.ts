@@ -86,21 +86,25 @@ function trackInteraction(
   promptLen: number,
   completionLen: number,
   latencyMs: number,
+  status: "success" | "error" = "success",
 ) {
   const promptTokens = Math.round(promptLen / 4);
   const completionTokens = Math.round(completionLen / 4);
   const tokensUsed = promptTokens + completionTokens;
   const costRate = COST_PER_1K[model] ?? 0.0001;
-  const estimatedCost = ((tokensUsed / 1000) * costRate).toFixed(6);
+  const estimatedCost = status === "success" ? ((tokensUsed / 1000) * costRate).toFixed(6) : "0";
 
   pool.query(
     `INSERT INTO ai_interactions
        (account_id, interaction_type, model, prompt_tokens, completion_tokens, tokens_used,
         estimated_cost_usd, latency_ms, status, created_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'success',NOW())
-     ON CONFLICT DO NOTHING`,
-    [accountId ?? null, interactionType, model, promptTokens, completionTokens, tokensUsed, estimatedCost, latencyMs],
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())`,
+    [accountId ?? null, interactionType, model, promptTokens, completionTokens, tokensUsed, estimatedCost, latencyMs, status],
   ).catch(() => {});
+}
+
+function trackFailure(accountId: number | undefined, interactionType: string, model: string, latencyMs: number) {
+  trackInteraction(accountId, interactionType, model, 0, 0, latencyMs, "error");
 }
 
 // ── Budget check ──────────────────────────────────────────────────────────────
@@ -181,6 +185,7 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
     });
 
     if (!apiRes.ok) {
+      trackFailure(req.userId, "chat", model, Date.now() - t0);
       sseWrite(res, { error: `AI API error ${apiRes.status}. Please try again.`, done: true });
       res.end();
       return;
@@ -214,7 +219,8 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
     trackInteraction(req.userId, "chat", model, sys.length + message.length, fullText.length, Date.now() - t0);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Stream failed";
-    if (!res.writableEnded) sseWrite(res, { error: msg, done: true });
+    trackFailure(req.userId, "chat", model, Date.now() - t0);
+    if (!res.writableEnded) sseWrite(res, { error: "AI review unavailable. Teacher review mode activated.", done: true });
   } finally {
     if (!res.writableEnded) res.end();
   }
@@ -262,10 +268,13 @@ aiGatewayRouter.post("/grade", async (req: AuthRequest, res: Response) => {
     try { if (match) parsed = JSON.parse(match[0]); } catch {}
     if (parsed) toCache(key, JSON.stringify(parsed));
     trackInteraction(req.userId, "grade", model, sys.length + studentAnswer.length, raw.length, Date.now() - t0);
-    return res.json({ ok: true, cached: false, result: parsed ?? { raw, parse_error: true } });
+    const result = parsed as any ?? { raw, parse_error: true };
+    const confidence = result?.percentage != null ? Math.min(1, result.percentage / 100) : (result?.score != null ? Math.min(1, result.score / maxMarks) : null);
+    return res.json({ ok: true, cached: false, result, confidence, requiresReview: confidence !== null && confidence < 0.65 });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Grade failed";
-    return res.json({ ok: false, fallback: true, result: { score: 0, feedback: `Grading failed: ${msg}. Please mark manually.`, improvements: [] } });
+    trackFailure(req.userId, "grade", model, Date.now() - t0);
+    return res.json({ ok: false, fallback: true, requiresReview: true, result: { score: 0, feedback: "AI grading temporarily unavailable. Teacher review mode activated.", improvements: [] } });
   }
 });
 
@@ -308,8 +317,8 @@ aiGatewayRouter.post("/generate", async (req: AuthRequest, res: Response) => {
     trackInteraction(req.userId, `generate-${type}`, model, sys.length + topic.length, result.length, Date.now() - t0);
     return res.json({ ok: true, cached: false, type, result });
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : "Generate failed";
-    return res.json({ ok: false, fallback: true, type, result: `Content generation failed: ${msg}. Please try again.` });
+    trackFailure(req.userId, `generate-${type}`, model, Date.now() - t0);
+    return res.json({ ok: false, fallback: true, type, result: `AI content generation is temporarily unavailable. Please create ${type} content manually or try again shortly.` });
   }
 });
 
