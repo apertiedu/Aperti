@@ -1,0 +1,267 @@
+---
+
+🚀 REPLIT AGENT PROMPT — APERTI AI SYSTEM v2 UPGRADE
+
+You are a Senior Full-Stack + AI Systems Architect working on the Aperti platform.
+
+Your mission is to upgrade the existing AI grading + monitoring system into a production-grade, scalable AI governance system.
+
+The system already includes:
+
+AI grading gateway
+
+confidence scoring (0–1)
+
+teacher override system
+
+audit tables
+
+admin monitoring dashboard
+
+snapgrade review UI
+
+
+
+---
+
+🎯 OBJECTIVE
+
+Improve reliability, intelligence, observability, and teacher experience by implementing the following upgrades WITHOUT breaking existing functionality.
+
+
+---
+
+🧠 1. CONFIDENCE SYSTEM UPGRADE (CRITICAL)
+
+Replace current binary threshold logic with a 3-tier confidence system:
+
+0.85 – 1.0 → auto-approve (no review needed)
+
+0.65 – 0.84 → soft review (optional teacher check)
+
+0.0 – 0.64 → required review (must be reviewed)
+
+
+Add:
+
+confidence_level: "high" | "medium" | "low"
+
+requiresReview must now depend on tier logic
+
+
+
+---
+
+🧠 2. AI EXPLANATION FIELD (NEW FEATURE)
+
+Extend AI grading response to include:
+
+reasoning_summary (short explanation of grading decision)
+
+uncertainty_factors[] (array of reasons confidence is not maxed)
+
+
+Examples:
+
+"Ambiguous phrasing in student answer"
+
+"Rubric coverage partially matched"
+
+"OCR text uncertainty detected"
+
+
+
+---
+
+📊 3. AI OBSERVABILITY ENHANCEMENTS
+
+Enhance ai_interactions tracking with:
+
+Add columns:
+
+confidence_level
+
+requires_review
+
+rubric_match_score (0–1)
+
+processing_latency_ms
+
+
+Ensure ALL AI calls log these values.
+
+
+---
+
+🧾 4. TEACHER OVERRIDE INTELLIGENCE LOOP
+
+When a teacher overrides an AI grade:
+
+Store full diff between AI grade and final grade
+
+Save override reason category:
+
+"AI misinterpretation"
+
+"Rubric disagreement"
+
+"Partial credit adjustment"
+
+"Manual correction"
+
+
+
+Add optional field:
+
+override_tags[]
+
+
+
+---
+
+🔁 5. LEARNING LOOP HOOK (IMPORTANT BUT SAFE)
+
+Do NOT implement ML training yet.
+
+Instead:
+
+Create a structured log stream:
+
+ai_prediction
+
+teacher_final_decision
+
+delta
+
+context metadata
+
+
+
+Expose this as:
+
+ai_learning_events table (NEW)
+
+
+This is preparation for future model improvement.
+
+
+---
+
+🧯 6. SMART FALLBACK SYSTEM
+
+Replace fallback behavior with:
+
+If AI fails:
+
+return structured response:
+
+status: "degraded"
+
+message: "AI temporarily unavailable"
+
+fallback_mode: "heuristic_scoring"
+
+requiresReview: true
+
+partial_score (if possible heuristic estimation)
+
+
+
+NEVER return empty grading.
+
+
+---
+
+📊 7. ADMIN DASHBOARD FIX + UPGRADE
+
+Fix all metrics consistency issues and add:
+
+override_rate %
+
+average confidence per subject
+
+AI failure rate trend
+
+top 10 hardest questions (by disagreement rate)
+
+
+Add visual grouping:
+
+system health
+
+teacher behavior
+
+AI performance
+
+
+
+---
+
+🧑‍🏫 8. SNAPGRADE REVIEW UX IMPROVEMENTS
+
+Enhance review page:
+
+Add:
+
+confidence tier badge (color coded)
+
+AI reasoning display
+
+override suggestion assistant ("Why AI might be wrong")
+
+side-by-side comparison: AI grade vs Teacher grade
+
+
+
+---
+
+⚙️ 9. API SAFETY & CONSISTENCY
+
+Ensure:
+
+No silent failures
+
+Every catch block logs to trackFailure()
+
+All AI responses are schema validated
+
+Missing confidence defaults to 0.5 (never undefined)
+
+
+
+---
+
+🧱 10. NON-BREAKING RULE
+
+Do NOT break existing API contracts.
+
+All upgrades must be:
+
+backward compatible
+
+additive, not destructive
+
+
+
+---
+
+🏁 FINAL GOAL
+
+After changes: The system should behave like a production-grade AI grading + audit + human-in-the-loop platform, not just an AI feature.
+
+
+---
+
+If anything conflicts with current implementation:
+
+prefer safety
+
+prefer logging over deletion
+
+prefer fallback over crash
+
+
+
+---
+
+🚀 END OF PROMPT
