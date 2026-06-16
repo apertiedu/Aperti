@@ -116,6 +116,9 @@ import { adminDebugRouter } from "./admin-debug";
 import businessOpsRouter from "./business-ops";
 import { contentCalendarRouter } from "./content-calendar";
 import { aiGovernanceRouter } from "./ai-governance";
+import { aiExamGeneratorRouter } from "./ai-exam-generator";
+import { weaknessDetectionRouter } from "./weakness-detection";
+import { anomalyDetectionRouter } from "./anomaly-detection";
 
 const router: IRouter = Router();
 
@@ -267,6 +270,11 @@ router.use(contentCalendarRouter);
 
 // AI Governance v2
 router.use("/ai-governance", aiGovernanceRouter);
+
+// Phase 48 — AI Intelligence Platform
+router.use(aiExamGeneratorRouter);
+router.use("/weakness", weaknessDetectionRouter);
+router.use("/shield", anomalyDetectionRouter);
 
 router.use("/system", systemRouter);
 

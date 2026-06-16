@@ -1463,4 +1463,37 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_repair_log_run_at   ON repair_log(run_at DESC)`,
   `CREATE INDEX IF NOT EXISTS idx_repair_log_severity ON repair_log(severity, run_at DESC)`,
+
+  /* Phase 48 — AI Intelligence Platform */
+
+  /* exams — AI draft metadata (exam generator) */
+  `ALTER TABLE exams ADD COLUMN IF NOT EXISTS ai_draft_metadata jsonb`,
+  `ALTER TABLE exams ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'published'`,
+
+  /* exam_questions — section grouping (AI exam generator) */
+  `ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS section_name text`,
+  `ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS difficulty text`,
+
+  /* echo_memory — last AI analysis timestamp (weakness detection) */
+  `ALTER TABLE echo_memory ADD COLUMN IF NOT EXISTS last_analyzed timestamptz`,
+
+  /* assessment_submissions — integrity / anomaly detection */
+  `ALTER TABLE assessment_submissions ADD COLUMN IF NOT EXISTS integrity_risk_score integer`,
+  `ALTER TABLE assessment_submissions ADD COLUMN IF NOT EXISTS integrity_flags jsonb`,
+  `ALTER TABLE assessment_submissions ADD COLUMN IF NOT EXISTS integrity_reviewed boolean NOT NULL DEFAULT false`,
+  `ALTER TABLE assessment_submissions ADD COLUMN IF NOT EXISTS integrity_decision text`,
+  `ALTER TABLE assessment_submissions ADD COLUMN IF NOT EXISTS exam_id integer`,
+  `CREATE INDEX IF NOT EXISTS idx_assessment_submissions_integrity ON assessment_submissions(integrity_risk_score DESC) WHERE integrity_risk_score IS NOT NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_assessment_submissions_exam ON assessment_submissions(exam_id) WHERE exam_id IS NOT NULL`,
+
+  /* ai_grade_reviews — teacher override tracking used by weakness detection */
+  `CREATE TABLE IF NOT EXISTS ai_grade_reviews (
+    id           serial PRIMARY KEY,
+    submission_id integer,
+    question_id  integer,
+    student_id   integer REFERENCES accounts(id) ON DELETE CASCADE,
+    overridden   boolean NOT NULL DEFAULT false,
+    created_at   timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_grade_reviews_student ON ai_grade_reviews(student_id)`,
 ];
