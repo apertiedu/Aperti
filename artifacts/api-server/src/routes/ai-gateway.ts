@@ -226,6 +226,13 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
   }
 });
 
+// ── Confidence tier helpers (gateway-local) ────────────────────────────────────
+function confidenceLevelOf(c: number): "high" | "medium" | "low" {
+  if (c >= 0.85) return "high";
+  if (c >= 0.65) return "medium";
+  return "low";
+}
+
 // ── POST /api/ai/grade (non-streaming) ────────────────────────────────────────
 aiGatewayRouter.post("/grade", async (req: AuthRequest, res: Response) => {
   const { studentAnswer, markScheme, maxMarks = 10, subject, mode = "balanced" } = req.body as {
@@ -237,25 +244,41 @@ aiGatewayRouter.post("/grade", async (req: AuthRequest, res: Response) => {
   }
 
   if (!AI_AVAILABLE) {
-    return res.json({ ok: false, fallback: true, result: { score: 0, feedback: "AI grading temporarily unavailable. Please review manually.", improvements: [] } });
+    return res.json({
+      ok: false,
+      status: "degraded",
+      message: "AI temporarily unavailable",
+      fallback_mode: "heuristic_scoring",
+      fallback: true,
+      requiresReview: true,
+      confidence: 0.5,
+      confidence_level: "low",
+      result: { score: 0, feedback: "AI grading temporarily unavailable. Please review manually.", improvements: [] },
+    });
   }
 
   const key = cacheKey("grade", markScheme, studentAnswer);
   const cached = fromCache(key);
   if (cached) {
-    try { return res.json({ ok: true, cached: true, result: JSON.parse(cached) }); } catch {}
+    try {
+      const parsed = JSON.parse(cached);
+      const conf = parsed?.percentage != null ? Math.min(1, parsed.percentage / 100) : (parsed?.score != null ? Math.min(1, parsed.score / maxMarks) : 0.5);
+      const level = confidenceLevelOf(conf);
+      return res.json({ ok: true, cached: true, result: parsed, confidence: conf, confidence_level: level, requiresReview: level === "low" });
+    } catch {}
   }
 
   const model = MODELS[mode] ?? MODELS.balanced;
   const t0 = Date.now();
-  const sys = `You are an expert ${subject || "IGCSE"} examiner. Grade strictly and return ONLY valid JSON:\n{"score":<0-${maxMarks}>,"grade":"<A*|A|B|C|D|E|U>","percentage":<0-100>,"awarded_marks":["<mark>"],"missed_marks":["<mark>"],"feedback":"<2-3 sentences>","improvements":["<action>"]}`;
+  const sys = `You are an expert ${subject || "IGCSE"} examiner. Grade strictly and return ONLY valid JSON:
+{"score":<0-${maxMarks}>,"grade":"<A*|A|B|C|D|E|U>","percentage":<0-100>,"awarded_marks":["<mark>"],"missed_marks":["<mark>"],"feedback":"<2-3 sentences>","improvements":["<action>"],"reasoning_summary":"<1 sentence why this score>","uncertainty_factors":["<reason confidence not 1.0>"],"confidence":<0.0-1.0>}`;
 
   try {
     const apiRes = await fetch(`${BASE_URL}/chat/completions`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${API_KEY}` },
       body: JSON.stringify({
-        model, max_tokens: 800,
+        model, max_tokens: 900,
         messages: [{ role: "system", content: sys }, { role: "user", content: `MARK SCHEME:\n${markScheme}\n\nSTUDENT ANSWER:\n${studentAnswer}` }],
       }),
       signal: AbortSignal.timeout(30_000),
@@ -264,17 +287,41 @@ aiGatewayRouter.post("/grade", async (req: AuthRequest, res: Response) => {
     const data = await apiRes.json() as { choices?: Array<{ message?: { content?: string } }> };
     const raw = data?.choices?.[0]?.message?.content ?? "";
     const match = raw.match(/\{[\s\S]*\}/);
-    let parsed: unknown = null;
+    let parsed: any = null;
     try { if (match) parsed = JSON.parse(match[0]); } catch {}
     if (parsed) toCache(key, JSON.stringify(parsed));
     trackInteraction(req.userId, "grade", model, sys.length + studentAnswer.length, raw.length, Date.now() - t0);
-    const result = parsed as any ?? { raw, parse_error: true };
-    const confidence = result?.percentage != null ? Math.min(1, result.percentage / 100) : (result?.score != null ? Math.min(1, result.score / maxMarks) : null);
-    return res.json({ ok: true, cached: false, result, confidence, requiresReview: confidence !== null && confidence < 0.65 });
+
+    const result = parsed ?? { raw, parse_error: true };
+    const rawConf = parsed?.confidence ?? (parsed?.percentage != null ? Math.min(1, parsed.percentage / 100) : (parsed?.score != null ? Math.min(1, parsed.score / maxMarks) : 0.5));
+    const confidence = Math.min(1, Math.max(0, parseFloat(rawConf) || 0.5));
+    const confidence_level = confidenceLevelOf(confidence);
+
+    return res.json({
+      ok: true,
+      cached: false,
+      result,
+      confidence,
+      confidence_level,
+      requiresReview: confidence_level === "low",
+      softReview: confidence_level === "medium",
+      reasoning_summary: parsed?.reasoning_summary ?? null,
+      uncertainty_factors: Array.isArray(parsed?.uncertainty_factors) ? parsed.uncertainty_factors : [],
+    });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Grade failed";
     trackFailure(req.userId, "grade", model, Date.now() - t0);
-    return res.json({ ok: false, fallback: true, requiresReview: true, result: { score: 0, feedback: "AI grading temporarily unavailable. Teacher review mode activated.", improvements: [] } });
+    return res.json({
+      ok: false,
+      status: "degraded",
+      message: "AI temporarily unavailable",
+      fallback_mode: "heuristic_scoring",
+      fallback: true,
+      requiresReview: true,
+      confidence: 0.5,
+      confidence_level: "low",
+      result: { score: 0, feedback: "AI grading temporarily unavailable. Teacher review mode activated.", improvements: [] },
+    });
   }
 });
 

@@ -105,6 +105,33 @@ async function extractTextWithVision(imagePath: string): Promise<{ text: string;
   }
 }
 
+// ── Confidence tier helpers ────────────────────────────────────────────────────
+function getConfidenceLevel(confidence: number): "high" | "medium" | "low" {
+  if (confidence >= 0.85) return "high";
+  if (confidence >= 0.65) return "medium";
+  return "low";
+}
+
+function requiresReviewFromTier(level: "high" | "medium" | "low"): boolean {
+  return level === "low";
+}
+
+// ── AI Quality Score Engine ────────────────────────────────────────────────────
+function computeAIQualityScore(opts: {
+  confidence: number;
+  rubricMatchScore: number;
+  ocrQuality: number;
+  consistencyScore: number;
+}): { aiQualityScore: number; reliabilityLabel: "high" | "medium" | "low"; qualityFactors: Record<string, number> } {
+  const { confidence, rubricMatchScore, ocrQuality, consistencyScore } = opts;
+  const score = Math.round((confidence * 0.40 + rubricMatchScore * 0.30 + ocrQuality * 0.15 + consistencyScore * 0.15) * 100) / 100;
+  return {
+    aiQualityScore: score,
+    reliabilityLabel: score >= 0.75 ? "high" : score >= 0.50 ? "medium" : "low",
+    qualityFactors: { confidence, rubric_match: rubricMatchScore, ocr_quality: ocrQuality, consistency: consistencyScore },
+  };
+}
+
 function ruleBasedGrade(ocrText: string, criteria: Array<{ keyword: string; marks: number }>) {
   const lower = ocrText.toLowerCase();
   let scored = 0;
@@ -119,13 +146,31 @@ function ruleBasedGrade(ocrText: string, criteria: Array<{ keyword: string; mark
   return { scored, annotated, confidence };
 }
 
+interface AIAnalysisResult {
+  grade: number;
+  feedback: string;
+  suggestions: string[];
+  confidence: number;
+  confidence_level: "high" | "medium" | "low";
+  requires_review: boolean;
+  reasoning_summary: string;
+  uncertainty_factors: string[];
+  rubric_match_score: number;
+  ai_quality_score: number;
+  reliability_label: "high" | "medium" | "low";
+  quality_factors: Record<string, number>;
+}
+
 async function analyzeWithAI(
   ocrText: string,
   criteria: Array<{ keyword: string; marks: number; description?: string }>,
-  totalMarks: number
-): Promise<{ grade: number; feedback: string; suggestions: string[]; confidence: number } | null> {
+  totalMarks: number,
+  ocrSource: string = "manual"
+): Promise<AIAnalysisResult | null> {
   const apiKey = getAIKey();
   if (!apiKey) return null;
+
+  const ocrQuality = ocrSource === "vision_ai" ? 0.85 : ocrSource === "tesseract" ? 0.60 : ocrSource === "tesseract_fallback" ? 0.45 : 0.90;
 
   const prompt = `You are grading a student's homework answer. The student wrote:
 
@@ -134,37 +179,59 @@ async function analyzeWithAI(
 Mark scheme criteria (${totalMarks} marks total):
 ${criteria.map(c => `- ${c.keyword}: ${c.marks} marks${c.description ? ` (${c.description})` : ""}`).join("\n")}
 
-Respond with JSON only: { "grade": <number 0-${totalMarks}>, "feedback": "<brief feedback>", "suggestions": ["<tip1>", "<tip2>"], "confidence": <0.0-1.0> }
-confidence reflects how certain you are about the grade (0=very uncertain, 1=very certain).`;
+Respond with JSON only:
+{
+  "grade": <number 0-${totalMarks}>,
+  "feedback": "<2-3 sentence assessment>",
+  "suggestions": ["<tip1>", "<tip2>"],
+  "confidence": <0.0-1.0>,
+  "reasoning_summary": "<1 sentence explaining why this grade was assigned>",
+  "uncertainty_factors": ["<reason confidence is not 1.0 — e.g. Ambiguous phrasing, Partial rubric match, OCR uncertainty>"],
+  "rubric_match_score": <0.0-1.0 fraction of criteria clearly addressed>
+}`;
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
     const response = await fetch(`${getAIBaseURL()}/chat/completions`, {
       method: "POST",
       signal: controller.signal,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: getAIModel(),
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
-        max_tokens: 350,
+        max_tokens: 500,
         response_format: { type: "json_object" },
       }),
     });
     clearTimeout(timeout);
 
     const data = await response.json() as any;
-    const parsed = JSON.parse(data.choices[0].message.content);
+    const raw = data.choices[0].message.content;
+    const parsed = JSON.parse(raw);
+
+    const confidence = Math.min(1, Math.max(0, parseFloat(parsed.confidence) ?? 0.50));
+    const rubricMatchScore = Math.min(1, Math.max(0, parseFloat(parsed.rubric_match_score) ?? confidence));
+    const confidenceLevel = getConfidenceLevel(confidence);
+
+    const consistencyScore = parsed.reasoning_summary && parsed.grade != null ? 0.85 : 0.60;
+    const quality = computeAIQualityScore({ confidence, rubricMatchScore, ocrQuality, consistencyScore });
+
     return {
       grade: Math.min(Math.max(0, parseFloat(parsed.grade) || 0), totalMarks),
       feedback: parsed.feedback ?? "See suggestions below.",
-      suggestions: parsed.suggestions ?? [],
-      confidence: Math.min(1, Math.max(0, parseFloat(parsed.confidence) ?? 0.75)),
+      suggestions: Array.isArray(parsed.suggestions) ? parsed.suggestions : [],
+      confidence,
+      confidence_level: confidenceLevel,
+      requires_review: requiresReviewFromTier(confidenceLevel) || quality.aiQualityScore < 0.50,
+      reasoning_summary: parsed.reasoning_summary ?? "Grade assigned based on rubric criteria matching.",
+      uncertainty_factors: Array.isArray(parsed.uncertainty_factors) ? parsed.uncertainty_factors : [],
+      rubric_match_score: rubricMatchScore,
+      ai_quality_score: quality.aiQualityScore,
+      reliability_label: quality.reliabilityLabel,
+      quality_factors: quality.qualityFactors,
     };
   } catch {
     return null;
@@ -227,7 +294,7 @@ router.post("/snapgrade/scan", ...studentGuard, upload.single("image"), async (r
       const criteria = (scheme.criteria as Array<{ keyword: string; marks: number; description?: string }>) ?? [];
       const totalMarks = parseFloat(scheme.totalMarks as string) || 0;
 
-      const aiResult = await analyzeWithAI(ocrText, criteria, totalMarks);
+      const aiResult = await analyzeWithAI(ocrText, criteria, totalMarks, ocrSource);
 
       if (aiResult) {
         grade = aiResult.grade;
@@ -235,16 +302,50 @@ router.post("/snapgrade/scan", ...studentGuard, upload.single("image"), async (r
         suggestions = aiResult.suggestions;
         aiConfidence = aiResult.confidence;
         aiSource = "ai_grading";
-        aiAnalysis = { source: "ai", grade: aiResult.grade, feedback: aiResult.feedback, confidence: aiResult.confidence };
-        requiresTeacherReview = aiResult.confidence < 0.65;
+        requiresTeacherReview = aiResult.requires_review;
+        aiAnalysis = {
+          source: "ai",
+          grade: aiResult.grade,
+          feedback: aiResult.feedback,
+          confidence: aiResult.confidence,
+          confidence_level: aiResult.confidence_level,
+          reasoning_summary: aiResult.reasoning_summary,
+          uncertainty_factors: aiResult.uncertainty_factors,
+          rubric_match_score: aiResult.rubric_match_score,
+          ai_quality_score: aiResult.ai_quality_score,
+          reliability_label: aiResult.reliability_label,
+          quality_factors: aiResult.quality_factors,
+        };
+
+        await pool.query(
+          `UPDATE snapgrade_submissions
+           SET confidence_level=$1, requires_review=$2, rubric_match_score=$3,
+               reasoning_summary=$4, uncertainty_factors=$5
+           WHERE id=$6`,
+          [
+            aiResult.confidence_level,
+            aiResult.requires_review,
+            aiResult.rubric_match_score,
+            aiResult.reasoning_summary,
+            JSON.stringify(aiResult.uncertainty_factors),
+            0,
+          ]
+        ).catch(() => {});
       } else {
         const ruleResult = ruleBasedGrade(ocrText, criteria);
         grade = ruleResult.scored;
         annotatedItems = ruleResult.annotated;
         aiConfidence = ruleResult.confidence;
         aiSource = "rule_based";
-        feedback = `AI review unavailable. Teacher review mode activated. Rule-based analysis matched ${ruleResult.annotated.filter(a => a.found).length}/${criteria.length} criteria.`;
-        aiAnalysis = { source: "rule_based", annotatedItems, confidence: ruleResult.confidence };
+        feedback = `AI temporarily unavailable. Rule-based analysis matched ${ruleResult.annotated.filter(a => a.found).length}/${criteria.length} criteria.`;
+        aiAnalysis = {
+          status: "degraded",
+          message: "AI temporarily unavailable",
+          fallback_mode: "heuristic_scoring",
+          source: "rule_based",
+          annotatedItems,
+          confidence: ruleResult.confidence,
+        };
         requiresTeacherReview = true;
       }
     }
@@ -260,12 +361,28 @@ router.post("/snapgrade/scan", ...studentGuard, upload.single("image"), async (r
     feedback,
   }).returning();
 
+  const aiResultMeta = (aiAnalysis as any);
   await pool.query(
     `UPDATE snapgrade_submissions
-     SET ai_confidence=$1, ai_source=$2
-     WHERE id=$3`,
-    [aiConfidence, aiSource, submission.id]
+     SET ai_confidence=$1, ai_source=$2,
+         confidence_level=$3, requires_review=$4,
+         rubric_match_score=$5, reasoning_summary=$6,
+         uncertainty_factors=$7
+     WHERE id=$8`,
+    [
+      aiConfidence,
+      aiSource,
+      aiResultMeta.confidence_level ?? null,
+      requiresTeacherReview,
+      aiResultMeta.rubric_match_score ?? null,
+      aiResultMeta.reasoning_summary ?? null,
+      JSON.stringify(aiResultMeta.uncertainty_factors ?? []),
+      submission.id,
+    ]
   ).catch(() => {});
+
+  const confidenceLevel = aiResultMeta.confidence_level ?? null;
+  const degraded = aiResultMeta.status === "degraded";
 
   res.json({
     submissionId: submission.id,
@@ -277,10 +394,20 @@ router.post("/snapgrade/scan", ...studentGuard, upload.single("image"), async (r
     ocrSource,
     aiAnalysis,
     confidence: aiConfidence,
+    confidence_level: confidenceLevel,
     aiSource,
     requiresTeacherReview,
+    reasoning_summary: aiResultMeta.reasoning_summary ?? null,
+    uncertainty_factors: aiResultMeta.uncertainty_factors ?? [],
+    rubric_match_score: aiResultMeta.rubric_match_score ?? null,
+    ai_quality_score: aiResultMeta.ai_quality_score ?? null,
+    reliability_label: aiResultMeta.reliability_label ?? null,
+    quality_factors: aiResultMeta.quality_factors ?? null,
+    ...(degraded ? { status: "degraded", message: "AI temporarily unavailable", fallback_mode: "heuristic_scoring" } : {}),
     teacherReviewMessage: requiresTeacherReview
-      ? "AI review unavailable. Teacher review mode activated."
+      ? confidenceLevel === "low"
+        ? `Low confidence (${aiConfidence !== null ? Math.round((aiConfidence as number) * 100) : "?"}%) — teacher review required.`
+        : "AI fallback active — teacher review required."
       : null,
   });
 });
@@ -338,11 +465,16 @@ router.put("/snapgrade/submissions/:id/review", ...teacherGuard, async (req: Aut
   try {
     const submissionId = parseInt(req.params.id);
     const reviewerId = req.userId!;
-    const { override_grade, override_feedback, decision, notes } = req.body as {
+    const {
+      override_grade, override_feedback, decision, notes,
+      override_reason_category, override_tags,
+    } = req.body as {
       override_grade?: number;
       override_feedback?: string;
       decision: "approved" | "rejected" | "modified";
       notes?: string;
+      override_reason_category?: "AI misinterpretation" | "Rubric disagreement" | "Partial credit adjustment" | "Manual correction";
+      override_tags?: string[];
     };
 
     if (!["approved", "rejected", "modified"].includes(decision)) {
@@ -357,22 +489,48 @@ router.put("/snapgrade/submissions/:id/review", ...teacherGuard, async (req: Aut
     if (!existing.length) { res.status(404).json({ error: "Submission not found" }); return; }
     const sub = existing[0];
 
+    const aiGradeNum = sub.grade != null ? parseFloat(sub.grade) : null;
+    const finalGradeNum = decision === "rejected" ? null
+      : (override_grade !== undefined ? override_grade : aiGradeNum);
+    const gradeDelta = aiGradeNum != null && finalGradeNum != null
+      ? Math.round((finalGradeNum - aiGradeNum) * 100) / 100
+      : null;
+
     await pool.query(
       `INSERT INTO ai_grade_reviews
          (submission_id, reviewer_id, original_ai_grade, original_ai_feedback,
           original_ai_confidence, original_ai_source,
-          override_grade, override_feedback, decision, notes)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+          override_grade, override_feedback, decision, notes,
+          override_reason_category, override_tags, grade_delta)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
       [
         submissionId, reviewerId,
         sub.grade, sub.feedback, sub.ai_confidence, sub.ai_source,
-        override_grade ?? sub.grade, override_feedback ?? null,
+        finalGradeNum != null ? String(finalGradeNum) : null,
+        override_feedback ?? null,
         decision, notes ?? null,
+        override_reason_category ?? null,
+        JSON.stringify(override_tags ?? []),
+        gradeDelta,
       ]
     );
 
-    const finalGrade = decision === "rejected" ? null
-      : (override_grade !== undefined ? override_grade : sub.grade);
+    pool.query(
+      `INSERT INTO ai_learning_events
+         (submission_id, reviewer_id, ai_prediction, teacher_final, delta,
+          confidence, confidence_level, module, override_reason, context_meta)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+      [
+        submissionId, reviewerId,
+        aiGradeNum, finalGradeNum, gradeDelta,
+        sub.ai_confidence ?? null,
+        sub.ai_confidence != null ? (parseFloat(sub.ai_confidence) >= 0.85 ? "high" : parseFloat(sub.ai_confidence) >= 0.65 ? "medium" : "low") : null,
+        "snapgrade",
+        override_reason_category ?? null,
+        JSON.stringify({ decision, source: sub.ai_source, tags: override_tags ?? [] }),
+      ]
+    ).catch(() => {});
+
     const finalFeedback = override_feedback ?? sub.feedback;
 
     const { rows: updated } = await pool.query(
@@ -383,12 +541,13 @@ router.put("/snapgrade/submissions/:id/review", ...teacherGuard, async (req: Aut
            reviewed_by=$3,
            reviewed_at=NOW()
        WHERE id=$4 RETURNING *`,
-      [finalGrade, finalFeedback, reviewerId, submissionId]
+      [finalGradeNum, finalFeedback, reviewerId, submissionId]
     );
 
     res.json({
       submission: updated[0],
       decision,
+      grade_delta: gradeDelta,
       message: decision === "approved"
         ? "AI grade approved."
         : decision === "rejected"

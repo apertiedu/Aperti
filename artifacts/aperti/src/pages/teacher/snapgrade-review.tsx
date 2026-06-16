@@ -10,15 +10,42 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AIStatusBanner, ConfidenceBadge } from "@/components/ai-status-banner";
+import { AIStatusBanner } from "@/components/ai-status-banner";
 import {
   CheckCircle2, XCircle, Edit3, ArrowLeft, User,
   BookOpen, Brain, AlertTriangle, Clock, ThumbsUp, ThumbsDown,
+  Info, ChevronDown, ChevronUp, Sparkles,
 } from "lucide-react";
 
 const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } };
 
 type Decision = "approved" | "modified" | "rejected";
+type OverrideReason = "AI misinterpretation" | "Rubric disagreement" | "Partial credit adjustment" | "Manual correction";
+
+function ConfidenceTierBadge({ level, confidence }: { level: "high" | "medium" | "low" | null; confidence: number | null }) {
+  if (!level) return null;
+  const pct = confidence != null ? Math.round(confidence * 100) : null;
+  const map = {
+    high:   { cls: "bg-emerald-100 text-emerald-700 border-emerald-200", label: `High confidence${pct != null ? ` (${pct}%)` : ""}` },
+    medium: { cls: "bg-amber-100 text-amber-700 border-amber-200",       label: `Medium confidence${pct != null ? ` (${pct}%)` : ""}` },
+    low:    { cls: "bg-rose-100 text-rose-700 border-rose-200",           label: `Low confidence${pct != null ? ` (${pct}%)` : ""}` },
+  };
+  const { cls, label } = map[level];
+  return (
+    <Badge className={`${cls} border text-xs font-medium`}>
+      {level === "low" && <AlertTriangle size={10} className="mr-1" />}
+      {label}
+    </Badge>
+  );
+}
+
+function QualityBadge({ score }: { score: number | null | undefined }) {
+  if (score == null) return null;
+  const pct = Math.round(score * 100);
+  const cls = pct >= 75 ? "bg-emerald-50 text-emerald-700" : pct >= 50 ? "bg-amber-50 text-amber-700" : "bg-rose-50 text-rose-700";
+  const label = pct >= 75 ? "High quality" : pct >= 50 ? "Medium quality" : "Low quality";
+  return <span className={`text-xs px-2 py-0.5 rounded-full ${cls}`}>{label} ({pct}%)</span>;
+}
 
 export default function SnapGradeReview() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +57,9 @@ export default function SnapGradeReview() {
   const [overrideGrade, setOverrideGrade] = useState("");
   const [overrideFeedback, setOverrideFeedback] = useState("");
   const [notes, setNotes] = useState("");
+  const [overrideReason, setOverrideReason] = useState<OverrideReason | "">("");
+  const [showReasoning, setShowReasoning] = useState(false);
+  const [showQuality, setShowQuality] = useState(false);
 
   const { data: submission, isLoading, error } = useQuery({
     queryKey: ["snapgrade-submission", id],
@@ -42,7 +72,13 @@ export default function SnapGradeReview() {
   });
 
   const reviewMutation = useMutation({
-    mutationFn: async (payload: { decision: Decision; override_grade?: number; override_feedback?: string; notes?: string }) => {
+    mutationFn: async (payload: {
+      decision: Decision;
+      override_grade?: number;
+      override_feedback?: string;
+      notes?: string;
+      override_reason_category?: OverrideReason;
+    }) => {
       const res = await apiFetch(`/api/snapgrade/submissions/${id}/review`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -50,7 +86,7 @@ export default function SnapGradeReview() {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.error ?? "Review failed");
+        throw new Error((err as any).error ?? "Review failed");
       }
       return res.json();
     },
@@ -69,9 +105,10 @@ export default function SnapGradeReview() {
     if (!decision) return;
     reviewMutation.mutate({
       decision,
-      override_grade: decision === "approved" ? undefined : overrideGrade ? parseFloat(overrideGrade) : undefined,
+      override_grade: decision !== "approved" && overrideGrade ? parseFloat(overrideGrade) : undefined,
       override_feedback: overrideFeedback || undefined,
       notes: notes || undefined,
+      override_reason_category: (overrideReason as OverrideReason) || undefined,
     });
   }
 
@@ -100,12 +137,38 @@ export default function SnapGradeReview() {
 
   const s = submission;
   const confidence: number | null = s.ai_confidence != null ? parseFloat(s.ai_confidence) : null;
-  const isLowConfidence = confidence !== null && confidence < 0.65;
+  const confidenceLevel: "high" | "medium" | "low" | null = s.confidence_level ?? (
+    confidence != null ? (confidence >= 0.85 ? "high" : confidence >= 0.65 ? "medium" : "low") : null
+  );
+  const requiresReview = s.requires_review === true || confidenceLevel === "low";
+  const isMediumReview = confidenceLevel === "medium" && !s.teacher_reviewed;
   const alreadyReviewed = s.teacher_reviewed === true;
 
   const aiAnalysis = s.ai_analysis ?? {};
   const keywords = aiAnalysis.keywords_found ?? [];
   const missingKeywords = aiAnalysis.missing_keywords ?? [];
+  const reasoningSummary: string | null = s.reasoning_summary ?? aiAnalysis.reasoning_summary ?? null;
+  const uncertaintyFactors: string[] = s.uncertainty_factors ?? aiAnalysis.uncertainty_factors ?? [];
+  const aiQualityScore = s.ai_quality_score ?? aiAnalysis.ai_quality_score ?? null;
+  const qualityFactors = s.quality_factors ?? aiAnalysis.quality_factors ?? null;
+
+  const aiGrade = s.grade != null ? parseFloat(s.grade) : null;
+  const teacherFinalGrade = s.teacher_override_grade != null ? parseFloat(s.teacher_override_grade) : null;
+  const gradeDelta = aiGrade != null && teacherFinalGrade != null ? teacherFinalGrade - aiGrade : null;
+
+  const overrideReasonOptions: OverrideReason[] = [
+    "AI misinterpretation",
+    "Rubric disagreement",
+    "Partial credit adjustment",
+    "Manual correction",
+  ];
+
+  const whyAIMightBeWrong: string[] = [
+    ...(uncertaintyFactors.length > 0 ? uncertaintyFactors : []),
+    ...(confidence != null && confidence < 0.65 ? ["AI confidence below acceptable threshold"] : []),
+    ...(aiAnalysis.source === "rule_based" ? ["Rule-based fallback was used (no AI model)"] : []),
+    ...(aiAnalysis.status === "degraded" ? ["AI service was degraded during grading"] : []),
+  ].filter(Boolean);
 
   return (
     <motion.div
@@ -123,28 +186,35 @@ export default function SnapGradeReview() {
           <h1 className="text-xl font-bold text-foreground">SnapGrade Review</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Human override for AI-marked submission</p>
         </div>
-        {alreadyReviewed ? (
-          <Badge className="bg-emerald-100 text-emerald-700">Already Reviewed</Badge>
-        ) : isLowConfidence ? (
-          <Badge className="bg-amber-100 text-amber-700 gap-1"><AlertTriangle size={11} /> Review Required</Badge>
-        ) : null}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {confidenceLevel && <ConfidenceTierBadge level={confidenceLevel} confidence={confidence} />}
+          {alreadyReviewed && <Badge className="bg-emerald-100 text-emerald-700">Already Reviewed</Badge>}
+        </div>
       </motion.div>
 
-      {isLowConfidence && !alreadyReviewed && (
+      {requiresReview && !alreadyReviewed && (
         <motion.div variants={fadeUp}>
           <AIStatusBanner
             status="low-confidence"
-            message={`AI confidence is ${confidence !== null ? Math.round(confidence * 100) : "?"}% on this submission — below the 65% threshold. Please review and confirm or override the AI grade.`}
+            message={`AI confidence is ${confidence !== null ? Math.round(confidence * 100) : "?"}% on this submission — below the 65% threshold. Teacher review is required.`}
           />
+        </motion.div>
+      )}
+
+      {isMediumReview && (
+        <motion.div variants={fadeUp}>
+          <div className="flex items-start gap-3 p-3.5 rounded-xl border border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+            <Info size={15} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-700 dark:text-amber-400">
+              Medium confidence ({confidence != null ? Math.round(confidence * 100) : "?"}%) — a soft review is recommended. The AI grade is likely acceptable but benefits from a quick check.
+            </p>
+          </div>
         </motion.div>
       )}
 
       {alreadyReviewed && (
         <motion.div variants={fadeUp}>
-          <AIStatusBanner
-            status="available"
-            message="This submission has already been reviewed. You can re-review it below."
-          />
+          <AIStatusBanner status="available" message="This submission has already been reviewed. You can re-review it below." />
         </motion.div>
       )}
 
@@ -173,19 +243,83 @@ export default function SnapGradeReview() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <span className="text-2xl font-bold text-foreground">
-                {s.grade != null ? parseFloat(s.grade).toFixed(1) : "—"}
+                {aiGrade != null ? aiGrade.toFixed(1) : "—"}
               </span>
               <span className="text-sm text-muted-foreground">marks</span>
-              <ConfidenceBadge confidence={confidence} />
+              {aiQualityScore != null && <QualityBadge score={aiQualityScore} />}
             </div>
             <p className="text-xs text-muted-foreground">
-              Source: {s.ai_source ?? "AI"} · {isLowConfidence ? "Low confidence" : "Acceptable confidence"}
+              Source: {s.ai_source ?? "AI"} · {confidenceLevel ? `${confidenceLevel} confidence` : "unknown confidence"}
             </p>
           </CardContent>
         </Card>
       </motion.div>
+
+      {(reasoningSummary || uncertaintyFactors.length > 0 || whyAIMightBeWrong.length > 0) && (
+        <motion.div variants={fadeUp} className="space-y-2">
+          <button
+            className="w-full flex items-center justify-between p-3 rounded-xl border border-border bg-card hover:bg-muted/30 transition-colors text-left"
+            onClick={() => setShowReasoning(v => !v)}
+          >
+            <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Sparkles size={14} className="text-teal-600" />
+              AI Reasoning & Uncertainty
+            </span>
+            {showReasoning ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
+          </button>
+
+          {showReasoning && (
+            <Card className="border border-border shadow-sm bg-card">
+              <CardContent className="pt-4 space-y-4">
+                {reasoningSummary && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">Why this grade was assigned</p>
+                    <p className="text-sm text-foreground leading-relaxed bg-muted/30 rounded-lg p-3">{reasoningSummary}</p>
+                  </div>
+                )}
+
+                {whyAIMightBeWrong.length > 0 && (
+                  <div>
+                    <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1 flex items-center gap-1">
+                      <AlertTriangle size={11} />
+                      Why AI might be wrong
+                    </p>
+                    <ul className="space-y-1.5">
+                      {whyAIMightBeWrong.map((f, i) => (
+                        <li key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {qualityFactors && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Quality factor breakdown</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(qualityFactors).map(([k, v]) => (
+                        <div key={k} className="space-y-0.5">
+                          <div className="flex justify-between text-xs">
+                            <span className="text-muted-foreground capitalize">{k.replace(/_/g, " ")}</span>
+                            <span className="text-foreground">{Math.round((v as number) * 100)}%</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-teal-500" style={{ width: `${(v as number) * 100}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </motion.div>
+      )}
 
       {s.homework_title && (
         <motion.div variants={fadeUp}>
@@ -264,7 +398,7 @@ export default function SnapGradeReview() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {(["approved", "modified", "rejected"] as Decision[]).map((d) => {
                   const labels: Record<Decision, string> = { approved: "Approve AI Grade", modified: "Modify Grade", rejected: "Reject — Manual Required" };
                   const icons: Record<Decision, React.ReactNode> = {
@@ -278,13 +412,7 @@ export default function SnapGradeReview() {
                     rejected: decision === d ? "bg-rose-600 text-white border-rose-600" : "border-rose-200 text-rose-700 hover:bg-rose-50",
                   };
                   return (
-                    <Button
-                      key={d}
-                      variant="outline"
-                      size="sm"
-                      className={`gap-1.5 flex-1 ${colors[d]}`}
-                      onClick={() => setDecision(d)}
-                    >
+                    <Button key={d} variant="outline" size="sm" className={`gap-1.5 flex-1 ${colors[d]}`} onClick={() => setDecision(d)}>
                       {icons[d]}
                       {labels[d]}
                     </Button>
@@ -292,8 +420,39 @@ export default function SnapGradeReview() {
                 })}
               </div>
 
+              {decision && decision !== "approved" && (
+                <div className="space-y-2">
+                  <Label className="text-xs font-medium">Override Reason</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {overrideReasonOptions.map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setOverrideReason(r === overrideReason ? "" : r)}
+                        className={`text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
+                          overrideReason === r
+                            ? "bg-teal-600 text-white border-teal-600"
+                            : "border-border text-muted-foreground hover:bg-muted/50"
+                        }`}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {decision === "modified" && (
                 <div className="space-y-3 p-3 rounded-lg border border-border bg-muted/20">
+                  <div className="grid grid-cols-2 gap-4 p-2 rounded-lg bg-muted/30">
+                    <div>
+                      <p className="text-xs text-muted-foreground">AI Grade</p>
+                      <p className="text-xl font-bold text-foreground">{aiGrade != null ? aiGrade.toFixed(1) : "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Your Grade</p>
+                      <p className="text-xl font-bold text-teal-600">{overrideGrade || "?"}</p>
+                    </div>
+                  </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium">Override Grade</Label>
                     <Input
@@ -301,8 +460,7 @@ export default function SnapGradeReview() {
                       placeholder={`AI gave: ${s.grade ?? "?"}`}
                       value={overrideGrade}
                       onChange={(e) => setOverrideGrade(e.target.value)}
-                      min={0}
-                      step={0.5}
+                      min={0} step={0.5}
                       className="h-8 text-sm"
                     />
                   </div>
@@ -322,7 +480,7 @@ export default function SnapGradeReview() {
                 <div className="flex items-start gap-2 p-3 rounded-lg border border-rose-200 bg-rose-50 dark:bg-rose-950/20 dark:border-rose-800">
                   <XCircle size={15} className="text-rose-600 shrink-0 mt-0.5" />
                   <p className="text-xs text-rose-700 dark:text-rose-400">
-                    The AI grade will be removed and the submission marked as requiring manual grading. You can assign a manual grade from the gradebook.
+                    The AI grade will be removed and the submission marked as requiring manual grading.
                   </p>
                 </div>
               )}
@@ -363,7 +521,7 @@ export default function SnapGradeReview() {
         </motion.div>
       )}
 
-      {alreadyReviewed && s.teacher_override_grade != null && (
+      {alreadyReviewed && (
         <motion.div variants={fadeUp}>
           <Card className="border border-border shadow-sm bg-card">
             <CardHeader className="pb-2">
@@ -372,15 +530,21 @@ export default function SnapGradeReview() {
                 Review Record
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="grid grid-cols-2 gap-4">
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-3 gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground">Original AI Grade</p>
-                  <p className="text-lg font-bold text-foreground">{s.grade != null ? parseFloat(s.grade).toFixed(1) : "—"}</p>
+                  <p className="text-xl font-bold text-foreground">{aiGrade != null ? aiGrade.toFixed(1) : "—"}</p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Final Teacher Grade</p>
-                  <p className="text-lg font-bold text-emerald-600">{parseFloat(s.teacher_override_grade).toFixed(1)}</p>
+                  <p className="text-xl font-bold text-emerald-600">{teacherFinalGrade != null ? teacherFinalGrade.toFixed(1) : "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Grade Delta</p>
+                  <p className={`text-xl font-bold ${gradeDelta == null ? "text-muted-foreground" : gradeDelta > 0 ? "text-emerald-600" : gradeDelta < 0 ? "text-rose-600" : "text-foreground"}`}>
+                    {gradeDelta != null ? `${gradeDelta > 0 ? "+" : ""}${gradeDelta.toFixed(1)}` : "—"}
+                  </p>
                 </div>
               </div>
               {s.reviewed_at && (

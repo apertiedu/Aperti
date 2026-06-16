@@ -115,6 +115,7 @@ import { aiStudioRouter } from "./ai-studio";
 import { adminDebugRouter } from "./admin-debug";
 import businessOpsRouter from "./business-ops";
 import { contentCalendarRouter } from "./content-calendar";
+import { aiGovernanceRouter } from "./ai-governance";
 
 const router: IRouter = Router();
 
@@ -263,6 +264,9 @@ router.use(businessOpsRouter);
 
 // Content Calendar
 router.use(contentCalendarRouter);
+
+// AI Governance v2
+router.use("/ai-governance", aiGovernanceRouter);
 
 router.use("/system", systemRouter);
 
