@@ -1496,4 +1496,47 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
     created_at   timestamptz NOT NULL DEFAULT NOW()
   )`,
   `CREATE INDEX IF NOT EXISTS idx_ai_grade_reviews_student ON ai_grade_reviews(student_id)`,
+
+  /* ── Phase Production Hardening — Observability & Validation ──────────── */
+
+  `CREATE TABLE IF NOT EXISTS system_metrics_log (
+    id          bigserial PRIMARY KEY,
+    method      text,
+    path        text,
+    status_code integer,
+    latency_ms  integer,
+    user_id     integer,
+    role        text,
+    model_used  text,
+    confidence  numeric(4,3),
+    success     boolean,
+    error_code  text,
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_sml_created  ON system_metrics_log(created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_sml_path     ON system_metrics_log(path, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_sml_success  ON system_metrics_log(success, created_at DESC)`,
+
+  `CREATE TABLE IF NOT EXISTS system_validation_errors (
+    id            bigserial PRIMARY KEY,
+    source        text NOT NULL,
+    error_type    text NOT NULL,
+    field_missing text,
+    raw_response  jsonb,
+    fallback_used boolean NOT NULL DEFAULT true,
+    created_at    timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_sve_source  ON system_validation_errors(source, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_sve_type    ON system_validation_errors(error_type, created_at DESC)`,
+
+  `CREATE TABLE IF NOT EXISTS ux_rule_violations (
+    id          bigserial PRIMARY KEY,
+    route       text NOT NULL,
+    rule_id     text NOT NULL,
+    description text,
+    severity    text NOT NULL DEFAULT 'warn',
+    created_at  timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_uxrv_route    ON ux_rule_violations(route, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_uxrv_severity ON ux_rule_violations(severity, created_at DESC)`,
 ];

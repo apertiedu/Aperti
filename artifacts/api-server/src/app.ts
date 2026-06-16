@@ -111,6 +111,7 @@ import { classforgeRouter } from "./routes/classforge";
 import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 import { sanitizeBody } from "./middleware/sanitize-body";
+import { requestObserver } from "./lib/request-observer";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -201,6 +202,9 @@ app.use(
 
 // ── Prometheus metrics ────────────────────────────────────────────────────────
 app.use(metricsMiddleware());
+
+// ── Request observability — logs every request to system_metrics_log ─────────
+app.use(requestObserver);
 
 // ── Session ───────────────────────────────────────────────────────────────────
 app.use(

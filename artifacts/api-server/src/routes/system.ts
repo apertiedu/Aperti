@@ -1,6 +1,7 @@
 import { Router, Request, Response } from "express";
 import { requireRole } from "../middleware/auth";
 import { logError } from "../lib/log-error";
+import { isSafeModeEnabled, setSafeMode, getSafeModeStatus } from "../lib/safe-mode";
 import { pool } from "@workspace/db";
 import os from "os";
 
@@ -167,5 +168,182 @@ systemRouter.get("/diagnostics", async (_req: Request, res: Response): Promise<v
   } catch (err) {
     await logError(err, { route: "/api/system/diagnostics", method: "GET" });
     res.status(500).json({ overall: "error", message: "Diagnostics check failed", timestamp: new Date().toISOString() });
+  }
+});
+
+/* ── Self-Check — automated pre-deployment readiness checks ─────────────── */
+systemRouter.get("/self-check", async (_req: Request, res: Response): Promise<void> => {
+  type CheckStatus = "pass" | "fail" | "warn";
+  interface Check { name: string; status: CheckStatus; latency_ms?: number; message?: string }
+  const checks: Check[] = [];
+
+  const [dbCheck, metricsCheck, aiCheck] = await Promise.allSettled([
+    (async (): Promise<Check> => {
+      const start = Date.now();
+      await pool.query("SELECT 1");
+      return { name: "database_connectivity", status: "pass", latency_ms: Date.now() - start };
+    })(),
+    (async (): Promise<Check> => {
+      const { rows } = await pool.query(
+        `SELECT
+           COUNT(*)::int AS total,
+           SUM(CASE WHEN success = false THEN 1 ELSE 0 END)::int AS failures
+         FROM system_metrics_log
+         WHERE created_at > NOW() - INTERVAL '1 hour'`,
+      );
+      const total    = rows[0]?.total    ?? 0;
+      const failures = rows[0]?.failures ?? 0;
+      const rate     = total > 0 ? failures / total : 0;
+      return {
+        name:    "error_rate_1h",
+        status:  rate < 0.1 ? "pass" : "fail",
+        message: `${(rate * 100).toFixed(1)}% error rate over ${total} requests`,
+      };
+    })(),
+    (async (): Promise<Check> => {
+      const aiAvailable = !!(
+        process.env.NVIDIA_API_KEY ||
+        process.env.AI_INTEGRATIONS_OPENAI_API_KEY ||
+        process.env.OPENAI_API_KEY
+      );
+      return {
+        name:    "ai_provider_configured",
+        status:  aiAvailable ? "pass" : "fail",
+        message: aiAvailable ? ACTIVE_PROVIDER : "No AI provider key configured",
+      };
+    })(),
+  ]);
+
+  checks.push(
+    dbCheck.status  === "fulfilled" ? dbCheck.value  : { name: "database_connectivity", status: "fail", message: String(dbCheck.reason) },
+    metricsCheck.status === "fulfilled" ? metricsCheck.value : { name: "error_rate_1h", status: "warn", message: "Metrics table not ready yet" },
+    aiCheck.status  === "fulfilled" ? aiCheck.value  : { name: "ai_provider_configured", status: "fail", message: String(aiCheck.reason) },
+  );
+
+  const requiredEnv = ["DATABASE_URL", "JWT_SECRET", "SESSION_SECRET"];
+  const missing     = requiredEnv.filter((k) => !process.env[k]);
+  checks.push({
+    name:    "environment_variables",
+    status:  missing.length === 0 ? "pass" : "fail",
+    message: missing.length > 0 ? `Missing: ${missing.join(", ")}` : "All required secrets present",
+  });
+
+  const safeModeOn = await isSafeModeEnabled().catch(() => false);
+  checks.push({
+    name:    "safe_mode_status",
+    status:  "pass",
+    message: safeModeOn ? "SAFE_MODE_ACTIVE — some features reduced" : "normal",
+  });
+
+  const productionReady = checks
+    .filter((c) => c.name !== "safe_mode_status")
+    .every((c) => c.status === "pass");
+
+  const overall = checks.every((c) => c.status === "pass") ? "pass"
+    : checks.some((c) => c.status === "fail") ? "fail"
+    : "warn";
+
+  res.status(overall === "pass" ? 200 : 207).json({
+    production_ready: productionReady,
+    overall,
+    checks,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+/* ── Safe Mode — GET status / POST toggle ───────────────────────────────── */
+systemRouter.get("/safe-mode", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const status = await getSafeModeStatus();
+    res.json(status);
+  } catch (err) {
+    await logError(err, { route: "/api/system/safe-mode", method: "GET" });
+    res.status(500).json({ error: "Failed to fetch safe mode status" });
+  }
+});
+
+systemRouter.post("/safe-mode", async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { enabled } = req.body as { enabled?: boolean };
+    if (typeof enabled !== "boolean") {
+      res.status(400).json({ error: "enabled must be a boolean" });
+      return;
+    }
+    await setSafeMode(enabled);
+    res.json({ success: true, enabled, timestamp: new Date().toISOString() });
+  } catch (err) {
+    await logError(err, { route: "/api/system/safe-mode", method: "POST" });
+    res.status(500).json({ error: "Failed to update safe mode" });
+  }
+});
+
+/* ── Production Metrics — aggregated health data for dashboard ──────────── */
+systemRouter.get("/production-metrics", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const [sysRows, uxRows, aiRows, valRows, safeModeResult] = await Promise.allSettled([
+      pool.query(`
+        SELECT
+          COUNT(*)::int                                              AS total_requests,
+          SUM(CASE WHEN success = false THEN 1 ELSE 0 END)::int     AS total_errors,
+          ROUND(AVG(latency_ms))::int                               AS avg_latency_ms,
+          ROUND(AVG(CASE WHEN success = false THEN 1.0 ELSE 0.0 END) * 100, 2)
+                                                                    AS error_rate_pct
+        FROM system_metrics_log WHERE created_at > NOW() - INTERVAL '24 hours'
+      `),
+      pool.query(`
+        SELECT
+          COUNT(*)::int                                              AS total_violations,
+          SUM(CASE WHEN severity = 'error' THEN 1 ELSE 0 END)::int  AS critical_violations
+        FROM ux_rule_violations WHERE created_at > NOW() - INTERVAL '24 hours'
+      `),
+      pool.query(`
+        SELECT
+          COUNT(*)::int                                              AS total_ai_calls,
+          ROUND(AVG(confidence)::numeric, 3)                        AS avg_confidence,
+          SUM(CASE WHEN accepted = false THEN 1 ELSE 0 END)::int    AS ai_failures,
+          ROUND(AVG(
+            EXTRACT(EPOCH FROM (created_at - created_at)) * 1000
+          ))::int                                                    AS ai_avg_latency_ms
+        FROM ai_interactions WHERE created_at > NOW() - INTERVAL '24 hours'
+      `),
+      pool.query(`
+        SELECT COUNT(*)::int AS total
+        FROM system_validation_errors WHERE created_at > NOW() - INTERVAL '24 hours'
+      `),
+      isSafeModeEnabled(),
+    ]);
+
+    const sys = sysRows.status      === "fulfilled" ? sysRows.value.rows[0]  : {};
+    const ux  = uxRows.status       === "fulfilled" ? uxRows.value.rows[0]   : {};
+    const ai  = aiRows.status       === "fulfilled" ? aiRows.value.rows[0]   : {};
+    const val = valRows.status      === "fulfilled" ? valRows.value.rows[0]  : {};
+    const safeMode = safeModeResult.status === "fulfilled" ? safeModeResult.value : false;
+
+    const uptimeSec = Math.round(process.uptime());
+
+    res.json({
+      safe_mode: safeMode,
+      system: {
+        uptime_seconds:       uptimeSec,
+        total_requests_24h:   sys.total_requests   ?? 0,
+        error_count_24h:      sys.total_errors     ?? 0,
+        error_rate_pct:       parseFloat(sys.error_rate_pct ?? "0"),
+        avg_latency_ms:       sys.avg_latency_ms   ?? 0,
+        validation_errors_24h: val.total           ?? 0,
+      },
+      ux: {
+        violations_24h:          ux.total_violations    ?? 0,
+        critical_violations_24h: ux.critical_violations ?? 0,
+      },
+      ai: {
+        total_calls_24h:   ai.total_ai_calls ?? 0,
+        failure_count_24h: ai.ai_failures    ?? 0,
+        avg_confidence:    parseFloat(ai.avg_confidence ?? "0"),
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (err) {
+    await logError(err, { route: "/api/system/production-metrics" });
+    res.status(500).json({ error: "Failed to fetch production metrics" });
   }
 });
