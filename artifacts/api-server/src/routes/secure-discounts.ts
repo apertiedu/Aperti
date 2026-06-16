@@ -190,6 +190,101 @@ secureDiscountsRouter.post("/", requireRole("admin", "super_admin", "teacher"), 
   }
 });
 
+/* ── POST /api/secure-discounts/apply ──────────────────────────────────── */
+secureDiscountsRouter.post("/apply", async (req: AuthRequest, res: Response): Promise<void> => {
+  const ip = getClientIp(req as unknown as { ip?: string; headers: Record<string, string | string[] | undefined> });
+  const client = await pool.connect();
+  try {
+    const { code, context, courseId } = req.body as {
+      code: string;
+      context: "platform_subscription" | "course_enrollment";
+      courseId?: number;
+    };
+
+    if (!code || !context) {
+      res.status(400).json({ error: "code and context are required" });
+      return;
+    }
+
+    await client.query("BEGIN");
+
+    const { rows } = await client.query(
+      `SELECT * FROM coupons WHERE code = UPPER(TRIM($1)) FOR UPDATE`,
+      [code],
+    );
+
+    if (rows.length === 0) {
+      await client.query("ROLLBACK");
+      res.status(404).json({ error: "Invalid discount code" });
+      return;
+    }
+
+    const coupon = rows[0];
+
+    if (!coupon.is_active) {
+      await client.query("ROLLBACK");
+      res.status(400).json({ error: "This discount code is no longer active" });
+      return;
+    }
+    if (coupon.expiry_date && new Date(coupon.expiry_date) < new Date()) {
+      await client.query("ROLLBACK");
+      res.status(400).json({ error: "This discount code has expired" });
+      return;
+    }
+    if (coupon.max_uses !== null && coupon.used_count >= coupon.max_uses) {
+      await client.query("ROLLBACK");
+      res.status(400).json({ error: "This discount code has reached its usage limit" });
+      return;
+    }
+    if (coupon.scope !== context) {
+      await client.query("ROLLBACK");
+      auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "APPLY_DISCOUNT_SCOPE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { couponScope: coupon.scope, requestedContext: context } });
+      res.status(403).json({ error: "This discount code cannot be used for this purchase type" });
+      return;
+    }
+    if (coupon.scope === "teacher_courses") {
+      if (!courseId) {
+        await client.query("ROLLBACK");
+        res.status(400).json({ error: "courseId is required for teacher discount codes" });
+        return;
+      }
+      const courseIds: number[] = Array.isArray(coupon.course_ids) ? coupon.course_ids : (JSON.parse(coupon.course_ids ?? "[]") as number[]);
+      if (!courseIds.includes(courseId)) {
+        await client.query("ROLLBACK");
+        auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "APPLY_DISCOUNT_COURSE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { courseId } });
+        res.status(403).json({ error: "This discount code is not valid for this course" });
+        return;
+      }
+    }
+
+    await client.query(
+      `UPDATE coupons SET used_count = used_count + 1 WHERE id = $1`,
+      [coupon.id],
+    );
+
+    await client.query("COMMIT");
+
+    auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "APPLY_DISCOUNT", targetId: coupon.id, targetType: "coupon", ip, result: "success", metadata: { code: coupon.code, context } });
+
+    res.json({
+      id: coupon.id,
+      code: coupon.code,
+      scope: coupon.scope,
+      discountType: coupon.discount_type,
+      discountPercent: coupon.discount_type === "percentage" ? parseFloat(coupon.discount_percent) : null,
+      discountFixed: coupon.discount_type === "fixed" ? parseFloat(coupon.discount_percent) : null,
+      expiryDate: coupon.expiry_date,
+      appliedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    await client.query("ROLLBACK").catch(() => {});
+    await logError(err, { route: "/api/secure-discounts/apply" });
+    res.status(500).json({ error: "Failed to apply discount code" });
+  } finally {
+    client.release();
+  }
+});
+
 /* ── PATCH /api/secure-discounts/:id/deactivate ────────────────────────── */
 secureDiscountsRouter.patch("/:id/deactivate", requireRole("admin", "super_admin", "teacher"), async (req: AuthRequest, res: Response): Promise<void> => {
   const ip = getClientIp(req as unknown as { ip?: string; headers: Record<string, string | string[] | undefined> });

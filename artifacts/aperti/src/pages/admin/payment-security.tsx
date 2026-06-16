@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import {
   Shield, CheckCircle, XCircle, Clock, AlertTriangle,
-  Users, Tag, FileText, RefreshCw, ChevronDown, Search,
+  Users, Tag, FileText, RefreshCw, ChevronDown, Search, Plus, X,
 } from "lucide-react";
 
 type Tab = "pending" | "history" | "discounts" | "assignments" | "audit";
@@ -81,10 +81,15 @@ function ApproveModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
         method: "POST",
         body: JSON.stringify({ notes }),
       }).then((r) => r.json()),
-    onSuccess: (_, action) => {
+    onSuccess: (data, action) => {
+      if (data.error) {
+        toast({ title: "Action blocked", description: data.error, variant: "destructive" });
+        return;
+      }
       toast({ title: action === "approve" ? "Transaction approved" : "Transaction rejected", description: `Reference: ${tx.reference_number ?? tx.id}` });
       qc.invalidateQueries({ queryKey: ["sp-pending"] });
       qc.invalidateQueries({ queryKey: ["sp-dashboard"] });
+      qc.invalidateQueries({ queryKey: ["sp-history"] });
       onClose();
     },
     onError: (err) => toast({ title: "Action failed", description: (err as Error).message, variant: "destructive" }),
@@ -97,7 +102,7 @@ function ApproveModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
         <div className="space-y-2 text-sm mb-4">
           {[
             ["User", tx.display_name ?? tx.username ?? "—"],
-            ["Amount", `${tx.amount} ${tx.currency}`],
+            ["Amount", `${parseFloat(tx.amount).toLocaleString()} ${tx.currency}`],
             ["Purpose", tx.purpose.replace(/_/g, " ")],
             ["Reference", tx.reference_number ?? "—"],
             ["Submitted", new Date(tx.created_at).toLocaleDateString()],
@@ -144,10 +149,238 @@ function ApproveModal({ tx, onClose }: { tx: Transaction; onClose: () => void })
   );
 }
 
+function CreateDiscountPanel({ onClose }: { onClose: () => void }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    code: "",
+    discountType: "percentage" as "percentage" | "fixed",
+    value: "",
+    scope: "platform_subscription" as "platform_subscription" | "teacher_courses",
+    maxUses: "",
+    expiryDate: "",
+  });
+
+  const createMutation = useMutation({
+    mutationFn: () =>
+      apiFetch("/api/secure-discounts", {
+        method: "POST",
+        body: JSON.stringify({
+          code: form.code,
+          discountType: form.discountType,
+          value: parseFloat(form.value),
+          scope: form.scope,
+          maxUses: form.maxUses ? parseInt(form.maxUses) : undefined,
+          expiryDate: form.expiryDate || undefined,
+        }),
+      }).then((r) => r.json()),
+    onSuccess: (data) => {
+      if (data.error) {
+        toast({ title: "Failed", description: data.error, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Discount code created", description: `Code: ${data.code}` });
+      qc.invalidateQueries({ queryKey: ["sp-discounts"] });
+      qc.invalidateQueries({ queryKey: ["sp-dashboard"] });
+      onClose();
+    },
+    onError: () => toast({ title: "Failed to create discount", variant: "destructive" }),
+  });
+
+  const field = "w-full text-sm px-3 py-2 rounded-lg border border-border bg-card focus:outline-none focus:ring-1 focus:ring-primary";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-card rounded-2xl border border-border shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-semibold text-foreground">Create Discount Code</h3>
+          <button onClick={onClose} className="p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4 text-muted-foreground" /></button>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Code</label>
+            <input
+              value={form.code}
+              onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+              placeholder="e.g. SUMMER30"
+              className={field}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Type</label>
+              <select value={form.discountType} onChange={(e) => setForm({ ...form, discountType: e.target.value as "percentage" | "fixed" })} className={field}>
+                <option value="percentage">Percentage %</option>
+                <option value="fixed">Fixed EGP</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Value</label>
+              <input
+                type="number"
+                value={form.value}
+                onChange={(e) => setForm({ ...form, value: e.target.value })}
+                placeholder={form.discountType === "percentage" ? "30" : "100"}
+                className={field}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Scope</label>
+            <select value={form.scope} onChange={(e) => setForm({ ...form, scope: e.target.value as "platform_subscription" | "teacher_courses" })} className={field}>
+              <option value="platform_subscription">Platform Subscription (admin only)</option>
+              <option value="teacher_courses">Teacher Courses</option>
+            </select>
+            <p className="text-[11px] text-muted-foreground mt-1">
+              {form.scope === "platform_subscription" ? "Applies to platform plans only. Admin-created." : "Applies to teacher course enrollments only."}
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Max Uses (optional)</label>
+              <input
+                type="number"
+                value={form.maxUses}
+                onChange={(e) => setForm({ ...form, maxUses: e.target.value })}
+                placeholder="Unlimited"
+                className={field}
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-muted-foreground mb-1 block">Expires (optional)</label>
+              <input
+                type="date"
+                value={form.expiryDate}
+                onChange={(e) => setForm({ ...form, expiryDate: e.target.value })}
+                className={field}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 mt-5">
+          <button
+            onClick={() => createMutation.mutate()}
+            disabled={createMutation.isPending || !form.code || !form.value}
+            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium rounded-lg px-4 py-2 transition-colors disabled:opacity-50"
+          >
+            {createMutation.isPending ? "Creating…" : "Create Code"}
+          </button>
+          <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-lg transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AssignAssistantPanel({ onClose }: { onClose: () => void }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [form, setForm] = useState({
+    assistantId: "",
+    courseIds: "",
+    teacherId: "",
+  });
+
+  const assignMutation = useMutation({
+    mutationFn: () => {
+      const courseIds = form.courseIds.split(",").map((s) => parseInt(s.trim())).filter((n) => !isNaN(n));
+      return apiFetch("/api/assistant-assignments", {
+        method: "POST",
+        body: JSON.stringify({
+          assistantId: parseInt(form.assistantId),
+          courseIds,
+          teacherId: form.teacherId ? parseInt(form.teacherId) : undefined,
+        }),
+      }).then((r) => r.json());
+    },
+    onSuccess: (data) => {
+      if (data.error) {
+        toast({ title: "Failed", description: data.error, variant: "destructive" });
+        return;
+      }
+      toast({ title: "Assistant assigned successfully" });
+      qc.invalidateQueries({ queryKey: ["sp-assignments"] });
+      qc.invalidateQueries({ queryKey: ["sp-dashboard"] });
+      onClose();
+    },
+    onError: () => toast({ title: "Failed to assign assistant", variant: "destructive" }),
+  });
+
+  const field = "w-full text-sm px-3 py-2 rounded-lg border border-border bg-card focus:outline-none focus:ring-1 focus:ring-primary";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-card rounded-2xl border border-border shadow-xl p-6 w-full max-w-md mx-4" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="font-semibold text-foreground">Assign Assistant</h3>
+          <button onClick={onClose} className="p-1 hover:bg-muted rounded-lg transition-colors"><X className="h-4 w-4 text-muted-foreground" /></button>
+        </div>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Assistant Account ID</label>
+            <input
+              type="number"
+              value={form.assistantId}
+              onChange={(e) => setForm({ ...form, assistantId: e.target.value })}
+              placeholder="e.g. 42"
+              className={field}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">Must be an account with role = assistant</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Course IDs (comma-separated)</label>
+            <input
+              value={form.courseIds}
+              onChange={(e) => setForm({ ...form, courseIds: e.target.value })}
+              placeholder="e.g. 1, 5, 12"
+              className={field}
+            />
+            <p className="text-[11px] text-muted-foreground mt-1">All courses must belong to the same teacher</p>
+          </div>
+          <div>
+            <label className="text-xs font-medium text-muted-foreground mb-1 block">Teacher Account ID (admin only — leave blank if you are the teacher)</label>
+            <input
+              type="number"
+              value={form.teacherId}
+              onChange={(e) => setForm({ ...form, teacherId: e.target.value })}
+              placeholder="Optional"
+              className={field}
+            />
+          </div>
+          <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-amber-700">
+                Assigned assistants can approve payment transactions only for the specified courses. They cannot approve platform subscription payments.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div className="flex gap-2 mt-5">
+          <button
+            onClick={() => assignMutation.mutate()}
+            disabled={assignMutation.isPending || !form.assistantId || !form.courseIds}
+            className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium rounded-lg px-4 py-2 transition-colors disabled:opacity-50"
+          >
+            {assignMutation.isPending ? "Assigning…" : "Assign Assistant"}
+          </button>
+          <button onClick={onClose} className="px-4 py-2 text-sm text-muted-foreground hover:bg-muted rounded-lg transition-colors">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function PaymentSecurityPage() {
   const [tab, setTab] = useState<Tab>("pending");
   const [selected, setSelected] = useState<Transaction | null>(null);
   const [search, setSearch] = useState("");
+  const [showCreateDiscount, setShowCreateDiscount] = useState(false);
+  const [showAssignAssistant, setShowAssignAssistant] = useState(false);
   const { toast } = useToast();
   const qc = useQueryClient();
 
@@ -356,89 +589,117 @@ export default function PaymentSecurityPage() {
       )}
 
       {tab === "discounts" && (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {["Code", "Scope", "Type", "Value", "Uses", "Expires", "Status", ""].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(discounts?.coupons ?? []).map((c) => (
-                <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/20">
-                  <td className="px-4 py-3 font-mono font-semibold text-xs">{c.code}</td>
-                  <td className="px-4 py-3">
-                    <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border", c.scope === "platform_subscription" ? "bg-violet-50 text-violet-700 border-violet-200" : "bg-blue-50 text-blue-700 border-blue-200")}>
-                      {c.scope === "platform_subscription" ? "Platform" : "Teacher Courses"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 text-xs capitalize">{c.discount_type}</td>
-                  <td className="px-4 py-3 font-semibold tabular-nums">
-                    {c.discount_type === "percentage" ? `${parseFloat(c.discount_percent)}%` : `${parseFloat(c.discount_percent)} EGP`}
-                  </td>
-                  <td className="px-4 py-3 text-xs tabular-nums">{c.used_count} / {c.max_uses ?? "∞"}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">{c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : "Never"}</td>
-                  <td className="px-4 py-3"><StatusBadge status={c.is_active ? "verified" : "rejected"} /></td>
-                  <td className="px-4 py-3">
-                    {c.is_active && (
-                      <button
-                        onClick={() => deactivateMutation.mutate(c.id)}
-                        className="text-[11px] text-red-500 hover:text-red-600 font-medium transition-colors"
-                      >
-                        Deactivate
-                      </button>
-                    )}
-                  </td>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium text-foreground">Discount Codes</p>
+              <p className="text-[11px] text-muted-foreground">Platform codes (admin-only) cannot be used for courses. Teacher codes cannot affect platform pricing.</p>
+            </div>
+            <button
+              onClick={() => setShowCreateDiscount(true)}
+              className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Create Code
+            </button>
+          </div>
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  {["Code", "Scope", "Type", "Value", "Uses", "Expires", "Status", ""].map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
+                  ))}
                 </tr>
-              ))}
-              {!discounts?.coupons?.length && (
-                <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground text-sm">No discount codes</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(discounts?.coupons ?? []).map((c) => (
+                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/20">
+                    <td className="px-4 py-3 font-mono font-semibold text-xs">{c.code}</td>
+                    <td className="px-4 py-3">
+                      <span className={cn("text-[10px] font-medium px-2 py-0.5 rounded-full border", c.scope === "platform_subscription" ? "bg-violet-50 text-violet-700 border-violet-200" : "bg-blue-50 text-blue-700 border-blue-200")}>
+                        {c.scope === "platform_subscription" ? "Platform" : "Teacher Courses"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-xs capitalize">{c.discount_type}</td>
+                    <td className="px-4 py-3 font-semibold tabular-nums">
+                      {c.discount_type === "percentage" ? `${parseFloat(c.discount_percent)}%` : `${parseFloat(c.discount_percent)} EGP`}
+                    </td>
+                    <td className="px-4 py-3 text-xs tabular-nums">{c.used_count} / {c.max_uses ?? "∞"}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">{c.expiry_date ? new Date(c.expiry_date).toLocaleDateString() : "Never"}</td>
+                    <td className="px-4 py-3"><StatusBadge status={c.is_active ? "verified" : "rejected"} /></td>
+                    <td className="px-4 py-3">
+                      {c.is_active && (
+                        <button
+                          onClick={() => deactivateMutation.mutate(c.id)}
+                          className="text-[11px] text-red-500 hover:text-red-600 font-medium transition-colors"
+                        >
+                          Deactivate
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {!discounts?.coupons?.length && (
+                  <tr><td colSpan={8} className="px-4 py-10 text-center text-muted-foreground text-sm">No discount codes</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {tab === "assignments" && (
-        <div className="bg-card border border-border rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {["Assistant", "Teacher", "Courses", "Assigned", ""].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(assignments?.assignments ?? []).map((a) => {
-                const courseIds: number[] = Array.isArray(a.course_ids) ? a.course_ids : JSON.parse(String(a.course_ids ?? "[]"));
-                return (
-                  <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/20">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-foreground">{a.assistant_name}</p>
-                      <p className="text-[11px] text-muted-foreground">{a.assistant_email}</p>
-                    </td>
-                    <td className="px-4 py-3 text-sm">{a.teacher_name ?? `Teacher #${a.teacher_id}`}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{courseIds.length} course{courseIds.length !== 1 ? "s" : ""}: {courseIds.join(", ")}</td>
-                    <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">
-                      <button
-                        onClick={() => revokeMutation.mutate(a.id)}
-                        className="text-[11px] text-red-500 hover:text-red-600 font-medium transition-colors"
-                      >
-                        Revoke
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-              {!assignments?.assignments?.length && (
-                <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-foreground text-sm">No assistant assignments</td></tr>
-              )}
-            </tbody>
-          </table>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <p className="text-sm font-medium text-foreground">Assistant Assignments</p>
+              <p className="text-[11px] text-muted-foreground">Assistants can only approve payments for explicitly assigned courses. Platform subscriptions are always admin/teacher-only.</p>
+            </div>
+            <button
+              onClick={() => setShowAssignAssistant(true)}
+              className="flex items-center gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Assign Assistant
+            </button>
+          </div>
+          <div className="bg-card border border-border rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  {["Assistant", "Teacher", "Courses", "Assigned", ""].map((h) => (
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(assignments?.assignments ?? []).map((a) => {
+                  const courseIds: number[] = Array.isArray(a.course_ids) ? a.course_ids : JSON.parse(String(a.course_ids ?? "[]"));
+                  return (
+                    <tr key={a.id} className="border-b border-border last:border-0 hover:bg-muted/20">
+                      <td className="px-4 py-3">
+                        <p className="font-medium text-foreground">{a.assistant_name}</p>
+                        <p className="text-[11px] text-muted-foreground">{a.assistant_email}</p>
+                      </td>
+                      <td className="px-4 py-3 text-sm">{a.teacher_name ?? `Teacher #${a.teacher_id}`}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">{courseIds.length} course{courseIds.length !== 1 ? "s" : ""}: {courseIds.join(", ")}</td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">{new Date(a.created_at).toLocaleDateString()}</td>
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => revokeMutation.mutate(a.id)}
+                          className="text-[11px] text-red-500 hover:text-red-600 font-medium transition-colors"
+                        >
+                          Revoke
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {!assignments?.assignments?.length && (
+                  <tr><td colSpan={5} className="px-4 py-10 text-center text-muted-foreground text-sm">No assistant assignments</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -473,6 +734,8 @@ export default function PaymentSecurityPage() {
       )}
 
       {selected && <ApproveModal tx={selected} onClose={() => setSelected(null)} />}
+      {showCreateDiscount && <CreateDiscountPanel onClose={() => setShowCreateDiscount(false)} />}
+      {showAssignAssistant && <AssignAssistantPanel onClose={() => setShowAssignAssistant(false)} />}
     </div>
   );
 }

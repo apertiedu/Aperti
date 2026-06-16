@@ -111,6 +111,9 @@ import { classforgeRouter } from "./routes/classforge";
 import { aiPersonalTutorRouter } from "./routes/ai-personal-tutor";
 import { smartStudyPlanRouter } from "./routes/smart-study-plan";
 import { gradePredictionRouter } from "./routes/grade-prediction";
+import { securePaymentsRouter } from "./routes/secure-payments";
+import { secureDiscountsRouter } from "./routes/secure-discounts";
+import { assistantAssignmentsRouter } from "./routes/assistant-assignments";
 import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 import { sanitizeBody } from "./middleware/sanitize-body";
@@ -446,6 +449,9 @@ app.use("/api", classforgeRouter);
 app.use("/api/ai-tutor", aiPersonalTutorRouter);
 app.use("/api/study-plan", smartStudyPlanRouter);
 app.use("/api/grade-prediction", gradePredictionRouter);
+app.use("/api/secure-payments", securePaymentsRouter);
+app.use("/api/secure-discounts", secureDiscountsRouter);
+app.use("/api/assistant-assignments", assistantAssignmentsRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
