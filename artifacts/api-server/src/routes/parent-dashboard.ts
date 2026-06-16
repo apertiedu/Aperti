@@ -139,7 +139,7 @@ parentDashboardRouter.get("/parent/dashboard", ...authParent, async (req: AuthRe
     res.json({ children });
   } catch (err: any) {
     console.error("parent/dashboard error", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -225,7 +225,7 @@ parentDashboardRouter.get("/parent/child/:studentId", ...authParent, async (req:
       ascend: ascend[0] || null,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -278,7 +278,7 @@ parentDashboardRouter.get("/parent/child/:studentId/grades", ...authParent, asyn
 
     res.json({ subjectGrades, trend: trend.reverse(), hwFeedback });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -324,7 +324,7 @@ parentDashboardRouter.get("/parent/child/:studentId/attendance", ...authParent, 
 
     res.json({ records, weekly, monthly, summary: summary[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -383,7 +383,7 @@ parentDashboardRouter.get("/parent/child/:studentId/revision", ...authParent, as
       consistencyScore: Math.round((parseInt(consistency[0]?.active_days || "0") / 30) * 100),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -414,7 +414,7 @@ parentDashboardRouter.get("/parent/child/:studentId/assignments", ...authParent,
 
     res.json({ pending, submitted, overdue, all: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -478,7 +478,7 @@ parentDashboardRouter.get("/parent/child/:studentId/exam-readiness", ...authPare
       nextExam: nextExam[0] || null,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -497,7 +497,7 @@ parentDashboardRouter.get("/parent/teachers", ...authParent, async (req: AuthReq
     );
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -549,7 +549,7 @@ parentDashboardRouter.get("/parent/messages", ...authParent, async (req: AuthReq
     const { rows } = await pool.query(query, params);
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -574,7 +574,7 @@ parentDashboardRouter.post("/parent/messages", ...authParent, async (req: AuthRe
 
     res.status(201).json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -590,7 +590,7 @@ parentDashboardRouter.get("/parent/meetings", ...authParent, async (req: AuthReq
     );
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -606,7 +606,7 @@ parentDashboardRouter.post("/parent/meetings", ...authParent, async (req: AuthRe
     );
     res.status(201).json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -623,7 +623,7 @@ parentDashboardRouter.put("/parent/meetings/:id", ...authParent, async (req: Aut
     if (!rowCount) return res.status(404).json({ error: "Meeting not found" });
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -636,7 +636,7 @@ parentDashboardRouter.get("/parent/notifications", ...authParent, async (req: Au
     );
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -649,7 +649,7 @@ parentDashboardRouter.put("/parent/notifications/:id/read", ...authParent, async
     );
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -659,7 +659,7 @@ parentDashboardRouter.put("/parent/notifications/read-all", ...authParent, async
     await pool.query("UPDATE parent_notifications SET is_read=true WHERE parent_id=$1", [req.userId]);
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -683,7 +683,7 @@ parentDashboardRouter.get("/parent/intervention-alerts", ...authParent, async (r
     );
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -702,7 +702,7 @@ parentDashboardRouter.post("/parent/resolve-alert/:id", ...authParent, async (re
     if (!rowCount) return res.status(404).json({ error: "Alert not found" });
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -737,7 +737,7 @@ parentDashboardRouter.get("/parent/billing", ...authParent, async (req: AuthRequ
 
     res.json({ invoices, subscriptions, linkedStudents });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -754,7 +754,7 @@ parentDashboardRouter.get("/parent/settings", ...authParent, async (req: AuthReq
       res.json(rows[0]);
     }
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -773,7 +773,7 @@ parentDashboardRouter.put("/parent/settings", ...authParent, async (req: AuthReq
     );
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -892,6 +892,6 @@ parentDashboardRouter.post("/parent/generate-report", ...authParent, async (req:
 
     res.json({ success: true, report });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

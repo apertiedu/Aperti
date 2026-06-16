@@ -71,7 +71,7 @@ questionExtractionRouter.post("/", async (req: AuthRequest, res: Response) => {
 
     res.status(202).json({ jobId, status: "pending", message: "Extraction started" });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -125,7 +125,7 @@ questionExtractionRouter.post("/upload",
 
       res.status(202).json({ jobId, status: "pending", message: "PDF extraction started" });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );

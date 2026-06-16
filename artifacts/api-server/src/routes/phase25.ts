@@ -85,7 +85,7 @@ phase25Router.get("/founder/scores", authenticate, requireRole("admin"), async (
       overview: { totalActive, new30d, mrr, openTickets, openProbs },
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -145,7 +145,7 @@ phase25Router.get("/admin/feature-usage", authenticate, requireRole("admin"), as
       totalEvents: heatmap.rows.reduce((s: number, r: any) => s + parseInt(r.uses_30d), 0),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -165,7 +165,7 @@ phase25Router.get("/user/preferences", authenticate, async (req: AuthRequest, re
       res.json({ account_id: req.userId, recent_courses: [], recent_assessments: [], recent_students: [], preferences: {} });
     }
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -193,7 +193,7 @@ phase25Router.put("/user/preferences", authenticate, async (req: AuthRequest, re
     );
     res.json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -245,7 +245,7 @@ phase25Router.get("/teacher/courses/:courseId/quality-score", authenticate, asyn
       },
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -300,6 +300,6 @@ phase25Router.get("/admin/system-health", authenticate, requireRole("admin"), as
       timestamp: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

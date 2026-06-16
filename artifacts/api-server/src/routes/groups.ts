@@ -18,7 +18,7 @@ groupsRouter.get("/", async (req: AuthRequest, res: Response) => {
     );
     res.json({ groups: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -34,7 +34,7 @@ groupsRouter.post("/", async (req: AuthRequest, res: Response) => {
     );
     res.status(201).json({ group: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -57,7 +57,7 @@ groupsRouter.patch("/:id", async (req: AuthRequest, res: Response) => {
     if (!rows.length) return res.status(404).json({ error: "Group not found" });
     res.json({ group: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -72,7 +72,7 @@ groupsRouter.delete("/:id", async (req: AuthRequest, res: Response) => {
     if (!rowCount) return res.status(404).json({ error: "Group not found" });
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -96,7 +96,7 @@ groupsRouter.get("/:id/members", async (req: AuthRequest, res: Response) => {
     );
     res.json({ members: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -122,7 +122,7 @@ groupsRouter.post("/:id/members", async (req: AuthRequest, res: Response) => {
     }
     res.json({ ok: true, added: studentIds.length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -139,7 +139,7 @@ groupsRouter.delete("/:id/members/:studentId", async (req: AuthRequest, res: Res
     await pool.query(`DELETE FROM teacher_group_members WHERE group_id=$1 AND student_id=$2`, [groupId, studentId]);
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -155,6 +155,6 @@ groupsRouter.get("/admin/all", requireRole("admin", "super_admin") as any, async
     `);
     res.json({ groups: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

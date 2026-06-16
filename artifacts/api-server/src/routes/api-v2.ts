@@ -71,7 +71,7 @@ apiV2Router.get("/features", authenticate, async (_req: AuthRequest, res: Respon
     );
     res.json({ flags: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -93,6 +93,6 @@ apiV2Router.put("/features/:key", authenticate, requireRole("admin"), async (req
     if (!rows[0]) return res.status(404).json({ error: "Feature flag not found" });
     res.json({ ok: true, flag: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

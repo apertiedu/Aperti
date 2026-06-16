@@ -162,7 +162,7 @@ semanticSearchRouter.post("/semantic", authenticate, async (req: AuthRequest, re
 
     return res.json({ results: flat, groups, query: q, total: flat.length });
   } catch (err: any) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -194,6 +194,6 @@ semanticSearchRouter.get("/", async (req: AuthRequest, res: Response) => {
     const results = [...accounts.rows, ...courses.rows, ...subjects.rows];
     res.json({ results, query: q, total: results.length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

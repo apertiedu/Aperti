@@ -82,7 +82,7 @@ sessionSlotsRouter.get("/", async (req: AuthRequest, res: Response) => {
           .orderBy(asc(sessionSlotsTable.sortOrder), asc(sessionSlotsTable.startTime));
     res.json(slots);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -121,7 +121,7 @@ sessionSlotsRouter.get("/conflicts", async (req: AuthRequest, res: Response) => 
     }
     res.json({ hasConflicts: conflicts.length > 0, conflicts, scannedSlots: slots.length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -135,7 +135,7 @@ sessionSlotsRouter.get("/:id", async (req: AuthRequest, res: Response) => {
     if (!hasAccess) return res.status(403).json({ error: "Access denied" });
     res.json(slot);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -159,7 +159,7 @@ sessionSlotsRouter.post("/", async (req: AuthRequest, res: Response) => {
     }).returning();
     res.status(201).json(slot);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -177,7 +177,7 @@ sessionSlotsRouter.put("/:id", async (req: AuthRequest, res: Response) => {
     if (!slot) return res.status(404).json({ error: "Session slot not found" });
     res.json(slot);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -190,6 +190,6 @@ sessionSlotsRouter.delete("/:id", async (req: AuthRequest, res: Response) => {
     await db.update(sessionSlotsTable).set({ isActive: false, updatedAt: new Date() }).where(eq(sessionSlotsTable.id, slotId));
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

@@ -67,7 +67,7 @@ flashcardV3Router.get("/learning-modes/:deckId", async (req: AuthRequest, res: R
 
     res.json({ modes, stats: { total, unlearned: parseInt(stats?.unlearned ?? 0), learning: parseInt(stats?.learning ?? 0), mastered: parseInt(stats?.mastered ?? 0) } });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -172,6 +172,6 @@ Return JSON: { "enhanced": [{"id":N,"front":"...","back":"...","tag":"..."}], "d
       message: `Enhanced ${enhanced.length} card(s)${duplicates.length > 0 ? `, found ${duplicates.length} potential duplicate(s)` : ""}`,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

@@ -24,7 +24,7 @@ assessmentExtrasRouter.post("/assessments/:id/archive", ...teacherOrAdmin, async
     );
     await pool.query("UPDATE assessments SET status='archived', updated_at=NOW() WHERE id=$1", [id]);
     res.status(201).json({ archive: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/archives
@@ -47,7 +47,7 @@ assessmentExtrasRouter.get("/archives", ...teacherOrAdmin, async (req: AuthReque
       params
     );
     res.json({ archives: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -83,7 +83,7 @@ assessmentExtrasRouter.get("/assessments/:id/monitor", ...teacherOrAdmin, async 
     };
 
     res.json({ students: rows, stats });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/assessments/:id/extend-time
@@ -98,7 +98,7 @@ assessmentExtrasRouter.post("/assessments/:id/extend-time", ...teacherOrAdmin, a
       [JSON.stringify({ time_extension_minutes: extra_minutes, extended_at: new Date() }), id, student_id]
     );
     res.json({ ok: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/assessments/:id/end-student-exam
@@ -111,7 +111,7 @@ assessmentExtrasRouter.post("/assessments/:id/end-student-exam", ...teacherOrAdm
       [id, student_id]
     );
     res.json({ ok: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -145,7 +145,7 @@ assessmentExtrasRouter.get("/submissions/:submissionId/results", ...anyAuth, asy
     ]);
     if (!subRes.rows.length) return res.status(404).json({ error: "Submission not found" });
     res.json({ submission: subRes.rows[0], answers: answersRes.rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -255,7 +255,7 @@ Respond ONLY with JSON: {"predicted_grade":"<IGCSE grade>","confidence":"<low|me
       subjects: subjectRes.rows,
       ai_insights: aiInsights,
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -277,5 +277,5 @@ Respond ONLY with a valid JSON array of ${count} questions in this format:
     if (!aiResponse) return res.status(503).json({ error: "AI unavailable" });
     const questions = JSON.parse(aiResponse.trim());
     res.json({ questions });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

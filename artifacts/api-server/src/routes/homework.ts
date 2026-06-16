@@ -41,7 +41,10 @@ homeworkRouter.post("/", authenticate, requireRole("teacher", "admin"), async (r
     }).catch(() => {});
     res.status(201).json(hw);
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    const msg = /duplicate|unique|constraint/i.test(err.message)
+      ? "A homework entry with this title already exists"
+      : "Invalid homework data";
+    res.status(400).json({ error: msg });
   }
 });
 

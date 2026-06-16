@@ -73,7 +73,7 @@ coursesRouter.get("/", async (req, res: Response) => {
     q += " ORDER BY c.created_at DESC";
     const { rows } = await pool.query(q, params);
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 coursesRouter.get("/teacher/my", authenticate, requireRole("teacher","admin","assistant"), async (req: AuthRequest, res: Response) => {
@@ -86,7 +86,7 @@ coursesRouter.get("/teacher/my", authenticate, requireRole("teacher","admin","as
       [req.userId]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 coursesRouter.get("/teacher/enrollments", authenticate, requireRole("teacher","admin","assistant"), async (req: AuthRequest, res: Response) => {
@@ -100,7 +100,7 @@ coursesRouter.get("/teacher/enrollments", authenticate, requireRole("teacher","a
       [req.userId]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 coursesRouter.get("/my/enrollments", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
@@ -114,7 +114,7 @@ coursesRouter.get("/my/enrollments", authenticate, requireRole("student"), async
       [req.userId]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 coursesRouter.get("/:id", async (req, res: Response) => {
@@ -128,7 +128,7 @@ coursesRouter.get("/:id", async (req, res: Response) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Course not found" });
     res.json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── TEACHER CRUD ──────────────────────────────────────────────────────────────
@@ -149,7 +149,7 @@ coursesRouter.post("/", authenticate, requireRole("teacher","admin"), enforceLim
     );
     await incrementUsage(req.userId!, "courses");
     res.status(201).json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 coursesRouter.put("/:id", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
@@ -169,7 +169,7 @@ coursesRouter.put("/:id", authenticate, requireRole("teacher","admin"), async (r
     );
     if (!rowCount) return res.status(404).json({ error: "Not found or unauthorized" });
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 coursesRouter.delete("/:id", authenticate, requireRole("teacher","admin"), async (req: AuthRequest, res: Response) => {
@@ -177,7 +177,7 @@ coursesRouter.delete("/:id", authenticate, requireRole("teacher","admin"), async
     const { rowCount } = await pool.query("DELETE FROM aperti_courses WHERE id=$1 AND teacher_account_id=$2", [parseInt(req.params.id), req.userId]);
     if (rowCount && rowCount > 0) await decrementUsage(req.userId!, "courses");
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── ENROLLMENT ────────────────────────────────────────────────────────────────
@@ -194,7 +194,7 @@ coursesRouter.post("/:id/enroll", authenticate, requireRole("student"), async (r
       [courseId, req.userId]
     );
     res.status(201).json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 coursesRouter.put("/enrollments/:id", authenticate, requireRole("teacher","admin","assistant"), async (req: AuthRequest, res: Response) => {
@@ -206,7 +206,7 @@ coursesRouter.put("/enrollments/:id", authenticate, requireRole("teacher","admin
       [status, req.userId, parseInt(req.params.id)]
     );
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PATCH /:id/archive — soft-archive a course (teacher or admin)
@@ -221,7 +221,7 @@ coursesRouter.patch("/:id/archive", authenticate, requireRole("teacher","admin")
     );
     if (!rowCount) return res.status(404).json({ error: "Course not found or unauthorized" });
     res.json({ success: true, message: "Course archived" });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PATCH /:id/unarchive — restore an archived course
@@ -233,5 +233,5 @@ coursesRouter.patch("/:id/unarchive", authenticate, requireRole("teacher","admin
     );
     if (!rowCount) return res.status(404).json({ error: "Course not found or unauthorized" });
     res.json({ success: true, message: "Course restored" });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

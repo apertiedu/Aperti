@@ -15,7 +15,7 @@ autopilotRouter.get("/tasks", async (req: AuthRequest, res: Response) => {
     );
     res.json({ tasks: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -42,7 +42,7 @@ autopilotRouter.post("/tasks", async (req: AuthRequest, res: Response) => {
     );
     res.status(201).json({ task: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -63,7 +63,7 @@ autopilotRouter.put("/tasks/:id", async (req: AuthRequest, res: Response) => {
     if (!rows.length) return res.status(404).json({ error: "Task not found" });
     res.json({ task: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -80,7 +80,7 @@ autopilotRouter.patch("/tasks/:id/toggle", async (req: AuthRequest, res: Respons
     if (!rows.length) return res.status(404).json({ error: "Task not found" });
     res.json({ task: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -95,7 +95,7 @@ autopilotRouter.delete("/tasks/:id", async (req: AuthRequest, res: Response) => 
     );
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -119,7 +119,7 @@ autopilotRouter.post("/tasks/:id/run-now", async (req: AuthRequest, res: Respons
     );
     res.json({ ok: true, message: `Task "${task.label}" executed` });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

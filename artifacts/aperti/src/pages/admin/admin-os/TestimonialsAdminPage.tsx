@@ -54,7 +54,7 @@ export default function TestimonialsAdminPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {isLoading && <div className="col-span-2 text-center text-gray-400 py-8">Loading...</div>}
+        {isLoading && <div className="col-span-2 space-y-3 animate-pulse">{[1,2].map(i => <div key={i} className="h-24 bg-gray-100 rounded-xl" />)}</div>}
         {!isLoading && items.length === 0 && (
           <div className="col-span-2 bg-white rounded-xl p-12 text-center border border-gray-100 shadow-sm">
             <Quote className="w-10 h-10 text-gray-300 mx-auto mb-3" />

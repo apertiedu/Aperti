@@ -39,7 +39,7 @@ settingsRouter.get("/", authenticate, async (req: AuthRequest, res: Response) =>
     const settings: Record<string, string> = {};
     for (const row of settingsRes.rows) settings[row.key] = row.value;
     res.json({ account: accountRes.rows[0], settings });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 settingsRouter.put("/", authenticate, async (req: AuthRequest, res: Response) => {
@@ -52,7 +52,7 @@ settingsRouter.put("/", authenticate, async (req: AuthRequest, res: Response) =>
       [req.userId, key, String(value ?? "")]
     );
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 settingsRouter.put("/profile", authenticate, async (req: AuthRequest, res: Response) => {
@@ -71,7 +71,7 @@ settingsRouter.put("/profile", authenticate, async (req: AuthRequest, res: Respo
       [displayName, firstName, lastName, bio, phone, country, avatarUrl, req.userId]
     );
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 settingsRouter.put("/password", authenticate, async (req: AuthRequest, res: Response) => {
@@ -86,7 +86,7 @@ settingsRouter.put("/password", authenticate, async (req: AuthRequest, res: Resp
     const hash = await bcrypt.hash(newPassword, 12);
     await pool.query(`UPDATE accounts SET password_hash=$1 WHERE id=$2`, [hash, req.userId]);
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 settingsRouter.get("/profile/:id", async (req: Request, res: Response) => {
@@ -98,7 +98,7 @@ settingsRouter.get("/profile/:id", async (req: Request, res: Response) => {
     );
     if (!rows.length) return res.status(404).json({ error: "Profile not found" });
     res.json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 settingsRouter.get("/sessions", authenticate, async (req: AuthRequest, res: Response) => {
@@ -109,7 +109,7 @@ settingsRouter.get("/sessions", authenticate, async (req: AuthRequest, res: Resp
       [req.userId]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // DELETE /settings/sessions/:id — revoke a specific session
@@ -121,7 +121,7 @@ settingsRouter.delete("/sessions/:id", authenticate, async (req: AuthRequest, re
       [sessionId, req.userId]
     );
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // DELETE /settings/sessions — revoke all sessions except current
@@ -140,5 +140,5 @@ settingsRouter.delete("/sessions", authenticate, async (req: AuthRequest, res: R
       );
     }
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

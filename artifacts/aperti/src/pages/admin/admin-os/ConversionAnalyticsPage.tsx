@@ -62,7 +62,7 @@ export default function ConversionAnalyticsPage() {
           </div>
           <div className="p-5 space-y-3">
             {isLoading ? (
-              <div className="text-center text-gray-400 py-8 text-sm">Loading...</div>
+              <div className="space-y-3 animate-pulse py-2">{[1,2,3].map(i=><div key={i} className="h-12 bg-gray-100 rounded-xl" />)}</div>
             ) : funnel.length === 0 ? (
               <div className="text-center text-gray-400 py-8 text-sm">No conversion events tracked yet.<br/><span className="text-xs">Events are recorded when users interact with public pages.</span></div>
             ) : (
@@ -97,7 +97,7 @@ export default function ConversionAnalyticsPage() {
           </div>
           <div className="p-5">
             {isLoading ? (
-              <div className="text-center text-gray-400 py-8 text-sm">Loading...</div>
+              <div className="space-y-3 animate-pulse py-2">{[1,2,3].map(i=><div key={i} className="h-12 bg-gray-100 rounded-xl" />)}</div>
             ) : trend.length === 0 ? (
               <div className="text-center text-gray-400 py-8 text-sm">No trend data yet</div>
             ) : (
@@ -124,7 +124,7 @@ export default function ConversionAnalyticsPage() {
         </div>
         <div className="overflow-x-auto">
           {loadingAdoption ? (
-            <div className="text-center text-gray-400 py-8 text-sm">Loading...</div>
+            <div className="space-y-3 animate-pulse py-2">{[1,2,3].map(i=><div key={i} className="h-12 bg-gray-100 rounded-xl" />)}</div>
           ) : adoption.length === 0 ? (
             <div className="text-center text-gray-400 py-8 text-sm">No feature data</div>
           ) : (

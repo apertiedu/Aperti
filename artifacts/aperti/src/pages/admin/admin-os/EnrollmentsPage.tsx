@@ -229,7 +229,7 @@ export default function EnrollmentsPage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={5} className="text-center py-12 text-sm text-gray-400">Loading...</td></tr>
+                Array(5).fill(0).map((_,i)=><tr key={i}>{Array(5).fill(0).map((_,j)=><td key={j} className="px-4 py-3"><div className="h-3 bg-gray-100 rounded animate-pulse" /></td>)}</tr>)
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={5} className="text-center py-12 text-sm text-gray-400">No enrollments found</td></tr>
               ) : (

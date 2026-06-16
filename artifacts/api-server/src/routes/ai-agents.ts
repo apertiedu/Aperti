@@ -291,6 +291,6 @@ aiAgentsRouter.get("/memory/:userId", requireRole("admin", "teacher"), async (re
     }
     res.json({ accountId: targetId, memory: grouped });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

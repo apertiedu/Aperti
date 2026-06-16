@@ -167,7 +167,15 @@ export default function AuditPage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={7} className="text-center py-12 text-gray-400">Loading…</td></tr>
+                Array(8).fill(0).map((_, i) => (
+                  <tr key={i} className="border-b border-gray-50">
+                    {Array(7).fill(0).map((_, j) => (
+                      <td key={j} className="px-4 py-3">
+                        <div className="h-3 bg-gray-100 rounded animate-pulse" style={{ width: `${60 + (i + j) * 7 % 40}%` }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
               ) : logs.length === 0 ? (
                 <tr><td colSpan={7} className="text-center py-12 text-gray-400">No logs found</td></tr>
               ) : logs.map((log: any) => (

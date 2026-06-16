@@ -104,7 +104,7 @@ Return JSON array of 5-8 items, each with: {"type":"summary|key_points|practice_
 
     res.status(201).json({ pack: inserted[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -118,7 +118,7 @@ revisionV3Router.get("/smart-pack/:id", async (req: AuthRequest, res: Response) 
     if (rows.length === 0) return res.status(404).json({ error: "Pack not found" });
     res.json({ pack: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -130,6 +130,6 @@ revisionV3Router.get("/smart-packs", async (req: AuthRequest, res: Response) => 
     );
     res.json({ packs: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

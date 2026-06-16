@@ -67,7 +67,7 @@ coremindAnalyticsRouter.get("/analytics/stats", authenticate, requireRole("admin
       callsTimeline,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -80,7 +80,7 @@ coremindAnalyticsRouter.get("/safety/pending", authenticate, requireRole("admin"
       .limit(100);
     res.json(pending);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -192,6 +192,6 @@ coremindAnalyticsRouter.get("/analytics/impact", authenticate, requireRole("admi
         : "Not enough data to compute impact. Students need AI interaction history and exam results.",
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

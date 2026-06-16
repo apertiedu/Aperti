@@ -96,7 +96,7 @@ export default function BackupsPage() {
         </div>
 
         {isLoading ? (
-          <div className="p-8 text-center text-gray-400">Loading…</div>
+          <div className="space-y-3 animate-pulse p-2">{[1,2,3].map(i=><div key={i} className="h-16 bg-gray-100 rounded-xl" />)}</div>
         ) : backupList.length === 0 ? (
           <div className="p-12 text-center text-gray-400">
             <Database className="w-10 h-10 mx-auto mb-2 opacity-30" />

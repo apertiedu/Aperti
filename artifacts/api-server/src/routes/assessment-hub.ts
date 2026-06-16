@@ -34,7 +34,7 @@ assessmentHubRouter.post("/assessments", ...teacherOrAdmin, enforceLimit("assess
     );
     await incrementUsage(teacherId, "assessments");
     res.status(201).json({ assessment: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── LIST ASSESSMENTS ─────────────────────────────────────────────────────────
@@ -76,7 +76,7 @@ assessmentHubRouter.get("/assessments", ...anyAuth, async (req: AuthRequest, res
 
     const { rows } = await pool.query(query, params);
     res.json({ assessments: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET ASSESSMENT DETAILS ────────────────────────────────────────────────────
@@ -106,7 +106,7 @@ assessmentHubRouter.get("/assessments/:id", ...anyAuth, async (req: AuthRequest,
       sections: sectionsRes.rows,
       questions: questionsRes.rows,
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── UPDATE ASSESSMENT ─────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ assessmentHubRouter.put("/assessments/:id", ...teacherOrAdmin, async (req: AuthR
     );
     if (!rows.length) return res.status(404).json({ error: "Not found or unauthorized" });
     res.json({ assessment: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── DELETE (ARCHIVE) ASSESSMENT ───────────────────────────────────────────────
@@ -154,7 +154,7 @@ assessmentHubRouter.delete("/assessments/:id", ...teacherOrAdmin, async (req: Au
       [id, teacherId]
     );
     res.json({ ok: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── ADD SECTION ───────────────────────────────────────────────────────────────
@@ -171,7 +171,7 @@ assessmentHubRouter.post("/assessments/:id/sections", ...teacherOrAdmin, async (
       [id, title, next, instructions ?? null]
     );
     res.status(201).json({ section: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── ADD QUESTION ──────────────────────────────────────────────────────────────
@@ -203,7 +203,7 @@ assessmentHubRouter.post("/assessments/:id/questions", ...teacherOrAdmin, async 
     );
 
     res.status(201).json({ question: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── REORDER QUESTIONS ─────────────────────────────────────────────────────────
@@ -215,7 +215,7 @@ assessmentHubRouter.put("/assessments/:id/questions/reorder", ...teacherOrAdmin,
       pool.query("UPDATE assessment_questions SET question_order=$1 WHERE id=$2", [idx, qId])
     ));
     res.json({ ok: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUBLISH ───────────────────────────────────────────────────────────────────
@@ -233,7 +233,7 @@ assessmentHubRouter.post("/assessments/:id/publish", ...teacherOrAdmin, async (r
     );
     if (!rows.length) return res.status(404).json({ error: "Not found" });
     res.json({ assessment: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── STUDENT: START ATTEMPT ────────────────────────────────────────────────────
@@ -279,7 +279,7 @@ assessmentHubRouter.post("/assessments/:id/start", ...anyAuth, async (req: AuthR
     );
 
     res.json({ submission: rows[0], questions: questions.rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── STUDENT: SUBMIT ───────────────────────────────────────────────────────────
@@ -338,7 +338,7 @@ assessmentHubRouter.post("/assessments/:id/submit", ...anyAuth, async (req: Auth
     );
 
     res.json({ submission: rows[0], auto_score: autoScore });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── TEACHER: VIEW ALL SUBMISSIONS ─────────────────────────────────────────────
@@ -355,7 +355,7 @@ assessmentHubRouter.get("/assessments/:id/submissions", ...teacherOrAdmin, async
       [id]
     );
     res.json({ submissions: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── TEACHER: VIEW SPECIFIC STUDENT SUBMISSION ─────────────────────────────────
@@ -387,7 +387,7 @@ assessmentHubRouter.get("/assessments/:id/submissions/:studentId", ...teacherOrA
     ]);
     if (!subRes.rows.length) return res.status(404).json({ error: "Submission not found" });
     res.json({ submission: subRes.rows[0], answers: answersRes.rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── QUESTION BANK: ADVANCED SEARCH ───────────────────────────────────────────
@@ -422,7 +422,7 @@ assessmentHubRouter.get("/question-bank/advanced-search", ...anyAuth, async (req
     );
 
     res.json({ questions: rows, total: rows.length });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── QUESTION BANK: CREATE VERSION ─────────────────────────────────────────────
@@ -447,7 +447,7 @@ assessmentHubRouter.post("/question-bank/:id/version", ...teacherOrAdmin, async 
       [id, updates.question_text ?? null, updates.model_answer ?? null, updates.max_marks ?? null, JSON.stringify(history)]
     );
     res.json({ question: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── QUESTION BANK: STATS ──────────────────────────────────────────────────────
@@ -467,5 +467,5 @@ assessmentHubRouter.get("/question-bank/:id/stats", ...anyAuth, async (req: Auth
     ]);
     if (!qRes.rows.length) return res.status(404).json({ error: "Not found" });
     res.json({ question: qRes.rows[0], stats: usageRes.rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

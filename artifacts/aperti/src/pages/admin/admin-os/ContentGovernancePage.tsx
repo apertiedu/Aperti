@@ -195,7 +195,7 @@ export default function ContentGovernancePage() {
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         {isLoading ? (
-          <div className="flex items-center justify-center py-20 text-gray-400 text-sm">Loading…</div>
+          <div className="space-y-3 animate-pulse py-4">{[1,2,3].map(i=><div key={i} className="h-16 bg-gray-100 rounded-xl" />)}</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

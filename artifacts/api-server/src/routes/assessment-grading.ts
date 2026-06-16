@@ -96,7 +96,7 @@ Marks must be between 0 and ${answer.max_marks}. Be fair and specific.`,
       );
 
       res.json({ submission: rows[0], results, total_score: totalScore, percentage, grade });
-    } catch (err: any) { res.status(500).json({ error: err.message }); }
+    } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   }
 );
 
@@ -136,7 +136,7 @@ assessmentGradingRouter.post("/grading/assessments/:submissionId/manual-grade", 
       );
 
       res.json({ submission: rows[0] });
-    } catch (err: any) { res.status(500).json({ error: err.message }); }
+    } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   }
 );
 
@@ -166,7 +166,7 @@ assessmentGradingRouter.post("/grading/assessments/:submissionId/moderate", ...t
       );
 
       res.json({ submission: rows[0] });
-    } catch (err: any) { res.status(500).json({ error: err.message }); }
+    } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   }
 );
 
@@ -192,7 +192,7 @@ assessmentGradingRouter.post("/practicals/:assessmentId/submit", ...anyAuth, asy
       [assessmentId, studentId, description ?? null, JSON.stringify(file_urls)]
     );
     res.json({ project: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.post("/practicals/:assessmentId/grade", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -206,7 +206,7 @@ assessmentGradingRouter.post("/practicals/:assessmentId/grade", ...teacherOrAdmi
     );
     if (!rows.length) return res.status(404).json({ error: "Submission not found" });
     res.json({ project: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -232,7 +232,7 @@ assessmentGradingRouter.post("/coursework/:assessmentId/submit", ...anyAuth, asy
        JSON.stringify(files), JSON.stringify(milestones)]
     );
     res.json({ project: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.get("/coursework/:assessmentId/submissions", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -247,7 +247,7 @@ assessmentGradingRouter.get("/coursework/:assessmentId/submissions", ...teacherO
       [assessmentId]
     );
     res.json({ submissions: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.post("/coursework/:submissionId/moderate", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -271,7 +271,7 @@ assessmentGradingRouter.post("/coursework/:submissionId/moderate", ...teacherOrA
     ).catch(() => {});
 
     res.json({ project: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -290,7 +290,7 @@ assessmentGradingRouter.post("/oral-exams/:assessmentId/schedule", ...teacherOrA
       [assessmentId, student_id, scheduled_for]
     );
     res.json({ oral: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.post("/oral-exams/:assessmentId/record", ...anyAuth, async (req: AuthRequest, res: Response) => {
@@ -309,7 +309,7 @@ assessmentGradingRouter.post("/oral-exams/:assessmentId/record", ...anyAuth, asy
       [assessmentId, studentId, recording_url]
     );
     res.json({ oral: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.post("/oral-exams/:id/grade", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -322,7 +322,7 @@ assessmentGradingRouter.post("/oral-exams/:id/grade", ...teacherOrAdmin, async (
     );
     if (!rows.length) return res.status(404).json({ error: "Not found" });
     res.json({ oral: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.get("/oral-exams/:id/transcript", ...anyAuth, async (req: AuthRequest, res: Response) => {
@@ -336,7 +336,7 @@ assessmentGradingRouter.get("/oral-exams/:id/transcript", ...anyAuth, async (req
     // If no transcript exists yet, return null — do not generate a fake one.
 
     res.json({ oral });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -351,7 +351,7 @@ assessmentGradingRouter.post("/moderation/benchmark", ...teacherOrAdmin, async (
       [JSON.stringify({ benchmark_answers }), assessment_id]
     );
     res.json({ ok: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.get("/moderation/consistency", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -371,7 +371,7 @@ assessmentGradingRouter.get("/moderation/consistency", ...teacherOrAdmin, async 
     );
     const discrepancies = rows.filter((r: any) => parseFloat(r.std_dev ?? "0") > 2);
     res.json({ analysis: rows, discrepancies });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.post("/moderation/double-mark", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -384,7 +384,7 @@ assessmentGradingRouter.post("/moderation/double-mark", ...teacherOrAdmin, async
       [JSON.stringify({ second_marker_id, double_mark_assigned_at: new Date() }), submission_id]
     );
     res.json({ ok: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -422,7 +422,7 @@ assessmentGradingRouter.post("/gradebook/calculate", ...teacherOrAdmin, async (r
     const finalGrade = igcseGrade(finalPct);
 
     res.json({ entries: rows, weighted_score: finalPct, final_grade: finalGrade, total_weight: totalWeight });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.get("/gradebook/export", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -459,7 +459,7 @@ assessmentGradingRouter.get("/gradebook/export", ...teacherOrAdmin, async (req: 
     }
 
     res.json({ entries: rows, exported_at: new Date() });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.put("/gradebook/settings", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -475,7 +475,7 @@ assessmentGradingRouter.put("/gradebook/settings", ...teacherOrAdmin, async (req
       [teacherId, JSON.stringify(weightings ?? {}), JSON.stringify(categories ?? []), JSON.stringify(grading_scale ?? {})]
     );
     res.json({ settings: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -539,7 +539,7 @@ assessmentGradingRouter.get("/reports/student/:studentId", ...anyAuth, async (re
       strong_topics: topicScores.slice(0, 5),
       weak_topics: topicScores.slice(-5).reverse(),
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.get("/reports/teacher/:teacherId/class", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -559,7 +559,7 @@ assessmentGradingRouter.get("/reports/teacher/:teacherId/class", ...teacherOrAdm
       [teacherId]
     );
     res.json({ assessments: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.get("/reports/parent/:studentId", ...anyAuth, async (req: AuthRequest, res: Response) => {
@@ -578,7 +578,7 @@ assessmentGradingRouter.get("/reports/parent/:studentId", ...anyAuth, async (req
       ? Math.round(rows.reduce((s: number, r: any) => s + (parseFloat(r.percentage) || 0), 0) / rows.length)
       : 0;
     res.json({ recent_results: rows, average_score: avgPct, overall_grade: igcseGrade(avgPct) });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -596,7 +596,7 @@ assessmentGradingRouter.post("/appeals", ...anyAuth, async (req: AuthRequest, re
       [submission_id, stuRes.rows[0].id, reason]
     );
     res.status(201).json({ appeal: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.get("/appeals", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -614,7 +614,7 @@ assessmentGradingRouter.get("/appeals", ...teacherOrAdmin, async (req: AuthReque
       [req.userId!]
     );
     res.json({ appeals: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 assessmentGradingRouter.put("/appeals/:id/resolve", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
@@ -628,7 +628,7 @@ assessmentGradingRouter.put("/appeals/:id/resolve", ...teacherOrAdmin, async (re
     );
     if (!rows.length) return res.status(404).json({ error: "Appeal not found" });
     res.json({ appeal: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── Student Self-Marking (Practice Mode) ─────────────────────────────────────
@@ -712,7 +712,7 @@ Respond ONLY with valid JSON in this exact format:
         return res.status(500).json({ error: "Failed to parse AI response. Please try again." });
       }
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );

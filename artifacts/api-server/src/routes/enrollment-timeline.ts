@@ -29,7 +29,7 @@ enrollmentTimelineRouter.get("/", async (req: AuthRequest, res: Response) => {
     );
     res.json({ rows, total: parseInt(countRows[0].count) });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -50,7 +50,7 @@ enrollmentTimelineRouter.post("/", async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -66,6 +66,6 @@ enrollmentTimelineRouter.get("/student/:studentId", async (req: AuthRequest, res
     `, [parseInt(req.params.studentId)]);
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

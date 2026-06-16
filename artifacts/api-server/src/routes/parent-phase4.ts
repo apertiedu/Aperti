@@ -213,7 +213,7 @@ parentPhase4Router.get(
 
     } catch (err: any) {
       console.error("[report-pdf]", err);
-      if (!res.headersSent) res.status(500).json({ error: err.message });
+      if (!res.headersSent) res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -350,7 +350,7 @@ parentPhase4Router.get(
 
       res.json(events.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()));
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -372,7 +372,7 @@ parentPhase4Router.get(
       );
       res.json(rows);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -391,7 +391,7 @@ parentPhase4Router.post(
       );
       res.status(201).json(rows[0]);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );

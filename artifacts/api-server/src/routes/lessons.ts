@@ -29,7 +29,10 @@ lessonsRouter.post("/", authenticate, async (req: AuthRequest, res: Response) =>
     }).returning();
     res.status(201).json(lesson);
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    const msg = /duplicate|unique|constraint/i.test(err.message)
+      ? "A lesson with this title already exists"
+      : "Invalid lesson data";
+    res.status(400).json({ error: msg });
   }
 });
 
@@ -50,7 +53,10 @@ lessonsRouter.put("/:id", authenticate, async (req: AuthRequest, res: Response) 
     const [updated] = await db.update(lessonsTable).set(updates).where(eq(lessonsTable.id, id)).returning();
     res.json(updated || { success: true });
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    const msg2 = /duplicate|unique|constraint/i.test(err.message)
+      ? "A lesson with this title already exists"
+      : "Invalid lesson data";
+    res.status(400).json({ error: msg2 });
   }
 });
 

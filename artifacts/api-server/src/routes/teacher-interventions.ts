@@ -125,7 +125,7 @@ Keep each suggestion to 1-2 sentences. Be direct and practical. Return a JSON ar
 
     res.json({ interventions: results });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

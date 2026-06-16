@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { attendanceTable, studentsTable, lessonsTable, attendanceAuditTable } from "@workspace/db";
+import { attendanceTable, studentsTable, attendanceAuditTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 
 export const attendanceRouter = Router();
@@ -32,8 +32,7 @@ async function logAudit(params: {
       deviceInfo: params.deviceInfo ?? null,
       ipAddress: params.ipAddress ?? null,
     });
-  } catch {
-  }
+  } catch { }
 }
 
 attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Response) => {
@@ -42,6 +41,14 @@ attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Respo
     return res.status(400).json({ error: "studentId, sessionId, and date are required" });
   }
   try {
+    if (req.role !== "admin") {
+      const [student] = await db.select({ id: studentsTable.id })
+        .from(studentsTable)
+        .where(and(eq(studentsTable.id, Number(studentId)), eq(studentsTable.teacherAccountId, req.userId!)))
+        .limit(1);
+      if (!student) return res.status(403).json({ error: "Student does not belong to your account" });
+    }
+
     const [existing] = await db.select({ id: attendanceTable.id, status: attendanceTable.status })
       .from(attendanceTable)
       .where(and(eq(attendanceTable.studentId, studentId), eq(attendanceTable.sessionId, sessionId), eq(attendanceTable.date, date)))
@@ -56,7 +63,7 @@ attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Respo
     }
     res.json({ success: true });
   } catch (err: any) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: "Failed to mark attendance" });
   }
 });
 
@@ -65,73 +72,121 @@ attendanceRouter.post("/mark-by-code", authenticate, async (req: AuthRequest, re
   if (!studentCode || !date) {
     return res.status(400).json({ error: "studentCode and date are required" });
   }
-  const [student] = await db
-    .select()
-    .from(studentsTable)
-    .where(eq(studentsTable.studentCode, studentCode.trim().toUpperCase()))
-    .limit(1);
-  if (!student) {
-    return res.status(404).json({ error: `No student found with code "${studentCode}"` });
+  try {
+    const studentFilter = req.role === "admin"
+      ? eq(studentsTable.studentCode, studentCode.trim().toUpperCase())
+      : and(eq(studentsTable.studentCode, studentCode.trim().toUpperCase()), eq(studentsTable.teacherAccountId, req.userId!));
+
+    const [student] = await db.select().from(studentsTable).where(studentFilter).limit(1);
+    if (!student) {
+      return res.status(404).json({ error: `No student found with code "${studentCode}"` });
+    }
+
+    const [existing] = await db.select({ id: attendanceTable.id, status: attendanceTable.status })
+      .from(attendanceTable)
+      .where(and(eq(attendanceTable.studentId, student.id), ...(lessonId ? [eq(attendanceTable.sessionId, Number(lessonId))] : []), eq(attendanceTable.date, date)))
+      .limit(1);
+    const newStatus = status || "Present";
+    if (existing) {
+      await db.update(attendanceTable).set({ status: newStatus, markedAt: sql`now()` }).where(eq(attendanceTable.id, existing.id));
+      await logAudit({ attendanceId: existing.id, studentId: student.id, lessonId: lessonId ? Number(lessonId) : undefined, action: "update_qr", oldStatus: existing.status, newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
+    } else {
+      const [inserted] = await db.insert(attendanceTable).values({ studentId: student.id, sessionId: lessonId ? Number(lessonId) : null, date, status: newStatus }).returning();
+      await logAudit({ attendanceId: inserted?.id, studentId: student.id, lessonId: lessonId ? Number(lessonId) : undefined, action: "scan_qr", newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
+    }
+    res.json({
+      success: true,
+      student: { id: student.id, name: student.studentName, code: student.studentCode },
+    });
+  } catch {
+    res.status(500).json({ error: "Failed to mark attendance by code" });
   }
-  const [existing] = await db.select({ id: attendanceTable.id, status: attendanceTable.status })
-    .from(attendanceTable)
-    .where(and(eq(attendanceTable.studentId, student.id), ...(lessonId ? [eq(attendanceTable.sessionId, Number(lessonId))] : []), eq(attendanceTable.date, date)))
-    .limit(1);
-  const newStatus = status || "Present";
-  if (existing) {
-    await db.update(attendanceTable).set({ status: newStatus, markedAt: sql`now()` }).where(eq(attendanceTable.id, existing.id));
-    await logAudit({ attendanceId: existing.id, studentId: student.id, lessonId: lessonId ? Number(lessonId) : undefined, action: "update_qr", oldStatus: existing.status, newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
-  } else {
-    const [inserted] = await db.insert(attendanceTable).values({ studentId: student.id, sessionId: lessonId ? Number(lessonId) : null, date, status: newStatus }).returning();
-    await logAudit({ attendanceId: inserted?.id, studentId: student.id, lessonId: lessonId ? Number(lessonId) : undefined, action: "scan_qr", newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
-  }
-  res.json({
-    success: true,
-    student: { id: student.id, name: student.studentName, code: student.studentCode },
-  });
 });
 
 attendanceRouter.get("/", authenticate, async (req: AuthRequest, res: Response) => {
-  const { date, lessonId } = req.query as { date?: string; lessonId?: string };
-  const dateStr = date || new Date().toISOString().split("T")[0];
-  const conditions = lessonId
-    ? and(eq(attendanceTable.sessionId, Number(lessonId)), eq(attendanceTable.date, dateStr))
-    : eq(attendanceTable.date, dateStr);
-  const records = await db
-    .select({
-      id: attendanceTable.id,
-      studentId: attendanceTable.studentId,
-      studentName: studentsTable.studentName,
-      studentCode: studentsTable.studentCode,
-      sessionId: attendanceTable.sessionId,
-      status: attendanceTable.status,
-      markedAt: attendanceTable.markedAt,
-    })
-    .from(attendanceTable)
-    .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
-    .where(conditions);
-  res.json(records);
+  try {
+    const { date, lessonId } = req.query as { date?: string; lessonId?: string };
+    const dateStr = date || new Date().toISOString().split("T")[0];
+
+    const baseConditions: any[] = [eq(attendanceTable.date, dateStr)];
+    if (lessonId) baseConditions.push(eq(attendanceTable.sessionId, Number(lessonId)));
+
+    if (req.role !== "admin") {
+      baseConditions.push(eq(studentsTable.teacherAccountId, req.userId!));
+    }
+
+    const records = await db
+      .select({
+        id: attendanceTable.id,
+        studentId: attendanceTable.studentId,
+        studentName: studentsTable.studentName,
+        studentCode: studentsTable.studentCode,
+        sessionId: attendanceTable.sessionId,
+        status: attendanceTable.status,
+        markedAt: attendanceTable.markedAt,
+      })
+      .from(attendanceTable)
+      .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+      .where(and(...baseConditions));
+
+    res.json(records);
+  } catch {
+    res.status(500).json({ error: "Failed to load attendance" });
+  }
 });
 
 attendanceRouter.get("/today", authenticate, async (req: AuthRequest, res: Response) => {
-  const today = new Date().toISOString().split("T")[0];
-  const records = await db
-    .select({
-      id: attendanceTable.id,
-      studentId: attendanceTable.studentId,
-      studentName: studentsTable.studentName,
-      studentCode: studentsTable.studentCode,
-      sessionId: attendanceTable.sessionId,
-      status: attendanceTable.status,
-      markedAt: attendanceTable.markedAt,
-    })
-    .from(attendanceTable)
-    .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
-    .where(eq(attendanceTable.date, today));
-  res.json(records);
+  try {
+    const today = new Date().toISOString().split("T")[0];
+    const conditions: any[] = [eq(attendanceTable.date, today)];
+    if (req.role !== "admin") {
+      conditions.push(eq(studentsTable.teacherAccountId, req.userId!));
+    }
+
+    const records = await db
+      .select({
+        id: attendanceTable.id,
+        studentId: attendanceTable.studentId,
+        studentName: studentsTable.studentName,
+        studentCode: studentsTable.studentCode,
+        sessionId: attendanceTable.sessionId,
+        status: attendanceTable.status,
+        markedAt: attendanceTable.markedAt,
+      })
+      .from(attendanceTable)
+      .innerJoin(studentsTable, eq(attendanceTable.studentId, studentsTable.id))
+      .where(and(...conditions));
+
+    res.json(records);
+  } catch {
+    res.status(500).json({ error: "Failed to load today's attendance" });
+  }
 });
 
 attendanceRouter.delete("/:id", authenticate, async (req: AuthRequest, res: Response) => {
-  await db.delete(attendanceTable).where(eq(attendanceTable.id, Number(req.params.id)));
-  res.json({ success: true });
+  try {
+    const id = Number(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ error: "Invalid attendance ID" });
+
+    if (req.role !== "admin") {
+      const [record] = await db
+        .select({ studentId: attendanceTable.studentId })
+        .from(attendanceTable)
+        .where(eq(attendanceTable.id, id))
+        .limit(1);
+      if (!record) return res.status(404).json({ error: "Attendance record not found" });
+
+      const [student] = await db
+        .select({ id: studentsTable.id })
+        .from(studentsTable)
+        .where(and(eq(studentsTable.id, record.studentId), eq(studentsTable.teacherAccountId, req.userId!)))
+        .limit(1);
+      if (!student) return res.status(403).json({ error: "Access denied" });
+    }
+
+    await db.delete(attendanceTable).where(eq(attendanceTable.id, id));
+    res.json({ success: true });
+  } catch {
+    res.status(500).json({ error: "Failed to delete attendance record" });
+  }
 });

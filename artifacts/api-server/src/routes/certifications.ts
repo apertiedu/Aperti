@@ -35,7 +35,7 @@ certificationsRouter.post("/certificates/issue", ...teacherOrAdmin, async (req: 
     );
 
     res.status(201).json({ certificate: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /certificates/:id ────────────────────────────────────────────────────
@@ -54,7 +54,7 @@ certificationsRouter.get("/certificates/:id", ...anyAuth, async (req: AuthReques
     );
     if (!rows.length) return res.status(404).json({ error: "Certificate not found" });
     res.json({ certificate: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /certificates/verify/:code — PUBLIC ───────────────────────────────────
@@ -79,7 +79,7 @@ certificationsRouter.get("/certificates/verify/:code", async (_req: AuthRequest,
       status: cert.status,
       certificate: cert,
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /certificates/student/:studentId ─────────────────────────────────────
@@ -95,7 +95,7 @@ certificationsRouter.get("/certificates/student/:studentId", ...anyAuth, async (
       [studentId]
     );
     res.json({ certificates: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /certificates — teacher lists certs they issued ─────────────────────
@@ -112,7 +112,7 @@ certificationsRouter.get("/certificates", ...teacherOrAdmin, async (req: AuthReq
       [teacherId]
     );
     res.json({ certificates: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /certificates/:id/revoke ─────────────────────────────────────────────
@@ -125,7 +125,7 @@ certificationsRouter.put("/certificates/:id/revoke", ...teacherOrAdmin, async (r
     );
     if (!rows.length) return res.status(404).json({ error: "Not found or unauthorized" });
     res.json({ certificate: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════
@@ -181,7 +181,7 @@ certificationsRouter.post("/transcripts/generate", ...anyAuth, async (req: AuthR
     );
 
     res.json({ transcript: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 certificationsRouter.get("/transcripts/student/:studentId", ...anyAuth, async (req: AuthRequest, res: Response) => {
@@ -192,5 +192,5 @@ certificationsRouter.get("/transcripts/student/:studentId", ...anyAuth, async (r
       [studentId]
     );
     res.json({ transcripts: rows });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

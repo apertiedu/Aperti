@@ -53,7 +53,7 @@ examSessionRouter.post("/start", async (req: AuthRequest, res: Response) => {
       time_limit_minutes: assessment.time_limit_minutes,
       expires_at: expiresAt,
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /exam-session/heartbeat ───────────────────────────────────────────────
@@ -117,7 +117,7 @@ examSessionRouter.post("/heartbeat", async (req: AuthRequest, res: Response) => 
       risk_score:     riskScore,
       flagged,
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /exam-session/end ─────────────────────────────────────────────────────
@@ -132,7 +132,7 @@ examSessionRouter.post("/end", async (req: AuthRequest, res: Response) => {
     );
     if (!rows.length) return res.status(404).json({ error: "Session not found" });
     res.json({ ok: true, session: rows[0] });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /exam-session/status?token=xxx ────────────────────────────────────────
@@ -164,5 +164,5 @@ examSessionRouter.get("/status", async (req: AuthRequest, res: Response) => {
     }
 
     res.json({ session, expired, valid: session.is_valid && !expired });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

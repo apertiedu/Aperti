@@ -133,7 +133,7 @@ Answer the parent's question using the data above. Be warm, specific, and give 1
 
       res.json({ reply: result.text, studentName, coremindBacked: analysis !== null, latencyMs: result.latencyMs });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -167,7 +167,7 @@ parentAiRouter.get(
         nextBestTopic: analysis.nextBestTopic,
       });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );

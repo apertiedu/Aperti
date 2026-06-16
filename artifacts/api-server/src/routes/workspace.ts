@@ -67,7 +67,7 @@ workspaceRouter.get("/mine", authenticate, async (req: AuthRequest, res: Respons
       [req.userId]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 workspaceRouter.post("/", authenticate, async (req: AuthRequest, res: Response) => {
@@ -83,7 +83,7 @@ workspaceRouter.post("/", authenticate, async (req: AuthRequest, res: Response) 
       [rows[0].id, req.userId]
     );
     res.status(201).json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 workspaceRouter.get("/:id", authenticate, async (req: AuthRequest, res: Response) => {
@@ -95,7 +95,7 @@ workspaceRouter.get("/:id", authenticate, async (req: AuthRequest, res: Response
     );
     if (!rows.length) return res.status(404).json({ error: "Workspace not found" });
     res.json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 workspaceRouter.get("/:id/roles", authenticate, async (req: AuthRequest, res: Response) => {
@@ -105,7 +105,7 @@ workspaceRouter.get("/:id/roles", authenticate, async (req: AuthRequest, res: Re
       [parseInt(req.params.id)]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 workspaceRouter.post("/:id/roles", authenticate, async (req: AuthRequest, res: Response) => {
@@ -117,7 +117,7 @@ workspaceRouter.post("/:id/roles", authenticate, async (req: AuthRequest, res: R
       [parseInt(req.params.id), name.trim(), permissions || []]
     );
     res.status(201).json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 workspaceRouter.get("/:id/members", authenticate, async (req: AuthRequest, res: Response) => {
@@ -131,5 +131,5 @@ workspaceRouter.get("/:id/members", authenticate, async (req: AuthRequest, res: 
       [parseInt(req.params.id)]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

@@ -311,7 +311,7 @@ router.get("/snapgrade/submissions", ...teacherGuard, async (req: AuthRequest, r
     const { rows } = await pool.query(query, params);
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -330,7 +330,7 @@ router.get("/snapgrade/submissions/:id", ...teacherGuard, async (req: AuthReques
     if (!rows.length) { res.status(404).json({ error: "Submission not found" }); return; }
     res.json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -396,7 +396,7 @@ router.put("/snapgrade/submissions/:id/review", ...teacherGuard, async (req: Aut
         : "Grade modified and saved.",
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -419,7 +419,7 @@ router.get("/snapgrade/review-stats", ...teacherGuard, async (req: AuthRequest, 
     );
     res.json(rows[0] ?? {});
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

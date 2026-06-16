@@ -139,7 +139,7 @@ Max 3 tasks per day. Keep it achievable.`;
     res.json({ plan: calendar, daysAvailable, generatedAt: new Date().toISOString(), aiGenerated: false });
   } catch (err: any) {
     console.error("generate-plan error:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

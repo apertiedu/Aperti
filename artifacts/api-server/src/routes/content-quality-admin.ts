@@ -29,7 +29,7 @@ contentQualityRouter.get("/scores", async (req: AuthRequest, res: Response) => {
 
     res.json({ scores: rows, total: parseInt(countRows[0]?.total || 0), page, limit });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -95,7 +95,7 @@ contentQualityRouter.put("/questions/:id/moderate", async (req: AuthRequest, res
 
     res.json({ ok: true, question: rows[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -123,7 +123,7 @@ aiCostsRouter.get("/costs", async (_req: AuthRequest, res: Response) => {
 
     res.json({ breakdown: rows, totals: { tokens: totalTokens, costUSD: totalCost.toFixed(4) } });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -154,7 +154,7 @@ aiCostsRouter.put("/settings", async (req: AuthRequest, res: Response) => {
     await Promise.all(updates);
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -173,6 +173,6 @@ aiCostsRouter.get("/budget", async (_req: AuthRequest, res: Response) => {
       enabledRoles: enabledRows[0] ? JSON.parse(enabledRows[0].value) : ["student","teacher","admin"],
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

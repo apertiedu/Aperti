@@ -60,6 +60,6 @@ sessionSlotsConflictsRouter.get("/", async (_req, res) => {
 
     res.json({ hasConflicts: conflicts.length > 0, conflicts, scannedSlots: slots.length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

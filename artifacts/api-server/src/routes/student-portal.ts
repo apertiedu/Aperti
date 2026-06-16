@@ -519,7 +519,7 @@ router.get("/portal/success", requireStudentAccess, async (req, res): Promise<vo
       overallProgress:     overallR.status === "fulfilled" ? overallR.value.rows[0] : null,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

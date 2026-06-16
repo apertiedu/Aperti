@@ -70,7 +70,7 @@ performanceRouter.get("/metrics", async (_req, res) => {
       timeline: [...dailyStats.rows].reverse(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -95,6 +95,6 @@ performanceRouter.get("/health-summary", async (_req, res) => {
       memoryMb: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

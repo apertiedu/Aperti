@@ -31,7 +31,7 @@ pastPapersRouter.get("/", async (req: Request, res: Response) => {
     }));
     res.json(enriched);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -43,7 +43,7 @@ pastPapersRouter.get("/subjects", async (_req: Request, res: Response) => {
     );
     res.json(rows.map((r: any) => r.subject));
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -68,7 +68,7 @@ pastPapersRouter.post(
       );
       res.status(201).json(rows[0]);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -94,7 +94,7 @@ pastPapersRouter.post(
       );
       res.status(201).json(rows[0]);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -109,7 +109,7 @@ pastPapersRouter.delete(
       await pool.query("DELETE FROM past_papers WHERE id=$1", [parseInt(req.params.id)]);
       res.json({ success: true });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );

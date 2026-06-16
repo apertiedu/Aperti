@@ -76,7 +76,12 @@ export default function CampaignsPage() {
       </div>
 
       <div className="space-y-3">
-        {isLoading && <div className="text-center text-gray-400 py-8">Loading...</div>}
+        {isLoading && [1, 2, 3].map(i => (
+          <div key={i} className="bg-white rounded-xl border border-gray-100 p-5 animate-pulse space-y-2">
+            <div className="h-4 bg-gray-100 rounded w-40" />
+            <div className="h-3 bg-gray-100 rounded w-64" />
+          </div>
+        ))}
         {!isLoading && campaigns.length === 0 && (
           <div className="bg-white rounded-xl p-12 text-center border border-gray-100 shadow-sm">
             <Megaphone className="w-10 h-10 text-gray-300 mx-auto mb-3" />

@@ -1,5 +1,5 @@
 import { Router, Response } from "express";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { writeFileSync, mkdirSync } from "fs";
 import { join, extname } from "path";
 import { randomBytes } from "crypto";
@@ -15,7 +15,7 @@ const ALLOWED_TYPES: Record<string, string> = {
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
-uploadRouter.post("/", authenticate, async (req: AuthRequest, res: Response) => {
+uploadRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
     const { fileName, fileType, fileData } = req.body as {
       fileName: string;
@@ -37,7 +37,7 @@ uploadRouter.post("/", authenticate, async (req: AuthRequest, res: Response) => 
       return res.status(400).json({ error: "File too large (max 10 MB)" });
     }
 
-    try { mkdirSync(UPLOAD_DIR, { recursive: true }); } catch {}
+    try { mkdirSync(UPLOAD_DIR, { recursive: true }); } catch { }
 
     const base64Data = fileData.replace(/^data:[^;]+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
@@ -47,7 +47,7 @@ uploadRouter.post("/", authenticate, async (req: AuthRequest, res: Response) => 
     writeFileSync(filePath, buffer);
 
     res.json({ url: `/uploads/${uniqueName}`, fileName: uniqueName });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch {
+    res.status(500).json({ error: "File upload failed" });
   }
 });

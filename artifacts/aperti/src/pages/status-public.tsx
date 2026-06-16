@@ -56,7 +56,14 @@ export default function StatusPublicPage() {
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-12 space-y-8">
         {/* Current Status */}
         {isLoading ? (
-          <div className="text-center py-12 text-gray-400">Loading...</div>
+          <div className="space-y-3 animate-pulse max-w-xl mx-auto py-6">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100">
+                <div className="h-3 bg-gray-100 rounded w-40" />
+                <div className="h-5 w-16 bg-gray-100 rounded-full" />
+              </div>
+            ))}
+          </div>
         ) : (
           <Reveal>
             <motion.div className="rounded-2xl p-8 border" style={{ backgroundColor: meta.bg, borderColor: meta.border }}>

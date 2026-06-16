@@ -34,7 +34,7 @@ onboardingRouter.get("/progress", authenticate, async (req: AuthRequest, res: Re
   try {
     const row = await ensureProgress(req.userId!);
     res.json(row);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 onboardingRouter.post("/save-step", authenticate, async (req: AuthRequest, res: Response) => {
@@ -50,7 +50,7 @@ onboardingRouter.post("/save-step", authenticate, async (req: AuthRequest, res: 
       [req.userId, step ?? 1, JSON.stringify(data ?? {})]
     );
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 onboardingRouter.post("/complete", authenticate, async (req: AuthRequest, res: Response) => {
@@ -62,5 +62,5 @@ onboardingRouter.post("/complete", authenticate, async (req: AuthRequest, res: R
       [req.userId]
     );
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

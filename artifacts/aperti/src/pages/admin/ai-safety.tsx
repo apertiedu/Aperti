@@ -148,7 +148,7 @@ export default function AiSafety() {
       {/* Pending Review Tab */}
       {tab === "pending" && (
         <section className="space-y-3">
-          {isLoading && <p className="text-sm text-slate-500 text-center py-8">Loading...</p>}
+          {isLoading && <div className="space-y-3 animate-pulse py-2">{[1,2,3].map(i=><div key={i} className="h-12 bg-gray-100 rounded-xl" />)}</div>}
           {!isLoading && pending.length === 0 && (
             <div className="text-center py-16 text-slate-400">
               <ShieldCheck size={40} className="mx-auto mb-3 opacity-40" />

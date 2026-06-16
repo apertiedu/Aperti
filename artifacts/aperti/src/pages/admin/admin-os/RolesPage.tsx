@@ -144,7 +144,11 @@ function PermissionsPanel({ role, onClose }: any) {
 
       <div className="p-5 space-y-4">
         {/* Direct permissions */}
-        {isLoading ? <p className="text-sm text-gray-400 text-center py-4">Loading...</p> : (
+        {isLoading ? (
+          <div className="space-y-2 animate-pulse">
+            {[1, 2, 3].map(i => <div key={i} className="h-10 bg-gray-100 rounded-lg" />)}
+          </div>
+        ) : (
           Object.keys(byResource).length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-4">No permissions assigned yet</p>
           ) : (

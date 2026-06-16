@@ -9,7 +9,7 @@ metricsRouter.get("/", async (_req, res) => {
     res.set("Content-Type", register.contentType);
     const metrics = await register.metrics();
     res.end(metrics);
-  } catch (err: any) {
-    res.status(500).end(err.message);
+  } catch {
+    res.status(500).end("# metrics unavailable");
   }
 });

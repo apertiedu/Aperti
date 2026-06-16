@@ -26,7 +26,7 @@ launchCmdRouter.get("/status", async (_req: AuthRequest, res: Response) => {
 
     res.json({ items: rows, summary: { total, passed, failed, pending, score } });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -42,7 +42,7 @@ launchCmdRouter.put("/checklist/:id", async (req: AuthRequest, res: Response) =>
     if (rows.length === 0) return res.status(404).json({ error: "Item not found" });
     res.json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -87,7 +87,7 @@ launchCmdRouter.get("/readiness-score", async (_req: AuthRequest, res: Response)
       launchReady: overall >= 80 && criticalBugs === 0,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -106,7 +106,7 @@ launchCmdRouter.post("/features/retire", async (req: AuthRequest, res: Response)
     );
     res.status(201).json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -120,7 +120,7 @@ launchCmdRouter.get("/features/retired", async (_req: AuthRequest, res: Response
     );
     res.json({ features: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -135,7 +135,7 @@ releasesRouter.get("/admin/releases", authenticate as any, requireRole("admin", 
       const { rows } = await pool.query(`SELECT * FROM releases ORDER BY release_date DESC`);
       res.json({ releases: rows });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -153,7 +153,7 @@ releasesRouter.post("/admin/releases", authenticate as any, requireRole("admin",
       );
       res.status(201).json(rows[0]);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -175,7 +175,7 @@ releasesRouter.put("/admin/releases/:id", authenticate as any, requireRole("admi
       if (rows.length === 0) return res.status(404).json({ error: "Release not found" });
       res.json(rows[0]);
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -186,7 +186,7 @@ releasesRouter.delete("/admin/releases/:id", authenticate as any, requireRole("a
       await pool.query(`DELETE FROM releases WHERE id=$1`, [req.params.id]);
       res.json({ ok: true });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 );
@@ -200,6 +200,6 @@ releasesRouter.get("/releases", async (_req: Request, res: Response) => {
     );
     res.json({ releases: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

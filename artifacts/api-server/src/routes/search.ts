@@ -208,7 +208,7 @@ searchRouter.get("/", async (req: Request, res: Response) => {
       syllabusSubject: syllabusCode ? SYLLABUS_MAP[syllabusCode] : undefined,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -257,7 +257,7 @@ searchRouter.get("/autocomplete", async (req: Request, res: Response) => {
 
     res.json({ suggestions: suggestions.slice(0, 8), query: q });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -340,7 +340,7 @@ searchRouter.get("/universal", async (req: Request, res: Response) => {
       syllabusSubject: syllabusCode ? SYLLABUS_MAP[syllabusCode] : undefined,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -368,6 +368,6 @@ searchRouter.get("/weak-topics", authenticate as any, async (req: AuthRequest, r
 
     res.json({ weakTopics: rows, studentId });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

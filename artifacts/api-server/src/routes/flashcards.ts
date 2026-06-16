@@ -163,7 +163,7 @@ flashcardsRouter.get("/decks/:id/mastery", authenticate, async (req: AuthRequest
       nextDue,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -176,7 +176,7 @@ flashcardsRouter.get("/", authenticate, async (req: AuthRequest, res: Response) 
     const cards = await db.query.flashcardItems.findMany({ limit });
     res.json(cards);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -216,7 +216,7 @@ flashcardsRouter.post("/track", authenticate, async (req: AuthRequest, res: Resp
     }
     res.json({ success: true, nextReview, interval, masteryLevel: qualityToMastery(quality) });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -305,7 +305,7 @@ flashcardsRouter.get("/student/decks", authenticate, requireRole("student"), asy
     });
     res.json(decks);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -346,6 +346,6 @@ flashcardsRouter.post("/review", authenticate, requireRole("student"), async (re
 
     res.json({ nextReview, interval, repetitions, masteryLevel: qualityToMastery(quality) });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

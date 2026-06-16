@@ -38,7 +38,12 @@ function UserAccessPanel({ userId, onClose }: { userId: number; onClose: () => v
             <Users className="w-4 h-4 text-teal-600" />
           </div>
           <div>
-            {isLoading ? <p className="text-sm text-gray-400">Loading...</p> : (
+            {isLoading ? (
+              <div className="space-y-1 animate-pulse">
+                <div className="h-4 bg-gray-100 rounded w-36" />
+                <div className="h-3 bg-gray-100 rounded w-48" />
+              </div>
+            ) : (
               <>
                 <p className="font-semibold text-gray-900">{user?.display_name || user?.username}</p>
                 <p className="text-xs text-gray-500">{user?.email} · {user?.role}</p>
@@ -151,7 +156,7 @@ export default function UserAccessPage() {
               <p className="text-xs font-medium text-gray-500">{total} users</p>
             </div>
             {isLoading ? (
-              <div className="text-center py-8 text-sm text-gray-400">Loading...</div>
+              <div className="space-y-3 animate-pulse py-2">{[1,2,3].map(i=><div key={i} className="h-12 bg-gray-100 rounded-xl" />)}</div>
             ) : users.length === 0 ? (
               <div className="text-center py-8 text-sm text-gray-400">No users found</div>
             ) : (

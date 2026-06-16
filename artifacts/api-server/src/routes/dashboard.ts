@@ -28,7 +28,7 @@ dashboardRouter.get("/summary", authenticate, async (req: AuthRequest, res: Resp
       pendingHomework: pending.length,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -46,7 +46,7 @@ dashboardRouter.get("/today-classes", authenticate, async (req: AuthRequest, res
       [teacherId, todayName],
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Pending assignment queue ─────────────────────────────────────────── */
@@ -66,7 +66,7 @@ dashboardRouter.get("/assignment-queue", authenticate, async (req: AuthRequest, 
       [teacherId],
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── 7-day attendance trend ───────────────────────────────────────────── */
@@ -86,7 +86,7 @@ dashboardRouter.get("/attendance-trend", authenticate, async (req: AuthRequest, 
       [teacherId],
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Extended summary (richer than /summary) ─────────────────────────── */
@@ -115,7 +115,7 @@ dashboardRouter.get("/extended-summary", authenticate, async (req: AuthRequest, 
       resourceCount: Number(resources.rows[0].count),
       unreadMessages: Number(msgs.rows[0].count),
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 dashboardRouter.get("/admin/activity-heatmap", authenticate, async (req: AuthRequest, res: Response) => {
@@ -135,7 +135,7 @@ dashboardRouter.get("/admin/activity-heatmap", authenticate, async (req: AuthReq
     );
     res.json({ cells: rows, days });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -171,7 +171,7 @@ dashboardRouter.get("/admin/live-stats", authenticate, async (req: AuthRequest, 
       lastUpdated: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -194,5 +194,5 @@ dashboardRouter.get("/subscription-status", authenticate, async (req: AuthReques
       : null;
     const limits = typeof sub.limits === "string" ? JSON.parse(sub.limits) : (sub.limits ?? {});
     res.json({ plan: sub.plan_name, status: sub.status, daysLeft, studentLimit: limits?.students ?? null });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

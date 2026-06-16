@@ -33,7 +33,7 @@ attendanceAuditRouter.get("/", async (req: AuthRequest, res: Response) => {
     );
     res.json({ rows, total: parseInt(countRows[0].count) });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -62,7 +62,7 @@ attendanceAuditRouter.post("/", async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -97,6 +97,6 @@ attendanceAuditRouter.get("/summary", async (req: AuthRequest, res: Response) =>
 
     res.json({ byAction: rows, topActors, recent });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

@@ -21,7 +21,7 @@ parentRouter.get("/my-code", authenticate, requireRole("parent"), async (req: Au
       await pool.query("UPDATE accounts SET pairing_code=$1 WHERE id=$2", [code, req.userId]);
     }
     res.json({ pairingCode: code });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /parent/generate-code — regenerate pairing code
@@ -36,7 +36,7 @@ parentRouter.post("/generate-code", authenticate, requireRole("parent"), async (
     }
     await pool.query("UPDATE accounts SET pairing_code=$1 WHERE id=$2", [code!, req.userId]);
     res.json({ pairingCode: code! });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /parent/pending-links — see pending link requests from students
@@ -52,7 +52,7 @@ parentRouter.get("/pending-links", authenticate, requireRole("parent"), async (r
       [req.userId]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /parent/approve-link/:id — approve or reject a link
@@ -66,7 +66,7 @@ parentRouter.put("/approve-link/:id", authenticate, requireRole("parent"), async
     );
     if (!rowCount) return res.status(404).json({ error: "Link not found" });
     res.json({ success: true });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /parent/child-stats/:linkId — parent gets child's attendance & homework summary
@@ -103,7 +103,7 @@ parentRouter.get("/child-stats/:linkId", authenticate, requireRole("parent"), as
       homeworkSubmitted: parseInt(hwRows[0]?.submitted || "0"),
       homeworkPending: parseInt(hwRows[0]?.pending || "0"),
     });
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── STUDENT ENDPOINTS ────────────────────────────────────────────────────────
@@ -124,7 +124,7 @@ parentRouter.get("/my-links", authenticate, requireRole("student"), async (req: 
       [studentId]
     );
     res.json(rows);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /parent/link-student — student enters parent's pairing code
@@ -164,5 +164,5 @@ parentRouter.post("/link-student", authenticate, requireRole("student"), async (
       [parentId, studentId, pairingCode.trim().toUpperCase()]
     );
     res.status(201).json(rows[0]);
-  } catch (err: any) { res.status(500).json({ error: err.message }); }
+  } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

@@ -30,7 +30,7 @@ mfaRouter.post("/setup", authenticate, async (req: AuthRequest, res: Response) =
 
     res.json({ secret, uri, message: "Scan this QR with your authenticator app, then verify with /mfa/verify" });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -58,7 +58,7 @@ mfaRouter.post("/verify", authenticate, async (req: AuthRequest, res: Response) 
     await pool.query("UPDATE accounts SET mfa_enabled=true WHERE id=$1", [req.userId]);
     res.json({ success: true, message: "MFA enabled successfully" });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -81,7 +81,7 @@ mfaRouter.post("/disable", authenticate, async (req: AuthRequest, res: Response)
     await pool.query("UPDATE accounts SET mfa_enabled=false, mfa_secret=NULL WHERE id=$1", [req.userId]);
     res.json({ success: true, message: "MFA disabled" });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -94,6 +94,6 @@ mfaRouter.get("/status", authenticate, async (req: AuthRequest, res: Response) =
     );
     res.json({ mfaEnabled: rows[0]?.mfa_enabled ?? false });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

@@ -69,7 +69,7 @@ export default function ReleaseNotesPublicPage() {
         {isLoading ? (
           <div className="text-center text-gray-400 py-16">
             <div className="w-8 h-8 border-2 border-t-transparent rounded-full animate-spin mx-auto mb-3" style={{ borderColor: TEAL, borderTopColor: "transparent" }} />
-            Loading...
+            Release notes loading
           </div>
         ) : notes.length === 0 ? (
           <div className="text-center text-gray-400 py-16">No release notes yet.</div>

@@ -43,7 +43,7 @@ shieldRouter.get("/violations", async (req: AuthRequest, res: Response) => {
     );
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -65,6 +65,6 @@ shieldRouter.get("/stats", async (req: AuthRequest, res: Response) => {
     );
     res.json(rows[0] ?? {});
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

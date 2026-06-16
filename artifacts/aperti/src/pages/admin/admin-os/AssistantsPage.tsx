@@ -131,7 +131,7 @@ export default function AssistantsPage() {
 
       {/* List */}
       {isLoading ? (
-        <div className="text-center py-12 text-sm text-gray-400">Loading...</div>
+        <div className="space-y-3 animate-pulse py-2">{[1,2,3].map(i=><div key={i} className="h-16 bg-gray-100 rounded-xl" />)}</div>
       ) : list.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
           <UserCog className="w-10 h-10 text-gray-200 mx-auto mb-3" />

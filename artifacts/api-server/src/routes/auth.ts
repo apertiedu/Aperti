@@ -374,7 +374,7 @@ authRouter.get("/stats", async (_req: Request, res: Response) => {
       attendanceRecords: parseInt(attendance.rows[0].count),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -596,7 +596,7 @@ authRouter.get("/login-history", async (req: Request, res: Response) => {
     );
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

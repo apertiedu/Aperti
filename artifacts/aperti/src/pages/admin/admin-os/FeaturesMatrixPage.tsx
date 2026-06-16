@@ -452,7 +452,7 @@ export default function FeaturesMatrixPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {isLoading ? <tr><td colSpan={6} className="text-center py-12 text-sm text-gray-400">Loading...</td></tr>
+                  {isLoading ? Array(5).fill(0).map((_,i)=><tr key={i}>{Array(6).fill(0).map((_,j)=><td key={j} className="px-4 py-3"><div className="h-3 bg-gray-100 rounded animate-pulse" /></td>)}</tr>)
                     : featureList.length === 0 ? <tr><td colSpan={6} className="text-center py-12 text-sm text-gray-400">No features yet</td></tr>
                     : featureList.map((f: any) => (
                       <FeatureRow key={f.id} feature={f}

@@ -28,7 +28,7 @@ contentEcosystemRouter.get("/contentcraft/pages", authenticate, requireRole("tea
     );
     res.json(rows.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -56,7 +56,7 @@ contentEcosystemRouter.post("/contentcraft/pages", authenticate, requireRole("te
     }
     res.status(201).json(page);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -79,7 +79,7 @@ contentEcosystemRouter.get("/contentcraft/pages/:id", authenticate, async (req: 
     );
     res.json({ ...pageRes.rows[0], blocks: blocksRes.rows, curriculum: mappingRes.rows[0] || null });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -96,7 +96,7 @@ contentEcosystemRouter.put("/contentcraft/pages/:id", authenticate, requireRole(
     );
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -118,7 +118,7 @@ contentEcosystemRouter.post("/contentcraft/pages/:id/blocks", authenticate, requ
     await pool.query(`UPDATE lesson_content SET updated_at = NOW() WHERE id = $1`, [pageId]);
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -151,7 +151,7 @@ contentEcosystemRouter.put("/contentcraft/blocks/:id", authenticate, requireRole
     }
     res.json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -166,7 +166,7 @@ contentEcosystemRouter.delete("/contentcraft/blocks/:id", authenticate, requireR
     }
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -180,7 +180,7 @@ contentEcosystemRouter.put("/contentcraft/blocks/reorder", authenticate, require
     if (pageId) await pool.query(`UPDATE lesson_content SET updated_at = NOW() WHERE id = $1`, [pageId]);
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -198,7 +198,7 @@ contentEcosystemRouter.post("/contentcraft/blocks/:id/duplicate", authenticate, 
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -215,7 +215,7 @@ contentEcosystemRouter.get("/contentcraft/blocks/:id/version-history", authentic
     );
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -233,7 +233,7 @@ contentEcosystemRouter.post("/contentcraft/blocks/:id/restore", authenticate, re
     );
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -248,7 +248,7 @@ contentEcosystemRouter.post("/contentcraft/blocks/:id/comment", authenticate, as
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -267,7 +267,7 @@ contentEcosystemRouter.get("/contentcraft/templates", authenticate, async (req: 
     ];
     res.json({ builtin, custom: result.rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -302,7 +302,7 @@ contentEcosystemRouter.post("/contentcraft/generate-from-template", authenticate
     }
     res.status(201).json(page);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -322,7 +322,7 @@ contentEcosystemRouter.post("/curriculum/map", authenticate, requireRole("teache
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -343,7 +343,7 @@ contentEcosystemRouter.get("/curriculum/search", authenticate, async (req: AuthR
     const result = await pool.query(q, params);
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -361,7 +361,7 @@ contentEcosystemRouter.get("/curriculum/coverage", authenticate, requireRole("te
     );
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -389,7 +389,7 @@ contentEcosystemRouter.get("/courses/:id/structure", authenticate, async (req: A
     );
     res.json(units.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -421,7 +421,7 @@ contentEcosystemRouter.post("/courses/:id/structure", authenticate, requireRole(
     }
     res.json({ success: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -435,7 +435,7 @@ contentEcosystemRouter.get("/course-templates", authenticate, async (req: AuthRe
     );
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -452,7 +452,7 @@ contentEcosystemRouter.post("/courses/:id/templates", authenticate, requireRole(
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -530,7 +530,7 @@ Return ONLY valid JSON. File: ${fileName || "syllabus.pdf"} Board: ${board} Subj
     
     res.status(201).json({ jobId, status: "completed", extractedData });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -588,7 +588,7 @@ contentEcosystemRouter.put("/syllabuilder/:jobId/confirm", authenticate, require
     
     res.json({ success: true, unitsCreated: units.length, lessonsCreated: lessonCount });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -618,7 +618,7 @@ contentEcosystemRouter.get("/questions/advanced-search", authenticate, async (re
     const result = await pool.query(q, params);
     res.json({ questions: result.rows, total: parseInt(countRes.rows[0].count), page: parseInt(page as string), limit: parseInt(limit as string) });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -675,7 +675,7 @@ Return JSON: {
 
     res.status(201).json({ jobId, status: "completed", questionsFound: extractedData.questions?.length || 0 });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -685,7 +685,7 @@ contentEcosystemRouter.get("/questions/import/:jobId", authenticate, async (req:
     if (!result.rows.length) return res.status(404).json({ error: "Not found" });
     res.json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -708,7 +708,7 @@ contentEcosystemRouter.put("/questions/import/:jobId/review", authenticate, requ
     );
     res.json({ imported: imported.length, questionIds: imported });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -721,7 +721,7 @@ contentEcosystemRouter.get("/questions/:id/relationships", authenticate, async (
     );
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -736,7 +736,7 @@ contentEcosystemRouter.post("/questions/:id/relationships", authenticate, requir
     );
     res.status(201).json(result.rows[0] || { message: "Already linked" });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -767,7 +767,7 @@ Return JSON array: [{"questionText":"...","modelAnswer":"...","maxMarks":4,"comm
     }
     res.json({ questions, count: questions.length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -783,7 +783,7 @@ contentEcosystemRouter.get("/questions/stats/:id", authenticate, async (req: Aut
       usageAnalytics: { timesUsed: qRes.rows[0].times_used },
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -828,7 +828,7 @@ Extract and return JSON:
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -838,7 +838,7 @@ contentEcosystemRouter.get("/submissions/handwritten/:id", authenticate, async (
     if (!result.rows.length) return res.status(404).json({ error: "Not found" });
     res.json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -886,7 +886,7 @@ contentEcosystemRouter.post("/assessments/generate", authenticate, requireRole("
       aiGeneratedQuestions: aiQuestions.map(q => ({ ...q, source: "ai" })),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -914,7 +914,7 @@ Return JSON: {
     
     res.json(pack);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -961,7 +961,7 @@ Return JSON array: [{"front":"Question or prompt","back":"Answer or explanation"
     
     res.json({ cards, total: cards.length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1002,7 +1002,7 @@ contentEcosystemRouter.post("/geometrix/sessions", authenticate, async (req: Aut
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1012,7 +1012,7 @@ contentEcosystemRouter.get("/geometrix/sessions/:id", authenticate, async (req: 
     if (!result.rows.length) return res.status(404).json({ error: "Not found" });
     res.json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1058,7 +1058,7 @@ contentEcosystemRouter.post("/simverse/labs/:labId/sessions", authenticate, asyn
     });
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1076,7 +1076,7 @@ contentEcosystemRouter.put("/simverse/sessions/:id", authenticate, async (req: A
     );
     res.json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1089,7 +1089,7 @@ contentEcosystemRouter.post("/simverse/labs/custom", authenticate, requireRole("
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1101,7 +1101,7 @@ contentEcosystemRouter.get("/simverse/labs/custom", authenticate, requireRole("t
     );
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1119,7 +1119,7 @@ contentEcosystemRouter.post("/resources/:id/approve", authenticate, requireRole(
     if (!result.rows.length) return res.status(404).json({ error: "Not found" });
     res.json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1140,7 +1140,7 @@ contentEcosystemRouter.get("/resources/library", authenticate, async (req: AuthR
     const result = await pool.query(q, params);
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1170,7 +1170,7 @@ contentEcosystemRouter.get("/practice/recommend", authenticate, async (req: Auth
     const questionsRes = await pool.query(q, params);
     res.json({ recommended: questionsRes.rows, history: historyRes.rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1183,7 +1183,7 @@ contentEcosystemRouter.post("/practice/sessions", authenticate, async (req: Auth
     );
     res.status(201).json(result.rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1208,7 +1208,7 @@ contentEcosystemRouter.put("/practice/sessions/:id", authenticate, async (req: A
       : 0;
     res.json({ ...session, score });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1240,7 +1240,7 @@ contentEcosystemRouter.post("/ai-studio/generate", authenticate, requireRole("te
     
     res.json({ contentType, generated, topic, subject });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1259,7 +1259,7 @@ contentEcosystemRouter.post("/past-papers/link", authenticate, requireRole("teac
     }
     res.json({ success: true, linked: (questionIds || []).length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1274,7 +1274,7 @@ contentEcosystemRouter.get("/past-papers/:id/questions", authenticate, async (re
     );
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1309,7 +1309,7 @@ contentEcosystemRouter.get("/analytics/content/:type/:id", authenticate, async (
       history: analyticsRes.rows,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1326,7 +1326,7 @@ contentEcosystemRouter.get("/analytics/content/top-performing", authenticate, re
     );
     res.json(result.rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1348,6 +1348,6 @@ contentEcosystemRouter.get("/analytics/content/dashboard", authenticate, require
       practice: practiceStats.rows[0],
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

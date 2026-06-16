@@ -563,7 +563,16 @@ export default function Students() {
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <div className="p-8 flex justify-center text-muted-foreground">Loading...</div>
+            <div className="p-4 space-y-2">
+              {[1, 2, 3, 4, 5].map(i => (
+                <div key={i} className="flex items-center gap-3 px-4 py-2 animate-pulse">
+                  <div className="h-4 bg-muted rounded w-8" />
+                  <div className="h-4 bg-muted rounded w-32" />
+                  <div className="h-4 bg-muted rounded w-24" />
+                  <div className="h-4 bg-muted rounded flex-1" />
+                </div>
+              ))}
+            </div>
           ) : (
             <Table>
               <TableHeader>

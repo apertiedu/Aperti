@@ -69,7 +69,7 @@ founderRouter.get("/overview", async (_req: AuthRequest, res: Response) => {
       support: { openTickets: parseInt(openTickets.rows[0]?.open) || 0 },
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -128,7 +128,7 @@ founderRouter.get("/revenue", async (_req: AuthRequest, res: Response) => {
       },
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -177,7 +177,7 @@ founderRouter.get("/growth", async (_req: AuthRequest, res: Response) => {
       },
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -219,7 +219,7 @@ founderRouter.get("/academic", async (_req: AuthRequest, res: Response) => {
       questions: qbActivity.rows[0],
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -247,7 +247,7 @@ founderRouter.get("/content-quality", async (_req: AuthRequest, res: Response) =
 
     res.json({ top: top.rows, lowRated: lowRated.rows, unused: unused.rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -279,7 +279,7 @@ founderRouter.get("/ai-usage", async (_req: AuthRequest, res: Response) => {
       },
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -320,7 +320,7 @@ founderRouter.get("/user-lifecycle", async (_req: AuthRequest, res: Response) =>
 
     res.json({ stages: rows, source: 'lifecycle_stages' });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -353,7 +353,7 @@ founderRouter.get("/subscriptions", async (_req: AuthRequest, res: Response) => 
 
     res.json({ byStatus: byStatus.rows, byPlan: byPlan.rows, monthly: monthly.rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -388,7 +388,7 @@ founderRouter.get("/readiness", async (_req: AuthRequest, res: Response) => {
 
     res.json({ checks, score, passCount, warningCount, failCount });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -400,7 +400,7 @@ founderRouter.get("/alerts", async (_req: AuthRequest, res: Response) => {
     );
     res.json({ alerts: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -409,7 +409,7 @@ founderRouter.put("/alerts/:id/read", async (req: AuthRequest, res: Response) =>
     await pool.query(`UPDATE founder_alerts SET is_read=TRUE WHERE id=$1`, [req.params.id]);
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -418,7 +418,7 @@ founderRouter.put("/alerts/read-all", async (_req: AuthRequest, res: Response) =
     await pool.query(`UPDATE founder_alerts SET is_read=TRUE WHERE is_read=FALSE`);
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -434,7 +434,7 @@ founderRouter.get("/alert-config", async (_req: AuthRequest, res: Response) => {
     res.json(rows[0] ?? {});
   } catch (err: any) {
     if (err.code === "42P01") return res.json({});
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -477,7 +477,7 @@ founderRouter.put("/alert-config", async (req: AuthRequest, res: Response) => {
     invalidateConfigCache();
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -491,7 +491,7 @@ founderRouter.post("/alert-config/test", async (_req: AuthRequest, res: Response
     });
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -507,7 +507,7 @@ founderRouter.get("/launch-blockers", async (_req: AuthRequest, res: Response) =
     res.json(rows);
   } catch (err: any) {
     if (err.code === "42P01") return res.json([]);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -539,7 +539,7 @@ founderRouter.post("/launch-blockers", async (req: AuthRequest, res: Response) =
 
     res.json(blocker);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -560,7 +560,7 @@ founderRouter.patch("/launch-blockers/:id", async (req: AuthRequest, res: Respon
     );
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -569,7 +569,7 @@ founderRouter.delete("/launch-blockers/:id", async (req: AuthRequest, res: Respo
     await pool.query(`DELETE FROM launch_blockers WHERE id = $1`, [req.params.id]);
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -784,7 +784,7 @@ founderRouter.get("/launch-certification", async (_req: AuthRequest, res: Respon
 
     res.json({ checks: results, certified, failCount, warnCount, checkedAt: new Date().toISOString() });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -913,7 +913,7 @@ founderRouter.get("/no-mock-data-audit", async (_req: AuthRequest, res: Response
         : "Some data sources could not be verified as real — review failed checks.",
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -995,7 +995,7 @@ founderRouter.get("/system-metrics", async (_req: AuthRequest, res: Response) =>
       ts: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1036,7 +1036,7 @@ founderRouter.get("/stability-score", async (_req: AuthRequest, res: Response) =
 
     res.json({ today: todayScore, trend, history, avgLatency, errorCount });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1092,7 +1092,7 @@ founderRouter.get("/platform-stability-metrics", async (_req: AuthRequest, res: 
       checkedAt: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1151,7 +1151,7 @@ founderRouter.get("/user-activity-metrics", async (_req: AuthRequest, res: Respo
       generatedAt: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1173,7 +1173,7 @@ founderRouter.get("/slow-queries", async (req: AuthRequest, res: Response) => {
     `);
     res.json({ queries: rows, stats: stats[0] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1220,7 +1220,7 @@ founderRouter.get("/friction-analytics", async (_req: AuthRequest, res: Response
 
     res.json({ byStep, byDay, topDrops, total: byStep.reduce((s: number, r: any) => s + parseInt(r.count), 0) });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1232,7 +1232,7 @@ founderRouter.get("/weekly-audit", async (_req: AuthRequest, res: Response) => {
     );
     res.json({ reports: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1268,7 +1268,7 @@ founderRouter.post("/weekly-audit/generate", async (_req: AuthRequest, res: Resp
 
     res.json({ ok: true, report });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1299,7 +1299,7 @@ founderRouter.get("/error-logs", async (req: AuthRequest, res: Response) => {
     ).catch(() => ({ rows: [] }));
     res.json({ logs: rows, total: rows.length });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1333,7 +1333,7 @@ founderRouter.get("/performance", async (_req: AuthRequest, res: Response) => {
       generatedAt: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1376,7 +1376,7 @@ founderRouter.get("/platform-health-score", async (_req: AuthRequest, res: Respo
       generatedAt: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1407,7 +1407,7 @@ founderRouter.post("/emergency/impersonate", async (req: AuthRequest, res: Respo
     await logEmergencyAction(req.userId, `founder:impersonate:${target.username}`, targetUserId);
     res.json({ token, username: target.username, role: target.role, expiresIn: "1h" });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1428,7 +1428,7 @@ founderRouter.post("/emergency/force-logout", async (req: AuthRequest, res: Resp
     await logEmergencyAction(req.userId, `founder:force-logout:${acc.rows[0].username}`, targetUserId);
     res.json({ success: true, deviceSessionsRevoked: devCount, sessionsRevoked: sessCount, username: acc.rows[0].username });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1442,7 +1442,7 @@ founderRouter.post("/emergency/reset-device-limit", async (req: AuthRequest, res
     await logEmergencyAction(req.userId, `founder:reset-device-limit:${acc.rows[0].username}`, targetUserId);
     res.json({ success: true, devicesCleared: del.rowCount ?? 0, username: acc.rows[0].username });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1461,7 +1461,7 @@ founderRouter.post("/emergency/unlock-account", async (req: AuthRequest, res: Re
     await logEmergencyAction(req.userId, `founder:unlock-account:${acc.rows[0].username}`, targetUserId);
     res.json({ success: true, username: acc.rows[0].username, previousStatus: acc.rows[0].status });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1499,7 +1499,7 @@ founderRouter.post("/emergency/repair-enrollments", async (req: AuthRequest, res
     await logEmergencyAction(req.userId, "founder:repair-enrollments", "system");
     res.json({ success: true, ...results, repairedAt: new Date().toISOString() });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -1516,6 +1516,6 @@ founderRouter.get("/emergency/audit-trail", async (_req: AuthRequest, res: Respo
     `).catch(() => ({ rows: [] }));
     res.json({ trail: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

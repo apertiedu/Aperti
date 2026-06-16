@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db, examsTable, examQuestionsTable, studentMarksTable, studentsTable } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 
@@ -7,6 +7,14 @@ const router: IRouter = Router();
 
 function getTeacherId(req: AuthRequest): number {
   return req.userId!;
+}
+
+async function assertExamOwner(req: AuthRequest, examId: number): Promise<{ exam: typeof examsTable.$inferSelect } | null> {
+  const [exam] = await db.select().from(examsTable).where(eq(examsTable.id, examId));
+  if (!exam) return null;
+  if (req.role === "admin") return { exam };
+  if (exam.teacherAccountId !== req.userId) return null;
+  return { exam };
 }
 
 router.get("/exams", authenticate, async (req: AuthRequest, res): Promise<void> => {
@@ -17,7 +25,7 @@ router.get("/exams", authenticate, async (req: AuthRequest, res): Promise<void> 
       ? await db.select().from(examsTable).where(filter).orderBy(examsTable.createdAt)
       : await db.select().from(examsTable).orderBy(examsTable.createdAt);
     res.json(rows);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to load exams" });
   }
 });
@@ -25,7 +33,7 @@ router.get("/exams", authenticate, async (req: AuthRequest, res): Promise<void> 
 router.post("/exams", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const { name, subjectId, examDate, totalMarks, timeLimitMinutes } = req.body;
-    if (!name?.trim()) { res.status(400).json({ message: "Exam name is required" }); return; }
+    if (!name?.trim()) { res.status(400).json({ error: "Exam name is required" }); return; }
     const teacherId = getTeacherId(req);
     const [created] = await db.insert(examsTable).values({
       name: name.trim(),
@@ -36,7 +44,7 @@ router.post("/exams", authenticate, async (req: AuthRequest, res): Promise<void>
       timeLimitMinutes: timeLimitMinutes ? parseInt(timeLimitMinutes, 10) : null,
     }).returning();
     res.status(201).json(created);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to create exam" });
   }
 });
@@ -44,8 +52,18 @@ router.post("/exams", authenticate, async (req: AuthRequest, res): Promise<void>
 router.get("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid exam ID" }); return; }
+
     const [exam] = await db.select().from(examsTable).where(eq(examsTable.id, id));
-    if (!exam) { res.status(404).json({ message: "Exam not found" }); return; }
+    if (!exam) { res.status(404).json({ error: "Exam not found" }); return; }
+
+    const isStudent = req.role === "student";
+    const isOwner = req.role === "admin" || exam.teacherAccountId === req.userId;
+
+    if (!isOwner && !isStudent) {
+      res.status(403).json({ error: "You do not have permission to view this exam" });
+      return;
+    }
 
     const questions = await db.select().from(examQuestionsTable)
       .where(eq(examQuestionsTable.examId, id))
@@ -54,11 +72,13 @@ router.get("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<vo
     const teacherId = getTeacherId(req);
     const students = req.role === "admin"
       ? await db.select().from(studentsTable)
-      : await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId));
+      : isStudent
+        ? []
+        : await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId));
 
     const marks = await db.select().from(studentMarksTable).where(eq(studentMarksTable.examId, id));
     res.json({ exam, questions, students, marks });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to load exam" });
   }
 });
@@ -66,6 +86,11 @@ router.get("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<vo
 router.patch("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid exam ID" }); return; }
+
+    const owned = await assertExamOwner(req, id);
+    if (!owned) { res.status(owned === null ? 404 : 403).json({ error: "Exam not found or access denied" }); return; }
+
     const { name, subjectId, examDate, totalMarks, timeLimitMinutes } = req.body;
     const updates: Record<string, unknown> = {};
     if (name) updates.name = name.trim();
@@ -74,9 +99,9 @@ router.patch("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<
     if ("totalMarks" in req.body) updates.totalMarks = totalMarks ? String(totalMarks) : null;
     if ("timeLimitMinutes" in req.body) updates.timeLimitMinutes = timeLimitMinutes ? parseInt(timeLimitMinutes, 10) : null;
     const [updated] = await db.update(examsTable).set(updates).where(eq(examsTable.id, id)).returning();
-    if (!updated) { res.status(404).json({ message: "Exam not found" }); return; }
+    if (!updated) { res.status(404).json({ error: "Exam not found" }); return; }
     res.json(updated);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to update exam" });
   }
 });
@@ -84,9 +109,16 @@ router.patch("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<
 router.delete("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid exam ID" }); return; }
+
+    const owned = await assertExamOwner(req, id);
+    if (!owned) { res.status(404).json({ error: "Exam not found or access denied" }); return; }
+
+    await db.delete(examQuestionsTable).where(eq(examQuestionsTable.examId, id));
+    await db.delete(studentMarksTable).where(eq(studentMarksTable.examId, id));
     await db.delete(examsTable).where(eq(examsTable.id, id));
-    res.json({ message: "Exam deleted" });
-  } catch (err) {
+    res.json({ success: true });
+  } catch {
     res.status(500).json({ error: "Failed to delete exam" });
   }
 });
@@ -94,8 +126,13 @@ router.delete("/exams/:id", authenticate, async (req: AuthRequest, res): Promise
 router.post("/exams/:id/questions", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const examId = parseInt(req.params.id, 10);
+    if (isNaN(examId)) { res.status(400).json({ error: "Invalid exam ID" }); return; }
+
+    const owned = await assertExamOwner(req, examId);
+    if (!owned) { res.status(404).json({ error: "Exam not found or access denied" }); return; }
+
     const { questionText, topic, maxMarks, questionOrder, parentId, questionType, options, correctOption } = req.body;
-    if (!maxMarks && maxMarks !== 0) { res.status(400).json({ message: "maxMarks is required" }); return; }
+    if (!maxMarks && maxMarks !== 0) { res.status(400).json({ error: "maxMarks is required" }); return; }
     const type = questionType || "written";
     const [created] = await db.insert(examQuestionsTable).values({
       examId,
@@ -109,7 +146,7 @@ router.post("/exams/:id/questions", authenticate, async (req: AuthRequest, res):
       correctOption: type === "mcq" && correctOption !== undefined ? parseInt(correctOption, 10) : null,
     }).returning();
     res.status(201).json(created);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to add question" });
   }
 });
@@ -117,6 +154,14 @@ router.post("/exams/:id/questions", authenticate, async (req: AuthRequest, res):
 router.patch("/exam-questions/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid question ID" }); return; }
+
+    const [question] = await db.select().from(examQuestionsTable).where(eq(examQuestionsTable.id, id));
+    if (!question) { res.status(404).json({ error: "Question not found" }); return; }
+
+    const owned = await assertExamOwner(req, question.examId);
+    if (!owned) { res.status(403).json({ error: "Access denied" }); return; }
+
     const { questionText, topic, maxMarks, questionOrder, questionType, options, correctOption } = req.body;
     const updates: Record<string, unknown> = {};
     if ("questionText" in req.body) updates.questionText = questionText;
@@ -130,7 +175,7 @@ router.patch("/exam-questions/:id", authenticate, async (req: AuthRequest, res):
     }
     const [updated] = await db.update(examQuestionsTable).set(updates).where(eq(examQuestionsTable.id, id)).returning();
     res.json(updated);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to update question" });
   }
 });
@@ -138,9 +183,17 @@ router.patch("/exam-questions/:id", authenticate, async (req: AuthRequest, res):
 router.delete("/exam-questions/:id", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) { res.status(400).json({ error: "Invalid question ID" }); return; }
+
+    const [question] = await db.select().from(examQuestionsTable).where(eq(examQuestionsTable.id, id));
+    if (!question) { res.status(404).json({ error: "Question not found" }); return; }
+
+    const owned = await assertExamOwner(req, question.examId);
+    if (!owned) { res.status(403).json({ error: "Access denied" }); return; }
+
     await db.delete(examQuestionsTable).where(eq(examQuestionsTable.id, id));
-    res.json({ message: "Question deleted" });
-  } catch (err) {
+    res.json({ success: true });
+  } catch {
     res.status(500).json({ error: "Failed to delete question" });
   }
 });
@@ -148,8 +201,13 @@ router.delete("/exam-questions/:id", authenticate, async (req: AuthRequest, res)
 router.post("/exams/:id/marks", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const examId = parseInt(req.params.id, 10);
+    if (isNaN(examId)) { res.status(400).json({ error: "Invalid exam ID" }); return; }
+
+    const owned = await assertExamOwner(req, examId);
+    if (!owned) { res.status(404).json({ error: "Exam not found or access denied" }); return; }
+
     const { marks } = req.body;
-    if (!Array.isArray(marks)) { res.status(400).json({ message: "marks array required" }); return; }
+    if (!Array.isArray(marks)) { res.status(400).json({ error: "marks array required" }); return; }
 
     for (const m of marks) {
       const { studentId, questionId, marksScored, mistakes } = m;
@@ -168,8 +226,8 @@ router.post("/exams/:id/marks", authenticate, async (req: AuthRequest, res): Pro
         },
       });
     }
-    res.json({ message: `Saved ${marks.length} mark entries` });
-  } catch (err) {
+    res.json({ success: true, saved: marks.length });
+  } catch {
     res.status(500).json({ error: "Failed to save marks" });
   }
 });
@@ -177,8 +235,15 @@ router.post("/exams/:id/marks", authenticate, async (req: AuthRequest, res): Pro
 router.get("/exams/:id/results", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const examId = parseInt(req.params.id, 10);
+    if (isNaN(examId)) { res.status(400).json({ error: "Invalid exam ID" }); return; }
+
     const [exam] = await db.select().from(examsTable).where(eq(examsTable.id, examId));
-    if (!exam) { res.status(404).json({ message: "Exam not found" }); return; }
+    if (!exam) { res.status(404).json({ error: "Exam not found" }); return; }
+
+    if (req.role !== "admin" && req.role !== "student" && exam.teacherAccountId !== req.userId) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
 
     const questions = await db.select().from(examQuestionsTable).where(eq(examQuestionsTable.examId, examId));
     const marks = await db.select({
@@ -209,7 +274,7 @@ router.get("/exams/:id/results", authenticate, async (req: AuthRequest, res): Pr
     })).sort((a: any, b: any) => b.totalScored - a.totalScored);
 
     res.json({ exam, questions, results, totalMax });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to load exam results" });
   }
 });

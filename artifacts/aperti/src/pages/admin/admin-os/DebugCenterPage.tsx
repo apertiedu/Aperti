@@ -197,7 +197,14 @@ export default function DebugCenterPage() {
             </CardHeader>
             <CardContent className="p-0 divide-y max-h-64 overflow-y-auto">
               {errQuery.isLoading ? (
-                <div className="p-6 text-center text-sm text-gray-400">Loading…</div>
+                <div className="divide-y">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="px-4 py-3 animate-pulse">
+                      <div className="h-3 bg-gray-100 rounded w-3/4 mb-1.5" />
+                      <div className="h-3 bg-gray-100 rounded w-1/2" />
+                    </div>
+                  ))}
+                </div>
               ) : errQuery.isError ? (
                 <div className="p-6 text-center text-sm text-red-400">Could not load error data</div>
               ) : (errQuery.data?.recentErrors ?? []).length === 0 ? (
@@ -234,7 +241,17 @@ export default function DebugCenterPage() {
             </CardHeader>
             <CardContent className="p-0 divide-y">
               {errQuery.isLoading ? (
-                <div className="p-6 text-center text-sm text-gray-400">Loading…</div>
+                <div className="divide-y">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="px-4 py-3 flex items-center gap-3 animate-pulse">
+                      <div className="h-7 w-7 rounded-lg bg-gray-100 shrink-0" />
+                      <div className="flex-1 space-y-1.5">
+                        <div className="h-3 bg-gray-100 rounded w-32" />
+                        <div className="h-2.5 bg-gray-100 rounded w-20" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (errQuery.data?.topRoutes ?? []).length === 0 ? (
                 <div className="p-6 text-center">
                   <CheckCircle2 className="h-8 w-8 text-emerald-300 mx-auto mb-2" />
@@ -268,7 +285,14 @@ export default function DebugCenterPage() {
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               {healthQuery.isLoading ? (
-                <div className="text-sm text-gray-400 text-center py-4">Loading…</div>
+                <div className="space-y-3 animate-pulse">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex justify-between items-center">
+                      <div className="h-3 bg-gray-100 rounded w-20" />
+                      <div className="h-3 bg-gray-100 rounded w-16" />
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <>
                   <div className="flex items-center justify-between text-sm">
@@ -327,7 +351,17 @@ export default function DebugCenterPage() {
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               {healthQuery.isLoading ? (
-                <div className="text-sm text-gray-400 text-center py-4">Loading…</div>
+                <div className="space-y-3 animate-pulse">
+                  {[1, 2].map(i => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="flex justify-between">
+                        <div className="h-3 bg-gray-100 rounded w-16" />
+                        <div className="h-3 bg-gray-100 rounded w-24" />
+                      </div>
+                      <div className="h-1.5 bg-gray-100 rounded-full" />
+                    </div>
+                  ))}
+                </div>
               ) : health?.memory ? (
                 <>
                   {[

@@ -151,7 +151,7 @@ export default function SystemInventoryPage() {
             <h3 className="font-bold text-gray-900 text-sm">Database</h3>
           </div>
           {healthLoading ? (
-            <div className="text-sm text-gray-400">Loading...</div>
+            <div className="h-4 w-24 bg-gray-100 rounded animate-pulse" />
           ) : (
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between">

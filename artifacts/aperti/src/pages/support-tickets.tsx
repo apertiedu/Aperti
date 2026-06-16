@@ -114,7 +114,14 @@ export default function SupportTickets() {
         </div>
         <div className="flex-1 overflow-y-auto">
           {isLoading ? (
-            <div className="p-8 text-center text-gray-400 text-sm">Loading…</div>
+            <div className="p-4 space-y-2">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="p-4 border border-gray-100 rounded-lg animate-pulse space-y-2">
+                  <div className="h-3 bg-gray-100 rounded w-2/3" />
+                  <div className="h-3 bg-gray-100 rounded w-1/3" />
+                </div>
+              ))}
+            </div>
           ) : filtered.length === 0 ? (
             <div className="p-8 text-center text-gray-400 text-sm">No tickets</div>
           ) : (
