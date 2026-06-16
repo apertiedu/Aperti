@@ -57,6 +57,29 @@ errorsLogRouter.post("/log", errorLogLimiter, async (req: Request, res: Response
   res.json({ ok: true });
 });
 
+/* ── POST /api/errors/ux-violation — authenticated, logs UX rule violations ── */
+const uxViolationLimiter = rateLimit({ windowMs: 60_000, max: 60, standardHeaders: true, legacyHeaders: false });
+
+errorsLogRouter.post("/ux-violation", uxViolationLimiter, (req, res, next) => {
+  try { (authenticate as any)(req, res, next); } catch { next(); }
+}, async (req: AuthRequest, res: Response) => {
+  try {
+    const { route, rule_id, description, severity } = req.body ?? {};
+    if (!route || !rule_id) { res.status(400).json({ error: "route and rule_id are required" }); return; }
+    const safeRoute = String(route).slice(0, 300);
+    const safeRule = String(rule_id).slice(0, 100);
+    const safeDesc = String(description ?? "").slice(0, 500);
+    const safeSev = ["warn", "error"].includes(severity) ? severity : "warn";
+    await pool.query(
+      `INSERT INTO ux_rule_violations (route, rule_id, description, severity, created_at) VALUES ($1, $2, $3, $4, NOW())`,
+      [safeRoute, safeRule, safeDesc, safeSev]
+    );
+    res.json({ ok: true });
+  } catch {
+    res.status(500).json({ error: "Failed to log violation" });
+  }
+});
+
 /* ── POST /api/errors/log-auth — authenticated, writes userId/role ───────── */
 errorsLogRouter.post("/log-auth", (req, res, next) => {
   try { (authenticate as any)(req, res, next); } catch { next(); }

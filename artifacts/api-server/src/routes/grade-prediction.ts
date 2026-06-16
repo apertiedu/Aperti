@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { logError } from "../lib/log-error";
+import { safeHandler } from "../lib/safe-handler";
 
 export const gradePredictionRouter = Router();
 gradePredictionRouter.use(authenticate);
@@ -105,7 +106,7 @@ function buildDataFallback(
 gradePredictionRouter.get(
   "/student/:studentId",
   requireRole("student", "teacher", "admin", "super_admin", "parent"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const studentId = parseInt(req.params.studentId);
       if (isNaN(studentId)) { res.status(400).json({ error: "Invalid student ID" }); return; }
@@ -239,14 +240,14 @@ Include 2 what-if simulations on the top weak topics.`;
       logError(err, { route: "grade-prediction/student" });
       res.status(500).json({ error: "Failed to generate prediction" });
     }
-  }
+  })
 );
 
 /* ── POST /api/grade-prediction/what-if ─────────────────────────────────── */
 gradePredictionRouter.post(
   "/what-if",
   requireRole("student", "teacher", "admin", "super_admin"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { student_id, topic, improvement_pct, current_range } = req.body as {
         student_id: number;
@@ -297,5 +298,5 @@ gradePredictionRouter.post(
       logError(err, { route: "grade-prediction/what-if" });
       res.status(500).json({ error: "Failed to run simulation" });
     }
-  }
+  })
 );

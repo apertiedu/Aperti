@@ -7,7 +7,7 @@ import RolesPage from "./RolesPage";
 import SubscriptionsPage from "./SubscriptionsPage";
 import PaymentsPage from "./PaymentsPage";
 import AnalyticsPage from "./AnalyticsPage";
-import HealthPage from "./HealthPage";
+import SystemHealthDashboard from "../system-health";
 import FeaturesPage from "./FeaturesPage";
 import AuditPage from "./AuditPage";
 import SecurityPage from "./SecurityPage";
@@ -119,7 +119,7 @@ export default function AdminOS() {
 
         {/* Operations */}
         <Route path="/admin/os/analytics" component={AnalyticsPage} />
-        <Route path="/admin/os/health" component={HealthPage} />
+        <Route path="/admin/os/health" component={SystemHealthDashboard} />
         <Route path="/admin/os/features" component={FeaturesPage} />
         <Route path="/admin/os/audit" component={AuditPage} />
         <Route path="/admin/os/security" component={SecurityPage} />

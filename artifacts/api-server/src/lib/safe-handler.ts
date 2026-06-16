@@ -17,7 +17,9 @@ export function safeHandler(handler: AsyncHandler, errorCode = "HANDLER_EXCEPTIO
         req.path.includes("/ai") ||
         req.path.includes("/tutor") ||
         req.path.includes("/snap") ||
-        req.path.includes("/mentor");
+        req.path.includes("/mentor") ||
+        req.path.includes("/study-plan") ||
+        req.path.includes("/grade-prediction");
 
       if (isAiRoute) {
         pool

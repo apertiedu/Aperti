@@ -277,6 +277,22 @@ systemRouter.post("/safe-mode", async (req: Request, res: Response): Promise<voi
   }
 });
 
+/* ── Validation Errors — recent AI validation failures ──────────────────── */
+systemRouter.get("/validation-errors", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, source, error_type, field_missing, fallback_used, created_at
+       FROM system_validation_errors
+       ORDER BY created_at DESC
+       LIMIT 50`,
+    );
+    res.json({ errors: rows });
+  } catch (err) {
+    await logError(err, { route: "/api/system/validation-errors" });
+    res.status(500).json({ error: "Failed to fetch validation errors" });
+  }
+});
+
 /* ── Production Metrics — aggregated health data for dashboard ──────────── */
 systemRouter.get("/production-metrics", async (_req: Request, res: Response): Promise<void> => {
   try {

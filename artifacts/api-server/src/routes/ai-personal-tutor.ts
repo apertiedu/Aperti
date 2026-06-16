@@ -2,6 +2,8 @@ import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { logError } from "../lib/log-error";
+import { safeHandler } from "../lib/safe-handler";
+import { validateAIResponse, buildFallbackAIResponse } from "../lib/validate-ai-response";
 
 export const aiPersonalTutorRouter = Router();
 aiPersonalTutorRouter.use(authenticate);
@@ -59,7 +61,7 @@ function parseJSON(text: string | null): any | null {
 aiPersonalTutorRouter.get(
   "/student/:studentId/weakness",
   requireRole("teacher", "admin", "super_admin", "student"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const studentId = parseInt(req.params.studentId);
       if (isNaN(studentId)) { res.status(400).json({ error: "Invalid student ID" }); return; }
@@ -100,14 +102,14 @@ aiPersonalTutorRouter.get(
       logError(err, { route: "ai-tutor/weakness" });
       res.status(500).json({ error: "Failed to load weakness profile" });
     }
-  }
+  })
 );
 
 /* ── POST /api/ai-tutor/explain ──────────────────────────────────────────── */
 aiPersonalTutorRouter.post(
   "/explain",
   requireRole("student", "teacher", "admin", "super_admin"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { student_id, concept, subject, preferred_style } = req.body as {
         student_id: number;
@@ -203,9 +205,12 @@ Generate a ${style} explanation at ${difficultyLevel} difficulty.`;
       const parsed = parseJSON(raw);
 
       if (!parsed) {
-        res.status(503).json({ error: "AI response parsing failed. Please retry." });
+        const fb = buildFallbackAIResponse("ai-tutor/explain");
+        res.json({ student_id, concept, ...fb, difficulty_level: difficultyLevel, examples: [], follow_up_questions: [], reinforcement_needed: isWeak, teaching_style_used: style, ai_generated: false });
         return;
       }
+
+      await validateAIResponse(parsed, "ai-tutor/explain", { requiredFields: ["explanation", "examples", "follow_up_questions"] });
 
       res.json({
         student_id,
@@ -230,14 +235,14 @@ Generate a ${style} explanation at ${difficultyLevel} difficulty.`;
       logError(err, { route: "ai-tutor/explain" });
       res.status(500).json({ error: "Failed to generate explanation" });
     }
-  }
+  })
 );
 
 /* ── POST /api/ai-tutor/adaptive-followup ────────────────────────────────── */
 aiPersonalTutorRouter.post(
   "/adaptive-followup",
   requireRole("student", "teacher", "admin", "super_admin"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { student_id, concept, student_answer, original_question, current_difficulty } = req.body as {
         student_id: number;
@@ -277,14 +282,17 @@ Evaluate and adapt.`;
       const parsed = parseJSON(raw);
 
       if (!parsed) {
-        res.status(503).json({ error: "AI unavailable. Please retry." });
+        const fb = buildFallbackAIResponse("ai-tutor/adaptive-followup");
+        res.json({ student_id, concept, correct: false, feedback: fb.content, next_difficulty: current_difficulty, next_style: "step-by-step", next_question: `Can you try explaining ${concept} again in your own words?`, hint: "Review the explanation and try again." });
         return;
       }
+
+      await validateAIResponse(parsed, "ai-tutor/adaptive-followup", { requiredFields: ["correct", "feedback", "next_difficulty"] });
 
       res.json({ student_id, concept, ...parsed });
     } catch (err) {
       logError(err, { route: "ai-tutor/adaptive-followup" });
       res.status(500).json({ error: "Failed to process follow-up" });
     }
-  }
+  })
 );

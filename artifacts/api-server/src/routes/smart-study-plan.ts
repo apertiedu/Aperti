@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { logError } from "../lib/log-error";
+import { safeHandler } from "../lib/safe-handler";
 
 export const smartStudyPlanRouter = Router();
 smartStudyPlanRouter.use(authenticate);
@@ -67,7 +68,7 @@ function daysBetween(from: string, to: string): number {
 smartStudyPlanRouter.get(
   "/exam-dates",
   requireRole("student", "teacher", "admin", "super_admin"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const studentId = req.query.student_id ? parseInt(req.query.student_id as string) : null;
       let examQuery: { rows: any[] };
@@ -98,14 +99,14 @@ smartStudyPlanRouter.get(
       logError(err, { route: "study-plan/exam-dates" });
       res.status(500).json({ error: "Failed to load exam dates" });
     }
-  }
+  })
 );
 
 /* ── POST /api/study-plan/generate ──────────────────────────────────────── */
 smartStudyPlanRouter.post(
   "/generate",
   requireRole("student", "teacher", "admin", "super_admin"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { student_id, exam_date, exam_name, hours_per_day } = req.body as {
         student_id: number;
@@ -271,14 +272,14 @@ HARD LIMIT: Last entry date must be ${addDays(exam_date, -1)} or earlier. Never 
       logError(err, { route: "study-plan/generate" });
       res.status(500).json({ error: "Failed to generate study plan" });
     }
-  }
+  })
 );
 
 /* ── POST /api/study-plan/regenerate ────────────────────────────────────── */
 smartStudyPlanRouter.post(
   "/regenerate",
   requireRole("student", "teacher", "admin", "super_admin"),
-  async (req: AuthRequest, res: Response): Promise<void> => {
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     try {
       const { student_id, exam_date, completed_up_to, new_weak_topics, hours_per_day } = req.body as {
         student_id: number;
@@ -328,5 +329,5 @@ Revision phase starts: ${revisionStart}.`;
       logError(err, { route: "study-plan/regenerate" });
       res.status(500).json({ error: "Failed to regenerate plan" });
     }
-  }
+  })
 );
