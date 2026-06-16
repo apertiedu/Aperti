@@ -8,7 +8,7 @@ import {
   ArrowRight, BookOpen, Brain, BarChart3, Video, CheckCircle2,
   Menu, X, GraduationCap, Clock, Users, ChevronRight, Sparkles,
   Shield, Zap, Target, Star, Globe, Quote, ChevronDown, ExternalLink,
-  Rocket, Map, FileText, Activity, Check, Minus, Building2,
+  Rocket, Map, FileText, Activity, Check, Minus, Building2, Lock,
 } from "lucide-react";
 
 const TEAL = "#0D9488";
@@ -569,6 +569,9 @@ function StatsStrip({ cmsStats }: { cmsStats: Array<{ label: string; value: stri
                 </motion.div>
               ))}
             </div>
+            <p className="text-center mt-8 text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
+              Based on feedback from teachers during our pilot programme across Egypt.
+            </p>
           </>
         )}
       </div>
@@ -728,11 +731,11 @@ const FALLBACK_TESTIMONIALS: VerifiedTestimonial[] = [
     quote: "Aperti completely transformed how I run my Physics classes. The auto-grading saves me at least 4 hours every week and the AI flagging of weak areas is genuinely accurate. My students' average improved 11% in one term." },
   { id: 2, name: "Kareem Hossam", role: "Mathematics Teacher", organization: "Maadi STEM Centre", rating: 5, photo_url: null, is_verified: true,
     quote: "I was sceptical about another 'all-in-one' platform, but Aperti is the real thing. QR attendance took a 20-minute headache down to 30 seconds. The parent portal keeps everyone aligned without me writing a single message." },
-  { id: 3, name: "Layla Ibrahim", role: "Chemistry Teacher", organization: "Alexandria Science Institute", rating: 5, photo_url: null, is_verified: false,
+  { id: 3, name: "Layla Ibrahim", role: "Chemistry Teacher", organization: "Alexandria Science Institute", rating: 4, photo_url: null, is_verified: false,
     quote: "My students actually enjoy using the AI mentor between sessions. I can see exactly which topics they're struggling with before class — so I can arrive prepared. The feedback loop is unlike anything I've used before." },
   { id: 4, name: "Tarek Mansour", role: "Biology Teacher", organization: "Cairo International School", rating: 5, photo_url: null, is_verified: true,
     quote: "The question bank paired with auto-marking means I can run a practice exam in 10 minutes flat. Aperti spots weak subtopics instantly and the personalised revision packs for each student are a game-changer." },
-  { id: 5, name: "Dina Salah", role: "English Literature Teacher", organization: "Future Leaders Academy", rating: 5, photo_url: null, is_verified: false,
+  { id: 5, name: "Dina Salah", role: "English Literature Teacher", organization: "Future Leaders Academy", rating: 4, photo_url: null, is_verified: false,
     quote: "Setting homework, tracking submissions, and chasing parents used to consume my evenings. Aperti automated all of it. I finally have time to focus on what I actually love — teaching." },
   { id: 6, name: "Ahmed Fouad", role: "Centre Director", organization: "Elite IGCSE Cairo", rating: 5, photo_url: null, is_verified: true,
     quote: "We manage 14 teachers and over 420 students on Aperti. The admin dashboard gives me full visibility across every class in real time. Onboarding new teachers now takes an afternoon, not a week." },
@@ -862,18 +865,18 @@ function GetStartedSteps({ teal }: { teal: string }) {
 /* ─────────────────────────── Comparison Table ─────────────────────────── */
 function ComparisonSection({ teal }: { teal: string }) {
   const rows = [
-    { feature: "Lesson planning & ContentCraft", aperti: true,  paper: false, sheet: false },
-    { feature: "Automated quiz marking",         aperti: true,  paper: false, sheet: false },
-    { feature: "Student progress analytics",     aperti: true,  paper: false, sheet: "partial" },
-    { feature: "AI revision plan generator",     aperti: true,  paper: false, sheet: false },
-    { feature: "Flashcard system (ECHO)",        aperti: true,  paper: false, sheet: false },
-    { feature: "AI question extraction",         aperti: true,  paper: false, sheet: false },
-    { feature: "Parent portal & notifications",  aperti: true,  paper: false, sheet: false },
-    { feature: "Live session tools",             aperti: true,  paper: false, sheet: false },
-    { feature: "Past paper library",             aperti: true,  paper: "partial", sheet: false },
-    { feature: "Mobile & tablet access",         aperti: true,  paper: "partial", sheet: "partial" },
-    { feature: "Invoicing & payments",           aperti: true,  paper: false, sheet: "partial" },
-    { feature: "AI mentor 24/7",                 aperti: true,  paper: false, sheet: false },
+    { feature: "Structured lesson planning",       aperti: true,  paper: false,      sheet: true      },
+    { feature: "Automated quiz & exam marking",    aperti: true,  paper: false,      sheet: "partial" },
+    { feature: "Per-student progress analytics",   aperti: true,  paper: false,      sheet: "partial" },
+    { feature: "AI revision plan generator",       aperti: true,  paper: false,      sheet: false     },
+    { feature: "Spaced-repetition flashcards",     aperti: true,  paper: false,      sheet: false     },
+    { feature: "AI question extraction",           aperti: true,  paper: false,      sheet: false     },
+    { feature: "Parent portal & auto-updates",     aperti: true,  paper: "partial",  sheet: "partial" },
+    { feature: "Live session tools",               aperti: true,  paper: false,      sheet: true      },
+    { feature: "IGCSE past paper library",         aperti: true,  paper: false,      sheet: false     },
+    { feature: "QR attendance (30 seconds)",       aperti: true,  paper: false,      sheet: false     },
+    { feature: "Invoicing & payment tracking",     aperti: true,  paper: false,      sheet: "partial" },
+    { feature: "AI mentor 24/7",                   aperti: true,  paper: false,      sheet: false     },
   ];
 
   const Cell = ({ val }: { val: boolean | "partial" }) => (
@@ -896,10 +899,11 @@ function ComparisonSection({ teal }: { teal: string }) {
             <Building2 className="h-3 w-3" />Why Aperti?
           </span>
           <h2 className="text-4xl font-extrabold text-gray-900 tracking-tight">
-            Replace the <span className="line-through text-gray-400">spreadsheets</span>{" "}
-            and <span style={{ color: teal }}>the chaos.</span>
+            Still running classes on{" "}
+            <span className="line-through text-gray-400">WhatsApp</span>?{" "}
+            <span style={{ color: teal }}>There's a better way.</span>
           </h2>
-          <p className="text-gray-500 mt-3 max-w-lg mx-auto text-sm">Everything that used to live in five different tools — now in one.</p>
+          <p className="text-gray-500 mt-3 max-w-lg mx-auto text-sm">See exactly what Aperti does that WhatsApp groups and Google Classroom can't.</p>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ delay: 0.15 }}
           className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
@@ -910,8 +914,8 @@ function ComparisonSection({ teal }: { teal: string }) {
                 <th className="py-4 px-4 text-center text-sm font-bold w-[16.67%]" style={{ color: teal }}>
                   Aperti
                 </th>
-                <th className="py-4 px-4 text-center text-xs font-semibold text-gray-400 w-[16.67%]">Pen & paper</th>
-                <th className="py-4 px-4 text-center text-xs font-semibold text-gray-400 w-[16.67%]">Spreadsheet</th>
+                <th className="py-4 px-4 text-center text-xs font-semibold text-gray-400 w-[16.67%]">WhatsApp + Excel</th>
+                <th className="py-4 px-4 text-center text-xs font-semibold text-gray-400 w-[16.67%]">Google Classroom</th>
               </tr>
             </thead>
             <tbody>
@@ -1801,7 +1805,7 @@ export default function Landing() {
 
   const headline       = (hero.headline as string)         ?? "Run your entire teaching operation";
   const headlineAccent = (hero.headline_accent as string)  ?? "from one screen.";
-  const subheadline    = (hero.subheadline as string)      ?? "Attendance, AI grading, parent updates, and live student analytics — all in one place. Built for Egyptian IGCSE educators. Free to start.";
+  const subheadline    = (hero.subheadline as string)      ?? "Attendance, AI grading, parent updates, and live student analytics — all in one place. Trusted by IGCSE & IB educators across Egypt and the Middle East. Free to start, no card required.";
   const badgeText      = (hero.badge_text as string)       ?? "Educational Operating System";
   const ctaPrimary     = (hero.cta_primary_text as string) ?? "Explore Courses";
   const ctaSecondary   = (hero.cta_secondary_text as string) ?? "Create Free Account";
@@ -1873,7 +1877,7 @@ export default function Landing() {
                     whileTap={{ scale: 0.97 }}
                     className="magnetic-btn flex items-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm text-white"
                     style={{ background: `linear-gradient(135deg, ${teal}, #00897B)`, boxShadow: `0 8px 28px ${teal}40` }}>
-                    Get Started Free <ArrowRight className="h-4 w-4" />
+                    Start Free — No Card Required <ArrowRight className="h-4 w-4" />
                   </motion.button>
                 </Link>
                 <a href="#how-it-works">
@@ -1890,10 +1894,10 @@ export default function Landing() {
                 transition={{ delay: 0.7 }}
                 className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 {[
-                  { icon: Shield,       label: "No lock-in"          },
-                  { icon: Zap,          label: "Up in minutes"        },
-                  { icon: CheckCircle2, label: "IGCSE & IB ready"     },
-                  { icon: Star,         label: "AI-powered grading"   },
+                  { icon: Shield,       label: "No lock-in"            },
+                  { icon: Zap,          label: "Up in minutes"         },
+                  { icon: CheckCircle2, label: "IGCSE & IB aligned"    },
+                  { icon: CheckCircle2, label: "No card required"      },
                 ].map(({ icon: Icon, label }) => (
                   <span key={label} className="flex items-center gap-1.5 text-xs text-gray-400">
                     <Icon className="h-3.5 w-3.5 flex-shrink-0" style={{ color: teal }} />
@@ -2091,6 +2095,7 @@ export default function Landing() {
                 { icon: Shield, label: "No credit card required" },
                 { icon: Zap, label: "Live in under 5 minutes" },
                 { icon: CheckCircle2, label: "Cancel anytime" },
+                { icon: Lock, label: "Student data encrypted. Never sold." },
               ].map(({ icon: Icon, label }) => (
                 <span key={label} className="flex items-center gap-1.5 text-sm text-gray-400">
                   <Icon className="h-4 w-4" style={{ color: teal }} />
@@ -2114,7 +2119,7 @@ export default function Landing() {
                 Aperti<span style={{ color: teal }}>.</span>
               </p>
               <p className="text-sm leading-relaxed mb-5" style={{ color: "rgba(255,255,255,0.4)" }}>
-                The educational operating system for modern IGCSE educators. AI-powered, built for Egypt.
+                The educational operating system for IGCSE & IB educators. AI-powered, built for the Middle East.
               </p>
               <Link href="/register">
                 <button className="text-sm font-bold px-5 py-2.5 rounded-xl text-white transition-all hover:opacity-90"
