@@ -230,6 +230,9 @@ const ExamResults = lazy(() => import("@/pages/student/exam-results"));
 const StudentTranscript = lazy(() => import("@/pages/student/transcript"));
 const StudentAppeals = lazy(() => import("@/pages/student/appeals"));
 const ExamReadiness = lazy(() => import("@/pages/student/exam-readiness"));
+const AiPersonalTutor = lazy(() => import("@/pages/student/ai-personal-tutor"));
+const SmartStudyPlan = lazy(() => import("@/pages/student/smart-study-plan"));
+const GradePrediction = lazy(() => import("@/pages/student/grade-prediction"));
 
 // Parent
 const GuardianHub = lazy(() => import("@/pages/parent/dashboard"));
@@ -503,6 +506,10 @@ function StudentRouter() {
         <Route path="/flashcards/swipe" component={FlashcardSwipe} />
         {/* Phase 34 — Student QR Center */}
         <Route path="/my-qr" component={MyQRPage} />
+        {/* Phase 51 — AI Intelligence Suite */}
+        <Route path="/ai-tutor" component={AiPersonalTutor} />
+        <Route path="/smart-study-plan" component={SmartStudyPlan} />
+        <Route path="/grade-prediction" component={GradePrediction} />
         <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>

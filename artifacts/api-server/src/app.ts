@@ -108,6 +108,9 @@ import { aiGatewayRouter } from "./routes/ai-gateway";
 import { aiAgentsRouter } from "./routes/ai-agents";
 import { apiV2Router } from "./routes/api-v2";
 import { classforgeRouter } from "./routes/classforge";
+import { aiPersonalTutorRouter } from "./routes/ai-personal-tutor";
+import { smartStudyPlanRouter } from "./routes/smart-study-plan";
+import { gradePredictionRouter } from "./routes/grade-prediction";
 import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 import { sanitizeBody } from "./middleware/sanitize-body";
@@ -439,6 +442,10 @@ app.use("/api/ai", aiAgentsRouter);
 app.use("/api/v2", apiV2Router);
 // ClassForge — live session engagement analytics
 app.use("/api", classforgeRouter);
+// Phase 51 — AI Intelligence Suite (Personal Tutor, Study Plan, Grade Prediction)
+app.use("/api/ai-tutor", aiPersonalTutorRouter);
+app.use("/api/study-plan", smartStudyPlanRouter);
+app.use("/api/grade-prediction", gradePredictionRouter);
 
 // ── Production: serve built React frontend + SPA fallback ─────────────────────
 if (isProduction) {
