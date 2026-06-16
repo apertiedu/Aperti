@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { withLanguage } from "../lib/ai-config";
+import { generateAIResponse, AI_AVAILABLE } from "../services/ai";
 
 export const parentAiRouter = Router();
 
@@ -15,20 +16,6 @@ async function isLinked(parentId: number, studentId: number): Promise<boolean> {
   return rows.length > 0;
 }
 
-async function openaiChat(messages: any[], maxTokens = 600): Promise<string> {
-  const apiKey = process.env["OPENAI_API_KEY"];
-  if (!apiKey) throw new Error("OPENAI_API_KEY not configured");
-  const response = await fetch(`${process.env.OPENAI_BASE_URL || "https://api.openai.com/v1"}/chat/completions`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-    body: JSON.stringify({ model: process.env["OPENAI_MODEL"] || "meta/llama-3.1-8b-instruct", messages, max_tokens: maxTokens }),
-  });
-  if (!response.ok) throw new Error(`OpenAI ${response.status}`);
-  return ((await response.json()) as any).choices?.[0]?.message?.content ?? "";
-}
-
-// POST /api/parent/ai-assistant/:studentId
-// Parent asks a question about their child; the response is backed by CoreMind real data.
 parentAiRouter.post(
   "/parent/ai-assistant/:studentId",
   ...authParent,
@@ -45,7 +32,6 @@ parentAiRouter.post(
         return res.status(403).json({ error: "Not linked to this student" });
       }
 
-      // Fetch student name
       const { rows: studentRows } = await pool.query(
         `SELECT s.student_name, a.display_name
          FROM students s LEFT JOIN accounts a ON a.id=s.account_id
@@ -54,14 +40,12 @@ parentAiRouter.post(
       );
       const studentName = studentRows[0]?.display_name || studentRows[0]?.student_name || "your child";
 
-      // Fetch CoreMind analysis (best-effort)
       let analysis: any = null;
       try {
         const { analyzeStudent } = await import("../lib/coremind");
         analysis = await analyzeStudent(studentId);
-      } catch { /* best-effort */ }
+      } catch { }
 
-      // Fetch attendance & grade snapshot
       const [attRes, gradeRes] = await Promise.all([
         pool.query(
           `SELECT ROUND(
@@ -81,7 +65,6 @@ parentAiRouter.post(
       const attRate = parseFloat(attRes.rows[0]?.att_rate ?? "0");
       const avgGrade = parseFloat(gradeRes.rows[0]?.avg_pct ?? "0");
 
-      // Build data context string
       const dataCtx = [
         `Student: ${studentName}`,
         `Attendance: ${attRate}%`,
@@ -92,23 +75,21 @@ parentAiRouter.post(
         analysis?.recommendedActions?.length > 0 ? `Recommendations: ${analysis.recommendedActions.slice(0, 2).join("; ")}` : null,
       ].filter(Boolean).join("\n");
 
-      // Rule-based fallback when no OpenAI key
-      if (!process.env.OPENAI_API_KEY) {
-        const lower = question.toLowerCase();
+      if (!AI_AVAILABLE) {
         let reply = `Here is what I know about ${studentName}:\n\n`;
-        reply += `📊 **Attendance:** ${attRate}%\n`;
-        reply += `📝 **Average Grade:** ${avgGrade > 0 ? `${avgGrade}%` : "Not yet recorded"}\n`;
+        reply += `**Attendance:** ${attRate}%\n`;
+        reply += `**Average Grade:** ${avgGrade > 0 ? `${avgGrade}%` : "Not yet recorded"}\n`;
         if (analysis) {
-          reply += `🎯 **Exam Readiness:** ${analysis.examReadiness}%\n`;
-          reply += `⚠️ **Risk Level:** ${analysis.riskLevel}\n`;
+          reply += `**Exam Readiness:** ${analysis.examReadiness}%\n`;
+          reply += `**Risk Level:** ${analysis.riskLevel}\n`;
           if (analysis.weakTopics?.length > 0) {
-            reply += `📚 **Weak Topics:** ${analysis.weakTopics.slice(0, 3).join(", ")}\n`;
+            reply += `**Weak Topics:** ${analysis.weakTopics.slice(0, 3).join(", ")}\n`;
           }
           if (analysis.recommendedActions?.length > 0) {
-            reply += `\n**Recommended Actions:**\n${analysis.recommendedActions.map((a: string) => `• ${a}`).join("\n")}`;
+            reply += `\n**Recommended Actions:**\n${analysis.recommendedActions.map((a: string) => `- ${a}`).join("\n")}`;
           }
         }
-        reply += "\n\n*Configure an OpenAI API key for conversational AI responses.*";
+        reply += "\n\n*AI assistant unavailable. Configure an AI API key for conversational responses.*";
         return res.json({ reply, studentName, dataCtx, fallback: true });
       }
 
@@ -126,19 +107,37 @@ ${dataCtx}
 
 Answer the parent's question using the data above. Be warm, specific, and give 1-2 clear actionable suggestions.`;
 
-      const reply = await openaiChat([
-        { role: "system", content: systemPrompt },
-        { role: "user", content: userPrompt },
-      ]);
+      const result = await generateAIResponse(
+        userPrompt,
+        {
+          systemPrompt,
+          maxTokens: 600,
+          module: "parent-ai",
+        }
+      );
 
-      res.json({ reply, studentName, coremindBacked: analysis !== null });
+      if (!result.ok || !result.text) {
+        let reply = `Here is what I know about ${studentName}:\n\n`;
+        reply += `**Attendance:** ${attRate}%\n`;
+        reply += `**Average Grade:** ${avgGrade > 0 ? `${avgGrade}%` : "Not yet recorded"}\n`;
+        if (analysis) {
+          reply += `**Exam Readiness:** ${analysis.examReadiness}%\n`;
+          reply += `**Risk Level:** ${analysis.riskLevel}\n`;
+          if (analysis.weakTopics?.length > 0) {
+            reply += `**Weak Topics:** ${analysis.weakTopics.slice(0, 3).join(", ")}\n`;
+          }
+        }
+        reply += "\n\n*AI review unavailable. Teacher review mode activated.*";
+        return res.json({ reply, studentName, dataCtx, fallback: true, error: result.error });
+      }
+
+      res.json({ reply: result.text, studentName, coremindBacked: analysis !== null, latencyMs: result.latencyMs });
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }
   }
 );
 
-// GET /api/parent/ai-snapshot/:studentId — quick structured snapshot for parent dashboard
 parentAiRouter.get(
   "/parent/ai-snapshot/:studentId",
   ...authParent,
@@ -153,7 +152,7 @@ parentAiRouter.get(
       try {
         const { analyzeStudent } = await import("../lib/coremind");
         analysis = await analyzeStudent(studentId);
-      } catch { /* best-effort */ }
+      } catch { }
 
       if (!analysis) {
         return res.json({ available: false, message: "No AI data available yet for this student." });
