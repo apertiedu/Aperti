@@ -1,0 +1,170 @@
+APERTI EMPTY STATES, ZERO STATES, NO-DATA STATES & FIRST-TIME USER EXPERIENCE MISSION
+You are acting as:
+Senior UX Designer
+Senior Product Designer
+Senior Frontend Engineer
+Senior SaaS Growth Designer
+MISSION
+Transform every empty, blank, loading, first-use, and no-data screen in Aperti into a premium, guided experience.
+Do not leave any section appearing broken, unfinished, abandoned, or confusing.
+====================================================
+PHASE 1 — DISCOVER ALL EMPTY STATES
+Scan the entire platform and identify:
+Empty dashboards
+Empty tables
+Empty courses
+Empty assignments
+Empty attendance records
+Empty reports
+Empty analytics
+Empty messages
+Empty notifications
+Empty announcements
+Empty study rooms
+Empty revision plans
+Empty resources
+Empty documents
+Empty gradebooks
+Empty assessments
+Empty subscriptions
+Empty billing pages
+Empty waitlists
+Empty search results
+Find ALL routes where a user could see:
+No data
+No results
+First-time use
+Unconfigured state
+Missing content
+====================================================
+PHASE 2 — FIRST LOGIN EXPERIENCE
+For first-time users:
+Student
+Teacher
+Parent
+Admin
+Create onboarding experiences.
+Instead of showing blank dashboards:
+Display:
+Welcome to Aperti
+Explain platform benefits.
+Show a setup checklist.
+Examples:
+✓ Complete profile
+✓ Join your first class
+✓ Upload your first assignment
+✓ Explore study tools
+Use progress indicators.
+Celebrate completion.
+====================================================
+PHASE 3 — EMPTY DASHBOARD DESIGN
+Never show:
+"No data"
+or
+"Nothing here"
+Instead show:
+Friendly illustration
+Helpful explanation
+Clear next action
+Example:
+You have no courses yet.
+Join a course to access assignments, grades and resources.
+[ Browse Courses ]
+====================================================
+PHASE 4 — EMPTY SEARCH STATES
+Replace generic:
+"No results"
+With:
+No results found for:
+"Physics 0625"
+Suggestions:
+Check spelling
+Try broader keywords
+Browse available resources
+Provide:
+Suggested searches
+Popular searches
+Recent searches
+====================================================
+PHASE 5 — ACHIEVEMENT EMPTY STATES
+Some empty states are successes.
+Examples:
+Inbox Zero
+No overdue assignments
+No attendance warnings
+No unresolved tickets
+Celebrate these moments.
+Examples:
+🎉 You're all caught up.
+No pending assignments.
+Enjoy the break.
+Add tasteful micro-animations.
+====================================================
+PHASE 6 — COURSE BUILDER STATES
+Teacher has no courses:
+Show:
+Create your first course
+Explain:
+Courses allow you to manage students, assignments, attendance and communication.
+[ Create Course ]
+====================================================
+PHASE 7 — ASSIGNMENT STATES
+Student has no assignments:
+Show:
+No assignments yet.
+Your teacher hasn't published any assignments.
+We'll notify you as soon as new work becomes available.
+====================================================
+PHASE 8 — ANALYTICS STATES
+Insufficient data:
+Show:
+Analytics will appear as students begin interacting with your classes.
+Provide examples of future insights.
+Do not display empty charts.
+====================================================
+PHASE 9 — LOADING STATES
+Replace spinners wherever possible.
+Use skeleton loading.
+Show realistic placeholders.
+Prevent layout shifts.
+Make loading feel intentional.
+====================================================
+PHASE 10 — ERROR STATES
+Replace technical errors.
+Never show:
+Undefined
+Null
+500 Error
+Stack traces
+Instead show:
+Something went wrong.
+Please try again.
+[ Retry ]
+Provide graceful recovery.
+====================================================
+PHASE 11 — MICROINTERACTIONS
+Add premium polish:
+Fade-ins
+Success animations
+Hover feedback
+Completion celebrations
+Smooth transitions
+Contextual tooltips
+Keep animations subtle and professional.
+====================================================
+PHASE 12 — PRODUCT QUALITY CHECK
+Review every page and ensure:
+Every state answers:
+Why is this empty?
+What is this section for?
+What should the user do next?
+No screen should ever feel broken.
+Every screen should guide the user toward progress.
+Generate a final report listing:
+Pages improved
+Empty states added
+UX improvements added
+Remaining UX issues
+Product polish score out of 100
+
+
