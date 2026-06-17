@@ -1711,4 +1711,69 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   )`,
   `CREATE INDEX IF NOT EXISTS idx_aa_assistant ON assistant_assignments(assistant_id) WHERE active = TRUE`,
   `CREATE INDEX IF NOT EXISTS idx_aa_teacher   ON assistant_assignments(teacher_id) WHERE active = TRUE`,
+
+  /* ── Features 18–21: Receipts ────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS receipts (
+    id             bigserial PRIMARY KEY,
+    invoice_id     integer NOT NULL REFERENCES billing_invoices(id) ON DELETE CASCADE,
+    user_id        integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    receipt_number text NOT NULL UNIQUE,
+    amount_paid    numeric(10,2) NOT NULL,
+    currency       text NOT NULL DEFAULT 'EGP',
+    payment_method text NOT NULL DEFAULT 'manual',
+    paid_at        timestamptz NOT NULL DEFAULT NOW(),
+    notes          text,
+    metadata       jsonb NOT NULL DEFAULT '{}',
+    created_at     timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_receipts_invoice ON receipts(invoice_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_receipts_user    ON receipts(user_id, paid_at DESC)`,
+
+  /* ── Features 18–21: Disputes ────────────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS disputes (
+    id             bigserial PRIMARY KEY,
+    transaction_id integer NOT NULL REFERENCES payment_transactions(id) ON DELETE CASCADE,
+    user_id        integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    reason         text NOT NULL,
+    evidence       jsonb NOT NULL DEFAULT '[]',
+    status         text NOT NULL DEFAULT 'open'
+                   CHECK (status IN ('open','investigating','resolved','rejected')),
+    resolution     text,
+    resolved_by    integer REFERENCES accounts(id) ON DELETE SET NULL,
+    resolved_at    timestamptz,
+    created_at     timestamptz NOT NULL DEFAULT NOW(),
+    updated_at     timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_disputes_user   ON disputes(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_disputes_status ON disputes(status, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_disputes_tx     ON disputes(transaction_id)`,
+
+  /* ── Features 18–21: Anomaly Predictions ────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS anomaly_predictions (
+    id                 bigserial PRIMARY KEY,
+    entity_id          text NOT NULL,
+    entity_type        text NOT NULL DEFAULT 'user',
+    risk_score         numeric(5,4) NOT NULL DEFAULT 0,
+    prediction         text,
+    recommended_action text NOT NULL DEFAULT 'monitor',
+    signals            jsonb NOT NULL DEFAULT '[]',
+    analyzed_at        timestamptz NOT NULL DEFAULT NOW(),
+    created_by         integer REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at         timestamptz NOT NULL DEFAULT NOW(),
+    UNIQUE (entity_id, entity_type)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_anomaly_pred_entity ON anomaly_predictions(entity_id, entity_type)`,
+  `CREATE INDEX IF NOT EXISTS idx_anomaly_pred_score  ON anomaly_predictions(risk_score DESC, analyzed_at DESC)`,
+
+  /* ── Features 18–21: billing_invoices extended columns ──────────────── */
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS invoice_number text`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS items          jsonb NOT NULL DEFAULT '[]'`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS subtotal       numeric(10,2)`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS discount       numeric(10,2) NOT NULL DEFAULT 0`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS total          numeric(10,2)`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS currency       text NOT NULL DEFAULT 'EGP'`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS expires_at     timestamptz`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS metadata       jsonb NOT NULL DEFAULT '{}'`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS paid_at        timestamptz`,
+  `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS notes          text`,
 ];

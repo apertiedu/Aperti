@@ -119,6 +119,9 @@ import { aiGovernanceRouter } from "./ai-governance";
 import { aiExamGeneratorRouter } from "./ai-exam-generator";
 import { weaknessDetectionRouter } from "./weakness-detection";
 import { anomalyDetectionRouter } from "./anomaly-detection";
+import { billingInvoicesRouter } from "./billing-invoices";
+import { disputesRouter } from "./disputes";
+import { aiAnomalyRouter } from "./ai-anomaly";
 
 const router: IRouter = Router();
 
@@ -284,6 +287,11 @@ import { assistantAssignmentsRouter } from "./assistant-assignments";
 router.use("/secure-payments", securePaymentsRouter);
 router.use("/secure-discounts", secureDiscountsRouter);
 router.use("/assistant-assignments", assistantAssignmentsRouter);
+
+// Features 18–21 — Billing, Disputes, AI Financial Anomaly, Multi-school
+router.use("/billing", billingInvoicesRouter);
+router.use("/disputes", disputesRouter);
+router.use("/ai-anomaly", aiAnomalyRouter);
 
 export default router;
 

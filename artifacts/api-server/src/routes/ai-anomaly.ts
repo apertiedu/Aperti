@@ -3,7 +3,7 @@ import { pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { logError } from "../lib/log-error";
 import { createFraudAlert } from "../lib/ledger-engine";
-import { AI_CONFIG } from "../lib/ai";
+import { AI_CONFIG } from "../lib/ai-config";
 
 export const aiAnomalyRouter = Router();
 
@@ -274,5 +274,42 @@ aiAnomalyRouter.get("/predictions", async (req: AuthRequest, res: Response): Pro
   } catch (err) {
     await logError(err, { route: "GET /api/ai-anomaly/predictions" });
     res.status(500).json({ error: "Failed to fetch predictions" });
+  }
+});
+
+/* ── GET /api/ai-anomaly/fraud-alerts ───────────────────────────────────── */
+aiAnomalyRouter.get("/fraud-alerts", async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { status, severity, limit = "100" } = req.query as Record<string, string>;
+    const params: unknown[] = [];
+    const conditions: string[] = [];
+
+    if (status)   { params.push(status);   conditions.push(`fa.status = $${params.length}`); }
+    if (severity) { params.push(severity); conditions.push(`fa.severity = $${params.length}`); }
+
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const { rows } = await pool.query(
+      `SELECT fa.*, a.display_name AS username, a.email
+       FROM fraud_alerts fa
+       LEFT JOIN accounts a ON a.id = fa.user_id
+       ${where}
+       ORDER BY fa.created_at DESC LIMIT $${params.length + 1}`,
+      [...params, parseInt(limit, 10)],
+    );
+
+    const { rows: stats } = await pool.query(`
+      SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE status='open')::int AS open,
+        COUNT(*) FILTER (WHERE severity='critical')::int AS critical,
+        COUNT(*) FILTER (WHERE severity='high')::int AS high,
+        COUNT(*) FILTER (WHERE severity='medium')::int AS medium
+      FROM fraud_alerts
+    `);
+
+    res.json({ alerts: rows, stats: stats[0] ?? {} });
+  } catch (err) {
+    await logError(err, { route: "GET /api/ai-anomaly/fraud-alerts" });
+    res.status(500).json({ error: "Failed to fetch fraud alerts" });
   }
 });

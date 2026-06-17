@@ -91,6 +91,11 @@ const TeacherVerification = lazy(() => import("@/pages/admin/teacher-verificatio
 const AiAnalytics = lazy(() => import("@/pages/admin/ai-analytics"));
 const AiSafety = lazy(() => import("@/pages/admin/ai-safety"));
 const AiMonitoring = lazy(() => import("@/pages/admin/ai-monitoring"));
+// Features 18–21
+const BillingCenter = lazy(() => import("@/pages/admin/billing-center"));
+const DisputeCenter = lazy(() => import("@/pages/admin/dispute-center"));
+const FinancialAnomalyPage = lazy(() => import("@/pages/admin/financial-anomaly"));
+const SchoolNetwork = lazy(() => import("@/pages/admin/school-network"));
 
 // Student Portal
 const PastPaperLibrary = lazy(() => import("@/pages/student-portal/past-paper-library"));
@@ -658,6 +663,11 @@ const ADMIN_ROUTES = (
     <Route path="/admin/repair" component={RepairPanel} />
     {/* Content Calendar */}
     <Route path="/admin/content-calendar" component={ContentCalendarPage} />
+    {/* Features 18–21 — Billing, Disputes, AI Anomaly, School Network */}
+    <Route path="/admin/billing-center" component={BillingCenter} />
+    <Route path="/admin/dispute-center" component={DisputeCenter} />
+    <Route path="/admin/financial-anomaly" component={FinancialAnomalyPage} />
+    <Route path="/admin/school-network" component={SchoolNetwork} />
   </>
 );
 
