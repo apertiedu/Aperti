@@ -15,7 +15,7 @@ import {
 export const weaveRouter = Router();
 
 // GET /weave/related?nodeId=&relation=
-weaveRouter.get("/related", authenticate, async (req: AuthRequest, res: Response) => {
+weaveRouter.get("/related", authenticate, async (req: AuthRequest, res: any) => {
   const nodeId = parseInt(req.query.nodeId as string);
   const relation = req.query.relation as string | undefined;
   if (isNaN(nodeId)) return res.status(400).json({ error: "nodeId required" });
@@ -25,7 +25,7 @@ weaveRouter.get("/related", authenticate, async (req: AuthRequest, res: Response
 });
 
 // GET /weave/path?sourceId=&targetId=
-weaveRouter.get("/path", authenticate, async (req: AuthRequest, res: Response) => {
+weaveRouter.get("/path", authenticate, async (req: AuthRequest, res: any) => {
   const sourceId = parseInt(req.query.sourceId as string);
   const targetId = parseInt(req.query.targetId as string);
   if (isNaN(sourceId) || isNaN(targetId)) return res.status(400).json({ error: "sourceId and targetId required" });
@@ -35,7 +35,7 @@ weaveRouter.get("/path", authenticate, async (req: AuthRequest, res: Response) =
 });
 
 // GET /weave/recommend?studentId=&type=topic|question|resource
-weaveRouter.get("/recommend", authenticate, async (req: AuthRequest, res: Response) => {
+weaveRouter.get("/recommend", authenticate, async (req: AuthRequest, res: any) => {
   const studentId = parseInt(req.query.studentId as string);
   const type = (req.query.type as "topic" | "question" | "resource") || "topic";
   if (isNaN(studentId)) return res.status(400).json({ error: "studentId required" });
@@ -44,7 +44,7 @@ weaveRouter.get("/recommend", authenticate, async (req: AuthRequest, res: Respon
 });
 
 // POST /weave/edges — manual edge creation (teacher/admin)
-weaveRouter.post("/edges", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+weaveRouter.post("/edges", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: any) => {
   const { fromNodeId, toNodeId, relationType, weight } = req.body;
   if (!fromNodeId || !toNodeId || !relationType) {
     return res.status(400).json({ error: "fromNodeId, toNodeId, relationType required" });
@@ -54,7 +54,7 @@ weaveRouter.post("/edges", authenticate, requireRole("teacher", "admin"), async 
 });
 
 // GET /weave/nodes — list all nodes (for UI explorer)
-weaveRouter.get("/nodes", authenticate, async (req: AuthRequest, res: Response) => {
+weaveRouter.get("/nodes", authenticate, async (req: AuthRequest, res: any) => {
   const type = req.query.type as string | undefined;
   let rows;
   if (type) {
@@ -66,7 +66,7 @@ weaveRouter.get("/nodes", authenticate, async (req: AuthRequest, res: Response) 
 });
 
 // GET /weave/health — graph statistics
-weaveRouter.get("/health", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+weaveRouter.get("/health", authenticate, requireRole("admin"), async (req: AuthRequest, res: any) => {
   const [nodeCount] = await db.select({ count: count() }).from(knowledgeNodesTable);
   const [edgeCount] = await db.select({ count: count() }).from(knowledgeEdgesTable);
 
@@ -94,7 +94,7 @@ weaveRouter.get("/health", authenticate, requireRole("admin"), async (req: AuthR
 });
 
 // POST /weave/populate — seed the graph from existing DB data
-weaveRouter.post("/populate", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+weaveRouter.post("/populate", authenticate, requireRole("admin"), async (req: AuthRequest, res: any) => {
   const log: string[] = [];
   let nodesCreated = 0;
   let edgesCreated = 0;

@@ -1,4 +1,4 @@
-import { Router, Response } from "express";
+import { Router } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 
@@ -50,11 +50,11 @@ const PERMISSIONS_LIST = [
   { name: "send_messages",      label: "Send Messages" },
 ];
 
-workspaceRouter.get("/permissions", (_req, res) => {
+workspaceRouter.get("/permissions", (_req: AuthRequest, res: any) => {
   res.json(PERMISSIONS_LIST);
 });
 
-workspaceRouter.get("/mine", authenticate, async (req: AuthRequest, res: Response) => {
+workspaceRouter.get("/mine", authenticate, async (req: AuthRequest, res: any) => {
   try {
     const { rows } = await pool.query(
       `SELECT w.*, a.display_name AS owner_name,
@@ -70,10 +70,10 @@ workspaceRouter.get("/mine", authenticate, async (req: AuthRequest, res: Respons
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
-workspaceRouter.post("/", authenticate, async (req: AuthRequest, res: Response) => {
+workspaceRouter.post("/", authenticate, async (req: AuthRequest, res: any) => {
   try {
     const { name, type, description } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: "Workspace name is required" });
+    if (!name?.trim()) { res.status(400).json({ error: "Workspace name is required" }); return; }
     const { rows } = await pool.query(
       `INSERT INTO workspaces (name, type, owner_id, description) VALUES ($1, $2, $3, $4) RETURNING *`,
       [name.trim(), type || "teacher", req.userId, description || null]
@@ -86,19 +86,19 @@ workspaceRouter.post("/", authenticate, async (req: AuthRequest, res: Response) 
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
-workspaceRouter.get("/:id", authenticate, async (req: AuthRequest, res: Response) => {
+workspaceRouter.get("/:id", authenticate, async (req: AuthRequest, res: any) => {
   try {
     const { rows } = await pool.query(
       `SELECT w.*, a.display_name AS owner_name FROM workspaces w
        JOIN accounts a ON w.owner_id=a.id WHERE w.id=$1`,
       [parseInt(req.params.id)]
     );
-    if (!rows.length) return res.status(404).json({ error: "Workspace not found" });
+    if (!rows.length) { res.status(404).json({ error: "Workspace not found" }); return; }
     res.json(rows[0]);
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
-workspaceRouter.get("/:id/roles", authenticate, async (req: AuthRequest, res: Response) => {
+workspaceRouter.get("/:id/roles", authenticate, async (req: AuthRequest, res: any) => {
   try {
     const { rows } = await pool.query(
       `SELECT * FROM workspace_roles WHERE workspace_id=$1 ORDER BY name ASC`,
@@ -108,10 +108,10 @@ workspaceRouter.get("/:id/roles", authenticate, async (req: AuthRequest, res: Re
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
-workspaceRouter.post("/:id/roles", authenticate, async (req: AuthRequest, res: Response) => {
+workspaceRouter.post("/:id/roles", authenticate, async (req: AuthRequest, res: any) => {
   try {
     const { name, permissions } = req.body;
-    if (!name?.trim()) return res.status(400).json({ error: "Role name is required" });
+    if (!name?.trim()) { res.status(400).json({ error: "Role name is required" }); return; }
     const { rows } = await pool.query(
       `INSERT INTO workspace_roles (workspace_id, name, permissions) VALUES ($1, $2, $3) RETURNING *`,
       [parseInt(req.params.id), name.trim(), permissions || []]
@@ -120,7 +120,7 @@ workspaceRouter.post("/:id/roles", authenticate, async (req: AuthRequest, res: R
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
-workspaceRouter.get("/:id/members", authenticate, async (req: AuthRequest, res: Response) => {
+workspaceRouter.get("/:id/members", authenticate, async (req: AuthRequest, res: any) => {
   try {
     const { rows } = await pool.query(
       `SELECT wm.*, a.display_name, a.username, a.role, a.email, wr.name AS role_name

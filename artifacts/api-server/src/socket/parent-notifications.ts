@@ -68,7 +68,7 @@ export async function notifyParentsOfStudent(
       [studentId]
     );
     await Promise.all(
-      rows.map(r => emitParentNotification({ ...notification, parentId: r.parent_account_id }))
+      rows.map((r: { parent_account_id: number }) => emitParentNotification({ ...notification, parentId: r.parent_account_id }))
     );
   } catch (err) {
     console.error("[parent-notifications] notifyParentsOfStudent error:", err);
