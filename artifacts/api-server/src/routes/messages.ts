@@ -12,7 +12,7 @@ messagesRouter.get("/messages/unread-count", authenticate, async (req: AuthReque
       [req.userId!],
     );
     res.json({ count: Number(rows[0].count) });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Conversations list ────────────────────────────────────────────────── */
@@ -44,7 +44,7 @@ messagesRouter.get("/messages/conversations", authenticate, async (req: AuthRequ
       [uid],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Thread with one account ───────────────────────────────────────────── */
@@ -63,7 +63,7 @@ messagesRouter.get("/messages/thread/:accountId", authenticate, async (req: Auth
     );
     await pool.query("UPDATE messages SET read=true WHERE to_account_id=$1 AND from_account_id=$2 AND read=false", [uid, other]);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Send message ──────────────────────────────────────────────────────── */
@@ -76,7 +76,7 @@ messagesRouter.post("/messages", authenticate, async (req: AuthRequest, res: Res
       [req.userId!, to_account_id, subject || null, body],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── List contacts (students + parents linked to teacher) ──────────────── */
@@ -92,7 +92,7 @@ messagesRouter.get("/messages/contacts", authenticate, async (req: AuthRequest, 
       [],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Announcements list ────────────────────────────────────────────────── */
@@ -118,7 +118,7 @@ messagesRouter.get("/announcements", authenticate, async (req: AuthRequest, res:
     }
     const { rows } = await pool.query(query, [uid]);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Create announcement ───────────────────────────────────────────────── */
@@ -131,7 +131,7 @@ messagesRouter.post("/announcements", authenticate, async (req: AuthRequest, res
       [req.userId!, title, body, audience_type || "all", audience_ids || null],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Delete announcement ───────────────────────────────────────────────── */
@@ -139,5 +139,5 @@ messagesRouter.delete("/announcements/:id", authenticate, async (req: AuthReques
   try {
     await pool.query("DELETE FROM announcements WHERE id=$1 AND sender_id=$2", [req.params.id, req.userId!]);
     res.json({ success: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

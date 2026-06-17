@@ -66,7 +66,7 @@ commSupportRouter.post("/tickets", authenticate, async (req: AuthRequest, res: R
     }).returning();
 
     res.status(201).json(ticket);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/tickets – list tickets ─────────────────────────────────────────
@@ -92,7 +92,7 @@ commSupportRouter.get("/tickets", authenticate, async (req: AuthRequest, res: Re
 
     const { rows } = await pool.query(query, params);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/tickets/:id – ticket detail ────────────────────────────────────
@@ -110,7 +110,7 @@ commSupportRouter.get("/tickets/:id", authenticate, async (req: AuthRequest, res
       [id],
     );
     res.json({ ticket: tickets[0], responses });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /api/tickets/:id – update ticket ────────────────────────────────────
@@ -134,7 +134,7 @@ commSupportRouter.put("/tickets/:id", authenticate, async (req: AuthRequest, res
     }
 
     res.json(ticket);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/tickets/:id/respond ───────────────────────────────────────────
@@ -154,7 +154,7 @@ commSupportRouter.post("/tickets/:id/respond", authenticate, async (req: AuthReq
     }
 
     res.status(201).json(response);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -182,7 +182,7 @@ commSupportRouter.get("/notifications/preferences", authenticate, async (req: Au
       prefs = inserted;
     }
     res.json(prefs);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /api/notifications/preferences – update prefs ───────────────────────
@@ -214,7 +214,7 @@ commSupportRouter.put("/notifications/preferences", authenticate, async (req: Au
       }
     }
     res.json(results);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -277,7 +277,7 @@ commSupportRouter.get("/analytics/communication", authenticate, requireRole("tea
     );
 
     res.json({ summary, top_messagers, ticket_stats, daily_activity, channel_activity });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -294,7 +294,7 @@ commSupportRouter.post("/moderation/flag", authenticate, async (req: AuthRequest
       reportedBy: req.userId!, contentType: content_type, contentId: Number(content_id), reason,
     }).returning();
     res.status(201).json(log);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/moderation/reports – list flagged content ──────────────────────
@@ -313,7 +313,7 @@ commSupportRouter.get("/moderation/reports", authenticate, requireRole("teacher"
       params,
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /api/moderation/reports/:id – take action ───────────────────────────
@@ -328,7 +328,7 @@ commSupportRouter.put("/moderation/reports/:id", authenticate, requireRole("teac
       resolvedBy: req.userId!,
     }).where(eq(moderationLogsTable.id, id)).returning();
     res.json(updated);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/moderation/stats ─────────────────────────────────────────────
@@ -346,7 +346,7 @@ commSupportRouter.get("/moderation/stats", authenticate, requireRole("teacher", 
       `SELECT content_type, COUNT(*) AS count FROM moderation_logs GROUP BY content_type ORDER BY count DESC`,
     );
     res.json({ ...totals, by_type });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/moderation/blocklist ─────────────────────────────────────────
@@ -354,7 +354,7 @@ commSupportRouter.get("/moderation/blocklist", authenticate, requireRole("teache
   try {
     const { rows } = await pool.query(`SELECT * FROM blocked_words ORDER BY severity DESC, word ASC`);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/moderation/blocklist ────────────────────────────────────────
@@ -367,7 +367,7 @@ commSupportRouter.post("/moderation/blocklist", authenticate, requireRole("teach
       [word.trim().toLowerCase(), severity, req.userId],
     );
     res.status(201).json(w);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── DELETE /api/moderation/blocklist/:id ──────────────────────────────────
@@ -375,7 +375,7 @@ commSupportRouter.delete("/moderation/blocklist/:id", authenticate, requireRole(
   try {
     await pool.query(`DELETE FROM blocked_words WHERE id = $1`, [req.params.id]);
     res.json({ deleted: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /api/tickets/:id – assign/update ticket (admin/teacher) ───────────
@@ -389,5 +389,5 @@ commSupportRouter.put("/tickets/:id/assign", authenticate, requireRole("teacher"
       updatedAt: new Date(),
     }).where(eq(supportTicketsTable.id, id)).returning();
     res.json(ticket);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

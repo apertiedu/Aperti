@@ -31,7 +31,7 @@ qaRouter.post("/admin/bugs", async (req: AuthRequest, res: Response) => {
       status: "reported",
     }).returning();
     res.status(201).json(bug);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.get("/admin/bugs", async (req: Request, res: Response) => {
@@ -60,7 +60,7 @@ qaRouter.get("/admin/bugs", async (req: Request, res: Response) => {
 
     const bugs = await query;
     res.json(bugs);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.put("/admin/bugs/:id", async (req: AuthRequest, res: Response) => {
@@ -79,7 +79,7 @@ qaRouter.put("/admin/bugs/:id", async (req: AuthRequest, res: Response) => {
       .returning();
     if (!bug) return res.status(404).json({ error: "Bug not found" });
     res.json(bug);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.get("/admin/bugs/stats", async (_req: Request, res: Response) => {
@@ -95,7 +95,7 @@ qaRouter.get("/admin/bugs/stats", async (_req: Request, res: Response) => {
       ["reported","triaged","in_progress","testing"].includes(r.status)
     ).reduce((s, r) => s + Number(r.count), 0);
     res.json({ bySeverity, byStatus, total, openCritical });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ─── TEST CASE MANAGEMENT ───────────────────────────────────────────────────
@@ -109,7 +109,7 @@ qaRouter.post("/admin/test-cases", async (req: AuthRequest, res: Response) => {
       status: "pending",
     }).returning();
     res.status(201).json(tc);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.get("/admin/test-cases", async (req: Request, res: Response) => {
@@ -122,7 +122,7 @@ qaRouter.get("/admin/test-cases", async (req: Request, res: Response) => {
     let q = db.select().from(testCasesTable).orderBy(testCasesTable.category, testCasesTable.createdAt).$dynamic();
     if (conditions.length) q = q.where(and(...conditions)) as typeof q;
     res.json(await q);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.put("/admin/test-cases/:id", async (req: AuthRequest, res: Response) => {
@@ -138,7 +138,7 @@ qaRouter.put("/admin/test-cases/:id", async (req: AuthRequest, res: Response) =>
     }).where(eq(testCasesTable.id, parseInt(req.params.id))).returning();
     if (!tc) return res.status(404).json({ error: "Test case not found" });
     res.json(tc);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.post("/admin/test-runs", async (req: AuthRequest, res: Response) => {
@@ -174,14 +174,14 @@ qaRouter.post("/admin/test-runs", async (req: AuthRequest, res: Response) => {
       executedAt: new Date(),
     }).returning();
     res.status(201).json(run);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.get("/admin/test-runs", async (_req: Request, res: Response) => {
   try {
     const runs = await db.select().from(testRunsTable).orderBy(desc(testRunsTable.executedAt)).limit(50);
     res.json(runs);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ─── QUALITY SCORE ENGINE ───────────────────────────────────────────────────
@@ -281,7 +281,7 @@ qaRouter.post("/admin/quality/calculate", async (req: AuthRequest, res: Response
       },
       date: today,
     });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.get("/admin/quality/score", async (_req: Request, res: Response) => {
@@ -297,7 +297,7 @@ qaRouter.get("/admin/quality/score", async (_req: Request, res: Response) => {
 
     const overall = Math.round(scores.reduce((s, r) => s + Number(r.score), 0) / scores.length);
     res.json({ scores, overallScore: overall, date: today });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ─── LAUNCH CHECKLIST ───────────────────────────────────────────────────────
@@ -306,7 +306,7 @@ qaRouter.get("/admin/launch-checklist", async (_req: Request, res: Response) => 
   try {
     const items = await db.select().from(launchChecklistTable).orderBy(launchChecklistTable.category, launchChecklistTable.id);
     res.json(items);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 qaRouter.put("/admin/launch-checklist/:id", async (req: AuthRequest, res: Response) => {
@@ -320,7 +320,7 @@ qaRouter.put("/admin/launch-checklist/:id", async (req: AuthRequest, res: Respon
     }).where(eq(launchChecklistTable.id, parseInt(req.params.id))).returning();
     if (!item) return res.status(404).json({ error: "Item not found" });
     res.json(item);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ─── ROUTE PERMISSION SCANNER ───────────────────────────────────────────────
@@ -382,7 +382,7 @@ qaRouter.post("/admin/security/scan-routes", async (req: AuthRequest, res: Respo
     };
 
     res.json({ summary, results });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ─── API SANITY TEST RUNNER ─────────────────────────────────────────────────
@@ -494,5 +494,5 @@ qaRouter.post("/admin/tests/run-sanity", async (req: AuthRequest, res: Response)
     }).returning();
 
     res.json({ runId: run.id, passed, failed, total: results.length, coverage, results });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

@@ -283,7 +283,7 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
       );
       res.json({ reply, fallback: true });
     } else {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   }
 });
@@ -316,7 +316,7 @@ Format as structured markdown.`;
 
     res.json({ plan });
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -345,7 +345,7 @@ Write specific, encouraging feedback that identifies what was good and what to i
     const feedback = await openaiChat([{ role: "user", content: prompt }], 200);
     res.json({ feedback });
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -373,7 +373,7 @@ Return as a JSON array with fields: question_text, model_answer, marks. No markd
       res.json({ variants: [], raw });
     }
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -422,6 +422,6 @@ No markdown, just raw JSON.`;
 
     res.json({ ...parsed, weaveEnriched });
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

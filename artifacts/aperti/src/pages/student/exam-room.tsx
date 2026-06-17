@@ -105,10 +105,11 @@ export default function ExamRoom() {
   useSecurityMonitor(sessionToken);
 
   // Fetch available assessments
-  const { data: availableExams } = useQuery({
+  const { data: availableExams, isError: examsError } = useQuery({
     queryKey: ["available-exams"],
     queryFn: async () => {
       const res = await apiFetch("/api/assessments");
+      if (!res.ok) throw new Error("Failed to load assessments");
       const data = await res.json();
       return (data.assessments ?? []).filter((a: any) =>
         ["published", "active"].includes(a.status) && a.submission_status !== "submitted"
@@ -186,7 +187,16 @@ export default function ExamRoom() {
           <p className="text-sm text-muted-foreground mt-0.5">Select an available assessment to begin.</p>
         </div>
 
-        {(!availableExams || availableExams.length === 0) ? (
+        {examsError ? (
+          <div className="text-center py-16 border border-dashed border-red-200 rounded-2xl bg-red-50/40">
+            <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
+            <p className="font-semibold text-sm text-red-600">Could not load available exams</p>
+            <p className="text-xs text-muted-foreground mt-1 mb-4">Check your connection and try again.</p>
+            <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        ) : (!availableExams || availableExams.length === 0) ? (
           <div className="text-center py-16 border border-dashed border-border rounded-2xl">
             <CheckCircle2 className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
             <p className="font-medium text-muted-foreground">No assessments available right now</p>

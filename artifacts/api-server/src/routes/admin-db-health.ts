@@ -67,7 +67,7 @@ adminDbHealthRouter.get("/", async (_req, res) => {
       checkedAt: new Date().toISOString(),
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -78,6 +78,6 @@ adminDbHealthRouter.post("/vacuum", async (_req, res) => {
     await pool.query("VACUUM ANALYZE");
     res.json({ ok: true, message: "VACUUM ANALYZE completed successfully.", ranAt: new Date().toISOString() });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

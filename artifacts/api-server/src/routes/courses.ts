@@ -201,9 +201,20 @@ coursesRouter.put("/enrollments/:id", authenticate, requireRole("teacher","admin
   try {
     const { status } = req.body;
     if (!["approved","rejected"].includes(status)) return res.status(400).json({ error: "Invalid status" });
+    const enrollmentId = parseInt(req.params.id);
+    if (isNaN(enrollmentId)) return res.status(400).json({ error: "Invalid enrollment ID" });
+
+    const { rows: ownerRows } = await pool.query(
+      `SELECT e.id FROM course_enrollments e
+       JOIN aperti_courses c ON c.id = e.course_id
+       WHERE e.id = $1 AND (c.teacher_account_id = $2 OR $3 = 'admin')`,
+      [enrollmentId, req.userId, req.role ?? ""],
+    );
+    if (!ownerRows.length) return res.status(403).json({ error: "Access denied" });
+
     await pool.query(
       "UPDATE course_enrollments SET status=$1,approved_by=$2,approved_at=NOW() WHERE id=$3",
-      [status, req.userId, parseInt(req.params.id)]
+      [status, req.userId, enrollmentId],
     );
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }

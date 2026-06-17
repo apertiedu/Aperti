@@ -31,10 +31,10 @@ function RetentionBar({ pct, label, color }: { pct: number | null; label: string
 export default function AnalyticsPage() {
   const [tab, setTab] = useState<"users" | "courses" | "ai" | "retention">("users");
 
-  const { data: userData, isLoading: usersLoading } = useQuery({ queryKey: ["analytics-users"], queryFn: () => fetchJSON("/api/admin/analytics/users") });
-  const { data: courseData, isLoading: coursesLoading } = useQuery({ queryKey: ["analytics-courses"], queryFn: () => fetchJSON("/api/admin/analytics/courses") });
-  const { data: aiData, isLoading: aiLoading } = useQuery({ queryKey: ["analytics-ai"], queryFn: () => fetchJSON("/api/admin/analytics/ai") });
-  const { data: retentionData, isLoading: retentionLoading } = useQuery({
+  const { data: userData, isLoading: usersLoading, isError: usersError } = useQuery({ queryKey: ["analytics-users"], queryFn: () => fetchJSON("/api/admin/analytics/users") });
+  const { data: courseData, isLoading: coursesLoading, isError: coursesError } = useQuery({ queryKey: ["analytics-courses"], queryFn: () => fetchJSON("/api/admin/analytics/courses") });
+  const { data: aiData, isLoading: aiLoading, isError: aiError } = useQuery({ queryKey: ["analytics-ai"], queryFn: () => fetchJSON("/api/admin/analytics/ai") });
+  const { data: retentionData, isLoading: retentionLoading, isError: retentionError } = useQuery({
     queryKey: ["analytics-retention"],
     queryFn: () => fetchJSON("/api/admin/analytics/retention"),
     enabled: tab === "retention",
@@ -44,6 +44,16 @@ export default function AnalyticsPage() {
     queryFn: () => fetchJSON("/api/admin/analytics/engagement"),
     enabled: tab === "retention",
   });
+
+  const activeError = tab === "users" && usersError
+    ? "User analytics could not be loaded."
+    : tab === "courses" && coursesError
+    ? "Course analytics could not be loaded."
+    : tab === "ai" && aiError
+    ? "AI usage analytics could not be loaded."
+    : tab === "retention" && retentionError
+    ? "Retention data could not be loaded."
+    : null;
 
   return (
     <div className="space-y-5">
@@ -61,6 +71,14 @@ export default function AnalyticsPage() {
           >{t}</button>
         ))}
       </div>
+
+      {activeError && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+          <svg className="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <span>{activeError} Check the server logs or try refreshing.</span>
+          <button onClick={() => window.location.reload()} className="ml-auto text-xs underline font-medium">Retry</button>
+        </div>
+      )}
 
       {/* Users Tab */}
       {tab === "users" && (

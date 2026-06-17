@@ -62,7 +62,7 @@ errorIntelligenceRouter.get("/summary", async (_req, res: Response) => {
       topComponents: topComponents.rows,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -85,7 +85,7 @@ errorIntelligenceRouter.get("/failed-logins", async (_req, res: Response) => {
 
     res.json({ failedLogins: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -108,7 +108,7 @@ errorIntelligenceRouter.get("/route-errors", async (_req, res: Response) => {
 
     res.json({ routeErrors: errorRows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -127,7 +127,7 @@ errorIntelligenceRouter.get("/trends", async (_req, res: Response) => {
 
     res.json({ trends: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

@@ -93,7 +93,7 @@ adminContentValidationRouter.get("/summary", async (_req, res: Response) => {
       possibleDuplicates: dupes.rows,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -122,7 +122,7 @@ adminContentValidationRouter.get("/mark-schemes", async (_req, res: Response) =>
 
     res.json({ questions: rows, stats: { withMarkScheme: withMs, withoutMarkScheme: withoutMs } });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -166,6 +166,6 @@ adminContentValidationRouter.get("/relationships", async (_req, res: Response) =
 
     res.json({ questions: questions.rows, markSchemes: markSchemes.rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

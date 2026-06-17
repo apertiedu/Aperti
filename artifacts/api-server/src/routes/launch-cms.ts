@@ -53,7 +53,7 @@ router.get("/admin/features", ...adminOnly, async (req, res) => {
     q += " ORDER BY fr.created_at DESC";
     const { rows } = await pool.query(q, params);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/admin/features — create feature
@@ -68,7 +68,7 @@ router.post("/admin/features", ...adminOnly, async (req, res) => {
     const feature = rows[0];
     if (status === "scheduled" && release_date) scheduleFeatureLaunch(feature.id, new Date(release_date));
     res.status(201).json(feature);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/features/:id — update feature
@@ -88,7 +88,7 @@ router.put("/admin/features/:id", ...adminOnly, async (req, res) => {
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     if (rows[0].status === "scheduled" && rows[0].release_date) scheduleFeatureLaunch(rows[0].id, new Date(rows[0].release_date));
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // DELETE /api/admin/features/:id — soft delete
@@ -96,7 +96,7 @@ router.delete("/admin/features/:id", ...adminOnly, async (req, res) => {
   try {
     await pool.query("UPDATE feature_registry SET status='archived', updated_at=NOW() WHERE id=$1", [req.params.id]);
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/admin/features/:id/schedule — set launch date
@@ -111,7 +111,7 @@ router.post("/admin/features/:id/schedule", ...adminOnly, async (req, res) => {
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     scheduleFeatureLaunch(rows[0].id, new Date(release_date));
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/features/:id/dependencies — dependency check
@@ -127,7 +127,7 @@ router.get("/admin/features/:id/dependencies", ...adminOnly, async (req, res) =>
     );
     const all_released = deps.every((d) => d.status === "released");
     res.json({ dependencies: deps, all_released });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/features/:id/dependency-tree — full tree
@@ -144,7 +144,7 @@ router.get("/admin/features/:id/dependency-tree", ...adminOnly, async (req, res)
       return { ...node, children: deps.map((d: number) => buildTree(d, new Set(visited))) };
     }
     res.json(buildTree(parseInt(req.params.id)));
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── Public Feature Routes ─────────────────────────────────────────────────────
@@ -161,7 +161,7 @@ router.get("/features/public", async (req, res) => {
        ORDER BY CASE status WHEN 'released' THEN 1 WHEN 'beta' THEN 2 WHEN 'coming_soon' THEN 3 WHEN 'scheduled' THEN 4 ELSE 5 END, name`,
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/features/:id — feature detail
@@ -184,7 +184,7 @@ router.get("/features/:id", async (req, res) => {
     const { rows: wl } = await pool.query("SELECT COUNT(*) AS count FROM feature_waitlist WHERE feature_id=$1", [req.params.id]);
     feat.waitlist_count = parseInt(wl[0].count);
     res.json(feat);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -205,7 +205,7 @@ router.post("/features/:id/waitlist", async (req, res) => {
     // Track conversion
     await pool.query("INSERT INTO conversion_events (visitor_id,event_type,metadata) VALUES ($1,'waitlist_join',$2)", [email, JSON.stringify({ feature_id: req.params.id })]).catch(() => {});
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/features/:id/waitlist — admin view waitlist
@@ -216,7 +216,7 @@ router.get("/admin/features/:id/waitlist", ...adminOnly, async (req, res) => {
       [req.params.id],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/waitlists — all waitlists summary
@@ -235,7 +235,7 @@ router.get("/admin/waitlists", ...adminOnly, async (req, res) => {
       ORDER BY total_waitlist DESC
     `);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/waitlist/:id — update waitlist entry (invite/grant/revoke)
@@ -248,7 +248,7 @@ router.put("/admin/waitlist/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -270,7 +270,7 @@ router.post("/admin/features/:id/beta/enroll", ...adminOnly, async (req, res) =>
       } catch {}
     }
     res.json({ enrolled: results.length, results });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/features/:id/beta/testers
@@ -284,7 +284,7 @@ router.get("/admin/features/:id/beta/testers", ...adminOnly, async (req, res) =>
       [req.params.id],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/beta — all beta programs summary
@@ -302,7 +302,7 @@ router.get("/admin/beta", ...adminOnly, async (req, res) => {
       ORDER BY active_testers DESC
     `);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/features/:id/beta/feedback — submit feedback
@@ -315,7 +315,7 @@ router.post("/features/:id/beta/feedback", authenticate, async (req: AuthRequest
       [JSON.stringify([fb]), req.params.id, req.userId],
     );
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -332,7 +332,7 @@ router.post("/admin/release-notes", ...adminOnly, async (req, res) => {
       [title, summary, content, type || "minor", feature_id || null, version, scheduled_at || null, status, published_at],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/release-notes — public list
@@ -345,7 +345,7 @@ router.get("/release-notes", async (req, res) => {
        ORDER BY rn.published_at DESC LIMIT 50`,
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/release-notes — all (admin)
@@ -357,7 +357,7 @@ router.get("/admin/release-notes", ...adminOnly, async (req, res) => {
        ORDER BY rn.created_at DESC`,
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/release-notes/:id
@@ -376,7 +376,7 @@ router.put("/admin/release-notes/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -392,7 +392,7 @@ router.post("/admin/roadmap", ...adminOnly, async (req, res) => {
       [title, description, category, status, target_date || null, feature_id || null, order || 0],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/roadmap — public
@@ -404,7 +404,7 @@ router.get("/roadmap", async (req, res) => {
        ORDER BY ri."order" ASC, ri.created_at DESC`,
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/roadmap — admin
@@ -416,7 +416,7 @@ router.get("/admin/roadmap", ...adminOnly, async (req, res) => {
        ORDER BY ri."order" ASC`,
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/roadmap/:id
@@ -434,7 +434,7 @@ router.put("/admin/roadmap/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -446,7 +446,7 @@ router.get("/admin/landing-sections", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM landing_sections ORDER BY "order" ASC');
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/admin/landing-sections
@@ -458,7 +458,7 @@ router.post("/admin/landing-sections", ...adminOnly, async (req, res) => {
       [slug, type, JSON.stringify(content || {}), is_published, order],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/landing-sections/:id
@@ -476,7 +476,7 @@ router.put("/admin/landing-sections/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // DELETE /api/admin/landing-sections/:id
@@ -484,7 +484,7 @@ router.delete("/admin/landing-sections/:id", ...adminOnly, async (req, res) => {
   try {
     await pool.query("DELETE FROM landing_sections WHERE id=$1", [req.params.id]);
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/landing-sections/reorder — reorder sections
@@ -495,7 +495,7 @@ router.put("/admin/landing-sections/reorder", ...adminOnly, async (req, res) => 
       await pool.query('UPDATE landing_sections SET "order"=$1 WHERE id=$2', [i + 1, ids[i]]);
     }
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/landing — public assembled landing page data
@@ -521,7 +521,7 @@ router.get("/landing", async (req, res) => {
       plans: plans.rows,
       branding: branding.rows[0] || { primary_color: "#0D9488" },
     });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/landing/pricing — public pricing data
@@ -531,7 +531,7 @@ router.get("/landing/pricing", async (req, res) => {
       "SELECT * FROM subscription_plans WHERE is_visible_landing=true ORDER BY display_order ASC, price_egp ASC",
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -547,7 +547,7 @@ router.post("/admin/testimonials", ...adminOnly, async (req, res) => {
       [name, role, organization, photo_url, quote, rating || 5, is_approved],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/testimonials
@@ -555,7 +555,7 @@ router.get("/admin/testimonials", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM testimonials ORDER BY created_at DESC");
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/testimonials/:id
@@ -572,7 +572,7 @@ router.put("/admin/testimonials/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/admin/faqs
@@ -584,7 +584,7 @@ router.post("/admin/faqs", ...adminOnly, async (req, res) => {
       [question, answer, category, order || 0, is_published],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/faqs
@@ -592,7 +592,7 @@ router.get("/admin/faqs", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query('SELECT * FROM faqs ORDER BY "order" ASC');
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/faqs/:id
@@ -608,7 +608,7 @@ router.put("/admin/faqs/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -630,7 +630,7 @@ router.put("/admin/plans/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -648,7 +648,7 @@ router.post("/admin/announcements", ...adminOnly, async (req, res) => {
       [title, content, type || "general", is_published || false],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/announcements
@@ -656,7 +656,7 @@ router.get("/admin/announcements", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM announcements ORDER BY created_at DESC LIMIT 100");
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/announcements/:id
@@ -670,7 +670,7 @@ router.put("/admin/announcements/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -686,7 +686,7 @@ router.post("/admin/events", ...adminOnly, async (req, res) => {
       [title, description, event_date, registration_url, capacity, JSON.stringify(speaker_info || {}), type || "webinar", JSON.stringify(resources || []), is_published],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/events — public
@@ -696,7 +696,7 @@ router.get("/events", async (req, res) => {
       "SELECT * FROM launch_events WHERE is_published=true ORDER BY event_date ASC",
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/events — admin
@@ -704,7 +704,7 @@ router.get("/admin/events", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM launch_events ORDER BY event_date DESC");
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/events/:id
@@ -721,7 +721,7 @@ router.put("/admin/events/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -737,7 +737,7 @@ router.post("/admin/demos", ...adminOnly, async (req, res) => {
       [type, title, JSON.stringify(content || {}), is_active],
     );
     res.status(201).json(rows[0] || {});
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/demo/:type — public
@@ -746,7 +746,7 @@ router.get("/demo/:type", async (req, res) => {
     const { rows } = await pool.query("SELECT * FROM demo_configurations WHERE type=$1 AND is_active=true LIMIT 1", [req.params.type]);
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/demos
@@ -754,7 +754,7 @@ router.get("/admin/demos", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM demo_configurations ORDER BY created_at DESC");
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/branding
@@ -780,7 +780,7 @@ router.put("/admin/branding", ...adminOnly, async (req, res) => {
       rows = r.rows;
     }
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/branding
@@ -788,7 +788,7 @@ router.get("/admin/branding", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM branding_settings ORDER BY id DESC LIMIT 1");
     res.json(rows[0] || { primary_color: "#0D9488" });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/branding — public
@@ -796,7 +796,7 @@ router.get("/branding", async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT logo_url, favicon_url, primary_color, seasonal_theme FROM branding_settings ORDER BY id DESC LIMIT 1");
     res.json(rows[0] || { primary_color: "#0D9488" });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -812,7 +812,7 @@ router.post("/admin/campaigns", ...adminOnly, async (req, res) => {
       [name, type, JSON.stringify(audience_filters || {}), message, JSON.stringify(channels || []), scheduled_at || null],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/campaigns
@@ -820,7 +820,7 @@ router.get("/admin/campaigns", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM notification_campaigns ORDER BY created_at DESC");
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // PUT /api/admin/campaigns/:id
@@ -836,7 +836,7 @@ router.put("/admin/campaigns/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/admin/campaigns/:id/send — trigger send
@@ -850,7 +850,7 @@ router.post("/admin/campaigns/:id/send", ...adminOnly, async (req, res) => {
       [req.params.id],
     );
     res.json({ ok: true, sent_at: new Date() });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -866,7 +866,7 @@ router.post("/analytics/conversion", async (req, res) => {
       [visitor_id || "anonymous", event_type, JSON.stringify(metadata || {})],
     );
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/analytics/conversion
@@ -895,7 +895,7 @@ router.get("/admin/analytics/conversion", ...adminOnly, async (req, res) => {
       `).catch(() => ({ rows: [] })),
     ]);
     res.json({ funnel: funnel.rows, trend: trend.rows, top_events: topEvents.rows });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/analytics/feature-adoption
@@ -915,7 +915,7 @@ router.get("/admin/analytics/feature-adoption", ...adminOnly, async (req, res) =
       ORDER BY fr.status, fr.name
     `).catch(() => ({ rows: [] }));
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/admin/analytics/adoption — record metrics
@@ -927,7 +927,7 @@ router.post("/admin/analytics/adoption", ...adminOnly, async (req, res) => {
       [feature_id, activation_rate, retention, usage_frequency, completion_rate, satisfaction_score],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -982,7 +982,7 @@ router.get("/admin/growth", ...adminOnly, async (req, res) => {
       events: recentEvents.rows,
       release_notes: recentReleaseNotes.rows,
     });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -994,7 +994,7 @@ router.get("/platform-status", async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM platform_status ORDER BY created_at DESC LIMIT 5");
     res.json({ current: rows[0] || { status: "operational" }, history: rows });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/admin/platform-status
@@ -1006,7 +1006,7 @@ router.post("/admin/platform-status", ...adminOnly, async (req, res) => {
       [status, message],
     );
     res.status(201).json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/platform-status
@@ -1014,7 +1014,7 @@ router.get("/admin/platform-status", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM platform_status ORDER BY created_at DESC LIMIT 20");
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -1036,7 +1036,7 @@ router.post("/admin/early-access/:featureId", ...adminOnly, async (req, res) => 
       } catch {}
     }
     res.json({ granted: results.length, results });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/early-access/:featureId
@@ -1051,7 +1051,7 @@ router.get("/admin/early-access/:featureId", ...adminOnly, async (req, res) => {
       [req.params.featureId],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // DELETE /api/admin/early-access/:id — revoke
@@ -1059,7 +1059,7 @@ router.delete("/admin/early-access/:id", ...adminOnly, async (req, res) => {
   try {
     await pool.query("UPDATE early_access_program SET revoked_at=NOW() WHERE id=$1", [req.params.id]);
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // POST /api/waitlist/join — public landing page CTA form submission
@@ -1074,7 +1074,7 @@ router.post("/waitlist/join", async (req, res) => {
       [name || null, email.trim().toLowerCase(), JSON.stringify(metadata || {})],
     );
     res.status(201).json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // GET /api/admin/waitlist/submissions — admin view all submissions
@@ -1082,7 +1082,7 @@ router.get("/admin/waitlist/submissions", ...adminOnly, async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT * FROM waitlist_submissions ORDER BY created_at DESC LIMIT 200");
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 export { router as launchCmsRouter };

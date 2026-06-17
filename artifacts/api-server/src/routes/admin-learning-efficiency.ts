@@ -90,6 +90,6 @@ learningEfficiencyRouter.get("/", async (req, res: Response) => {
 
     res.json({ activityEfficiency, subjectBreakdown, weeklyTrend, summary, topPerformers: [] });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

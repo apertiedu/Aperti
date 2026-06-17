@@ -1,5 +1,5 @@
 import { Router, Response } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { markSchemesTable, studentMarksTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
@@ -102,8 +102,17 @@ gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), asyn
 gradingRouter.post("/submission/:submissionId/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
     const submissionId = parseInt(req.params.submissionId);
+    if (isNaN(submissionId)) { res.status(400).json({ error: "Invalid submission ID" }); return; }
     const mark = await db.query.studentMarks.findFirst({ where: (m, { eq }) => eq(m.id, submissionId) });
     if (!mark) { res.status(404).json({ error: "Submission not found" }); return; }
+
+    if (req.role !== "admin" && req.role !== "super_admin" && mark.examId) {
+      const { rows: examRows } = await pool.query(
+        "SELECT id FROM exams WHERE id=$1 AND teacher_account_id=$2 LIMIT 1",
+        [mark.examId, req.userId],
+      );
+      if (!examRows.length) { res.status(403).json({ error: "Access denied" }); return; }
+    }
 
     const scheme = await db.query.markSchemes.findFirst({ where: (s, { eq }) => eq(s.examQuestionId, mark.questionId) });
     if (!scheme) { res.status(404).json({ error: "No scheme for this question" }); return; }

@@ -16,7 +16,7 @@ notificationRulesRouter.get("/", async (_req: AuthRequest, res: Response) => {
     );
     res.json({ rules: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -33,7 +33,7 @@ notificationRulesRouter.post("/", async (req: AuthRequest, res: Response) => {
     );
     res.status(201).json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -51,7 +51,7 @@ notificationRulesRouter.put("/:id", async (req: AuthRequest, res: Response) => {
     if (rows.length === 0) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -60,6 +60,6 @@ notificationRulesRouter.delete("/:id", async (req: AuthRequest, res: Response) =
     await pool.query(`DELETE FROM notification_rules WHERE id=$1`, [req.params.id]);
     res.json({ ok: true });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

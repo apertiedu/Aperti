@@ -30,6 +30,6 @@ queueAdminRouter.post("/test", async (_req, res) => {
     const id = await enqueue("send-notification", { message: "Test job from admin", type: "test" });
     res.json({ success: true, jobId: id });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

@@ -31,7 +31,7 @@ commRoomsRouter.post("/rooms", authenticate, async (req: AuthRequest, res: Respo
     await db.insert(roomMembersTable).values({ roomId: room.id, userId: req.userId!, role: "owner" });
 
     res.status(201).json(room);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/rooms – list rooms ─────────────────────────────────────────────
@@ -57,7 +57,7 @@ commRoomsRouter.get("/rooms", authenticate, async (req: AuthRequest, res: Respon
 
     const { rows } = await pool.query(query, params);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/rooms/:id – room detail ────────────────────────────────────────
@@ -87,7 +87,7 @@ commRoomsRouter.get("/rooms/:id", authenticate, async (req: AuthRequest, res: Re
 
     const myRole = members.find((m: any) => m.user_id === uid)?.role || null;
     res.json({ room: roomRows[0], members, messages, resources, myRole });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/rooms/:id/join – join room ────────────────────────────────────
@@ -106,7 +106,7 @@ commRoomsRouter.post("/rooms/:id/join", authenticate, async (req: AuthRequest, r
 
     const [member] = await db.insert(roomMembersTable).values({ roomId, userId: uid, role: "member" }).returning();
     res.status(201).json(member);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /api/rooms/:id/members/:userId – change role or remove ──────────────
@@ -132,7 +132,7 @@ commRoomsRouter.put("/rooms/:id/members/:userId", authenticate, async (req: Auth
       and(eq(roomMembersTable.roomId, roomId), eq(roomMembersTable.userId, targetId)),
     ).returning();
     res.json(updated);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/rooms/:id/messages – send room message ────────────────────────
@@ -153,7 +153,7 @@ commRoomsRouter.post("/rooms/:id/messages", authenticate, async (req: AuthReques
       roomId, senderId: uid, content: content.trim(), attachmentUrl: attachment_url || null,
     }).returning();
     res.status(201).json(msg);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/rooms/:id/share – share resource ──────────────────────────────
@@ -173,7 +173,7 @@ commRoomsRouter.post("/rooms/:id/share", authenticate, async (req: AuthRequest, 
       roomId, userId: uid, resourceType: resource_type, resourceId: resource_id || null, title: title || null,
     }).returning();
     res.status(201).json(shared);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/rooms/:id/collaborate – launch session token ───────────────────
@@ -189,5 +189,5 @@ commRoomsRouter.get("/rooms/:id/collaborate", authenticate, async (req: AuthRequ
 
     const token = Buffer.from(`${roomId}:${uid}:${Date.now()}`).toString("base64url");
     res.json({ token, room_id: roomId, user_id: uid });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

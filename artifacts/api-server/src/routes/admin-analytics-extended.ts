@@ -31,7 +31,7 @@ adminAnalyticsExtendedRouter.get("/active-users", async (_req, res) => {
       dailyTrend: dailyTrend.rows,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -70,7 +70,7 @@ adminAnalyticsExtendedRouter.get("/revenue-growth", async (_req, res) => {
       thisMonth: total.rows[0]?.this_month ?? 0,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -117,7 +117,7 @@ adminAnalyticsExtendedRouter.get("/retention", async (_req, res) => {
       newVsReturning: newVsReturning.rows,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -146,7 +146,7 @@ adminAnalyticsExtendedRouter.get("/error-trends", async (_req, res) => {
     ]);
     res.json({ daily: daily.rows, bySource: bySource.rows, recent: recent.rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -162,7 +162,7 @@ adminAnalyticsExtendedRouter.get("/enrollment-trends", async (_req, res) => {
     `).catch(() => ({ rows: [] }));
     res.json({ weekly: weekly.rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -190,6 +190,6 @@ adminAnalyticsExtendedRouter.get("/user-growth", async (_req, res) => {
       active: total.rows[0]?.active ?? 0,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

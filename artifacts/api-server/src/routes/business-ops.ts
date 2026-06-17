@@ -34,7 +34,7 @@ router.get("/admin/signup-waitlist", ...adminOnly, async (req, res) => {
     const { rows } = await pool.query(dataQ, params);
 
     res.json({ entries: rows, total, page: parseInt(page), limit: parseInt(limit) });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 router.get("/admin/signup-waitlist/stats", ...adminOnly, async (req, res) => {
@@ -51,7 +51,7 @@ router.get("/admin/signup-waitlist/stats", ...adminOnly, async (req, res) => {
       FROM waitlist_submissions
     `);
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 router.get("/admin/signup-waitlist/growth", ...adminOnly, async (req, res) => {
@@ -66,7 +66,7 @@ router.get("/admin/signup-waitlist/growth", ...adminOnly, async (req, res) => {
       ORDER BY day ASC
     `);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 router.put("/admin/signup-waitlist/:id", ...adminOnly, async (req, res) => {
@@ -78,14 +78,14 @@ router.put("/admin/signup-waitlist/:id", ...adminOnly, async (req, res) => {
     );
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 router.delete("/admin/signup-waitlist/:id", ...adminOnly, async (req, res) => {
   try {
     await pool.query("DELETE FROM waitlist_submissions WHERE id=$1", [req.params.id]);
     res.json({ ok: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 router.get("/admin/signup-waitlist/export", ...adminOnly, async (req, res) => {
@@ -105,7 +105,7 @@ router.get("/admin/signup-waitlist/export", ...adminOnly, async (req, res) => {
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", 'attachment; filename="waitlist-submissions.csv"');
     res.send(csv);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -169,7 +169,7 @@ router.get("/admin/business-analytics", ...adminOnly, async (req, res) => {
       sub_growth: subTrendR.rows,
       conversion_rate: conversionRate,
     });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -184,7 +184,7 @@ router.get("/admin/content-audit", ...adminOnly, async (req, res) => {
       ORDER BY created_at DESC LIMIT 100
     `);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 export default router;

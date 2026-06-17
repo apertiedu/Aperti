@@ -104,12 +104,13 @@ export default function TakeExam() {
   const pendingViolationsRef = useRef<{ tab?: boolean; paste?: boolean; copy?: boolean }>({});
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["exam", "take", examId],
     queryFn: async () => {
       const res = await fetch(`${API}/exams/student/${examId}/take`, {
-        headers: {},
+        credentials: "include",
       });
+      if (!res.ok) throw new Error("Failed to load exam");
       return res.json();
     },
   });
@@ -314,6 +315,34 @@ export default function TakeExam() {
 
   if (isLoading) {
     return <div className="min-h-screen bg-background p-6"><Skeleton className="h-96 w-full rounded-xl" /></div>;
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-6">
+        <Card className="max-w-md text-center shadow-lg">
+          <CardContent className="p-8 space-y-5">
+            <div className="h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+              <AlertTriangle className="h-8 w-8 text-red-500" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold mb-1">Failed to load exam</h2>
+              <p className="text-muted-foreground text-sm">
+                We could not retrieve this exam. This may be due to a network issue or the exam may no longer be available.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setLocation("/student/exams")}>
+                Back to Exams
+              </Button>
+              <Button className="flex-1" onClick={() => window.location.reload()}>
+                Try Again
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const questions = data?.questions || [];

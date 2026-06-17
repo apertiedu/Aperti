@@ -23,7 +23,7 @@ contentCalendarRouter.get("/admin/content-calendar", async (req: AuthRequest, re
     const { rows } = await pool.query(q, params);
     res.json(rows);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -39,7 +39,7 @@ contentCalendarRouter.get("/admin/content-calendar/:id", async (req: AuthRequest
     if (!rows.length) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -55,7 +55,7 @@ contentCalendarRouter.post("/admin/content-calendar", async (req: AuthRequest, r
     );
     res.status(201).json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -71,7 +71,7 @@ contentCalendarRouter.put("/admin/content-calendar/:id", async (req: AuthRequest
     if (!rows.length) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -86,7 +86,7 @@ contentCalendarRouter.post("/admin/content-calendar/:id/publish", async (req: Au
     if (!rows.length) return res.status(404).json({ error: "Not found or already published" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -101,7 +101,7 @@ contentCalendarRouter.post("/admin/content-calendar/:id/cancel", async (req: Aut
     if (!rows.length) return res.status(404).json({ error: "Not found or cannot cancel" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -110,7 +110,7 @@ contentCalendarRouter.delete("/admin/content-calendar/:id", async (req: AuthRequ
     await pool.query("DELETE FROM content_calendar WHERE id=$1", [req.params.id]);
     res.json({ success: true });
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -123,6 +123,6 @@ contentCalendarRouter.get("/admin/content-calendar-due", async (_req: AuthReques
     );
     res.json(rows);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

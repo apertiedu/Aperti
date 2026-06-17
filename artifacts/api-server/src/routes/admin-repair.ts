@@ -111,7 +111,7 @@ adminRepairRouter.post("/fix-orphans", async (req: Request, res: Response) => {
     res.json({ ok: true, type, affected, message: `Fixed ${affected} ${type} record(s)` });
   } catch (err: any) {
     console.error(`fix-orphans error [${type}]:`, err);
-    res.status(500).json({ error: `Failed to fix ${type}: ${err.message}` });
+    res.status(500).json({ error: `Failed to apply fix for: ${type}` });
   }
 });
 

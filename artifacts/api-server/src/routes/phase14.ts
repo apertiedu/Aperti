@@ -37,7 +37,7 @@ router.post("/testimonials", authenticate, async (req: AuthRequest, res) => {
     );
     res.status(201).json({ ok: true, testimonial: rows[0], pending_approval: true });
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -52,7 +52,7 @@ router.get("/admin/testimonials/all", ...adminOnly, async (_req, res) => {
     );
     res.json(rows);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -67,7 +67,7 @@ router.put("/admin/testimonials/:id/approve", ...adminOnly, async (req, res) => 
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -81,7 +81,7 @@ router.put("/admin/testimonials/:id/reject", ...adminOnly, async (req, res) => {
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -91,7 +91,7 @@ router.delete("/admin/testimonials/:id", ...adminOnly, async (req, res) => {
     await pool.query("DELETE FROM testimonials WHERE id=$1", [req.params.id]);
     res.json({ ok: true });
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -112,7 +112,7 @@ router.get("/admin/content-governance", ...adminOnly, async (_req, res) => {
     );
     res.json(rows);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -135,7 +135,7 @@ router.put("/admin/content-governance/:id", ...adminOnly, async (req, res) => {
     if (!rows[0]) return res.status(404).json({ error: "Not found" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -153,7 +153,7 @@ router.post("/admin/content-governance", ...adminOnly, async (req, res) => {
     );
     res.status(201).json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -165,7 +165,7 @@ router.get("/admin/users/verified", ...adminOnly, async (_req, res) => {
     );
     res.json(rows);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -180,7 +180,7 @@ router.put("/admin/users/:id/verify", ...adminOnly, async (req, res) => {
     if (!rows[0]) return res.status(404).json({ error: "User not found" });
     res.json(rows[0]);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

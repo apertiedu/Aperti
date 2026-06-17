@@ -25,7 +25,7 @@ teacherCoursesRouter.get(
       );
       res.json(rows);
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   },
 );
@@ -50,7 +50,7 @@ teacherCoursesRouter.post(
       await incrementUsage(tid, "courses");
       res.status(201).json(rows[0]);
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   },
 );
@@ -94,7 +94,7 @@ teacherCoursesRouter.get(
       );
       res.json({ ...course, units });
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   },
 );
@@ -115,7 +115,7 @@ teacherCoursesRouter.put(
       );
       res.json({ success: true });
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   },
 );
@@ -129,7 +129,7 @@ teacherCoursesRouter.delete(
       await pool.query("DELETE FROM teacher_courses WHERE id=$1 AND teacher_account_id=$2", [req.params.id, req.userId!]);
       res.json({ success: true });
     } catch (e: any) {
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: "An unexpected error occurred" });
     }
   },
 );

@@ -203,7 +203,7 @@ adminDataQualityRouter.get("/", async (_req, res) => {
 
     res.json({ score, issues, stats, generatedAt: new Date().toISOString() });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -252,7 +252,7 @@ adminDataQualityRouter.post("/fix", async (req, res) => {
 
     res.json({ fixed, issueId });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

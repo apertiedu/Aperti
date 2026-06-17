@@ -203,6 +203,6 @@ weaveRouter.post("/populate", authenticate, requireRole("admin"), async (req: Au
     log.push(`Created ${nodesCreated} nodes and ${edgesCreated} edges`);
     res.json({ success: true, nodesCreated, edgesCreated, log });
   } catch (err: any) {
-    res.status(500).json({ error: err.message, log });
+    res.status(500).json({ error: "An unexpected error occurred", log });
   }
 });

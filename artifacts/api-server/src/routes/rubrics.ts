@@ -24,7 +24,7 @@ function rubricsList() {
         [tid],
       );
       res.json(rows);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   });
 }
 
@@ -39,7 +39,7 @@ function rubricsCreate() {
         [tid, title, type || "analytic", max_marks || 10, subject_id || null, homework_id || null, JSON.stringify(criteria || [])],
       );
       res.status(201).json(rows[0]);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   });
 }
 
@@ -52,7 +52,7 @@ function rubricsGet() {
       );
       if (!rows.length) return res.status(404).json({ error: "Not found" });
       res.json(rows[0]);
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   });
 }
 
@@ -65,7 +65,7 @@ function rubricsUpdate() {
         [title, type, max_marks, subject_id || null, homework_id || null, JSON.stringify(criteria || []), req.params.id, req.userId!],
       );
       res.json({ success: true });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   });
 }
 
@@ -74,6 +74,6 @@ function rubricsDelete() {
     try {
       await pool.query("DELETE FROM rubrics WHERE id=$1 AND teacher_account_id=$2", [req.params.id, req.userId!]);
       res.json({ success: true });
-    } catch (e: any) { res.status(500).json({ error: e.message }); }
+    } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
   });
 }

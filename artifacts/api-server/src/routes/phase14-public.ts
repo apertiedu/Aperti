@@ -35,7 +35,7 @@ router.get("/landing/stats", async (_req, res) => {
     statsCache = { data, expires: Date.now() + 5 * 60 * 1000 };
     res.json(data);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -50,7 +50,7 @@ router.get("/testimonials", async (req, res) => {
     const { rows } = await pool.query(q, params);
     res.json(rows);
   } catch (e: any) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

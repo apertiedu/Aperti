@@ -64,7 +64,7 @@ adminHealthRouter.get("/backup-logs", async (_req, res) => {
     ).catch(() => ({ rows: [] }));
     res.json(rows);
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -76,7 +76,7 @@ adminHealthRouter.post("/run-backup", async (_req, res) => {
     runBackup().catch(() => {});
     res.json({ success: true, message: "Backup started. Check backup logs in a few seconds." });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

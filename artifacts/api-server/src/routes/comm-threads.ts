@@ -63,7 +63,7 @@ commThreadsRouter.post("/messages/threads", authenticate, async (req: AuthReques
     await db.insert(threadParticipantsTable).values(participants.map((uid) => ({ threadId: thread.id, userId: uid })));
 
     res.status(201).json(thread);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/messages/threads – list user threads ───────────────────────────
@@ -88,7 +88,7 @@ commThreadsRouter.get("/messages/threads", authenticate, async (req: AuthRequest
       [uid],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/messages/threads/:id – get thread + messages ───────────────────
@@ -119,7 +119,7 @@ commThreadsRouter.get("/messages/threads/:id", authenticate, async (req: AuthReq
     );
 
     res.json({ thread, messages, participants });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/messages/threads/:id/messages – send message ──────────────────
@@ -145,7 +145,7 @@ commThreadsRouter.post("/messages/threads/:id/messages", authenticate, async (re
     await pool.query(`UPDATE message_threads_ext SET updated_at = NOW() WHERE id = $1`, [threadId]);
 
     res.status(201).json(msg);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/messages/threads/:id/summary – AI summary ──────────────────────
@@ -158,7 +158,7 @@ commThreadsRouter.get("/messages/threads/:id/summary", authenticate, async (req:
     );
     const summary = await aiSummarize(rows.map((r: any) => r.content));
     res.json({ summary });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/messages/threads/:id/unanswered ────────────────────────────────
@@ -174,7 +174,7 @@ commThreadsRouter.get("/messages/threads/:id/unanswered", authenticate, async (r
       [threadId],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/messages/translate – translate message ────────────────────────
@@ -200,7 +200,7 @@ commThreadsRouter.post("/messages/translate", authenticate, async (req: AuthRequ
     });
     const d = await r.json() as any;
     res.json({ translated: d.choices?.[0]?.message?.content ?? content });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -217,7 +217,7 @@ commThreadsRouter.post("/channels", authenticate, requireRole("teacher", "admin"
       createdBy: req.userId!,
     }).returning();
     res.status(201).json(channel);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/channels/:courseId – get channel for course ────────────────────
@@ -237,7 +237,7 @@ commThreadsRouter.get("/channels/:courseId", authenticate, async (req: AuthReque
       [channel.id],
     );
     res.json({ channel, messages });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/channels – list all channels ───────────────────────────────────
@@ -245,7 +245,7 @@ commThreadsRouter.get("/channels", authenticate, async (req: AuthRequest, res: R
   try {
     const channels = await db.select().from(classChannelsTable).orderBy(desc(classChannelsTable.createdAt));
     res.json(channels);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/channels/:id/messages – post in channel ───────────────────────
@@ -264,7 +264,7 @@ commThreadsRouter.post("/channels/:id/messages", authenticate, async (req: AuthR
       channelId, senderId: req.userId!, content: content.trim(), attachmentUrl: attachment_url || null,
     }).returning();
     res.status(201).json(msg);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /api/channels/:id/settings – teacher controls ───────────────────────
@@ -276,7 +276,7 @@ commThreadsRouter.put("/channels/:id/settings", authenticate, requireRole("teach
       .set({ isLocked: is_locked ?? false, pinnedMessageId: pinned_message_id ?? null })
       .where(eq(classChannelsTable.id, channelId)).returning();
     res.json(updated);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -307,7 +307,7 @@ commThreadsRouter.post("/announcements", authenticate, requireRole("teacher", "a
       }
     }
     res.status(201).json(ann);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── GET /api/announcements – list for user ───────────────────────────────────
@@ -328,7 +328,7 @@ commThreadsRouter.get("/announcements", authenticate, async (req: AuthRequest, r
 
     const { rows } = await pool.query(query, [uid]);
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── PUT /api/announcements/:id – edit/schedule ──────────────────────────────
@@ -342,7 +342,7 @@ commThreadsRouter.put("/announcements/:id", authenticate, requireRole("teacher",
       scheduledAt: scheduled_at ? new Date(scheduled_at) : undefined,
     }).where(and(eq(announcementsTable.id, id), eq(announcementsTable.senderId, req.userId!))).returning();
     res.json(updated);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── DELETE /api/announcements/:id ───────────────────────────────────────────
@@ -351,7 +351,7 @@ commThreadsRouter.delete("/announcements/:id", authenticate, requireRole("teache
     const id = parseInt(req.params.id);
     await db.delete(announcementsTable).where(and(eq(announcementsTable.id, id), eq(announcementsTable.senderId, req.userId!)));
     res.json({ success: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 // ── POST /api/announcements/:id/read – mark as read ─────────────────────────
@@ -366,5 +366,5 @@ commThreadsRouter.post("/announcements/:id/read", authenticate, async (req: Auth
       await db.insert(announcementReadsTable).values({ announcementId: annId, userId: uid });
     }
     res.json({ success: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

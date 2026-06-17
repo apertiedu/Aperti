@@ -16,7 +16,7 @@ classforgeRouter.get("/classforge/session/:sessionId", authenticate, async (req:
       [req.params.sessionId],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── List recent live sessions with engagement summaries ──────────────── */
@@ -40,7 +40,7 @@ classforgeRouter.get("/classforge/sessions", authenticate, async (req: AuthReque
       [req.userId!],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Update engagement record (from live class events) ────────────────── */
@@ -55,7 +55,7 @@ classforgeRouter.post("/classforge/engagement", authenticate, async (req: AuthRe
         (hand_raises || 0) * 3 + (chat_messages || 0) * 2 + (poll_responses || 0) * 5],
     );
     res.json({ success: true });
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
 /* ── Heatmap data: participation by student per week ──────────────────── */
@@ -76,5 +76,5 @@ classforgeRouter.get("/classforge/heatmap", authenticate, async (req: AuthReques
       [req.userId!],
     );
     res.json(rows);
-  } catch (e: any) { res.status(500).json({ error: e.message }); }
+  } catch (e: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

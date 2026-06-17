@@ -102,7 +102,7 @@ Respond with ONLY this JSON structure:
     res.json({ success: true, feedback: parsed });
   } catch (err: any) {
     console.error("AI feedback error:", err);
-    res.status(500).json({ error: "Failed to generate AI feedback", details: err.message });
+    res.status(500).json({ error: "Failed to generate AI feedback" });
   }
 });
 

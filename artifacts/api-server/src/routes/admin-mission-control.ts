@@ -45,7 +45,7 @@ adminMissionControlRouter.get("/summary", async (_req, res: Response) => {
       trend: trend.rows,
     });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -70,7 +70,7 @@ adminMissionControlRouter.get("/recent", async (req: AuthRequest, res: Response)
     );
     res.json({ errors: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
@@ -84,6 +84,6 @@ adminMissionControlRouter.get("/failed-logins", async (_req, res: Response) => {
     `).catch(() => ({ rows: [] }));
     res.json({ failedLogins: rows });
   } catch (err: any) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

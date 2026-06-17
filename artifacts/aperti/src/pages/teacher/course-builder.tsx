@@ -230,7 +230,13 @@ export default function CourseBuilder() {
         <div className="flex items-center gap-3">
           {saved && <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-xs text-green-600 flex items-center gap-1"><Save size={12} /> Saved</motion.span>}
           <Button variant="outline" size="sm" onClick={() => setAiDialog(true)}><Sparkles size={14} className="mr-1 text-primary" /> AI Structure</Button>
-          <Button size="sm" onClick={() => saveStructure.mutate()} className="bg-primary hover:bg-primary/80 text-white" disabled={saveStructure.isPending}>
+          <Button size="sm" onClick={() => {
+            const emptyUnit = units.find(u => !u.title?.trim());
+            if (emptyUnit) { toast({ title: "Unit title is required", description: "Please give every unit a name before saving.", variant: "destructive" }); return; }
+            const emptyTopic = units.flatMap(u => u.topics || []).find((t: any) => !t.title?.trim());
+            if (emptyTopic) { toast({ title: "Topic title is required", description: "Please give every topic a name before saving.", variant: "destructive" }); return; }
+            saveStructure.mutate();
+          }} className="bg-primary hover:bg-primary/80 text-white" disabled={saveStructure.isPending}>
             {saveStructure.isPending ? "Saving..." : "Save Structure"}
           </Button>
         </div>
