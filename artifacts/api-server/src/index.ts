@@ -36,6 +36,7 @@ async function main() {
   }
 
   // ── Environment validation ─────────────────────────────────────────────────
+  const isProd = process.env.NODE_ENV === "production";
   const requiredEnv = ["DATABASE_URL", "PORT", "JWT_SECRET"];
   const missingEnv = requiredEnv.filter(k => !process.env[k]);
   if (missingEnv.length > 0) {
@@ -50,6 +51,15 @@ async function main() {
   if (jwtSecret === "aperti-dev-secret-change-in-prod") {
     console.error("[startup] FATAL: JWT_SECRET is set to the default insecure value. Please set a strong, unique secret.");
     process.exit(1);
+  }
+  const instapayVars = ["INSTAPAY_PHONE", "INSTAPAY_NAME"].filter(k => !process.env[k]);
+  if (instapayVars.length > 0) {
+    if (isProd) {
+      console.error(`[startup] FATAL: Missing payment variables: ${instapayVars.join(", ")} — payment instructions will be broken in production`);
+      process.exit(1);
+    } else {
+      console.warn(`[startup] WARN: ${instapayVars.join(", ")} not set — payment instructions will show placeholders (acceptable in development)`);
+    }
   }
   const warnEnv = ["SESSION_SECRET", "OPENAI_API_KEY"];
   const missingWarn = warnEnv.filter(k => !process.env[k]);

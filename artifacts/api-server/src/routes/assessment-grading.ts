@@ -599,6 +599,25 @@ assessmentGradingRouter.post("/appeals", ...anyAuth, async (req: AuthRequest, re
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
+assessmentGradingRouter.get("/appeals/my", ...anyAuth, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    const stuRes = await pool.query("SELECT id FROM students WHERE account_id=$1 LIMIT 1", [userId]);
+    if (!stuRes.rows.length) return res.status(403).json({ error: "Not a student" });
+    const { rows } = await pool.query(
+      `SELECT ap.*, assess.title AS assessment_title, asub.score, asub.grade
+       FROM appeals ap
+       JOIN assessment_submissions asub ON asub.id = ap.submission_id
+       JOIN assessments assess ON assess.id = asub.assessment_id
+       WHERE ap.student_id=$1
+       ORDER BY ap.created_at DESC
+       LIMIT 50`,
+      [stuRes.rows[0].id]
+    );
+    res.json({ appeals: rows });
+  } catch { res.status(500).json({ error: "An unexpected error occurred" }); }
+});
+
 assessmentGradingRouter.get("/appeals", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { rows } = await pool.query(

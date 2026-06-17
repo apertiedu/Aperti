@@ -24,14 +24,12 @@ export default function StudentAppeals() {
     },
   });
 
-  // Ideally we'd have a student-specific appeals endpoint, but we'll re-use /appeals  
-  // with the student's own data (the API returns teacher appeals; student can POST)
-  const { data: appeals, isLoading } = useQuery({
+  const { data: appeals = [], isLoading } = useQuery<any[]>({
     queryKey: ["student-appeals"],
     queryFn: async () => {
-      // We approximate by checking recent submissions
-      // Real impl would be GET /student/appeals — functional via POST
-      return [] as any[];
+      const res = await apiFetch("/api/appeals/my");
+      const data = await res.json();
+      return data.appeals ?? [];
     },
   });
 

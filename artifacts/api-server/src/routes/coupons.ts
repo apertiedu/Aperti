@@ -1,14 +1,15 @@
 import { Router, Response } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { couponsTable } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { eq } from "drizzle-orm";
 
 export const couponsRouter = Router();
 
-couponsRouter.post("/validate", async (req, res: Response) => {
+couponsRouter.post("/validate", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { code } = req.body as { code: string };
+    const userId = req.userId!;
     if (!code) { res.status(400).json({ error: "Code required" }); return; }
 
     const [coupon] = await db.select().from(couponsTable)
@@ -23,13 +24,21 @@ couponsRouter.post("/validate", async (req, res: Response) => {
       res.status(400).json({ error: "Coupon has reached its usage limit" }); return;
     }
 
+    const { rows: used } = await pool.query(
+      `SELECT id FROM coupon_redemptions WHERE coupon_id=$1 AND account_id=$2 LIMIT 1`,
+      [coupon.id, userId]
+    );
+    if (used.length > 0) {
+      res.status(400).json({ error: "You have already used this coupon" }); return;
+    }
+
     res.json({
       id: coupon.id,
       code: coupon.code,
       discountPercent: Number(coupon.discountPercent),
       expiryDate: coupon.expiryDate,
     });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to validate coupon" });
   }
 });
@@ -40,7 +49,7 @@ couponsRouter.get("/", ...adminOnly, async (_req, res: Response) => {
   try {
     const coupons = await db.select().from(couponsTable).orderBy(couponsTable.createdAt);
     res.json(coupons);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to load coupons" });
   }
 });
@@ -60,7 +69,7 @@ couponsRouter.post("/", ...adminOnly, async (req: AuthRequest, res: Response) =>
       createdBy: req.userId,
     }).returning();
     res.status(201).json(coupon);
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to create coupon" });
   }
 });
@@ -77,7 +86,7 @@ couponsRouter.put("/:id", ...adminOnly, async (req, res: Response) => {
 
     await db.update(couponsTable).set(updates).where(eq(couponsTable.id, id));
     res.json({ success: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to update coupon" });
   }
 });
@@ -87,7 +96,7 @@ couponsRouter.delete("/:id", ...adminOnly, async (req, res: Response) => {
     const id = parseInt(req.params.id);
     await db.delete(couponsTable).where(eq(couponsTable.id, id));
     res.json({ success: true });
-  } catch (err) {
+  } catch {
     res.status(500).json({ error: "Failed to delete coupon" });
   }
 });

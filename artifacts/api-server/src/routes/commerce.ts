@@ -66,6 +66,22 @@ commerceRouter.post("/commerce/subscribe", authenticate, subscribeLimiter, async
   if (!planRes.rows[0]) { res.status(400).json({ error: "Plan not found" }); return; }
   const plan = planRes.rows[0];
 
+  const existing = await pool.query(
+    `SELECT id, reference_code, instructions, amount FROM payment_requests
+     WHERE user_id=$1 AND plan_id=$2 AND status='pending' AND created_at > NOW()-INTERVAL '10 minutes'
+     LIMIT 1`,
+    [userId, planId],
+  );
+  if (existing.rows[0]) {
+    const pr = existing.rows[0];
+    res.json({
+      paymentRequest: pr,
+      instapay: { phone: INSTAPAY_PHONE, name: INSTAPAY_NAME, amount: parseFloat(pr.amount), reference: pr.reference_code },
+      instructions: pr.instructions,
+    });
+    return;
+  }
+
   const ref = genRef();
   const amount = parseFloat(plan.price_egp);
   const instructions = `Send EGP ${amount} to ${INSTAPAY_PHONE} (${INSTAPAY_NAME}) via InstaPay. Use reference code: ${ref}`;

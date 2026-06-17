@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { SaveIndicator } from "@/components/save-indicator";
 import { MathHtml, smartTextToHtml } from "@/components/math-renderer";
+import DOMPurify from "dompurify";
 
 const API = "/api";
 
@@ -241,7 +242,7 @@ function RichTextEditor({
           ref={editorRef}
           contentEditable
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: value || "<p></p>" }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(value || "<p></p>") }}
           onInput={e => onChange((e.target as HTMLDivElement).innerHTML)}
           onPaste={handleSmartPaste}
           onKeyDown={e => {

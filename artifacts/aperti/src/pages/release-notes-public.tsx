@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { motion, useInView } from "framer-motion";
 import { Link } from "wouter";
 import { FileText, Shield, Zap, Megaphone, AlertCircle } from "lucide-react";
+import DOMPurify from "dompurify";
 
 
 const TYPE_META: Record<string, { label: string; color: string; bg: string; icon: any }> = {
@@ -24,12 +25,15 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 }
 
 function MarkdownContent({ content }: { content: string }) {
-  const html = content
-    .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-gray-900 mt-4 mb-2">$1</h2>')
-    .replace(/^### (.+)$/gm, '<h3 class="text-sm font-semibold text-gray-800 mt-3 mb-1">$1</h3>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^- (.+)$/gm, '<li class="text-sm text-gray-600 ml-4 list-disc">$1</li>')
-    .replace(/\n\n/g, '<br/>');
+  const html = DOMPurify.sanitize(
+    content
+      .replace(/^## (.+)$/gm, '<h2 class="text-base font-bold text-gray-900 mt-4 mb-2">$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3 class="text-sm font-semibold text-gray-800 mt-3 mb-1">$1</h3>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^- (.+)$/gm, '<li class="text-sm text-gray-600 ml-4 list-disc">$1</li>')
+      .replace(/\n\n/g, '<br/>'),
+    { ALLOWED_TAGS: ["h2", "h3", "strong", "li", "br"] }
+  );
   return <div dangerouslySetInnerHTML={{ __html: html }} className="prose-sm text-gray-600" />;
 }
 
