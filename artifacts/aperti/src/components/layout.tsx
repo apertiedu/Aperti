@@ -6,8 +6,8 @@ import {
   BarChart2, BarChart3, TrendingUp, ClipboardCheck,
   Award, CreditCard, HelpCircle,
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart, Package,
-  RefreshCw, Settings, MessageSquare,
-  LogOut, ChevronLeft, ChevronRight, Search, KeyRound, Wrench,
+  RefreshCw, Settings, MessageSquare, Zap, DatabaseZap,
+  LogOut, ChevronLeft, ChevronRight, ChevronDown, Search, KeyRound, Wrench,
   Sun, Moon, ShoppingBag, UserCheck, Link2, Bot, Sparkles,
   GraduationCap, TableProperties, Medal, Scale, Archive,
   Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X, Activity,
@@ -36,6 +36,7 @@ interface NavItem {
 interface NavGroup {
   label: string;
   items: NavItem[];
+  collapsible?: boolean;
 }
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -51,6 +52,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
   const [mobileOpen, setMobileOpen] = useState(false);
   const { open: paletteOpen, setOpen: setPaletteOpen } = useCommandPalette();
+  const [collapsedGroups, setCollapsedGroupsRaw] = useState<Set<string>>(() => {
+    try {
+      const stored = localStorage.getItem("aperti_collapsed_groups");
+      return stored ? new Set(JSON.parse(stored)) : new Set(["Platform Infrastructure"]);
+    } catch { return new Set(["Platform Infrastructure"]); }
+  });
+  const toggleGroup = (label: string) => {
+    setCollapsedGroupsRaw(prev => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label); else next.add(label);
+      try { localStorage.setItem("aperti_collapsed_groups", JSON.stringify([...next])); } catch {}
+      return next;
+    });
+  };
   const { dark, toggleDark } = useTheme();
   const { recent, push } = useRecentPages();
 
@@ -121,6 +136,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "AutoPilot", href: "/automation", icon: Bot, roles: ["admin","teacher"] },
         { name: "KudosEngine", href: "/kudos-engine", icon: Award, roles: ["admin","teacher"] },
         { name: "HelpDesk", href: "/helpdesk", icon: HelpCircle, roles: ["admin","teacher","assistant"] },
+      ],
+    },
+    {
+      label: "Platform Infrastructure",
+      collapsible: true,
+      items: [
+        { name: "Billing Center",      href: "/admin/billing-center",      icon: CreditCard,  roles: ["admin"] },
+        { name: "Dispute Center",      href: "/admin/dispute-center",      icon: Scale,       roles: ["admin"] },
+        { name: "Financial Anomaly",   href: "/admin/financial-anomaly",   icon: Activity,    roles: ["admin"] },
+        { name: "School Network",      href: "/admin/school-network",      icon: Globe,       roles: ["admin"] },
+        { name: "Architecture",        href: "/admin/architecture",        icon: Cpu,         roles: ["admin"] },
+        { name: "Migration Safety",    href: "/admin/migration-safety",    icon: DatabaseZap, roles: ["admin"] },
+        { name: "Deployment Pipeline", href: "/admin/deployment-pipeline", icon: Package,     roles: ["admin"] },
+        { name: "Load Simulation",     href: "/admin/load-simulation",     icon: Zap,         roles: ["admin"] },
       ],
     },
     {
@@ -295,38 +324,74 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             ))}
           </div>
         )}
-        {filteredGroups.map((group, gi) => (
-          <div key={gi} className="space-y-0.5">
-            {(isMobile || !collapsed) && (
-              <p className="px-2 text-[9px] font-bold tracking-widest text-muted-foreground/60 uppercase mb-1">
-                {group.label}
-              </p>
-            )}
-            {group.items.map((item) => {
-              const isActive =
-                location === item.href ||
-                (item.href !== "/" && location.startsWith(item.href));
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  onClick={() => isMobile && setMobileOpen(false)}
-                  className={`group flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 min-h-[36px] ${
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm nav-item-active"
-                      : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
-                  } ${(!isMobile && collapsed) ? "justify-center" : ""}`}
-                  title={(!isMobile && collapsed) ? item.name : undefined}
-                >
-                  <item.icon
-                    className={`w-3.5 h-3.5 shrink-0 ${isActive ? "" : "group-hover:text-primary"} transition-colors`}
-                  />
-                  {(isMobile || !collapsed) && <span className="truncate">{item.name}</span>}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+        {filteredGroups.map((group, gi) => {
+          const isGroupCollapsed = group.collapsible && collapsedGroups.has(group.label) && !collapsed && !isMobile;
+          const hasActiveItem = group.items.some(
+            (item) => location === item.href || (item.href !== "/" && location.startsWith(item.href)),
+          );
+          return (
+            <div key={gi} className="space-y-0.5">
+              {(isMobile || !collapsed) && (
+                group.collapsible ? (
+                  <button
+                    onClick={() => toggleGroup(group.label)}
+                    className="w-full flex items-center justify-between px-2 mb-1 rounded hover:bg-sidebar-accent/50 py-0.5 transition-colors group/hdr"
+                  >
+                    <p className="text-[9px] font-bold tracking-widest text-muted-foreground/60 uppercase flex items-center gap-1.5">
+                      {group.label}
+                      {isGroupCollapsed && hasActiveItem && (
+                        <span className="h-1.5 w-1.5 rounded-full bg-primary inline-block" />
+                      )}
+                    </p>
+                    <ChevronDown
+                      className={`h-3 w-3 text-muted-foreground/40 transition-transform duration-200 ${isGroupCollapsed ? "-rotate-90" : ""}`}
+                    />
+                  </button>
+                ) : (
+                  <p className="px-2 text-[9px] font-bold tracking-widest text-muted-foreground/60 uppercase mb-1">
+                    {group.label}
+                  </p>
+                )
+              )}
+              <AnimatePresence initial={false}>
+                {!isGroupCollapsed && (
+                  <motion.div
+                    key="items"
+                    initial={group.collapsible ? { height: 0, opacity: 0 } : false}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
+                    className="overflow-hidden"
+                  >
+                    {group.items.map((item) => {
+                      const isActive =
+                        location === item.href ||
+                        (item.href !== "/" && location.startsWith(item.href));
+                      return (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          onClick={() => isMobile && setMobileOpen(false)}
+                          className={`group flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 min-h-[36px] ${
+                            isActive
+                              ? "bg-primary text-primary-foreground shadow-sm nav-item-active"
+                              : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
+                          } ${(!isMobile && collapsed) ? "justify-center" : ""}`}
+                          title={(!isMobile && collapsed) ? item.name : undefined}
+                        >
+                          <item.icon
+                            className={`w-3.5 h-3.5 shrink-0 ${isActive ? "" : "group-hover:text-primary"} transition-colors`}
+                          />
+                          {(isMobile || !collapsed) && <span className="truncate">{item.name}</span>}
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          );
+        })}
       </nav>
 
       {/* Footer */}
