@@ -3,7 +3,7 @@ import {
   LayoutDashboard, QrCode, CalendarDays, CalendarClock, ClipboardList, CheckSquare2, History,
   FileText, Users2,
   BookMarked, Layers, Wand2, Palette, FlaskConical, Brain, ScanLine,
-  BarChart3, TrendingUp, ClipboardCheck,
+  BarChart2, BarChart3, TrendingUp, ClipboardCheck,
   Award, CreditCard, HelpCircle,
   Terminal, Globe, Library, Shield, DollarSign, Cpu, PieChart, Package,
   RefreshCw, Settings, MessageSquare,
@@ -100,6 +100,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Pulse", href: "/pulse", icon: BarChart3, roles: ["admin","teacher"] },
         { name: "InsightStream", href: "/insight-stream", icon: TrendingUp, roles: ["admin","teacher"] },
         { name: "InsightExams", href: "/insight-exams", icon: ClipboardCheck, roles: ["admin","teacher","assistant"] },
+        { name: "Grade Forecast", href: "/teacher/grade-forecast", icon: BarChart2, roles: ["admin","teacher"] },
       ],
     },
     {

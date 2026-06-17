@@ -243,6 +243,339 @@ Include 2 what-if simulations on the top weak topics.`;
   })
 );
 
+/* ── GET /api/grade-prediction/class-forecast ───────────────────────────── */
+/* Runs the statistical prediction model for ALL students in a subject        */
+gradePredictionRouter.get(
+  "/class-forecast",
+  requireRole("teacher", "admin", "super_admin"),
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const teacherId = req.userId!;
+      const subjectId = req.query.subjectId ? parseInt(req.query.subjectId as string) : null;
+      const examId    = req.query.examId    ? parseInt(req.query.examId    as string) : null;
+
+      if (!subjectId && !examId) {
+        res.status(400).json({ error: "subjectId or examId required" });
+        return;
+      }
+
+      /* ── 1. Verify teacher owns subject ──────────────────────────────── */
+      if (subjectId) {
+        const { rows: [sub] } = await pool.query(
+          `SELECT id FROM subjects WHERE id=$1 AND teacher_account_id=$2`,
+          [subjectId, teacherId],
+        );
+        if (!sub && req.role !== "admin" && req.role !== "super_admin") {
+          res.status(403).json({ error: "Subject not found or access denied" });
+          return;
+        }
+      }
+
+      /* ── 2. Resolve subjectId from examId if needed ──────────────────── */
+      let resolvedSubjectId = subjectId;
+      let resolvedExamId = examId;
+      if (!resolvedSubjectId && examId) {
+        const { rows: [ex] } = await pool.query(
+          `SELECT subject_id FROM exams WHERE id=$1`, [examId],
+        );
+        resolvedSubjectId = ex?.subject_id ?? null;
+      }
+
+      /* ── 3. Pull all mark data for teacher's students in this subject ── */
+      const examFilter = resolvedExamId
+        ? `AND e.id = ${resolvedExamId}`
+        : resolvedSubjectId ? `AND e.subject_id = ${resolvedSubjectId}` : "";
+
+      const { rows: allMarks } = await pool.query(`
+        SELECT
+          s.id            AS student_id,
+          s.student_name,
+          s.student_code,
+          sm.marks_scored::numeric AS marks_scored,
+          eq.max_marks::numeric    AS max_marks,
+          eq.topic,
+          sm.teacher_override_marks,
+          e.exam_date,
+          e.name   AS exam_name,
+          e.id     AS exam_id
+        FROM students s
+        JOIN student_marks sm ON sm.student_id = s.id
+        JOIN exam_questions eq ON eq.id = sm.question_id
+        JOIN exams e ON e.id = eq.exam_id
+        WHERE s.teacher_account_id = $1
+          AND sm.marks_scored IS NOT NULL
+          AND eq.max_marks > 0
+          ${examFilter}
+        ORDER BY s.id, e.exam_date DESC NULLS LAST, sm.id DESC
+      `, [teacherId]);
+
+      if (allMarks.length === 0) {
+        res.json({
+          students: [],
+          distribution: [],
+          class_stats: { mean: 0, median: 0, pass_rate: 0, at_risk_count: 0, borderline_count: 0, on_track_count: 0, total_students: 0 },
+          subject_id: resolvedSubjectId,
+          exam_id: resolvedExamId,
+          disclaimer: "No student mark data found for this subject/exam.",
+        });
+        return;
+      }
+
+      /* ── 4. Pull attendance per student (for context) ────────────────── */
+      const studentIds = [...new Set(allMarks.map((r: any) => r.student_id))];
+      const { rows: attendanceRows } = await pool.query(`
+        SELECT a.student_id,
+               COUNT(*) FILTER (WHERE a.status='Present')::int AS present,
+               COUNT(*)::int AS total
+        FROM attendance a
+        WHERE a.student_id = ANY($1::int[])
+        GROUP BY a.student_id
+      `, [studentIds]).catch(() => ({ rows: [] }));
+
+      const attendanceMap: Record<number, { present: number; total: number }> = {};
+      for (const r of attendanceRows) {
+        attendanceMap[r.student_id] = { present: parseInt(r.present), total: parseInt(r.total) };
+      }
+
+      /* ── 5. Group marks by student and run prediction model ──────────── */
+      const studentMarkMap: Record<number, { name: string; code: string; marks: any[] }> = {};
+      for (const row of allMarks) {
+        if (!studentMarkMap[row.student_id]) {
+          studentMarkMap[row.student_id] = { name: row.student_name, code: row.student_code, marks: [] };
+        }
+        studentMarkMap[row.student_id].marks.push(row);
+      }
+
+      const calcAvg = (arr: any[]) => {
+        const valid = arr.filter((r: any) => r.max_marks > 0 && r.marks_scored != null);
+        if (!valid.length) return 0;
+        return valid.reduce((s: number, r: any) => s + (Number(r.marks_scored) / Number(r.max_marks)) * 100, 0) / valid.length;
+      };
+
+      const predictions: any[] = [];
+
+      for (const [sidStr, data] of Object.entries(studentMarkMap)) {
+        const sid = parseInt(sidStr);
+        const marks = data.marks;
+        const recentCount = Math.max(1, Math.ceil(marks.length * 0.4));
+        const recent = marks.slice(0, recentCount);
+        const recentAvg = calcAvg(recent);
+        const overallAvg = calcAvg(marks);
+
+        const topicMap: Record<string, { scored: number; total: number }> = {};
+        for (const r of marks) {
+          if (!r.topic) continue;
+          if (!topicMap[r.topic]) topicMap[r.topic] = { scored: 0, total: 0 };
+          topicMap[r.topic].scored += Number(r.marks_scored) || 0;
+          topicMap[r.topic].total  += Number(r.max_marks) || 0;
+        }
+        const weakTopics = Object.entries(topicMap)
+          .map(([t, d]) => ({ topic: t, pct: d.total > 0 ? (d.scored / d.total) * 100 : 0 }))
+          .filter((t) => t.pct < 55)
+          .sort((a, b) => a.pct - b.pct)
+          .map((t) => t.topic);
+
+        const overrideCount = marks.filter((r: any) => r.teacher_override_marks != null).length;
+        const overrideFreq  = marks.length > 0 ? (overrideCount / marks.length) * 10 : 0;
+        const examCount     = new Set(marks.map((r: any) => r.exam_id)).size;
+
+        const trendFactor   = recentAvg >= overallAvg ? 1.03 : 0.97;
+        const weakPenalty   = Math.min(weakTopics.length * 2.5, 20);
+        const overridePenalty = Math.min(overrideFreq * 1.5, 10);
+        const attendance    = attendanceMap[sid];
+        const attendanceRate = attendance && attendance.total > 0
+          ? attendance.present / attendance.total
+          : 1;
+        const absencePenalty = attendanceRate < 0.7 ? (0.7 - attendanceRate) * 30 : 0;
+
+        const basePrediction = Math.max(0, Math.min(100,
+          recentAvg * trendFactor - weakPenalty - overridePenalty - absencePenalty,
+        ));
+
+        const range: [number, number] = [
+          Math.round(Math.max(0, basePrediction - 8)),
+          Math.round(Math.min(100, basePrediction + 6)),
+        ];
+        const midpoint      = (range[0] + range[1]) / 2;
+        const passProb      = Math.round(Math.min(99, Math.max(1, (basePrediction - 45) * 2 + 50)));
+        const riskLevel     = basePrediction < 45 ? "high" : basePrediction < 62 ? "medium" : "low";
+        const trend         = recentAvg > overallAvg + 3 ? "improving"
+                            : recentAvg < overallAvg - 3 ? "declining"
+                            : "stable";
+        const confidence    = examCount >= 5 ? "high" : examCount >= 2 ? "medium" : "low";
+
+        const topicBreakdown = Object.entries(topicMap).map(([t, d]) => ({
+          topic: t,
+          pct: d.total > 0 ? Math.round((d.scored / d.total) * 100) : 0,
+          weak: d.total > 0 && (d.scored / d.total) < 0.55,
+        })).sort((a, b) => a.pct - b.pct);
+
+        predictions.push({
+          student_id:          sid,
+          student_name:        data.name,
+          student_code:        data.code,
+          predicted_range:     range,
+          predicted_midpoint:  Math.round(midpoint),
+          pass_probability:    passProb / 100,
+          risk_level:          riskLevel,
+          trend,
+          confidence,
+          recent_avg:          Math.round(recentAvg),
+          overall_avg:         Math.round(overallAvg),
+          attendance_rate:     attendance ? Math.round(attendanceRate * 100) : null,
+          data_points:         marks.length,
+          exam_count:          examCount,
+          top_weak_topic:      weakTopics[0] ?? null,
+          weak_topic_count:    weakTopics.length,
+          topic_breakdown:     topicBreakdown.slice(0, 8),
+          key_factors: [
+            `Recent avg: ${Math.round(recentAvg)}%`,
+            weakTopics.length > 0 ? `Weak in ${weakTopics.slice(0, 2).join(", ")}` : "No major weak topics",
+            trend !== "stable" ? `Trend: ${trend}` : null,
+            attendance && attendanceRate < 0.75 ? `Low attendance: ${Math.round(attendanceRate * 100)}%` : null,
+          ].filter(Boolean),
+        });
+      }
+
+      predictions.sort((a, b) => a.predicted_midpoint - b.predicted_midpoint);
+
+      /* ── 6. Score distribution buckets ──────────────────────────────── */
+      const buckets = [
+        { label: "0–20",  min: 0,  max: 20,  count: 0, students: [] as string[] },
+        { label: "21–40", min: 21, max: 40,  count: 0, students: [] as string[] },
+        { label: "41–50", min: 41, max: 50,  count: 0, students: [] as string[] },
+        { label: "51–65", min: 51, max: 65,  count: 0, students: [] as string[] },
+        { label: "66–80", min: 66, max: 80,  count: 0, students: [] as string[] },
+        { label: "81–100",min: 81, max: 100, count: 0, students: [] as string[] },
+      ];
+      for (const p of predictions) {
+        const bucket = buckets.find((b) => p.predicted_midpoint >= b.min && p.predicted_midpoint <= b.max);
+        if (bucket) { bucket.count++; bucket.students.push(p.student_name); }
+      }
+
+      /* ── 7. Class stats ──────────────────────────────────────────────── */
+      const midpoints   = predictions.map((p) => p.predicted_midpoint);
+      const mean        = midpoints.length > 0
+        ? Math.round(midpoints.reduce((s, v) => s + v, 0) / midpoints.length)
+        : 0;
+      const sorted      = [...midpoints].sort((a, b) => a - b);
+      const median      = sorted.length > 0
+        ? sorted[Math.floor(sorted.length / 2)]
+        : 0;
+      const passRate    = midpoints.length > 0
+        ? Math.round(midpoints.filter((m) => m >= 50).length / midpoints.length * 100)
+        : 0;
+
+      const classStats = {
+        mean,
+        median,
+        pass_rate:        passRate,
+        at_risk_count:    predictions.filter((p) => p.risk_level === "high").length,
+        borderline_count: predictions.filter((p) => p.risk_level === "medium").length,
+        on_track_count:   predictions.filter((p) => p.risk_level === "low").length,
+        total_students:   predictions.length,
+        improving_count:  predictions.filter((p) => p.trend === "improving").length,
+        declining_count:  predictions.filter((p) => p.trend === "declining").length,
+      };
+
+      /* ── 8. Subject/exam info ────────────────────────────────────────── */
+      let subjectInfo = null;
+      if (resolvedSubjectId) {
+        const { rows: [si] } = await pool.query(
+          `SELECT name, board, level FROM subjects WHERE id=$1`, [resolvedSubjectId],
+        ).catch(() => ({ rows: [] }));
+        subjectInfo = si ?? null;
+      }
+
+      let examInfo = null;
+      if (resolvedExamId) {
+        const { rows: [ei] } = await pool.query(
+          `SELECT name, exam_date, total_marks FROM exams WHERE id=$1`, [resolvedExamId],
+        ).catch(() => ({ rows: [] }));
+        examInfo = ei ?? null;
+      }
+
+      res.json({
+        students:    predictions,
+        distribution: buckets,
+        class_stats: classStats,
+        subject_id:  resolvedSubjectId,
+        exam_id:     resolvedExamId,
+        subject:     subjectInfo,
+        exam:        examInfo,
+        disclaimer:  "Statistical model only — not final grades. Predictions use historical marks, recency weighting, topic analysis, and attendance.",
+        generated_at: new Date().toISOString(),
+      });
+
+    } catch (err) {
+      logError(err, { route: "grade-prediction/class-forecast" });
+      res.status(500).json({ error: "Failed to generate class forecast" });
+    }
+  }),
+);
+
+/* ── GET /api/grade-prediction/teacher-subjects ─────────────────────────── */
+/* Subjects with exam data for the teacher subject selector                   */
+gradePredictionRouter.get(
+  "/teacher-subjects",
+  requireRole("teacher", "admin", "super_admin"),
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const teacherId = req.userId!;
+      const { rows } = await pool.query(`
+        SELECT
+          su.id,
+          su.name,
+          su.board,
+          su.level,
+          su.syllabus_code,
+          COUNT(DISTINCT e.id)::int   AS exam_count,
+          COUNT(DISTINCT sm.student_id)::int AS student_count,
+          MAX(e.exam_date)            AS last_exam_date
+        FROM subjects su
+        JOIN exams e   ON e.subject_id = su.id AND e.status = 'published'
+        JOIN exam_questions eq ON eq.exam_id = e.id
+        JOIN student_marks sm ON sm.question_id = eq.id AND sm.marks_scored IS NOT NULL
+        WHERE su.teacher_account_id = $1
+        GROUP BY su.id
+        HAVING COUNT(DISTINCT sm.student_id) > 0
+        ORDER BY student_count DESC, su.name
+      `, [teacherId]);
+      res.json({ subjects: rows });
+    } catch (err) {
+      logError(err, { route: "grade-prediction/teacher-subjects" });
+      res.status(500).json({ error: "Failed" });
+    }
+  }),
+);
+
+/* ── GET /api/grade-prediction/subject-exams/:subjectId ─────────────────── */
+gradePredictionRouter.get(
+  "/subject-exams/:subjectId",
+  requireRole("teacher", "admin", "super_admin"),
+  safeHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const teacherId = req.userId!;
+      const subjectId = parseInt(req.params.subjectId);
+      const { rows } = await pool.query(`
+        SELECT e.id, e.name, e.exam_date, e.total_marks,
+               COUNT(DISTINCT sm.student_id)::int AS students_with_data
+        FROM exams e
+        JOIN exam_questions eq ON eq.exam_id = e.id
+        JOIN student_marks sm ON sm.question_id = eq.id
+        WHERE e.subject_id = $1 AND e.teacher_account_id = $2
+        GROUP BY e.id
+        HAVING COUNT(sm.id) > 0
+        ORDER BY e.exam_date DESC NULLS LAST
+      `, [subjectId, teacherId]);
+      res.json({ exams: rows });
+    } catch (err) {
+      logError(err, { route: `grade-prediction/subject-exams/${req.params.subjectId}` });
+      res.status(500).json({ error: "Failed" });
+    }
+  }),
+);
+
 /* ── POST /api/grade-prediction/what-if ─────────────────────────────────── */
 gradePredictionRouter.post(
   "/what-if",

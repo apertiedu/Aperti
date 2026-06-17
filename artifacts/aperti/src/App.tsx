@@ -103,6 +103,7 @@ const PricingExperimentsPage = lazy(() => import("@/pages/admin/pricing-experime
 const BillingEventsPage = lazy(() => import("@/pages/admin/billing-events"));
 const FinanceControlCenterPage = lazy(() => import("@/pages/admin/finance-control-center"));
 const SubscribeV2Page = lazy(() => import("@/pages/subscribe-v2"));
+const GradeForecastPage = lazy(() => import("@/pages/teacher/grade-forecast"));
 // Features 22–25
 const ArchitecturePage = lazy(() => import("@/pages/admin/architecture"));
 const MigrationSafetyPage = lazy(() => import("@/pages/admin/migration-safety"));
@@ -584,6 +585,7 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/assessments/:id/builder" component={AssessmentBuilder} />
     <Route path="/teacher/assessments/:id/monitor" component={AssessmentMonitor} />
     <Route path="/teacher/gradebook"><Redirect to="/gradebook-plus" /></Route>
+    <Route path="/teacher/grade-forecast" component={GradeForecastPage} />
     <Route path="/teacher/moderation" component={ModerationCenter} />
     <Route path="/teacher/snapgrade/:id/review" component={SnapGradeReview} />
     <Route path="/teacher/archives" component={ExamArchives} />
