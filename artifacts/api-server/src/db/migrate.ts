@@ -1765,6 +1765,20 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_anomaly_pred_entity ON anomaly_predictions(entity_id, entity_type)`,
   `CREATE INDEX IF NOT EXISTS idx_anomaly_pred_score  ON anomaly_predictions(risk_score DESC, analyzed_at DESC)`,
 
+  /* ── Features 22–25: Domain Events (event bus persistence) ──────────── */
+  `CREATE TABLE IF NOT EXISTS domain_events (
+    id             bigserial PRIMARY KEY,
+    event_type     text NOT NULL,
+    payload        jsonb NOT NULL DEFAULT '{}',
+    actor_id       integer REFERENCES accounts(id) ON DELETE SET NULL,
+    actor_role     text,
+    correlation_id text,
+    created_at     timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_domain_events_type    ON domain_events(event_type, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_domain_events_actor   ON domain_events(actor_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_domain_events_corr    ON domain_events(correlation_id)`,
+
   /* ── Features 18–21: billing_invoices extended columns ──────────────── */
   `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS invoice_number text`,
   `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS items          jsonb NOT NULL DEFAULT '[]'`,

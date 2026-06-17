@@ -122,6 +122,13 @@ import { anomalyDetectionRouter } from "./anomaly-detection";
 import { billingInvoicesRouter } from "./billing-invoices";
 import { disputesRouter } from "./disputes";
 import { aiAnomalyRouter } from "./ai-anomaly";
+import { architectureRouter } from "./architecture";
+import { migrationSafetyRouter } from "./migration-safety";
+import { deploymentReadinessRouter } from "./deployment-readiness";
+import { loadSimulationRouter } from "./load-simulation";
+import { securePaymentsRouter } from "./secure-payments";
+import { secureDiscountsRouter } from "./secure-discounts";
+import { assistantAssignmentsRouter } from "./assistant-assignments";
 
 const router: IRouter = Router();
 
@@ -281,9 +288,6 @@ router.use("/shield", anomalyDetectionRouter);
 
 router.use("/system", systemRouter);
 
-import { securePaymentsRouter } from "./secure-payments";
-import { secureDiscountsRouter } from "./secure-discounts";
-import { assistantAssignmentsRouter } from "./assistant-assignments";
 router.use("/secure-payments", securePaymentsRouter);
 router.use("/secure-discounts", secureDiscountsRouter);
 router.use("/assistant-assignments", assistantAssignmentsRouter);
@@ -292,6 +296,12 @@ router.use("/assistant-assignments", assistantAssignmentsRouter);
 router.use("/billing", billingInvoicesRouter);
 router.use("/disputes", disputesRouter);
 router.use("/ai-anomaly", aiAnomalyRouter);
+
+// Features 22–25 — Architecture, Migration Safety, Deployment Readiness, Load Simulation
+router.use("/architecture", architectureRouter);
+router.use("/migration-safety", migrationSafetyRouter);
+router.use("/deployment", deploymentReadinessRouter);
+router.use("/load-sim", loadSimulationRouter);
 
 export default router;
 
