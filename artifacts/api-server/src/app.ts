@@ -8,6 +8,8 @@ import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import path from "path";
+import jwt from "jsonwebtoken";
+import cron from "node-cron";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
@@ -183,6 +185,46 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
+// ── Per-user / route-specific rate limiting ───────────────────────────────────
+function extractRateLimitKey(req: Request): string {
+  try {
+    const token = (req as any).cookies?.["token"];
+    if (token) {
+      const decoded = jwt.decode(token) as { id?: number } | null;
+      if (decoded?.id) return `u:${decoded.id}`;
+    }
+  } catch {}
+  return "guest";
+}
+
+const aiChatLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 200,
+  keyGenerator: extractRateLimitKey,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
+  message: { error: "Daily AI request quota exceeded — try again tomorrow" },
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts — please wait before trying again" },
+});
+
+const subInitiateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
+  keyGenerator: extractRateLimitKey,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
+  message: { error: "Too many subscription requests — try again in an hour" },
+});
+
 // ── CORS ──────────────────────────────────────────────────────────────────────
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
@@ -237,7 +279,7 @@ app.use(
     cookie: {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
+      sameSite: "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     },
   }),
@@ -249,14 +291,20 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   res.on("finish", () => {
     const duration = Date.now() - start;
     const endpoint = req.route?.path ?? req.path ?? "unknown";
-    pool.query(
-      "INSERT INTO api_metrics (method, endpoint, status_code, duration_ms, recorded_at) VALUES ($1,$2,$3,$4,NOW())",
-      [req.method, endpoint.substring(0, 200), res.statusCode, duration],
-    ).catch(() => {});
+    if (Math.random() < 0.1) {
+      pool.query(
+        "INSERT INTO api_metrics (method, endpoint, status_code, duration_ms, recorded_at) VALUES ($1,$2,$3,$4,NOW())",
+        [req.method, endpoint.substring(0, 200), res.statusCode, duration],
+      ).catch(() => {});
+    }
     recordRequest(req.method, endpoint.substring(0, 200), duration);
   });
   next();
 });
+
+cron.schedule("0 3 * * *", () => {
+  pool.query("DELETE FROM api_metrics WHERE recorded_at < NOW() - INTERVAL '30 days'").catch(() => {});
+}, { timezone: "UTC" });
 
 // ── Static files (uploads) with cache headers ─────────────────────────────────
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads"), {
@@ -300,33 +348,15 @@ app.get("/health", async (_req, res) => {
 
 // ── Public health check ───────────────────────────────────────────────────────
 app.get("/api/health", async (_req, res) => {
-  const start = Date.now();
   let dbOk = false;
-  let dbLatencyMs = 0;
-  let tableCount = 0;
   try {
-    const t0 = Date.now();
     await pool.query("SELECT 1");
-    dbLatencyMs = Date.now() - t0;
     dbOk = true;
-    const tc = await pool.query(
-      `SELECT count(*)::int AS cnt FROM pg_stat_user_tables`
-    ).catch(() => ({ rows: [{ cnt: 0 }] }));
-    tableCount = tc.rows[0]?.cnt ?? 0;
   } catch {}
-  const memUsed = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
-  const status = dbOk ? (dbLatencyMs > 800 ? "degraded" : "healthy") : "critical";
-  res.json({
+  const status = dbOk ? "healthy" : "critical";
+  res.status(dbOk ? 200 : 503).json({
     status,
-    db: dbOk ? "connected" : "error",
-    dbLatencyMs,
-    dbTables: tableCount,
-    session: "memory",
-    uptime: Math.round(process.uptime()),
-    latencyMs: Date.now() - start,
-    memoryMb: memUsed,
-    version: process.env.COMMIT_HASH || "dev",
-    env: process.env.NODE_ENV || "development",
+    db: dbOk,
     timestamp: new Date().toISOString(),
   });
 });
@@ -352,6 +382,10 @@ app.use("/api", launchCmsRouter);
 
 // Phase 33 — Error capture (public, rate-limited) — MUST be before main router
 app.use("/api/errors", errorsLogRouter);
+
+app.use("/api/ai/chat", aiChatLimiter);
+app.use("/auth/login", loginLimiter);
+app.use("/api/sub-engine/initiate", subInitiateLimiter);
 
 // ── Application routes ────────────────────────────────────────────────────────
 app.use("/api", router);

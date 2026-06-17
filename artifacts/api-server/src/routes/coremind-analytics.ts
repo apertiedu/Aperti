@@ -32,8 +32,6 @@ coremindAnalyticsRouter.get("/analytics/stats", authenticate, requireRole("admin
                COALESCE(SUM(tokens_used), 0)::bigint                    AS total_tokens
         FROM ${aiInteractionsTable}
       `),
-      // Separate token sum for cost calc (already included above, kept for clarity)
-      db.execute(sql`SELECT 1 AS dummy`),
       // Calls in last 7 days
       db.execute(sql`
         SELECT COUNT(*)::int AS recent_calls

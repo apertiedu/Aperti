@@ -76,12 +76,22 @@ adminAuditRouter.get("/stats", async (_req, res: Response) => {
   }
 });
 
+function csvEscape(val: unknown): string {
+  const s = val === null || val === undefined ? "" : String(val);
+  if (s.includes(",") || s.includes('"') || s.includes("\n") || s.includes("\r")) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
 adminAuditRouter.get("/export", async (_req: Request, res: Response) => {
   try {
     const logs = await db.select().from(auditLogsTable).orderBy(desc(auditLogsTable.createdAt)).limit(2000);
     const header = "id,accountId,action,resource,resourceId,severity,ipAddress,createdAt\n";
     const rows = logs.map(l =>
-      `${l.id},${l.accountId || ""},${l.action},${l.resource},${l.resourceId || ""},${l.severity || "info"},${l.ipAddress || ""},${l.createdAt}`
+      [l.id, l.accountId ?? "", l.action, l.resource, l.resourceId ?? "", l.severity ?? "info", l.ipAddress ?? "", l.createdAt]
+        .map(csvEscape)
+        .join(",")
     ).join("\n");
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", "attachment; filename=audit-logs.csv");

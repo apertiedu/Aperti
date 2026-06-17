@@ -21,6 +21,24 @@
 export function validateEnv(): void {
   const errors: string[] = [];
   const warnings: string[] = [];
+  const isProd = process.env.NODE_ENV === "production";
+
+  if (isProd) {
+    const prodRequired = [
+      "ALLOWED_ORIGINS",
+      "EXAM_VAULT_KEY",
+      "VAPID_PUBLIC_KEY",
+      "VAPID_PRIVATE_KEY",
+      "INSTAPAY_PHONE",
+      "INSTAPAY_NAME",
+    ];
+    for (const k of prodRequired) {
+      if (!process.env[k]) {
+        console.error(`[FATAL] ${k} must be set in production`);
+        errors.push(`  ${k} is required in production but not set.`);
+      }
+    }
+  }
 
   // ── Required ───────────────────────────────────────────────────────────────
   if (!process.env["DATABASE_URL"]) {

@@ -60,7 +60,12 @@ secureDiscountsRouter.post("/validate", async (req: AuthRequest, res: Response):
         res.status(400).json({ error: "courseId is required for teacher discount codes" });
         return;
       }
-      const courseIds: number[] = Array.isArray(coupon.course_ids) ? coupon.course_ids : (JSON.parse(coupon.course_ids ?? "[]") as number[]);
+      let courseIds: number[] = [];
+      try {
+        courseIds = Array.isArray(coupon.course_ids) ? coupon.course_ids : (JSON.parse(coupon.course_ids ?? "[]") as number[]);
+      } catch {
+        courseIds = [];
+      }
       if (!courseIds.includes(courseId)) {
         auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "VALIDATE_DISCOUNT_COURSE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { courseId } });
         res.status(403).json({ error: "This discount code is not valid for this course" });
@@ -248,7 +253,12 @@ secureDiscountsRouter.post("/apply", async (req: AuthRequest, res: Response): Pr
         res.status(400).json({ error: "courseId is required for teacher discount codes" });
         return;
       }
-      const courseIds: number[] = Array.isArray(coupon.course_ids) ? coupon.course_ids : (JSON.parse(coupon.course_ids ?? "[]") as number[]);
+      let courseIds: number[] = [];
+      try {
+        courseIds = Array.isArray(coupon.course_ids) ? coupon.course_ids : (JSON.parse(coupon.course_ids ?? "[]") as number[]);
+      } catch {
+        courseIds = [];
+      }
       if (!courseIds.includes(courseId)) {
         await client.query("ROLLBACK");
         auditLog({ actorId: req.userId ?? null, actorRole: req.role ?? "user", action: "APPLY_DISCOUNT_COURSE_MISMATCH", targetId: coupon.id, targetType: "coupon", ip, result: "blocked", metadata: { courseId } });
