@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "wouter";
 import { Eye, EyeOff, Check, ArrowLeft, ArrowRight, Globe, User, GraduationCap, Users } from "lucide-react";
@@ -147,6 +147,12 @@ export default function Register() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+
+  useEffect(() => {
+    const ref = new URLSearchParams(window.location.search).get("ref");
+    if (ref) setReferralCode(ref.toUpperCase().slice(0, 8));
+  }, []);
 
   const set = (k: string, v: string) => { setError(""); setForm(p => ({ ...p, [k]: v })); };
 
@@ -180,6 +186,7 @@ export default function Register() {
           firstName: form.firstName.trim(), lastName: form.lastName.trim(),
           username: form.username.trim().toLowerCase(),
           email: form.email.toLowerCase().trim(), password: form.password, role, country: form.country,
+          ...(referralCode.trim() ? { referralCode: referralCode.trim() } : {}),
         }),
       });
       const data = await res.json();
@@ -387,6 +394,23 @@ export default function Register() {
                         </motion.div>
                       ))}
                     </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="space-y-1.5"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <label className="text-xs font-semibold uppercase tracking-wider text-slate-500">Referral code <span className="normal-case font-normal text-slate-400">(optional)</span></label>
+                    <input
+                      type="text"
+                      value={referralCode}
+                      onChange={e => setReferralCode(e.target.value.toUpperCase().slice(0, 8))}
+                      placeholder="e.g. ABC12345"
+                      className="w-full h-10 px-4 rounded-xl border text-sm text-slate-900 bg-white outline-none transition-all duration-200"
+                      style={{ borderColor: referralCode ? "hsl(var(--primary))" : "#e2e8f0", boxShadow: referralCode ? `0 0 0 3px ${"hsl(var(--primary))"}18` : "none" }}
+                    />
                   </motion.div>
 
                   {/* Agreement */}

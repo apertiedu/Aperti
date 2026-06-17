@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { eq } from "drizzle-orm";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { accountsTable, deviceSessionsTable, auditLogsTable } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 
@@ -551,6 +551,22 @@ authRouter.post("/register", registerLimiter, async (req: Request, res: Response
       [rows[0].id]
     ).catch(() => {});
 
+    const { referralCode } = req.body;
+    if (referralCode && typeof referralCode === "string") {
+      const normalizedRef = referralCode.toUpperCase().trim();
+      await dbPool.query(
+        "SELECT id FROM accounts WHERE referral_code = $1 AND id != $2 LIMIT 1",
+        [normalizedRef, rows[0].id]
+      ).then(({ rows: refRows }) => {
+        if (refRows.length > 0) {
+          return dbPool.query(
+            "INSERT INTO referrals (referrer_id, referred_id, code, status, activated_at) VALUES ($1,$2,$3,'active',NOW())",
+            [refRows[0].id, rows[0].id, normalizedRef]
+          );
+        }
+      }).catch(() => {});
+    }
+
     const token = jwt.sign({ id: rows[0].id, role: rows[0].role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
     res.status(201).json({
       token,
@@ -740,5 +756,97 @@ authRouter.delete("/devices", authenticate as any, async (req: AuthRequest, res:
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: "Failed to revoke sessions" });
+  }
+});
+
+const isProduction = process.env.NODE_ENV === "production";
+
+authRouter.get("/google", (req: Request, res: Response) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    const base = process.env.PUBLIC_URL ?? `${req.protocol}://${req.host}`;
+    res.redirect(`${base}/login?error=google_not_configured`);
+    return;
+  }
+  const state = crypto.randomUUID();
+  res.cookie("oauth_state", state, { httpOnly: true, secure: isProduction, sameSite: "lax", maxAge: 10 * 60 * 1000 });
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI ?? `${req.protocol}://${req.host}/auth/google/callback`;
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    scope: "openid email profile",
+    state,
+    access_type: "online",
+    prompt: "select_account",
+  });
+  res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+});
+
+authRouter.get("/google/callback", async (req: Request, res: Response) => {
+  const { code, state, error: oauthError } = req.query as Record<string, string>;
+  const cookieState = (req as any).cookies?.["oauth_state"];
+  res.clearCookie("oauth_state");
+  const frontendBase = process.env.PUBLIC_URL ?? `${req.protocol}://${req.host}`;
+  if (oauthError || !code) {
+    res.redirect(`${frontendBase}/login?error=google_cancelled`);
+    return;
+  }
+  if (!state || state !== cookieState) {
+    res.redirect(`${frontendBase}/login?error=invalid_state`);
+    return;
+  }
+  try {
+    const clientId = process.env.GOOGLE_CLIENT_ID!;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI ?? `${req.protocol}://${req.host}/auth/google/callback`;
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, grant_type: "authorization_code" }),
+    });
+    if (!tokenRes.ok) { res.redirect(`${frontendBase}/login?error=google_token_failed`); return; }
+    const tokenData = await tokenRes.json() as { access_token: string };
+    const userInfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    if (!userInfoRes.ok) { res.redirect(`${frontendBase}/login?error=google_userinfo_failed`); return; }
+    const googleUser = await userInfoRes.json() as { sub: string; email: string; name: string; picture?: string; email_verified: boolean };
+    if (!googleUser.email_verified) { res.redirect(`${frontendBase}/login?error=google_email_unverified`); return; }
+    const { rows } = await pool.query(
+      `SELECT * FROM accounts WHERE google_id = $1 OR (email = $2 AND email IS NOT NULL) ORDER BY (google_id = $1) DESC LIMIT 1`,
+      [googleUser.sub, googleUser.email],
+    );
+    let account = rows[0];
+    let isNew = false;
+    if (!account) {
+      isNew = true;
+      const base = googleUser.email.split("@")[0].replace(/[^a-z0-9_]/gi, "").toLowerCase().substring(0, 20) || "user";
+      const { rows: existRows } = await pool.query(`SELECT username FROM accounts WHERE username LIKE $1`, [`${base}%`]);
+      const taken = new Set(existRows.map((r: any) => r.username));
+      let username = base;
+      let n = 1;
+      while (taken.has(username)) username = `${base}${n++}`;
+      const { rows: newRows } = await pool.query(
+        `INSERT INTO accounts (username, password_hash, display_name, email, role, status, google_id, avatar_url, email_verified, created_at)
+         VALUES ($1,$2,$3,$4,'teacher','active',$5,$6,true,NOW()) RETURNING *`,
+        [username, "oauth:google", googleUser.name, googleUser.email, googleUser.sub, googleUser.picture ?? null],
+      );
+      account = newRows[0];
+    } else {
+      await pool.query(
+        `UPDATE accounts SET google_id = COALESCE(google_id, $2), avatar_url = COALESCE(avatar_url, $3), last_login_at = NOW() WHERE id = $1`,
+        [account.id, googleUser.sub, googleUser.picture ?? null],
+      );
+    }
+    if (account.status !== "active") { res.redirect(`${frontendBase}/login?error=account_suspended`); return; }
+    const token = jwt.sign({ id: account.id, role: account.role, username: account.username }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    res.cookie("aperti_token", token, { httpOnly: true, secure: isProduction, sameSite: "lax", maxAge: 7 * 24 * 60 * 60 * 1000 });
+    writeAudit({ accountId: account.id, action: "LOGIN_GOOGLE", resource: "auth", ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
+    const dest = isNew ? "/onboarding" : (account.role === "admin" || account.role === "super_admin" ? "/admin/command" : "/");
+    res.redirect(`${frontendBase}${dest}`);
+  } catch (err) {
+    console.error("[OAuth] Google error:", err);
+    res.redirect(`${frontendBase}/login?error=google_error`);
   }
 });

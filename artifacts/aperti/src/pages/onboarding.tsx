@@ -328,12 +328,16 @@ export default function Onboarding() {
       </div>
       <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}
         className="relative z-10 w-full max-w-lg bg-card rounded-2xl shadow-sm border border-border p-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <span className="text-xl font-bold text-primary">Aperti.</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "#f0fdfa", color: "hsl(var(--primary))" }}>Account setup</span>
-          </div>
+          <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: "#f0fdfa", color: "hsl(var(--primary))" }}>Account setup</span>
         </div>
+        {user?.displayName && (
+          <div className="mb-6 p-4 rounded-xl border border-border bg-muted/40">
+            <p className="text-sm font-semibold text-foreground">Welcome, {user.displayName}!</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Let&apos;s set up your account in a few quick steps.</p>
+          </div>
+        )}
         {user?.role === "teacher" || user?.role === "admin" || user?.role === "assistant" ? (
           <TeacherWizard onDone={handleDone} />
         ) : user?.role === "parent" ? (

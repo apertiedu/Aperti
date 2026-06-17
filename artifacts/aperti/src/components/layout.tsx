@@ -124,6 +124,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Course Marketplace", href: "/courses", icon: ShoppingBag, roles: ["admin","teacher","assistant","parent"] },
         { name: "My Courses", href: "/my-courses", icon: BookMarked, roles: ["admin","teacher"] },
         { name: "Student Approvals", href: "/student-approvals", icon: UserCheck, roles: ["admin","teacher"] },
+        { name: "Referrals", href: "/referrals", icon: Users2, roles: ["admin","teacher","assistant"] },
         { name: "Link Child Account", href: "/parent/link-student", icon: Link2, roles: ["parent"] },
       ],
     },

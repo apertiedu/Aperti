@@ -10,7 +10,7 @@ import {
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
   Sun, Moon, LogOut, Users, Shield, Repeat2, Library, Link2,
   MessageSquare, BarChart3, Cpu, Lock, GraduationCap,
-  Bell, Inbox, Megaphone, Ticket,
+  Bell, Inbox, Megaphone, Ticket, Share2,
 } from "lucide-react";
 import NotificationBell from "@/components/notification-bell";
 
@@ -60,6 +60,7 @@ const allNav = [
   { href: "/support", label: "Support", icon: Ticket, desc: "Help & tickets" },
   { href: "/notifications", label: "Notifications", icon: Bell, desc: "Notification settings" },
   { href: "/exam-vault", label: "ExamVault", icon: Lock, desc: "Secure offline exams" },
+  { href: "/referrals", label: "Referrals", icon: Share2, desc: "Invite friends, earn rewards" },
   { href: "/my-qr", label: "My QR Code", icon: GraduationCap, desc: "Attendance QR & ID card" },
   { href: "/exam-room", label: "Exam Room", icon: GraduationCap, desc: "Take your exams" },
   { href: "/student/exam-readiness", label: "Exam Readiness", icon: Target, desc: "AI readiness dashboard" },

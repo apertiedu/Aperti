@@ -137,6 +137,7 @@ import { paymentRecoveryRouter } from "./payment-recovery";
 import { pricingExperimentsRouter } from "./pricing-experiments";
 import { roleBasedPlansRouter } from "./role-based-plans";
 import { gradeForecastPdfRouter } from "./grade-forecast-pdf";
+import { referralRouter } from "./referral";
 
 const router: IRouter = Router();
 
@@ -322,6 +323,8 @@ router.use("/architecture", architectureRouter);
 router.use("/migration-safety", migrationSafetyRouter);
 router.use("/deployment", deploymentReadinessRouter);
 router.use("/load-sim", loadSimulationRouter);
+
+router.use("/referrals", referralRouter);
 
 export default router;
 

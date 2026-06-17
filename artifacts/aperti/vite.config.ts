@@ -126,6 +126,13 @@ export default defineConfig({
           const url = req.url ?? "";
           if (url.startsWith("/@") || url.startsWith("/__")) return url;
           if (url.match(/\.(tsx?|jsx?|css|scss|svg|png|jpe?g|gif|webp|ico|woff2?|ttf|eot|map)(\?.*)?$/)) return url;
+          const BACKEND_PREFIXES = [
+            "/api", "/auth", "/courses", "/parent", "/uploads",
+            "/socket.io", "/dashboard", "/flashcards", "/lessons",
+            "/subscriptions", "/homework", "/question-bank",
+            "/mentor", "/revisit", "/attendance", "/students",
+          ];
+          if (BACKEND_PREFIXES.some(p => url === p || url.startsWith(p + "/") || url.startsWith(p + "?"))) return undefined;
           if ((req.headers.accept ?? "").includes("text/html")) return "/index.html";
         },
       },

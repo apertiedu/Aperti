@@ -151,6 +151,7 @@ const PrivacyVault = lazy(() => import("@/pages/privacy-vault"));
 const Register = lazy(() => import("@/pages/register"));
 const Onboarding = lazy(() => import("@/pages/onboarding"));
 const Settings = lazy(() => import("@/pages/settings"));
+const Referrals = lazy(() => import("@/pages/referrals"));
 const Profile = lazy(() => import("@/pages/profile"));
 const AccessDenied = lazy(() => import("@/pages/access-denied"));
 const SessionsPage = lazy(() => import("@/pages/account/sessions"));
@@ -445,6 +446,7 @@ function StudentRouter() {
         <Route path="/account/sessions" component={SessionsPage} />
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/settings" component={Settings} />
+        <Route path="/referrals" component={Referrals} />
         <Route path="/profile/:id" component={Profile} />
         <Route path="/courses" component={Courses} />
         <Route path="/courses/:id" component={CourseDetail} />
@@ -623,6 +625,7 @@ const TEACHER_ROUTES = (
     {/* Phase 17 — Mobile */}
     <Route path="/mobile/home" component={TeacherMobileHome} />
     <Route path="/flashcards/swipe" component={FlashcardSwipe} />
+    <Route path="/referrals" component={Referrals} />
   </>
 );
 

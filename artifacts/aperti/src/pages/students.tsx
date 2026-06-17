@@ -574,6 +574,7 @@ export default function Students() {
               ))}
             </div>
           ) : (
+            <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent">
@@ -640,6 +641,7 @@ export default function Students() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>

@@ -46,6 +46,16 @@ export default function StudyStream() {
   const { user } = useAuth();
   const [showAllActions, setShowAllActions] = useState(false);
 
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    const key = "aperti_streak_updated";
+    if (localStorage.getItem(key) !== today) {
+      fetch("/api/ascend/update-streak", { method: "POST", credentials: "include" })
+        .then(r => { if (r.ok) localStorage.setItem(key, today); })
+        .catch(() => {});
+    }
+  }, []);
+
   const { data: summary, isLoading } = useQuery({
     queryKey: ["student", "home-summary"],
     queryFn: () => fetchJSON("/api/student/home-summary"),

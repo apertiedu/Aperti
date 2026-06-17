@@ -48,7 +48,7 @@ export default function CourseDetail() {
     },
     onSuccess: () => {
       setEnrolled(true);
-      toast({ title: "Enrollment request sent! ✅", description: "Your teacher will review and approve your request shortly." });
+      toast({ title: "Enrollment request sent!", description: "Your teacher will review and approve your request shortly." });
     },
     onError: (err: Error) => {
       toast({ title: "Enrollment failed", description: err.message, variant: "destructive" });
@@ -173,7 +173,7 @@ export default function CourseDetail() {
 
               {enrolled ? (
                 <div className="w-full py-3 rounded-xl text-center font-semibold text-sm text-emerald-700 bg-emerald-50 border border-emerald-200">
-                  ✅ Enrollment requested!
+                  Enrollment requested
                 </div>
               ) : user?.role === "student" ? (
                 <Button className="w-full h-11 rounded-xl font-semibold text-sm text-white bg-primary"

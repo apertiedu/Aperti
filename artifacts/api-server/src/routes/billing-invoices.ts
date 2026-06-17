@@ -30,7 +30,12 @@ billingInvoicesRouter.post("/invoices", async (req: AuthRequest, res: Response):
       metadata?: Record<string, unknown>;
     };
 
-    const targetUserId = user_id ?? req.userId;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+    if (user_id !== undefined && user_id !== req.userId && !isAdmin) {
+      res.status(403).json({ error: "Forbidden: cannot create invoices for other users" });
+      return;
+    }
+    const targetUserId = (isAdmin && user_id) ? user_id : req.userId;
     if (!items || !Array.isArray(items) || items.length === 0) {
       res.status(400).json({ error: "items array is required and must not be empty" });
       return;
