@@ -20,6 +20,7 @@
 import { Router, Response } from "express";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { pool } from "@workspace/db";
+import { isSafeModeEnabled } from "../lib/safe-mode";
 
 export const aiGatewayRouter = Router();
 aiGatewayRouter.use(authenticate);
@@ -96,10 +97,22 @@ function trackInteraction(
 
   pool.query(
     `INSERT INTO ai_interactions
-       (account_id, interaction_type, model, prompt_tokens, completion_tokens, tokens_used,
-        estimated_cost_usd, latency_ms, status, created_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())`,
-    [accountId ?? null, interactionType, model, promptTokens, completionTokens, tokensUsed, estimatedCost, latencyMs, status],
+       (user_id, module, action, tokens_used, estimated_cost_usd, latency_ms, accepted,
+        model, prompt_tokens, completion_tokens, status, created_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,NOW())`,
+    [
+      accountId ?? null,
+      interactionType,
+      model,
+      tokensUsed,
+      estimatedCost,
+      latencyMs,
+      status === "success",
+      model,
+      promptTokens,
+      completionTokens,
+      status,
+    ],
   ).catch(() => {});
 }
 
@@ -163,7 +176,8 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
   }
 
   const sys = systemPrompt ?? "You are an expert IGCSE educational AI assistant. Be concise, accurate, and supportive.";
-  const model = MODELS[mode] ?? MODELS.balanced;
+  const safeModeActive = await isSafeModeEnabled().catch(() => false);
+  const model = MODELS[safeModeActive ? "cheap" : mode] ?? MODELS.balanced;
   const t0 = Date.now();
   let fullText = "";
 
@@ -268,7 +282,8 @@ aiGatewayRouter.post("/grade", async (req: AuthRequest, res: Response) => {
     } catch {}
   }
 
-  const model = MODELS[mode] ?? MODELS.balanced;
+  const safeModeActiveGrade = await isSafeModeEnabled().catch(() => false);
+  const model = MODELS[safeModeActiveGrade ? "cheap" : mode] ?? MODELS.balanced;
   const t0 = Date.now();
   const sys = `You are an expert ${subject || "IGCSE"} examiner. Grade strictly and return ONLY valid JSON:
 {"score":<0-${maxMarks}>,"grade":"<A*|A|B|C|D|E|U>","percentage":<0-100>,"awarded_marks":["<mark>"],"missed_marks":["<mark>"],"feedback":"<2-3 sentences>","improvements":["<action>"],"reasoning_summary":"<1 sentence why this score>","uncertainty_factors":["<reason confidence not 1.0>"],"confidence":<0.0-1.0>}`;
@@ -347,7 +362,8 @@ aiGatewayRouter.post("/generate", async (req: AuthRequest, res: Response) => {
   };
 
   const sys = prompts[type] ?? prompts.lesson;
-  const model = MODELS[mode] ?? MODELS.balanced;
+  const safeModeActiveGen = await isSafeModeEnabled().catch(() => false);
+  const model = MODELS[safeModeActiveGen ? "cheap" : mode] ?? MODELS.balanced;
   const t0 = Date.now();
 
   try {

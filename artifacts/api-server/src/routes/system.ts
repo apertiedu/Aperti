@@ -296,7 +296,7 @@ systemRouter.get("/validation-errors", async (_req: Request, res: Response): Pro
 /* ── Production Metrics — aggregated health data for dashboard ──────────── */
 systemRouter.get("/production-metrics", async (_req: Request, res: Response): Promise<void> => {
   try {
-    const [sysRows, uxRows, aiRows, valRows, safeModeResult] = await Promise.allSettled([
+    const [sysRows, uxRows, aiRows, valRows, safeModeResult, latPercRows] = await Promise.allSettled([
       pool.query(`
         SELECT
           COUNT(*)::int                                              AS total_requests,
@@ -317,9 +317,8 @@ systemRouter.get("/production-metrics", async (_req: Request, res: Response): Pr
           COUNT(*)::int                                              AS total_ai_calls,
           ROUND(AVG(confidence)::numeric, 3)                        AS avg_confidence,
           SUM(CASE WHEN accepted = false THEN 1 ELSE 0 END)::int    AS ai_failures,
-          ROUND(AVG(
-            EXTRACT(EPOCH FROM (created_at - created_at)) * 1000
-          ))::int                                                    AS ai_avg_latency_ms
+          ROUND(AVG(latency_ms))::int                               AS ai_avg_latency_ms,
+          COALESCE(SUM(tokens_used), 0)::int                        AS total_tokens
         FROM ai_interactions WHERE created_at > NOW() - INTERVAL '24 hours'
       `),
       pool.query(`
@@ -327,39 +326,75 @@ systemRouter.get("/production-metrics", async (_req: Request, res: Response): Pr
         FROM system_validation_errors WHERE created_at > NOW() - INTERVAL '24 hours'
       `),
       isSafeModeEnabled(),
+      pool.query(`
+        SELECT
+          ROUND(PERCENTILE_CONT(0.5)  WITHIN GROUP (ORDER BY latency_ms))::int AS p50_ms,
+          ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY latency_ms))::int AS p95_ms
+        FROM system_metrics_log
+        WHERE created_at > NOW() - INTERVAL '1 hour' AND latency_ms IS NOT NULL
+      `),
     ]);
 
-    const sys = sysRows.status      === "fulfilled" ? sysRows.value.rows[0]  : {};
-    const ux  = uxRows.status       === "fulfilled" ? uxRows.value.rows[0]   : {};
-    const ai  = aiRows.status       === "fulfilled" ? aiRows.value.rows[0]   : {};
-    const val = valRows.status      === "fulfilled" ? valRows.value.rows[0]  : {};
-    const safeMode = safeModeResult.status === "fulfilled" ? safeModeResult.value : false;
+    const sys      = sysRows.status       === "fulfilled" ? sysRows.value.rows[0]       : {};
+    const ux       = uxRows.status        === "fulfilled" ? uxRows.value.rows[0]        : {};
+    const ai       = aiRows.status        === "fulfilled" ? aiRows.value.rows[0]        : {};
+    const val      = valRows.status       === "fulfilled" ? valRows.value.rows[0]       : {};
+    const safeMode = safeModeResult.status === "fulfilled" ? safeModeResult.value       : false;
+    const latPerc  = latPercRows && latPercRows.status === "fulfilled" ? latPercRows.value.rows[0] : null;
 
     const uptimeSec = Math.round(process.uptime());
 
     res.json({
       safe_mode: safeMode,
       system: {
-        uptime_seconds:       uptimeSec,
-        total_requests_24h:   sys.total_requests   ?? 0,
-        error_count_24h:      sys.total_errors     ?? 0,
-        error_rate_pct:       parseFloat(sys.error_rate_pct ?? "0"),
-        avg_latency_ms:       sys.avg_latency_ms   ?? 0,
-        validation_errors_24h: val.total           ?? 0,
+        uptime_seconds:        uptimeSec,
+        total_requests_24h:    sys.total_requests   ?? 0,
+        error_count_24h:       sys.total_errors     ?? 0,
+        error_rate_pct:        parseFloat(sys.error_rate_pct ?? "0"),
+        avg_latency_ms:        sys.avg_latency_ms   ?? 0,
+        latency_p50_ms:        latPerc?.p50_ms      ?? 0,
+        latency_p95_ms:        latPerc?.p95_ms      ?? 0,
+        validation_errors_24h: val.total            ?? 0,
       },
       ux: {
         violations_24h:          ux.total_violations    ?? 0,
         critical_violations_24h: ux.critical_violations ?? 0,
       },
       ai: {
-        total_calls_24h:   ai.total_ai_calls ?? 0,
-        failure_count_24h: ai.ai_failures    ?? 0,
+        total_calls_24h:   ai.total_ai_calls      ?? 0,
+        failure_count_24h: ai.ai_failures         ?? 0,
         avg_confidence:    parseFloat(ai.avg_confidence ?? "0"),
+        avg_latency_ms:    ai.ai_avg_latency_ms   ?? 0,
+        total_tokens_24h:  ai.total_tokens        ?? 0,
       },
       timestamp: new Date().toISOString(),
     });
   } catch (err) {
     await logError(err, { route: "/api/system/production-metrics" });
     res.status(500).json({ error: "Failed to fetch production metrics" });
+  }
+});
+
+/* ── Metrics Trend — hourly breakdown for sparkline charts ──────────────── */
+systemRouter.get("/metrics-trend", async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const { rows } = await pool.query<{
+      hour: string;
+      requests: number;
+      errors: number;
+    }>(`
+      SELECT
+        TO_CHAR(DATE_TRUNC('hour', created_at), 'HH24:MI') AS hour,
+        COUNT(*)::int                                        AS requests,
+        SUM(CASE WHEN success = false THEN 1 ELSE 0 END)::int AS errors
+      FROM system_metrics_log
+      WHERE created_at > NOW() - INTERVAL '12 hours'
+      GROUP BY DATE_TRUNC('hour', created_at)
+      ORDER BY DATE_TRUNC('hour', created_at)
+    `);
+    res.json({ hours: rows });
+  } catch (err) {
+    await logError(err, { route: "/api/system/metrics-trend" });
+    res.status(500).json({ error: "Failed to fetch metrics trend" });
   }
 });

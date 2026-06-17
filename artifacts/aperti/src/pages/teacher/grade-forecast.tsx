@@ -9,6 +9,7 @@ import {
   BookOpen, Activity, Info,
 } from "lucide-react";
 import { useState } from "react";
+import { useUxGuard } from "@/hooks/use-ux-guard";
 
 /* ── Types ──────────────────────────────────────────────────────────────── */
 interface StudentPrediction {
@@ -257,6 +258,13 @@ export default function GradeForecast() {
   const [sortBy, setSortBy] = useState<"risk" | "score" | "name">("risk");
   const [filterRisk, setFilterRisk] = useState<"all" | "high" | "medium" | "low">("all");
   const [expandedId, setExpandedId] = useState<number | null>(null);
+
+  useUxGuard({
+    route: "/teacher/grade-forecast",
+    hasLoadingState: true,
+    hasErrorState: true,
+    hasData: true,
+  });
 
   const { data: subjectsData, isLoading: subjectsLoading } = useQuery<any>({
     queryKey: ["grade-forecast-subjects"],

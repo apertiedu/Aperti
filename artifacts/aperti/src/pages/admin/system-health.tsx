@@ -18,6 +18,8 @@ interface ProductionMetrics {
     error_count_24h: number;
     error_rate_pct: number;
     avg_latency_ms: number;
+    latency_p50_ms: number;
+    latency_p95_ms: number;
     validation_errors_24h: number;
   };
   ux: {
@@ -28,6 +30,8 @@ interface ProductionMetrics {
     total_calls_24h: number;
     failure_count_24h: number;
     avg_confidence: number;
+    avg_latency_ms: number;
+    total_tokens_24h: number;
   };
   timestamp: string;
 }
@@ -164,6 +168,13 @@ export default function SystemHealthDashboard() {
     staleTime: 30_000,
   });
 
+  const { data: trend } = useQuery<{ hours: Array<{ hour: string; requests: number; errors: number }> }>({
+    queryKey: ["system-metrics-trend"],
+    queryFn: () => apiFetch("/api/system/metrics-trend").then(r => r.json()),
+    refetchInterval: 60_000,
+    staleTime: 30_000,
+  });
+
   function handleRefresh() {
     refetchMetrics();
     refetchSelfCheck();
@@ -241,13 +252,14 @@ export default function SystemHealthDashboard() {
                 icon={AlertTriangle}
                 warn={metrics.system.error_rate_pct > 5}
                 trend={metrics.system.error_rate_pct > 5 ? "up" : "flat"}
-                sub={`${metrics.system.error_count_24h} errors / ${metrics.system.total_requests_24h} requests`}
+                sub={`${metrics.system.error_count_24h} errors / ${metrics.system.total_requests_24h} reqs`}
               />
               <MetricTile
                 label="Avg latency" value={`${metrics.system.avg_latency_ms}ms`}
                 icon={Zap}
                 warn={metrics.system.avg_latency_ms > 1000}
                 trend={metrics.system.avg_latency_ms > 500 ? "up" : "flat"}
+                sub={metrics.system.latency_p50_ms > 0 ? `p50 ${metrics.system.latency_p50_ms}ms` : undefined}
               />
               <MetricTile
                 label="Validation errors (24h)" value={metrics.system.validation_errors_24h}
@@ -255,6 +267,28 @@ export default function SystemHealthDashboard() {
                 warn={metrics.system.validation_errors_24h > 10}
               />
             </div>
+            {metrics.system.latency_p95_ms > 0 && (
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="rounded-lg bg-muted/30 border border-border p-3 text-sm">
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-muted-foreground">Latency p50 (last 1h)</span>
+                    <span className={cn("font-semibold", metrics.system.latency_p50_ms > 500 ? "text-amber-600" : "text-foreground")}>
+                      {metrics.system.latency_p50_ms}ms
+                    </span>
+                  </div>
+                  <HealthBar value={Math.min(metrics.system.latency_p50_ms, 2000)} max={2000} color={metrics.system.latency_p50_ms > 1000 ? "bg-rose-500" : metrics.system.latency_p50_ms > 500 ? "bg-amber-500" : "bg-emerald-500"} />
+                </div>
+                <div className="rounded-lg bg-muted/30 border border-border p-3 text-sm">
+                  <div className="flex justify-between mb-1.5">
+                    <span className="text-muted-foreground">Latency p95 (last 1h)</span>
+                    <span className={cn("font-semibold", metrics.system.latency_p95_ms > 1000 ? "text-rose-600" : metrics.system.latency_p95_ms > 500 ? "text-amber-600" : "text-foreground")}>
+                      {metrics.system.latency_p95_ms}ms
+                    </span>
+                  </div>
+                  <HealthBar value={Math.min(metrics.system.latency_p95_ms, 2000)} max={2000} color={metrics.system.latency_p95_ms > 1500 ? "bg-rose-500" : metrics.system.latency_p95_ms > 800 ? "bg-amber-500" : "bg-primary"} />
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div className="rounded-lg bg-muted/30 border border-border p-3">
                 <div className="flex justify-between mb-1.5">
@@ -302,6 +336,20 @@ export default function SystemHealthDashboard() {
                 accent={confidencePct >= 85}
                 sub={confidencePct >= 85 ? "High confidence" : confidencePct >= 65 ? "Medium confidence" : confidencePct > 0 ? "Low confidence" : "No data"}
               />
+              <MetricTile
+                label="AI avg latency"
+                value={metrics.ai.avg_latency_ms > 0 ? `${metrics.ai.avg_latency_ms}ms` : "N/A"}
+                icon={Clock}
+                warn={metrics.ai.avg_latency_ms > 5000}
+                sub="Per AI request"
+              />
+              <MetricTile
+                label="Total tokens (24h)"
+                value={metrics.ai.total_tokens_24h > 0 ? metrics.ai.total_tokens_24h.toLocaleString() : "N/A"}
+                icon={Zap}
+                accent={metrics.ai.total_tokens_24h > 0}
+                sub="Across all AI calls"
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div className="rounded-lg bg-muted/30 border border-border p-3">
@@ -324,6 +372,37 @@ export default function SystemHealthDashboard() {
           </>
         ) : null}
       </motion.div>
+
+      {/* ── Request Trend (12h sparkline) ───────────────────────────── */}
+      {trend && trend.hours.length > 0 && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}
+          className="rounded-xl bg-card border border-border p-5">
+          <SectionHeader icon={BarChart2} label="Request Volume (last 12h)" />
+          <div className="flex items-end gap-1 h-16">
+            {(() => {
+              const maxReq = Math.max(...trend.hours.map(h => h.requests), 1);
+              return trend.hours.map((h, i) => {
+                const pct = (h.requests / maxReq) * 100;
+                const errPct = h.requests > 0 ? (h.errors / h.requests) * 100 : 0;
+                return (
+                  <div key={i} className="flex-1 flex flex-col items-center gap-0.5 group relative">
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 bg-popover border border-border rounded px-1.5 py-0.5 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                      {h.hour} · {h.requests} reqs{h.errors > 0 ? ` · ${h.errors} err` : ""}
+                    </div>
+                    <div className="w-full rounded-t-sm" style={{ height: `${Math.max(4, pct)}%`, backgroundColor: errPct > 10 ? "#f43f5e" : errPct > 3 ? "#f59e0b" : "#0d9488" }} />
+                    <span className="text-[9px] text-muted-foreground hidden md:block">{h.hour.split(":")[0]}</span>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-primary inline-block" /> Normal</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-amber-500 inline-block" /> Elevated errors</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-500 inline-block" /> High error rate</span>
+          </div>
+        </motion.div>
+      )}
 
       {/* ── UX Health ───────────────────────────────────────────────── */}
       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
