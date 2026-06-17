@@ -130,6 +130,12 @@ import { securePaymentsRouter } from "./secure-payments";
 import { secureDiscountsRouter } from "./secure-discounts";
 import { assistantAssignmentsRouter } from "./assistant-assignments";
 import { subscriptionEngineRouter } from "./subscription-engine";
+import { subscriptionAnalyticsRouter } from "./subscription-analytics";
+import { planChangeRouter } from "./plan-change";
+import { billingEventsRouter } from "./billing-events";
+import { paymentRecoveryRouter } from "./payment-recovery";
+import { pricingExperimentsRouter } from "./pricing-experiments";
+import { roleBasedPlansRouter } from "./role-based-plans";
 
 const router: IRouter = Router();
 
@@ -300,6 +306,14 @@ router.use("/ai-anomaly", aiAnomalyRouter);
 
 // Subscription Engine — hardened FSM billing system
 router.use("/sub-engine", subscriptionEngineRouter);
+
+// Features 26–34 — Subscription billing intelligence layer
+router.use("/sub-analytics", subscriptionAnalyticsRouter);
+router.use("/plan-change", planChangeRouter);
+router.use("/billing-events", billingEventsRouter);
+router.use("/payment-recovery", paymentRecoveryRouter);
+router.use("/pricing-experiments", pricingExperimentsRouter);
+router.use("/role-plans", roleBasedPlansRouter);
 
 // Features 22–25 — Architecture, Migration Safety, Deployment Readiness, Load Simulation
 router.use("/architecture", architectureRouter);

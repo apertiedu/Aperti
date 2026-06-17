@@ -97,6 +97,12 @@ const DisputeCenter = lazy(() => import("@/pages/admin/dispute-center"));
 const FinancialAnomalyPage = lazy(() => import("@/pages/admin/financial-anomaly"));
 const SchoolNetwork = lazy(() => import("@/pages/admin/school-network"));
 const SubscriptionEnginePage = lazy(() => import("@/pages/admin/subscription-engine"));
+const SubscriptionAnalyticsPage = lazy(() => import("@/pages/admin/subscription-analytics"));
+const PaymentRecoveryPage = lazy(() => import("@/pages/admin/payment-recovery"));
+const PricingExperimentsPage = lazy(() => import("@/pages/admin/pricing-experiments"));
+const BillingEventsPage = lazy(() => import("@/pages/admin/billing-events"));
+const FinanceControlCenterPage = lazy(() => import("@/pages/admin/finance-control-center"));
+const SubscribeV2Page = lazy(() => import("@/pages/subscribe-v2"));
 // Features 22–25
 const ArchitecturePage = lazy(() => import("@/pages/admin/architecture"));
 const MigrationSafetyPage = lazy(() => import("@/pages/admin/migration-safety"));
@@ -674,8 +680,14 @@ const ADMIN_ROUTES = (
     <Route path="/admin/dispute-center" component={DisputeCenter} />
     <Route path="/admin/financial-anomaly" component={FinancialAnomalyPage} />
     <Route path="/admin/school-network" component={SchoolNetwork} />
-    {/* Subscription Engine */}
+    {/* Subscription Engine + Billing Intelligence Suite */}
     <Route path="/admin/subscription-engine" component={SubscriptionEnginePage} />
+    <Route path="/admin/subscription-analytics" component={SubscriptionAnalyticsPage} />
+    <Route path="/admin/payment-recovery" component={PaymentRecoveryPage} />
+    <Route path="/admin/pricing-experiments" component={PricingExperimentsPage} />
+    <Route path="/admin/billing-events" component={BillingEventsPage} />
+    <Route path="/admin/finance-control-center" component={FinanceControlCenterPage} />
+    <Route path="/subscribe" component={SubscribeV2Page} />
     {/* Features 22–25 — Architecture, Migration Safety, Deployment, Load Simulation */}
     <Route path="/admin/architecture" component={ArchitecturePage} />
     <Route path="/admin/migration-safety" component={MigrationSafetyPage} />
