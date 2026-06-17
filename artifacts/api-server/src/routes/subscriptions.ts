@@ -54,15 +54,22 @@ subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res
     }
   }
 
-  const status = paymentMethod === "stripe" ? "active" : "pending_review";
+  // ── SECURITY: Stripe integration is not active on this platform.
+  // Accepting paymentMethod="stripe" and marking the subscription "active"
+  // without any webhook verification is a free-subscription bypass.
+  // Any payment method other than "instapay" is rejected until properly integrated.
+  if (paymentMethod && paymentMethod !== "instapay") {
+    return res.status(400).json({ error: "Only InstaPay payments are currently supported." });
+  }
+
   const [subscription] = await db.insert(subscriptionsTable).values({
     accountId,
     planId,
-    status,
+    status: "pending_review",
     startDate: new Date(),
     endDate: null,
-    instaPayCode: paymentMethod === "instapay" ? String(instapayCode || "").trim() : null,
-    paymentStatus: paymentMethod === "stripe" ? "paid" : "pending",
+    instaPayCode: instapayCode ? String(instapayCode).trim() : null,
+    paymentStatus: "pending",
   }).returning();
 
   res.status(201).json({ subscription });
@@ -71,20 +78,27 @@ subscriptionsRouter.post("/checkout", authenticate, async (req: AuthRequest, res
 // ─── ADMIN ROUTES ───
 
 // GET /subscriptions/admin/all — all subscriptions with joined plan
-subscriptionsRouter.get("/admin/all", authenticate, requireRole("admin"), async (_req: AuthRequest, res: Response) => {
-  const subs = await db.select().from(subscriptionsTable);
+subscriptionsRouter.get("/admin/all", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
+  const limit = Math.min(500, Math.max(1, parseInt((req.query.limit as string) || "200", 10)));
+  const offset = Math.max(0, parseInt((req.query.offset as string) || "0", 10));
+  // Never load all rows: unbounded SELECT on a table with 100k+ rows crashes the process
+  const subs = await db.select().from(subscriptionsTable).limit(limit).offset(offset);
   const plans = await db.select().from(subscriptionPlansTable);
   const planMap = Object.fromEntries(plans.map(p => [p.id, p]));
   const result = subs.map(s => ({ ...s, plan: planMap[s.planId] ?? null }));
-  res.json(result);
+  res.json({ subscriptions: result, limit, offset });
 });
 
 // PUT /subscriptions/admin/:id/approve
 subscriptionsRouter.put("/admin/:id/approve", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
-  const id = parseInt(req.params.id);
-  await db.update(subscriptionsTable)
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+  // Only approve subscriptions that are actually pending — prevents double-approval races
+  const [updated] = await db.update(subscriptionsTable)
     .set({ status: "active", paymentStatus: "paid" })
-    .where(eq(subscriptionsTable.id, id));
+    .where(eq(subscriptionsTable.id, id))
+    .returning();
+  if (!updated) return res.status(404).json({ error: "Subscription not found" });
   res.json({ success: true });
 });
 

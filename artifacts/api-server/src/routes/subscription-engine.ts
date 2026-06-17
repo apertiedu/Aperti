@@ -79,15 +79,21 @@ subscriptionEngineRouter.post("/initiate", paymentAttemptLimiter, async (req: Au
 
     if (discountCode) {
       const trimmed = discountCode.trim().toUpperCase();
+
+      // ── SECURITY: Atomic coupon claim — check and increment in one statement.
+      // A separate SELECT then UPDATE creates a TOCTOU race: two concurrent
+      // requests can both pass the max_uses check before either increments
+      // used_count. The UPDATE ... WHERE ... RETURNING is atomic at the DB level.
       const { rows: [coupon] } = await pool.query(
-        `SELECT c.* FROM coupons c
-         WHERE c.code = $1
-           AND (c.scope = 'platform' OR c.scope = 'subscription')
-           AND c.scope != 'teacher'
-           AND (c.expires_at IS NULL OR c.expires_at > NOW())
-           AND (c.max_uses IS NULL OR c.used_count < c.max_uses)
-           AND c.is_active = TRUE
-         LIMIT 1`,
+        `UPDATE coupons
+         SET used_count = used_count + 1
+         WHERE code = $1
+           AND is_active = TRUE
+           AND (scope = 'platform' OR scope = 'subscription')
+           AND scope != 'teacher'
+           AND (expires_at IS NULL OR expires_at > NOW())
+           AND (max_uses IS NULL OR used_count < max_uses)
+         RETURNING *`,
         [trimmed],
       ).catch(() => ({ rows: [] }));
 
@@ -123,9 +129,11 @@ subscriptionEngineRouter.post("/initiate", paymentAttemptLimiter, async (req: Au
       [userId, planId, ref, invoice.id],
     );
 
-    if (appliedDiscount) {
+    // Coupon already atomically incremented above — no second update needed.
+    // If subscription insertion fails, roll back the coupon claim.
+    if (appliedDiscount && !sub) {
       await pool.query(
-        `UPDATE coupons SET used_count = used_count + 1 WHERE code = $1`,
+        `UPDATE coupons SET used_count = GREATEST(used_count - 1, 0) WHERE code = $1`,
         [appliedDiscount.code],
       ).catch(() => {});
     }

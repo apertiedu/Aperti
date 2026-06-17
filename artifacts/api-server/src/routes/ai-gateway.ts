@@ -147,14 +147,25 @@ function sseWrite(res: Response, data: object) {
 
 // ── POST /api/ai/chat (streaming SSE) ─────────────────────────────────────────
 aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
-  const { message, systemPrompt, mode = "balanced", context } = req.body as {
-    message: string; systemPrompt?: string; mode?: string; context?: string;
+  const { message, mode = "balanced", context } = req.body as {
+    message: string; mode?: string; context?: string;
   };
+  // Discard any user-supplied systemPrompt — accepting it enables prompt
+  // injection: a student could override the educational persona, bypass safety
+  // guidelines, or extract the system configuration.
+  // Teachers/admins who need custom prompts should use dedicated admin routes.
 
   if (!message) {
     res.status(400).json({ error: "message is required" });
     return;
   }
+
+  // Clamp mode to known safe values; never allow arbitrary strings into model selection
+  const safeMode = (["cheap", "balanced", "premium"] as const).includes(mode as any) ? mode : "balanced";
+
+  // Only teachers and admins may request the expensive premium model
+  const canUsePremium = req.role === "teacher" || req.role === "admin" || req.role === "super_admin";
+  const effectiveMode = safeMode === "premium" && !canUsePremium ? "balanced" : safeMode;
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
@@ -175,9 +186,10 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const sys = systemPrompt ?? "You are an expert IGCSE educational AI assistant. Be concise, accurate, and supportive.";
+  // Server-defined system prompt — never sourced from client input
+  const sys = "You are an expert IGCSE educational AI assistant. Be concise, accurate, and supportive.";
   const safeModeActive = await isSafeModeEnabled().catch(() => false);
-  const model = MODELS[safeModeActive ? "cheap" : mode] ?? MODELS.balanced;
+  const model = MODELS[safeModeActive ? "cheap" : effectiveMode] ?? MODELS.balanced;
   const t0 = Date.now();
   let fullText = "";
 

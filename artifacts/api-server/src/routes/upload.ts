@@ -1,7 +1,8 @@
 import { Router, Response } from "express";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { writeFileSync, mkdirSync } from "fs";
-import { join, extname } from "path";
+import { mkdirSync } from "fs";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 import { randomBytes } from "crypto";
 
 export const uploadRouter = Router();
@@ -15,7 +16,7 @@ const ALLOWED_TYPES: Record<string, string> = {
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
-uploadRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+uploadRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { fileName, fileType, fileData } = req.body as {
       fileName: string;
@@ -44,7 +45,9 @@ uploadRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req
     const uniqueName = `${Date.now()}-${randomBytes(6).toString("hex")}${ext}`;
     const filePath = join(UPLOAD_DIR, uniqueName);
 
-    writeFileSync(filePath, buffer);
+    // Non-blocking async write — writeFileSync blocks the Node.js event loop
+    // for the entire duration of the file write, stalling ALL concurrent requests.
+    await writeFile(filePath, buffer);
 
     res.json({ url: `/uploads/${uniqueName}`, fileName: uniqueName });
   } catch {

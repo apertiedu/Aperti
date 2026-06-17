@@ -105,10 +105,19 @@ commerceRouter.post("/commerce/upload-proof", authenticate, async (req: AuthRequ
   const { paymentRequestId, proofUrl } = req.body;
   if (!paymentRequestId || !proofUrl) { res.status(400).json({ error: "paymentRequestId and proofUrl required" }); return; }
 
+  // Restrict proof URLs to platform-hosted uploads only — prevents fraudsters
+  // from submitting arbitrary external URLs (e.g. a fake screenshot on their own server)
+  // that might fool an admin reviewing the proof.
+  const proofStr = String(proofUrl);
+  if (!proofStr.startsWith("/uploads/")) {
+    res.status(400).json({ error: "proofUrl must be a platform-hosted upload path (/uploads/...)" });
+    return;
+  }
+
   const { rows } = await pool.query(
     `UPDATE payment_requests SET proof_url = $1, status = 'paid'
      WHERE id = $2 AND user_id = $3 AND status = 'pending' RETURNING *`,
-    [proofUrl, paymentRequestId, userId],
+    [proofStr, paymentRequestId, userId],
   );
   if (!rows[0]) { res.status(404).json({ error: "Payment request not found or already processed" }); return; }
   res.json({ success: true, paymentRequest: rows[0] });
