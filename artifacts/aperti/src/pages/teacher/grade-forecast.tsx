@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import {
   AlertTriangle, TrendingUp, TrendingDown, Minus, BarChart2,
   Users, Target, CheckCircle2, ChevronDown, ChevronUp,
-  BookOpen, Activity, Info,
+  BookOpen, Activity, Info, Download,
 } from "lucide-react";
 import { useState } from "react";
 import { useUxGuard } from "@/hooks/use-ux-guard";
@@ -335,6 +335,17 @@ export default function GradeForecast() {
             </p>
           </div>
         </div>
+
+        {forecast && (
+          <a
+            href={`/api/grade-prediction/forecast-pdf${selectedSubject ? `?subjectId=${selectedSubject}` : ""}${selectedExam ? `&examId=${selectedExam}` : ""}`}
+            download
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-sm font-semibold transition-colors"
+          >
+            <Download className="h-4 w-4" />
+            Export PDF
+          </a>
+        )}
       </motion.div>
 
       {/* Selectors */}

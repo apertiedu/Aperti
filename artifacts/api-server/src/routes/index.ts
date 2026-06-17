@@ -136,6 +136,7 @@ import { billingEventsRouter } from "./billing-events";
 import { paymentRecoveryRouter } from "./payment-recovery";
 import { pricingExperimentsRouter } from "./pricing-experiments";
 import { roleBasedPlansRouter } from "./role-based-plans";
+import { gradeForecastPdfRouter } from "./grade-forecast-pdf";
 
 const router: IRouter = Router();
 
@@ -314,6 +315,7 @@ router.use("/billing-events", billingEventsRouter);
 router.use("/payment-recovery", paymentRecoveryRouter);
 router.use("/pricing-experiments", pricingExperimentsRouter);
 router.use("/role-plans", roleBasedPlansRouter);
+router.use(gradeForecastPdfRouter);
 
 // Features 22–25 — Architecture, Migration Safety, Deployment Readiness, Load Simulation
 router.use("/architecture", architectureRouter);

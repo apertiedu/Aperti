@@ -79,11 +79,13 @@ adminPasswordResetsRouter.post("/:id/approve", async (req: Request, res: Respons
       [hash, req_row.account_id]
     );
 
+    // Store a redacted marker — the plaintext password is returned in the response
+    // only and never persisted to the database.
     await pool.query(
       `UPDATE password_reset_requests
-       SET status = 'approved', resolved_at = NOW(), resolved_by = $1, temp_password = $2
-       WHERE id = $3`,
-      [adminId, tempPassword, parseInt(id)]
+       SET status = 'approved', resolved_at = NOW(), resolved_by = $1, temp_password = '[shown once at approval]'
+       WHERE id = $2`,
+      [adminId, parseInt(id)]
     );
 
     res.json({

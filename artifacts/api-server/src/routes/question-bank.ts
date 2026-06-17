@@ -35,9 +35,11 @@ questionBankRouter.get("/", authenticate, requireRole("teacher", "admin", "assis
   const teacherId = req.userId!;
   const { subject, topic, difficulty, search, board, commandWord, paper } = req.query;
 
+  // Cap at 2000 to prevent unbounded in-memory loading; in-memory filters applied below
   let questions = await db.query.questionBank.findMany({
     where: (q, { eq }) => eq(q.teacherAccountId, teacherId),
     orderBy: (q, { desc }) => [desc(q.createdAt)],
+    limit: 2000,
   });
 
   if (subject) questions = questions.filter(q => q.subjectId === parseInt(subject as string));

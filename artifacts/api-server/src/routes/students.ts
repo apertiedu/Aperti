@@ -13,9 +13,10 @@ function isAdmin(req: AuthRequest) { return req.role === "admin"; }
 studentsRouter.get("/", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const teacherId = req.userId!;
+    // Cap at 2000 rows to prevent unbounded memory use; admins can paginate
     const students = isAdmin(req)
-      ? await db.select().from(studentsTable)
-      : await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId));
+      ? await db.select().from(studentsTable).limit(2000)
+      : await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId)).limit(2000);
     res.json(students);
   } catch {
     res.status(500).json({ error: "Failed to load students" });

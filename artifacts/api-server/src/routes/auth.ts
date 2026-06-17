@@ -191,6 +191,16 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // ── MFA gate: if MFA is enabled, do NOT issue a full JWT yet ─────────────
+    if (account.mfa_enabled && account.mfa_secret) {
+      const preAuthToken = jwt.sign(
+        { id: account.id, role: account.role, stage: "mfa_pending" },
+        JWT_SECRET,
+        { expiresIn: "5m" },
+      );
+      return res.json({ mfa_required: true, pre_auth_token: preAuthToken });
+    }
+
     // ── Device session limit: max 2 concurrent devices per account ────────────
     if (deviceId) {
       const existing = await db
@@ -247,6 +257,67 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.error("Login error:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// POST /auth/mfa-challenge – verify TOTP and exchange pre-auth token for full JWT
+authRouter.post("/mfa-challenge", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
+  try {
+    const { pre_auth_token, token } = req.body;
+    if (!pre_auth_token || !token) {
+      return res.status(400).json({ error: "pre_auth_token and token are required" });
+    }
+
+    let payload: any;
+    try {
+      payload = jwt.verify(pre_auth_token, JWT_SECRET);
+    } catch {
+      return res.status(401).json({ error: "Invalid or expired pre-auth token" });
+    }
+
+    if (!payload || payload.stage !== "mfa_pending" || !payload.id) {
+      return res.status(401).json({ error: "Invalid pre-auth token" });
+    }
+
+    const { pool: dbPool } = await import("@workspace/db");
+    const { rows } = await dbPool.query(
+      "SELECT * FROM accounts WHERE id=$1 AND status='active' LIMIT 1",
+      [payload.id],
+    );
+    if (!rows.length) {
+      return res.status(401).json({ error: "Account not found or inactive" });
+    }
+    const account = rows[0] as any;
+
+    if (!account.mfa_enabled || !account.mfa_secret) {
+      return res.status(400).json({ error: "MFA not configured for this account" });
+    }
+
+    const { decryptField, verifyTotp } = await import("../lib/mfa");
+    const secret = decryptField(account.mfa_secret);
+    if (!verifyTotp(secret, String(token))) {
+      writeAudit({ accountId: account.id, action: "mfa_failed", resource: "auth", ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "warning" });
+      return res.status(401).json({ error: "Invalid or expired MFA code" });
+    }
+
+    const isProduction = process.env.NODE_ENV === "production";
+    const fullToken = jwt.sign({ id: account.id, role: account.role }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    res.cookie("aperti_token", fullToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
+    await dbPool.query("UPDATE accounts SET last_login_at=NOW() WHERE id=$1", [account.id]).catch(() => {});
+    writeAudit({ accountId: account.id, action: "login_mfa_success", resource: "auth", details: { role: account.role }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
+
+    res.json({ token: fullToken, user: safeUser(account as unknown as Record<string, unknown>) });
+  } catch (err) {
+    console.error("MFA challenge error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

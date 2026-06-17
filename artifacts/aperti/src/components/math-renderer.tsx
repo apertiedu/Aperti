@@ -113,7 +113,7 @@ export function MathHtml({
   if (!html) return null;
   const sanitizedInput = DOMPurify.sanitize(html, { ADD_TAGS: ["math", "svg"], ADD_ATTR: ["class", "style", "aria-hidden", "focusable", "role", "viewBox", "xmlns", "d", "fill", "stroke", "width", "height"] });
   const parts = sanitizedInput.split(/(<[^>]+>)/);
-  const processed = parts
+  const rawProcessed = parts
     .map(part => {
       if (part.startsWith("<") || !part.trim()) return part;
       const segs = parseSegments(part);
@@ -127,6 +127,12 @@ export function MathHtml({
         .join("");
     })
     .join("");
+
+  // Re-sanitize after KaTeX injection to close any XSS surface
+  const processed = DOMPurify.sanitize(rawProcessed, {
+    ADD_TAGS: ["math", "svg"],
+    ADD_ATTR: ["class", "style", "aria-hidden", "focusable", "role", "viewBox", "xmlns", "d", "fill", "stroke", "width", "height"],
+  });
 
   return (
     <div
