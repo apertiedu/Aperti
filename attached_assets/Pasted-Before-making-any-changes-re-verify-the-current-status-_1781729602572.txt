@@ -1,0 +1,46 @@
+Before making any changes, re-verify the current status of these items by reading the actual code at the specified file:line locations, and checking which environment variables are currently set. Some may already be resolved since the last audit — report back exactly what's still open before fixing anything.
+
+Files/lines to check:
+- app.ts:196 (CORS origin: true)
+- app.ts:240 (cookie sameSite: "none")
+- app.ts:252 (api_metrics insert on every request)
+- app.ts:302 (/api/health response fields)
+- app.ts:176 (rate limiter — IP-based only)
+- coremind-analytics.ts (leftover SELECT 1 AS dummy)
+- admin-audit.ts:87 (CSV export, unquoted values)
+- secure-discounts.ts:63 (JSON.parse on course_ids, no try/catch)
+- Env vars: ALLOWED_ORIGINS, EXAM_VAULT_KEY, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, INSTAPAY_PHONE, INSTAPAY_NAME
+
+Once confirmed, apply all of the following in parallel:
+
+1. STARTUP CONFIG CHECK
+Add a production startup guard that fails loudly if any of the 6 env vars above are missing in production: console.error("[FATAL] <NAME> must be set in production"); process.exit(1);
+Verify: restart with one var deliberately unset in a staging check — confirm the process exits with the fatal log rather than starting silently.
+
+2. CORS FIX — app.ts:196
+Replace cors({ origin: true, credentials: true }) with a function that validates the request origin against process.env.ALLOWED_ORIGINS.split(','), rejecting any origin not on the list when in production.
+Verify: send a request with Origin: https://evil.com and confirm it's rejected (no Access-Control-Allow-Origin header back, or an explicit 403).
+
+3. CSRF FIX — app.ts:240
+Change sameSite from "none" to "lax", unless the frontend is genuinely on a different domain/subdomain than the API (check vite.config.ts and the deployed URLs first — show me what you find before changing this one).
+Verify: confirm login still works end-to-end after the change (cookie is still sent on same-site requests), and that a simulated cross-site form POST no longer carries the session cookie.
+
+4. HEALTH ENDPOINT — app.ts:302
+Strip commit hash, node env name, table count, and memory usage from the public /api/health response. Keep only status, db (boolean), and timestamp. If the detailed version is used elsewhere (monitoring, internal dashboard), move it to an admin-authenticated route instead of removing it outright.
+Verify: curl /api/health unauthenticated and confirm only the 3 allowed fields are present.
+
+5. METRICS INSERT THROTTLE — app.ts:252
+Change the per-request pool.query("INSERT INTO api_metrics...") to sample 1-in-10 requests (or batch-insert on an interval). Add a scheduled daily job: DELETE FROM api_metrics WHERE recorded_at < NOW() - INTERVAL '30 days'.
+Verify: confirm the insert no longer fires on every request (log a counter for a short burst of test traffic and check the ratio), and confirm the cleanup job is registered with the scheduler.
+
+6. RATE LIMITING — app.ts:176
+Add per-user (not just per-IP) rate limiting, keyed by IP+user-ID combined, with a daily quota stored in the DB and scoped by subscription tier, on: /api/ai/chat, /auth/login, /api/sub-engine/initiate.
+Verify: confirm two different users behind the same IP each get their own independent quota, and that exceeding it returns 429.
+
+7. SMALL CLEANUP BATCH
+- coremind-analytics.ts: remove the leftover db.execute(sql`SELECT 1 AS dummy`) no-op.
+- admin-audit.ts:87: replace manual CSV string-building with a proper quoted CSV serializer (e.g. a small library or RFC 4180-compliant quoting) so commas/newlines/quotes in any field can't break the export.
+- secure-discounts.ts:63: wrap the JSON.parse(coupon.course_ids ?? "[]") call in try/catch, falling back to [] on parse failure instead of throwing a 500.
+Verify: export a CSV with a test audit entry containing a comma and a newline in one field, confirm the file still parses correctly in Excel/Sheets; create a coupon with a malformed course_ids string and confirm validation falls back gracefully instead of 500ing.
+
+After implementing, restart both workflows and confirm clean compilation with no errors. Then give me a summary table: what was fixed, what was already resolved before this session, and what (if anything) remains open — including the verification result for each item above.
