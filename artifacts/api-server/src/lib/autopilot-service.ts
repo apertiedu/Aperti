@@ -1,9 +1,12 @@
 import { pool } from "@workspace/db";
 import { executeTask } from "../routes/autopilot";
 import { logger } from "./logger";
+import { runAutoRenewInvoices } from "./auto-renew-invoices";
 
-const INTERVAL_MS = 60_000; // check every minute
+const INTERVAL_MS = 60_000;
+const DAILY_MS = 24 * 60 * 60_000;
 let _started = false;
+let _lastAutoRenewRun: Date | null = null;
 
 export function startAutopilotService(): void {
   if (_started) return;
@@ -30,6 +33,21 @@ export function startAutopilotService(): void {
       }
     } catch (err) {
       logger.error({ err }, "[AutoPilot] Scheduler tick failed");
+    }
+  }, INTERVAL_MS);
+
+  setInterval(async () => {
+    const now = new Date();
+    const shouldRun = !_lastAutoRenewRun ||
+      (now.getTime() - _lastAutoRenewRun.getTime() >= DAILY_MS);
+    if (!shouldRun) return;
+    _lastAutoRenewRun = now;
+    try {
+      logger.info("[AutoRenew] Running daily auto-renew invoice job");
+      const result = await runAutoRenewInvoices(false);
+      logger.info({ created: result.created, errors: result.errors.length }, "[AutoRenew] Job complete");
+    } catch (err) {
+      logger.error({ err }, "[AutoRenew] Daily job failed");
     }
   }, INTERVAL_MS);
 

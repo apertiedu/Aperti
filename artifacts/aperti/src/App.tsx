@@ -102,6 +102,7 @@ const PaymentRecoveryPage = lazy(() => import("@/pages/admin/payment-recovery"))
 const PricingExperimentsPage = lazy(() => import("@/pages/admin/pricing-experiments"));
 const BillingEventsPage = lazy(() => import("@/pages/admin/billing-events"));
 const FinanceControlCenterPage = lazy(() => import("@/pages/admin/finance-control-center"));
+const AutoRenewPage = lazy(() => import("@/pages/admin/auto-renew"));
 const SubscribeV2Page = lazy(() => import("@/pages/subscribe-v2"));
 const GradeForecastPage = lazy(() => import("@/pages/teacher/grade-forecast"));
 // Features 22–25
@@ -686,6 +687,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/subscription-engine" component={SubscriptionEnginePage} />
     <Route path="/admin/subscription-analytics" component={SubscriptionAnalyticsPage} />
     <Route path="/admin/payment-recovery" component={PaymentRecoveryPage} />
+    <Route path="/admin/auto-renew" component={AutoRenewPage} />
     <Route path="/admin/pricing-experiments" component={PricingExperimentsPage} />
     <Route path="/admin/billing-events" component={BillingEventsPage} />
     <Route path="/admin/finance-control-center" component={FinanceControlCenterPage} />

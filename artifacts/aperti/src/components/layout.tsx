@@ -10,7 +10,7 @@ import {
   LogOut, ChevronLeft, ChevronRight, ChevronDown, Search, KeyRound, Wrench,
   Sun, Moon, ShoppingBag, UserCheck, Link2, Bot, Sparkles,
   GraduationCap, TableProperties, Medal, Scale, Archive,
-  Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X, Activity,
+  Bell, Inbox, Hash, Megaphone, Users, Ticket, Menu, X, Activity, ReceiptText,
 } from "lucide-react";
 import { assertRouteValid } from "@/lib/route-registry";
 import { useAuth } from "@/context/auth";
@@ -176,6 +176,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Sub Engine",              href: "/admin/subscription-engine",  icon: Cpu,         roles: ["admin"] },
         { name: "Billing Events",          href: "/admin/billing-events",       icon: Activity,    roles: ["admin"] },
         { name: "Payment Recovery",        href: "/admin/payment-recovery",     icon: RefreshCw,   roles: ["admin"] },
+        { name: "Auto-Renew Invoices",     href: "/admin/auto-renew",           icon: ReceiptText, roles: ["admin"] },
         { name: "Pricing Experiments",     href: "/admin/pricing-experiments",  icon: FlaskConical,roles: ["admin"] },
         { name: "Executive Dashboard",    href: "/admin/executive",            icon: TrendingUp,  roles: ["admin"] },
         { name: "Route Health",            href: "/admin/route-health",         icon: Shield,      roles: ["admin"] },

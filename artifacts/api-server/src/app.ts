@@ -118,6 +118,7 @@ import { fraudDetectionRouter } from "./routes/fraud-detection";
 import { refundEngineRouter } from "./routes/refund-engine";
 import { teacherRevenueRouter } from "./routes/teacher-revenue";
 import { subscriptionLifecycleRouter } from "./routes/subscription-lifecycle";
+import { autoRenewRouter } from "./routes/auto-renew";
 import { ledgerRouter } from "./routes/ledger";
 import { fraudAlertsRouter } from "./routes/fraud-alerts";
 import { teacherPayoutsRouter } from "./routes/teacher-payouts";
@@ -464,6 +465,7 @@ app.use("/api/fraud-alerts", fraudAlertsRouter);
 app.use("/api/refunds", refundEngineRouter);
 app.use("/api/revenue", teacherRevenueRouter);
 app.use("/api/subscriptions/lifecycle", subscriptionLifecycleRouter);
+app.use("/api/auto-renew", autoRenewRouter);
 app.use("/api/ledger", ledgerRouter);
 app.use("/api/payouts", teacherPayoutsRouter);
 

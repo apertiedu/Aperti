@@ -18,7 +18,9 @@ export type BillingEventType =
   | "recovery_succeeded"
   | "recovery_failed"
   | "grace_period_started"
-  | "experiment_assigned";
+  | "experiment_assigned"
+  | "renewal_invoice_created"
+  | "renewal_invoice_skipped";
 
 export interface BillingEvent {
   type: BillingEventType;
