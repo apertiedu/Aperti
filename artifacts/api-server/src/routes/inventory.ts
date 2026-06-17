@@ -89,7 +89,7 @@ router.delete("/inventory/:id", requireTenantAccess, async (req, res): Promise<v
 // List sales
 router.get("/inventory/sales", requireTenantAccess, async (req, res): Promise<void> => {
   const teacherId = getTeacherId(req);
-  const limit = parseInt((req.query.limit as string) || "50", 10);
+  const limit = Math.min(200, Math.max(1, parseInt((req.query.limit as string) || "50", 10)));
   const { rows } = await pool.query(`
     SELECT s.*, i.name AS item_name, i.item_type,
            st.student_name, st.student_code

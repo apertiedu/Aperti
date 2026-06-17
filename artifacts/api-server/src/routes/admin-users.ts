@@ -230,7 +230,8 @@ adminUsersRouter.post("/bulk-import", async (req: Request, res: Response) => {
     const results = { created: 0, failed: 0, errors: [] as string[] };
     for (const u of users) {
       try {
-        const passwordHash = await bcrypt.hash(u.password || "Aperti@123", 10);
+        if (!u.password || u.password.length < 8) throw new Error("password required (min 8 chars)");
+        const passwordHash = await bcrypt.hash(u.password, 10);
         await db.insert(accountsTable).values({ username: u.username, passwordHash, displayName: u.displayName || u.username, email: u.email, role: u.role || "student", status: "active" });
         results.created++;
       } catch (e: any) {

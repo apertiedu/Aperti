@@ -19,15 +19,23 @@ function igcseGrade(pct: number): string {
 router.get("/gradebook", requireTenantAccess, async (req, res): Promise<void> => {
   try {
     const { teacherId, isAdmin } = req.tenant;
-    const teacherCond = !isAdmin && teacherId ? `AND st.teacher_account_id = ${teacherId}` : "";
-    const examTeacherCond = !isAdmin && teacherId ? `AND e.teacher_account_id = ${teacherId}` : "";
-
     const { subjectId, sessionId } = req.query as { subjectId?: string; sessionId?: string };
 
-    const subjectFilter = subjectId ? `AND e.subject_id = ${parseInt(subjectId, 10)}` : "";
-    const sessionFilter = sessionId
-      ? `AND (st.lesson1_session_id = ${parseInt(sessionId, 10)} OR st.lesson2_session_id = ${parseInt(sessionId, 10)} OR st.lesson3_session_id = ${parseInt(sessionId, 10)})`
-      : "";
+    // ── Exams query ────────────────────────────────────────────────────────
+    const examParams: any[] = [];
+    let examTeacherCond = "";
+    let subjectFilter = "";
+    if (!isAdmin && teacherId) {
+      examParams.push(teacherId);
+      examTeacherCond = `AND e.teacher_account_id = $${examParams.length}`;
+    }
+    if (subjectId) {
+      const sid = parseInt(subjectId, 10);
+      if (!isNaN(sid)) {
+        examParams.push(sid);
+        subjectFilter = `AND e.subject_id = $${examParams.length}`;
+      }
+    }
 
     const { rows: exams } = await pool.query(`
       SELECT e.id, e.name, e.exam_date AS "examDate", e.total_marks AS "totalMarks",
@@ -36,7 +44,24 @@ router.get("/gradebook", requireTenantAccess, async (req, res): Promise<void> =>
       LEFT JOIN subjects sub ON sub.id = e.subject_id
       WHERE 1=1 ${examTeacherCond} ${subjectFilter}
       ORDER BY e.exam_date ASC NULLS LAST, e.name
-    `);
+    `, examParams);
+
+    // ── Students query ─────────────────────────────────────────────────────
+    const stuParams: any[] = [];
+    let teacherCond = "";
+    let sessionFilter = "";
+    if (!isAdmin && teacherId) {
+      stuParams.push(teacherId);
+      teacherCond = `AND st.teacher_account_id = $${stuParams.length}`;
+    }
+    if (sessionId) {
+      const sesId = parseInt(sessionId, 10);
+      if (!isNaN(sesId)) {
+        stuParams.push(sesId);
+        const idx = stuParams.length;
+        sessionFilter = `AND (st.lesson1_session_id = $${idx} OR st.lesson2_session_id = $${idx} OR st.lesson3_session_id = $${idx})`;
+      }
+    }
 
     const { rows: students } = await pool.query(`
       SELECT st.id, st.student_name AS "studentName", st.student_code AS "studentCode",
@@ -44,7 +69,7 @@ router.get("/gradebook", requireTenantAccess, async (req, res): Promise<void> =>
       FROM students st
       WHERE st.status = 'active' ${teacherCond} ${sessionFilter}
       ORDER BY st.student_name
-    `);
+    `, stuParams);
 
     if (students.length === 0 || exams.length === 0) {
       res.json({ exams, students: students.map((s: any) => ({ ...s, scores: {}, attendanceRate: 0, average: null, igcse: null })) });
@@ -120,16 +145,27 @@ router.get("/gradebook", requireTenantAccess, async (req, res): Promise<void> =>
 router.get("/gradebook/filters", requireTenantAccess, async (req, res): Promise<void> => {
   try {
     const { teacherId, isAdmin } = req.tenant;
-    const teacherCond = !isAdmin && teacherId ? `AND teacher_account_id = ${teacherId}` : "";
 
-    const { rows: subjects } = await pool.query(`SELECT id, name FROM subjects WHERE 1=1 ${teacherCond} ORDER BY name`);
+    // Parameterized — no template literal interpolation of user-controlled values
+    const subjectParams: any[] = [];
+    let subjectCond = "";
+    const sessionParams: any[] = [];
+    let sessionCond = "";
+    if (!isAdmin && teacherId) {
+      subjectParams.push(teacherId);
+      subjectCond = `AND teacher_account_id = $${subjectParams.length}`;
+      sessionParams.push(teacherId);
+      sessionCond = `AND s.teacher_account_id = $${sessionParams.length}`;
+    }
+
+    const { rows: subjects } = await pool.query(`SELECT id, name FROM subjects WHERE 1=1 ${subjectCond} ORDER BY name`, subjectParams);
     const { rows: sessions } = await pool.query(`
       SELECT s.id, s.lesson_number AS "lessonNumber", s.day_of_week AS "dayOfWeek", s.start_time AS "startTime",
              COALESCE(sub.name,'No Subject') AS "subjectName"
       FROM lessons s LEFT JOIN subjects sub ON sub.id=s.subject_id
-      WHERE 1=1 ${teacherCond.replace('teacher_account_id', 's.teacher_account_id')}
+      WHERE 1=1 ${sessionCond}
       ORDER BY s.lesson_number, s.day_of_week
-    `);
+    `, sessionParams);
 
     res.json({ subjects, sessions });
   } catch (err) {

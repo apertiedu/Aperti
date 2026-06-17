@@ -17,7 +17,8 @@ const SEVERITY_COLORS: Record<string, string> = {
 adminAuditRouter.get("/", async (req: Request, res: Response) => {
   try {
     const { search, from, to, severity, action, page = "1", limit = "100" } = req.query as Record<string, string>;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit, 10) || 100), 1000);
+    const offset = (Math.max(1, parseInt(page, 10) || 1) - 1) * safeLimit;
 
     const conditions: any[] = [];
     if (search) conditions.push(ilike(auditLogsTable.action, `%${search}%`));
@@ -46,7 +47,7 @@ adminAuditRouter.get("/", async (req: Request, res: Response) => {
         .leftJoin(accountsTable, eq(auditLogsTable.accountId, accountsTable.id))
         .where(where)
         .orderBy(desc(auditLogsTable.createdAt))
-        .limit(parseInt(limit))
+        .limit(safeLimit)
         .offset(offset),
       db.select({ c: sql<number>`count(*)::int` }).from(auditLogsTable).where(where),
     ]);
@@ -77,7 +78,7 @@ adminAuditRouter.get("/stats", async (_req, res: Response) => {
 
 adminAuditRouter.get("/export", async (_req: Request, res: Response) => {
   try {
-    const logs = await db.select().from(auditLogsTable).orderBy(desc(auditLogsTable.createdAt)).limit(5000);
+    const logs = await db.select().from(auditLogsTable).orderBy(desc(auditLogsTable.createdAt)).limit(2000);
     const header = "id,accountId,action,resource,resourceId,severity,ipAddress,createdAt\n";
     const rows = logs.map(l =>
       `${l.id},${l.accountId || ""},${l.action},${l.resource},${l.resourceId || ""},${l.severity || "info"},${l.ipAddress || ""},${l.createdAt}`

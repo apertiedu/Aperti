@@ -9,49 +9,77 @@ export const coremindAnalyticsRouter = Router();
 // GET /coremind/analytics/stats — AI usage + acceptance stats (admin only)
 coremindAnalyticsRouter.get("/analytics/stats", authenticate, requireRole("admin"), async (req: AuthRequest, res: Response) => {
   try {
-    const allInteractions = await db.select().from(aiInteractionsTable).limit(5000);
+    // Use DB aggregates instead of fetching thousands of rows into memory
+    const [moduleRows, totalsRows, tokenRows, recentRows, timelineRows] = await Promise.all([
+      // Per-module breakdown
+      db.execute(sql`
+        SELECT COALESCE(module, 'unknown') AS module,
+               COUNT(*)::int                                              AS total,
+               COUNT(*) FILTER (WHERE accepted = true)::int              AS accepted,
+               COUNT(*) FILTER (WHERE accepted = false)::int             AS rejected,
+               COUNT(*) FILTER (WHERE accepted IS NULL)::int             AS pending,
+               ROUND(AVG(confidence::float)::numeric, 2)                AS avg_confidence
+        FROM ${aiInteractionsTable}
+        GROUP BY module
+      `),
+      // Overall totals
+      db.execute(sql`
+        SELECT COUNT(*)::int                                              AS total_calls,
+               COUNT(*) FILTER (WHERE accepted = true)::int              AS total_accepted,
+               COUNT(*) FILTER (WHERE accepted = false)::int             AS total_rejected,
+               COUNT(*) FILTER (WHERE accepted IS NULL)::int             AS total_pending,
+               ROUND(AVG(confidence::float)::numeric, 2)                AS avg_confidence,
+               COALESCE(SUM(tokens_used), 0)::bigint                    AS total_tokens
+        FROM ${aiInteractionsTable}
+      `),
+      // Separate token sum for cost calc (already included above, kept for clarity)
+      db.execute(sql`SELECT 1 AS dummy`),
+      // Calls in last 7 days
+      db.execute(sql`
+        SELECT COUNT(*)::int AS recent_calls
+        FROM ${aiInteractionsTable}
+        WHERE created_at > NOW() - INTERVAL '7 days'
+      `),
+      // Daily timeline (last 14 days)
+      db.execute(sql`
+        SELECT DATE(created_at) AS date, COUNT(*)::int AS calls
+        FROM ${aiInteractionsTable}
+        WHERE created_at > NOW() - INTERVAL '14 days'
+        GROUP BY DATE(created_at)
+        ORDER BY date
+      `),
+    ]);
 
-    const byModule: Record<string, { total: number; accepted: number; rejected: number; pending: number; avgConfidence: number }> = {};
-    for (const row of allInteractions) {
-      const mod = row.module || "unknown";
-      if (!byModule[mod]) byModule[mod] = { total: 0, accepted: 0, rejected: 0, pending: 0, avgConfidence: 0 };
-      byModule[mod].total++;
-      if (row.accepted === true) byModule[mod].accepted++;
-      else if (row.accepted === false) byModule[mod].rejected++;
-      else byModule[mod].pending++;
-      byModule[mod].avgConfidence += parseFloat(String(row.confidence ?? 0));
-    }
-    for (const mod of Object.keys(byModule)) {
-      byModule[mod].avgConfidence = byModule[mod].total > 0
-        ? Math.round((byModule[mod].avgConfidence / byModule[mod].total) * 100) / 100
-        : 0;
-    }
-
-    const totalCalls = allInteractions.length;
-    const totalAccepted = allInteractions.filter(r => r.accepted === true).length;
-    const totalRejected = allInteractions.filter(r => r.accepted === false).length;
-    const totalPending = allInteractions.filter(r => r.accepted === null).length;
-    const overallAcceptanceRate = totalCalls > 0 ? Math.round((totalAccepted / (totalAccepted + totalRejected || 1)) * 100) : 0;
-
-    const avgConfidence = totalCalls > 0
-      ? Math.round(allInteractions.reduce((s, r) => s + parseFloat(String(r.confidence ?? 0)), 0) / totalCalls * 100) / 100
-      : 0;
-
-    const totalTokens = allInteractions.reduce((s, r) => s + (r.tokensUsed ?? 0), 0);
+    const totals = (totalsRows as any).rows?.[0] ?? totalsRows[0] ?? {};
+    const totalCalls: number = totals.total_calls ?? 0;
+    const totalAccepted: number = totals.total_accepted ?? 0;
+    const totalRejected: number = totals.total_rejected ?? 0;
+    const totalPending: number = totals.total_pending ?? 0;
+    const avgConfidence: number = parseFloat(String(totals.avg_confidence ?? 0));
+    const totalTokens: number = parseInt(String(totals.total_tokens ?? 0), 10);
     const estimatedCostUSD = Math.round(totalTokens * 0.00000015 * 100) / 100;
+    const overallAcceptanceRate = totalCalls > 0
+      ? Math.round((totalAccepted / (totalAccepted + totalRejected || 1)) * 100)
+      : 0;
+    const recentCalls: number = ((recentRows as any).rows?.[0] ?? recentRows[0])?.recent_calls ?? 0;
 
-    const last7Days = new Date(Date.now() - 7 * 86400000);
-    const recentCalls = allInteractions.filter(r => new Date(r.createdAt) > last7Days).length;
-
-    const callsPerDay: Record<string, number> = {};
-    for (const row of allInteractions) {
-      const day = new Date(row.createdAt).toISOString().split("T")[0];
-      callsPerDay[day] = (callsPerDay[day] ?? 0) + 1;
+    const moduleRawRows = (moduleRows as any).rows ?? moduleRows;
+    const byModule: Record<string, { total: number; accepted: number; rejected: number; pending: number; avgConfidence: number }> = {};
+    for (const row of moduleRawRows as any[]) {
+      byModule[String(row.module)] = {
+        total: row.total,
+        accepted: row.accepted,
+        rejected: row.rejected,
+        pending: row.pending,
+        avgConfidence: parseFloat(String(row.avg_confidence ?? 0)),
+      };
     }
-    const callsTimeline = Object.entries(callsPerDay)
-      .sort(([a], [b]) => a.localeCompare(b))
-      .slice(-14)
-      .map(([date, calls]) => ({ date, calls }));
+
+    const timelineRawRows = (timelineRows as any).rows ?? timelineRows;
+    const callsTimeline = (timelineRawRows as any[]).map((r: any) => ({
+      date: typeof r.date === "object" ? r.date.toISOString().split("T")[0] : String(r.date),
+      calls: r.calls,
+    }));
 
     res.json({
       totalCalls,

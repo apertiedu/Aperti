@@ -544,7 +544,11 @@ assessmentGradingRouter.get("/reports/student/:studentId", ...anyAuth, async (re
 
 assessmentGradingRouter.get("/reports/teacher/:teacherId/class", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const teacherId = parseInt(req.params.teacherId) || req.userId!;
+    // Admins may query any teacher; non-admins are scoped to their own data only
+    const isAdminRole = req.role === "admin" || req.role === "super_admin";
+    const teacherId = isAdminRole
+      ? (parseInt(req.params.teacherId, 10) || req.userId!)
+      : req.userId!;
     const { rows } = await pool.query(
       `SELECT assess.title, assess.type, COUNT(asub.id) AS submissions,
               ROUND(AVG(asub.percentage),1) AS avg_pct,
@@ -565,6 +569,37 @@ assessmentGradingRouter.get("/reports/teacher/:teacherId/class", ...teacherOrAdm
 assessmentGradingRouter.get("/reports/parent/:studentId", ...anyAuth, async (req: AuthRequest, res: Response) => {
   try {
     const { studentId } = req.params;
+    const sid = parseInt(studentId, 10);
+    if (isNaN(sid)) return res.status(400).json({ error: "Invalid studentId" });
+
+    const role = req.role;
+    const userId = req.userId!;
+
+    // Access control — only the student themselves, their linked parent, their
+    // teacher, or an admin may view this data
+    if (role === "parent") {
+      const { rows: link } = await pool.query(
+        `SELECT id FROM guardian_links
+         WHERE parent_account_id=$1 AND student_id=$2 AND status='active' LIMIT 1`,
+        [userId, sid],
+      );
+      if (!link.length) return res.status(403).json({ error: "Not linked to this student" });
+    } else if (role === "student") {
+      const { rows: stu } = await pool.query(
+        "SELECT id FROM students WHERE account_id=$1 AND id=$2 LIMIT 1",
+        [userId, sid],
+      );
+      if (!stu.length) return res.status(403).json({ error: "Access denied" });
+    } else if (role === "teacher") {
+      const { rows: stu } = await pool.query(
+        "SELECT id FROM students WHERE teacher_account_id=$1 AND id=$2 LIMIT 1",
+        [userId, sid],
+      );
+      if (!stu.length) return res.status(403).json({ error: "Student not in your class" });
+    } else if (role !== "admin" && role !== "super_admin") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+
     const { rows } = await pool.query(
       `SELECT asub.percentage, asub.grade, asub.submitted_at,
               assess.title, assess.type
@@ -572,7 +607,7 @@ assessmentGradingRouter.get("/reports/parent/:studentId", ...anyAuth, async (req
        JOIN assessments assess ON assess.id = asub.assessment_id
        WHERE asub.student_id=$1 AND asub.status IN ('graded','returned')
        ORDER BY asub.submitted_at DESC LIMIT 10`,
-      [studentId]
+      [sid],
     );
     const avgPct = rows.length > 0
       ? Math.round(rows.reduce((s: number, r: any) => s + (parseFloat(r.percentage) || 0), 0) / rows.length)

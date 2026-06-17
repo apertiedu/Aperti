@@ -8,9 +8,22 @@ adminCoursesRouter.use(requireRole("admin", "super_admin"));
 
 adminCoursesRouter.get("/", async (req: Request, res: Response) => {
   try {
-    const { search, page = "1", limit = "50" } = req.query as Record<string, string>;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
-    const searchClause = search ? `AND (tc.name ILIKE '%${search}%')` : "";
+    const pageNum = Math.max(1, parseInt((req.query.page as string) || "1", 10));
+    const limitNum = Math.min(200, Math.max(1, parseInt((req.query.limit as string) || "50", 10)));
+    const offset = (pageNum - 1) * limitNum;
+    const search = (req.query.search as string) ?? "";
+
+    // Use fully parameterized query — never interpolate user input into SQL
+    const params: any[] = [];
+    let searchClause = "";
+    if (search) {
+      params.push(`%${search}%`);
+      searchClause = `AND (tc.name ILIKE $${params.length})`;
+    }
+    params.push(limitNum, offset);
+    const limitIdx = params.length - 1;
+    const offsetIdx = params.length;
+
     const { rows } = await pool.query(`
       SELECT tc.*, a.username, a.display_name as teacher_name,
              (SELECT count(*)::int FROM course_units WHERE course_id = tc.id) as unit_count
@@ -18,8 +31,8 @@ adminCoursesRouter.get("/", async (req: Request, res: Response) => {
       LEFT JOIN accounts a ON a.id = tc.teacher_account_id
       WHERE 1=1 ${searchClause}
       ORDER BY tc.created_at DESC
-      LIMIT ${parseInt(limit)} OFFSET ${offset}
-    `).catch(() => ({ rows: [] }));
+      LIMIT $${limitIdx} OFFSET $${offsetIdx}
+    `, params).catch(() => ({ rows: [] }));
     const { rows: cnt } = await pool.query("SELECT count(*)::int as c FROM teacher_courses").catch(() => ({ rows: [{ c: 0 }] }));
     res.json({ courses: rows, total: cnt[0].c });
   } catch (err) {
