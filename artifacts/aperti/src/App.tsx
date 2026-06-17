@@ -96,6 +96,7 @@ const BillingCenter = lazy(() => import("@/pages/admin/billing-center"));
 const DisputeCenter = lazy(() => import("@/pages/admin/dispute-center"));
 const FinancialAnomalyPage = lazy(() => import("@/pages/admin/financial-anomaly"));
 const SchoolNetwork = lazy(() => import("@/pages/admin/school-network"));
+const SubscriptionEnginePage = lazy(() => import("@/pages/admin/subscription-engine"));
 // Features 22–25
 const ArchitecturePage = lazy(() => import("@/pages/admin/architecture"));
 const MigrationSafetyPage = lazy(() => import("@/pages/admin/migration-safety"));
@@ -673,6 +674,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/dispute-center" component={DisputeCenter} />
     <Route path="/admin/financial-anomaly" component={FinancialAnomalyPage} />
     <Route path="/admin/school-network" component={SchoolNetwork} />
+    {/* Subscription Engine */}
+    <Route path="/admin/subscription-engine" component={SubscriptionEnginePage} />
     {/* Features 22–25 — Architecture, Migration Safety, Deployment, Load Simulation */}
     <Route path="/admin/architecture" component={ArchitecturePage} />
     <Route path="/admin/migration-safety" component={MigrationSafetyPage} />

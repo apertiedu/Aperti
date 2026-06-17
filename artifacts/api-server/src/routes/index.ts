@@ -129,6 +129,7 @@ import { loadSimulationRouter } from "./load-simulation";
 import { securePaymentsRouter } from "./secure-payments";
 import { secureDiscountsRouter } from "./secure-discounts";
 import { assistantAssignmentsRouter } from "./assistant-assignments";
+import { subscriptionEngineRouter } from "./subscription-engine";
 
 const router: IRouter = Router();
 
@@ -296,6 +297,9 @@ router.use("/assistant-assignments", assistantAssignmentsRouter);
 router.use("/billing", billingInvoicesRouter);
 router.use("/disputes", disputesRouter);
 router.use("/ai-anomaly", aiAnomalyRouter);
+
+// Subscription Engine — hardened FSM billing system
+router.use("/sub-engine", subscriptionEngineRouter);
 
 // Features 22–25 — Architecture, Migration Safety, Deployment Readiness, Load Simulation
 router.use("/architecture", architectureRouter);

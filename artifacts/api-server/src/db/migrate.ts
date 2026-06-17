@@ -1765,6 +1765,33 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_anomaly_pred_entity ON anomaly_predictions(entity_id, entity_type)`,
   `CREATE INDEX IF NOT EXISTS idx_anomaly_pred_score  ON anomaly_predictions(risk_score DESC, analyzed_at DESC)`,
 
+  /* ── Subscription Engine: audit log + FSM columns ───────────────────── */
+  `CREATE TABLE IF NOT EXISTS subscription_audit_log (
+    id              bigserial PRIMARY KEY,
+    subscription_id integer REFERENCES subscriptions(id) ON DELETE SET NULL,
+    user_id         integer REFERENCES accounts(id) ON DELETE SET NULL,
+    previous_status text NOT NULL DEFAULT 'unknown',
+    new_status      text NOT NULL,
+    reason          text NOT NULL,
+    triggered_by    text NOT NULL DEFAULT 'system',
+    actor_id        integer REFERENCES accounts(id) ON DELETE SET NULL,
+    metadata        jsonb NOT NULL DEFAULT '{}',
+    created_at      timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_sub_audit_sub    ON subscription_audit_log(subscription_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_sub_audit_user   ON subscription_audit_log(user_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_sub_audit_status ON subscription_audit_log(new_status, created_at DESC)`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS grace_period_ends_at   timestamptz`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS suspended_at           timestamptz`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS suspended_by           integer REFERENCES accounts(id) ON DELETE SET NULL`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS suspended_reason       text`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS fraud_flags            jsonb NOT NULL DEFAULT '[]'`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS payment_attempt_count  integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS pending_invoice_id     integer REFERENCES billing_invoices(id) ON DELETE SET NULL`,
+  `ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS updated_at             timestamptz`,
+  `ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS fraud_flagged boolean NOT NULL DEFAULT false`,
+  `ALTER TABLE payment_requests ADD COLUMN IF NOT EXISTS attempt_count  integer NOT NULL DEFAULT 0`,
+
   /* ── Features 22–25: Domain Events (event bus persistence) ──────────── */
   `CREATE TABLE IF NOT EXISTS domain_events (
     id             bigserial PRIMARY KEY,
