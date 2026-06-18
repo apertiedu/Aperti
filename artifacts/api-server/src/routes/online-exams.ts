@@ -174,6 +174,10 @@ router.post("/portal/online-exams/:examId/submit", requireStudentAccess as any, 
 });
 
 router.get("/online-exams/:examId/monitor", requireTenantAccess as any, async (req: AuthRequest, res): Promise<void> => {
+  if (req.role === "student" || req.role === "parent") {
+    res.status(403).json({ error: "Access restricted to teachers and admins" });
+    return;
+  }
   try {
     const examId = parseInt(req.params.examId as string, 10);
     const { teacherId, isAdmin } = req.tenant;

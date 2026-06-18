@@ -53,23 +53,12 @@ const SYLLABUS_MAP: Record<string, string> = {
 };
 
 /* ── Universal Search ────────────────────────────────────────────────────────── */
-searchRouter.get("/", async (req: Request, res: Response) => {
+searchRouter.get("/", authenticate as any, async (req: Request, res: Response) => {
   try {
     const q = ((req.query.q as string) || "").trim();
     if (!q || q.length < 2) return res.json({ results: [], query: q });
 
-    const token = (req.headers.authorization ?? "").replace("Bearer ", "");
-    let userId: number | null = null;
-    if (token) {
-      try {
-        const jwt = await import("jsonwebtoken");
-        const jwtSecret = process.env.JWT_SECRET;
-        if (jwtSecret) {
-          const payload = jwt.default.verify(token, jwtSecret) as any;
-          userId = payload?.id ?? null;
-        }
-      } catch { /* best-effort */ }
-    }
+    const userId: number | null = (req as any).userId ?? null;
 
     const { keywords, intent, syllabusCode } = parseNaturalLanguage(q);
     const primaryKeyword = keywords[0] || q;

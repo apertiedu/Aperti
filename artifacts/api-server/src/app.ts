@@ -309,6 +309,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
 cron.schedule("0 3 * * *", () => {
   pool.query("DELETE FROM api_metrics WHERE recorded_at < NOW() - INTERVAL '30 days'").catch(() => {});
+  pool.query("DELETE FROM system_metrics_log WHERE created_at < NOW() - INTERVAL '30 days'").catch(() => {});
 }, { timezone: "UTC" });
 
 // ── Static files (uploads) with cache headers ─────────────────────────────────
@@ -604,9 +605,11 @@ async function seedDefaultAdmin() {
   try {
     const existing = await db.select().from(accountsTable);
     if (existing.length === 0) {
-      const passwordHash = await bcrypt.hash("admin123", 10);
+      const { randomBytes } = await import("crypto");
+      const tempPassword = randomBytes(12).toString("hex");
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
       await db.insert(accountsTable).values({ username: "admin", passwordHash, displayName: "Admin", role: "admin", status: "active", mustChangePassword: true });
-      logger.info("Default admin created: admin / admin123 (must change password on first login)");
+      logger.warn({ tempPassword }, "[SEED] Default admin created — CHANGE THIS PASSWORD IMMEDIATELY: admin / " + tempPassword);
     }
   } catch (err) {
     logger.error({ err }, "Failed to seed admin account");

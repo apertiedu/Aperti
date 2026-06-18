@@ -146,10 +146,26 @@ adminUsersRouter.post("/", validateBody(createUserSchema), async (req: Request, 
 });
 
 /* ── Update User ─────────────────────────────────────────────────────────── */
-adminUsersRouter.put("/:id", validateBody(updateUserSchema), async (req: Request, res: Response) => {
+adminUsersRouter.put("/:id", validateBody(updateUserSchema), async (req: Request, res: Response): Promise<void> => {
   try {
+    const actorId: number = (req as any).userId;
+    const actorRole: string = (req as any).role ?? "";
+    const targetId = parseInt(req.params.id);
     const { displayName, email, role, status, phone, country, bio, avatarUrl, firstName, lastName } = req.body;
-    const [user] = await db.update(accountsTable).set({ displayName, email, role, status, phone, country, bio, avatarUrl, firstName, lastName }).where(eq(accountsTable.id, parseInt(req.params.id))).returning();
+
+    if (role === "super_admin" && actorRole !== "super_admin") {
+      res.status(403).json({ error: "Only super admins can assign the super_admin role" });
+      return;
+    }
+    if (role && actorId === targetId) {
+      res.status(403).json({ error: "You cannot change your own role" });
+      return;
+    }
+
+    const [user] = await db.update(accountsTable)
+      .set({ displayName, email, role, status, phone, country, bio, avatarUrl, firstName, lastName })
+      .where(eq(accountsTable.id, targetId))
+      .returning();
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: "Failed to update user" });

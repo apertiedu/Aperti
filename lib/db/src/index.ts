@@ -89,7 +89,13 @@ const querySchema = {
   channelMessages: schema.channelMessagesTable,
 };
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 25,
+  idleTimeoutMillis: 10_000,
+  connectionTimeoutMillis: 3_000,
+  options: "--statement_timeout=30000",
+});
 export const db = drizzle(pool, { schema: querySchema });
 
 export * from "./schema";

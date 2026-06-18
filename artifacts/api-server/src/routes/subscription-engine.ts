@@ -96,6 +96,15 @@ subscriptionEngineRouter.post("/initiate", paymentAttemptLimiter, async (req: Au
     if (discountCode) {
       const trimmed = discountCode.trim().toUpperCase();
 
+      const { rows: alreadyUsed } = await pool.query(
+        `SELECT id FROM coupon_redemptions WHERE user_id = $1 AND coupon_code = $2 LIMIT 1`,
+        [userId, trimmed],
+      ).catch(() => ({ rows: [] }));
+      if (alreadyUsed.length > 0) {
+        res.status(409).json({ error: "You have already used this discount code.", code: "COUPON_ALREADY_USED" });
+        return;
+      }
+
       // ── SECURITY: Atomic coupon claim — check and increment in one statement.
       // A separate SELECT then UPDATE creates a TOCTOU race: two concurrent
       // requests can both pass the max_uses check before either increments
@@ -120,6 +129,11 @@ subscriptionEngineRouter.post("/initiate", paymentAttemptLimiter, async (req: Au
       const discount = parseFloat(coupon.discount_pct ?? "0");
       finalAmount = Math.round(finalAmount * (1 - discount / 100) * 100) / 100;
       appliedDiscount = { code: coupon.code, pct: discount };
+
+      await pool.query(
+        `INSERT INTO coupon_redemptions (user_id, coupon_code, redeemed_at) VALUES ($1, $2, NOW()) ON CONFLICT DO NOTHING`,
+        [userId, trimmed],
+      ).catch(() => {});
     }
 
     const ref = genRef();
