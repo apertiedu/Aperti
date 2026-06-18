@@ -50,7 +50,8 @@ adminSubscriptionsRouter.delete("/plans/:id", async (req: Request, res: Response
 adminSubscriptionsRouter.get("/", async (req: Request, res: Response) => {
   try {
     const { page = "1", limit = "50", status, planId } = req.query as Record<string, string>;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 50), 200);
+    const offset = (Math.max(1, parseInt(page) || 1) - 1) * safeLimit;
     const rows = await db
       .select({
         id: subscriptionsTable.id,
@@ -72,7 +73,7 @@ adminSubscriptionsRouter.get("/", async (req: Request, res: Response) => {
       .leftJoin(accountsTable, eq(subscriptionsTable.accountId, accountsTable.id))
       .leftJoin(subscriptionPlansTable, eq(subscriptionsTable.planId, subscriptionPlansTable.id))
       .orderBy(desc(subscriptionsTable.createdAt))
-      .limit(parseInt(limit))
+      .limit(safeLimit)
       .offset(offset);
     const [cnt] = await db.select({ c: sql<number>`count(*)::int` }).from(subscriptionsTable);
     res.json({ subscriptions: rows, total: cnt.c });

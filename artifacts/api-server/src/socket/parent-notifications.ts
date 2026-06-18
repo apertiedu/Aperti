@@ -1,24 +1,51 @@
 import type { Server as SocketServer } from "socket.io";
 import { pool } from "@workspace/db";
+import * as jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "";
 
 let _io: SocketServer | null = null;
+
+function parseCookieHeader(header: string): Record<string, string> {
+  const out: Record<string, string> = {};
+  header.split(";").forEach(part => {
+    const idx = part.indexOf("=");
+    if (idx < 0) return;
+    const key = part.slice(0, idx).trim();
+    const val = part.slice(idx + 1).trim();
+    if (key) out[key] = decodeURIComponent(val);
+  });
+  return out;
+}
 
 export function setupParentNotifications(io: SocketServer) {
   _io = io;
 
   const parentNs = io.of("/parent");
 
+  parentNs.use((socket, next) => {
+    const rawCookie = socket.handshake.headers.cookie || "";
+    const cookies = parseCookieHeader(rawCookie);
+    const token = cookies["aperti_token"];
+    if (!token) return next(new Error("Unauthorized"));
+    try {
+      const payload = jwt.verify(token, JWT_SECRET) as Record<string, unknown>;
+      if (!payload.id || payload.role !== "parent") return next(new Error("Forbidden"));
+      socket.data.userId = payload.id as number;
+      next();
+    } catch {
+      next(new Error("Unauthorized"));
+    }
+  });
+
   parentNs.on("connection", (socket) => {
-    // Parent joins their personal room after auth
     socket.on("join", (parentId: number) => {
-      if (parentId) {
+      if (parentId && socket.data.userId === parentId) {
         socket.join(`parent:${parentId}`);
       }
     });
 
-    socket.on("disconnect", () => {
-      // auto-cleanup
-    });
+    socket.on("disconnect", () => {});
   });
 }
 

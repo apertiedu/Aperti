@@ -291,7 +291,8 @@ governanceRouter.delete("/users/:userId/roles/:roleId", async (req: AuthRequest,
 governanceRouter.get("/users/access", async (req, res: Response) => {
   try {
     const { search, page = "1", limit = "50" } = req.query as Record<string, string>;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 50), 200);
+    const offset = (Math.max(1, parseInt(page) || 1) - 1) * safeLimit;
     const q = search ? `%${search}%` : null;
     const { rows } = await pool.query(
       `SELECT a.id, a.username, a.display_name, a.email, a.role, a.status,
@@ -300,7 +301,7 @@ governanceRouter.get("/users/access", async (req, res: Response) => {
        WHERE ($1::text IS NULL OR a.username ILIKE $1 OR a.display_name ILIKE $1)
        ORDER BY a.created_at DESC
        LIMIT $2 OFFSET $3`,
-      [q, parseInt(limit), offset]
+      [q, safeLimit, offset]
     );
     const countRes = await pool.query(
       `SELECT COUNT(*)::int AS total FROM accounts
@@ -394,7 +395,8 @@ governanceRouter.delete("/assistants/:id", async (req: AuthRequest, res: Respons
 
 governanceRouter.get("/enrollments", async (req, res: Response) => {
   const { status, courseId, teacherId, page = "1", limit = "50" } = req.query as Record<string, string>;
-  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const safeLimit = Math.min(Math.max(1, parseInt(limit) || 50), 200);
+  const offset = (Math.max(1, parseInt(page) || 1) - 1) * safeLimit;
   try {
     const { rows } = await pool.query(
       `SELECT ge.*,

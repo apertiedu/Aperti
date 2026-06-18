@@ -10,10 +10,11 @@ adminOrgsRouter.use(requireRole("admin", "super_admin"));
 adminOrgsRouter.get("/", async (req: Request, res: Response) => {
   try {
     const { search, status, page = "1", limit = "50" } = req.query as Record<string, string>;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 50), 200);
+    const offset = (Math.max(1, parseInt(page) || 1) - 1) * safeLimit;
     let query = db.select().from(organizationsTable).$dynamic();
     if (search) query = query.where(ilike(organizationsTable.name, `%${search}%`));
-    const orgs = await query.orderBy(desc(organizationsTable.createdAt)).limit(parseInt(limit)).offset(offset);
+    const orgs = await query.orderBy(desc(organizationsTable.createdAt)).limit(safeLimit).offset(offset);
     const [cnt] = await db.select({ c: sql<number>`count(*)::int` }).from(organizationsTable);
     res.json({ organizations: orgs, total: cnt.c });
   } catch (err) {

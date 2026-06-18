@@ -42,7 +42,8 @@ adminUsersRouter.use(requireRole("admin", "super_admin"));
 adminUsersRouter.get("/", async (req: Request, res: Response) => {
   try {
     const { search, role, status, page = "1", limit = "50" } = req.query as Record<string, string>;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 50), 200);
+    const offset = (Math.max(1, parseInt(page) || 1) - 1) * safeLimit;
 
     const conditions: any[] = [];
     if (search) {
@@ -77,7 +78,7 @@ adminUsersRouter.get("/", async (req: Request, res: Response) => {
         .from(accountsTable)
         .where(where)
         .orderBy(desc(accountsTable.createdAt))
-        .limit(parseInt(limit))
+        .limit(safeLimit)
         .offset(offset),
       db.select({ count: sql<number>`count(*)::int` }).from(accountsTable).where(where),
     ]);

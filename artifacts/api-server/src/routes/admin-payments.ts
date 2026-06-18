@@ -13,7 +13,8 @@ adminPaymentsRouter.use(requireRole("admin", "super_admin"));
 adminPaymentsRouter.get("/transactions", async (req: Request, res: Response) => {
   try {
     const { status, page = "1", limit = "50" } = req.query as Record<string, string>;
-    const offset = (parseInt(page) - 1) * parseInt(limit);
+    const safeLimit = Math.min(Math.max(1, parseInt(limit) || 50), 200);
+    const offset = (Math.max(1, parseInt(page) || 1) - 1) * safeLimit;
     const rows = await db
       .select({
         id: paymentTransactionsTable.id,
@@ -36,7 +37,7 @@ adminPaymentsRouter.get("/transactions", async (req: Request, res: Response) => 
       .leftJoin(accountsTable, eq(paymentTransactionsTable.userId, accountsTable.id))
       .where(status ? eq(paymentTransactionsTable.status, status) : undefined as any)
       .orderBy(desc(paymentTransactionsTable.createdAt))
-      .limit(parseInt(limit))
+      .limit(safeLimit)
       .offset(offset);
     const [cnt] = await db.select({ c: sql<number>`count(*)::int` }).from(paymentTransactionsTable);
     res.json({ transactions: rows, total: cnt.c });

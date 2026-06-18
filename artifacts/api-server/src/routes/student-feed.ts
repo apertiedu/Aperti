@@ -186,7 +186,7 @@ router.get("/student/feed", ...studentGuard, async (req: AuthRequest, res: Respo
 
   // Cursor-based pagination: cursor is the index of the last seen item
   const cursorParam = req.query.cursor as string | undefined;
-  const limitParam = parseInt((req.query.limit as string) ?? "20", 10);
+  const limitParam = Math.min(Math.max(1, parseInt((req.query.limit as string) ?? "20", 10)), 100);
   const startIdx = cursorParam ? parseInt(cursorParam, 10) : 0;
   const paginated = feedItems.slice(startIdx, startIdx + limitParam);
   const nextCursor = startIdx + paginated.length < feedItems.length

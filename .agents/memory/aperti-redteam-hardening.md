@@ -27,9 +27,19 @@ description: All vulnerabilities found and fixed across two full adversarial aud
 - No external alerting (Slack/PagerDuty) — errors stored in DB only; need webhook_url configured in founder settings
 - Upload storage quota (storage_gb per plan) exists in enforceLimit middleware but is NOT wired to POST /upload or /snapgrade/scan
 
+## Session 3 fixes (WebSocket, pagination, account enumeration)
+- parent-notifications.ts: parent namespace now requires JWT from httpOnly cookie on connect; parseCookieHeader() reads socket.handshake.headers.cookie; join event validates socket.data.userId === parentId before allowing room join
+- index.ts Socket.IO CORS: now uses ALLOWED_ORIGINS env var if set; warns in production if not set
+- Pagination caps added (Math.min(parseInt(limit), 200)) to: admin-users.ts, admin-payments.ts, admin-organizations.ts, admin-subscriptions.ts, governance.ts (users/access + enrollments)
+- student-feed.ts in-memory slice capped: Math.min(limitParam, 100)
+- Account enumeration via suspended accounts: deliberate UX tradeoff — suspended users see "account suspended" message (401), other failures return generic "Invalid credentials"; accepted pattern for educational platforms
+
 ## Key invariants to maintain
 - All student-facing exam routes MUST use requireStudentAccess (not raw authenticate)
 - All AI user input MUST be sliced before being sent to model
 - /metrics MUST require METRICS_TOKEN in production
 - Coupon claim in subscription-engine MUST check coupon_redemptions before atomic UPDATE
 - Admin role updates MUST block self-role-change and super_admin promotion by non-super_admins
+- Socket.IO parent namespace MUST verify JWT from cookie — never trust client-supplied parentId alone
+- All list endpoints MUST use Math.min(parseInt(limit), MAX) — never pass limit directly to DB
+- ALLOWED_ORIGINS env var MUST be set in production (warning fires if not)

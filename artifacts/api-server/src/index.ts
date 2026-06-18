@@ -105,8 +105,16 @@ async function main() {
 
   const httpServer = createServer(app);
 
+  const allowedWsOrigins = (process.env.ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+  if (!allowedWsOrigins.length && isProd) {
+    logger.warn("ALLOWED_ORIGINS is not set — Socket.IO will accept connections from any origin in production. Set ALLOWED_ORIGINS to restrict this.");
+  }
+
   const io = new SocketServer(httpServer, {
-    cors: { origin: true, credentials: true },
+    cors: {
+      origin: allowedWsOrigins.length > 0 ? allowedWsOrigins : true,
+      credentials: true,
+    },
     transports: ["websocket", "polling"],
     path: "/socket.io",
   });
