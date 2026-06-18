@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq, and, sql, desc, gte } from "drizzle-orm";
+import { eq, and, sql, desc, gte, inArray } from "drizzle-orm";
 import {
   db, studentsTable, attendanceTable, examsTable, studentMarksTable,
   examQuestionsTable, homeworkTable, homeworkSubmissionsTable,
@@ -192,44 +192,62 @@ router.get("/reports/weekly-data", requireTenantAccess, async (req, res): Promis
   const studentFilter = !isAdmin && teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`;
   const hwTeacherFilter = !isAdmin && teacherId ? eq(homeworkTable.teacherAccountId, teacherId) : sql`1=1`;
 
-  const students = await db.select().from(studentsTable).where(studentFilter);
+  const students = await db.select().from(studentsTable).where(studentFilter).limit(500);
+  if (students.length === 0) { res.json([]); return; }
 
+  const studentIds = students.map(s => s.id);
   const fourWeeksAgo = new Date();
   fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
   const recentCutoff = fourWeeksAgo.toISOString().split("T")[0]!;
 
-  // Get teacher display name
   const [myAccount] = await db.select({ displayName: accountsTable.displayName }).from(accountsTable).where(eq(accountsTable.id, accountId));
   const teacherName = myAccount?.displayName ?? "";
 
-  const result = await Promise.all(students.map(async (student) => {
-    // Attendance totals
-    const attRows = await db.select({ status: attendanceTable.status, cnt: sql<number>`count(*)::int` })
-      .from(attendanceTable).where(eq(attendanceTable.studentId, student.id)).groupBy(attendanceTable.status);
-    const totalPresent = attRows.find(r => r.status === "Present")?.cnt ?? 0;
-    const totalAbsent = attRows.find(r => r.status === "Absent")?.cnt ?? 0;
-    const total = totalPresent + totalAbsent;
-    const attRate = total > 0 ? Math.round((totalPresent / total) * 100) : 0;
+  const [allAtt, recentAtt, allMarks, allHwSubs, [hwTotal]] = await Promise.all([
+    db.select({ sid: attendanceTable.studentId, status: attendanceTable.status, cnt: sql<number>`count(*)::int` })
+      .from(attendanceTable).where(inArray(attendanceTable.studentId, studentIds)).groupBy(attendanceTable.studentId, attendanceTable.status),
+    db.select({ sid: attendanceTable.studentId, status: attendanceTable.status, cnt: sql<number>`count(*)::int` })
+      .from(attendanceTable).where(and(inArray(attendanceTable.studentId, studentIds), gte(attendanceTable.date, recentCutoff))).groupBy(attendanceTable.studentId, attendanceTable.status),
+    db.select({ sid: studentMarksTable.studentId, examId: studentMarksTable.examId, marksScored: studentMarksTable.marksScored, maxMarks: examQuestionsTable.maxMarks, topic: examQuestionsTable.topic })
+      .from(studentMarksTable).innerJoin(examQuestionsTable, eq(studentMarksTable.questionId, examQuestionsTable.id)).where(inArray(studentMarksTable.studentId, studentIds)),
+    db.select({ sid: homeworkSubmissionsTable.studentId, marksAwarded: homeworkSubmissionsTable.marksAwarded, totalMarks: homeworkTable.totalMarks })
+      .from(homeworkSubmissionsTable).innerJoin(homeworkTable, eq(homeworkSubmissionsTable.homeworkId, homeworkTable.id)).where(and(inArray(homeworkSubmissionsTable.studentId, studentIds), hwTeacherFilter)),
+    db.select({ cnt: sql<number>`count(*)::int` }).from(homeworkTable).where(hwTeacherFilter),
+  ]);
 
-    // Recent attendance rate (last 4 weeks)
-    const recentRows = await db.select({ status: attendanceTable.status, cnt: sql<number>`count(*)::int` })
-      .from(attendanceTable)
-      .where(and(eq(attendanceTable.studentId, student.id), gte(attendanceTable.date, recentCutoff)))
-      .groupBy(attendanceTable.status);
-    const rPresent = recentRows.find(r => r.status === "Present")?.cnt ?? 0;
-    const rTotal = (recentRows.find(r => r.status === "Present")?.cnt ?? 0) + (recentRows.find(r => r.status === "Absent")?.cnt ?? 0);
-    const recentRate = rTotal > 0 ? Math.round((rPresent / rTotal) * 100) : attRate;
+  const attMap = new Map<number, { present: number; absent: number }>();
+  for (const r of allAtt) {
+    if (!attMap.has(r.sid)) attMap.set(r.sid, { present: 0, absent: 0 });
+    const a = attMap.get(r.sid)!;
+    if (r.status === "Present") a.present = r.cnt; else if (r.status === "Absent") a.absent = r.cnt;
+  }
+  const recentAttMap = new Map<number, { present: number; absent: number }>();
+  for (const r of recentAtt) {
+    if (!recentAttMap.has(r.sid)) recentAttMap.set(r.sid, { present: 0, absent: 0 });
+    const a = recentAttMap.get(r.sid)!;
+    if (r.status === "Present") a.present = r.cnt; else if (r.status === "Absent") a.absent = r.cnt;
+  }
+  const marksMap = new Map<number, typeof allMarks>();
+  for (const m of allMarks) {
+    if (!marksMap.has(m.sid)) marksMap.set(m.sid, []);
+    marksMap.get(m.sid)!.push(m);
+  }
+  const hwSubsMap = new Map<number, typeof allHwSubs>();
+  for (const s of allHwSubs) {
+    if (!hwSubsMap.has(s.sid)) hwSubsMap.set(s.sid, []);
+    hwSubsMap.get(s.sid)!.push(s);
+  }
+  const hwCount = hwTotal?.cnt ?? 0;
 
-    // Exam marks
-    const marks = await db.select({
-      examId: studentMarksTable.examId,
-      marksScored: studentMarksTable.marksScored,
-      maxMarks: examQuestionsTable.maxMarks,
-      topic: examQuestionsTable.topic,
-    }).from(studentMarksTable)
-      .innerJoin(examQuestionsTable, eq(studentMarksTable.questionId, examQuestionsTable.id))
-      .where(eq(studentMarksTable.studentId, student.id));
+  const result = students.map(student => {
+    const att = attMap.get(student.id) ?? { present: 0, absent: 0 };
+    const total = att.present + att.absent;
+    const attRate = total > 0 ? Math.round((att.present / total) * 100) : 0;
+    const rAtt = recentAttMap.get(student.id) ?? { present: 0, absent: 0 };
+    const rTotal = rAtt.present + rAtt.absent;
+    const recentRate = rTotal > 0 ? Math.round((rAtt.present / rTotal) * 100) : attRate;
 
+    const marks = marksMap.get(student.id) ?? [];
     const byExam: Record<number, { scored: number; max: number }> = {};
     const byTopic: Record<string, { scored: number; max: number }> = {};
     for (const m of marks) {
@@ -242,33 +260,17 @@ router.get("/reports/weekly-data", requireTenantAccess, async (req, res): Promis
         byTopic[m.topic].max += Number(m.maxMarks ?? 0);
       }
     }
-
     const examPcts = Object.values(byExam).filter(e => e.max > 0).map(e => Math.round((e.scored / e.max) * 100));
     const examAvg = examPcts.length > 0 ? Math.round(examPcts.reduce((a, b) => a + b, 0) / examPcts.length) : null;
-    const examTrend = examPcts.length >= 2
-      ? Math.round(examPcts[examPcts.length - 1]! - examPcts.slice(0, -1).reduce((a, b) => a + b, 0) / (examPcts.length - 1))
-      : null;
-
-    const topicStats = Object.entries(byTopic)
-      .map(([topic, { scored, max }]) => ({ topic, pct: max > 0 ? Math.round((scored / max) * 100) : 0 }))
-      .sort((a, b) => a.pct - b.pct);
+    const examTrend = examPcts.length >= 2 ? Math.round(examPcts[examPcts.length - 1]! - examPcts.slice(0, -1).reduce((a, b) => a + b, 0) / (examPcts.length - 1)) : null;
+    const topicStats = Object.entries(byTopic).map(([topic, { scored, max }]) => ({ topic, pct: max > 0 ? Math.round((scored / max) * 100) : 0 })).sort((a, b) => a.pct - b.pct);
     const weakTopics = topicStats.filter(t => t.pct < 60).map(t => t.topic).slice(0, 3);
     const strongTopics = topicStats.filter(t => t.pct >= 80).map(t => t.topic).slice(-2);
 
-    // Homework
-    const [hwTotal] = await db.select({ cnt: sql<number>`count(*)::int` }).from(homeworkTable).where(hwTeacherFilter);
-    const hwSubs = await db.select({
-      marksAwarded: homeworkSubmissionsTable.marksAwarded,
-      totalMarks: homeworkTable.totalMarks,
-    }).from(homeworkSubmissionsTable)
-      .innerJoin(homeworkTable, eq(homeworkSubmissionsTable.homeworkId, homeworkTable.id))
-      .where(eq(homeworkSubmissionsTable.studentId, student.id));
-    const hwCount = hwTotal?.cnt ?? 0;
+    const hwSubs = hwSubsMap.get(student.id) ?? [];
     const hwSubmitted = hwSubs.length;
     const hwRate = hwCount > 0 ? Math.round((hwSubmitted / hwCount) * 100) : 0;
-    const hwScores = hwSubs
-      .filter(s => s.marksAwarded != null && s.totalMarks != null && Number(s.totalMarks) > 0)
-      .map(s => Math.round((Number(s.marksAwarded) / Number(s.totalMarks)) * 100));
+    const hwScores = hwSubs.filter(s => s.marksAwarded != null && s.totalMarks != null && Number(s.totalMarks) > 0).map(s => Math.round((Number(s.marksAwarded) / Number(s.totalMarks)) * 100));
     const hwAvg = hwScores.length > 0 ? Math.round(hwScores.reduce((a, b) => a + b, 0) / hwScores.length) : null;
 
     return {
@@ -276,11 +278,11 @@ router.get("/reports/weekly-data", requireTenantAccess, async (req, res): Promis
       studentCode: student.studentCode,
       studentName: student.studentName,
       teacherName,
-      attendance: { rate: attRate, recentRate, totalPresent, totalAbsent, total },
+      attendance: { rate: attRate, recentRate, totalPresent: att.present, totalAbsent: att.absent, total },
       exams: { count: examPcts.length, avg: examAvg, trend: examTrend, weakTopics, strongTopics },
       homework: { assigned: hwCount, submitted: hwSubmitted, rate: hwRate, avg: hwAvg },
     };
-  }));
+  });
 
   res.json(result);
 });
@@ -288,32 +290,52 @@ router.get("/reports/weekly-data", requireTenantAccess, async (req, res): Promis
 // POST /api/reports/generate  — generate formatted text report for one or all students
 router.post("/reports/generate", requireTenantAccess, async (req, res): Promise<void> => {
   const { weekLabel = "This week" } = req.body;
-  const { teacherId, isAdmin } = req.tenant;
+  const { teacherId, isAdmin, accountId } = req.tenant;
   const studentFilter = !isAdmin && teacherId ? eq(studentsTable.teacherAccountId, teacherId) : sql`1=1`;
   const hwTeacherFilter = !isAdmin && teacherId ? eq(homeworkTable.teacherAccountId, teacherId) : sql`1=1`;
 
-  const { accountId } = req.tenant;
   const [myAccount] = await db.select({ displayName: accountsTable.displayName }).from(accountsTable).where(eq(accountsTable.id, accountId));
   const teacherName = myAccount?.displayName ?? "";
 
-  const students = await db.select().from(studentsTable).where(studentFilter);
-  const fourWeeksAgo = new Date(); fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
-  const recentCutoff = fourWeeksAgo.toISOString().split("T")[0]!;
+  const students = await db.select().from(studentsTable).where(studentFilter).limit(500);
+  if (students.length === 0) { res.json([]); return; }
 
-  const reports: { studentId: number; studentCode: string; studentName: string; report: string }[] = [];
+  const studentIds = students.map(s => s.id);
 
-  for (const student of students) {
-    const attRows = await db.select({ status: attendanceTable.status, cnt: sql<number>`count(*)::int` })
-      .from(attendanceTable).where(eq(attendanceTable.studentId, student.id)).groupBy(attendanceTable.status);
-    const totalPresent = attRows.find(r => r.status === "Present")?.cnt ?? 0;
-    const totalAbsent = attRows.find(r => r.status === "Absent")?.cnt ?? 0;
-    const total = totalPresent + totalAbsent;
-    const attRate = total > 0 ? Math.round((totalPresent / total) * 100) : 0;
+  const [allAtt, allMarks, allHwSubs, [hwTotal]] = await Promise.all([
+    db.select({ sid: attendanceTable.studentId, status: attendanceTable.status, cnt: sql<number>`count(*)::int` })
+      .from(attendanceTable).where(inArray(attendanceTable.studentId, studentIds)).groupBy(attendanceTable.studentId, attendanceTable.status),
+    db.select({ sid: studentMarksTable.studentId, examId: studentMarksTable.examId, marksScored: studentMarksTable.marksScored, maxMarks: examQuestionsTable.maxMarks, topic: examQuestionsTable.topic })
+      .from(studentMarksTable).innerJoin(examQuestionsTable, eq(studentMarksTable.questionId, examQuestionsTable.id)).where(inArray(studentMarksTable.studentId, studentIds)),
+    db.select({ sid: homeworkSubmissionsTable.studentId, marksAwarded: homeworkSubmissionsTable.marksAwarded, totalMarks: homeworkTable.totalMarks })
+      .from(homeworkSubmissionsTable).innerJoin(homeworkTable, eq(homeworkSubmissionsTable.homeworkId, homeworkTable.id)).where(and(inArray(homeworkSubmissionsTable.studentId, studentIds), hwTeacherFilter)),
+    db.select({ cnt: sql<number>`count(*)::int` }).from(homeworkTable).where(hwTeacherFilter),
+  ]);
 
-    const marks = await db.select({ examId: studentMarksTable.examId, marksScored: studentMarksTable.marksScored, maxMarks: examQuestionsTable.maxMarks, topic: examQuestionsTable.topic })
-      .from(studentMarksTable).innerJoin(examQuestionsTable, eq(studentMarksTable.questionId, examQuestionsTable.id))
-      .where(eq(studentMarksTable.studentId, student.id));
+  const attMap = new Map<number, { present: number; absent: number }>();
+  for (const r of allAtt) {
+    if (!attMap.has(r.sid)) attMap.set(r.sid, { present: 0, absent: 0 });
+    const a = attMap.get(r.sid)!;
+    if (r.status === "Present") a.present = r.cnt; else if (r.status === "Absent") a.absent = r.cnt;
+  }
+  const marksMap = new Map<number, typeof allMarks>();
+  for (const m of allMarks) {
+    if (!marksMap.has(m.sid)) marksMap.set(m.sid, []);
+    marksMap.get(m.sid)!.push(m);
+  }
+  const hwSubsMap = new Map<number, typeof allHwSubs>();
+  for (const s of allHwSubs) {
+    if (!hwSubsMap.has(s.sid)) hwSubsMap.set(s.sid, []);
+    hwSubsMap.get(s.sid)!.push(s);
+  }
+  const hwCount = hwTotal?.cnt ?? 0;
 
+  const reports: { studentId: number; studentCode: string; studentName: string; report: string }[] = students.map(student => {
+    const att = attMap.get(student.id) ?? { present: 0, absent: 0 };
+    const total = att.present + att.absent;
+    const attRate = total > 0 ? Math.round((att.present / total) * 100) : 0;
+
+    const marks = marksMap.get(student.id) ?? [];
     const byExam: Record<number, { scored: number; max: number }> = {};
     const byTopic: Record<string, { scored: number; max: number }> = {};
     for (const m of marks) {
@@ -331,31 +353,21 @@ router.post("/reports/generate", requireTenantAccess, async (req, res): Promise<
     const weakTopics = topicStats.filter(t => t.pct < 60).map(t => t.topic).slice(0, 3);
     const strongTopics = topicStats.filter(t => t.pct >= 80).map(t => t.topic).slice(-2);
 
-    const [hwTotal] = await db.select({ cnt: sql<number>`count(*)::int` }).from(homeworkTable).where(hwTeacherFilter);
-    const hwSubs = await db.select({
-      marksAwarded: homeworkSubmissionsTable.marksAwarded,
-      totalMarks: homeworkTable.totalMarks,
-    }).from(homeworkSubmissionsTable)
-      .innerJoin(homeworkTable, eq(homeworkSubmissionsTable.homeworkId, homeworkTable.id))
-      .where(eq(homeworkSubmissionsTable.studentId, student.id));
-    const hwCount = hwTotal?.cnt ?? 0;
+    const hwSubs = hwSubsMap.get(student.id) ?? [];
     const hwSubmitted = hwSubs.length;
     const hwRate = hwCount > 0 ? Math.round((hwSubmitted / hwCount) * 100) : 0;
-    const hwScores = hwSubs
-      .filter(s => s.marksAwarded != null && s.totalMarks != null && Number(s.totalMarks) > 0)
-      .map(s => Math.round((Number(s.marksAwarded) / Number(s.totalMarks)) * 100));
+    const hwScores = hwSubs.filter(s => s.marksAwarded != null && s.totalMarks != null && Number(s.totalMarks) > 0).map(s => Math.round((Number(s.marksAwarded) / Number(s.totalMarks)) * 100));
     const hwAvg = hwScores.length > 0 ? Math.round(hwScores.reduce((a, b) => a + b, 0) / hwScores.length) : null;
 
     const reportText = buildReportText(
       student.studentName, student.studentCode, teacherName, weekLabel,
-      attRate, totalPresent, totalAbsent,
+      attRate, att.present, att.absent,
       examAvg, examPcts.length, examTrend,
       hwRate, hwSubmitted, hwCount, hwAvg,
       weakTopics, strongTopics,
     );
-
-    reports.push({ studentId: student.id, studentCode: student.studentCode, studentName: student.studentName, report: reportText });
-  }
+    return { studentId: student.id, studentCode: student.studentCode, studentName: student.studentName, report: reportText };
+  });
 
   res.json(reports);
 });
@@ -364,19 +376,43 @@ router.post("/reports/generate", requireTenantAccess, async (req, res): Promise<
 router.get("/reports/system-stats", requireTenantAccess, async (req, res): Promise<void> => {
   if (!req.tenant.isAdmin) { res.status(403).json({ message: "Admin only" }); return; }
 
-  const allAccounts = await db.select().from(accountsTable);
-  const accountMap = Object.fromEntries(allAccounts.map(a => [a.id, a]));
+  const [
+    [totalStudents], [totalAttendance], [presentCount], [totalExams], [totalSessions],
+    [teacherCount], [assistantCount], [studentAccountCount],
+    teacherStudentCounts,
+    recentLogs,
+  ] = await Promise.all([
+    db.select({ count: sql<number>`count(*)::int` }).from(studentsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable).where(eq(attendanceTable.status, "Present")),
+    db.select({ count: sql<number>`count(*)::int` }).from(examsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable),
+    db.select({ count: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "teacher")),
+    db.select({ count: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "assistant")),
+    db.select({ count: sql<number>`count(*)::int` }).from(accountsTable).where(eq(accountsTable.role, "student")),
+    db.select({
+      teacherAccountId: studentsTable.teacherAccountId,
+      studentCount: sql<number>`count(*)::int`,
+    }).from(studentsTable).groupBy(studentsTable.teacherAccountId).orderBy(desc(sql`count(*)`)).limit(10),
+    db.select().from(auditLogsTable).orderBy(desc(auditLogsTable.createdAt)).limit(100),
+  ]);
 
-  const [totalStudents] = await db.select({ count: sql<number>`count(*)::int` }).from(studentsTable);
-  const [totalAttendance] = await db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable);
-  const [presentCount] = await db.select({ count: sql<number>`count(*)::int` }).from(attendanceTable).where(eq(attendanceTable.status, "Present"));
-  const [totalExams] = await db.select({ count: sql<number>`count(*)::int` }).from(examsTable);
-  const [totalSessions] = await db.select({ count: sql<number>`count(*)::int` }).from(sessionsTable);
-
-  const teacherStudentCounts = await db.select({
-    teacherAccountId: studentsTable.teacherAccountId,
-    studentCount: sql<number>`count(*)::int`,
-  }).from(studentsTable).groupBy(studentsTable.teacherAccountId).orderBy(desc(sql`count(*)`)).limit(10);
+  const neededIds = [
+    ...teacherStudentCounts.map(t => t.teacherAccountId).filter(Boolean) as number[],
+    ...recentLogs.map(l => l.accountId).filter(Boolean) as number[],
+  ];
+  const uniqueIds = [...new Set(neededIds)];
+  const accountRows = uniqueIds.length > 0
+    ? await db.select({
+        id: accountsTable.id,
+        displayName: accountsTable.displayName,
+        username: accountsTable.username,
+        role: accountsTable.role,
+        status: accountsTable.status,
+        createdAt: accountsTable.createdAt,
+      }).from(accountsTable).where(inArray(accountsTable.id, uniqueIds))
+    : [];
+  const accountMap = Object.fromEntries(accountRows.map(a => [a.id, a]));
 
   const topTeachers = teacherStudentCounts.map(t => ({
     teacherId: t.teacherAccountId,
@@ -386,23 +422,30 @@ router.get("/reports/system-stats", requireTenantAccess, async (req, res): Promi
     status: t.teacherAccountId ? accountMap[t.teacherAccountId]?.status ?? "active" : "active",
   }));
 
-  const recentLogs = await db.select().from(auditLogsTable).orderBy(desc(auditLogsTable.createdAt)).limit(100);
+  const paginatedAccounts = await db.select({
+    id: accountsTable.id,
+    username: accountsTable.username,
+    displayName: accountsTable.displayName,
+    role: accountsTable.role,
+    status: accountsTable.status,
+    createdAt: accountsTable.createdAt,
+  }).from(accountsTable).orderBy(desc(accountsTable.createdAt)).limit(200);
 
   const attRate = totalAttendance?.count > 0 ? Math.round(((presentCount?.count ?? 0) / totalAttendance.count) * 100) : 0;
 
   res.json({
     totals: {
       students: totalStudents?.count ?? 0,
-      teachers: allAccounts.filter(a => a.role === "teacher").length,
-      assistants: allAccounts.filter(a => a.role === "assistant").length,
-      studentAccounts: allAccounts.filter(a => a.role === "student").length,
+      teachers: teacherCount?.count ?? 0,
+      assistants: assistantCount?.count ?? 0,
+      studentAccounts: studentAccountCount?.count ?? 0,
       sessions: totalSessions?.count ?? 0,
       exams: totalExams?.count ?? 0,
       totalAttendance: totalAttendance?.count ?? 0,
     },
     overallAttendanceRate: attRate,
     topTeachers,
-    accounts: allAccounts.map(a => ({ id: a.id, username: a.username, displayName: a.displayName, role: a.role, status: a.status, createdAt: a.createdAt })),
+    accounts: paginatedAccounts,
     recentAuditLogs: recentLogs.map(l => ({
       id: l.id,
       action: l.action,

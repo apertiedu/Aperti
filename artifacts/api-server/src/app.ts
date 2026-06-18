@@ -188,13 +188,13 @@ app.use(globalLimiter);
 // ── Per-user / route-specific rate limiting ───────────────────────────────────
 function extractRateLimitKey(req: Request): string {
   try {
-    const token = (req as any).cookies?.["token"];
+    const token = (req as any).cookies?.["aperti_token"];
     if (token) {
       const decoded = jwt.decode(token) as { id?: number } | null;
       if (decoded?.id) return `u:${decoded.id}`;
     }
   } catch {}
-  return "guest";
+  return req.ip ?? "guest";
 }
 
 const aiChatLimiter = rateLimit({
@@ -229,6 +229,11 @@ const subInitiateLimiter = rateLimit({
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
   : null;
+
+if (!ALLOWED_ORIGINS && process.env.NODE_ENV === "production") {
+  console.warn("[CORS] ALLOWED_ORIGINS is not set in production — cross-origin requests are unrestricted. Set ALLOWED_ORIGINS to lock down the API.");
+}
+
 app.use(cors({
   origin: ALLOWED_ORIGINS
     ? (origin, cb) => {

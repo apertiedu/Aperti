@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, inArray } from "drizzle-orm";
 
 export const analyticsRouter = Router();
 
@@ -14,11 +14,17 @@ analyticsRouter.get("/class-overview", authenticate, async (req: AuthRequest, re
     where: (s, { eq }) => eq(s.teacherAccountId, teacherId),
   });
 
-  // 2. Attendance rate (last 30 days)
+  // 2. Attendance rate (last 30 days) — scoped to this teacher's students only
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
-  const attendanceRecords = await db.query.attendance.findMany({
-    where: (a, { gte }) => gte(a.date, thirtyDaysAgo),
-  });
+  const studentIds = students.map(s => s.id);
+  const attendanceRecords = studentIds.length > 0
+    ? await db.query.attendance.findMany({
+        where: (a, { gte, inArray, and }) => and(
+          gte(a.date, thirtyDaysAgo),
+          inArray(a.studentId, studentIds),
+        ),
+      })
+    : [];
   const present = attendanceRecords.filter(a => a.status === "Present").length;
   const totalRecs = attendanceRecords.length;
   const attendanceRate = totalRecs > 0 ? Math.round((present / totalRecs) * 100) : 0;
@@ -37,17 +43,27 @@ analyticsRouter.get("/class-overview", authenticate, async (req: AuthRequest, re
     .slice(0, 5)
     .map(([topic, count]) => ({ topic, count }));
 
-  // 4. Recent exam average
+  // 4. Recent exam average — single aggregation query instead of N+1
   const exams = await db.query.exams.findMany({
     where: (e, { eq }) => eq(e.teacherAccountId, teacherId),
     orderBy: (e, { desc }) => [desc(e.createdAt)],
     limit: 5,
   });
-  const recentExamAverages = await Promise.all(exams.map(async exam => {
-    const marks = await db.query.studentMarks.findMany({ where: (m, { eq }) => eq(m.examId, exam.id) });
-    const avg = marks.length > 0 ? marks.reduce((sum, m) => sum + parseFloat(m.marksScored || "0"), 0) / marks.length : 0;
-    return { examId: exam.id, examName: exam.name, average: Math.round(avg) };
-  }));
+  let recentExamAverages: { examId: number; examName: string; average: number }[] = [];
+  if (exams.length > 0) {
+    const examIds = exams.map(e => e.id);
+    const { rows: markRows } = await pool.query<{ exam_id: number; avg: string }>(
+      `SELECT exam_id, ROUND(AVG(marks_scored::float)::numeric, 0)::text AS avg
+       FROM student_marks WHERE exam_id = ANY($1) GROUP BY exam_id`,
+      [examIds],
+    );
+    const markMap = new Map(markRows.map(r => [r.exam_id, parseFloat(r.avg ?? "0")]));
+    recentExamAverages = exams.map(exam => ({
+      examId: exam.id,
+      examName: exam.name,
+      average: Math.round(markMap.get(exam.id) ?? 0),
+    }));
+  }
 
   res.json({
     studentCount: students.length,

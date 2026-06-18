@@ -146,11 +146,31 @@ teacherCoursesRouter.post("/teacher-courses/:courseId/units", authenticate, asyn
 
 teacherCoursesRouter.put("/teacher-courses/units/:id", authenticate, async (req: AuthRequest, res: Response) => {
   const { title, ord } = req.body;
+  const isAdmin = req.role === "admin" || req.role === "super_admin";
+  const ownerCheck = isAdmin
+    ? await pool.query("SELECT id FROM course_units WHERE id=$1 LIMIT 1", [req.params.id])
+    : await pool.query(
+        `SELECT cu.id FROM course_units cu
+         JOIN teacher_courses tc ON tc.id = cu.course_id
+         WHERE cu.id=$1 AND tc.teacher_account_id=$2 LIMIT 1`,
+        [req.params.id, req.userId],
+      );
+  if (ownerCheck.rows.length === 0) { res.status(403).json({ error: "Forbidden" }); return; }
   await pool.query("UPDATE course_units SET title=$1, ord=$2 WHERE id=$3", [title, ord, req.params.id]);
   res.json({ success: true });
 });
 
 teacherCoursesRouter.delete("/teacher-courses/units/:id", authenticate, async (req: AuthRequest, res: Response) => {
+  const isAdmin = req.role === "admin" || req.role === "super_admin";
+  const ownerCheck = isAdmin
+    ? await pool.query("SELECT id FROM course_units WHERE id=$1 LIMIT 1", [req.params.id])
+    : await pool.query(
+        `SELECT cu.id FROM course_units cu
+         JOIN teacher_courses tc ON tc.id = cu.course_id
+         WHERE cu.id=$1 AND tc.teacher_account_id=$2 LIMIT 1`,
+        [req.params.id, req.userId],
+      );
+  if (ownerCheck.rows.length === 0) { res.status(403).json({ error: "Forbidden" }); return; }
   await pool.query("DELETE FROM course_units WHERE id=$1", [req.params.id]);
   res.json({ success: true });
 });
@@ -166,6 +186,17 @@ teacherCoursesRouter.post("/teacher-courses/units/:unitId/topics", authenticate,
 });
 
 teacherCoursesRouter.delete("/teacher-courses/topics/:id", authenticate, async (req: AuthRequest, res: Response) => {
+  const isAdmin = req.role === "admin" || req.role === "super_admin";
+  const ownerCheck = isAdmin
+    ? await pool.query("SELECT id FROM course_topics WHERE id=$1 LIMIT 1", [req.params.id])
+    : await pool.query(
+        `SELECT ct.id FROM course_topics ct
+         JOIN course_units cu ON cu.id = ct.unit_id
+         JOIN teacher_courses tc ON tc.id = cu.course_id
+         WHERE ct.id=$1 AND tc.teacher_account_id=$2 LIMIT 1`,
+        [req.params.id, req.userId],
+      );
+  if (ownerCheck.rows.length === 0) { res.status(403).json({ error: "Forbidden" }); return; }
   await pool.query("DELETE FROM course_topics WHERE id=$1", [req.params.id]);
   res.json({ success: true });
 });
@@ -181,6 +212,18 @@ teacherCoursesRouter.post("/teacher-courses/topics/:topicId/lessons", authentica
 });
 
 teacherCoursesRouter.delete("/teacher-courses/lessons/:id", authenticate, async (req: AuthRequest, res: Response) => {
+  const isAdmin = req.role === "admin" || req.role === "super_admin";
+  const ownerCheck = isAdmin
+    ? await pool.query("SELECT id FROM course_lessons_map WHERE id=$1 LIMIT 1", [req.params.id])
+    : await pool.query(
+        `SELECT clm.id FROM course_lessons_map clm
+         JOIN course_topics ct ON ct.id = clm.topic_id
+         JOIN course_units cu ON cu.id = ct.unit_id
+         JOIN teacher_courses tc ON tc.id = cu.course_id
+         WHERE clm.id=$1 AND tc.teacher_account_id=$2 LIMIT 1`,
+        [req.params.id, req.userId],
+      );
+  if (ownerCheck.rows.length === 0) { res.status(403).json({ error: "Forbidden" }); return; }
   await pool.query("DELETE FROM course_lessons_map WHERE id=$1", [req.params.id]);
   res.json({ success: true });
 });

@@ -19,6 +19,7 @@ export function requestObserver(req: AuthReq, res: Response, next: NextFunction)
   const start = Date.now();
 
   res.on("finish", () => {
+    if (Math.random() > 0.1) return;
     const latency_ms = Date.now() - start;
     const statusCode = res.statusCode;
     const success = statusCode < 400;

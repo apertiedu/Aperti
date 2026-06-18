@@ -10,6 +10,13 @@ learningEfficiencyRouter.get("/", async (req, res: Response) => {
   try {
     const subject = req.query.subject as string | undefined;
 
+    const activityParams: any[] = [];
+    let activitySubjectClause = "";
+    if (subject) {
+      activityParams.push(`%${subject}%`);
+      activitySubjectClause = `AND s.assessment_id IN (SELECT id FROM assessments WHERE title ILIKE $1)`;
+    }
+
     const [activityRows, subjectRows, trendRows, summaryRows] = await Promise.all([
       pool.query(`
         SELECT
@@ -19,8 +26,8 @@ learningEfficiencyRouter.get("/", async (req, res: Response) => {
           COALESCE(AVG(s.score), 0) as avg_improvement
         FROM student_assessments s
         WHERE s.submitted_at > NOW() - INTERVAL '90 days'
-        ${subject ? `AND s.assessment_id IN (SELECT id FROM assessments WHERE title ILIKE '%${subject.replace(/'/g, "''")}%')` : ""}
-      `).catch(() => ({ rows: [] })),
+        ${activitySubjectClause}
+      `, activityParams).catch(() => ({ rows: [] })),
 
       pool.query(`
         SELECT

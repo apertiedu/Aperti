@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
+import { SkeletonStatRow } from "@/components/query-boundary";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -119,12 +120,14 @@ export default function AiAnalytics() {
       {/* Usage Metrics */}
       <section>
         <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Usage Metrics</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={Activity} label="Total AI Calls" value={isLoading ? "—" : stats?.totalCalls ?? 0} color="primary" />
-          <StatCard icon={Zap} label="Last 7 Days" value={isLoading ? "—" : stats?.recentCallsLast7Days ?? 0} color="blue" />
-          <StatCard icon={DollarSign} label="Est. Cost (USD)" value={isLoading ? "—" : `$${stats?.estimatedCostUSD ?? "0.00"}`} sub={`${stats?.totalTokens ?? 0} tokens`} color="amber" />
-          <StatCard icon={TrendingUp} label="Avg Confidence" value={isLoading ? "—" : `${Math.round((stats?.avgConfidence ?? 0) * 100)}%`} color="violet" />
-        </div>
+        {isLoading ? <SkeletonStatRow count={4} /> : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard icon={Activity} label="Total AI Calls" value={stats?.totalCalls ?? 0} color="primary" />
+            <StatCard icon={Zap} label="Last 7 Days" value={stats?.recentCallsLast7Days ?? 0} color="blue" />
+            <StatCard icon={DollarSign} label="Est. Cost (USD)" value={`$${stats?.estimatedCostUSD ?? "0.00"}`} sub={`${stats?.totalTokens ?? 0} tokens`} color="amber" />
+            <StatCard icon={TrendingUp} label="Avg Confidence" value={`${Math.round((stats?.avgConfidence ?? 0) * 100)}%`} color="violet" />
+          </div>
+        )}
       </section>
 
       {/* Call Volume Timeline */}
@@ -165,12 +168,14 @@ export default function AiAnalytics() {
       {/* Accuracy Metrics */}
       <section>
         <h2 className="text-sm font-semibold text-slate-600 uppercase tracking-wide mb-3">Accuracy & Acceptance</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard icon={CheckCircle2} label="Accepted" value={isLoading ? "—" : stats?.totalAccepted ?? 0} color="primary" />
-          <StatCard icon={XCircle} label="Rejected" value={isLoading ? "—" : stats?.totalRejected ?? 0} color="rose" />
-          <StatCard icon={Clock} label="Pending Review" value={isLoading ? "—" : stats?.totalPending ?? 0} color="amber" />
-          <StatCard icon={BarChart3} label="Acceptance Rate" value={isLoading ? "—" : `${stats?.overallAcceptanceRate ?? 0}%`} color="blue" />
-        </div>
+        {isLoading ? <SkeletonStatRow count={4} /> : (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard icon={CheckCircle2} label="Accepted" value={stats?.totalAccepted ?? 0} color="primary" />
+            <StatCard icon={XCircle} label="Rejected" value={stats?.totalRejected ?? 0} color="rose" />
+            <StatCard icon={Clock} label="Pending Review" value={stats?.totalPending ?? 0} color="amber" />
+            <StatCard icon={BarChart3} label="Acceptance Rate" value={`${stats?.overallAcceptanceRate ?? 0}%`} color="blue" />
+          </div>
+        )}
       </section>
 
       {/* By Module */}
