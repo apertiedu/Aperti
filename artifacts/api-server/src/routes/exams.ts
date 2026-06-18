@@ -209,21 +209,34 @@ router.post("/exams/:id/marks", authenticate, async (req: AuthRequest, res): Pro
     const { marks } = req.body;
     if (!Array.isArray(marks)) { res.status(400).json({ error: "marks array required" }); return; }
 
+    const allowedStudentIds: Set<number> | null = req.role === "admin" ? null : await (async () => {
+      const rows = await db.select({ id: studentsTable.id }).from(studentsTable).where(eq(studentsTable.teacherAccountId, req.userId!));
+      return new Set(rows.map(r => r.id));
+    })();
+
     for (const m of marks) {
       const { studentId, questionId, marksScored, mistakes } = m;
+      const sid = parseInt(studentId, 10);
+      if (isNaN(sid)) { res.status(400).json({ error: "Invalid studentId" }); return; }
+      if (allowedStudentIds && !allowedStudentIds.has(sid)) {
+        res.status(403).json({ error: `Student ${sid} does not belong to your account` });
+        return;
+      }
+      const scored = marksScored !== undefined && marksScored !== null ? parseFloat(String(marksScored)) : null;
+      if (scored !== null && (isNaN(scored) || scored < 0 || scored > 10000)) {
+        res.status(400).json({ error: "marksScored must be a number between 0 and 10000" });
+        return;
+      }
+      const scoredStr = scored !== null ? String(scored) : null;
       await db.insert(studentMarksTable).values({
-        studentId: parseInt(studentId, 10),
+        studentId: sid,
         examId,
         questionId: parseInt(questionId, 10),
-        marksScored: marksScored !== undefined && marksScored !== null ? String(marksScored) : null,
+        marksScored: scoredStr,
         mistakes: mistakes || null,
       }).onConflictDoUpdate({
         target: [studentMarksTable.studentId, studentMarksTable.questionId],
-        set: {
-          marksScored: marksScored !== undefined && marksScored !== null ? String(marksScored) : null,
-          mistakes: mistakes || null,
-          markedAt: new Date(),
-        },
+        set: { marksScored: scoredStr, mistakes: mistakes || null, markedAt: new Date() },
       });
     }
     res.json({ success: true, saved: marks.length });
@@ -240,7 +253,11 @@ router.get("/exams/:id/results", authenticate, async (req: AuthRequest, res): Pr
     const [exam] = await db.select().from(examsTable).where(eq(examsTable.id, examId));
     if (!exam) { res.status(404).json({ error: "Exam not found" }); return; }
 
-    if (req.role !== "admin" && req.role !== "student" && exam.teacherAccountId !== req.userId) {
+    if (req.role === "student") {
+      res.status(403).json({ error: "Use the student portal to view your results" });
+      return;
+    }
+    if (req.role !== "admin" && exam.teacherAccountId !== req.userId) {
       res.status(403).json({ error: "Access denied" });
       return;
     }

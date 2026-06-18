@@ -67,8 +67,21 @@ referralRouter.post("/apply", async (req: AuthRequest, res: Response): Promise<v
 
     const normalizedCode = code.toUpperCase().trim();
 
+    const FORTY_EIGHT_HOURS = 48 * 60 * 60 * 1000;
+    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+
+    const { rows: selfRows } = await pool.query(
+      "SELECT created_at FROM accounts WHERE id = $1",
+      [req.userId],
+    );
+    const accountAge = selfRows[0]?.created_at ? Date.now() - new Date(selfRows[0].created_at).getTime() : Infinity;
+    if (accountAge > FORTY_EIGHT_HOURS) {
+      res.status(400).json({ error: "Referral codes can only be applied within 48 hours of account creation" });
+      return;
+    }
+
     const { rows: codeRows } = await pool.query(
-      "SELECT id FROM accounts WHERE referral_code = $1 AND id != $2 LIMIT 1",
+      "SELECT id, created_at FROM accounts WHERE referral_code = $1 AND id != $2 LIMIT 1",
       [normalizedCode, req.userId],
     );
     if (codeRows.length === 0) {
@@ -77,6 +90,11 @@ referralRouter.post("/apply", async (req: AuthRequest, res: Response): Promise<v
     }
 
     const referrerId = codeRows[0].id;
+    const referrerAge = codeRows[0].created_at ? Date.now() - new Date(codeRows[0].created_at).getTime() : 0;
+    if (referrerAge < SEVEN_DAYS) {
+      res.status(400).json({ error: "Referral code is not yet active" });
+      return;
+    }
 
     const { rows: existing } = await pool.query(
       "SELECT id FROM referrals WHERE referred_id = $1 LIMIT 1",

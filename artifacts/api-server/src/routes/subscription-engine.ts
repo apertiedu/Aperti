@@ -52,6 +52,22 @@ subscriptionEngineRouter.post("/initiate", paymentAttemptLimiter, async (req: Au
     );
     if (!plan) { res.status(400).json({ error: "Plan not found" }); return; }
 
+    const planType: string = plan.type ?? "teacher";
+    const userRole: string = req.role ?? "";
+    const studentRoles = ["student"];
+    const teacherRoles = ["teacher", "admin", "super_admin"];
+    const parentRoles = ["parent", "admin", "super_admin"];
+    const adminRoles = ["admin", "super_admin"];
+    const planAllowed =
+      (planType === "student" && studentRoles.includes(userRole)) ||
+      (planType === "teacher" && teacherRoles.includes(userRole)) ||
+      (planType === "parent" && parentRoles.includes(userRole)) ||
+      adminRoles.includes(userRole);
+    if (!planAllowed) {
+      res.status(403).json({ error: "This plan is not available for your account type.", code: "PLAN_TYPE_MISMATCH" });
+      return;
+    }
+
     const { rows: existing } = await pool.query(
       `SELECT id, status FROM subscriptions
        WHERE account_id = $1 AND status IN ('pending_payment','pending_confirmation','active')

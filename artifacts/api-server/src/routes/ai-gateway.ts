@@ -159,6 +159,8 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
     res.status(400).json({ error: "message is required" });
     return;
   }
+  const safeMessage = typeof message === "string" ? message.slice(0, 4000) : "";
+  const safeContext = typeof context === "string" ? context.slice(0, 2000) : undefined;
 
   // Clamp mode to known safe values; never allow arbitrary strings into model selection
   const safeMode = (["cheap", "balanced", "premium"] as const).includes(mode as any) ? mode : "balanced";
@@ -203,8 +205,7 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
         max_tokens: 1500,
         messages: [
           { role: "system", content: sys },
-          ...(context ? [{ role: "assistant", content: String(context) }] : []),
-          { role: "user", content: message },
+          { role: "user", content: safeContext ? `[Prior context]\n${safeContext}\n\n[Student question]\n${safeMessage}` : safeMessage },
         ],
       }),
       signal: AbortSignal.timeout(60_000),
@@ -242,7 +243,7 @@ aiGatewayRouter.post("/chat", async (req: AuthRequest, res: Response) => {
     }
 
     if (fullText && !res.writableEnded) sseWrite(res, { done: true });
-    trackInteraction(req.userId, "chat", model, sys.length + message.length, fullText.length, Date.now() - t0);
+    trackInteraction(req.userId, "chat", model, sys.length + safeMessage.length, fullText.length, Date.now() - t0);
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Stream failed";
     trackFailure(req.userId, "chat", model, Date.now() - t0);

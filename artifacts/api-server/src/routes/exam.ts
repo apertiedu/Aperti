@@ -2,7 +2,8 @@ import { Router, Response } from "express";
 import { db } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { examsTable, examQuestionsTable, studentMarksTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { requireStudentAccess } from "../middleware/tenant";
 
 export const examsRouter = Router();
 
@@ -82,19 +83,27 @@ examsRouter.get("/:id/submissions", authenticate, requireRole("teacher", "admin"
   }
 });
 
-examsRouter.get("/student/assigned", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+examsRouter.get("/student/assigned", requireStudentAccess, async (req: AuthRequest, res: Response) => {
   try {
-    const exams = await db.query.exams.findMany({ orderBy: (e, { desc }) => [desc(e.createdAt)] });
+    const teacherAccountId = (req as any).teacherAccountId as number;
+    const exams = await db.query.exams.findMany({
+      where: (e, { eq }) => eq(e.teacherAccountId, teacherAccountId),
+      orderBy: (e, { desc }) => [desc(e.createdAt)],
+    });
     res.json(exams);
   } catch (err) {
     res.status(500).json({ error: "Failed to load assigned exams" });
   }
 });
 
-examsRouter.get("/student/:id/take", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+examsRouter.get("/student/:id/take", requireStudentAccess, async (req: AuthRequest, res: Response) => {
   try {
     const examId = parseInt(req.params.id);
-    const exam = await db.query.exams.findFirst({ where: (e, { eq }) => eq(e.id, examId) });
+    const teacherAccountId = (req as any).teacherAccountId as number;
+    const exam = await db.query.exams.findFirst({
+      where: (e, { and: qAnd, eq }) => qAnd(eq(e.id, examId), eq(e.teacherAccountId, teacherAccountId)),
+    });
+    if (!exam) { res.status(404).json({ error: "Exam not found" }); return; }
     const questions = await db.query.examQuestions.findMany({
       where: (q, { eq }) => eq(q.examId, examId),
       orderBy: (q, { asc }) => [asc(q.questionOrder)],
@@ -105,17 +114,27 @@ examsRouter.get("/student/:id/take", authenticate, requireRole("student"), async
   }
 });
 
-examsRouter.post("/student/:id/submit", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
+examsRouter.post("/student/:id/submit", requireStudentAccess, async (req: AuthRequest, res: Response) => {
   try {
     const examId = parseInt(req.params.id);
-    const studentId = req.userId!;
+    const studentId = (req as any).studentId as number;
+    const teacherAccountId = (req as any).teacherAccountId as number;
     const { answers } = req.body;
+
+    const exam = await db.query.exams.findFirst({
+      where: (e, { and: qAnd, eq }) => qAnd(eq(e.id, examId), eq(e.teacherAccountId, teacherAccountId)),
+    });
+    if (!exam) { res.status(404).json({ error: "Exam not found" }); return; }
+    if (!Array.isArray(answers)) { res.status(400).json({ error: "answers array required" }); return; }
 
     let totalScored = 0;
     for (const ans of answers) {
-      const question = await db.query.examQuestions.findFirst({ where: (q, { eq }) => eq(q.id, ans.questionId) });
+      const question = await db.query.examQuestions.findFirst({
+        where: (q, { and: qAnd, eq }) => qAnd(eq(q.id, ans.questionId), eq(q.examId, examId)),
+      });
+      if (!question) continue;
       let marksScored = "0";
-      if (question?.questionType === "mcq" && question.correctOption === parseInt(ans.answerText)) {
+      if (question.questionType === "mcq" && question.correctOption === parseInt(ans.answerText)) {
         marksScored = question.maxMarks;
       }
       totalScored += parseFloat(marksScored);
