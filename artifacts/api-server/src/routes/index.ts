@@ -66,7 +66,6 @@ import peakRankingsRouter from "./peak-rankings";
 import studyGroupsRouter from "./study-groups";
 import studentMessagesThreadedRouter from "./student-messages-threaded";
 import studentCalendarRouter from "./student-calendar";
-import snapgradeRouter from "./snapgrade";
 import trialVaultRouter from "./trial-vault";
 import examVaultRouter from "./exam-vault";
 import studentAnalyticsRouter from "./student-analytics";
@@ -74,10 +73,8 @@ import studentHomeSummaryRouter from "./student-home-summary";
 import aiStatusRouter from "./ai-status";
 import safetyRouter from "./safety";
 import { weaveRouter } from "./weave";
-import { coremindRouter } from "./coremind";
 import { misconceptionsRouter } from "./misconceptions";
 import { gradingRouter } from "./grading";
-import { coremindAnalyticsRouter } from "./coremind-analytics";
 import { parentAiRouter } from "./parent-ai";
 import { parentRouter } from "./parent";
 import { parentDashboardRouter } from "./parent-dashboard";
@@ -109,22 +106,14 @@ import { contentCraftRouter } from "./content-craft";
 import { contentcraftStudioRouter } from "./contentcraft-studio";
 import { problemReportsRouter } from "./problem-reports";
 import { phase25Router } from "./phase25";
-import { aiGatewayRouter } from "./ai-gateway";
-import { aiStudioRouter } from "./ai-studio";
 import { adminDebugRouter } from "./admin-debug";
 import businessOpsRouter from "./business-ops";
 import { contentCalendarRouter } from "./content-calendar";
-import { aiGovernanceRouter } from "./ai-governance";
-import { aiExamGeneratorRouter } from "./ai-exam-generator";
-import { weaknessDetectionRouter } from "./weakness-detection";
-import { anomalyDetectionRouter } from "./anomaly-detection";
 import { billingInvoicesRouter } from "./billing-invoices";
 import { disputesRouter } from "./disputes";
-import { aiAnomalyRouter } from "./ai-anomaly";
 import { architectureRouter } from "./architecture";
 import { migrationSafetyRouter } from "./migration-safety";
 import { deploymentReadinessRouter } from "./deployment-readiness";
-import { loadSimulationRouter } from "./load-simulation";
 import { securePaymentsRouter } from "./secure-payments";
 import { secureDiscountsRouter } from "./secure-discounts";
 import { assistantAssignmentsRouter } from "./assistant-assignments";
@@ -205,7 +194,6 @@ router.use(echoProfileRouter);
 router.use(peakRankingsRouter);
 router.use(studyGroupsRouter);
 router.use(studentCalendarRouter);
-router.use(snapgradeRouter);
 router.use(trialVaultRouter);
 router.use(examVaultRouter);
 router.use(studentAnalyticsRouter);
@@ -213,10 +201,8 @@ router.use(studentHomeSummaryRouter);
 router.use(aiStatusRouter);
 router.use(safetyRouter);
 router.use("/weave", weaveRouter);
-router.use("/coremind", coremindRouter);
 router.use(misconceptionsRouter);
 router.use("/grading", gradingRouter);
-router.use("/coremind", coremindAnalyticsRouter);
 router.use(parentAiRouter);
 router.use("/parent", parentRouter);
 router.use("/parent", parentDashboardRouter);
@@ -274,9 +260,6 @@ router.use(problemReportsRouter);
 // Phase 25 — Product Excellence
 router.use(phase25Router);
 
-// Phase 38 — AI Gateway & Admin Debug
-router.use("/ai", aiGatewayRouter);
-router.use("/ai-studio", aiStudioRouter);
 router.use("/admin/debug", adminDebugRouter);
 
 // Phase 15 — Business Operations & No-Code Admin Control Center
@@ -285,13 +268,7 @@ router.use(businessOpsRouter);
 // Content Calendar
 router.use(contentCalendarRouter);
 
-// AI Governance v2
-router.use("/ai-governance", aiGovernanceRouter);
 
-// Phase 48 — AI Intelligence Platform
-router.use(aiExamGeneratorRouter);
-router.use("/weakness", weaknessDetectionRouter);
-router.use("/shield", anomalyDetectionRouter);
 
 router.use("/system", systemRouter);
 
@@ -302,7 +279,6 @@ router.use("/assistant-assignments", assistantAssignmentsRouter);
 // Features 18–21 — Billing, Disputes, AI Financial Anomaly, Multi-school
 router.use("/billing", billingInvoicesRouter);
 router.use("/disputes", disputesRouter);
-router.use("/ai-anomaly", aiAnomalyRouter);
 
 // Subscription Engine — hardened FSM billing system
 router.use("/sub-engine", subscriptionEngineRouter);
@@ -316,11 +292,9 @@ router.use("/pricing-experiments", pricingExperimentsRouter);
 router.use("/role-plans", roleBasedPlansRouter);
 router.use(gradeForecastPdfRouter);
 
-// Features 22–25 — Architecture, Migration Safety, Deployment Readiness, Load Simulation
 router.use("/architecture", architectureRouter);
 router.use("/migration-safety", migrationSafetyRouter);
 router.use("/deployment", deploymentReadinessRouter);
-router.use("/load-sim", loadSimulationRouter);
 
 router.use("/referrals", referralRouter);
 

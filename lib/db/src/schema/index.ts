@@ -10,7 +10,6 @@ export * from "./Live-class";
 export * from "./Marker-mind";
 export * from "./Mark-schemes";
 export * from "./Paper-vault";
-export * from "./Simulations";
 export * from "./accounts";
 export * from "./aperti-courses";
 export * from "./attendance";

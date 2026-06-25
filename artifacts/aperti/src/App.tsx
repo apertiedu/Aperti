@@ -77,19 +77,11 @@ const AssistantPermissions = lazy(() => import("@/pages/admin/assistant-permissi
 const CheckoutPage = lazy(() => import("@/pages/checkout"));
 const HelpDeskAdmin = lazy(() => import("@/pages/admin/helpdesk-admin"));
 const ShieldCore = lazy(() => import("@/pages/admin/shield-core"));
-const QuickSwitch = lazy(() => import("@/pages/admin/quick-switch"));
-const BudgetSense = lazy(() => import("@/pages/admin/budget-sense"));
-const AutoScale = lazy(() => import("@/pages/admin/auto-scale"));
-const SpendWise = lazy(() => import("@/pages/admin/spend-wise"));
 const AdminCommand = lazy(() => import("@/pages/admin/admin-command"));
 const EnrollmentAudit = lazy(() => import("@/pages/admin/enrollment-audit"));
 const PlatformHealth = lazy(() => import("@/pages/admin/platform-health"));
-const WorldPilot = lazy(() => import("@/pages/admin/world-pilot"));
 const GuardianPulseAdmin = lazy(() => import("@/pages/admin/guardian-pulse-admin"));
 const TeacherVerification = lazy(() => import("@/pages/admin/teacher-verification"));
-const AiAnalytics = lazy(() => import("@/pages/admin/ai-analytics"));
-const AiSafety = lazy(() => import("@/pages/admin/ai-safety"));
-const AiMonitoring = lazy(() => import("@/pages/admin/ai-monitoring"));
 // Features 18–21
 const BillingCenter = lazy(() => import("@/pages/admin/billing-center"));
 const DisputeCenter = lazy(() => import("@/pages/admin/dispute-center"));
@@ -108,7 +100,6 @@ const GradeForecastPage = lazy(() => import("@/pages/teacher/grade-forecast"));
 const ArchitecturePage = lazy(() => import("@/pages/admin/architecture"));
 const MigrationSafetyPage = lazy(() => import("@/pages/admin/migration-safety"));
 const DeploymentPipelinePage = lazy(() => import("@/pages/admin/deployment-pipeline"));
-const LoadSimulationPage = lazy(() => import("@/pages/admin/load-simulation"));
 
 // Student Portal
 const PastPaperLibrary = lazy(() => import("@/pages/student-portal/past-paper-library"));
@@ -127,7 +118,6 @@ const MyQRPage = lazy(() => import("@/pages/student/my-qr"));
 const LearnPath = lazy(() => import("@/pages/student/learn-path"));
 const RevisionPlanPage = lazy(() => import("@/pages/student/revision-plan"));
 const QuestionExtractionPage = lazy(() => import("@/pages/teacher/question-extraction"));
-const DiscoverFeed = lazy(() => import("@/pages/student/discover-feed"));
 const Revisit = lazy(() => import("@/pages/student/revisit"));
 const FocusCoach = lazy(() => import("@/pages/student/focus-coach"));
 const FocusZone = lazy(() => import("@/pages/student/focus-zone"));
@@ -135,7 +125,6 @@ const SuccessCenter = lazy(() => import("@/pages/student/success-center"));
 const TrialVault = lazy(() => import("@/pages/student/trial-vault"));
 const PeakRankings = lazy(() => import("@/pages/student/peak-rankings"));
 const PeerReview = lazy(() => import("@/pages/student/peer-review"));
-const SnapGrade = lazy(() => import("@/pages/student/snap-grade"));
 const Echo = lazy(() => import("@/pages/student/echo"));
 const StudentAnalytics = lazy(() => import("@/pages/student/analytics"));
 const StudyGroups = lazy(() => import("@/pages/student/study-groups"));
@@ -245,7 +234,6 @@ const AssessmentBuilder = lazy(() => import("@/pages/teacher/assessment-builder"
 const AssessmentMonitor = lazy(() => import("@/pages/teacher/assessment-monitor"));
 const TeacherGradebook = lazy(() => import("@/pages/teacher/gradebook"));
 const ModerationCenter = lazy(() => import("@/pages/teacher/moderation"));
-const SnapGradeReview = lazy(() => import("@/pages/teacher/snapgrade-review"));
 const ExamArchives = lazy(() => import("@/pages/teacher/archives"));
 const TeacherSchedulePage = lazy(() => import("@/pages/teacher/schedule"));
 const TeacherRevenueDashboard = lazy(() => import("@/pages/teacher/revenue-dashboard"));
@@ -256,9 +244,6 @@ const ExamResults = lazy(() => import("@/pages/student/exam-results"));
 const StudentTranscript = lazy(() => import("@/pages/student/transcript"));
 const StudentAppeals = lazy(() => import("@/pages/student/appeals"));
 const ExamReadiness = lazy(() => import("@/pages/student/exam-readiness"));
-const AiPersonalTutor = lazy(() => import("@/pages/student/ai-personal-tutor"));
-const SmartStudyPlan = lazy(() => import("@/pages/student/smart-study-plan"));
-const GradePrediction = lazy(() => import("@/pages/student/grade-prediction"));
 
 // Parent
 const GuardianHub = lazy(() => import("@/pages/parent/dashboard"));
@@ -467,14 +452,12 @@ function StudentRouter() {
         <Route path="/exams/:examId/take" component={TakeExam} />
         <Route path="/skill-badge" component={SkillBadge} />
         <Route path="/learn-path" component={LearnPath} />
-        <Route path="/discover" component={DiscoverFeed} />
         <Route path="/revisit" component={Revisit} />
         <Route path="/focus-coach" component={FocusCoach} />
         <Route path="/focus-zone" component={FocusZone} />
         <Route path="/trial-vault" component={TrialVault} />
         <Route path="/peak-rankings" component={PeakRankings} />
         <Route path="/peer-review" component={PeerReview} />
-        <Route path="/snap-grade" component={SnapGrade} />
         <Route path="/papers" component={PastPaperLibrary} />
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
@@ -529,9 +512,6 @@ function StudentRouter() {
         {/* Phase 34 — Student QR Center */}
         <Route path="/my-qr" component={MyQRPage} />
         {/* Phase 51 — AI Intelligence Suite */}
-        <Route path="/ai-tutor" component={AiPersonalTutor} />
-        <Route path="/smart-study-plan" component={SmartStudyPlan} />
-        <Route path="/grade-prediction" component={GradePrediction} />
         <Route path="/500" component={ServerError} />
         <Route component={NotFound} />
       </Switch>
@@ -588,7 +568,6 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/gradebook"><Redirect to="/gradebook-plus" /></Route>
     <Route path="/teacher/grade-forecast" component={GradeForecastPage} />
     <Route path="/teacher/moderation" component={ModerationCenter} />
-    <Route path="/teacher/snapgrade/:id/review" component={SnapGradeReview} />
     <Route path="/teacher/archives" component={ExamArchives} />
     <Route path="/teacher/schedule" component={TeacherSchedulePage} />
     {/* Phase 7 — Communication */}
@@ -635,21 +614,13 @@ const ADMIN_ROUTES = (
     <Route path="/admin/os" component={AdminOS} />
     <Route path="/admin/command" component={AdminCommand} />
     <Route path="/admin/certificates" component={AdminCertificates} />
-    <Route path="/admin/world-pilot" component={WorldPilot} />
     <Route path="/admin/paper-vault" component={PaperVaultAdmin} />
     <Route path="/admin/helpdesk" component={HelpDeskAdmin} />
     <Route path="/admin/shield-core" component={ShieldCore} />
-    <Route path="/admin/quick-switch" component={QuickSwitch} />
-    <Route path="/admin/budget-sense" component={BudgetSense} />
-    <Route path="/admin/auto-scale" component={AutoScale} />
-    <Route path="/admin/spend-wise" component={SpendWise} />
     <Route path="/admin/guardian-pulse" component={GuardianPulseAdmin} />
     <Route path="/admin/landing-editor" component={LandingEditor} />
     <Route path="/admin/assistant-permissions" component={AssistantPermissions} />
     <Route path="/admin/teacher-verification" component={TeacherVerification} />
-    <Route path="/admin/ai-analytics" component={AiAnalytics} />
-    <Route path="/admin/ai-monitoring" component={AiMonitoring} />
-    <Route path="/admin/ai-safety" component={AiSafety} />
     <Route path="/admin/subpilot-settings" component={SubpilotSettings} />
     {/* Phase 7 — Admin Communication */}
     <Route path="/admin/moderation" component={AdminModeration} />
@@ -699,7 +670,6 @@ const ADMIN_ROUTES = (
     <Route path="/admin/architecture" component={ArchitecturePage} />
     <Route path="/admin/migration-safety" component={MigrationSafetyPage} />
     <Route path="/admin/deployment-pipeline" component={DeploymentPipelinePage} />
-    <Route path="/admin/load-simulation" component={LoadSimulationPage} />
   </>
 );
 

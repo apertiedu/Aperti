@@ -55,8 +55,7 @@ const querySchema = {
   peerReviews: schema.peerReviewsTable,
   messageThreads: schema.messageThreadsTable,
   studentMessages: schema.studentMessagesTable,
-  simulations: schema.simulationsTable,
-  simulationResults: schema.simulationResultsTable,
+
   aiInteractions: schema.aiInteractionsTable,
   misconceptions: schema.misconceptionsTable,
   knowledgeNodes: schema.knowledgeNodesTable,

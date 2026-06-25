@@ -11,7 +11,6 @@ router.get("/settings/ai-status", authenticate, async (_req: AuthRequest, res: R
     aiEnabled: AI_AVAILABLE,
     features: {
       mentor: AI_AVAILABLE,
-      snapgrade: true,
       trialVault: true,
       echoProfile: true,
       tutorcraft: AI_AVAILABLE,
@@ -38,7 +37,6 @@ router.get("/ai/health", async (_req: Request, res: Response): Promise<void> => 
     features: {
       mentor: AI_AVAILABLE,
       tutorcraft: AI_AVAILABLE,
-      snapgrade: true,
       trialVault: true,
       echoProfile: true,
       flashcardGeneration: AI_AVAILABLE,

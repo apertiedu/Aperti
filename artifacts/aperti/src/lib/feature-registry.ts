@@ -38,8 +38,6 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
 
   { id: "the-mentor", name: "The Mentor", description: "AI academic tutor for students", route: "/mentor", status: "stable", roles: ["student"], category: "AI" },
   { id: "tutorcraft", name: "TutorCraft", description: "AI tutoring session configurator", route: "/tutorcraft", status: "beta", roles: ["admin", "teacher"], category: "AI" },
-  { id: "ai-safety", name: "AI Safety", description: "Monitor and moderate AI responses", route: "/admin/ai-safety", status: "stable", roles: ["admin"], category: "AI" },
-  { id: "ai-analytics", name: "AI Analytics", description: "AI usage stats and cost monitoring", route: "/admin/ai-analytics", status: "stable", roles: ["admin"], category: "AI" },
 
   { id: "study-stream", name: "StudyStream", description: "Student personalised learning dashboard", route: "/", status: "stable", roles: ["student"], category: "Student" },
   { id: "ascend", name: "Ascend", description: "Gamified learning progression and XP", route: "/ascend", status: "stable", roles: ["student"], category: "Student" },
@@ -49,7 +47,6 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: "exam-vault", name: "ExamVault", description: "Past paper practice vault", route: "/exam-vault", status: "stable", roles: ["student"], category: "Student" },
   { id: "exam-room", name: "Exam Room", description: "Live proctored exam environment", route: "/student/exam-room", status: "beta", roles: ["student"], category: "Student" },
   { id: "success-center", name: "Success Center", description: "Student goals and progress tracking", route: "/student/success-center", status: "stable", roles: ["student"], category: "Student" },
-  { id: "revision-plan", name: "Revision Planner", description: "AI-generated personalised revision schedule", route: "/student/revision-plan", status: "stable", roles: ["student"], category: "Student" },
   { id: "transcript", name: "Transcript", description: "Academic transcript and record", route: "/student/transcript", status: "stable", roles: ["student"], category: "Student" },
 
   { id: "admin-os", name: "AdminOS", description: "Full administrative operating system", route: "/admin/os", status: "stable", roles: ["admin"], category: "Admin" },
@@ -57,14 +54,9 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: "data-quality", name: "Data Quality", description: "Database health and orphan repair", route: "/admin/data-quality", status: "stable", roles: ["admin"], category: "Admin" },
   { id: "route-health", name: "Route Health", description: "API and frontend route monitoring", route: "/admin/route-health", status: "stable", roles: ["admin"], category: "Admin" },
   { id: "test-runner", name: "Test Runner", description: "System-wide health and integration tests", route: "/admin/test-runner", status: "stable", roles: ["admin"], category: "Admin" },
-  { id: "budget-sense", name: "BudgetSense", description: "AI cost and budget monitoring", route: "/admin/budget-sense", status: "stable", roles: ["admin"], category: "Admin" },
-  { id: "auto-scale", name: "AutoScale", description: "Infrastructure auto-scaling controls", route: "/admin/auto-scale", status: "beta", roles: ["admin"], category: "Admin" },
-  { id: "world-pilot", name: "WorldPilot", description: "Multi-region deployment and geo-routing", route: "/admin/world-pilot", status: "beta", roles: ["admin"], category: "Admin" },
   { id: "guardian-pulse", name: "GuardianPulse", description: "Parent engagement and satisfaction analytics", route: "/admin/guardian-pulse", status: "stable", roles: ["admin"], category: "Admin" },
   { id: "executive", name: "Executive Dashboard", description: "C-level platform metrics and KPIs", route: "/admin/executive", status: "stable", roles: ["admin"], category: "Admin" },
-  { id: "spend-wise", name: "SpendWise", description: "Operational spend and budget allocation", route: "/admin/spend-wise", status: "stable", roles: ["admin"], category: "Admin" },
   { id: "feature-status", name: "Feature Status", description: "Module rollout and feature flag management", route: "/admin/feature-status", status: "stable", roles: ["admin"], category: "Admin" },
-  { id: "quick-switch", name: "QuickSwitch", description: "Admin role impersonation and switching", route: "/admin/quick-switch", status: "stable", roles: ["admin"], category: "Admin" },
 
   { id: "unified-inbox", name: "Inbox", description: "Unified messaging and notifications", route: "/inbox", status: "stable", roles: ["admin", "teacher", "assistant", "student", "parent"], category: "Communication" },
   { id: "announcements", name: "Announcements", description: "School-wide announcements and broadcasts", route: "/announcements", status: "stable", roles: ["admin", "teacher", "assistant", "student", "parent"], category: "Communication" },

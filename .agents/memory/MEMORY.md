@@ -1,3 +1,4 @@
+- [Aperti Phase 1 Purification](aperti-phase1-purification.md) — 19 backend route files + 15 frontend pages deleted; all mounts/imports/routes/nav entries removed; Simulations schema removed from index; sed multi-expression requires -e flag not multiple -i flags.
 - [Aperti AI config](aperti-ai-config.md) — NVIDIA_API_KEY drives AI; ai.ts is canonical; ai-gateway.ts priority must be NVIDIA → Replit → OpenAI; AI_CONFIG already exported at bottom of ai.ts (do not add a second one).
 - [Aperti auth pattern](aperti-auth-pattern.md) — JWT via httpOnly cookies (credentials:"include"); token is never exposed to JS; test-runner token guards must be removed so cookies authenticate instead.
 - [Aperti route paths](aperti-route-paths.md) — All frontend fetch() calls need /api/ prefix; dashboard sub-routes mount at /api/dashboard/; missing prefix causes silent 404s with null data (no crash because fallbacks handle it).

@@ -40,7 +40,6 @@ import { adminSubscriptionsRouter } from "./routes/admin-subscriptions";
 import { adminPaymentsRouter } from "./routes/admin-payments";
 import { adminAnalyticsRouter } from "./routes/admin-analytics";
 import { adminHealthRouter } from "./routes/admin-health";
-import { adminFeaturesRouter } from "./routes/admin-features";
 import { adminAuditRouter } from "./routes/admin-audit";
 import { adminSecurityRouter } from "./routes/admin-security";
 import { adminSupportRouter } from "./routes/admin-support";
@@ -103,15 +102,8 @@ import { notificationsInboxRouter } from "./routes/notifications-inbox";
 // Phase 33 — Error System & Performance
 import { errorsLogRouter } from "./routes/errors-log";
 // Phase 47 — AI Teaching Assistant, V2 Permissions, Repair System
-import { aiTeachRouter } from "./routes/ai-teach";
 import { adminRepairRouter } from "./routes/admin-repair";
-import { aiGatewayRouter } from "./routes/ai-gateway";
-import { aiAgentsRouter } from "./routes/ai-agents";
-import { apiV2Router } from "./routes/api-v2";
 import { classforgeRouter } from "./routes/classforge";
-import { aiPersonalTutorRouter } from "./routes/ai-personal-tutor";
-import { smartStudyPlanRouter } from "./routes/smart-study-plan";
-import { gradePredictionRouter } from "./routes/grade-prediction";
 import { securePaymentsRouter } from "./routes/secure-payments";
 import { secureDiscountsRouter } from "./routes/secure-discounts";
 import { assistantAssignmentsRouter } from "./routes/assistant-assignments";
@@ -422,7 +414,6 @@ app.use("/api/admin/subscriptions", adminSubscriptionsRouter);
 app.use("/api/admin/payments", adminPaymentsRouter);
 app.use("/api/admin/analytics", adminAnalyticsRouter);
 app.use("/api/admin/health", adminHealthRouter);
-app.use("/api/admin/features", adminFeaturesRouter);
 app.use("/api/admin/audit-logs", adminAuditRouter);
 app.use("/api/admin/security", adminSecurityRouter);
 app.use("/api/admin/support", adminSupportRouter);
@@ -479,22 +470,9 @@ app.use("/api/session-slots", sessionSlotsRouter);
 app.use("/api/attendance-audit", attendanceAuditRouter);
 app.use("/api/enrollment-timeline", enrollmentTimelineRouter);
 app.use("/api/notifications/inbox", notificationsInboxRouter);
-// Phase 47 — AI Teaching Assistant System
-app.use("/api/ai-teach", aiTeachRouter);
 // Phase 47 — Repair Panel & Launch Score
 app.use("/api/admin/repair", adminRepairRouter);
-// Phase 48 — AI Gateway (streaming SSE, caching, cost tracking)
-app.use("/api/ai", aiGatewayRouter);
-// Phase 48 — AI Multi-Agent Orchestrator (teacher / student / admin agents)
-app.use("/api/ai", aiAgentsRouter);
-// Phase 48 — V2 Shadow API namespace
-app.use("/api/v2", apiV2Router);
-// ClassForge — live session engagement analytics
 app.use("/api", classforgeRouter);
-// Phase 51 — AI Intelligence Suite (Personal Tutor, Study Plan, Grade Prediction)
-app.use("/api/ai-tutor", aiPersonalTutorRouter);
-app.use("/api/study-plan", smartStudyPlanRouter);
-app.use("/api/grade-prediction", gradePredictionRouter);
 app.use("/api/secure-payments", securePaymentsRouter);
 app.use("/api/secure-discounts", secureDiscountsRouter);
 app.use("/api/assistant-assignments", assistantAssignmentsRouter);
