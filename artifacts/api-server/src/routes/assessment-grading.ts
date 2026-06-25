@@ -1,104 +1,10 @@
 import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
-import { openaiChat } from "../lib/ai-config";
-
 export const assessmentGradingRouter = Router();
 
 const teacherOrAdmin = [authenticate, requireRole("teacher", "admin")];
 const anyAuth = [authenticate];
-
-// ══════════════════════════════════════════════════════════════════
-// AUTO-GRADING
-// ══════════════════════════════════════════════════════════════════
-
-// POST /grading/assessments/:submissionId/auto-grade
-assessmentGradingRouter.post("/grading/assessments/:submissionId/auto-grade", ...teacherOrAdmin,
-  async (req: AuthRequest, res: Response) => {
-    try {
-      const { submissionId } = req.params;
-
-      const [subRes, answersRes] = await Promise.all([
-        pool.query("SELECT * FROM assessment_submissions WHERE id=$1", [submissionId]),
-        pool.query(
-          `SELECT sa.*, aq.marks AS max_marks, aq.question_type,
-                  aq.correct_answer, aq.options,
-                  COALESCE(qb.question_text, aq.custom_question->>'text') AS question_text,
-                  qb.model_answer
-           FROM submission_answers sa
-           JOIN assessment_questions aq ON aq.id = sa.question_id
-           LEFT JOIN question_bank qb ON qb.id = aq.question_bank_id
-           WHERE sa.submission_id=$1`,
-          [submissionId]
-        ),
-      ]);
-
-      if (!subRes.rows.length) return res.status(404).json({ error: "Submission not found" });
-
-      let totalScore = 0;
-      const results: any[] = [];
-
-      for (const answer of answersRes.rows) {
-        let marksAwarded = answer.marks_awarded ?? 0;
-        let feedback = answer.grader_feedback ?? "";
-        let isCorrect = answer.is_correct ?? false;
-
-        if (answer.question_type === "mcq" && answer.correct_answer) {
-          isCorrect = answer.answer_text?.trim() === answer.correct_answer?.trim();
-          marksAwarded = isCorrect ? parseFloat(answer.max_marks) : 0;
-          feedback = isCorrect ? "Correct!" : `Expected: ${answer.correct_answer}`;
-        } else if (answer.question_type === "short_answer" && answer.correct_answer) {
-          const studentAns = (answer.answer_text ?? "").toLowerCase().trim();
-          const correctAns = answer.correct_answer.toLowerCase().trim();
-          isCorrect = studentAns.includes(correctAns) || correctAns.includes(studentAns);
-          marksAwarded = isCorrect ? parseFloat(answer.max_marks) : 0;
-        } else if (answer.question_type === "written" && answer.answer_text && answer.question_text) {
-          // AI grading for written answers
-          const aiResponse = await openaiChat({
-            systemPrompt: `You are an expert exam grader. Grade this student answer based on the question and model answer.
-Respond ONLY with valid JSON in this exact format: {"marks": <number>, "feedback": "<string>", "strength": "<string>", "improvement": "<string>"}
-Marks must be between 0 and ${answer.max_marks}. Be fair and specific.`,
-            userMessage: `Question: ${answer.question_text}\nModel Answer: ${answer.model_answer ?? "N/A"}\nMax Marks: ${answer.max_marks}\nStudent Answer: ${answer.answer_text}`,
-            maxTokens: 300,
-          });
-
-          if (aiResponse) {
-            try {
-              const parsed = JSON.parse(aiResponse.trim());
-              marksAwarded = Math.min(Math.max(0, parseFloat(parsed.marks) || 0), parseFloat(answer.max_marks));
-              feedback = `${parsed.feedback ?? ""}\n\nStrength: ${parsed.strength ?? ""}\nFor improvement: ${parsed.improvement ?? ""}`;
-            } catch { marksAwarded = 0; feedback = "AI grading encountered an issue. Please review manually."; }
-          } else {
-            feedback = "Requires manual grading.";
-          }
-        }
-
-        totalScore += marksAwarded;
-
-        await pool.query(
-          `UPDATE submission_answers SET marks_awarded=$1, grader_feedback=$2, is_correct=$3, auto_graded=TRUE
-           WHERE id=$4`,
-          [marksAwarded, feedback, isCorrect, answer.id]
-        );
-
-        results.push({ question_id: answer.question_id, marks_awarded: marksAwarded, max_marks: answer.max_marks, feedback, is_correct: isCorrect });
-      }
-
-      const maxScore = parseFloat(subRes.rows[0].max_score ?? "0");
-      const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
-      const grade = igcseGrade(percentage);
-
-      const { rows } = await pool.query(
-        `UPDATE assessment_submissions
-         SET score=$1, percentage=$2, grade=$3, status='graded', graded_at=NOW()
-         WHERE id=$4 RETURNING *`,
-        [totalScore, percentage, grade, submissionId]
-      );
-
-      res.json({ submission: rows[0], results, total_score: totalScore, percentage, grade });
-    } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
-  }
-);
 
 // POST /grading/assessments/:submissionId/manual-grade
 assessmentGradingRouter.post("/grading/assessments/:submissionId/manual-grade", ...teacherOrAdmin,

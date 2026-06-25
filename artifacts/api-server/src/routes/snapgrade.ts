@@ -496,41 +496,6 @@ router.put("/snapgrade/submissions/:id/review", ...teacherGuard, async (req: Aut
       ? Math.round((finalGradeNum - aiGradeNum) * 100) / 100
       : null;
 
-    await pool.query(
-      `INSERT INTO ai_grade_reviews
-         (submission_id, reviewer_id, original_ai_grade, original_ai_feedback,
-          original_ai_confidence, original_ai_source,
-          override_grade, override_feedback, decision, notes,
-          override_reason_category, override_tags, grade_delta)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-      [
-        submissionId, reviewerId,
-        sub.grade, sub.feedback, sub.ai_confidence, sub.ai_source,
-        finalGradeNum != null ? String(finalGradeNum) : null,
-        override_feedback ?? null,
-        decision, notes ?? null,
-        override_reason_category ?? null,
-        JSON.stringify(override_tags ?? []),
-        gradeDelta,
-      ]
-    );
-
-    pool.query(
-      `INSERT INTO ai_learning_events
-         (submission_id, reviewer_id, ai_prediction, teacher_final, delta,
-          confidence, confidence_level, module, override_reason, context_meta)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-      [
-        submissionId, reviewerId,
-        aiGradeNum, finalGradeNum, gradeDelta,
-        sub.ai_confidence ?? null,
-        sub.ai_confidence != null ? (parseFloat(sub.ai_confidence) >= 0.85 ? "high" : parseFloat(sub.ai_confidence) >= 0.65 ? "medium" : "low") : null,
-        "snapgrade",
-        override_reason_category ?? null,
-        JSON.stringify({ decision, source: sub.ai_source, tags: override_tags ?? [] }),
-      ]
-    ).catch(() => {});
-
     const finalFeedback = override_feedback ?? sub.feedback;
 
     const { rows: updated } = await pool.query(

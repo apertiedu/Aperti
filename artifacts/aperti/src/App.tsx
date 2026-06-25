@@ -49,7 +49,6 @@ const Syllabuilder = lazy(() => import("@/pages/syllabuilder"));
 const KudosEngine = lazy(() => import("@/pages/kudos-engine"));
 const Pulse = lazy(() => import("@/pages/pulse"));
 const ContentCraft = lazy(() => import("@/pages/content-craft"));
-const LabsComingSoon = lazy(() => import("@/pages/labs-coming-soon"));
 const MarkerMind = lazy(() => import("@/pages/marker-mind"));
 const InsightStream = lazy(() => import("@/pages/insight-stream"));
 const HelpDesk = lazy(() => import("@/pages/helpdesk"));
@@ -332,7 +331,7 @@ const ADMIN_PREFIXES = ["/admin"];
 const TEACHER_ONLY_PREFIXES = [
   "/plan-grid", "/checkin", "/submit-flow", "/grade-flow", "/scheme-craft",
   "/query-vault", "/cardstack", "/syllabuilder", "/kudos-engine", "/pulse",
-  "/content-craft", "/lab-builder", "/marker-mind", "/insight-stream",
+  "/content-craft", "/marker-mind", "/insight-stream",
   "/risk-report", "/timetable", "/helpdesk", "/insight-exams", "/scan-scribe",
   "/error-trace", "/tutorcraft", "/teacher-courses", "/teacher/",
   "/automation", "/assessment-hub", "/gradebook-plus", "/certifications",
@@ -460,7 +459,6 @@ function StudentRouter() {
         <Route path="/mentor" component={TheMentor} />
         <Route path="/flashcards" component={MyCardStack} />
         <Route path="/ascend" component={Ascend} />
-        <Route path="/simverse" component={LabsComingSoon} />
         <Route path="/exams/:examId/take" component={TakeExam} />
         <Route path="/skill-badge" component={SkillBadge} />
         <Route path="/learn-path" component={LearnPath} />
@@ -472,10 +470,6 @@ function StudentRouter() {
         <Route path="/peak-rankings" component={PeakRankings} />
         <Route path="/peer-review" component={PeerReview} />
         <Route path="/snap-grade" component={SnapGrade} />
-        <Route path="/labs/forge-field" component={LabsComingSoon} />
-        <Route path="/labs/react-sphere" component={LabsComingSoon} />
-        <Route path="/labs/geometrix" component={LabsComingSoon} />
-        <Route path="/labs/biosphere" component={LabsComingSoon} />
         <Route path="/papers" component={PastPaperLibrary} />
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
@@ -514,8 +508,6 @@ function StudentRouter() {
         <Route path="/practice" component={PracticeCenter} />
         <Route path="/submit/handwritten" component={HandwrittenSubmit} />
         <Route path="/resources/library" component={ResourcesLibrary} />
-        <Route path="/simverse/labs" component={LabsComingSoon} />
-        <Route path="/simverse/geometrix" component={LabsComingSoon} />
         {/* Phase 16 — Commercialization */}
         <Route path="/pricing" component={PricingPage} />
         <Route path="/subscribe/:planId" component={SubscribePage} />
@@ -563,7 +555,6 @@ const TEACHER_ROUTES = (
     <Route path="/kudos-engine" component={KudosEngine} />
     <Route path="/pulse" component={Pulse} />
     <Route path="/content-craft" component={ContentCraft} />
-    <Route path="/lab-builder" component={LabsComingSoon} />
     <Route path="/exams" component={Exams} />
     <Route path="/marker-mind" component={MarkerMind} />
     <Route path="/insight-stream" component={InsightStream} />
@@ -614,8 +605,6 @@ const TEACHER_ROUTES = (
     <Route path="/teacher/revenue" component={TeacherRevenueDashboard} />
     <Route path="/admin/fraud-monitor" component={FraudMonitorPage} />
     <Route path="/resources/library" component={ResourcesLibrary} />
-    <Route path="/simverse/labs" component={LabsComingSoon} />
-    <Route path="/simverse/geometrix" component={LabsComingSoon} />
     {/* Phase 16 — Commercialization */}
     <Route path="/pricing" component={PricingPage} />
     <Route path="/subscribe/:planId" component={SubscribePage} />

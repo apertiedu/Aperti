@@ -499,18 +499,6 @@ const PHASE15_MIGRATIONS: string[] = [
     created_at        timestamptz NOT NULL DEFAULT NOW()
   )`,
 
-  /* Lab Configurations */
-  `CREATE TABLE IF NOT EXISTS lab_configurations (
-    id           serial PRIMARY KEY,
-    teacher_id   integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    lab_type     text NOT NULL,
-    config       jsonb NOT NULL DEFAULT '{}',
-    is_published boolean NOT NULL DEFAULT false,
-    created_at   timestamptz NOT NULL DEFAULT NOW(),
-    updated_at   timestamptz NOT NULL DEFAULT NOW()
-  )`,
-  `CREATE INDEX IF NOT EXISTS idx_lab_configurations_teacher ON lab_configurations(teacher_id)`,
-
   /* Resource Library extensions */
   `ALTER TABLE resources ADD COLUMN IF NOT EXISTS version              integer NOT NULL DEFAULT 1`,
   `ALTER TABLE resources ADD COLUMN IF NOT EXISTS approval_status      text NOT NULL DEFAULT 'draft'`,
@@ -542,17 +530,6 @@ const PHASE15_MIGRATIONS: string[] = [
     recorded_at  timestamptz NOT NULL DEFAULT NOW()
   )`,
   `CREATE INDEX IF NOT EXISTS idx_academic_analytics_content ON academic_analytics(content_type, content_id)`,
-
-  /* Geometrix Sessions */
-  `CREATE TABLE IF NOT EXISTS geometrix_sessions (
-    id         serial PRIMARY KEY,
-    student_id integer NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
-    module     text NOT NULL,
-    tool       text,
-    data       jsonb NOT NULL DEFAULT '{}',
-    score      numeric(5,2),
-    created_at timestamptz NOT NULL DEFAULT NOW()
-  )`,
 
   /* Question Relationships */
   `CREATE TABLE IF NOT EXISTS question_relationships (

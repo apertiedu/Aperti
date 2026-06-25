@@ -30,7 +30,6 @@ const ALL_ROUTES = [
   { name: "CardStack (Flashcards)", href: "/cardstack",              icon: Book,            roles: ["admin","teacher"],     category: "Content" },
   { name: "Syllabuilder",        href: "/syllabuilder",              icon: BookOpen,        roles: ["admin","teacher"],     category: "Content" },
   { name: "ContentCraft",        href: "/content-craft",             icon: Sparkles,        roles: ["admin","teacher"],     category: "Content" },
-  { name: "LabBuilder",          href: "/lab-builder",               icon: BookOpen,        roles: ["admin","teacher"],     category: "Content" },
   { name: "MarkerMind",          href: "/marker-mind",               icon: TrendingUp,      roles: ["admin","teacher","assistant"], category: "Content" },
   { name: "ScanScribe",          href: "/scan-scribe",               icon: FileBarChart,    roles: ["admin","teacher","assistant"], category: "Content" },
   { name: "TutorCraft AI",       href: "/tutorcraft",                icon: Sparkles,        roles: ["admin","teacher","assistant"], category: "Content" },

@@ -6,7 +6,7 @@ import { useAuth } from "@/context/auth";
 import { useTheme } from "@/context/theme";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Home, BookOpen, CalendarCheck, Brain, Layers, Flame, FlaskConical,
+  Home, BookOpen, CalendarCheck, Brain, Layers, Flame,
   Target, Clock, Trophy, Star, Camera, FileText, MoreHorizontal,
   Sun, Moon, LogOut, Users, Shield, Repeat2, Library, Link2,
   MessageSquare, BarChart3, Cpu, Lock, GraduationCap,
@@ -31,7 +31,6 @@ const allNav = [
   { href: "/mentor", label: "The Mentor", icon: Brain, desc: "Adaptive AI tutor" },
   { href: "/flashcards", label: "CardStack", icon: Layers, desc: "Spaced repetition" },
   { href: "/ascend", label: "Ascend", icon: Flame, desc: "Academic RPG" },
-  { href: "/simverse", label: "SimVerse", icon: FlaskConical, desc: "Labs & simulations" },
   { href: "/revisit", label: "Revisit", icon: Repeat2, desc: "Revision planner" },
   { href: "/revision-plan", label: "Revision Plan", icon: Target, desc: "AI daily study calendar" },
   { href: "/ai-tutor", label: "AI Personal Tutor", icon: Brain, desc: "Adaptive AI teaching engine" },

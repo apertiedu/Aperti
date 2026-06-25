@@ -28,7 +28,6 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: "cardstack", name: "CardStack", description: "Flashcard deck management", route: "/cardstack", status: "stable", roles: ["admin", "teacher"], category: "Content" },
   { id: "syllabuilder", name: "Syllabuilder", description: "Curriculum and syllabus designer", route: "/syllabuilder", status: "stable", roles: ["admin", "teacher"], category: "Content" },
   { id: "content-craft", name: "ContentCraft", description: "AI lesson content generation studio", route: "/content-craft", status: "stable", roles: ["admin", "teacher"], category: "Content" },
-  { id: "lab-builder", name: "LabBuilder", description: "Interactive science experiment designer", route: "/lab-builder", status: "beta", roles: ["admin", "teacher"], category: "Content" },
   { id: "marker-mind", name: "MarkerMind", description: "AI-powered answer marking tool", route: "/marker-mind", status: "stable", roles: ["admin", "teacher", "assistant"], category: "Content" },
   { id: "scan-scribe", name: "ScanScribe", description: "Handwritten work OCR and digitisation", route: "/scan-scribe", status: "beta", roles: ["admin", "teacher", "assistant"], category: "Content" },
 
@@ -81,8 +80,7 @@ export const FEATURE_REGISTRY: FeatureEntry[] = [
   { id: "subscription", name: "My Subscription", description: "Manage your current plan and billing", route: "/account/subscription", status: "stable", roles: ["admin", "teacher", "assistant"], category: "Billing" },
   { id: "commerce-admin", name: "Commerce Admin", description: "Revenue, payments, and subscription management", route: "/admin/commerce", status: "stable", roles: ["admin"], category: "Billing" },
 
-  { id: "simverse", name: "SimVerse", description: "Interactive science simulations", route: "/simverse", status: "coming-soon", roles: ["student", "teacher"], category: "Labs" },
-  { id: "paper-vault", name: "PaperVault", description: "Past paper library and smart search", route: "/student-portal/past-papers", status: "stable", roles: ["student", "admin", "teacher"], category: "Labs" },
+  { id: "paper-vault", name: "PaperVault", description: "Past paper library and smart search", route: "/student-portal/past-papers", status: "stable", roles: ["student", "admin", "teacher"], category: "Content" },
 ];
 
 export function getFeaturesByCategory(): Record<string, FeatureEntry[]> {

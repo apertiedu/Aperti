@@ -102,7 +102,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "CardStack", href: "/cardstack", icon: Layers, roles: ["admin","teacher"] },
         { name: "Syllabuilder", href: "/syllabuilder", icon: Wand2, roles: ["admin","teacher"] },
         { name: "ContentCraft", href: "/content-craft", icon: Palette, roles: ["admin","teacher"] },
-        { name: "LabBuilder", href: "/lab-builder", icon: FlaskConical, roles: ["admin","teacher"] },
         { name: "MarkerMind", href: "/marker-mind", icon: Brain, roles: ["admin","teacher","assistant"] },
         { name: "ScanScribe", href: "/scan-scribe", icon: ScanLine, roles: ["admin","teacher","assistant"] },
       ],
