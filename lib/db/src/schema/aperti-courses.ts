@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, numeric } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, numeric, integer } from "drizzle-orm/pg-core";
 
 export const apertiCoursesTable = pgTable("aperti_courses", {
   id: serial("id").primaryKey(),
@@ -9,6 +9,8 @@ export const apertiCoursesTable = pgTable("aperti_courses", {
   syllabusJson: text("syllabus_json"),
   certificateAvailable: text("certificate_available").notNull().default("false"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
+  deletedBy: integer("deleted_by"),
 });
 
 export type ApertiCourse = typeof apertiCoursesTable.$inferSelect;

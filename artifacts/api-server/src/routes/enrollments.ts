@@ -31,6 +31,76 @@ function guardInt(val: string | undefined, fallback = 50): number {
 
 enrollmentsRouter.use(authenticate);
 
+/* ── Student: request enrollment in a course ─────────────────────────────── */
+enrollmentsRouter.post(
+  "/",
+  requireRole("student"),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { course_id, notes } = req.body as { course_id: number; notes?: string };
+      if (!course_id || isNaN(course_id)) {
+        res.status(400).json({ error: "course_id is required" });
+        return;
+      }
+
+      const { rows: courseRows } = await pool.query(
+        `SELECT id, title, teacher_account_id, price_egp, deleted_at FROM aperti_courses WHERE id=$1`,
+        [course_id],
+      );
+      if (!courseRows[0] || courseRows[0].deleted_at) {
+        res.status(404).json({ error: "Course not found" });
+        return;
+      }
+      const course = courseRows[0];
+
+      const { rows: existing } = await pool.query(
+        `SELECT id, status FROM course_enrollments WHERE student_account_id=$1 AND course_id=$2 AND deleted_at IS NULL`,
+        [req.userId, course_id],
+      );
+      if (existing.length > 0) {
+        const active = existing.find(e => !["rejected","cancelled"].includes(e.status));
+        if (active) {
+          res.status(409).json({ error: `You already have an enrollment for this course with status '${active.status}'` });
+          return;
+        }
+      }
+
+      const initialStatus = course.price_egp && parseFloat(course.price_egp) > 0
+        ? "payment_pending"
+        : "requested";
+
+      const { rows: inserted } = await pool.query(
+        `INSERT INTO course_enrollments (student_account_id, course_id, status, notes, requested_at)
+         VALUES ($1, $2, $3, $4, NOW())
+         RETURNING id, status`,
+        [req.userId, course_id, initialStatus, notes ?? null],
+      );
+
+      const enrollment = inserted[0];
+
+      const { rows: actorRows } = await pool.query(
+        "SELECT display_name FROM accounts WHERE id=$1",
+        [req.userId],
+      );
+      const studentName = actorRows[0]?.display_name ?? "A student";
+
+      await notifyUser({
+        accountId: course.teacher_account_id,
+        title: `New enrollment request for "${course.title}"`,
+        message: `${studentName} has requested enrollment.`,
+        type: "enrollment_requested",
+        link: `/enrollment-queue`,
+        relatedEntityType: "enrollment",
+        relatedEntityId: enrollment.id,
+      });
+
+      res.status(201).json({ enrollment_id: enrollment.id, status: enrollment.status });
+    } catch {
+      res.status(500).json({ error: "Failed to create enrollment request" });
+    }
+  },
+);
+
 /* ── Teacher/Admin: list enrollments with filters + search + pagination ─── */
 enrollmentsRouter.get(
   "/",

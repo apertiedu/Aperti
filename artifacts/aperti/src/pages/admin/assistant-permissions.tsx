@@ -19,16 +19,25 @@ async function fetchJSON(url: string, opts?: RequestInit) {
   return res.json();
 }
 
-const PERMISSION_META: Record<string, { label: string; desc: string; icon: string }> = {
-  manage_students:      { label: "Manage Students",      desc: "Add, edit, and view student records",    icon: "👨‍🎓" },
-  approve_enrollments:  { label: "Approve Enrollments",  desc: "Approve or reject student enrolments",   icon: "✅" },
-  manage_attendance:    { label: "Mark Attendance",       desc: "Mark and edit attendance records",       icon: "📋" },
-  manage_flashcards:    { label: "Manage Flashcards",     desc: "Create and edit flashcard decks",        icon: "🗂️" },
-  manage_homework:      { label: "Set Homework",          desc: "Create and grade homework assignments",  icon: "📝" },
-  manage_exams:         { label: "Manage Exams",          desc: "Create exams and enter marks",           icon: "📊" },
-  view_analytics:       { label: "View Analytics",        desc: "Access student and class analytics",     icon: "📈" },
-  manage_sessions:      { label: "Manage Sessions",       desc: "Create and edit session slots",          icon: "🗓️" },
-  mark_payments:        { label: "Mark Payments",         desc: "Record student payment receipts",        icon: "💳" },
+const PERMISSION_META: Record<string, { label: string; desc: string; icon: string; group: string }> = {
+  can_manage_courses:    { label: "Manage Courses",       desc: "Create, edit, and delete courses",               icon: "📚", group: "Course Management" },
+  can_manage_materials:  { label: "Manage Materials",     desc: "Upload and manage course materials",             icon: "📎", group: "Course Management" },
+  can_grade_exams:       { label: "Grade Exams",          desc: "Enter marks and grade exam submissions",         icon: "📊", group: "Assessment" },
+  can_approve_grades:    { label: "Approve Grades",       desc: "Approve or override student grade results",      icon: "✅", group: "Assessment" },
+  can_manage_enrollments:{ label: "Manage Enrollments",   desc: "Approve, reject, or transition enrollments",     icon: "🎓", group: "Students" },
+  can_view_students:     { label: "View Students",        desc: "Access and view student records and profiles",   icon: "👨‍🎓", group: "Students" },
+  can_view_reports:      { label: "View Reports",         desc: "Access analytics dashboards and reports",        icon: "📈", group: "Visibility" },
+  can_view_revenue:      { label: "View Revenue",         desc: "See financial data, payments, and revenue",      icon: "💰", group: "Visibility" },
+  can_manage_assistants: { label: "Manage Assistants",    desc: "Invite and configure other assistant accounts",  icon: "👥", group: "Administration" },
+  manage_students:       { label: "Student Records",      desc: "Add, edit, and archive student records",         icon: "📋", group: "Legacy" },
+  approve_enrollments:   { label: "Approve Enrollments",  desc: "Approve or reject student enrolments (legacy)",  icon: "✅", group: "Legacy" },
+  manage_attendance:     { label: "Mark Attendance",      desc: "Mark and edit attendance records",               icon: "📋", group: "Legacy" },
+  manage_flashcards:     { label: "Manage Flashcards",    desc: "Create and edit flashcard decks",                icon: "🗂️", group: "Legacy" },
+  manage_homework:       { label: "Set Homework",         desc: "Create and grade homework assignments",          icon: "📝", group: "Legacy" },
+  manage_exams:          { label: "Manage Exams",         desc: "Create exams and enter marks",                   icon: "📊", group: "Legacy" },
+  view_analytics:        { label: "View Analytics",       desc: "Access student and class analytics",             icon: "📈", group: "Legacy" },
+  manage_sessions:       { label: "Manage Sessions",      desc: "Create and edit session slots",                  icon: "🗓️", group: "Legacy" },
+  mark_payments:         { label: "Mark Payments",        desc: "Record student payment receipts",                icon: "💳", group: "Legacy" },
 };
 
 interface Assistant {

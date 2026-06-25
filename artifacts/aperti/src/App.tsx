@@ -180,6 +180,11 @@ const SupportTickets = lazy(() => import("@/pages/support-tickets"));
 const NotificationCenter = lazy(() => import("@/pages/notification-center"));
 const AttendanceAuditPage = lazy(() => import("@/pages/attendance-audit"));
 const EnrollmentTimelinePage = lazy(() => import("@/pages/enrollment-timeline"));
+// Phase 2 — Enrollment Management, Teacher Ops, Activity Timeline
+const TeacherOpsCenter = lazy(() => import("@/pages/teacher-ops"));
+const EnrollmentQueue = lazy(() => import("@/pages/enrollment-queue"));
+const ActivityTimeline = lazy(() => import("@/pages/activity-timeline"));
+const MyEnrollments = lazy(() => import("@/pages/student/my-enrollments"));
 const AdminModeration = lazy(() => import("@/pages/admin/moderation"));
 const CommunicationAnalytics = lazy(() => import("@/pages/admin/communication-analytics"));
 
@@ -504,6 +509,8 @@ function StudentRouter() {
         <Route path="/notifications" component={NotificationCenter} />
         <Route path="/attendance-audit" component={AttendanceAuditPage} />
         <Route path="/enrollment-timeline" component={EnrollmentTimelinePage} />
+        {/* Phase 2 — Enrollment & Activity */}
+        <Route path="/my-enrollments" component={MyEnrollments} />
         {/* Phase 15 — Educational Content Ecosystem */}
         <Route path="/practice" component={PracticeCenter} />
         <Route path="/submit/handwritten" component={HandwrittenSubmit} />
@@ -594,6 +601,10 @@ const TEACHER_ROUTES = (
     <Route path="/notifications" component={NotificationCenter} />
     <Route path="/attendance-audit" component={AttendanceAuditPage} />
     <Route path="/enrollment-timeline" component={EnrollmentTimelinePage} />
+    {/* Phase 2 — Teacher Ops, Enrollment Queue, Activity */}
+    <Route path="/teacher-ops" component={TeacherOpsCenter} />
+    <Route path="/enrollment-queue" component={EnrollmentQueue} />
+    <Route path="/activity-timeline" component={ActivityTimeline} />
     {/* Phase 15 — Educational Content Ecosystem */}
     <Route path="/teacher/contentcraft" component={ContentCraftStudio} />
     <Route path="/teacher/contentcraft/:pageId" component={ContentCraftStudio} />

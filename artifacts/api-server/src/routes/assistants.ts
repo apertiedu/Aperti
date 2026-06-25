@@ -7,6 +7,15 @@ import { eq, and, inArray } from "drizzle-orm";
 export const assistantsRouter = Router();
 
 const ALL_PERMISSIONS = [
+  "can_manage_courses",
+  "can_manage_materials",
+  "can_grade_exams",
+  "can_approve_grades",
+  "can_manage_enrollments",
+  "can_view_students",
+  "can_view_reports",
+  "can_view_revenue",
+  "can_manage_assistants",
   "manage_students",
   "approve_enrollments",
   "manage_attendance",
