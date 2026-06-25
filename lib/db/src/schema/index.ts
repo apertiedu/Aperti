@@ -43,3 +43,4 @@ export * from "./session-slots";
 export * from "./attendance-audit";
 export * from "./enrollment-timeline";
 export * from "./contentcraft";
+export * from "./grade-approval-logs";

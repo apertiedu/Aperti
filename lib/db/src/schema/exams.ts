@@ -35,6 +35,16 @@ export const studentMarksTable = pgTable("student_marks", {
   marksScored: numeric("marks_scored", { precision: 10, scale: 2 }),
   mistakes: text("mistakes"),
   markedAt: timestamp("marked_at", { withTimezone: true }).notNull().defaultNow(),
+  // Human-grading authority: AI may suggest but never sets the official grade.
+  // pending  → entered (by AI or teacher draft) — not yet officially reviewed
+  // graded   → teacher has reviewed and confirmed the mark
+  // approved → officially released; students may view this grade
+  gradingStatus: text("grading_status").notNull().default("pending"),
+  gradedAt: timestamp("graded_at", { withTimezone: true }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  approvedBy: integer("approved_by").references(() => accountsTable.id, { onDelete: "set null" }),
+  aiSuggestedMarks: numeric("ai_suggested_marks", { precision: 10, scale: 2 }),
+  aiConfidence: numeric("ai_confidence", { precision: 5, scale: 4 }),
 });
 
 export type Exam = typeof examsTable.$inferSelect;

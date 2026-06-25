@@ -42,6 +42,10 @@ export const assistantPermissionsTable = pgTable("assistant_permissions", {
   permission: text("permission").notNull(),
   grantedBy: integer("granted_by"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  // When true, grades submitted by this assistant are automatically set to
+  // 'approved' without requiring an explicit teacher sign-off.
+  // Default false — teacher approval is required for all assistants.
+  autoApproveGrades: boolean("auto_approve_grades").notNull().default(false),
 });
 
 export type Account = typeof accountsTable.$inferSelect;

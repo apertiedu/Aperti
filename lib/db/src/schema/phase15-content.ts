@@ -76,15 +76,6 @@ export const handwrittenSubmissionsTable = pgTable("handwritten_submissions", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const labConfigurationsTable = pgTable("lab_configurations", {
-  id: serial("id").primaryKey(),
-  teacherId: integer("teacher_id").notNull().references(() => accountsTable.id, { onDelete: "cascade" }),
-  labType: text("lab_type").notNull(),
-  config: jsonb("config").notNull().default({}),
-  isPublished: boolean("is_published").notNull().default(false),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-});
 
 export const practiceSessionsTable = pgTable("practice_sessions", {
   id: serial("id").primaryKey(),
@@ -126,20 +117,9 @@ export const blockVersionHistoryTable = pgTable("block_version_history", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const geometrixSessionsTable = pgTable("geometrix_sessions", {
-  id: serial("id").primaryKey(),
-  studentId: integer("student_id").notNull().references(() => accountsTable.id, { onDelete: "cascade" }),
-  module: text("module").notNull(),
-  tool: text("tool"),
-  data: jsonb("data").notNull().default({}),
-  score: numeric("score", { precision: 5, scale: 2 }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
-
 export type ContentBlock = typeof contentBlocksTable.$inferSelect;
 export type CurriculumMapping = typeof curriculumMappingsTable.$inferSelect;
 export type QuestionExtractionJob = typeof questionExtractionJobsTable.$inferSelect;
 export type HandwrittenSubmission = typeof handwrittenSubmissionsTable.$inferSelect;
-export type LabConfiguration = typeof labConfigurationsTable.$inferSelect;
 export type PracticeSession = typeof practiceSessionsTable.$inferSelect;
 export type AcademicAnalytics = typeof academicAnalyticsTable.$inferSelect;

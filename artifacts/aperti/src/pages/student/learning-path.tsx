@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CheckCircle2, Circle, Lock, ChevronRight, Brain,
-  Zap, Target, RefreshCw, FlaskConical, Layers, ArrowRight,
+  Zap, Target, RefreshCw, Layers, ArrowRight,
   Sparkles, TrendingUp, Clock,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -222,11 +222,6 @@ export default function LearningPathPage() {
                               <Link href={`/micro-assessment?topic=${encodeURIComponent(node.title)}`}>
                                 <Button size="sm" className="gap-1 text-xs h-7">
                                   <Target className="h-3 w-3" /> Practice
-                                </Button>
-                              </Link>
-                              <Link href="/simverse">
-                                <Button size="sm" variant="outline" className="gap-1 text-xs h-7">
-                                  <FlaskConical className="h-3 w-3" /> Simulate
                                 </Button>
                               </Link>
                               <Link href={`/mentor?topic=${encodeURIComponent(node.title)}`}>

@@ -1,5 +1,5 @@
 import type { Response, NextFunction } from "express";
-import { db, auditLogsTable, studentsTable } from "@workspace/db";
+import { db, auditLogsTable, studentsTable, accountsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { authenticate, AuthRequest } from "./auth";
 
@@ -31,8 +31,8 @@ export async function requireStudentAccess(req: AuthRequest, res: Response, next
   });
 }
 
-export function requireTenantAccess(req: AuthRequest, res: Response, next: NextFunction): void {
-  authenticate(req, res, () => {
+export async function requireTenantAccess(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
+  authenticate(req, res, async () => {
     const accountId = req.userId;
     const role = req.role || "admin";
 
@@ -40,13 +40,25 @@ export function requireTenantAccess(req: AuthRequest, res: Response, next: NextF
     if (role === "student") { res.status(403).json({ message: "Students must use the student portal" }); return; }
 
     let teacherId: number | null = null;
+
     if (role === "teacher") {
       teacherId = accountId;
     } else if (role === "assistant") {
-      const account = (req as any)._account;
+      // JWT only carries { id, role } — must query DB to resolve the owning teacher.
+      // This is intentional: client-supplied teacherAccountId is never trusted.
+      const [account] = await db
+        .select({ teacherAccountId: accountsTable.teacherAccountId })
+        .from(accountsTable)
+        .where(eq(accountsTable.id, accountId));
+
       teacherId = account?.teacherAccountId ?? null;
-      if (!teacherId) { res.status(403).json({ message: "Assistant is not assigned to a teacher" }); return; }
+
+      if (!teacherId) {
+        res.status(403).json({ message: "Assistant is not assigned to a teacher" });
+        return;
+      }
     }
+    // admin: teacherId stays null — admins operate globally
 
     req.tenant = { accountId, teacherId, isAdmin: role === "admin", role };
     next();
@@ -75,6 +87,11 @@ export async function logAudit(
   }
 }
 
+/**
+ * Builds a Drizzle WHERE clause that scopes a query to the authenticated teacher.
+ * For admins (teacherId === null) no filter is applied — they see everything.
+ * ALWAYS call this; never accept teacherAccountId from the request body or params.
+ */
 export function tenantFilter<T extends Record<string, any>>(
   table: T,
   column: keyof T,

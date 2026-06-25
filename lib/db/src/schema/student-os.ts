@@ -115,9 +115,17 @@ export const snapgradeSubmissionsTable = pgTable("snapgrade_submissions", {
   imageUrl: text("image_url"),
   ocrText: text("ocr_text"),
   aiAnalysis: jsonb("ai_analysis").$type<Record<string, unknown>>(),
+  aiSuggestedGrade: numeric("ai_suggested_grade", { precision: 10, scale: 2 }),
+  aiConfidence: numeric("ai_confidence", { precision: 5, scale: 4 }),
   grade: numeric("grade", { precision: 10, scale: 2 }),
   feedback: text("feedback"),
   submittedAt: timestamp("submitted_at", { withTimezone: true }).notNull().defaultNow(),
+  // Human-grading authority fields
+  gradingStatus: text("grading_status").notNull().default("pending"),
+  gradedAt: timestamp("graded_at", { withTimezone: true }),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  approvedBy: integer("approved_by").references(() => accountsTable.id, { onDelete: "set null" }),
+  requiresReview: boolean("requires_review").notNull().default(false),
 });
 
 // ── Peer Reviews ──────────────────────────────────────────────────────────────

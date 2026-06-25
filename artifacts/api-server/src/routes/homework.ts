@@ -168,5 +168,16 @@ homeworkRouter.get("/:id/my-submission", authenticate, requireRole("student"), a
   const sub = await db.query.homeworkSubmissions.findFirst({
     where: (s, { eq, and }) => and(eq(s.homeworkId, homeworkId), eq(s.studentId, studentId)),
   });
-  res.json(sub || null);
+  if (!sub) { res.json(null); return; }
+
+  // HUMAN GRADING AUTHORITY: mask grade/feedback until teacher has approved it.
+  // Students see their submission status but not the grade until it is officially released.
+  const gradeReleased = sub.gradingStatus === "approved";
+  res.json({
+    ...sub,
+    marksAwarded: gradeReleased ? sub.marksAwarded : null,
+    teacherFeedback: gradeReleased ? sub.teacherFeedback : null,
+    gradingStatus: sub.gradingStatus,
+    gradeReleased,
+  });
 });

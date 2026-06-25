@@ -130,7 +130,6 @@ export default function PlatformConfigPage() {
     { key: "question_extraction", label: "Question Extraction", description: "AI-powered question extraction from documents" },
     { key: "snapgrade", label: "SnapGrade", description: "Camera-based OCR grading for students" },
     { key: "ascend", label: "Ascend RPG", description: "Gamification and academic progress RPG" },
-    { key: "simverse", label: "SimVerse Labs", description: "Interactive science simulations" },
     { key: "peer_review", label: "Peer Review", description: "Student peer assessment workflow" },
   ];
 

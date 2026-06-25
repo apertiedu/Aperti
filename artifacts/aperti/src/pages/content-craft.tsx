@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import {
   Plus, Trash2, ArrowUp, ArrowDown, FileText, Video,
-  HelpCircle, FlaskConical, Layers, Image, Heading1, Heading2,
+  HelpCircle, Layers, Image, Heading1, Heading2,
   Bold, Italic, Underline, X, Save, ChevronRight, AlignLeft,
   Palette, Eye, EyeOff, Code, List, ListOrdered, Link2,
   Sigma, Check,
@@ -33,7 +33,7 @@ async function fetchJSON(url: string, options?: RequestInit) {
   return res.json();
 }
 
-type SectionType = "heading" | "subheading" | "text" | "video" | "quiz" | "image" | "simulation" | "flashcards";
+type SectionType = "heading" | "subheading" | "text" | "video" | "quiz" | "image" | "flashcards";
 
 interface Section {
   type: SectionType;
@@ -41,7 +41,6 @@ interface Section {
   content?: string;
   htmlContent?: string;
   quizQuestionIds?: number[];
-  simulationId?: number;
   flashcardDeckId?: number;
   imageUrl?: string;
 }
@@ -292,7 +291,6 @@ const SECTION_ICONS: Record<SectionType, React.ReactNode> = {
   video: <Video className="h-4 w-4" />,
   image: <Image className="h-4 w-4" />,
   quiz: <HelpCircle className="h-4 w-4" />,
-  simulation: <FlaskConical className="h-4 w-4" />,
   flashcards: <Layers className="h-4 w-4" />,
 };
 
@@ -303,7 +301,6 @@ const SECTION_COLORS: Record<SectionType, string> = {
   video: "bg-purple-100 text-purple-700",
   image: "bg-green-100 text-green-700",
   quiz: "bg-amber-100 text-amber-700",
-  simulation: "bg-primary/15 text-primary",
   flashcards: "bg-pink-100 text-pink-700",
 };
 
@@ -461,7 +458,6 @@ function FullScreenEditor({
                 <SelectItem value="video">🎬 Video</SelectItem>
                 <SelectItem value="image">🖼️ Image</SelectItem>
                 <SelectItem value="quiz">❓ Quiz</SelectItem>
-                <SelectItem value="simulation">🧪 Simulation</SelectItem>
                 <SelectItem value="flashcards">🃏 Flashcards</SelectItem>
               </SelectContent>
             </Select>
@@ -622,18 +618,6 @@ function FullScreenEditor({
                         </div>
                       )}
 
-                      {s.type === "simulation" && (
-                        <div className="space-y-2">
-                          {!previewAll && (
-                            <>
-                              <Input placeholder="Section title (optional)" value={s.title || ""} onChange={e => update(idx, "title", e.target.value)} className="text-sm h-8" />
-                              <Input type="number" placeholder="SimVerse simulation ID" value={s.simulationId ?? ""} onChange={e => update(idx, "simulationId", e.target.value ? Number(e.target.value) : undefined)} className="text-sm h-8" />
-                            </>
-                          )}
-                          {previewAll && <div className="flex items-center gap-2 py-2 text-sm text-primary bg-primary/8 rounded-lg px-3"><FlaskConical className="h-4 w-4" /> Simulation #{s.simulationId || "—"}</div>}
-                        </div>
-                      )}
-
                       {s.type === "flashcards" && (
                         <div className="space-y-2">
                           {!previewAll && (
@@ -696,7 +680,6 @@ export default function ContentCraft() {
     quiz: "bg-amber-100 text-amber-700",
     heading: "bg-primary/10 text-primary",
     subheading: "bg-blue-100 text-blue-700",
-    simulation: "bg-primary/15 text-primary",
     flashcards: "bg-pink-100 text-pink-700",
   };
 

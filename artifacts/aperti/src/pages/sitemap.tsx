@@ -37,7 +37,6 @@ const sections = [
       { label: "The Mentor (AI)", href: "/mentor" },
       { label: "CardStack (Flashcards)", href: "/flashcards" },
       { label: "Ascend (Analytics)", href: "/ascend" },
-      { label: "SimVerse (Labs)", href: "/simverse" },
       { label: "Exams", href: "/exams" },
       { label: "Skill Badges", href: "/skill-badge" },
       { label: "Learning Path", href: "/learn-path" },

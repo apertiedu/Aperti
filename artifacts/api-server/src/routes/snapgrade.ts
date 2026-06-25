@@ -351,14 +351,21 @@ router.post("/snapgrade/scan", ...studentGuard, upload.single("image"), async (r
     }
   }
 
+  // HUMAN GRADING AUTHORITY: AI result is stored as a *suggestion* only.
+  // The official `grade` column stays null until a teacher explicitly approves it.
+  // gradingStatus = 'pending' until teacher reviews; 'graded' once teacher sets; 'approved' once released.
   const [submission] = await db.insert(snapgradeSubmissionsTable).values({
     studentId: student.id,
     homeworkId,
     imageUrl,
     ocrText: ocrText || null,
     aiAnalysis,
-    grade: grade !== null ? String(grade) : null,
+    aiSuggestedGrade: grade !== null ? String(grade) : null,
+    aiConfidence: aiConfidence !== null ? String(aiConfidence) : null,
+    grade: null,
     feedback,
+    gradingStatus: "pending",
+    requiresReview: requiresTeacherReview || grade !== null,
   }).returning();
 
   const aiResultMeta = (aiAnalysis as any);
@@ -498,15 +505,22 @@ router.put("/snapgrade/submissions/:id/review", ...teacherGuard, async (req: Aut
 
     const finalFeedback = override_feedback ?? sub.feedback;
 
+    // Map teacher decision to human-authority grading statuses:
+    // 'approved'  → grade is officially released, student can view
+    // 'modified'  → teacher set a different grade, released to student
+    // 'rejected'  → AI grade discarded, grade stays null (pending re-grade)
+    const newGradingStatus = decision === "rejected" ? "pending" : "approved";
+
     const { rows: updated } = await pool.query(
       `UPDATE snapgrade_submissions
-       SET teacher_reviewed=TRUE,
-           teacher_override_grade=$1,
-           teacher_override_feedback=$2,
-           reviewed_by=$3,
-           reviewed_at=NOW()
-       WHERE id=$4 RETURNING *`,
-      [finalGradeNum, finalFeedback, reviewerId, submissionId]
+       SET grade=$1,
+           feedback=$2,
+           grading_status=$3,
+           graded_at=NOW(),
+           approved_at=CASE WHEN $3='approved' THEN NOW() ELSE NULL END,
+           approved_by=CASE WHEN $3='approved' THEN $4 ELSE NULL END
+       WHERE id=$5 RETURNING *`,
+      [finalGradeNum, finalFeedback, newGradingStatus, reviewerId, submissionId]
     );
 
     res.json({
@@ -514,10 +528,10 @@ router.put("/snapgrade/submissions/:id/review", ...teacherGuard, async (req: Aut
       decision,
       grade_delta: gradeDelta,
       message: decision === "approved"
-        ? "AI grade approved."
+        ? "Grade approved and released to student."
         : decision === "rejected"
-        ? "AI grade rejected. Manual grading required."
-        : "Grade modified and saved.",
+        ? "AI suggestion rejected. Submission returned for manual grading."
+        : "Grade modified and released to student.",
     });
   } catch (err: any) {
     res.status(500).json({ error: "An unexpected error occurred" });

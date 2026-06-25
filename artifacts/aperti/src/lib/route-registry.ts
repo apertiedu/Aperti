@@ -14,9 +14,9 @@ const STATIC_ROUTES = new Set([
   "/team-forge", "/privacy-vault", "/inbox", "/announcements",
   "/rooms", "/support", "/notifications", "/pricing",
   "/account/subscription", "/account/sessions", "/revision-notes",
-  "/resources/library", "/simverse/labs", "/simverse/geometrix",
+  "/resources/library",
   "/my-homework", "/assignments", "/course-hub", "/my-timetable",
-  "/my-attendance", "/mentor", "/flashcards", "/ascend", "/simverse",
+  "/my-attendance", "/mentor", "/flashcards", "/ascend",
   "/skill-badge", "/learn-path", "/discover", "/revisit",
   "/focus-coach", "/focus-zone", "/trial-vault", "/peak-rankings",
   "/peer-review", "/snap-grade", "/echo", "/study-groups",
@@ -26,8 +26,7 @@ const STATIC_ROUTES = new Set([
   "/learning-analytics", "/micro-assessment", "/attendance-audit",
   "/enrollment-timeline", "/practice", "/revision-plan",
   "/link-parent", "/my-qr", "/flashcards/swipe",
-  "/labs/forge-field", "/labs/react-sphere", "/labs/geometrix",
-  "/labs/biosphere", "/teacher/assessments", "/teacher/moderation",
+  "/teacher/assessments", "/teacher/moderation",
   "/teacher/archives", "/teacher/contentcraft", "/teacher/schedule",
   "/teacher/question-studio", "/teacher/questions/import",
   "/teacher/questions/extract", "/teacher/analytics/content",
@@ -52,7 +51,7 @@ const STATIC_ROUTES = new Set([
 const DYNAMIC_PREFIXES = [
   "/courses/", "/profile/", "/channels/", "/collaborate/",
   "/exams/", "/subscribe/", "/teacher/assessments/",
-  "/teacher/contentcraft/", "/admin/os/", "/labs/",
+  "/teacher/contentcraft/", "/admin/os/",
   "/student/exams/", "/courses/", "/resources/",
 ];
 

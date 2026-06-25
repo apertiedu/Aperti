@@ -29,6 +29,13 @@ export const homeworkSubmissionsTable = pgTable("homework_submissions", {
   submittedAt: timestamp("submitted_at", { withTimezone: true }),
   gradedAt: timestamp("graded_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  // Human-grading authority fields
+  // pending  → not yet teacher-reviewed
+  // graded   → teacher has set marksAwarded
+  // approved → officially released; students may view this grade
+  gradingStatus: text("grading_status").notNull().default("pending"),
+  approvedAt: timestamp("approved_at", { withTimezone: true }),
+  approvedBy: integer("approved_by").references(() => accountsTable.id, { onDelete: "set null" }),
 }, (t) => [unique().on(t.homeworkId, t.studentId)]);
 
 export type Homework = typeof homeworkTable.$inferSelect;

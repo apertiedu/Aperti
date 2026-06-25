@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, and } from "drizzle-orm";
 import { db, examsTable, examQuestionsTable, studentMarksTable, studentsTable } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
 
@@ -76,7 +76,12 @@ router.get("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<vo
         ? []
         : await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId));
 
-    const marks = await db.select().from(studentMarksTable).where(eq(studentMarksTable.examId, id));
+    // HUMAN GRADING AUTHORITY: students only see approved grades.
+    // Teachers see all marks (so they can review/approve pending ones).
+    const marksFilter = isStudent
+      ? and(eq(studentMarksTable.examId, id), eq(studentMarksTable.gradingStatus, "approved"))
+      : eq(studentMarksTable.examId, id);
+    const marks = await db.select().from(studentMarksTable).where(marksFilter);
     res.json({ exam, questions, students, marks });
   } catch {
     res.status(500).json({ error: "Failed to load exam" });
@@ -228,15 +233,19 @@ router.post("/exams/:id/marks", authenticate, async (req: AuthRequest, res): Pro
         return;
       }
       const scoredStr = scored !== null ? String(scored) : null;
+      // Teacher-entered marks start as 'graded' (teacher has already reviewed them).
+      // They still need an explicit 'approved' action to be released to students.
       await db.insert(studentMarksTable).values({
         studentId: sid,
         examId,
         questionId: parseInt(questionId, 10),
         marksScored: scoredStr,
         mistakes: mistakes || null,
+        gradingStatus: "graded",
+        gradedAt: new Date(),
       }).onConflictDoUpdate({
         target: [studentMarksTable.studentId, studentMarksTable.questionId],
-        set: { marksScored: scoredStr, mistakes: mistakes || null, markedAt: new Date() },
+        set: { marksScored: scoredStr, mistakes: mistakes || null, markedAt: new Date(), gradingStatus: "graded", gradedAt: new Date() },
       });
     }
     res.json({ success: true, saved: marks.length });

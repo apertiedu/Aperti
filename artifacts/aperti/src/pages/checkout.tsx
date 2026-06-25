@@ -9,7 +9,7 @@ import { apiFetch } from "@/lib/api";
 const STUDENT_PLANS = [
   { id: "free",     name: "Free",      price: 0,   color: "#757575", features: ["Past paper access", "AI Mentor (5/day)", "Basic flashcards", "Public course library"] },
   { id: "essential",name: "Essential", price: 79,  color: "hsl(var(--primary))",      features: ["All Free features", "Unlimited AI Mentor", "Full flashcard engine", "Revision schedules"] },
-  { id: "plus",     name: "Plus",      price: 149, color: "#00897B", features: ["All Essential features", "Revision Notes", "SimVerse labs", "Peer review access"] },
+  { id: "plus",     name: "Plus",      price: 149, color: "#00897B", features: ["All Essential features", "Revision Notes", "Peer review access", "Priority support"] },
   { id: "pro",      name: "Pro",       price: 249, color: "#00695C", features: ["All Plus features", "Priority AI tutor", "Practice exam library", "Progress analytics"] },
   { id: "elite",    name: "Elite",     price: 399, color: "#004D40", features: ["All Pro features", "Premium content access", "Dedicated support", "Custom learning path"] },
 ];

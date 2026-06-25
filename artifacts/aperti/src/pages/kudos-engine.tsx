@@ -187,7 +187,7 @@ export default function KudosEngine() {
               { name: "Helping Hand", desc: "Assisted a classmate via peer review.", xp: 75, icon: "🤝" },
               { name: "Top of Class", desc: "Ranked #1 on the weekly leaderboard.", xp: 300, icon: "🏆" },
               { name: "Streak Master", desc: "7-day login streak.", xp: 120, icon: "🔥" },
-              { name: "Deep Diver", desc: "Spent 10+ hours in SimVerse.", xp: 180, icon: "🔬" },
+              { name: "Deep Diver", desc: "Completed 10+ practice sessions.", xp: 180, icon: "🔬" },
               { name: "Flashcard Champ", desc: "Reviewed 100 flashcards in a week.", xp: 90, icon: "🃏" },
             ].map((badge, i) => (
               <motion.div

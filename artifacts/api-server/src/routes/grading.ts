@@ -124,13 +124,69 @@ gradingRouter.post("/submission/:submissionId/grade", authenticate, requireRole(
       if (answer.toLowerCase().includes(c.keyword.toLowerCase())) total += c.marks;
     }
 
+    // HUMAN GRADING AUTHORITY: AI result goes into aiSuggestedMarks only.
+    // marksScored stays null until a teacher explicitly approves via /approve.
     await db.update(studentMarksTable)
-      .set({ marksScored: total.toString(), mistakes: `[Auto-graded] ${answer}` })
+      .set({
+        aiSuggestedMarks: total.toString(),
+        aiConfidence: "0.8",
+        gradingStatus: "pending",
+        mistakes: `[AI-suggested] ${answer}`,
+      })
       .where(eq(studentMarksTable.id, submissionId));
 
-    res.json({ totalAwarded: total, totalMarks: scheme.totalMarks });
+    res.json({
+      totalAwarded: total,
+      totalMarks: scheme.totalMarks,
+      status: "pending",
+      message: "AI suggestion stored. A teacher must review and approve before the grade is official.",
+    });
   } catch (err) {
     res.status(500).json({ error: "Failed to auto-grade submission" });
+  }
+});
+
+// ── Grade approval for student_marks ─────────────────────────────────────────
+// Teacher reviews an AI suggestion, optionally overrides the mark, and sets
+// gradingStatus → 'graded' (saved) or 'approved' (released to student).
+gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+  try {
+    const submissionId = parseInt(req.params.submissionId);
+    if (isNaN(submissionId)) { res.status(400).json({ error: "Invalid submission ID" }); return; }
+
+    const { marksScored, action } = req.body as {
+      marksScored?: number;
+      action?: "grade" | "approve";  // grade=save without releasing, approve=release to student
+    };
+    const act = action === "grade" ? "grade" : "approve";
+
+    const mark = await db.query.studentMarks.findFirst({ where: (m, { eq }) => eq(m.id, submissionId) });
+    if (!mark) { res.status(404).json({ error: "Submission not found" }); return; }
+
+    const officialMarks = marksScored !== undefined ? String(marksScored) : mark.aiSuggestedMarks;
+    if (!officialMarks) { res.status(400).json({ error: "No marks to approve — provide marksScored or run AI grading first" }); return; }
+
+    const newStatus = act === "approve" ? "approved" : "graded";
+    const nowVal = new Date();
+
+    await db.update(studentMarksTable).set({
+      marksScored: officialMarks,
+      gradingStatus: newStatus,
+      gradedAt: nowVal,
+      approvedAt: act === "approve" ? nowVal : null,
+      approvedBy: act === "approve" ? req.userId : null,
+    }).where(eq(studentMarksTable.id, submissionId));
+
+    res.json({
+      id: submissionId,
+      marksScored: officialMarks,
+      gradingStatus: newStatus,
+      message: act === "approve"
+        ? "Grade approved and released to student."
+        : "Grade saved. Run approve to release to student.",
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to approve grade" });
   }
 });
 

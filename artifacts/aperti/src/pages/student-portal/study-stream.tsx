@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   BookOpen, CalendarCheck, Clock, CheckCircle, AlertCircle, Zap, Target,
-  TrendingUp, Flame, ArrowRight, Brain, FlaskConical, Layers, Trophy,
+  TrendingUp, Flame, ArrowRight, Brain, Layers, Trophy,
   Sparkles, Star, Calendar, BarChart3, Route, Shield, QrCode,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -457,7 +457,6 @@ export default function StudyStream() {
                     { href: "/learning-path", label: "Learn Path", icon: Route, color: "text-primary" },
                     { href: "/micro-assessment", label: "Quick Quiz", icon: Zap, color: "text-yellow-500" },
                     { href: "/learning-analytics", label: "Analytics", icon: BarChart3, color: "text-blue-500" },
-                    { href: "/simverse", label: "SimVerse", icon: FlaskConical, color: "text-orange-500" },
                     { href: "/recommendations", label: "For You", icon: Sparkles, color: "text-violet-500" },
                   ];
                   const visible = showAllActions ? ALL_ACTIONS : ALL_ACTIONS.slice(0, 6);
