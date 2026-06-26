@@ -1,0 +1,267 @@
+PHASE 3 — PRODUCTION HARDENING & SAAS READINESS
+
+Act as:
+
+Principal Security Engineer
+Principal Backend Architect
+Principal DevOps Engineer
+Principal Database Architect
+Principal QA Engineer
+Principal SaaS Architect
+
+Objective:
+
+Transform the platform from "secure" into "production-grade".
+
+Assume:
+
+- Real schools
+- Real student data
+- Thousands of users
+- Public SaaS launch
+
+Do not redesign UI yet.
+
+Focus entirely on platform reliability, scalability, permissions, auditing, monitoring, and operational readiness.
+
+PART 1 — CLOSE REMAINING SECURITY RISKS
+
+Implement and verify:
+
+Upload Ownership Registry
+
+Replace static file serving.
+
+Create:
+
+upload_registry table
+
+Fields:
+
+- id
+- uploader_id
+- tenant_id
+- filename
+- original_filename
+- mime_type
+- size
+- uploaded_at
+
+Replace:
+
+express.static("/uploads")
+
+with:
+
+Authenticated file access endpoint.
+
+Requirements:
+
+- Ownership validation
+- Tenant validation
+- Admin override
+- Secure file responses
+- Audit logging
+
+Coursework Moderation Ownership
+
+Verify:
+
+coursework_projects
+
+belongs to:
+
+teacher → assessment → tenant
+
+Prevent:
+
+- cross-teacher moderation
+- cross-tenant moderation
+
+PART 2 — CENTRALIZED PERMISSIONS
+
+Create unified authorization framework.
+
+Replace scattered checks.
+
+Create:
+
+canAccess()
+
+canModify()
+
+canDelete()
+
+canExport()
+
+canGrade()
+
+Requirements:
+
+- Role-aware
+- Tenant-aware
+- Ownership-aware
+
+Generate:
+
+Permission Matrix
+
+PART 3 — AUDIT LOGGING
+
+Audit all sensitive actions.
+
+Log:
+
+- grade changes
+- report exports
+- student access
+- file downloads
+- enrollment actions
+- admin actions
+- permission changes
+
+Store:
+
+- actor
+- action
+- resource
+- timestamp
+- tenant
+- ip address
+
+Generate:
+
+Audit Coverage Report
+
+PART 4 — RATE LIMITING
+
+Protect:
+
+- exports
+- reports
+- searches
+- authentication
+- uploads
+
+Implement:
+
+- user limits
+- IP limits
+- burst protection
+
+Generate:
+
+Rate Limiting Report
+
+PART 5 — OBSERVABILITY
+
+Add:
+
+- structured logging
+- error tracking
+- request tracing
+- health checks
+
+Verify:
+
+- startup health
+- database health
+- storage health
+- dependency health
+
+Generate:
+
+Operations Report
+
+PART 6 — DATABASE HARDENING
+
+Review:
+
+- indexes
+- foreign keys
+- cascades
+- orphan records
+
+Identify:
+
+- missing indexes
+- slow queries
+- integrity risks
+
+Generate:
+
+Database Health Report
+
+PART 7 — PERFORMANCE REVIEW
+
+Analyze:
+
+- API response times
+- dashboard loading
+- query efficiency
+- bundle size
+
+Generate:
+
+Performance Report
+
+PART 8 — TEST COVERAGE
+
+Create and execute:
+
+- unit tests
+- integration tests
+- authorization tests
+- tenant isolation tests
+- upload security tests
+
+Generate:
+
+Testing Coverage Report
+
+PART 9 — ACCESSIBILITY
+
+Verify:
+
+WCAG 2.2 AA
+
+Review:
+
+- keyboard navigation
+- contrast
+- focus states
+- screen reader support
+
+Generate:
+
+Accessibility Report
+
+FINAL REPORT
+
+Produce:
+
+1. Security Score
+2. Reliability Score
+3. Scalability Score
+4. Auditability Score
+5. Performance Score
+6. Accessibility Score
+7. SaaS Readiness Score
+
+Identify:
+
+- Remaining Critical Issues
+- Remaining High Issues
+- Remaining Medium Issues
+
+Provide:
+
+Production Readiness Verdict
+
+Choose:
+
+- NOT READY
+- READY FOR INTERNAL TESTING
+- READY FOR PRIVATE BETA
+- READY FOR PUBLIC BETA
+- READY FOR PRODUCTION

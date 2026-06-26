@@ -275,7 +275,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ) : (
           <div className="overflow-hidden">
             <h1 className="font-bold text-sm tracking-tight text-foreground leading-none">
-              Aperti
+              Aperti<span className="text-primary">.</span>
             </h1>
           </div>
         )}
@@ -367,17 +367,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                           key={item.name}
                           href={item.href}
                           onClick={() => isMobile && setMobileOpen(false)}
-                          className={`group flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 min-h-[36px] ${
+                          className={`group flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all duration-150 min-h-[36px] sidebar-nav-item ${
                             isActive
-                              ? "bg-primary text-primary-foreground shadow-sm nav-item-active"
+                              ? "bg-primary text-primary-foreground shadow-sm"
                               : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground"
                           } ${(!isMobile && collapsed) ? "justify-center" : ""}`}
                           title={(!isMobile && collapsed) ? item.name : undefined}
                         >
                           <item.icon
-                            className={`w-3.5 h-3.5 shrink-0 ${isActive ? "" : "group-hover:text-primary"} transition-colors`}
+                            className={`w-3.5 h-3.5 shrink-0 ${isActive ? "opacity-90" : "group-hover:text-primary"} transition-colors`}
                           />
-                          {(isMobile || !collapsed) && <span className="truncate">{item.name}</span>}
+                          {(isMobile || !collapsed) && (
+                            <span className="truncate flex-1">{item.name}</span>
+                          )}
+                          {isActive && !collapsed && !isMobile && (
+                            <span className="w-1 h-1 rounded-full bg-primary-foreground/70 shrink-0" />
+                          )}
                         </Link>
                       );
                     })}

@@ -102,10 +102,10 @@ export default function Dashboard() {
   }, [weekStartStr]);
 
   const kpis = [
-    { title: "Total Students", value: summary?.totalStudents ?? 0, icon: Users, color: "text-blue-600", bg: "bg-blue-100/60 dark:bg-blue-900/30", border: "border-blue-200 dark:border-blue-800/50" },
-    { title: "Attendance Rate", value: `${summary?.attendanceRate ?? 0}%`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-100/60 dark:bg-emerald-900/30", border: "border-emerald-200 dark:border-emerald-800/50" },
-    { title: "Present Today", value: summary?.presentToday ?? 0, icon: UserCheck, color: "text-primary", bg: "bg-primary/10", border: "border-primary/20" },
-    { title: "Total Absences", value: summary?.absentStudents ?? 0, icon: UserX, color: "text-red-600", bg: "bg-red-100/60 dark:bg-red-900/30", border: "border-red-200 dark:border-red-800/50" },
+    { title: "Total Students", value: summary?.totalStudents ?? 0, icon: Users, color: "text-blue-600", bg: "bg-blue-100/60 dark:bg-blue-900/30", accentClass: "stat-accent-blue" },
+    { title: "Attendance Rate", value: `${summary?.attendanceRate ?? 0}%`, icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-100/60 dark:bg-emerald-900/30", accentClass: "stat-accent-emerald" },
+    { title: "Present Today", value: summary?.presentToday ?? 0, icon: UserCheck, color: "text-primary", bg: "bg-primary/10", accentClass: "stat-accent-teal" },
+    { title: "Total Absences", value: summary?.absentStudents ?? 0, icon: UserX, color: "text-red-600", bg: "bg-red-100/60 dark:bg-red-900/30", accentClass: "stat-accent-red" },
   ];
 
   const chartData = weeklyStats?.byLesson.map(l => ({
@@ -128,13 +128,13 @@ export default function Dashboard() {
       <TrustStatusBar />
 
       {/* ── Hero greeting ── */}
-      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="flex items-start justify-between gap-4 flex-wrap">
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="dashboard-hero flex items-start justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight">
-            {getGreeting()}, {user?.displayName?.split(" ")[0] ?? user?.username} 👋
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
+            {getGreeting()}, <span className="teal-gradient-text">{user?.displayName?.split(" ")[0] ?? user?.username}</span>
           </h1>
-          <p className="text-muted-foreground mt-1.5 flex items-center gap-2 text-sm">
-            <Calendar className="w-4 h-4" /> {dateStr}
+          <p className="text-muted-foreground mt-1 flex items-center gap-1.5 text-sm">
+            <Calendar className="w-3.5 h-3.5" /> {dateStr}
           </p>
         </div>
         {attendanceWarning && (
@@ -179,23 +179,23 @@ export default function Dashboard() {
       </motion.div>
 
       {/* ── KPI cards ── */}
-      <motion.div variants={stagger} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <motion.div variants={stagger} initial="hidden" animate="show" className="dashboard-kpi-grid">
         {loading.summary ? (
           [...Array(4)].map((_, i) => <div key={i} className="skeleton h-24 rounded-2xl" />)
         ) : (
           kpis.map((k, i) => (
             <motion.div key={i} variants={fadeUp}>
-              <Card className={`border ${k.border} shadow-sm hover:shadow-md transition-shadow`}>
-                <CardContent className="p-5 flex items-center justify-between gap-3">
+              <div className={`stat-card-premium ${k.accentClass} stat-highlight`}>
+                <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">{k.title}</p>
-                    <p className={`text-3xl font-black ${k.color}`}><AnimatedCounter value={k.value} /></p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{k.title}</p>
+                    <p className={`text-3xl font-black stat-number ${k.color}`}><AnimatedCounter value={k.value} /></p>
                   </div>
-                  <div className={`${k.bg} p-3 rounded-xl shrink-0`}>
-                    <k.icon className={`w-5 h-5 ${k.color}`} />
+                  <div className={`${k.bg} p-2.5 rounded-xl shrink-0 mt-0.5`}>
+                    <k.icon className={`w-4.5 h-4.5 ${k.color}`} style={{ width: "1.125rem", height: "1.125rem" }} />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </motion.div>
           ))
         )}

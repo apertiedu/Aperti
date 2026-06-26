@@ -65,29 +65,68 @@ assessmentGradingRouter.post("/grading/assessments/:submissionId/moderate", ...t
       const { moderated_score, reason } = req.body;
       const moderatorId = req.userId!;
       const isAdmin = req.role === "admin" || req.role === "super_admin";
+      const isSuperAdmin = req.role === "super_admin";
 
       const subRes = await pool.query(
-        `SELECT asub.*, a.teacher_id AS assessment_teacher_id
+        `SELECT asub.*, a.teacher_id AS assessment_teacher_id,
+                a.subject_id,
+                acc.teacher_account_id AS assessment_teacher_tenant
          FROM assessment_submissions asub
          JOIN assessments a ON a.id = asub.assessment_id
+         JOIN accounts acc ON acc.id = a.teacher_id
          WHERE asub.id=$1 LIMIT 1`,
         [submissionId]
       );
       if (!subRes.rows.length) return res.status(404).json({ error: "Not found" });
       const sub = subRes.rows[0];
-      if (!isAdmin && sub.assessment_teacher_id !== moderatorId) return res.status(403).json({ error: "Access denied" });
+
+      // Ownership check: teacher must own the assessment
+      if (!isAdmin && sub.assessment_teacher_id !== moderatorId) {
+        return res.status(403).json({ error: "Access denied: you do not own this assessment" });
+      }
+
+      // Tenant isolation for scoped admins: an admin belongs to a tenant and cannot
+      // cross into another tenant's data. super_admin bypasses this.
+      if (isAdmin && !isSuperAdmin) {
+        const { rows: adminTenant } = await pool.query(
+          "SELECT teacher_account_id FROM accounts WHERE id=$1 LIMIT 1",
+          [moderatorId]
+        );
+        const modTenant = adminTenant[0]?.teacher_account_id;
+        const subTenant = sub.assessment_teacher_tenant;
+        // Both must be platform-level (null) or share the same tenant root
+        if (modTenant !== null && subTenant !== null && modTenant !== subTenant) {
+          return res.status(403).json({ error: "Cross-tenant moderation denied" });
+        }
+      }
+
+      if (moderated_score === undefined || moderated_score === null) {
+        return res.status(400).json({ error: "moderated_score is required" });
+      }
+      const score = parseFloat(moderated_score);
+      if (isNaN(score) || score < 0) {
+        return res.status(400).json({ error: "moderated_score must be a non-negative number" });
+      }
 
       await pool.query(
         `INSERT INTO moderation_logs (assessment_id, student_id, original_grade, moderated_grade, moderator_id, reason)
          VALUES ($1,$2,$3,$4,$5,$6)`,
-        [sub.assessment_id, sub.student_id, sub.score, moderated_score, moderatorId, reason ?? null]
+        [sub.assessment_id, sub.student_id, sub.score, score, moderatorId, reason ?? null]
       );
 
+      // Audit log
+      pool.query(
+        `INSERT INTO audit_logs (actor_id, actor_role, action, resource_type, resource_id, ip_address, metadata, created_at)
+         VALUES ($1,$2,'GRADE_MODERATED','assessment_submission',$3,$4,$5,NOW())`,
+        [moderatorId, req.role, submissionId, (req as any).ip ?? null,
+         JSON.stringify({ original: sub.score, moderated: score, reason: reason ?? null })]
+      ).catch(() => null);
+
       const maxScore = parseFloat(sub.max_score ?? "100");
-      const percentage = maxScore > 0 ? Math.round((moderated_score / maxScore) * 100) : 0;
+      const percentage = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
       const { rows } = await pool.query(
         `UPDATE assessment_submissions SET score=$1, percentage=$2, grade=$3 WHERE id=$4 RETURNING *`,
-        [moderated_score, percentage, igcseGrade(percentage), submissionId]
+        [score, percentage, igcseGrade(percentage), submissionId]
       );
 
       res.json({ submission: rows[0] });
