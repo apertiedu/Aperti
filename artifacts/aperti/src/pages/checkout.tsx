@@ -1,18 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Tag, ArrowRight, Loader2, Upload, AlertCircle, Lock, ChevronLeft } from "lucide-react";
+import { CheckCircle2, Tag, ArrowRight, Loader2, Upload, AlertCircle, Lock, ChevronLeft, Clock, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiFetch } from "@/lib/api";
 
-
 const STUDENT_PLANS = [
-  { id: "free",     name: "Free",      price: 0,   color: "#757575", features: ["Past paper access", "AI Mentor (5/day)", "Basic flashcards", "Public course library"] },
-  { id: "essential",name: "Essential", price: 79,  color: "hsl(var(--primary))",      features: ["All Free features", "Unlimited AI Mentor", "Full flashcard engine", "Revision schedules"] },
-  { id: "plus",     name: "Plus",      price: 149, color: "#00897B", features: ["All Essential features", "Revision Notes", "Peer review access", "Priority support"] },
-  { id: "pro",      name: "Pro",       price: 249, color: "#00695C", features: ["All Plus features", "Priority AI tutor", "Practice exam library", "Progress analytics"] },
-  { id: "elite",    name: "Elite",     price: 399, color: "#004D40", features: ["All Pro features", "Premium content access", "Dedicated support", "Custom learning path"] },
+  { id: "free",      name: "Free",      price: 0,   color: "#757575", features: ["Past paper access", "AI Mentor (5/day)", "Basic flashcards", "Public course library"] },
+  { id: "essential", name: "Essential", price: 79,  color: "hsl(var(--primary))",  features: ["All Free features", "Unlimited AI Mentor", "Full flashcard engine", "Revision schedules"] },
+  { id: "plus",      name: "Plus",      price: 149, color: "#00897B", features: ["All Essential features", "Revision Notes", "Peer review access", "Priority support"] },
+  { id: "pro",       name: "Pro",       price: 249, color: "#00695C", features: ["All Plus features", "Priority AI tutor", "Practice exam library", "Progress analytics"] },
+  { id: "elite",     name: "Elite",     price: 399, color: "#004D40", features: ["All Pro features", "Premium content access", "Dedicated support", "Custom learning path"] },
 ];
+
+const INSTAPAY_ID = import.meta.env.VITE_INSTAPAY_ID ?? "aperti@instapay.eg";
 
 function PlanCard({ plan, selected, onSelect }: { plan: typeof STUDENT_PLANS[0]; selected: boolean; onSelect: () => void }) {
   return (
@@ -30,11 +31,11 @@ function PlanCard({ plan, selected, onSelect }: { plan: typeof STUDENT_PLANS[0];
         </motion.div>
       )}
       <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${plan.color}18` }}>
-          <span className="text-lg font-black" style={{ color: plan.color, fontSize: 13 }}>{plan.name[0]}</span>
+        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${plan.color}18` }}>
+          <span className="text-xs font-black" style={{ color: plan.color }}>{plan.name[0]}</span>
         </div>
-        <div className="flex-1">
-          <div className="flex items-baseline gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-2 flex-wrap">
             <h3 className="font-bold text-gray-900">{plan.name}</h3>
             <span className="text-lg font-black" style={{ color: plan.color }}>
               {plan.price === 0 ? "Free" : `EGP ${plan.price}`}
@@ -67,6 +68,8 @@ export default function CheckoutPage() {
   const [validatingCoupon, setValidatingCoupon] = useState(false);
   const [instaPayCode, setInstaPayCode] = useState("");
   const [screenshot, setScreenshot] = useState<File | null>(null);
+  const [screenshotError, setScreenshotError] = useState("");
+  const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const selectedPlan = STUDENT_PLANS.find(p => p.id === selectedPlanId)!;
@@ -95,24 +98,74 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSubmit = async () => {
-    if (selectedPlan.price === 0) {
-      toast({ title: "Free plan activated!" });
-      setStep("done");
+  const handleScreenshotChange = (file: File | null) => {
+    setScreenshotError("");
+    if (!file) { setScreenshot(null); return; }
+    if (file.size > 5 * 1024 * 1024) {
+      setScreenshotError("File must be smaller than 5MB");
+      setScreenshot(null);
       return;
     }
+    if (!file.type.startsWith("image/")) {
+      setScreenshotError("Only image files are accepted (PNG, JPG, WEBP)");
+      setScreenshot(null);
+      return;
+    }
+    setScreenshot(file);
+  };
+
+  const uploadScreenshot = async (file: File): Promise<string | null> => {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("purpose", "payment_screenshot");
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        credentials: "include",
+        body: fd,
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || "Upload failed");
+      }
+      const data = await res.json();
+      return data.url ?? data.fileUrl ?? data.path ?? null;
+    } catch (e: any) {
+      toast({ title: `Screenshot upload failed: ${e.message}`, variant: "destructive" });
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (selectedPlan.price === 0) {
+      try {
+        const res = await apiFetch("/api/subscriptions/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ planId: selectedPlanId, paymentMethod: "free" }),
+        });
+        if (res.ok) { setStep("done"); }
+        else { const d = await res.json(); throw new Error(d.error || "Activation failed"); }
+      } catch (e: any) {
+        toast({ title: e.message || "Activation failed", variant: "destructive" });
+      }
+      return;
+    }
+
     if (!instaPayCode.trim()) {
       toast({ title: "Please enter your InstaPay transaction code", variant: "destructive" });
       return;
     }
+
     setSubmitting(true);
     try {
-      const formData = new FormData();
-      formData.append("planId", selectedPlanId);
-      formData.append("paymentMethod", "instapay");
-      formData.append("instapayCode", instaPayCode.trim());
-      if (coupon) formData.append("couponId", String(coupon.id));
-      if (screenshot) formData.append("screenshot", screenshot);
+      let screenshotUrl: string | null = null;
+      if (screenshot) {
+        screenshotUrl = await uploadScreenshot(screenshot);
+      }
 
       const res = await apiFetch("/api/subscriptions/checkout", {
         method: "POST",
@@ -122,10 +175,16 @@ export default function CheckoutPage() {
           paymentMethod: "instapay",
           instapayCode: instaPayCode.trim(),
           couponId: coupon?.id,
+          screenshotUrl,
         }),
       });
-      if (res.ok) { setStep("done"); }
-      else { const d = await res.json(); throw new Error(d.error || "Checkout failed"); }
+
+      if (res.ok) {
+        setStep("done");
+      } else {
+        const d = await res.json();
+        throw new Error(d.error || "Checkout failed");
+      }
     } catch (e: any) {
       toast({ title: e.message || "Checkout failed", variant: "destructive" });
     } finally {
@@ -135,25 +194,22 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#F5F5F5" }}>
-      {/* Header */}
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center gap-4">
         <button onClick={() => navigate("/")} className="text-gray-400 hover:text-gray-600 transition-colors">
           <ChevronLeft className="h-5 w-5" />
         </button>
-        <span className="text-xl font-extrabold tracking-tight" style={{ color: "#121212" }}>
+        <span className="text-xl font-extrabold tracking-tight text-gray-900">
           Aperti<span className="text-primary">.</span>
         </span>
         <span className="text-sm text-gray-400 ml-1">Checkout</span>
         <div className="ml-auto flex items-center gap-1.5 text-xs text-gray-400">
-          <Lock className="h-3.5 w-3.5" />
-          Secure checkout
+          <Lock className="h-3.5 w-3.5" /> Secure checkout
         </div>
       </div>
 
       <div className="flex-1 max-w-4xl mx-auto w-full px-5 py-10">
         <AnimatePresence mode="wait">
 
-          {/* Step 1 – Plan Selection */}
           {step === "plan" && (
             <motion.div key="plan" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Choose your plan</h1>
@@ -165,7 +221,6 @@ export default function CheckoutPage() {
                 ))}
               </div>
 
-              {/* Coupon field */}
               {selectedPlan.price > 0 && (
                 <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-8">
                   <p className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
@@ -176,8 +231,7 @@ export default function CheckoutPage() {
                       value={couponCode}
                       onChange={e => { setCouponCode(e.target.value.toUpperCase()); setCoupon(null); setCouponError(""); }}
                       placeholder="ENTER CODE"
-                      className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm font-mono uppercase tracking-wider focus:outline-none focus:ring-2 transition-all"
-                      style={{ "--ring-color": "hsl(var(--primary))" } as any}
+                      className="flex-1 border border-gray-200 rounded-xl px-4 py-2 text-sm font-mono uppercase tracking-wider focus:outline-none focus:border-primary transition-all"
                       onKeyDown={e => e.key === "Enter" && validateCoupon()}
                     />
                     <button
@@ -200,11 +254,10 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Order Summary */}
               <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-6">
                 <h3 className="font-bold text-gray-900 mb-4">Order Summary</h3>
                 <div className="space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-gray-500">{selectedPlan.name} Plan</span><span className="font-medium">EGP {basePrice}</span></div>
+                  <div className="flex justify-between"><span className="text-gray-500">{selectedPlan.name} Plan</span><span className="font-medium">{basePrice === 0 ? "Free" : `EGP ${basePrice}`}</span></div>
                   {coupon && <div className="flex justify-between"><span className="text-primary">Coupon ({coupon.code})</span><span className="text-primary">−EGP {discountAmt}</span></div>}
                   <div className="border-t pt-2 flex justify-between font-bold text-gray-900">
                     <span>Total</span>
@@ -214,7 +267,7 @@ export default function CheckoutPage() {
               </div>
 
               <motion.button
-                onClick={() => selectedPlan.price === 0 ? setStep("done") : setStep("pay")}
+                onClick={() => selectedPlan.price === 0 ? handleSubmit() : setStep("pay")}
                 whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
                 className="w-full py-3.5 rounded-2xl font-bold text-white text-base flex items-center justify-center gap-2 shadow-lg"
                 style={{ background: selectedPlan.color }}>
@@ -223,17 +276,17 @@ export default function CheckoutPage() {
             </motion.div>
           )}
 
-          {/* Step 2 – Payment */}
           {step === "pay" && (
             <motion.div key="pay" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
               <button onClick={() => setStep("plan")} className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 mb-6 transition-colors">
                 <ChevronLeft className="h-4 w-4" /> Back to plans
               </button>
               <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Complete payment</h1>
-              <p className="text-gray-500 mb-8">Pay EGP {finalPrice}/month via InstaPay to activate your <strong>{selectedPlan.name}</strong> plan.</p>
+              <p className="text-gray-500 mb-8">
+                Pay <strong>EGP {finalPrice}/month</strong> via InstaPay to activate your <strong>{selectedPlan.name}</strong> plan.
+              </p>
 
               <div className="grid md:grid-cols-2 gap-6">
-                {/* InstaPay Instructions */}
                 <div className="bg-white rounded-2xl border border-gray-200 p-6">
                   <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-green-500 text-white text-xs flex items-center justify-center font-bold">IP</span>
@@ -241,40 +294,55 @@ export default function CheckoutPage() {
                   </h3>
                   <ol className="space-y-3 text-sm text-gray-600 mb-5">
                     <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">1.</span>Open your bank's mobile app and go to InstaPay.</li>
-                    <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">2.</span>Send <strong>EGP {finalPrice}</strong> to the Aperti InstaPay ID:</li>
+                    <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">2.</span>Send <strong>EGP {finalPrice}</strong> to the Aperti account:</li>
                     <li>
-                      <code className="block bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm font-bold text-center text-primary">
-                        aperti@instapay.eg
+                      <code className="block bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 font-mono text-sm font-bold text-center text-primary select-all">
+                        {INSTAPAY_ID}
                       </code>
                     </li>
-                    <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">3.</span>Copy your transaction reference code and enter it below.</li>
-                    <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">4.</span>Submit. An admin will approve your subscription within 2–4 hours.</li>
+                    <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">3.</span>Copy your transaction reference code and paste it below.</li>
+                    <li className="flex gap-2"><span className="font-bold text-gray-900 w-5 shrink-0">4.</span>Optionally upload a screenshot of the transfer confirmation.</li>
                   </ol>
 
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">Transaction Reference Code *</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    Transaction Reference Code <span className="text-red-500">*</span>
+                  </label>
                   <input
                     value={instaPayCode}
                     onChange={e => setInstaPayCode(e.target.value)}
                     placeholder="e.g. TXN-2024-XXXXXXXX"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-primary transition-all mb-3"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-mono focus:outline-none focus:border-primary transition-all mb-4"
                   />
 
                   <label className="block text-xs font-bold text-gray-700 mb-1.5">Upload Screenshot (optional)</label>
-                  <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-primary/40 transition-colors group">
-                    <Upload className="h-5 w-5 text-gray-300 group-hover:text-primary transition-colors mb-1" />
-                    <span className="text-xs text-gray-400">{screenshot ? screenshot.name : "PNG or JPG, max 5MB"}</span>
-                    <input type="file" accept="image/*" className="hidden" onChange={e => setScreenshot(e.target.files?.[0] ?? null)} />
-                  </label>
+                  {screenshot ? (
+                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-xl border border-gray-200 mb-1">
+                      <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="text-xs text-gray-600 flex-1 truncate">{screenshot.name}</span>
+                      <button onClick={() => setScreenshot(null)} className="text-gray-400 hover:text-gray-600">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-200 rounded-xl cursor-pointer hover:border-primary/40 transition-colors group mb-1">
+                      <Upload className="h-5 w-5 text-gray-300 group-hover:text-primary transition-colors mb-1" />
+                      <span className="text-xs text-gray-400">PNG, JPG or WEBP · max 5MB</span>
+                      <input type="file" accept="image/*" className="hidden"
+                        onChange={e => handleScreenshotChange(e.target.files?.[0] ?? null)} />
+                    </label>
+                  )}
+                  {screenshotError && (
+                    <p className="text-xs text-red-500 flex items-center gap-1"><AlertCircle className="h-3.5 w-3.5" />{screenshotError}</p>
+                  )}
 
-                  <p className="mt-3 flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                    Your plan will be set to <strong>Pending Review</strong> until an admin verifies your payment.
+                  <p className="mt-4 flex items-center gap-1.5 text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
+                    Your plan will be <strong>Pending Review</strong> until an admin verifies your payment (typically 2–4 hours).
                   </p>
                 </div>
 
-                {/* Order Summary */}
                 <div>
-                  <div className="bg-white rounded-2xl border border-gray-200 p-5 mb-4 sticky top-4">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-5 sticky top-4">
                     <h3 className="font-bold text-gray-900 mb-4">Order Summary</h3>
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between"><span className="text-gray-500">{selectedPlan.name} Plan</span><span>EGP {basePrice}</span></div>
@@ -285,37 +353,34 @@ export default function CheckoutPage() {
                       </div>
                     </div>
 
-                    <div className="mt-4 space-y-1.5">
+                    <ul className="mt-4 space-y-1.5">
                       {selectedPlan.features.map(f => (
-                        <div key={f} className="flex items-center gap-2 text-xs text-gray-500">
+                        <li key={f} className="flex items-center gap-2 text-xs text-gray-500">
                           <CheckCircle2 className="h-3 w-3 shrink-0" style={{ color: selectedPlan.color }} />{f}
-                        </div>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
 
                     <motion.button
                       onClick={handleSubmit}
-                      disabled={submitting || !instaPayCode.trim()}
+                      disabled={submitting || uploading || !instaPayCode.trim()}
                       whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
                       className="mt-5 w-full py-3 rounded-2xl font-bold text-white text-sm flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg"
                       style={{ background: selectedPlan.color }}>
-                      {submitting ? <><Loader2 className="h-4 w-4 animate-spin" />Submitting…</> : <>Submit for Review <ArrowRight className="h-4 w-4" /></>}
+                      {uploading ? <><Loader2 className="h-4 w-4 animate-spin" />Uploading screenshot…</>
+                        : submitting ? <><Loader2 className="h-4 w-4 animate-spin" />Submitting…</>
+                        : <>Submit for Review <ArrowRight className="h-4 w-4" /></>}
                     </motion.button>
 
                     <p className="mt-3 text-center text-xs text-gray-400 flex items-center justify-center gap-1">
                       <Lock className="h-3 w-3" /> SSL secured · Cancel anytime
                     </p>
-                    <div className="mt-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
-                      <p className="text-xs text-center text-gray-400 font-medium">💳 Stripe / Card payment</p>
-                      <p className="text-[10px] text-center text-gray-300 mt-0.5">Coming Soon</p>
-                    </div>
                   </div>
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* Step 3 – Done */}
           {step === "done" && (
             <motion.div key="done" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center text-center py-20">
@@ -329,17 +394,24 @@ export default function CheckoutPage() {
               <h2 className="text-3xl font-extrabold text-gray-900 mb-3">
                 {selectedPlan.price === 0 ? "You're all set!" : "Payment submitted!"}
               </h2>
-              <p className="text-gray-500 max-w-sm mb-8">
+              <p className="text-gray-500 max-w-sm mb-8 leading-relaxed">
                 {selectedPlan.price === 0
                   ? "Your free plan is active. Start learning now."
-                  : "Your InstaPay submission is under review. You'll get access within 2–4 hours after admin verification."}
+                  : "Your InstaPay submission is under review. You'll receive access within 2–4 hours once an admin verifies your payment."}
               </p>
-              <button
-                onClick={() => navigate("/login")}
-                className="px-8 py-3 rounded-2xl font-bold text-white shadow-lg"
-                style={{ background: selectedPlan.color }}>
-                Go to Login
-              </button>
+              <div className="flex gap-3 flex-wrap justify-center">
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-8 py-3 rounded-2xl font-bold text-white shadow-lg"
+                  style={{ background: selectedPlan.color }}>
+                  Go to Login
+                </button>
+                <button
+                  onClick={() => navigate("/")}
+                  className="px-8 py-3 rounded-2xl font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors">
+                  Back to Home
+                </button>
+              </div>
             </motion.div>
           )}
 
