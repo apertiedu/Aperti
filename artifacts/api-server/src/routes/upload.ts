@@ -4,6 +4,9 @@ import { mkdirSync } from "fs";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { randomBytes } from "crypto";
+import { pool } from "@workspace/db";
+import { auditFromReq } from "../lib/audit";
+import { uploadLimiter } from "../middleware/rate-limit";
 
 export const uploadRouter = Router();
 
@@ -29,7 +32,7 @@ function hasMagicBytes(buf: Buffer, fileType: string): boolean {
 
 const UPLOAD_DIR = join(process.cwd(), "uploads");
 
-uploadRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response): Promise<void> => {
+uploadRouter.post("/", authenticate, requireRole("teacher", "admin"), uploadLimiter, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { fileName, fileType, fileData } = req.body as {
       fileName: string;
@@ -63,11 +66,30 @@ uploadRouter.post("/", authenticate, requireRole("teacher", "admin"), async (req
     const uniqueName = `${Date.now()}-${randomBytes(6).toString("hex")}${ext}`;
     const filePath = join(UPLOAD_DIR, uniqueName);
 
-    // Non-blocking async write — writeFileSync blocks the Node.js event loop
-    // for the entire duration of the file write, stalling ALL concurrent requests.
     await writeFile(filePath, buffer);
 
-    res.json({ url: `/uploads/${uniqueName}`, fileName: uniqueName });
+    // Register in upload_registry for authenticated-only serving + audit trail
+    await pool.query(
+      `INSERT INTO upload_registry (uploader_id, tenant_id, filename, original_filename, mime_type, size, uploaded_at)
+       VALUES ($1,$2,$3,$4,$5,$6,NOW())
+       ON CONFLICT (filename) DO NOTHING`,
+      [
+        req.userId,
+        req.userId,       // tenant_id defaults to the uploader (teacher) for their own uploads
+        uniqueName,
+        fileName ?? uniqueName,
+        fileType,
+        buffer.length,
+      ],
+    );
+
+    auditFromReq(req, "FILE_UPLOAD", "upload", {
+      resourceId: uniqueName,
+      metadata: { filename: uniqueName, originalFilename: fileName, size: buffer.length, mimeType: fileType },
+    });
+
+    // Return /files/ URL — authenticated access only
+    res.json({ url: `/files/${uniqueName}`, fileName: uniqueName });
   } catch {
     res.status(500).json({ error: "File upload failed" });
   }

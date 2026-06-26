@@ -1,7 +1,10 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
+// Per-user key: uses authenticated userId when available, falls back to
+// IPv6-safe IP address for unauthenticated requests.
 function perUserKeyGenerator(req: any): string {
-  return `user:${req.userId ?? req.ip}`;
+  if (req.userId) return `user:${req.userId}`;
+  return `ip:${ipKeyGenerator(req)}`;
 }
 
 export const exportLimiter = rateLimit({

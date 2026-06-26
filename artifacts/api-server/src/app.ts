@@ -119,6 +119,7 @@ import { validateEnv } from "./config/env";
 import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 import { sanitizeBody } from "./middleware/sanitize-body";
 import { requestObserver } from "./lib/request-observer";
+import { filesRouter } from "./routes/files";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -303,11 +304,13 @@ cron.schedule("0 3 * * *", () => {
   pool.query("DELETE FROM system_metrics_log WHERE created_at < NOW() - INTERVAL '30 days'").catch(() => {});
 }, { timezone: "UTC" });
 
-// ── Static files (uploads) with cache headers ─────────────────────────────────
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads"), {
-  maxAge: isProduction ? "1d" : 0,
-  etag: true,
-}));
+// ── Authenticated file serving (replaces unauthenticated express.static) ──────
+// Files are served via /files/:filename with ownership + tenant validation.
+// Direct /uploads/* paths are blocked to prevent unauthenticated access.
+app.use(filesRouter);
+app.use("/uploads", (_req, res) => {
+  res.status(403).json({ error: "Direct file access is not permitted. Use /files/:filename." });
+});
 
 // ── Prometheus metrics endpoint ───────────────────────────────────────────────
 app.use("/metrics", metricsRouter);
@@ -322,21 +325,46 @@ app.get("/health", async (_req, res) => {
   const start = Date.now();
   let dbOk = false;
   let dbLatencyMs = 0;
+  let storageOk = false;
+  let uploadCount = 0;
+
+  // Database check
   try {
     const t0 = Date.now();
     await pool.query("SELECT 1");
     dbLatencyMs = Date.now() - t0;
     dbOk = true;
   } catch {}
-  const memUsed = Math.round(process.memoryUsage().heapUsed / 1024 / 1024);
-  const status = dbOk ? (dbLatencyMs > 800 ? "degraded" : "healthy") : "critical";
-  res.status(dbOk ? 200 : 503).json({
+
+  // Storage check — verify uploads dir is writable and count registered files
+  try {
+    const { existsSync, mkdirSync, writeFileSync, unlinkSync } = await import("fs");
+    const uploadDir = path.join(process.cwd(), "uploads");
+    mkdirSync(uploadDir, { recursive: true });
+    const probe = path.join(uploadDir, `.health-${Date.now()}`);
+    writeFileSync(probe, "ok");
+    unlinkSync(probe);
+    storageOk = true;
+    const { rows } = await pool.query("SELECT COUNT(*) FROM upload_registry");
+    uploadCount = parseInt(rows[0]?.count ?? "0", 10);
+  } catch {}
+
+  const mem = process.memoryUsage();
+  const memUsedMb = Math.round(mem.heapUsed / 1024 / 1024);
+  const memTotalMb = Math.round(mem.heapTotal / 1024 / 1024);
+
+  const allOk = dbOk && storageOk;
+  const status = !dbOk ? "critical" : (dbLatencyMs > 800 ? "degraded" : "healthy");
+
+  res.status(allOk ? 200 : 503).json({
     status,
-    db: dbOk ? "connected" : "error",
-    dbLatencyMs,
+    checks: {
+      database: { ok: dbOk, latencyMs: dbLatencyMs },
+      storage:  { ok: storageOk, registeredFiles: uploadCount },
+      memory:   { ok: memUsedMb < 900, usedMb: memUsedMb, totalMb: memTotalMb },
+    },
     uptime: Math.round(process.uptime()),
     latencyMs: Date.now() - start,
-    memoryMb: memUsed,
     version: process.env.COMMIT_HASH || "dev",
     env: process.env.NODE_ENV || "development",
     timestamp: new Date().toISOString(),

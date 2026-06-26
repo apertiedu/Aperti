@@ -86,6 +86,7 @@ const querySchema = {
   moderationLogs: schema.moderationLogsTable,
   classChannels: schema.classChannelsTable,
   channelMessages: schema.channelMessagesTable,
+  uploadRegistry: schema.uploadRegistryTable,
 };
 
 export const pool = new Pool({

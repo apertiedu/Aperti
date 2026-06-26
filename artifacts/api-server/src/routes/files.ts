@@ -20,7 +20,7 @@ filesRouter.get("/files/:filename", authenticate, async (req: AuthRequest, res: 
   try {
     const { filename } = req.params;
 
-    if (!filename || /[\/\\]/.test(filename)) {
+    if (!filename || /[/\\]/.test(filename)) {
       res.status(400).json({ error: "Invalid filename" });
       return;
     }
@@ -28,7 +28,7 @@ filesRouter.get("/files/:filename", authenticate, async (req: AuthRequest, res: 
     const { rows } = await pool.query(
       `SELECT uploader_id, tenant_id, original_filename, mime_type, size
        FROM upload_registry WHERE filename=$1 LIMIT 1`,
-      [filename]
+      [filename],
     );
 
     if (!rows.length) {
@@ -39,29 +39,33 @@ filesRouter.get("/files/:filename", authenticate, async (req: AuthRequest, res: 
     const record = rows[0];
     const isAdmin = req.role === "admin" || req.role === "super_admin";
     const isOwner = record.uploader_id === req.userId;
-    const isSameTenant = record.tenant_id !== null && record.tenant_id === req.userId;
 
-    if (!isAdmin && !isOwner && !isSameTenant) {
+    // isSameTenant: check if the requesting user belongs to the same teacher/tenant.
+    // Bug fix: original code compared tenant_id to req.userId directly (always false).
+    let isSameTenant = false;
+    if (!isAdmin && !isOwner && record.tenant_id !== null) {
       const { rows: tenantRows } = await pool.query(
         `SELECT 1 FROM accounts WHERE id=$1 AND teacher_account_id=$2 LIMIT 1
          UNION ALL
          SELECT 1 FROM students WHERE account_id=$1 AND teacher_account_id=$2 LIMIT 1`,
-        [req.userId, record.tenant_id]
+        [req.userId, record.tenant_id],
       );
-      if (!tenantRows.length) {
-        auditLog({
-          actorId: req.userId!,
-          actorRole: req.role!,
-          action: "FILE_ACCESS_DENIED",
-          targetId: filename,
-          targetType: "upload",
-          ip: getClientIp(req),
-          result: "blocked",
-          metadata: { filename, uploaderId: record.uploader_id },
-        });
-        res.status(403).json({ error: "Access denied" });
-        return;
-      }
+      isSameTenant = tenantRows.length > 0;
+    }
+
+    if (!isAdmin && !isOwner && !isSameTenant) {
+      auditLog({
+        actorId: req.userId!,
+        actorRole: req.role!,
+        action: "FILE_ACCESS_DENIED",
+        targetId: filename,
+        targetType: "upload",
+        ip: getClientIp(req),
+        result: "blocked",
+        metadata: { filename, uploaderId: record.uploader_id },
+      });
+      res.status(403).json({ error: "Access denied" });
+      return;
     }
 
     const filePath = join(UPLOAD_DIR, filename);
