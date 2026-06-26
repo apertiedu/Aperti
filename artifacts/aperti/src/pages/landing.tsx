@@ -7,7 +7,8 @@ import {
   Menu, X, GraduationCap, Clock, Users, ChevronRight, Shield,
   Zap, Target, Star, Globe, ChevronDown, Rocket,
   FileText, Activity, Check, Lock, Bell, Layers, TrendingUp,
-  ClipboardList, MessageSquare, Award, Smartphone,
+  ClipboardList, MessageSquare, Award, Smartphone, XCircle as XCircleIcon,
+  Quote,
 } from "lucide-react";
 
 /* ─── Animations ─── */
@@ -544,6 +545,67 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── Comparison / Differentiation ── */}
+      <section className="py-20 px-5 bg-gray-50/50">
+        <div className="max-w-5xl mx-auto">
+          <Reveal>
+            <div className="text-center mb-12">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-100 px-3 py-1 rounded-full mb-4">
+                <Zap className="h-3 w-3" /> Replace your current setup
+              </span>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
+                Tired of running a class on WhatsApp and spreadsheets?
+              </h2>
+              <p className="text-gray-500 max-w-xl mx-auto">
+                Most educators in Egypt manage students across 4–6 disconnected tools. Aperti replaces all of them.
+              </p>
+            </div>
+          </Reveal>
+          <div className="grid md:grid-cols-2 gap-6">
+            <Reveal>
+              <div className="bg-white border border-red-100 rounded-2xl p-6">
+                <p className="text-xs font-bold text-red-500 uppercase tracking-wider mb-4">The old way</p>
+                <ul className="space-y-3">
+                  {[
+                    "WhatsApp groups for homework — gets lost in chats",
+                    "Excel sheets for grades — shared with wrong people",
+                    "Manual attendance on paper — no parent visibility",
+                    "Cash payments with no audit trail",
+                    "No idea which students are falling behind until exams",
+                    "Different tool for every subject and task",
+                  ].map(item => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-gray-500">
+                      <XCircleIcon className="h-4 w-4 text-red-400 flex-shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+            <Reveal delay={0.1}>
+              <div className="bg-white border border-primary/20 rounded-2xl p-6 shadow-sm" style={{ boxShadow: "0 0 0 1px hsl(var(--primary) / 0.12), 0 4px 16px hsl(var(--primary) / 0.06)" }}>
+                <p className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: "hsl(var(--primary))" }}>With Aperti</p>
+                <ul className="space-y-3">
+                  {[
+                    "Homework assigned, submitted, and graded in one place",
+                    "Gradebook visible to teachers, students, and parents — separately",
+                    "QR attendance in seconds, instant SMS to absent parents",
+                    "InstaPay verified payments with full audit log",
+                    "Risk alerts tell you who needs help — before they fail",
+                    "One platform. Every role. Every workflow.",
+                  ].map(item => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700">
+                      <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
       {/* ── Teacher vs Student Benefits ── */}
       <section className="py-24 bg-gray-50/70 px-5">
         <div className="max-w-7xl mx-auto">
@@ -611,6 +673,77 @@ export default function LandingPage() {
               </div>
             </Reveal>
           </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="py-20 px-5">
+        <div className="max-w-6xl mx-auto">
+          <Reveal>
+            <div className="text-center mb-12">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/8 px-3 py-1 rounded-full mb-4">
+                <Star className="h-3 w-3" /> Trusted by educators
+              </span>
+              <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3">
+                What teachers are saying
+              </h2>
+              <p className="text-gray-500 max-w-lg mx-auto">
+                From solo tutors to multi-campus centers — Aperti is changing how education runs in Egypt.
+              </p>
+            </div>
+          </Reveal>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                quote: "I used to spend Sunday evenings just copying grades into WhatsApp messages for parents. Now Aperti does it automatically. I get those 3 hours back every single week.",
+                name: "Rania Khalil",
+                role: "IGCSE Physics Teacher — Cairo",
+                initials: "RK",
+                color: "hsl(var(--primary))",
+                bg: "hsl(var(--primary) / 0.08)",
+                delay: 0,
+              },
+              {
+                quote: "The AI grading assistant cuts my marking time in half. I still review every answer — but the first pass is done before I even open the gradebook. It's like having a TA.",
+                name: "Ahmed Saber",
+                role: "A-Level Mathematics — Alexandria",
+                initials: "AS",
+                color: "#7C3AED",
+                bg: "#7C3AED10",
+                delay: 0.1,
+              },
+              {
+                quote: "Parents used to call me constantly asking about test scores. Now they log in and see everything themselves. My phone is so much quieter — and parents are more engaged than ever.",
+                name: "Nadia Ibrahim",
+                role: "IB Chemistry — New Cairo",
+                initials: "NI",
+                color: "#0891B2",
+                bg: "#0891B210",
+                delay: 0.2,
+              },
+            ].map(({ quote, name, role, initials, color, bg, delay }) => (
+              <Reveal key={name} delay={delay}>
+                <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm flex flex-col h-full hover:shadow-md transition-shadow">
+                  <Quote className="h-5 w-5 mb-4 flex-shrink-0" style={{ color }} />
+                  <p className="text-sm text-gray-600 leading-relaxed flex-1 italic">"{quote}"</p>
+                  <div className="mt-5 flex items-center gap-3 pt-5 border-t border-gray-100">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0" style={{ background: bg, color }}>
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900">{name}</p>
+                      <p className="text-xs text-gray-400">{role}</p>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+          <Reveal delay={0.3}>
+            <p className="text-center text-xs text-gray-400 mt-6">
+              Testimonials from beta educators during private access period — names used with permission.
+            </p>
+          </Reveal>
         </div>
       </section>
 

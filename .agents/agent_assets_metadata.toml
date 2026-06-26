@@ -23,3 +23,9 @@ id = "1vYc0VT8FNBm-Y1AaagtA"
 uri = "file://SECURITY_FINDINGS_REPORT.md"
 type = "text"
 title = "Aperti Security Findings Report — Phase 2"
+
+[[outputs]]
+id = "0UrTy0DZqMbTD06vesPD_"
+uri = "file://docs/PRODUCTION_READINESS_CERTIFICATE.md"
+type = "text"
+title = "Aperti — Phase 6 Production Readiness Certificate (87/100)"

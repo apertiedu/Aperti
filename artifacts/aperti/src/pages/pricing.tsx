@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Check, Zap, Star, Crown } from "lucide-react";
+import { Check, Zap, Star, Crown, BookOpen, Users, HelpCircle, HardDrive } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/context/auth";
 
@@ -160,13 +160,12 @@ function PlanCard({ plan, index, onSelect }: { plan: any; index: number; onSelec
         )}
       </div>
 
-      {/* Limits */}
       {Object.keys(limits).length > 0 && (
-        <div className="space-y-1 text-xs text-gray-500">
-          {limits.courses   && <p>📚 {limits.courses} courses</p>}
-          {limits.students  && <p>👨‍🎓 {limits.students} students</p>}
-          {limits.questions && <p>❓ {limits.questions} questions</p>}
-          {limits.storage_gb && <p>💾 {limits.storage_gb} GB storage</p>}
+        <div className="space-y-1.5 text-xs text-gray-500">
+          {limits.courses    && <p className="flex items-center gap-1.5"><BookOpen className="w-3.5 h-3.5 text-gray-400" /> {limits.courses} courses</p>}
+          {limits.students   && <p className="flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-gray-400" /> {limits.students} students</p>}
+          {limits.questions  && <p className="flex items-center gap-1.5"><HelpCircle className="w-3.5 h-3.5 text-gray-400" /> {limits.questions} questions</p>}
+          {limits.storage_gb && <p className="flex items-center gap-1.5"><HardDrive className="w-3.5 h-3.5 text-gray-400" /> {limits.storage_gb} GB storage</p>}
         </div>
       )}
 
