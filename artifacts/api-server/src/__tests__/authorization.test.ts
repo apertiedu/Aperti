@@ -6,6 +6,7 @@ import {
   canDelete,
   canExport,
   canGrade,
+  canModerate,
   PERMISSION_MATRIX,
   type AuthContext,
   type ResourceRecord,

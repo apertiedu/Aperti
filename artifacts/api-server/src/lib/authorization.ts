@@ -7,6 +7,7 @@
  * Usage:
  *   const ok = await canAccess(req, "exam", examRow);
  *   const ok = await canGrade(req, homeworkRow);
+ *   const ok = await canModerate(req, submissionRow);
  */
 
 import { pool } from "@workspace/db";
@@ -20,7 +21,8 @@ export interface AuthContext {
 export type ResourceType =
   | "exam" | "homework" | "student" | "grade" | "report"
   | "upload" | "course" | "attendance" | "enrollment" | "analytics"
-  | "subscription" | "payment" | "audit" | "user" | "setting";
+  | "subscription" | "payment" | "audit" | "user" | "setting"
+  | "assessment" | "submission";
 
 export interface ResourceRecord {
   teacher_account_id?: number;
@@ -30,12 +32,20 @@ export interface ResourceRecord {
   account_id?: number;
   created_by?: number;
   owner_id?: number;
+  /** For assessment submissions: the teacher who owns the assessment */
+  assessment_teacher_id?: number;
+  /** The tenant root of the assessment's teacher */
+  assessment_teacher_tenant?: number | null;
 }
 
 // ── Internal helpers ──────────────────────────────────────────────────────────
 
 function isAdmin(ctx: AuthContext): boolean {
   return ctx.role === "admin" || ctx.role === "super_admin";
+}
+
+function isSuperAdmin(ctx: AuthContext): boolean {
+  return ctx.role === "super_admin";
 }
 
 function isSameUser(ctx: AuthContext, ownerId?: number): boolean {
@@ -69,6 +79,15 @@ async function roleHasPermission(ctx: AuthContext, permission: Permission): Prom
   return hasPermission(role, permission);
 }
 
+async function getActorTenantId(ctx: AuthContext): Promise<number | null> {
+  if (!ctx.userId) return null;
+  const { rows } = await pool.query(
+    "SELECT teacher_account_id FROM accounts WHERE id=$1 LIMIT 1",
+    [ctx.userId],
+  );
+  return rows[0]?.teacher_account_id ?? null;
+}
+
 // ── Public API ────────────────────────────────────────────────────────────────
 
 /**
@@ -98,6 +117,8 @@ export async function canAccess(
     audit: "audit:view",
     user: "users:view",
     setting: "settings:view",
+    assessment: "exams:view",
+    submission: "exams:view",
   };
 
   const perm = permMap[resourceType];
@@ -149,6 +170,7 @@ export async function canModify(
     payment: "payments:manage",
     setting: "settings:manage",
     user: "users:edit",
+    assessment: "exams:manage",
   };
 
   const perm = permMap[resourceType];
@@ -175,6 +197,7 @@ export async function canDelete(
     user: "users:delete",
     exam: "exams:manage",
     homework: "homework:manage",
+    assessment: "exams:manage",
   };
 
   const perm = permMap[resourceType];
@@ -217,12 +240,12 @@ export async function canExport(
  */
 export async function canGrade(
   ctx: AuthContext,
-  resourceType: "exam" | "homework",
+  resourceType: "exam" | "homework" | "assessment",
   resource?: ResourceRecord,
 ): Promise<boolean> {
   if (isAdmin(ctx)) return true;
 
-  const perm: Permission = resourceType === "exam" ? "exams:grade" : "homework:grade";
+  const perm: Permission = resourceType === "homework" ? "homework:grade" : "exams:grade";
   if (!(await roleHasPermission(ctx, perm))) return false;
   if (!resource) return true;
 
@@ -240,13 +263,53 @@ export async function canGrade(
   return isSameUser(ctx, owner);
 }
 
+/**
+ * canModerate — moderation permission for assessment submissions.
+ *
+ * Rules:
+ *   - super_admin: always allowed.
+ *   - admin (scoped): may moderate within their own tenant only.
+ *   - teacher: may moderate only their own assessments.
+ *   - assistant / student / parent: never.
+ *
+ * The resource record must include `assessment_teacher_id` (who owns the
+ * assessment) and `assessment_teacher_tenant` (that teacher's tenant root).
+ */
+export async function canModerate(
+  ctx: AuthContext,
+  resource: ResourceRecord,
+): Promise<boolean> {
+  if (!ctx.userId) return false;
+
+  // super_admin always passes
+  if (isSuperAdmin(ctx)) return true;
+
+  // Only teachers and admins can moderate
+  if (ctx.role !== "teacher" && ctx.role !== "admin") return false;
+
+  if (ctx.role === "teacher") {
+    // Teacher must own the assessment
+    return ctx.userId === resource.assessment_teacher_id;
+  }
+
+  // Admin (scoped) — must be in the same tenant
+  const actorTenant = await getActorTenantId(ctx);
+  const resourceTenant = resource.assessment_teacher_tenant;
+
+  // Platform-level admins (no tenant) can moderate anything
+  if (actorTenant === null) return true;
+
+  // Scoped admins can only moderate within their tenant
+  return actorTenant === resourceTenant;
+}
+
 // ── Permission Matrix export (for reporting) ─────────────────────────────────
 
 export const PERMISSION_MATRIX = {
-  super_admin: { access: true,  modify: true,  delete: true,  export: true,  grade: true  },
-  admin:       { access: true,  modify: true,  delete: true,  export: true,  grade: true  },
-  teacher:     { access: "own", modify: "own", delete: "own", export: "own", grade: "own" },
-  assistant:   { access: "tenant", modify: false, delete: false, export: false, grade: "if_permitted" },
-  student:     { access: "self",   modify: false, delete: false, export: false, grade: false },
-  parent:      { access: "child",  modify: false, delete: false, export: false, grade: false },
+  super_admin: { access: true,  modify: true,  delete: true,  export: true,  grade: true,  moderate: true  },
+  admin:       { access: true,  modify: true,  delete: true,  export: true,  grade: true,  moderate: "same_tenant" },
+  teacher:     { access: "own", modify: "own", delete: "own", export: "own", grade: "own", moderate: "own" },
+  assistant:   { access: "tenant", modify: false, delete: false, export: false, grade: "if_permitted", moderate: false },
+  student:     { access: "self",   modify: false, delete: false, export: false, grade: false, moderate: false },
+  parent:      { access: "child",  modify: false, delete: false, export: false, grade: false, moderate: false },
 } as const;

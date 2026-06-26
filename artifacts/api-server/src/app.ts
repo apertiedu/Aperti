@@ -120,6 +120,7 @@ import { recordRequest, startPerfFlushInterval } from "./lib/perf-tracker";
 import { sanitizeBody } from "./middleware/sanitize-body";
 import { requestObserver } from "./lib/request-observer";
 import { filesRouter } from "./routes/files";
+import { correlationId } from "./middleware/correlation-id";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -131,6 +132,9 @@ const isReplit = !!process.env.REPL_ID;
 if (isProduction || isReplit) {
   app.set("trust proxy", 1);
 }
+
+// ── Correlation ID — must be first so all downstream middleware can trace ─────
+app.use(correlationId);
 
 // ── Security headers ──────────────────────────────────────────────────────────
 app.use(
