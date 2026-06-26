@@ -334,6 +334,61 @@ subscriptionLifecycleRouter.post(
   },
 );
 
+/* ── GET /api/subscriptions/lifecycle/audit-log (admin) ─────────────────── */
+subscriptionLifecycleRouter.get(
+  "/audit-log",
+  requireRole("admin", "super_admin"),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const page   = Math.max(1, parseInt((req.query.page as string) ?? "1", 10));
+      const limit  = Math.min(100, Math.max(10, parseInt((req.query.limit as string) ?? "50", 10)));
+      const offset = (page - 1) * limit;
+      const userId = req.query.userId ? parseInt(req.query.userId as string, 10) : null;
+
+      const whereParts: string[] = [];
+      const params: any[] = [];
+      if (userId) {
+        params.push(userId);
+        whereParts.push(`sal.user_id = $${params.length}`);
+      }
+      const where = whereParts.length ? `WHERE ${whereParts.join(" AND ")}` : "";
+
+      const { rows } = await pool.query(
+        `SELECT
+           sal.id, sal.subscription_id, sal.user_id,
+           sal.previous_status, sal.new_status,
+           sal.reason, sal.triggered_by, sal.actor_id,
+           sal.metadata, sal.created_at,
+           a.display_name AS user_name, a.email AS user_email,
+           actor.display_name AS actor_name
+         FROM subscription_audit_log sal
+         LEFT JOIN accounts a     ON a.id     = sal.user_id
+         LEFT JOIN accounts actor ON actor.id = sal.actor_id
+         ${where}
+         ORDER BY sal.created_at DESC
+         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limit, offset],
+      );
+
+      const { rows: countRows } = await pool.query(
+        `SELECT COUNT(*)::int AS total FROM subscription_audit_log sal ${where}`,
+        params,
+      );
+
+      res.json({
+        entries: rows,
+        total: countRows[0]?.total ?? 0,
+        page,
+        limit,
+        pages: Math.ceil((countRows[0]?.total ?? 0) / limit),
+      });
+    } catch (err) {
+      await logError(err, { route: "/api/subscriptions/lifecycle/audit-log" });
+      res.status(500).json({ error: "Failed to fetch subscription audit log" });
+    }
+  },
+);
+
 /* ── GET /api/subscriptions/lifecycle/overview (admin) ─────────────────── */
 subscriptionLifecycleRouter.get(
   "/overview",

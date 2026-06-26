@@ -128,6 +128,11 @@ import { redisClient } from "./lib/redis-client";
 import { rateLimitStore } from "./lib/redis-rate-limit-store";
 import { adminSlowQueriesRouter } from "./routes/admin-slow-queries";
 import { RedisStore as ConnectRedisStore } from "connect-redis";
+// SaaS Readiness
+import { emailVerificationRouter } from "./routes/email-verification";
+import { accountSuspensionRouter } from "./routes/account-suspension";
+import { onboardingRouter } from "./routes/onboarding";
+import { runGraceAndExpiryCheck } from "./lib/subscription-fsm";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -337,6 +342,27 @@ cron.schedule("0 3 * * *", () => {
   pool.query("DELETE FROM system_metrics_log WHERE created_at < NOW() - INTERVAL '30 days'").catch(() => {});
 }, { timezone: "UTC" });
 
+// ── Subscription grace-period & expiry check ── 01:00 UTC ────────────────────
+// Moves active subscriptions whose end_date has passed into grace_period, then
+// expires grace_period subscriptions whose grace window has closed.
+// runGraceAndExpiryCheck() uses FOR UPDATE SKIP LOCKED so multi-instance
+// deployments are safe (only one process will process each row).
+cron.schedule("0 1 * * *", async () => {
+  logger.info("[grace-check] Starting subscription grace/expiry check");
+  try {
+    const result = await runGraceAndExpiryCheck();
+    logger.info(
+      { moved_to_grace: result.moved_to_grace.length, expired: result.expired.length, errors: result.errors.length },
+      "[grace-check] Completed",
+    );
+    if (result.errors.length) {
+      logger.warn({ errors: result.errors }, "[grace-check] Some subscriptions had errors");
+    }
+  } catch (err) {
+    logger.error({ err }, "[grace-check] Fatal error in grace/expiry check");
+  }
+}, { timezone: "UTC" });
+
 // ── Nightly VACUUM ANALYZE ── 04:00 UTC ───────────────────────────────────────
 // Reclaims dead tuples and updates planner statistics on high-write tables.
 // Runs sequentially (no parallelism) to keep WAL pressure low.
@@ -530,6 +556,10 @@ app.use("/api/admin/docs", adminDocsRouter);
 app.use("/api/admin/launch-audit", adminLaunchAuditRouter);
 app.use("/api", userExportRouter);
 app.use("/api", complianceConsentRouter);
+// SaaS Readiness — email verification, account suspension, onboarding wizard
+app.use("/api", emailVerificationRouter);
+app.use("/api/admin/accounts", accountSuspensionRouter);
+app.use("/api/onboarding", onboardingRouter);
 
 // Phase 32 — Zero-Defect Initiative
 app.use("/api/admin/route-health", adminRouteHealthRouter);
