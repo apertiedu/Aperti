@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import { db } from "@workspace/db";
 import {
-  paymentTransactionsTable, subscriptionsTable, accountsTable, revenueRecordsTable
+  paymentTransactionsTable, subscriptionsTable, accountsTable, revenueRecordsTable, notificationsTable,
 } from "@workspace/db";
 import { eq, desc, sql, and } from "drizzle-orm";
 import { requireRole } from "../middleware/auth";
@@ -92,7 +92,33 @@ adminPaymentsRouter.post("/reject", async (req: Request, res: Response) => {
   try {
     const { transactionId, notes } = req.body;
     const adminId = (req as any).userId;
-    const [tx] = await db.update(paymentTransactionsTable).set({ status: "rejected", verifiedBy: adminId, verifiedAt: new Date(), notes }).where(eq(paymentTransactionsTable.id, transactionId)).returning();
+    if (!notes?.trim()) {
+      return res.status(400).json({ error: "Rejection reason is required" });
+    }
+    const [tx] = await db.update(paymentTransactionsTable)
+      .set({ status: "rejected", verifiedBy: adminId, verifiedAt: new Date(), notes })
+      .where(eq(paymentTransactionsTable.id, transactionId))
+      .returning();
+    if (!tx) return res.status(404).json({ error: "Transaction not found" });
+
+    if (tx.subscriptionId) {
+      await db.update(subscriptionsTable)
+        .set({ status: "pending_review", paymentStatus: "failed" })
+        .where(eq(subscriptionsTable.id, tx.subscriptionId))
+        .catch(() => {});
+    }
+
+    if (tx.userId) {
+      await db.insert(notificationsTable as any).values({
+        accountId: tx.userId,
+        type: "payment_rejected",
+        title: "Payment Rejected",
+        message: `Your InstaPay payment was rejected. Reason: ${notes.trim()}. Please resubmit with a valid transaction reference.`,
+        isRead: false,
+        link: "/checkout",
+      }).catch(() => {});
+    }
+
     res.json(tx);
   } catch (err) {
     res.status(500).json({ error: "Failed to reject transaction" });

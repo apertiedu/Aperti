@@ -367,6 +367,79 @@ subscriptionEngineRouter.post("/cancel", async (req: AuthRequest, res: Response)
   }
 });
 
+/* ── POST /api/sub-engine/upload-proof ─────────────────────────────────── */
+subscriptionEngineRouter.post("/upload-proof", async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { fileName, fileType, fileData } = req.body as {
+      fileName?: string;
+      fileType: string;
+      fileData: string;
+    };
+
+    if (!fileData || !fileType) {
+      res.status(400).json({ error: "fileData and fileType required" });
+      return;
+    }
+
+    const ALLOWED: Record<string, string> = {
+      "image/png": ".png",
+      "image/jpeg": ".jpg",
+      "image/jpg": ".jpg",
+      "application/pdf": ".pdf",
+    };
+    const ext = ALLOWED[fileType];
+    if (!ext) {
+      res.status(400).json({ error: "Only PNG, JPG and PDF files are allowed" });
+      return;
+    }
+
+    const base64Data = fileData.replace(/^data:[^;]+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+
+    if (buffer.length > 5 * 1024 * 1024) {
+      res.status(400).json({ error: "File too large (max 5 MB)" });
+      return;
+    }
+
+    const MAGIC: Record<string, number[]> = {
+      "image/png":       [0x89, 0x50, 0x4e, 0x47],
+      "image/jpeg":      [0xff, 0xd8, 0xff],
+      "image/jpg":       [0xff, 0xd8, 0xff],
+      "application/pdf": [0x25, 0x50, 0x44, 0x46],
+    };
+    const sig = MAGIC[fileType];
+    if (sig && !sig.every((b, i) => buffer[i] === b)) {
+      res.status(400).json({ error: "File content does not match declared type" });
+      return;
+    }
+
+    const { mkdirSync } = await import("fs");
+    const { writeFile } = await import("fs/promises");
+    const { join } = await import("path");
+    const { randomBytes } = await import("crypto");
+
+    const UPLOAD_DIR = join(process.cwd(), "uploads");
+    try { mkdirSync(UPLOAD_DIR, { recursive: true }); } catch {}
+
+    const uniqueName = `proof-${Date.now()}-${randomBytes(6).toString("hex")}${ext}`;
+    const filePath = join(UPLOAD_DIR, uniqueName);
+    await writeFile(filePath, buffer);
+
+    await pool.query(
+      `INSERT INTO upload_registry
+         (uploader_id, tenant_id, filename, original_filename, mime_type, size, uploaded_at)
+       VALUES ($1,$1,$2,$3,$4,$5,NOW())
+       ON CONFLICT (filename) DO NOTHING`,
+      [req.userId, uniqueName, fileName ?? uniqueName, fileType, buffer.length],
+    ).catch(() => {});
+
+    res.json({ url: `/files/${uniqueName}`, fileName: uniqueName });
+  } catch (err) {
+    await logError(err, { route: "POST /api/sub-engine/upload-proof" });
+    res.status(500).json({ error: "Upload failed" });
+  }
+});
+
 /* ── ADMIN ─────────────────────────────────────────────────────────────── */
 
 /* ── GET /api/sub-engine/admin/all ─────────────────────────────────────── */
@@ -485,10 +558,20 @@ subscriptionEngineRouter.post("/admin/reject/:id", requireRole("admin", "super_a
     const subscriptionId = parseInt(req.params.id);
     const { reason } = req.body as { reason?: string };
 
+    if (!reason?.trim()) {
+      res.status(400).json({ error: "Rejection reason is required" });
+      return;
+    }
+
+    const { rows: [sub] } = await pool.query(
+      `SELECT account_id FROM subscriptions WHERE id = $1`,
+      [subscriptionId],
+    );
+
     const result = await transitionSubscription({
       subscriptionId,
       to: "pending_payment",
-      reason: `Admin rejected payment: ${reason ?? "No reason given"}`,
+      reason: `Admin rejected payment: ${reason}`,
       triggeredBy: "admin",
       actorId: req.userId,
       metadata: { admin_reason: reason },
@@ -498,6 +581,20 @@ subscriptionEngineRouter.post("/admin/reject/:id", requireRole("admin", "super_a
     if (!result.success) {
       res.status(422).json({ error: result.error });
       return;
+    }
+
+    if (sub?.account_id) {
+      await pool.query(
+        `INSERT INTO notifications (account_id, type, title, message, is_read, link, created_at)
+         VALUES ($1,'payment_rejected','Payment Rejected',$2,FALSE,'/checkout',NOW())`,
+        [sub.account_id, `Your InstaPay payment was rejected. Reason: ${reason.trim()}. Please resubmit with a valid transaction reference.`],
+      ).catch(() => {});
+
+      sendPushToUser(sub.account_id, {
+        title: "Payment Rejected",
+        body: `Reason: ${reason.trim()}. Please resubmit your payment.`,
+        url: "/checkout",
+      }).catch(() => {});
     }
 
     auditLog({ actorId: req.userId!, actorRole: "admin", action: "PAYMENT_REJECTED_ADMIN", targetId: subscriptionId, targetType: "subscription", ip, result: "success" });
