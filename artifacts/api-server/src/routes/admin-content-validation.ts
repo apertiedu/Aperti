@@ -1,12 +1,14 @@
 import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { requireRole } from "../middleware/auth";
+import { auditFromReq } from "../lib/audit";
 
 export const adminContentValidationRouter = Router();
 adminContentValidationRouter.use(requireRole("admin", "super_admin") as any);
 
 /* GET /api/admin/content-validation/summary */
-adminContentValidationRouter.get("/summary", async (_req, res: Response) => {
+adminContentValidationRouter.get("/summary", async (req, res: Response) => {
+  auditFromReq(req as any, "EXPORT_REPORT", "content_validation_summary", { result: "success" });
   try {
     const [overview, flagged, bySubject, dupes] = await Promise.all([
       pool.query(`
@@ -98,7 +100,8 @@ adminContentValidationRouter.get("/summary", async (_req, res: Response) => {
 });
 
 /* GET /api/admin/content-validation/mark-schemes */
-adminContentValidationRouter.get("/mark-schemes", async (_req, res: Response) => {
+adminContentValidationRouter.get("/mark-schemes", async (req, res: Response) => {
+  auditFromReq(req as any, "EXPORT_REPORT", "content_validation_mark_schemes", { result: "success" });
   try {
     const { rows } = await pool.query(`
       SELECT
@@ -127,7 +130,8 @@ adminContentValidationRouter.get("/mark-schemes", async (_req, res: Response) =>
 });
 
 /* GET /api/admin/content-validation/relationships */
-adminContentValidationRouter.get("/relationships", async (_req, res: Response) => {
+adminContentValidationRouter.get("/relationships", async (req, res: Response) => {
+  auditFromReq(req as any, "EXPORT_REPORT", "content_validation_relationships", { result: "success" });
   try {
     const [questions, markSchemes] = await Promise.all([
       pool.query(`

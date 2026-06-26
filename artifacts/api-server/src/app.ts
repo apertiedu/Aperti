@@ -122,6 +122,8 @@ import { sanitizeBody } from "./middleware/sanitize-body";
 import { requestObserver } from "./lib/request-observer";
 import { filesRouter } from "./routes/files";
 import { correlationId } from "./middleware/correlation-id";
+import { csrfProtection, issueCsrfToken } from "./middleware/csrf";
+import { circuitStatus } from "./lib/ai-circuit-breaker";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
@@ -249,6 +251,12 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(cookieParser());
 app.use(sanitizeBody);
+
+// ── CSRF protection (after cookie-parser, before auth routes) ─────────────────
+// Issues a double-submit cookie; frontend must send x-csrf-token header on mutations.
+// Token endpoint is public so unauthenticated pages can also get a token.
+app.get("/api/auth/csrf-token", issueCsrfToken);
+app.use(csrfProtection);
 
 // ── HTTP logging ──────────────────────────────────────────────────────────────
 app.use(

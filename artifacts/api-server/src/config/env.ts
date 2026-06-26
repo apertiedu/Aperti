@@ -102,6 +102,23 @@ export function validateEnv(): void {
     warnings.push("  EXAM_VAULT_KEY not set — exam vault encryption is disabled.");
   }
 
+  // SMTP — optional but strongly recommended in production
+  const hasSmtp = !!(process.env["SMTP_HOST"] && process.env["SMTP_USER"] && process.env["SMTP_PASS"]);
+  if (!hasSmtp) {
+    warnings.push(
+      "  SMTP_HOST / SMTP_USER / SMTP_PASS not set — transactional email (password reset, alerts) will be console-logged only.\n" +
+      "  Set SMTP_HOST, SMTP_PORT (default 587), SMTP_USER, SMTP_PASS, SMTP_FROM to enable real delivery."
+    );
+  }
+
+  // ALLOWED_ORIGINS — must be set in production for tight CORS
+  if (isProd && !process.env["ALLOWED_ORIGINS"] && !process.env["REPLIT_DOMAINS"]) {
+    errors.push(
+      "  ALLOWED_ORIGINS must be set in production. Provide a comma-separated list of allowed frontend origins.\n" +
+      "  Example: ALLOWED_ORIGINS=https://your-app.replit.app,https://yourdomain.com"
+    );
+  }
+
   // ── Report ──────────────────────────────────────────────────────────────────
   if (errors.length > 0) {
     console.error("\n[startup] FATAL — Missing or invalid environment variables:");

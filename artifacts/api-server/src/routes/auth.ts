@@ -3,9 +3,27 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
 import { eq } from "drizzle-orm";
+import { randomBytes } from "crypto";
 import { db, pool } from "@workspace/db";
 import { accountsTable, deviceSessionsTable, auditLogsTable } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
+import { sendEmail, buildPasswordResetEmail, SMTP_CONFIGURED } from "../lib/email";
+
+/**
+ * Validate password complexity.
+ * Enforces: min 8 chars, ≥1 uppercase, ≥1 lowercase, ≥1 digit, ≥1 special char.
+ * Returns null on success, error message string on failure.
+ */
+function validatePasswordComplexity(password: string): string | null {
+  if (typeof password !== "string") return "Password must be a string";
+  if (password.length < 8) return "Password must be at least 8 characters";
+  if (password.length > 500) return "Password is too long";
+  if (!/[A-Z]/.test(password)) return "Password must contain at least one uppercase letter";
+  if (!/[a-z]/.test(password)) return "Password must contain at least one lowercase letter";
+  if (!/[0-9]/.test(password)) return "Password must contain at least one number";
+  if (!/[^A-Za-z0-9]/.test(password)) return "Password must contain at least one special character (!@#$% etc.)";
+  return null;
+}
 
 // Fire-and-forget audit log helper — never throws
 function writeAudit(entry: {
@@ -468,7 +486,8 @@ authRouter.post("/student-register", registerLimiter, async (req: Request, res: 
     if (!username || !password) return res.status(400).json({ error: "Username and password are required" });
     if (typeof username !== "string" || username.length > 200) return res.status(400).json({ error: "Invalid username" });
     if (typeof password !== "string" || password.length > 500) return res.status(400).json({ error: "Invalid password" });
-    if (password.length < 6) return res.status(400).json({ error: "Password must be at least 6 characters" });
+    const pwErr = validatePasswordComplexity(password);
+    if (pwErr) return res.status(400).json({ error: pwErr });
     if (!teacherId) return res.status(400).json({ error: "Please select a teacher" });
 
     const { rows: teacherRows } = await (await import("@workspace/db")).pool.query(
@@ -508,7 +527,8 @@ authRouter.post("/register", registerLimiter, async (req: Request, res: Response
     if (!email?.trim() || !password) return res.status(400).json({ error: "Email and password are required" });
     const validRoles = ["teacher", "student", "parent"];
     if (!validRoles.includes(role || "")) return res.status(400).json({ error: "Role must be teacher, student, or parent" });
-    if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+    const pwErr2 = validatePasswordComplexity(password);
+    if (pwErr2) return res.status(400).json({ error: pwErr2 });
 
     const { pool: dbPool } = await import("@workspace/db");
 
@@ -588,42 +608,94 @@ const forgotPasswordLimiter = rateLimit({
   },
 });
 
-// POST /auth/forgot-password — admin-assisted flow (no email sent)
+// POST /auth/forgot-password — email-based reset when SMTP configured, else admin-assisted
 authRouter.post("/forgot-password", forgotPasswordLimiter, async (req: Request, res: Response) => {
   const { email, username } = req.body;
   if (!email?.trim() && !username?.trim()) {
     return res.status(400).json({ error: "Email or username is required" });
   }
-  const SAFE = { message: "Your request has been submitted. An administrator will reset your password and provide you with a temporary one shortly." };
+  // Always return the same message regardless of whether the account exists (timing-safe)
+  const SAFE_EMAIL = { message: "If an account with that email exists, a password reset link has been sent." };
+  const SAFE_ADMIN = { message: "Your request has been submitted. An administrator will reset your password and provide you with a temporary one shortly." };
   try {
     const { pool: dbPool } = await import("@workspace/db");
     let account: any = null;
     if (email?.trim()) {
       const { rows } = await dbPool.query(
-        "SELECT id, email, username FROM accounts WHERE LOWER(email)=$1 AND status='active' LIMIT 1",
+        "SELECT id, email, username, display_name FROM accounts WHERE LOWER(email)=$1 AND status='active' LIMIT 1",
         [email.toLowerCase().trim()]
       );
       account = rows[0] ?? null;
     }
     if (!account && username?.trim()) {
       const { rows } = await dbPool.query(
-        "SELECT id, email, username FROM accounts WHERE LOWER(username)=$1 AND status='active' LIMIT 1",
+        "SELECT id, email, username, display_name FROM accounts WHERE LOWER(username)=$1 AND status='active' LIMIT 1",
         [username.toLowerCase().trim()]
       );
       account = rows[0] ?? null;
     }
+
     if (account) {
-      await dbPool.query(
-        `INSERT INTO password_reset_requests (account_id, email, username, status, created_at)
-         VALUES ($1, $2, $3, 'pending', NOW())`,
-        [account.id, account.email ?? email?.trim() ?? null, account.username ?? username?.trim() ?? null]
-      );
+      if (SMTP_CONFIGURED && account.email) {
+        // Email-based flow: generate a secure token, store it, send email
+        const resetToken = randomBytes(32).toString("hex");
+        const expiryMinutes = 120;
+        await dbPool.query(
+          `INSERT INTO password_reset_tokens (account_id, token, expires_at, created_at)
+           VALUES ($1, $2, NOW() + INTERVAL '${expiryMinutes} minutes', NOW())
+           ON CONFLICT DO NOTHING`,
+          [account.id, resetToken]
+        ).catch(async () => {
+          // If token table doesn't exist yet, create it
+          await dbPool.query(`
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+              id SERIAL PRIMARY KEY,
+              account_id INT NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+              token TEXT NOT NULL UNIQUE,
+              used_at TIMESTAMPTZ,
+              expires_at TIMESTAMPTZ NOT NULL,
+              created_at TIMESTAMPTZ DEFAULT NOW()
+            )
+          `);
+          await dbPool.query(
+            `INSERT INTO password_reset_tokens (account_id, token, expires_at, created_at)
+             VALUES ($1, $2, NOW() + INTERVAL '${expiryMinutes} minutes', NOW())`,
+            [account.id, resetToken]
+          );
+        });
+
+        const publicUrl = process.env.PUBLIC_URL ?? "https://aperti.app";
+        const resetUrl = `${publicUrl}/reset-password?token=${resetToken}`;
+        const { html, text } = buildPasswordResetEmail({
+          displayName: account.display_name ?? account.username,
+          resetUrl,
+          expiryMinutes,
+        });
+
+        await sendEmail({
+          to: account.email,
+          subject: "Reset your Aperti password",
+          html,
+          text,
+        }).catch(err => console.error("[forgot-password] Email send failed:", err));
+
+        res.json(SAFE_EMAIL);
+      } else {
+        // Admin-assisted fallback when SMTP is not configured
+        await dbPool.query(
+          `INSERT INTO password_reset_requests (account_id, email, username, status, created_at)
+           VALUES ($1, $2, $3, 'pending', NOW())`,
+          [account.id, account.email ?? email?.trim() ?? null, account.username ?? username?.trim() ?? null]
+        );
+        res.json(SAFE_ADMIN);
+      }
+    } else {
+      // Account not found — still return safe message
+      res.json(SMTP_CONFIGURED ? SAFE_EMAIL : SAFE_ADMIN);
     }
-    // Always return the same safe message whether or not account was found
-    res.json(SAFE);
   } catch (err) {
     console.error("Forgot password error:", err);
-    res.json(SAFE);
+    res.json(SMTP_CONFIGURED ? SAFE_EMAIL : SAFE_ADMIN);
   }
 });
 
@@ -631,7 +703,8 @@ authRouter.post("/forgot-password", forgotPasswordLimiter, async (req: Request, 
 authRouter.post("/reset-password", async (req: Request, res: Response) => {
   const { token, password } = req.body;
   if (!token || !password) return res.status(400).json({ error: "Token and new password are required" });
-  if (password.length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
+  const pwResetErr = validatePasswordComplexity(password);
+  if (pwResetErr) return res.status(400).json({ error: pwResetErr });
   try {
     const { pool: dbPool } = await import("@workspace/db");
     const { rows } = await dbPool.query(

@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/context/auth";
 import { ThemeProvider } from "@/context/theme";
 import ErrorBoundary from "@/components/error-boundary";
+import { LiveAnnouncerProvider, RouteChangeAnnouncer } from "@/components/live-announcer";
 const NotFound = lazy(() => import("@/pages/not-found"));
 const ForceChangePassword = lazy(() => import("@/pages/force-change-password"));
 import Layout from "@/components/layout";
@@ -892,26 +893,29 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <AuthProvider>
-            <ErrorBoundary>
-                <a
-                  href="#main-content"
-                  className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-background focus:border focus:border-primary focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
-                >
-                  Skip to main content
-                </a>
-                <AppContent />
-                <SessionExpiryGate />
-              </ErrorBoundary>
-          </AuthProvider>
-          <RouteProgressBar />
-          <NetworkStatusBanner />
-          <Toaster />
-          <LowBandwidthBanner />
-          <OfflineDetector />
-          <PWAInstallBanner />
-          <KeyboardShortcutsHelp />
-          <ConsentBanner />
+          <LiveAnnouncerProvider>
+            <AuthProvider>
+              <ErrorBoundary>
+                  <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-background focus:border focus:border-primary focus:text-primary focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium"
+                  >
+                    Skip to main content
+                  </a>
+                  <RouteChangeAnnouncer />
+                  <AppContent />
+                  <SessionExpiryGate />
+                </ErrorBoundary>
+            </AuthProvider>
+            <RouteProgressBar />
+            <NetworkStatusBanner />
+            <Toaster />
+            <LowBandwidthBanner />
+            <OfflineDetector />
+            <PWAInstallBanner />
+            <KeyboardShortcutsHelp />
+            <ConsentBanner />
+          </LiveAnnouncerProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

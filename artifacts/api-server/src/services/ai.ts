@@ -9,6 +9,7 @@
  *   - Returns typed, safe responses
  */
 import { pool } from "@workspace/db";
+import { circuitAllows, circuitSuccess, circuitFailure } from "../lib/ai-circuit-breaker";
 
 // ── Config (resolved once at module load) ─────────────────────────────────────
 
@@ -113,6 +114,17 @@ export async function generateAIResponse(
     };
   }
 
+  // ── Circuit breaker check ────────────────────────────────────────────────
+  if (!circuitAllows()) {
+    return {
+      text: null,
+      ok: false,
+      fallback: true,
+      latencyMs: 0,
+      error: "AI circuit breaker is OPEN — too many recent failures. Requests are paused.",
+    };
+  }
+
   const system = injectLanguage(
     opts.systemPrompt ?? "You are a helpful educational AI assistant.",
     opts.language,
@@ -141,6 +153,7 @@ export async function generateAIResponse(
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       logAIFailure(`HTTP ${res.status}`, body, opts.module);
+      circuitFailure();
       return {
         text: null,
         ok: false,
@@ -153,10 +166,12 @@ export async function generateAIResponse(
     const data = await res.json() as any;
     const text: string | null = data?.choices?.[0]?.message?.content ?? null;
 
+    circuitSuccess();
     return { text, ok: true, fallback: false, latencyMs: Date.now() - t0 };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     logAIFailure(msg, err, opts.module);
+    circuitFailure();
     return {
       text: null,
       ok: false,
@@ -179,6 +194,9 @@ export async function generateAIText(
   const result = await generateAIResponse(userMessage, opts);
   return result.text ?? fallbackMessage;
 }
+
+// ── Re-export circuit breaker status for monitoring ───────────────────────────
+export { circuitStatus as aiCircuitStatus } from "../lib/ai-circuit-breaker";
 
 // ── Re-export legacy openaiChat shape for backward compatibility ───────────────
 // Routes that already call openaiChat() don't need to change.

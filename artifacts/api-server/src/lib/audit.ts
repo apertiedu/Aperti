@@ -17,6 +17,7 @@
 
 import { pool } from "@workspace/db";
 import { Request } from "express";
+import { dispatchAlert } from "./alert-dispatch";
 
 export type AuditAction =
   // Authentication
@@ -106,6 +107,22 @@ export async function audit(entry: AuditEntry): Promise<void> {
     );
   } catch {
     // Audit logging must never crash the application
+  }
+
+  // Fire-and-forget alert for critical events
+  if (severity === "critical") {
+    dispatchAlert({
+      type: entry.action,
+      severity: "critical",
+      message: `[${entry.action}] actor=${entry.actorId}(${entry.actorRole}) resource=${entry.resource}${entry.resourceId ? `/${entry.resourceId}` : ""} result=${entry.result ?? "success"}`,
+      meta: {
+        actorId: String(entry.actorId),
+        actorRole: entry.actorRole,
+        ip: entry.ip ?? "unknown",
+        resource: entry.resource,
+        resourceId: String(entry.resourceId ?? ""),
+      },
+    }).catch(() => {});
   }
 }
 

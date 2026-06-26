@@ -3,6 +3,8 @@ import { pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { logError } from "../lib/log-error";
 import { auditLog, getClientIp } from "../lib/financial-audit";
+import { transitionSubscription } from "../lib/subscription-fsm";
+import { dispatchAlert } from "../lib/alert-dispatch";
 
 export const subscriptionLifecycleRouter = Router();
 
@@ -211,6 +213,123 @@ subscriptionLifecycleRouter.post(
     } catch (err) {
       await logError(err, { route: `/api/subscriptions/lifecycle/restore/${req.params.id}` });
       res.status(500).json({ error: "Failed to restore subscription" });
+    }
+  },
+);
+
+/* ── POST /api/subscriptions/lifecycle/payment-failure (system / admin) ── *
+ * Records a payment failure event, moves the subscription into grace_period
+ * (if currently active) or expires it if the grace period has also elapsed.
+ * Fires a critical alert so the ops team can follow up.
+ */
+subscriptionLifecycleRouter.post(
+  "/payment-failure",
+  requireRole("admin", "super_admin"),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    const ip = getClientIp(req as unknown as { ip?: string; headers: Record<string, string | string[] | undefined> });
+    try {
+      const { subscriptionId, reason } = req.body as {
+        subscriptionId: number;
+        reason?: string;
+      };
+
+      if (!subscriptionId || typeof subscriptionId !== "number") {
+        res.status(400).json({ error: "subscriptionId (number) is required" });
+        return;
+      }
+
+      const { rows } = await pool.query(
+        `SELECT s.*, a.email, a.display_name
+         FROM subscriptions s
+         LEFT JOIN accounts a ON a.id = s.account_id
+         WHERE s.id = $1 LIMIT 1`,
+        [subscriptionId],
+      );
+
+      if (rows.length === 0) {
+        res.status(404).json({ error: "Subscription not found" });
+        return;
+      }
+
+      const sub = rows[0];
+      const failureNote = reason ?? "Payment failed";
+
+      // Record the failure event
+      await pool.query(
+        `INSERT INTO billing_events (subscription_id, account_id, event_type, amount, currency, metadata, created_at)
+         VALUES ($1, $2, 'payment_failed', $3, 'EGP', $4, NOW())`,
+        [sub.id, sub.account_id, sub.price_egp ?? 0, JSON.stringify({ reason: failureNote })],
+      ).catch(() => {
+        // billing_events table may not exist in all environments; not fatal
+      });
+
+      // Determine new state
+      let newStatus: "grace_period" | "expired";
+      let transitionReason: string;
+
+      if (sub.status === "active") {
+        newStatus = "grace_period";
+        transitionReason = `Payment failure — entered grace period. ${failureNote}`;
+      } else if (sub.status === "grace_period") {
+        newStatus = "expired";
+        transitionReason = `Payment failure during grace period — subscription expired. ${failureNote}`;
+      } else {
+        res.status(400).json({
+          error: `Cannot record payment failure from state: ${sub.status}`,
+          current_state: sub.status,
+        });
+        return;
+      }
+
+      const result = await transitionSubscription({
+        subscriptionId: sub.id,
+        to: newStatus,
+        reason: transitionReason,
+        triggeredBy: "payment",
+        actorId: req.userId,
+        metadata: { payment_failure_reason: failureNote, admin_id: req.userId },
+      });
+
+      if (!result.success) {
+        res.status(400).json({ error: result.error });
+        return;
+      }
+
+      auditLog({
+        actorId: req.userId!,
+        actorRole: req.role ?? "admin",
+        action: newStatus === "grace_period" ? "SUBSCRIPTION_GRACE_PERIOD" : "SUBSCRIPTION_EXPIRED",
+        targetId: sub.id,
+        targetType: "subscription",
+        ip,
+        result: "success",
+        metadata: { reason: failureNote, new_status: newStatus },
+      });
+
+      // Fire alert for ops team
+      await dispatchAlert({
+        type: "SUBSCRIPTION_PAYMENT_FAILURE",
+        severity: "warning",
+        message: `Payment failure for subscription #${sub.id} (user: ${sub.email ?? sub.account_id}). Status → ${newStatus}. ${failureNote}`,
+        meta: {
+          subscriptionId: String(sub.id),
+          accountId: String(sub.account_id),
+          email: sub.email ?? "",
+          newStatus,
+          reason: failureNote,
+        },
+      });
+
+      res.json({
+        success: true,
+        subscription_id: sub.id,
+        previous_status: sub.status,
+        new_status: newStatus,
+        message: `Subscription moved to ${newStatus}`,
+      });
+    } catch (err) {
+      await logError(err, { route: "POST /api/subscriptions/lifecycle/payment-failure" });
+      res.status(500).json({ error: "Failed to process payment failure" });
     }
   },
 );

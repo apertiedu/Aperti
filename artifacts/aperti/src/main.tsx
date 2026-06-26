@@ -2,6 +2,10 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import ErrorBoundary from "@/components/error-boundary";
+import { fetchCsrfToken } from "@/lib/api";
+
+// Prefetch CSRF token on boot so it's ready before any mutation
+fetchCsrfToken().catch(() => {});
 
 // ── Global unhandled error capture ───────────────────────────────────────────
 function reportToBackend(payload: Record<string, unknown>) {

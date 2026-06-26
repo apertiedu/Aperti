@@ -13,15 +13,54 @@ const API_BASE = "";
 const RETRY_DELAY_MS = 600;
 const DEFAULT_TIMEOUT_MS = 20_000;
 
+// ── CSRF token management ─────────────────────────────────────────────────────
+// Token is fetched once on app load and stored in memory (not localStorage).
+// The server sets a csrf_token cookie; we mirror it in this header.
+let _csrfToken: string | null = null;
+let _csrfFetchPromise: Promise<void> | null = null;
+
+export async function fetchCsrfToken(): Promise<void> {
+  if (_csrfToken) return; // already have one
+  if (_csrfFetchPromise) return _csrfFetchPromise; // in-flight dedup
+  _csrfFetchPromise = (async () => {
+    try {
+      const res = await fetch("/api/auth/csrf-token", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        _csrfToken = data?.csrfToken ?? null;
+      }
+    } catch {
+      // Non-fatal — CSRF protection degrades gracefully when the endpoint is unavailable
+    } finally {
+      _csrfFetchPromise = null;
+    }
+  })();
+  return _csrfFetchPromise;
+}
+
+export function getCsrfToken(): string | null {
+  return _csrfToken;
+}
+
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
 export function apiFetch(url: string, options?: RequestInit & { timeout?: number }): Promise<Response> {
   const { timeout = DEFAULT_TIMEOUT_MS, ...fetchOptions } = options ?? {};
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
+
+  const method = (fetchOptions.method ?? "GET").toUpperCase();
+  const csrfHeaders: Record<string, string> = {};
+  if (MUTATING_METHODS.has(method) && _csrfToken) {
+    csrfHeaders["x-csrf-token"] = _csrfToken;
+  }
+
   return fetch(`${API_BASE}${url}`, {
     ...fetchOptions,
     credentials: "include",
     signal: fetchOptions.signal ?? controller.signal,
     headers: {
+      ...csrfHeaders,
       ...(fetchOptions.headers as Record<string, string> | undefined),
     },
   }).finally(() => clearTimeout(timer));
