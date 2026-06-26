@@ -124,9 +124,23 @@ import { filesRouter } from "./routes/files";
 import { correlationId } from "./middleware/correlation-id";
 import { csrfProtection, issueCsrfToken } from "./middleware/csrf";
 import { circuitStatus } from "./lib/ai-circuit-breaker";
+import { redisClient } from "./lib/redis-client";
+import { rateLimitStore } from "./lib/redis-rate-limit-store";
+import { adminSlowQueriesRouter } from "./routes/admin-slow-queries";
+import { RedisStore as ConnectRedisStore } from "connect-redis";
 
 const app: Express = express();
 const PgSession = connectPgSimple(session);
+
+// ── Session store: Redis when available, Postgres otherwise ──────────────────
+// connect-redis supports lazy-connect (client can be pre-connected client object)
+const sessionStore = redisClient
+  ? new ConnectRedisStore({
+      client: redisClient as any,
+      prefix: "aperti:sess:",
+      ttl: 7 * 24 * 60 * 60, // 7 days in seconds
+    })
+  : new PgSession({ pool, tableName: "session" });
 
 validateEnv();
 
@@ -173,12 +187,14 @@ app.use((_req, res, next) => {
 // ── Compression ───────────────────────────────────────────────────────────────
 app.use(compression());
 
-// ── Global rate limiting ──────────────────────────────────────────────────────
+// ── Global rate limiting (Redis-backed when REDIS_URL is set) ─────────────────
 const globalLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
+  store: rateLimitStore,                 // Redis store or undefined (memory fallback)
+  validate: { xForwardedForHeader: false },
   skip: (req) => req.path === "/api/health" || req.path === "/metrics",
   message: { error: "Too many requests — please slow down" },
 });
@@ -278,7 +294,7 @@ app.use(requestObserver);
 // ── Session ───────────────────────────────────────────────────────────────────
 app.use(
   session({
-    store: new PgSession({ pool, tableName: "session" }),
+    store: sessionStore,
     secret: (() => {
       const secret = process.env["SESSION_SECRET"] || process.env["JWT_SECRET"];
       if (!secret) {
@@ -315,9 +331,35 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+// ── Nightly data cleanup ── 03:00 UTC ─────────────────────────────────────────
 cron.schedule("0 3 * * *", () => {
   pool.query("DELETE FROM api_metrics WHERE recorded_at < NOW() - INTERVAL '30 days'").catch(() => {});
   pool.query("DELETE FROM system_metrics_log WHERE created_at < NOW() - INTERVAL '30 days'").catch(() => {});
+}, { timezone: "UTC" });
+
+// ── Nightly VACUUM ANALYZE ── 04:00 UTC ───────────────────────────────────────
+// Reclaims dead tuples and updates planner statistics on high-write tables.
+// Runs sequentially (no parallelism) to keep WAL pressure low.
+cron.schedule("0 4 * * *", async () => {
+  const VACUUM_TABLES = [
+    "attendance",
+    "student_marks",
+    "audit_logs",
+    "api_metrics",
+    "accounts",
+    "subscriptions",
+    "notifications",
+  ];
+  logger.info("[vacuum] Nightly VACUUM ANALYZE started");
+  for (const t of VACUUM_TABLES) {
+    try {
+      await pool.query(`VACUUM ANALYZE ${t}`);
+      logger.debug({ table: t }, "[vacuum] done");
+    } catch (err: any) {
+      logger.warn({ table: t, err: err.message }, "[vacuum] skipped");
+    }
+  }
+  logger.info("[vacuum] Nightly VACUUM ANALYZE complete");
 }, { timezone: "UTC" });
 
 // ── Authenticated file serving (replaces unauthenticated express.static) ──────
@@ -484,6 +526,8 @@ app.use("/api/admin/route-health", adminRouteHealthRouter);
 app.use("/api/admin/launch-dashboard", adminLaunchDashboardRouter);
 // Phase 33 — Platform Perfection
 app.use("/api/admin/db-health", adminDbHealthRouter);
+// Scalability hardening — slow-query ranking, pg_stat_statements, on-demand VACUUM
+app.use("/api/admin/db", adminSlowQueriesRouter);
 app.use("/api/admin/analytics/extended", adminAnalyticsExtendedRouter);
 
 // Phase 19 — Founder Control Center & Operational Layer

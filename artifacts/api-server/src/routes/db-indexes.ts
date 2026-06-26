@@ -19,6 +19,13 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_attendance_teacher_date
             ON attendance (teacher_account_id, created_at DESC)`,
     },
+    // NEW: composite for attendance-rate aggregations (student_id + status — avoids seqscan)
+    {
+      name: "idx_attendance_student_status",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_attendance_student_status
+            ON attendance (student_id, status)`,
+    },
+
     // ── Student marks ─────────────────────────────────────────────────────────
     {
       name: "idx_student_marks_student_exam",
@@ -35,6 +42,21 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_student_marks_grading_status
             ON student_marks (grading_status) WHERE grading_status != 'approved'`,
     },
+    // NEW: covering index for gradebook SUM query — exam_id + marks_scored inline
+    {
+      name: "idx_student_marks_exam_scored",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_student_marks_exam_scored
+            ON student_marks (exam_id, student_id) INCLUDE (marks_scored)`,
+    },
+
+    // ── Exam questions ────────────────────────────────────────────────────────
+    // NEW: covering index for CTE exam_totals — avoids full table scan on question_bank join
+    {
+      name: "idx_exam_questions_exam_max",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_exam_questions_exam_max
+            ON exam_questions (exam_id) INCLUDE (max_marks)`,
+    },
+
     // ── Homework submissions ──────────────────────────────────────────────────
     {
       name: "idx_hw_submissions_student_hw",
@@ -46,6 +68,7 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_hw_submissions_status
             ON homework_submissions (grading_status, submitted_at DESC)`,
     },
+
     // ── Students ──────────────────────────────────────────────────────────────
     {
       name: "idx_students_teacher_status",
@@ -57,6 +80,13 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_students_account
             ON students (account_id)`,
     },
+    // NEW: covering index for sorted student listing (teacher + status + name)
+    {
+      name: "idx_students_teacher_status_name",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_students_teacher_status_name
+            ON students (teacher_account_id, status, student_name)`,
+    },
+
     // ── Exams ─────────────────────────────────────────────────────────────────
     {
       name: "idx_exams_teacher_date",
@@ -68,6 +98,13 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_exams_status_date
             ON exams (status, exam_date)`,
     },
+    // NEW: composite for subject-filtered gradebook exam query
+    {
+      name: "idx_exams_teacher_subject",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_exams_teacher_subject
+            ON exams (teacher_account_id, subject_id, exam_date DESC)`,
+    },
+
     // ── Accounts ──────────────────────────────────────────────────────────────
     {
       name: "idx_accounts_username_lower",
@@ -84,6 +121,13 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_accounts_email_lower
             ON accounts (LOWER(email)) WHERE email IS NOT NULL`,
     },
+    // NEW: for teacher_account_id lookups on accounts (joins from students/lessons)
+    {
+      name: "idx_accounts_teacher_status",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_accounts_teacher_status
+            ON accounts (role, status) WHERE role IN ('teacher','admin','assistant')`,
+    },
+
     // ── Audit & activity logs ─────────────────────────────────────────────────
     {
       name: "idx_audit_logs_account_created",
@@ -100,6 +144,13 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_logs_teacher_created
             ON audit_logs (teacher_id, created_at DESC)`,
     },
+    // NEW: for severity-only security dashboards
+    {
+      name: "idx_audit_logs_severity_created",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_logs_severity_created
+            ON audit_logs (severity, created_at DESC) WHERE severity IN ('critical','warn')`,
+    },
+
     // ── Upload registry ───────────────────────────────────────────────────────
     {
       name: "idx_upload_registry_uploader",
@@ -111,12 +162,14 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_upload_registry_tenant
             ON upload_registry (tenant_id)`,
     },
+
     // ── Flashcard spaced repetition ───────────────────────────────────────────
     {
       name: "idx_flashcard_progress_review",
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_flashcard_progress_review
             ON flashcard_progress (student_id, next_review_at ASC)`,
     },
+
     // ── Subscriptions ─────────────────────────────────────────────────────────
     {
       name: "idx_subscriptions_account_status",
@@ -128,23 +181,82 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_subscriptions_expires
             ON subscriptions (end_date) WHERE status = 'active'`,
     },
+    // NEW: for expiry-check cron (status + end_date together)
+    {
+      name: "idx_subscriptions_status_end_date",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_subscriptions_status_end_date
+            ON subscriptions (status, end_date) WHERE status IN ('active','grace_period','pending_renewal')`,
+    },
+
     // ── Notifications ─────────────────────────────────────────────────────────
     {
       name: "idx_notifications_recipient_read",
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_notifications_recipient_read
             ON notifications (recipient_id, read_at) WHERE read_at IS NULL`,
     },
-    // ── API metrics (cleanup) ─────────────────────────────────────────────────
+
+    // ── API metrics ───────────────────────────────────────────────────────────
     {
       name: "idx_api_metrics_recorded",
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_metrics_recorded
             ON api_metrics (recorded_at DESC)`,
     },
-    // ── Sessions ──────────────────────────────────────────────────────────────
+    // NEW: for slow-endpoint dashboards (endpoint + duration_ms)
+    {
+      name: "idx_api_metrics_endpoint_duration",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_api_metrics_endpoint_duration
+            ON api_metrics (endpoint, duration_ms DESC, recorded_at DESC)`,
+    },
+
+    // ── Sessions / lessons ────────────────────────────────────────────────────
     {
       name: "idx_sessions_subject_day",
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_sessions_subject_day
             ON sessions (subject_id, day_of_week)`,
+    },
+
+    // ── Payment transactions ──────────────────────────────────────────────────
+    // NEW: for payment history queries (user_id + status + created_at)
+    {
+      name: "idx_payment_transactions_user_status",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_payment_transactions_user_status
+            ON payment_transactions (user_id, status, created_at DESC)`,
+    },
+    // NEW: for subscription-scoped payment lookups
+    {
+      name: "idx_payment_transactions_subscription",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_payment_transactions_subscription
+            ON payment_transactions (subscription_id, status, created_at DESC)`,
+    },
+
+    // ── Error logs ────────────────────────────────────────────────────────────
+    // NEW: for error intelligence dashboards
+    {
+      name: "idx_error_logs_level_created",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_error_logs_level_created
+            ON error_logs (level, created_at DESC)`,
+    },
+
+    // ── AI interactions ───────────────────────────────────────────────────────
+    // NEW: for per-user AI usage analytics
+    {
+      name: "idx_ai_interactions_user_created",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_interactions_user_created
+            ON ai_interactions (user_id, created_at DESC)`,
+    },
+    // NEW: for module-level AI cost aggregations
+    {
+      name: "idx_ai_interactions_module_created",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_ai_interactions_module_created
+            ON ai_interactions (module, created_at DESC) INCLUDE (tokens_used)`,
+    },
+
+    // ── Question bank ─────────────────────────────────────────────────────────
+    // NEW: for subject+difficulty filtering in content validation
+    {
+      name: "idx_question_bank_subject_difficulty",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_question_bank_subject_difficulty
+            ON question_bank (subject_id, difficulty)`,
     },
   ];
 
