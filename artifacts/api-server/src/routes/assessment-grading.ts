@@ -202,6 +202,18 @@ assessmentGradingRouter.post("/coursework/:submissionId/moderate", ...teacherOrA
     const { submissionId } = req.params;
     const { moderated_grade, reason } = req.body;
     const moderatorId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: own } = await pool.query(
+        `SELECT cp.id FROM coursework_projects cp
+         JOIN assessments a ON a.id = cp.assessment_id
+         WHERE cp.id=$1 AND a.teacher_id=$2 LIMIT 1`,
+        [submissionId, moderatorId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    }
+
     const { rows } = await pool.query(
       `UPDATE coursework_projects
        SET moderated_grade=$1, moderated_by=$2, moderated_at=NOW()
