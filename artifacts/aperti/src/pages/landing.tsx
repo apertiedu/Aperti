@@ -2182,6 +2182,8 @@ export default function Landing() {
                 {[
                   { label: "Terms of Service", href: "/terms" },
                   { label: "Privacy Policy", href: "/privacy" },
+                  { label: "Data Retention", href: "/data-retention" },
+                  { label: "Legal / DPO", href: "/legal" },
                   { label: "Contact", href: "/contact" },
                 ].map(({ label, href }) => (
                   <div key={label}>

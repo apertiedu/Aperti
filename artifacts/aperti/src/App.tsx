@@ -20,6 +20,7 @@ import { NetworkStatusBanner } from "@/components/network-status-banner";
 const ServerError = lazy(() => import("@/pages/server-error"));
 
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
+import ConsentBanner from "@/components/consent-banner";
 import { useToast } from "@/hooks/use-toast";
 
 // Public & Legal
@@ -33,6 +34,8 @@ const Terms = lazy(() => import("@/pages/terms"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 const Contact = lazy(() => import("@/pages/contact"));
 const TrustCenter = lazy(() => import("@/pages/trust"));
+const DataRetention = lazy(() => import("@/pages/data-retention"));
+const LegalContact = lazy(() => import("@/pages/legal"));
 const Sitemap = lazy(() => import("@/pages/sitemap"));
 const PaperVaultPublic = lazy(() => import("@/pages/paper-vault-public"));
 
@@ -179,6 +182,8 @@ const CommunicationAnalytics = lazy(() => import("@/pages/admin/communication-an
 
 // Phase 9 — Admin OS
 const AdminOS = lazy(() => import("@/pages/admin/admin-os"));
+// Phase 4 — Compliance Dashboard
+const ComplianceDashboard = lazy(() => import("@/pages/admin/compliance-dashboard"));
 // Phase 47 — Role & Permission Matrix
 const RolesMatrix = lazy(() => import("@/pages/admin/roles-matrix"));
 // Phase 47 — Repair Panel
@@ -670,6 +675,7 @@ const ADMIN_ROUTES = (
     <Route path="/admin/architecture" component={ArchitecturePage} />
     <Route path="/admin/migration-safety" component={MigrationSafetyPage} />
     <Route path="/admin/deployment-pipeline" component={DeploymentPipelinePage} />
+    <Route path="/admin/compliance" component={ComplianceDashboard} />
   </>
 );
 
@@ -789,6 +795,8 @@ function PublicRouter() {
       <Route path="/privacy" component={Privacy} />
       <Route path="/contact" component={Contact} />
       <Route path="/trust" component={TrustCenter} />
+      <Route path="/data-retention" component={DataRetention} />
+      <Route path="/legal" component={LegalContact} />
       <Route path="/sitemap" component={Sitemap} />
       <Route path="/paper-vault" component={PaperVaultPublic} />
       <Route path="/features" component={FeatureShowcase} />
@@ -895,6 +903,7 @@ export default function App() {
           <OfflineDetector />
           <PWAInstallBanner />
           <KeyboardShortcutsHelp />
+          <ConsentBanner />
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

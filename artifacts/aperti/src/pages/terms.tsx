@@ -15,8 +15,17 @@ export default function Terms() {
       </header>
 
       <main className="max-w-3xl mx-auto py-12 px-4">
-        <h1 className="text-4xl font-extrabold mb-2 tracking-tight">Terms of Service</h1>
-        <p className="text-muted-foreground mb-8">Last updated: 15 June 2026</p>
+        <div className="flex items-center gap-2 mb-3">
+          <h1 className="text-4xl font-extrabold tracking-tight">Terms of Service</h1>
+          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 self-start mt-2">v2026.06</span>
+        </div>
+        <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground mb-8">
+          <span>Last updated: 26 June 2026</span>
+          <span>·</span>
+          <a href="/privacy" className="text-primary underline hover:opacity-80 text-sm">Privacy Policy</a>
+          <span>·</span>
+          <a href="/legal" className="text-primary underline hover:opacity-80 text-sm">Legal Contact</a>
+        </div>
 
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-3 mb-10 text-sm text-amber-800 dark:text-amber-300">
           This document is provided for informational purposes only and does not constitute legal advice.

@@ -60,6 +60,22 @@ const TRUST_LINKS = [
     badgeColor: null,
   },
   {
+    href: "/data-retention",
+    icon: Database,
+    title: "Data Retention Policy",
+    description: "How long we keep each category of data and our automated purge schedule.",
+    badge: null,
+    badgeColor: null,
+  },
+  {
+    href: "/legal",
+    icon: KeyRound,
+    title: "Legal Contact & DPO",
+    description: "Submit formal data protection requests and exercise your GDPR rights.",
+    badge: null,
+    badgeColor: null,
+  },
+  {
     href: "/contact",
     icon: Mail,
     title: "Contact Us",

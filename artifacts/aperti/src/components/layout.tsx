@@ -185,6 +185,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: "Feature Registry",        href: "/admin/feature-registry",     icon: Layers,      roles: ["admin"] },
         { name: "Roles & Permissions",     href: "/admin/roles-matrix",         icon: KeyRound,    roles: ["admin"] },
         { name: "Repair Panel",            href: "/admin/repair",               icon: Wrench,      roles: ["admin"] },
+        { name: "Compliance",              href: "/admin/compliance",           icon: Shield,      roles: ["admin"] },
       ],
     },
     {

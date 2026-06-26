@@ -60,6 +60,7 @@ import { mobileRouter } from "./routes/mobile";
 import { adminDocsRouter } from "./routes/admin-docs";
 import { adminLaunchAuditRouter } from "./routes/admin-launch-audit";
 import { userExportRouter } from "./routes/user-export";
+import { complianceConsentRouter } from "./routes/compliance-consent";
 import { i18nRouter } from "./routes/i18n";
 // Phase 19 — Founder Control Center & Operational Layer
 import { founderRouter } from "./routes/founder";
@@ -465,6 +466,7 @@ app.use("/api/admin/governance", governanceRouter);
 app.use("/api/admin/docs", adminDocsRouter);
 app.use("/api/admin/launch-audit", adminLaunchAuditRouter);
 app.use("/api", userExportRouter);
+app.use("/api", complianceConsentRouter);
 
 // Phase 32 — Zero-Defect Initiative
 app.use("/api/admin/route-health", adminRouteHealthRouter);
