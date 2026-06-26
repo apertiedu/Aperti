@@ -94,6 +94,7 @@ flashcardsRouter.get("/decks/:id/cards", authenticate, async (_req: AuthRequest,
   const cards = await db.query.flashcardItems.findMany({
     where: (c, { eq }) => eq(c.deckId, deckId),
     orderBy: (c, { asc }) => [asc(c.id)],
+    limit: 500,
   });
   res.json(cards);
 });

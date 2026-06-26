@@ -83,9 +83,24 @@ assessmentHubRouter.get("/assessments", ...anyAuth, async (req: AuthRequest, res
 assessmentHubRouter.get("/assessments/:id", ...anyAuth, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
+    const requesterId = req.userId!;
+    const requesterRole = req.role!;
 
-    const [assessRes, sectionsRes, questionsRes] = await Promise.all([
-      pool.query("SELECT * FROM assessments WHERE id = $1", [id]),
+    const { rows: assessRows } = await pool.query("SELECT * FROM assessments WHERE id = $1", [id]);
+    if (!assessRows.length) return res.status(404).json({ error: "Assessment not found" });
+
+    const assessment = assessRows[0];
+
+    if (requesterRole === "student" || requesterRole === "parent") {
+      return res.status(403).json({ error: "Access denied" });
+    }
+    if (requesterRole === "teacher" || requesterRole === "assistant") {
+      if (assessment.teacher_id !== requesterId) {
+        return res.status(403).json({ error: "Access denied" });
+      }
+    }
+
+    const [sectionsRes, questionsRes] = await Promise.all([
       pool.query("SELECT * FROM assessment_sections WHERE assessment_id = $1 ORDER BY section_order", [id]),
       pool.query(
         `SELECT aq.*,
@@ -99,10 +114,8 @@ assessmentHubRouter.get("/assessments/:id", ...anyAuth, async (req: AuthRequest,
       ),
     ]);
 
-    if (!assessRes.rows.length) return res.status(404).json({ error: "Assessment not found" });
-
     res.json({
-      assessment: assessRes.rows[0],
+      assessment,
       sections: sectionsRes.rows,
       questions: questionsRes.rows,
     });

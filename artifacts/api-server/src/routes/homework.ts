@@ -12,6 +12,7 @@ homeworkRouter.get("/teacher", authenticate, requireRole("teacher", "admin"), as
   const list = await db.query.homework.findMany({
     where: (h, { eq }) => eq(h.teacherAccountId, teacherId),
     orderBy: (h, { desc }) => [desc(h.createdAt)],
+    limit: 200,
   });
   res.json(list);
 });

@@ -221,24 +221,42 @@ refundEngineRouter.post("/:id/process", requireRole("admin", "super_admin"), asy
       return;
     }
 
-    const { rows } = await pool.query("SELECT * FROM refund_requests WHERE id = $1 LIMIT 1", [id]);
-    if (rows.length === 0) { res.status(404).json({ error: "Refund request not found" }); return; }
-    if (rows[0].status !== "pending") { res.status(409).json({ error: `Already processed (${rows[0].status})` }); return; }
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const { rows } = await client.query("SELECT * FROM refund_requests WHERE id = $1 FOR UPDATE LIMIT 1", [id]);
+      if (rows.length === 0) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Refund request not found" });
+        return;
+      }
+      if (rows[0].status !== "pending") {
+        await client.query("ROLLBACK");
+        res.status(409).json({ error: `Already processed (${rows[0].status})` });
+        return;
+      }
 
-    await pool.query(
-      `UPDATE refund_requests SET status = $1, decided_by = $2, decided_at = NOW(), reason = COALESCE($3, reason) WHERE id = $4`,
-      [action, req.userId, notes ?? null, id],
-    );
+      await client.query(
+        `UPDATE refund_requests SET status = $1, decided_by = $2, decided_at = NOW(), reason = COALESCE($3, reason) WHERE id = $4`,
+        [action, req.userId, notes ?? null, id],
+      );
 
-    if (action !== "rejected") {
-      await pool.query(
-        `UPDATE payment_transactions SET status = 'refunded' WHERE id = $1`,
-        [rows[0].transaction_id],
-      ).catch(() => {});
+      if (action !== "rejected") {
+        await client.query(
+          `UPDATE payment_transactions SET status = 'refunded' WHERE id = $1`,
+          [rows[0].transaction_id],
+        );
+      }
+
+      await client.query("COMMIT");
+      auditLog({ actorId: req.userId!, actorRole: req.role!, action: `REFUND_${action.toUpperCase()}`, targetId: id, targetType: "refund_request", ip, result: "success", metadata: { transactionId: rows[0].transaction_id } });
+      res.json({ success: true, status: action });
+    } catch (innerErr) {
+      await client.query("ROLLBACK").catch(() => {});
+      throw innerErr;
+    } finally {
+      client.release();
     }
-
-    auditLog({ actorId: req.userId!, actorRole: req.role!, action: `REFUND_${action.toUpperCase()}`, targetId: id, targetType: "refund_request", ip, result: "success", metadata: { transactionId: rows[0].transaction_id } });
-    res.json({ success: true, status: action });
   } catch (err) {
     await logError(err, { route: `/api/refunds/${req.params.id}/process` });
     res.status(500).json({ error: "Failed to process refund" });

@@ -106,7 +106,7 @@ router.delete("/sessions/:id", authenticate, async (req: AuthRequest, res): Prom
   }
 });
 
-router.get("/sessions/:id/capacity", async (req, res): Promise<void> => {
+router.get("/sessions/:id/capacity", authenticate, async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id as string, 10);
     const [session] = await db.select().from(sessionsTable).where(eq(sessionsTable.id, id));

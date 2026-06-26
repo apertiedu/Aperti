@@ -105,7 +105,7 @@ ascendRouter.post("/update-streak", ...studentGuard, async (req: AuthRequest, re
 
 ascendRouter.get("/quests", ...studentGuard, async (req: AuthRequest, res: Response) => {
   try {
-    const quests = await db.query.quests.findMany();
+    const quests = await db.query.quests.findMany({ limit: 200 });
     res.json(quests);
   } catch (err) {
     res.status(500).json({ error: "Failed to load quests" });
