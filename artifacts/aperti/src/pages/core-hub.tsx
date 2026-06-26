@@ -66,25 +66,27 @@ function StatsCard({ label, value, icon, sub, loading, attention }: any) {
   const animated = useCountUp(isNumeric ? numVal : 0, 700, !loading && isNumeric);
 
   if (loading) return (
-    <Card><CardContent className="p-4 flex items-center gap-4">
-      <Skeleton className="h-10 w-10 rounded-full" />
-      <div className="space-y-2"><Skeleton className="h-6 w-16" /><Skeleton className="h-3 w-24" /></div>
-    </CardContent></Card>
+    <div className="stat-card">
+      <div className="flex items-center justify-between mb-3">
+        <div className="h-3 w-20 skeleton-premium rounded" />
+        <div className="h-8 w-8 skeleton-premium rounded-lg" />
+      </div>
+      <div className="h-8 w-16 skeleton-premium rounded mb-2" />
+      <div className="h-3 w-24 skeleton-premium rounded" />
+    </div>
   );
   return (
     <motion.div variants={item} whileHover={{ y: -2, transition: { duration: 0.15, type: "spring", stiffness: 400, damping: 28 } }}>
-      <Card className={`card-hover transition-shadow ${attention ? "attention-pulse" : ""}`}>
-        <CardContent className="p-4 flex items-center gap-4">
-          <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">{icon}</div>
-          <div>
-            <p className="text-2xl font-bold tabular-nums stat-number">
-              {isNumeric ? animated : (value ?? "—")}
-            </p>
-            <p className="text-xs text-muted-foreground">{label}</p>
-            {sub && <p className="text-xs text-primary mt-0.5">{sub}</p>}
-          </div>
-        </CardContent>
-      </Card>
+      <div className={`stat-card ${attention ? "attention-pulse border-amber-200 dark:border-amber-800/60" : ""}`}>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-label text-muted-foreground truncate">{label}</p>
+          <div className="icon-bg icon-bg-sm bg-primary/10 text-primary shrink-0">{icon}</div>
+        </div>
+        <p className="text-2xl font-bold tabular-nums stat-number text-foreground">
+          {isNumeric ? animated : (value ?? "—")}
+        </p>
+        {sub && <p className="text-xs text-primary mt-1.5 font-medium">{sub}</p>}
+      </div>
     </motion.div>
   );
 }
@@ -397,12 +399,15 @@ export default function CoreHub() {
 
       {/* Stats row */}
       {show("stats") && (
-        <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-list">
-          <StatsCard loading={sumLoading} label="Today's Classes" value={summary?.lessonsToday ?? 0} icon={<BookOpen className="h-5 w-5 text-primary" />} />
-          <StatsCard loading={sumLoading} label="Students Present" value={summary?.studentsPresent ?? 0} icon={<Users className="h-5 w-5 text-primary" />} sub={summary?.attendanceRate != null ? `${summary.attendanceRate}% rate` : undefined} />
-          <StatsCard loading={false} label="Pending Grading" value={pendingCount} icon={<Clock className="h-5 w-5 text-amber-500" />} attention={pendingCount > 3} />
-          <StatsCard loading={false} label="Question Bank" value={extended?.questionBankCount ?? 0} icon={<FileText className="h-5 w-5 text-primary" />} />
-        </motion.div>
+        <>
+          <p className="text-caption text-muted-foreground mb-3">AT A GLANCE</p>
+          <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 stagger-list">
+            <StatsCard loading={sumLoading} label="Today's Classes" value={summary?.lessonsToday ?? 0} icon={<BookOpen className="h-4 w-4" />} />
+            <StatsCard loading={sumLoading} label="Students Present" value={summary?.studentsPresent ?? 0} icon={<Users className="h-4 w-4" />} sub={summary?.attendanceRate != null ? `${summary.attendanceRate}% rate` : undefined} />
+            <StatsCard loading={false} label="Pending Grading" value={pendingCount} icon={<Clock className="h-4 w-4 text-amber-500" />} attention={pendingCount > 3} />
+            <StatsCard loading={false} label="Question Bank" value={extended?.questionBankCount ?? 0} icon={<FileText className="h-4 w-4" />} />
+          </motion.div>
+        </>
       )}
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
@@ -641,12 +646,12 @@ function RecentlyUsedSection() {
               <button
                 key={item.href}
                 onClick={() => nav(item.href)}
-                className="flex flex-col items-start p-3 rounded-lg border border-gray-100 hover:border-primary/25 hover:bg-primary/8/30 transition-all text-left group"
+                className="flex flex-col items-start p-3 rounded-lg border border-border hover:border-primary/30 hover:bg-primary/5 transition-all text-left group"
               >
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-1">
                   {new Date(item.visitedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
-                <span className="text-xs font-medium text-gray-800 line-clamp-2 leading-snug group-hover:text-primary">
+                <span className="text-xs font-medium text-foreground line-clamp-2 leading-snug group-hover:text-primary">
                   {item.label}
                 </span>
               </button>

@@ -100,17 +100,17 @@ export default function StudentDashboard() {
   if (loading) {
     return (
       <div className="space-y-6 pb-6">
-        <div className="h-10 skeleton rounded-xl w-64" />
+        <div className="h-10 skeleton-premium rounded-xl w-64" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[...Array(2)].map((_, i) => <div key={i} className="h-36 skeleton rounded-2xl" />)}
+          {[...Array(2)].map((_, i) => <div key={i} className="h-36 skeleton-premium rounded-2xl" />)}
         </div>
-        <div className="h-20 skeleton rounded-2xl" />
+        <div className="h-20 skeleton-premium rounded-2xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => <div key={i} className="h-52 skeleton rounded-2xl" />)}
+          {[...Array(3)].map((_, i) => <div key={i} className="h-52 skeleton-premium rounded-2xl" />)}
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 h-64 skeleton rounded-2xl" />
-          <div className="h-64 skeleton rounded-2xl" />
+          <div className="lg:col-span-2 h-64 skeleton-premium rounded-2xl" />
+          <div className="h-64 skeleton-premium rounded-2xl" />
         </div>
       </div>
     );
@@ -211,10 +211,10 @@ export default function StudentDashboard() {
 
       {/* Greeting & Motivation Card */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <h1 className="text-3xl sm:text-4xl font-black text-foreground">{getGreeting()}, {firstName}! 👋</h1>
+        <h1 className="text-3xl sm:text-4xl font-black text-foreground">{getGreeting()}, {firstName}!</h1>
         
         <div className="mt-4 bg-card border border-border p-4 rounded-2xl shadow-sm flex items-start gap-4">
-          <div className="text-4xl shrink-0">💡</div>
+          <div className="shrink-0 w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Zap className="w-5 h-5 text-primary" /></div>
           <div>
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Today's Tip</span>
             <p className="text-foreground font-medium text-sm mt-0.5">
@@ -260,7 +260,7 @@ export default function StudentDashboard() {
               <p className="text-sm font-medium opacity-90 mt-1 truncate">{data.latestExam.examName}</p>
               <div className="mt-4 bg-black/10 rounded-xl p-3 backdrop-blur-sm">
                 <p className="text-xs font-semibold flex items-center gap-1.5">
-                  {examScore >= 80 ? "🌟 Top tier performance!" : examScore >= 60 ? "👍 Solid understanding" : "📚 Needs more practice"}
+                  {examScore >= 80 ? "Top tier performance" : examScore >= 60 ? "Solid understanding" : "Keep practising"}
                 </p>
               </div>
             </div>
