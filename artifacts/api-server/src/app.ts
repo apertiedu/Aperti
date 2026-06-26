@@ -342,6 +342,7 @@ cron.schedule("0 3 * * *", () => {
 // Runs sequentially (no parallelism) to keep WAL pressure low.
 cron.schedule("0 4 * * *", async () => {
   const VACUUM_TABLES = [
+    // Core write-heavy tables
     "attendance",
     "student_marks",
     "audit_logs",
@@ -349,6 +350,15 @@ cron.schedule("0 4 * * *", async () => {
     "accounts",
     "subscriptions",
     "notifications",
+    // Added in scalability hardening pass
+    "exams",
+    "exam_questions",
+    "homework",
+    "homework_submissions",
+    "assessment_submissions",
+    "ai_interactions",
+    "gradebook_entries",
+    "error_logs",
   ];
   logger.info("[vacuum] Nightly VACUUM ANALYZE started");
   for (const t of VACUUM_TABLES) {
@@ -689,5 +699,12 @@ startPerfFlushInterval();
 
 // Phase 29 — ensure DB performance indexes exist at startup
 ensurePerformanceIndexes().catch(err => logger.warn({ err }, "[startup] Could not ensure indexes"));
+
+// Scalability hardening — try to enable pg_stat_statements at startup.
+// Silent fail: managed Postgres hosts pre-load it; self-hosted may need
+// shared_preload_libraries = 'pg_stat_statements' in postgresql.conf.
+pool.query("CREATE EXTENSION IF NOT EXISTS pg_stat_statements")
+  .then(() => logger.info("[pg-stat] pg_stat_statements extension ensured"))
+  .catch(() => logger.debug("[pg-stat] pg_stat_statements not available — use POST /api/admin/db/enable-stat-statements"));
 
 export default app;

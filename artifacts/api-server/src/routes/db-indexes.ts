@@ -258,6 +258,52 @@ export async function ensurePerformanceIndexes(): Promise<void> {
       sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_question_bank_subject_difficulty
             ON question_bank (subject_id, difficulty)`,
     },
+
+    // ── Assessment submissions ────────────────────────────────────────────────
+    // Covers student-scoped submission lookups (student portal, grading queue)
+    {
+      name: "idx_assessment_submissions_student_assess",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_assessment_submissions_student_assess
+            ON assessment_submissions (student_id, assessment_id, submitted_at DESC)`,
+    },
+    // Covers teacher-scoped grading queue filtered by status
+    {
+      name: "idx_assessment_submissions_teacher_status",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_assessment_submissions_teacher_status
+            ON assessment_submissions (teacher_id, status, submitted_at DESC)`,
+    },
+
+    // ── Grades ────────────────────────────────────────────────────────────────
+    // Covers mobile dashboard "recent grades" query (SELECT … ORDER BY graded_at DESC LIMIT 5)
+    {
+      name: "idx_grades_student_graded",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_grades_student_graded
+            ON grades (student_id, graded_at DESC)`,
+    },
+
+    // ── Homework ──────────────────────────────────────────────────────────────
+    // Covers teacher-scoped homework listing sorted by due date
+    {
+      name: "idx_homework_teacher_due",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_homework_teacher_due
+            ON homework (teacher_account_id, due_date DESC NULLS LAST)`,
+    },
+
+    // ── Lessons ───────────────────────────────────────────────────────────────
+    // Covers active-lesson lookups per teacher (gradebook filters, session selector)
+    {
+      name: "idx_lessons_teacher_active",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_lessons_teacher_active
+            ON lessons (teacher_account_id, is_active) WHERE is_active = TRUE`,
+    },
+
+    // ── Student marks (additional) ────────────────────────────────────────────
+    // Covering index for per-student sorted mark queries (recent results widget)
+    {
+      name: "idx_student_marks_student_graded",
+      sql: `CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_student_marks_student_graded
+            ON student_marks (student_id, graded_at DESC) INCLUDE (marks_scored, exam_id)`,
+    },
   ];
 
   let created = 0;

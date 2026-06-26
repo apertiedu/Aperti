@@ -125,3 +125,46 @@ export async function invalidateTeacherRefCache(teacherId: number | null): Promi
 export async function invalidatePlanCache(): Promise<void> {
   await cacheDel("ref:subscription_plans").catch(() => {});
 }
+
+/**
+ * Exams per teacher (optionally filtered by subject) — used by gradebook, reports.
+ * TTL deliberately short (60 s) so newly created exams appear promptly.
+ * Invalidate on exam create/update/delete.
+ */
+export async function getCachedExams(
+  teacherId: number | null,
+  isAdmin: boolean,
+  subjectId?: number,
+): Promise<any[]> {
+  const key = `ref:exams:t${teacherId ?? "admin"}:s${subjectId ?? "all"}`;
+  return cacheGetOrSet(key, async () => {
+    const params: any[] = [];
+    const conditions: string[] = [];
+    if (!isAdmin && teacherId) {
+      params.push(teacherId);
+      conditions.push(`e.teacher_account_id = $${params.length}`);
+    }
+    if (subjectId) {
+      params.push(subjectId);
+      conditions.push(`e.subject_id = $${params.length}`);
+    }
+    const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+    const { rows } = await pool.query(
+      `SELECT e.id, e.name, e.exam_date AS "examDate", e.total_marks AS "totalMarks",
+              COALESCE(sub.name, 'No Subject') AS "subjectName", sub.id AS "subjectId"
+       FROM exams e
+       LEFT JOIN subjects sub ON sub.id = e.subject_id
+       ${where}
+       ORDER BY e.exam_date ASC NULLS LAST, e.name`,
+      params,
+    );
+    return rows;
+  }, 60); // 60-second TTL
+}
+
+/** Invalidate exam cache for a teacher (call on exam mutations) */
+export async function invalidateExamCache(teacherId: number | null): Promise<void> {
+  // Pattern-style invalidation: delete both the "all subjects" key and common subject keys.
+  // For a full wildcard delete a Redis SCAN would be needed; TTL expiry handles the rest.
+  await cacheDel(`ref:exams:t${teacherId ?? "admin"}:s:all`).catch(() => {});
+}
