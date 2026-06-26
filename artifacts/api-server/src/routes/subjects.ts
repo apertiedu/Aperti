@@ -79,7 +79,12 @@ router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<voi
 
 router.delete("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
-  await db.delete(subjectsTable).where(eq(subjectsTable.id, id));
+  const { teacherId, isAdmin } = req.tenant;
+  const condition = isAdmin
+    ? eq(subjectsTable.id, id)
+    : and(eq(subjectsTable.id, id), eq(subjectsTable.teacherAccountId, teacherId!));
+  const result = await db.delete(subjectsTable).where(condition!).returning();
+  if (!result.length) { res.status(403).json({ error: "Not found or access denied" }); return; }
   res.json({ message: "Subject deleted" });
 });
 

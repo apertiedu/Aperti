@@ -104,7 +104,7 @@ router.delete("/resources/:id", requireTenantAccess, async (req, res): Promise<v
   }
 });
 
-router.post("/resources/:id/view", async (req, res): Promise<void> => {
+router.post("/resources/:id/view", requireTenantAccess, async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id as string, 10);
     await db.update(resourcesTable).set({ viewCount: sql`${resourcesTable.viewCount} + 1` }).where(eq(resourcesTable.id, id));

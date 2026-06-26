@@ -86,11 +86,12 @@ searchRouter.get("/", authenticate as any, async (req: Request, res: Response) =
     const [accounts, courses, subjects, questions, questionText, assessments, flashDecks, revNotes, syllabusResults] =
       await Promise.all([
         pool.query(
-          `SELECT id, display_name AS name, username, role, NULL AS subtitle,
+          `SELECT id, display_name AS name, username, NULL AS subtitle,
                   'person' AS type, 'People' AS category
            FROM accounts
-           WHERE (display_name ILIKE $1 OR username ILIKE $1) AND status='active' LIMIT 5`,
-          [like]
+           WHERE (display_name ILIKE $1 OR username ILIKE $1) AND status='active'
+             AND (role='teacher' OR id=$2) LIMIT 5`,
+          [like, userId]
         ),
 
         pool.query(
@@ -107,20 +108,20 @@ searchRouter.get("/", authenticate as any, async (req: Request, res: Response) =
           [like]
         ).catch(() => ({ rows: [] as any[] })),
 
-        // Search questions by topic
+        // Search questions by topic — scoped to the authenticated user's tenant
         pool.query(
           `SELECT id, topic AS name, difficulty AS subtitle,
                   'question' AS type, 'Questions' AS category
-           FROM question_bank WHERE topic ILIKE $1 LIMIT 6`,
-          [like]
+           FROM question_bank WHERE topic ILIKE $1 AND teacher_account_id=$2 LIMIT 6`,
+          [like, userId]
         ).catch(() => ({ rows: [] as any[] })),
 
-        // Search questions by question text content (Phase 33 upgrade)
+        // Search questions by question text content — scoped to tenant
         pool.query(
           `SELECT id, COALESCE(topic, 'Question') AS name, difficulty AS subtitle,
                   'question' AS type, 'Questions' AS category
-           FROM question_bank WHERE question_text ILIKE $1 LIMIT 4`,
-          [like]
+           FROM question_bank WHERE question_text ILIKE $1 AND teacher_account_id=$2 LIMIT 4`,
+          [like, userId]
         ).catch(() => ({ rows: [] as any[] })),
 
         pool.query(
@@ -169,8 +170,8 @@ searchRouter.get("/", authenticate as any, async (req: Request, res: Response) =
         `SELECT r.id, r.title AS name, s.name AS subtitle,
                 'recording' AS type, 'Recordings' AS category
          FROM recordings r LEFT JOIN subjects s ON s.id = r.subject_id
-         WHERE r.title ILIKE $1 LIMIT 4`,
-        [like]
+         WHERE r.title ILIKE $1 AND r.teacher_account_id=$2 LIMIT 4`,
+        [like, userId]
       ).catch(() => ({ rows: [] as any[] })),
     ]);
 

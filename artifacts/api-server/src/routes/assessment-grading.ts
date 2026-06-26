@@ -16,6 +16,17 @@ assessmentGradingRouter.post("/grading/assessments/:submissionId/manual-grade", 
         overall_feedback?: string;
       };
       const teacherId = req.userId!;
+      const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+      if (!isAdmin) {
+        const { rows: ownerRows } = await pool.query(
+          `SELECT asub.id FROM assessment_submissions asub
+           JOIN assessments a ON a.id = asub.assessment_id
+           WHERE asub.id=$1 AND a.teacher_id=$2 LIMIT 1`,
+          [submissionId, teacherId]
+        );
+        if (!ownerRows.length) return res.status(403).json({ error: "Access denied" });
+      }
 
       for (const a of answers) {
         await pool.query(
@@ -53,10 +64,18 @@ assessmentGradingRouter.post("/grading/assessments/:submissionId/moderate", ...t
       const { submissionId } = req.params;
       const { moderated_score, reason } = req.body;
       const moderatorId = req.userId!;
+      const isAdmin = req.role === "admin" || req.role === "super_admin";
 
-      const subRes = await pool.query("SELECT * FROM assessment_submissions WHERE id=$1", [submissionId]);
+      const subRes = await pool.query(
+        `SELECT asub.*, a.teacher_id AS assessment_teacher_id
+         FROM assessment_submissions asub
+         JOIN assessments a ON a.id = asub.assessment_id
+         WHERE asub.id=$1 LIMIT 1`,
+        [submissionId]
+      );
       if (!subRes.rows.length) return res.status(404).json({ error: "Not found" });
       const sub = subRes.rows[0];
+      if (!isAdmin && sub.assessment_teacher_id !== moderatorId) return res.status(403).json({ error: "Access denied" });
 
       await pool.query(
         `INSERT INTO moderation_logs (assessment_id, student_id, original_grade, moderated_grade, moderator_id, reason)
@@ -105,6 +124,17 @@ assessmentGradingRouter.post("/practicals/:assessmentId/grade", ...teacherOrAdmi
   try {
     const { assessmentId } = req.params;
     const { student_id, score, feedback, rubric_id } = req.body;
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: own } = await pool.query(
+        "SELECT id FROM assessments WHERE id=$1 AND teacher_id=$2 LIMIT 1",
+        [assessmentId, teacherId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    }
+
     const { rows } = await pool.query(
       `UPDATE coursework_projects SET score=$1, feedback=$2, status='graded'
        WHERE assessment_id=$3 AND student_id=$4 RETURNING *`,
@@ -144,6 +174,17 @@ assessmentGradingRouter.post("/coursework/:assessmentId/submit", ...anyAuth, asy
 assessmentGradingRouter.get("/coursework/:assessmentId/submissions", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { assessmentId } = req.params;
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: own } = await pool.query(
+        "SELECT id FROM assessments WHERE id=$1 AND teacher_id=$2 LIMIT 1",
+        [assessmentId, teacherId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    }
+
     const { rows } = await pool.query(
       `SELECT cp.*, a.display_name AS student_name
        FROM coursework_projects cp
@@ -222,6 +263,19 @@ assessmentGradingRouter.post("/oral-exams/:id/grade", ...teacherOrAdmin, async (
   try {
     const { id } = req.params;
     const { score, feedback } = req.body;
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: own } = await pool.query(
+        `SELECT or_.id FROM oral_recordings or_
+         JOIN assessments a ON a.id = or_.assessment_id
+         WHERE or_.id=$1 AND a.teacher_id=$2 LIMIT 1`,
+        [id, teacherId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    }
+
     const { rows } = await pool.query(
       "UPDATE oral_recordings SET score=$1, feedback=$2, graded_at=NOW() WHERE id=$3 RETURNING *",
       [score, feedback ?? null, id]
@@ -231,15 +285,29 @@ assessmentGradingRouter.post("/oral-exams/:id/grade", ...teacherOrAdmin, async (
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
-assessmentGradingRouter.get("/oral-exams/:id/transcript", ...anyAuth, async (req: AuthRequest, res: Response) => {
+assessmentGradingRouter.get("/oral-exams/:id/transcript", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const { rows } = await pool.query("SELECT * FROM oral_recordings WHERE id=$1", [id]);
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    const { rows } = await pool.query(
+      `SELECT or_.*, a.teacher_id AS assessment_teacher_id
+       FROM oral_recordings or_
+       JOIN assessments a ON a.id = or_.assessment_id
+       WHERE or_.id=$1 LIMIT 1`,
+      [id]
+    );
     if (!rows.length) return res.status(404).json({ error: "Not found" });
     const oral = rows[0];
 
-    // Transcript is only populated by a real speech-to-text integration (e.g. Whisper).
-    // If no transcript exists yet, return null — do not generate a fake one.
+    if (!isAdmin && oral.assessment_teacher_id !== teacherId) {
+      const { rows: stuRows } = await pool.query(
+        "SELECT id FROM students WHERE id=$1 AND account_id=$2 LIMIT 1",
+        [oral.student_id, req.userId]
+      );
+      if (!stuRows.length) return res.status(403).json({ error: "Access denied" });
+    }
 
     res.json({ oral });
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
@@ -252,6 +320,17 @@ assessmentGradingRouter.get("/oral-exams/:id/transcript", ...anyAuth, async (req
 assessmentGradingRouter.post("/moderation/benchmark", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { assessment_id, benchmark_answers } = req.body;
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: own } = await pool.query(
+        "SELECT id FROM assessments WHERE id=$1 AND teacher_id=$2 LIMIT 1",
+        [assessment_id, teacherId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    }
+
     await pool.query(
       `UPDATE assessments SET settings = settings || $1 WHERE id=$2`,
       [JSON.stringify({ benchmark_answers }), assessment_id]
@@ -263,6 +342,16 @@ assessmentGradingRouter.post("/moderation/benchmark", ...teacherOrAdmin, async (
 assessmentGradingRouter.get("/moderation/consistency", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { assessment_id } = req.query;
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: own } = await pool.query(
+        "SELECT id FROM assessments WHERE id=$1 AND teacher_id=$2 LIMIT 1",
+        [assessment_id, teacherId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    }
     const { rows } = await pool.query(
       `SELECT sa.question_id, STDDEV(sa.marks_awarded) AS std_dev,
               AVG(sa.marks_awarded) AS avg_marks, COUNT(*) AS count,
@@ -283,6 +372,19 @@ assessmentGradingRouter.get("/moderation/consistency", ...teacherOrAdmin, async 
 assessmentGradingRouter.post("/moderation/double-mark", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { submission_id, second_marker_id } = req.body;
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: own } = await pool.query(
+        `SELECT asub.id FROM assessment_submissions asub
+         JOIN assessments a ON a.id = asub.assessment_id
+         WHERE asub.id=$1 AND a.teacher_id=$2 LIMIT 1`,
+        [submission_id, teacherId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    }
+
     await pool.query(
       `UPDATE assessment_submissions
        SET device_info = device_info || $1
@@ -300,6 +402,16 @@ assessmentGradingRouter.post("/moderation/double-mark", ...teacherOrAdmin, async
 assessmentGradingRouter.post("/gradebook/calculate", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
     const { student_id, course_id } = req.body;
+    const teacherId = req.userId!;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+
+    if (!isAdmin) {
+      const { rows: stuCheck } = await pool.query(
+        "SELECT id FROM students WHERE id=$1 AND teacher_account_id=$2 LIMIT 1",
+        [student_id, teacherId]
+      );
+      if (!stuCheck.length) return res.status(403).json({ error: "Access denied" });
+    }
 
     const { rows } = await pool.query(
       `SELECT ge.*, a.title AS assessment_title, a.type AS assessment_type
@@ -333,8 +445,11 @@ assessmentGradingRouter.post("/gradebook/calculate", ...teacherOrAdmin, async (r
 
 assessmentGradingRouter.get("/gradebook/export", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
-    const { teacher_id, format = "json" } = req.query as Record<string, string>;
-    const teacherId = teacher_id ? parseInt(teacher_id) : req.userId!;
+    const { format = "json" } = req.query as Record<string, string>;
+    const isAdmin = req.role === "admin" || req.role === "super_admin";
+    const teacherId = isAdmin && req.query.teacher_id
+      ? parseInt(req.query.teacher_id as string)
+      : req.userId!;
 
     const { rows } = await pool.query(
       `SELECT a.display_name AS student_name, s.grade_level,
@@ -391,6 +506,33 @@ assessmentGradingRouter.put("/gradebook/settings", ...teacherOrAdmin, async (req
 assessmentGradingRouter.get("/reports/student/:studentId", ...anyAuth, async (req: AuthRequest, res: Response) => {
   try {
     const { studentId } = req.params;
+    const sid = parseInt(studentId, 10);
+    if (isNaN(sid)) return res.status(400).json({ error: "Invalid studentId" });
+    const userId = req.userId!;
+    const role = req.role;
+
+    if (role === "student") {
+      const { rows: own } = await pool.query(
+        "SELECT id FROM students WHERE id=$1 AND account_id=$2 LIMIT 1",
+        [sid, userId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    } else if (role === "teacher") {
+      const { rows: own } = await pool.query(
+        "SELECT id FROM students WHERE id=$1 AND teacher_account_id=$2 LIMIT 1",
+        [sid, userId]
+      );
+      if (!own.length) return res.status(403).json({ error: "Access denied" });
+    } else if (role === "parent") {
+      const { rows: link } = await pool.query(
+        `SELECT id FROM guardian_links
+         WHERE parent_account_id=$1 AND student_id=$2 AND status='active' LIMIT 1`,
+        [userId, sid]
+      );
+      if (!link.length) return res.status(403).json({ error: "Not linked to this student" });
+    } else if (role !== "admin" && role !== "super_admin") {
+      return res.status(403).json({ error: "Access denied" });
+    }
 
     const [profileRes, submissionsRes, strongWeakRes] = await Promise.all([
       pool.query(

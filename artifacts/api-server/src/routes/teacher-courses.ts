@@ -61,12 +61,13 @@ teacherCoursesRouter.get(
   authenticate,
   async (req: AuthRequest, res: Response) => {
     try {
+      const isAdmin = req.role === "admin" || req.role === "super_admin";
       const { rows: courses } = await pool.query(
         `SELECT tc.*, s.name AS subject_name
            FROM teacher_courses tc
            LEFT JOIN subjects s ON tc.subject_id = s.id
-          WHERE tc.id = $1`,
-        [req.params.id],
+          WHERE tc.id = $1${isAdmin ? "" : " AND tc.teacher_account_id = $2"}`,
+        isAdmin ? [req.params.id] : [req.params.id, req.userId],
       );
       if (!courses.length) return res.status(404).json({ error: "Not found" });
       const course = courses[0];
@@ -137,6 +138,11 @@ teacherCoursesRouter.delete(
 /* ── Unit CRUD ────────────────────────────────────────────────────────── */
 teacherCoursesRouter.post("/teacher-courses/:courseId/units", authenticate, async (req: AuthRequest, res: Response) => {
   const { title, ord } = req.body;
+  const isAdmin = req.role === "admin" || req.role === "super_admin";
+  const ownerCheck = isAdmin
+    ? await pool.query("SELECT id FROM teacher_courses WHERE id=$1 LIMIT 1", [req.params.courseId])
+    : await pool.query("SELECT id FROM teacher_courses WHERE id=$1 AND teacher_account_id=$2 LIMIT 1", [req.params.courseId, req.userId]);
+  if (!ownerCheck.rows.length) { res.status(403).json({ error: "Forbidden" }); return; }
   const { rows } = await pool.query(
     `INSERT INTO course_units (course_id, title, ord) VALUES ($1,$2,$3) RETURNING *`,
     [req.params.courseId, title, ord ?? 0],
@@ -178,6 +184,16 @@ teacherCoursesRouter.delete("/teacher-courses/units/:id", authenticate, async (r
 /* ── Topic CRUD ───────────────────────────────────────────────────────── */
 teacherCoursesRouter.post("/teacher-courses/units/:unitId/topics", authenticate, async (req: AuthRequest, res: Response) => {
   const { title, ord } = req.body;
+  const isAdmin = req.role === "admin" || req.role === "super_admin";
+  const ownerCheck = isAdmin
+    ? await pool.query("SELECT cu.id FROM course_units cu WHERE cu.id=$1 LIMIT 1", [req.params.unitId])
+    : await pool.query(
+        `SELECT cu.id FROM course_units cu
+         JOIN teacher_courses tc ON tc.id = cu.course_id
+         WHERE cu.id=$1 AND tc.teacher_account_id=$2 LIMIT 1`,
+        [req.params.unitId, req.userId]
+      );
+  if (!ownerCheck.rows.length) { res.status(403).json({ error: "Forbidden" }); return; }
   const { rows } = await pool.query(
     `INSERT INTO course_topics (unit_id, title, ord) VALUES ($1,$2,$3) RETURNING *`,
     [req.params.unitId, title, ord ?? 0],
@@ -204,6 +220,17 @@ teacherCoursesRouter.delete("/teacher-courses/topics/:id", authenticate, async (
 /* ── Lesson CRUD ──────────────────────────────────────────────────────── */
 teacherCoursesRouter.post("/teacher-courses/topics/:topicId/lessons", authenticate, async (req: AuthRequest, res: Response) => {
   const { title, type, duration_min, ord } = req.body;
+  const isAdmin = req.role === "admin" || req.role === "super_admin";
+  const ownerCheck = isAdmin
+    ? await pool.query("SELECT ct.id FROM course_topics ct WHERE ct.id=$1 LIMIT 1", [req.params.topicId])
+    : await pool.query(
+        `SELECT ct.id FROM course_topics ct
+         JOIN course_units cu ON cu.id = ct.unit_id
+         JOIN teacher_courses tc ON tc.id = cu.course_id
+         WHERE ct.id=$1 AND tc.teacher_account_id=$2 LIMIT 1`,
+        [req.params.topicId, req.userId]
+      );
+  if (!ownerCheck.rows.length) { res.status(403).json({ error: "Forbidden" }); return; }
   const { rows } = await pool.query(
     `INSERT INTO course_lessons_map (topic_id, title, type, duration_min, ord) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
     [req.params.topicId, title, type || "lecture", duration_min || 60, ord ?? 0],

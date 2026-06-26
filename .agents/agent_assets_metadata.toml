@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "tpRu_38r2V02ZJH8dWyvr"
@@ -18,3 +17,9 @@ id = "fnrfhJOmq6JfH43ewQSZg"
 uri = "file://artifacts/mockup-sandbox/public/images/blocks-ui.png"
 type = "image"
 title = "Content editor blocks abstract UI"
+
+[[outputs]]
+id = "1vYc0VT8FNBm-Y1AaagtA"
+uri = "file://SECURITY_FINDINGS_REPORT.md"
+type = "text"
+title = "Aperti Security Findings Report — Phase 2"

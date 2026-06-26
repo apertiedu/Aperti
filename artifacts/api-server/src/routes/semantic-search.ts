@@ -78,8 +78,9 @@ semanticSearchRouter.post("/semantic", authenticate, async (req: AuthRequest, re
            ) wm ON wm.student_id = s.id
            WHERE (wm.weak_topics ILIKE $1 OR a.display_name ILIKE $1)
              AND a.status = 'active'
+             AND s.teacher_account_id = $2
            LIMIT 10`,
-          [`%${topicKeyword}%`]
+          [`%${topicKeyword}%`, userId]
         );
         results.Students = stuRows.rows.map((r: any) => ({
           id: r.id,
@@ -98,10 +99,11 @@ semanticSearchRouter.post("/semantic", authenticate, async (req: AuthRequest, re
       const qRows = await pool.query(
         `SELECT id, question_text AS name, subject AS subtitle, difficulty, marks
          FROM questions
-         WHERE question_text ILIKE $1 OR topic ILIKE $1 OR subject ILIKE $1
+         WHERE (question_text ILIKE $1 OR topic ILIKE $1 OR subject ILIKE $1)
+           AND teacher_account_id = $2
          ORDER BY (CASE WHEN question_text ILIKE $1 THEN 1 ELSE 2 END)
          LIMIT 6`,
-        [like]
+        [like, userId]
       );
       results.Questions = qRows.rows.map((r: any) => ({
         id: r.id,
@@ -120,9 +122,9 @@ semanticSearchRouter.post("/semantic", authenticate, async (req: AuthRequest, re
         `SELECT l.id, l.title AS name, s.name AS subtitle, 'lesson' AS type
          FROM lessons l
          LEFT JOIN subjects s ON l.subject_id = s.id
-         WHERE l.title ILIKE $1
+         WHERE l.title ILIKE $1 AND l.teacher_account_id = $2
          LIMIT 5`,
-        [like]
+        [like, userId]
       );
       results.Resources = lRows.rows.map((r: any) => ({
         id: r.id,
@@ -139,9 +141,10 @@ semanticSearchRouter.post("/semantic", authenticate, async (req: AuthRequest, re
       const like = `%${q}%`;
       const [people, courses] = await Promise.all([
         pool.query(
-          `SELECT id, display_name AS name, username AS subtitle, role, 'person' AS type, 'People' AS category
-           FROM accounts WHERE (display_name ILIKE $1 OR username ILIKE $1) AND status='active' LIMIT 5`,
-          [like]
+          `SELECT id, display_name AS name, username AS subtitle, 'person' AS type, 'People' AS category
+           FROM accounts WHERE (display_name ILIKE $1 OR username ILIKE $1) AND status='active'
+             AND (role='teacher' OR id=$2) LIMIT 5`,
+          [like, userId]
         ),
         pool.query(
           `SELECT id, title AS name, subject AS subtitle, 'course' AS type, 'Courses' AS category
@@ -166,18 +169,20 @@ semanticSearchRouter.post("/semantic", authenticate, async (req: AuthRequest, re
   }
 });
 
-// Legacy GET /search passthrough (keyword only)
-semanticSearchRouter.get("/", async (req: AuthRequest, res: Response) => {
+// Legacy GET /search passthrough (keyword only) — requires authentication
+semanticSearchRouter.get("/", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const q = ((req.query.q as string) || "").trim();
     if (!q || q.length < 2) return res.json({ results: [], query: q });
     const like = `%${q}%`;
+    const userId = req.userId!;
 
     const [accounts, courses, subjects] = await Promise.all([
       pool.query(
-        `SELECT id, display_name AS name, username, role, NULL AS subtitle, 'person' AS type, 'People' AS category
-         FROM accounts WHERE (display_name ILIKE $1 OR username ILIKE $1) AND status='active' LIMIT 5`,
-        [like]
+        `SELECT id, display_name AS name, username, NULL AS subtitle, 'person' AS type, 'People' AS category
+         FROM accounts WHERE (display_name ILIKE $1 OR username ILIKE $1) AND status='active'
+           AND (role='teacher' OR id=$2) LIMIT 5`,
+        [like, userId]
       ),
       pool.query(
         `SELECT id, title AS name, subject AS subtitle, 'course' AS type, 'Courses' AS category
@@ -186,8 +191,8 @@ semanticSearchRouter.get("/", async (req: AuthRequest, res: Response) => {
       ).catch(() => ({ rows: [] as any[] })),
       pool.query(
         `SELECT id, name, board AS subtitle, 'subject' AS type, 'Subjects' AS category
-         FROM subjects WHERE name ILIKE $1 LIMIT 4`,
-        [like]
+         FROM subjects WHERE name ILIKE $1 AND teacher_account_id=$2 LIMIT 4`,
+        [like, userId]
       ).catch(() => ({ rows: [] as any[] })),
     ]);
 
