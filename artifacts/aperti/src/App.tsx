@@ -103,6 +103,9 @@ const GradeForecastPage = lazy(() => import("@/pages/teacher/grade-forecast"));
 const ArchitecturePage = lazy(() => import("@/pages/admin/architecture"));
 const MigrationSafetyPage = lazy(() => import("@/pages/admin/migration-safety"));
 const DeploymentPipelinePage = lazy(() => import("@/pages/admin/deployment-pipeline"));
+// Phase 4 — Compliance & Trust Layer
+const ConsentSettings = lazy(() => import("@/pages/consent-settings"));
+const LegalEditorPage = lazy(() => import("@/pages/admin/legal-editor"));
 
 // Student Portal
 const PastPaperLibrary = lazy(() => import("@/pages/student-portal/past-paper-library"));
@@ -466,6 +469,7 @@ function StudentRouter() {
         <Route path="/papers" component={PastPaperLibrary} />
         <Route path="/team-forge" component={TeamForge} />
         <Route path="/privacy-vault" component={PrivacyVault} />
+        <Route path="/consent-settings" component={ConsentSettings} />
         <Route path="/link-parent" component={LinkParent} />
         <Route path="/echo" component={Echo} />
         <Route path="/analytics" component={StudentAnalytics} />
@@ -528,6 +532,8 @@ function StudentRouter() {
 
 const TEACHER_ROUTES = (
   <>
+    <Route path="/consent-settings" component={ConsentSettings} />
+    <Route path="/privacy-vault" component={PrivacyVault} />
     <Route path="/onboarding" component={Onboarding} />
     <Route path="/settings" component={Settings} />
     <Route path="/profile/:id" component={Profile} />
@@ -676,6 +682,8 @@ const ADMIN_ROUTES = (
     <Route path="/admin/migration-safety" component={MigrationSafetyPage} />
     <Route path="/admin/deployment-pipeline" component={DeploymentPipelinePage} />
     <Route path="/admin/compliance" component={ComplianceDashboard} />
+    {/* Phase 4 — Compliance & Trust Layer */}
+    <Route path="/admin/legal-editor" component={LegalEditorPage} />
   </>
 );
 

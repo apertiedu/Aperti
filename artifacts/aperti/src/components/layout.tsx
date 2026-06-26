@@ -435,6 +435,23 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Active Sessions
               </Button>
             </Link>
+            <Link href="/privacy-vault">
+              <Button variant="ghost" size="sm" className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground text-[11px] h-7">
+                <Shield className="w-3 h-3" />
+                PrivacyVault™
+              </Button>
+            </Link>
+            <div className="flex flex-wrap gap-x-2 gap-y-0.5 px-2 py-1">
+              {[
+                { href: "/privacy", label: "Privacy" },
+                { href: "/terms", label: "Terms" },
+                { href: "/legal", label: "Legal" },
+              ].map(({ href, label }) => (
+                <Link key={href} href={href} className="text-[9px] text-muted-foreground/60 hover:text-muted-foreground transition-colors underline underline-offset-2">
+                  {label}
+                </Link>
+              ))}
+            </div>
             <Button
               variant="ghost" size="sm"
               className="w-full justify-start gap-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 text-[11px] h-7"

@@ -91,6 +91,60 @@ export default function Privacy() {
           </section>
 
           <section>
+            <h2 className="text-lg font-bold mb-3 text-foreground">2b. Lawful Basis for Processing (GDPR Art. 6)</h2>
+            <p className="text-muted-foreground mb-3">
+              For users in the European Economic Area or where GDPR applies, the following table maps each
+              processing activity to its lawful basis under Article 6 of the GDPR:
+            </p>
+            <div className="overflow-x-auto rounded-lg border border-border">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="bg-muted/50 border-b border-border">
+                    <th className="text-left px-3 py-2.5 font-semibold text-foreground">Processing activity</th>
+                    <th className="text-left px-3 py-2.5 font-semibold text-foreground">Lawful basis</th>
+                    <th className="text-left px-3 py-2.5 font-semibold text-foreground hidden sm:table-cell">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {[
+                    ["Account creation & management", "Contract (Art. 6(1)(b))", "Necessary to provide the Platform service"],
+                    ["Academic records & grade tracking", "Contract (Art. 6(1)(b))", "Core educational service delivery"],
+                    ["AI feature responses (Mentor, TutorCraft)", "Contract (Art. 6(1)(b))", "Anonymised queries; integral to service"],
+                    ["Payment verification (InstaPay)", "Contract (Art. 6(1)(b))", "Required for subscription processing"],
+                    ["Security logging & fraud detection", "Legitimate interest (Art. 6(1)(f))", "Protecting platform integrity and users"],
+                    ["System uptime and performance monitoring", "Legitimate interest (Art. 6(1)(f))", "Maintaining reliable service"],
+                    ["Analytics (usage patterns)", "Consent (Art. 6(1)(a))", "Opt-in via privacy preferences"],
+                    ["Marketing communications", "Consent (Art. 6(1)(a))", "Explicit opt-in required"],
+                    ["AI model improvement", "Consent (Art. 6(1)(a))", "Optional — anonymised only"],
+                    ["Financial record retention (5 years)", "Legal obligation (Art. 6(1)(c))", "Egyptian financial regulations"],
+                    ["Audit log retention (12 months)", "Legal obligation (Art. 6(1)(c))", "Security & compliance requirements"],
+                  ].map(([activity, basis, details]) => (
+                    <tr key={activity} className="hover:bg-muted/20 transition-colors">
+                      <td className="px-3 py-2 text-foreground">{activity}</td>
+                      <td className="px-3 py-2 text-muted-foreground font-medium">{basis}</td>
+                      <td className="px-3 py-2 text-muted-foreground hidden sm:table-cell">{details}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section>
+            <h2 className="text-lg font-bold mb-3 text-foreground">2c. Data Protection Officer (DPO)</h2>
+            <p className="text-muted-foreground">
+              Aperti has designated a Data Protection Officer responsible for overseeing compliance with data protection
+              law and acting as the primary contact for data subjects and supervisory authorities.
+            </p>
+            <div className="mt-3 bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm space-y-1">
+              <p><strong className="text-foreground">DPO Contact:</strong> <a href="mailto:dpo@aperti.ai" className="text-primary underline hover:opacity-80">dpo@aperti.ai</a></p>
+              <p><strong className="text-foreground">Privacy team:</strong> <a href="mailto:privacy@aperti.ai" className="text-primary underline hover:opacity-80">privacy@aperti.ai</a></p>
+              <p><strong className="text-foreground">Legal matters:</strong> <a href="mailto:legal@aperti.ai" className="text-primary underline hover:opacity-80">legal@aperti.ai</a></p>
+              <p><strong className="text-foreground">Response SLA:</strong> 30 days for data subject requests; 72 hours for breach notifications</p>
+            </div>
+          </section>
+
+          <section>
             <h2 className="text-lg font-bold mb-3 text-foreground">3. How We Use Your Data</h2>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
               <li>To create and manage your account and provide the Platform's core services.</li>

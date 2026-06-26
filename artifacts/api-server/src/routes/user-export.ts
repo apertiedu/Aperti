@@ -37,21 +37,85 @@ userExportRouter.post("/user/export", authenticate, async (req: AuthRequest, res
 userExportRouter.post("/user/deletion-request", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.userId!;
+
+    // Server-side confirmation validation — require the exact confirmation phrase
+    const CONFIRM_PHRASE = "delete my account";
+    const { confirmation, reason } = req.body as { confirmation?: string; reason?: string };
+    if (!confirmation || confirmation.trim().toLowerCase() !== CONFIRM_PHRASE) {
+      res.status(400).json({ error: "Invalid confirmation phrase. Please type 'delete my account' to confirm." });
+      return;
+    }
+
+    // Check if a pending deletion request already exists to prevent duplicates
+    const existing = await pool.query(
+      `SELECT id FROM compliance_requests WHERE user_id = $1
+       AND (request_type = 'account_deletion' OR type = 'account_deletion')
+       AND status IN ('pending', 'in_review')
+       LIMIT 1`,
+      [userId]
+    ).catch(() => ({ rows: [] }));
+    if (existing.rows.length > 0) {
+      res.status(409).json({ error: "A deletion request is already pending for your account." });
+      return;
+    }
+
     await pool.query(
       `INSERT INTO compliance_requests (user_id, request_type, status, notes, created_at)
-       VALUES ($1, 'account_deletion', 'pending', $2, NOW())
-       ON CONFLICT DO NOTHING`,
-      [userId, req.body.reason ?? "User requested account deletion"]
+       VALUES ($1, 'account_deletion', 'pending', $2, NOW())`,
+      [userId, reason?.slice(0, 500) ?? "User requested account deletion"]
     ).catch(async () => {
+      // Fallback if column name is 'type' instead of 'request_type'
       await pool.query(
-        `INSERT INTO compliance_requests (user_id, request_type, status, created_at)
-         VALUES ($1, 'account_deletion', 'pending', NOW())`,
-        [userId]
+        `INSERT INTO compliance_requests (user_id, type, status, notes, created_at)
+         VALUES ($1, 'account_deletion', 'pending', $2, NOW())`,
+        [userId, reason?.slice(0, 500) ?? "User requested account deletion"]
       );
     });
     res.json({ success: true, message: "Your account deletion request has been submitted. Our team will process it within 30 days." });
   } catch (err) {
     res.status(500).json({ error: "Failed to submit deletion request" });
+  }
+});
+
+// GET /api/user/deletion-request-status — check if user has a pending account deletion request
+userExportRouter.get("/user/deletion-request-status", authenticate, async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.userId!;
+    // Filter strictly to account_deletion requests (both column naming conventions)
+    const { rows } = await pool.query(
+      `SELECT status, created_at, notes
+       FROM compliance_requests
+       WHERE user_id = $1
+         AND (request_type = 'account_deletion' OR type = 'account_deletion')
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [userId]
+    ).catch(async () => {
+      // Fallback for older schema: try requested_at column
+      const r2 = await pool.query(
+        `SELECT status, requested_at AS created_at, notes
+         FROM compliance_requests
+         WHERE user_id = $1
+           AND (request_type = 'account_deletion' OR type = 'account_deletion')
+         ORDER BY requested_at DESC
+         LIMIT 1`,
+        [userId]
+      );
+      return { rows: r2.rows };
+    });
+    if (!rows.length) {
+      res.json({ hasPending: false });
+      return;
+    }
+    const r = rows[0];
+    const hasPending = r.status === "pending" || r.status === "in_review";
+    res.json({
+      hasPending,
+      status: r.status,
+      requestedAt: r.created_at,
+    });
+  } catch {
+    res.json({ hasPending: false });
   }
 });
 

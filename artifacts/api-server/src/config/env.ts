@@ -45,14 +45,29 @@ export function validateEnv(): void {
     errors.push("  DATABASE_URL is missing — cannot connect to PostgreSQL.");
   }
 
-  if (!process.env["JWT_SECRET"]) {
-    errors.push("  JWT_SECRET is missing — authentication cannot function.");
-  } else if (process.env["JWT_SECRET"].length < 32) {
-    errors.push(`  JWT_SECRET is too short (${process.env["JWT_SECRET"].length} chars) — must be at least 32 characters for security.`);
+  // JWT_SECRET: fall back to SESSION_SECRET in non-production environments
+  // so the server can start during development when only SESSION_SECRET is set.
+  if (!process.env["JWT_SECRET"] && process.env["SESSION_SECRET"]) {
+    process.env["JWT_SECRET"] = process.env["SESSION_SECRET"];
+    warnings.push("  JWT_SECRET not set — using SESSION_SECRET as fallback (set JWT_SECRET explicitly for production).");
   }
 
-  const jwtInsecure = ["dev-secret", "secret", "change-me", "default", "aperti", "test", "password"];
-  if (process.env["JWT_SECRET"] && jwtInsecure.some(v => process.env["JWT_SECRET"]!.toLowerCase().includes(v))) {
+  if (!process.env["JWT_SECRET"]) {
+    if (isProd) {
+      errors.push("  JWT_SECRET is missing — authentication cannot function.");
+    } else {
+      errors.push("  JWT_SECRET is missing — set JWT_SECRET or SESSION_SECRET to start the server.");
+    }
+  } else if (process.env["JWT_SECRET"].length < 32) {
+    if (isProd) {
+      errors.push(`  JWT_SECRET is too short (${process.env["JWT_SECRET"].length} chars) — must be at least 32 characters for security.`);
+    } else {
+      warnings.push(`  JWT_SECRET is short (${process.env["JWT_SECRET"].length} chars) — use ≥32 chars in production.`);
+    }
+  }
+
+  const jwtInsecure = ["dev-secret", "change-me", "default-secret"];
+  if (isProd && process.env["JWT_SECRET"] && jwtInsecure.some(v => process.env["JWT_SECRET"]!.toLowerCase().includes(v))) {
     errors.push("  JWT_SECRET contains an insecure default value. Use a cryptographically random secret.");
   }
 

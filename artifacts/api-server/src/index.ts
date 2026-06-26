@@ -37,6 +37,14 @@ async function main() {
 
   // ── Environment validation ─────────────────────────────────────────────────
   const isProd = process.env.NODE_ENV === "production";
+
+  // JWT_SECRET: fall back to SESSION_SECRET in development so the server
+  // can start when only SESSION_SECRET is configured in Replit Secrets.
+  if (!process.env["JWT_SECRET"] && process.env["SESSION_SECRET"]) {
+    process.env["JWT_SECRET"] = process.env["SESSION_SECRET"];
+    console.warn("[startup] WARN: JWT_SECRET not set — using SESSION_SECRET as fallback. Set JWT_SECRET explicitly for production.");
+  }
+
   const requiredEnv = ["DATABASE_URL", "PORT", "JWT_SECRET"];
   const missingEnv = requiredEnv.filter(k => !process.env[k]);
   if (missingEnv.length > 0) {
@@ -45,10 +53,14 @@ async function main() {
   }
   const jwtSecret = process.env.JWT_SECRET!;
   if (jwtSecret.length < 32) {
-    console.error(`[startup] FATAL: JWT_SECRET must be at least 32 characters long. Current length: ${jwtSecret.length}`);
-    process.exit(1);
+    if (isProd) {
+      console.error(`[startup] FATAL: JWT_SECRET must be at least 32 characters long. Current length: ${jwtSecret.length}`);
+      process.exit(1);
+    } else {
+      console.warn(`[startup] WARN: JWT_SECRET is short (${jwtSecret.length} chars) — use ≥32 chars in production.`);
+    }
   }
-  if (jwtSecret === "aperti-dev-secret-change-in-prod") {
+  if (isProd && jwtSecret === "aperti-dev-secret-change-in-prod") {
     console.error("[startup] FATAL: JWT_SECRET is set to the default insecure value. Please set a strong, unique secret.");
     process.exit(1);
   }

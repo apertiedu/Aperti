@@ -126,6 +126,8 @@ import { pricingExperimentsRouter } from "./pricing-experiments";
 import { roleBasedPlansRouter } from "./role-based-plans";
 import { gradeForecastPdfRouter } from "./grade-forecast-pdf";
 import { referralRouter } from "./referral";
+import { complianceConsentRouter } from "./compliance-consent";
+import { legalPolicyRouter } from "./legal-policy";
 
 const router: IRouter = Router();
 
@@ -297,6 +299,10 @@ router.use("/migration-safety", migrationSafetyRouter);
 router.use("/deployment", deploymentReadinessRouter);
 
 router.use("/referrals", referralRouter);
+
+// Phase 4 — Compliance & Trust Layer
+router.use(complianceConsentRouter);
+router.use(legalPolicyRouter);
 
 export default router;
 

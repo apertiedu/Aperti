@@ -1886,4 +1886,35 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS metadata       jsonb NOT NULL DEFAULT '{}'`,
   `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS paid_at        timestamptz`,
   `ALTER TABLE billing_invoices ADD COLUMN IF NOT EXISTS notes          text`,
+
+  /* ── Phase 4 — Compliance & Trust Layer ─────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS legal_policy_versions (
+    id                 serial PRIMARY KEY,
+    policy_type        varchar(64) NOT NULL,
+    version            varchar(32) NOT NULL,
+    content            text NOT NULL DEFAULT '',
+    summary            text NOT NULL DEFAULT '',
+    effective_date     date NOT NULL,
+    created_by         integer REFERENCES accounts(id) ON DELETE SET NULL,
+    created_at         timestamptz NOT NULL DEFAULT NOW(),
+    is_active          boolean NOT NULL DEFAULT false,
+    requires_reconsent boolean NOT NULL DEFAULT false
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_legal_policy_type_date ON legal_policy_versions(policy_type, created_at DESC)`,
+  /* Seed default active versions (ignored if already exist) */
+  `INSERT INTO legal_policy_versions (policy_type, version, content, summary, effective_date, is_active)
+   SELECT 'privacy_policy', 'v2026.06', 'See /privacy for full content.', 'Initial GDPR-aligned privacy policy', '2026-06-01', true
+   WHERE NOT EXISTS (SELECT 1 FROM legal_policy_versions WHERE policy_type = 'privacy_policy' AND is_active = true)`,
+  `INSERT INTO legal_policy_versions (policy_type, version, content, summary, effective_date, is_active)
+   SELECT 'terms_of_service', 'v2026.06', 'See /terms for full content.', 'Platform terms of service', '2026-06-01', true
+   WHERE NOT EXISTS (SELECT 1 FROM legal_policy_versions WHERE policy_type = 'terms_of_service' AND is_active = true)`,
+  `INSERT INTO legal_policy_versions (policy_type, version, content, summary, effective_date, is_active)
+   SELECT 'data_retention', 'v2026.06', 'See /data-retention for full content.', 'Granular retention schedules per data category', '2026-06-01', true
+   WHERE NOT EXISTS (SELECT 1 FROM legal_policy_versions WHERE policy_type = 'data_retention' AND is_active = true)`,
+  `INSERT INTO legal_policy_versions (policy_type, version, content, summary, effective_date, is_active)
+   SELECT 'cookie_policy', 'v2026.06', 'Aperti uses strictly essential cookies only. Analytics and marketing cookies are opt-in.', 'Cookie usage policy', '2026-06-01', true
+   WHERE NOT EXISTS (SELECT 1 FROM legal_policy_versions WHERE policy_type = 'cookie_policy' AND is_active = true)`,
+  /* Ensure compliance_requests has grace_period_ends column */
+  `ALTER TABLE compliance_requests ADD COLUMN IF NOT EXISTS grace_period_ends timestamptz`,
+  `ALTER TABLE compliance_requests ADD COLUMN IF NOT EXISTS cancelled_at      timestamptz`,
 ];
