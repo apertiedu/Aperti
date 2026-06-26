@@ -150,6 +150,7 @@ securePaymentsRouter.get(
       const { rows } = await pool.query(
         `SELECT pt.*, a.username, a.display_name,
                 al.role AS approver_role, al.action AS approval_action,
+                al.batch_id,
                 approver.display_name AS approver_name, al.created_at AS decided_at
          FROM payment_transactions pt
          LEFT JOIN accounts a ON a.id = pt.user_id
@@ -375,6 +376,177 @@ securePaymentsRouter.post(
     } catch (err) {
       await logError(err, { route: "/api/secure-payments/submit", method: "POST" });
       res.status(500).json({ status: "degraded", message: "Submission failed", requiresReview: true, error_code: "SUBMIT_EXCEPTION" });
+    }
+  },
+);
+
+/* ── POST /api/secure-payments/bulk ─────────────────────────────────────── */
+securePaymentsRouter.post(
+  "/bulk",
+  requireRole("admin", "super_admin"),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    const actor: Actor = { id: req.userId!, role: req.role! };
+    const ip = getClientIp(req as unknown as { ip?: string; headers: Record<string, string | string[] | undefined> });
+    const { ids, action, reason, notes } = req.body as {
+      ids: number[];
+      action: "approve" | "reject";
+      reason?: string;
+      notes?: string;
+    };
+
+    if (!Array.isArray(ids) || ids.length === 0) {
+      res.status(400).json({ error: "ids must be a non-empty array" });
+      return;
+    }
+    if (ids.length > 100) {
+      res.status(400).json({ error: "Bulk operations are limited to 100 transactions at once" });
+      return;
+    }
+    if (!["approve", "reject"].includes(action)) {
+      res.status(400).json({ error: "action must be 'approve' or 'reject'" });
+      return;
+    }
+    if (action === "reject" && !reason?.trim()) {
+      res.status(400).json({ error: "reason is required for bulk rejection" });
+      return;
+    }
+
+    const batchId = crypto.randomUUID();
+    const approved: number[] = [];
+    const rejectedIds: number[] = [];
+    const failed: Array<{ id: number; error: string }> = [];
+
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+
+      const validIds = ids.filter(id => !isNaN(id) && id > 0);
+      const { rows: txRows } = await client.query<TxRow>(
+        `SELECT * FROM payment_transactions WHERE id = ANY($1) AND status = 'pending' FOR UPDATE SKIP LOCKED`,
+        [validIds],
+      );
+
+      const lockedIds = new Set(txRows.map(r => r.id));
+      for (const id of validIds) {
+        if (!lockedIds.has(id)) {
+          failed.push({ id, error: "Transaction locked or already processed" });
+        }
+      }
+
+      for (const tx of txRows) {
+        const perm = await checkApprovalPermission(actor, tx);
+        if (!perm.allowed) {
+          failed.push({ id: tx.id, error: perm.reason ?? "Not permitted" });
+          continue;
+        }
+
+        if (action === "approve") {
+          await client.query(
+            `UPDATE payment_transactions
+             SET status = 'verified', verified_by = $1, verified_at = NOW(),
+                 approved_by_role = $2, notes = COALESCE($3, notes)
+             WHERE id = $4`,
+            [actor.id, actor.role, notes ?? null, tx.id],
+          );
+          await client.query(
+            `INSERT INTO approval_log (transaction_id, approved_by, role, action, reason, batch_id, created_at)
+             VALUES ($1, $2, $3, 'approve', $4, $5, NOW())`,
+            [tx.id, actor.id, actor.role, notes ?? null, batchId],
+          );
+          if (tx.subscription_id) {
+            await client.query(
+              `UPDATE subscriptions SET status = 'active', payment_status = 'approved' WHERE id = $1`,
+              [tx.subscription_id],
+            );
+          }
+          await client.query(
+            `INSERT INTO revenue_records (date, source, amount, currency, teacher_id)
+             VALUES (CURRENT_DATE, $1, $2, $3, $4)`,
+            [tx.purpose === "course_enrollment" ? "course" : "subscription", tx.amount, tx.currency, actor.id],
+          ).catch(() => {});
+          approved.push(tx.id);
+        } else {
+          await client.query(
+            `UPDATE payment_transactions
+             SET status = 'rejected', verified_by = $1, verified_at = NOW(),
+                 approved_by_role = $2, notes = COALESCE($3, notes)
+             WHERE id = $4`,
+            [actor.id, actor.role, reason ?? null, tx.id],
+          );
+          await client.query(
+            `INSERT INTO approval_log (transaction_id, approved_by, role, action, reason, batch_id, created_at)
+             VALUES ($1, $2, $3, 'reject', $4, $5, NOW())`,
+            [tx.id, actor.id, actor.role, reason ?? null, batchId],
+          );
+          rejectedIds.push(tx.id);
+        }
+      }
+
+      await client.query("COMMIT");
+
+      auditLog({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: action === "approve" ? "BULK_APPROVE_TX" : "BULK_REJECT_TX",
+        targetId: batchId,
+        targetType: "payment_transaction_batch",
+        ip,
+        result: "success",
+        metadata: { batchId, requested: ids.length, approved: approved.length, rejected: rejectedIds.length, failed: failed.length },
+      });
+
+      res.json({
+        batchId,
+        action,
+        approved,
+        rejected: rejectedIds,
+        failed,
+        summary: { requested: ids.length, processed: approved.length + rejectedIds.length, failed: failed.length },
+      });
+    } catch (err) {
+      await client.query("ROLLBACK").catch(() => {});
+      await logError(err, { route: "/api/secure-payments/bulk", method: "POST", userId: actor.id });
+      auditLog({
+        actorId: actor.id,
+        actorRole: actor.role,
+        action: action === "approve" ? "BULK_APPROVE_TX" : "BULK_REJECT_TX",
+        targetId: batchId,
+        targetType: "payment_transaction_batch",
+        ip,
+        result: "blocked",
+        metadata: { error: (err as Error)?.message },
+      });
+      res.status(500).json({ error: "Bulk operation failed", batchId });
+    } finally {
+      client.release();
+    }
+  },
+);
+
+/* ── GET /api/secure-payments/batch/:batchId ────────────────────────────── */
+securePaymentsRouter.get(
+  "/batch/:batchId",
+  requireRole("admin", "super_admin"),
+  async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+      const { batchId } = req.params;
+      const { rows } = await pool.query(
+        `SELECT al.id, al.transaction_id, al.action, al.reason, al.created_at,
+                pt.amount, pt.currency, pt.purpose, pt.reference_number,
+                a.display_name AS user_name,
+                approver.display_name AS approver_name
+         FROM approval_log al
+         JOIN payment_transactions pt ON pt.id = al.transaction_id
+         JOIN accounts a ON a.id = pt.user_id
+         JOIN accounts approver ON approver.id = al.approved_by
+         WHERE al.batch_id = $1
+         ORDER BY al.created_at ASC`,
+        [batchId],
+      );
+      res.json({ batchId, entries: rows, count: rows.length });
+    } catch (err) {
+      await logError(err, { route: `/api/secure-payments/batch/${req.params.batchId}` });
+      res.status(500).json({ error: "Failed to fetch batch audit trail" });
     }
   },
 );

@@ -1917,4 +1917,7 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   /* Ensure compliance_requests has grace_period_ends column */
   `ALTER TABLE compliance_requests ADD COLUMN IF NOT EXISTS grace_period_ends timestamptz`,
   `ALTER TABLE compliance_requests ADD COLUMN IF NOT EXISTS cancelled_at      timestamptz`,
+  /* Bulk approval batch tracking */
+  `ALTER TABLE approval_log ADD COLUMN IF NOT EXISTS batch_id TEXT`,
+  `CREATE INDEX IF NOT EXISTS idx_approval_log_batch ON approval_log(batch_id) WHERE batch_id IS NOT NULL`,
 ];
