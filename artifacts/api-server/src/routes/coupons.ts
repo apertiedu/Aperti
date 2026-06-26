@@ -20,9 +20,6 @@ couponsRouter.post("/validate", authenticate, async (req: AuthRequest, res: Resp
     if (coupon.expiryDate && new Date(coupon.expiryDate) < new Date()) {
       res.status(400).json({ error: "Coupon has expired" }); return;
     }
-    if (coupon.maxUses !== null && coupon.usedCount >= coupon.maxUses) {
-      res.status(400).json({ error: "Coupon has reached its usage limit" }); return;
-    }
 
     const { rows: used } = await pool.query(
       `SELECT id FROM coupon_redemptions WHERE coupon_id=$1 AND account_id=$2 LIMIT 1`,
@@ -30,6 +27,18 @@ couponsRouter.post("/validate", authenticate, async (req: AuthRequest, res: Resp
     );
     if (used.length > 0) {
       res.status(400).json({ error: "You have already used this coupon" }); return;
+    }
+
+    if (coupon.maxUses !== null) {
+      const { rows: claimed } = await pool.query(
+        `UPDATE coupons SET used_count = used_count + 1
+         WHERE id = $1 AND (max_uses IS NULL OR used_count < max_uses)
+         RETURNING used_count`,
+        [coupon.id]
+      );
+      if (claimed.length === 0) {
+        res.status(400).json({ error: "Coupon has reached its usage limit" }); return;
+      }
     }
 
     res.json({

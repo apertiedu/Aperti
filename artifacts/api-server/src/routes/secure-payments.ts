@@ -339,24 +339,35 @@ securePaymentsRouter.post(
   async (req: AuthRequest, res: Response): Promise<void> => {
     const ip = getClientIp(req as unknown as { ip?: string; headers: Record<string, string | string[] | undefined> });
     try {
-      const { userId, amount, referenceNumber, screenshotUrl, purpose = "platform_subscription", targetId, subscriptionId, notes } = req.body as {
-        userId: number; amount: number; referenceNumber?: string;
+      const userId = req.userId!;
+      const { amount, referenceNumber, screenshotUrl, purpose = "platform_subscription", targetId, subscriptionId, notes } = req.body as {
+        amount: number; referenceNumber?: string;
         screenshotUrl?: string; purpose?: string; targetId?: number;
         subscriptionId?: number; notes?: string;
       };
 
-      if (!userId || !amount) {
-        res.status(400).json({ error: "userId and amount are required" });
+      if (!amount || typeof amount !== "number" || amount <= 0) {
+        res.status(400).json({ error: "A valid positive amount is required" });
         return;
       }
 
+      if (screenshotUrl !== undefined && screenshotUrl !== null) {
+        try {
+          const parsed = new URL(screenshotUrl);
+          if (parsed.protocol !== "https:") throw new Error("not https");
+        } catch {
+          res.status(400).json({ error: "screenshotUrl must be a valid https:// URL" });
+          return;
+        }
+      }
+
       if (referenceNumber) {
-        const { rows } = await pool.query(
+        const { rows: dupRows } = await pool.query(
           "SELECT id FROM payment_transactions WHERE reference_number = $1 LIMIT 1",
           [referenceNumber],
         );
-        if (rows.length > 0) {
-          auditLog({ actorId: userId, actorRole: "user", action: "SUBMIT_TX_DUPLICATE", targetId: referenceNumber, targetType: "payment_transaction", ip, result: "blocked" });
+        if (dupRows.length > 0) {
+          auditLog({ actorId: userId, actorRole: req.role ?? "user", action: "SUBMIT_TX_DUPLICATE", targetId: referenceNumber, targetType: "payment_transaction", ip, result: "blocked" });
           res.status(409).json({ error: "Duplicate reference number — this payment has already been submitted" });
           return;
         }
@@ -371,7 +382,7 @@ securePaymentsRouter.post(
         [userId, subscriptionId ?? null, amount, referenceNumber ?? null, screenshotUrl ?? null, purpose, targetId ?? null, notes ?? null],
       );
 
-      auditLog({ actorId: userId, actorRole: "user", action: "SUBMIT_TX", targetId: rows[0].id, targetType: "payment_transaction", ip, result: "success" });
+      auditLog({ actorId: userId, actorRole: req.role ?? "user", action: "SUBMIT_TX", targetId: rows[0].id, targetType: "payment_transaction", ip, result: "success" });
       res.status(201).json(rows[0]);
     } catch (err) {
       await logError(err, { route: "/api/secure-payments/submit", method: "POST" });

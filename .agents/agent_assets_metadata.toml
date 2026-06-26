@@ -29,3 +29,9 @@ id = "0UrTy0DZqMbTD06vesPD_"
 uri = "file://docs/PRODUCTION_READINESS_CERTIFICATE.md"
 type = "text"
 title = "Aperti — Phase 6 Production Readiness Certificate (87/100)"
+
+[[outputs]]
+id = "zN5VIcLAJKuejUvsvbFX_"
+uri = "file://docs/APERTI_MASTER_AUDIT_REPORT.md"
+type = "text"
+title = "Aperti Master Audit Report — Pre-Launch Independent Audit"
