@@ -1920,4 +1920,54 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   /* Bulk approval batch tracking */
   `ALTER TABLE approval_log ADD COLUMN IF NOT EXISTS batch_id TEXT`,
   `CREATE INDEX IF NOT EXISTS idx_approval_log_batch ON approval_log(batch_id) WHERE batch_id IS NOT NULL`,
+
+  /* ── Certificates & Transcripts (Certification Engine) ───────────────── */
+  `CREATE TABLE IF NOT EXISTS certificates (
+    id               serial PRIMARY KEY,
+    student_id       integer NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    course_id        integer,
+    assessment_id    integer,
+    title            text NOT NULL,
+    description      text,
+    template         jsonb NOT NULL DEFAULT '{}',
+    issued_by        integer NOT NULL REFERENCES accounts(id),
+    unique_code      text NOT NULL UNIQUE,
+    verification_url text,
+    status           text NOT NULL DEFAULT 'active',
+    issued_at        timestamptz NOT NULL DEFAULT NOW(),
+    revoked_at       timestamptz,
+    revoked_by       integer REFERENCES accounts(id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_certificates_student     ON certificates (student_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_certificates_code        ON certificates (unique_code)`,
+  `CREATE INDEX IF NOT EXISTS idx_certificates_issued_by   ON certificates (issued_by)`,
+  `CREATE INDEX IF NOT EXISTS idx_certificates_assessment  ON certificates (assessment_id) WHERE assessment_id IS NOT NULL`,
+
+  `CREATE TABLE IF NOT EXISTS transcripts (
+    id           serial PRIMARY KEY,
+    student_id   integer NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    data         jsonb NOT NULL DEFAULT '{}',
+    version      integer NOT NULL DEFAULT 1,
+    generated_at timestamptz NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_transcripts_student ON transcripts (student_id, generated_at DESC)`,
+
+  /* ── High-traffic FK indexes (audit pass 2026-06) ────────────────────── */
+  `CREATE INDEX IF NOT EXISTS idx_parent_notifications_parent  ON parent_notifications (parent_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_guardian_links_parent        ON guardian_links (parent_account_id, status)`,
+  `CREATE INDEX IF NOT EXISTS idx_guardian_links_student       ON guardian_links (student_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_flashcard_progress_card      ON flashcard_progress (card_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_flashcard_items_deck         ON flashcard_items (deck_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_course_enrollments_course    ON course_enrollments (course_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_course_enrollments_student   ON course_enrollments (student_account_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_checkin_tokens_lesson        ON checkin_tokens (lesson_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_session_slots_lesson         ON session_slots (lesson_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_announcement_reads_ann       ON announcement_reads (announcement_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_student_marks_question       ON student_marks (question_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_coupon         ON subscriptions (coupon_id) WHERE coupon_id IS NOT NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_subscriptions_pending_inv    ON subscriptions (pending_invoice_id) WHERE pending_invoice_id IS NOT NULL`,
+  `CREATE INDEX IF NOT EXISTS idx_room_members_room            ON room_members (room_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_room_messages_room           ON room_messages (room_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_homework_due_published       ON homework (due_date) WHERE is_published = true`,
+  `CREATE INDEX IF NOT EXISTS idx_mastery_records_student      ON mastery_records (student_id)`,
 ];

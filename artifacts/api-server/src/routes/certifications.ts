@@ -21,6 +21,35 @@ certificationsRouter.post("/certificates/issue", ...teacherOrAdmin, async (req: 
       return res.status(400).json({ error: "student_id and title required" });
     }
 
+    const { rows: studentRows } = await pool.query(
+      `SELECT s.id FROM students s WHERE s.id = $1 AND s.teacher_account_id = $2`,
+      [student_id, issuedBy]
+    );
+    if (!studentRows.length) {
+      return res.status(403).json({ error: "Student not in your scope" });
+    }
+
+    if (assessment_id) {
+      const { rows: markRows } = await pool.query(
+        `SELECT sm.marks_scored, e.total_marks
+         FROM student_marks sm
+         JOIN exams e ON e.id = sm.exam_id
+         WHERE sm.exam_id = $1 AND sm.student_id = $2 AND sm.approved_at IS NOT NULL
+         LIMIT 1`,
+        [assessment_id, student_id]
+      );
+      if (!markRows.length) {
+        return res.status(422).json({ error: "No approved grade found for this student on the selected assessment" });
+      }
+      const mark = markRows[0];
+      const pct = parseFloat(mark.marks_scored) / parseFloat(mark.total_marks);
+      if (pct < 0.5) {
+        return res.status(422).json({
+          error: `Student scored ${Math.round(pct * 100)}% — a passing mark (≥50%) is required to issue a certificate`,
+        });
+      }
+    }
+
     const uniqueCode = `APT-${crypto.randomBytes(4).toString("hex").toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
     const verificationUrl = `${process.env.PUBLIC_URL ?? "https://aperti.app"}/verify/${uniqueCode}`;
 
@@ -120,7 +149,7 @@ certificationsRouter.put("/certificates/:id/revoke", ...teacherOrAdmin, async (r
   try {
     const { id } = req.params;
     const { rows } = await pool.query(
-      "UPDATE certificates SET status='revoked' WHERE id=$1 AND issued_by=$2 RETURNING *",
+      "UPDATE certificates SET status='revoked', revoked_at=NOW(), revoked_by=$2 WHERE id=$1 AND issued_by=$2 RETURNING *",
       [id, req.userId!]
     );
     if (!rows.length) return res.status(404).json({ error: "Not found or unauthorized" });
@@ -134,22 +163,19 @@ certificationsRouter.put("/certificates/:id/revoke", ...teacherOrAdmin, async (r
 
 certificationsRouter.post("/transcripts/generate", ...anyAuth, async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.userId!;
     const { student_id } = req.body;
 
-    // Verify access
     const stuRes = await pool.query("SELECT id, account_id FROM students WHERE id=$1", [student_id]);
     if (!stuRes.rows.length) return res.status(404).json({ error: "Student not found" });
 
-    // Gather all graded data
-    const [submissionsRes, certsRes] = await Promise.all([
+    const [marksRes, certsRes] = await Promise.all([
       pool.query(
-        `SELECT asub.score, asub.max_score, asub.percentage, asub.grade,
-                assess.title, assess.type, assess.created_at
-         FROM assessment_submissions asub
-         JOIN assessments assess ON assess.id = asub.assessment_id
-         WHERE asub.student_id=$1 AND asub.status IN ('graded','returned')
-         ORDER BY assess.created_at`,
+        `SELECT sm.marks_scored, sm.grading_status,
+                e.title, e.total_marks, e.created_at
+         FROM student_marks sm
+         JOIN exams e ON e.id = sm.exam_id
+         WHERE sm.student_id=$1 AND sm.approved_at IS NOT NULL
+         ORDER BY e.created_at`,
         [student_id]
       ),
       pool.query(
@@ -166,10 +192,14 @@ certificationsRouter.post("/transcripts/generate", ...anyAuth, async (req: AuthR
     const data = {
       student: profileRes.rows[0],
       generated_at: new Date(),
-      assessments: submissionsRes.rows,
+      assessments: marksRes.rows,
       certificates: certsRes.rows,
-      overall_average: submissionsRes.rows.length
-        ? Math.round(submissionsRes.rows.reduce((s: number, r: any) => s + (parseFloat(r.percentage) || 0), 0) / submissionsRes.rows.length)
+      overall_average: marksRes.rows.length
+        ? Math.round(
+            marksRes.rows.reduce((s: number, r: any) =>
+              s + (parseFloat(r.marks_scored) / parseFloat(r.total_marks)) * 100, 0
+            ) / marksRes.rows.length
+          )
         : null,
     };
 

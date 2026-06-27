@@ -1,5 +1,5 @@
 import { Router, Response } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { attendanceTable, studentsTable, attendanceAuditTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
@@ -35,6 +35,32 @@ async function logAudit(params: {
   } catch { }
 }
 
+async function notifyParentOfAbsence(studentId: number, date: string) {
+  try {
+    const { rows: links } = await pool.query(
+      `SELECT gl.parent_account_id, s.student_name
+       FROM guardian_links gl
+       JOIN students s ON s.id = $1
+       WHERE gl.student_id = $1 AND gl.status = 'active'`,
+      [studentId]
+    );
+    if (!links.length) return;
+    const studentName = links[0].student_name;
+    const inserts = links.map((l: any) =>
+      pool.query(
+        `INSERT INTO parent_notifications (parent_id, type, title, message, is_read, created_at)
+         VALUES ($1, 'attendance', $2, $3, false, NOW())`,
+        [
+          l.parent_account_id,
+          `Absence recorded — ${studentName}`,
+          `${studentName} was marked absent on ${date}. Please contact the teacher if this is incorrect.`,
+        ]
+      )
+    );
+    await Promise.all(inserts);
+  } catch { }
+}
+
 attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Response) => {
   const { studentId, sessionId, date, status } = req.body;
   if (!studentId || !sessionId || !date) {
@@ -61,6 +87,11 @@ attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Respo
       const [inserted] = await db.insert(attendanceTable).values({ studentId, sessionId, date, status: newStatus }).returning();
       await logAudit({ attendanceId: inserted?.id, studentId, lessonId: sessionId, action: "mark", newStatus, performedBy: req.userId!, scanMethod: "manual", ipAddress: req.ip });
     }
+
+    if (newStatus === "Absent" || newStatus === "absent") {
+      notifyParentOfAbsence(Number(studentId), date);
+    }
+
     res.json({ success: true });
   } catch (err: any) {
     res.status(400).json({ error: "Failed to mark attendance" });
@@ -94,6 +125,11 @@ attendanceRouter.post("/mark-by-code", authenticate, async (req: AuthRequest, re
       const [inserted] = await db.insert(attendanceTable).values({ studentId: student.id, sessionId: lessonId ? Number(lessonId) : null, date, status: newStatus }).returning();
       await logAudit({ attendanceId: inserted?.id, studentId: student.id, lessonId: lessonId ? Number(lessonId) : undefined, action: "scan_qr", newStatus, performedBy: req.userId!, scanMethod: "qr", deviceInfo, ipAddress: req.ip });
     }
+
+    if (newStatus === "Absent" || newStatus === "absent") {
+      notifyParentOfAbsence(student.id, date);
+    }
+
     res.json({
       success: true,
       student: { id: student.id, name: student.studentName, code: student.studentCode },
