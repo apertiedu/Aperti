@@ -416,11 +416,11 @@ function PricingSection() {
 export default function LandingPage() {
   const FEATURES = [
     { Icon: ClipboardList, title: "Smart Attendance", description: "QR check-in, instant parent alerts, and auto-generated absence reports — all without touching a spreadsheet." },
-    { Icon: Brain, title: "AI-Assisted Grading", description: "MCQ auto-marking and AI essay suggestions. Teachers review and approve; humans always have final authority." },
+    { Icon: CheckCircle2, title: "Structured Grading", description: "Split-screen marking workspace with rubric criteria. Teachers enter marks, write feedback, and approve — full control, full audit trail." },
     { Icon: BarChart3, title: "Student Analytics", description: "Risk flags, engagement scores, and performance trends for every student. Know who needs help before they fall behind." },
     { Icon: Bell, title: "Parent Dashboard", description: "Real-time grade updates, attendance alerts, and behavior notes visible to parents in their own secure portal." },
     { Icon: FileText, title: "Homework Engine", description: "Assign, collect, grade, and return homework in one flow. Students submit from any device; teachers grade in seconds." },
-    { Icon: Target, title: "Exam Builder", description: "Create IGCSE and IB-style exams, conduct them online, and receive AI-marked results with detailed question analytics." },
+    { Icon: Target, title: "Exam Builder", description: "Create IGCSE and IB-style exams, conduct them online with secure session monitoring and detailed question analytics." },
     { Icon: Layers, title: "Flashcard Engine", description: "Spaced-repetition study decks with Easy / OK / Hard confidence ratings. Students master content at their own pace." },
     { Icon: Globe, title: "Course Marketplace", description: "Publish your courses publicly or privately. Accept InstaPay enrolments and manage student access automatically." },
   ];
@@ -441,7 +441,7 @@ export default function LandingPage() {
   ];
 
   const STUDENT_BENEFITS = [
-    { icon: Brain, text: "AI Mentor available 24/7 to explain any concept" },
+    { icon: Brain, text: "Personal study mentor available 24/7 to explain any concept" },
     { icon: Target, text: "Spaced-repetition flashcards proven to improve retention" },
     { icon: BarChart3, text: "See your own progress, risk score, and next steps" },
     { icon: Smartphone, text: "Works on any device — phone, tablet, laptop" },
@@ -460,7 +460,7 @@ export default function LandingPage() {
             <div>
               <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                 <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary bg-primary/8 px-3 py-1 rounded-full mb-6">
-                  <Rocket className="h-3 w-3" /> Educational Operating System
+                  <Rocket className="h-3 w-3" /> Built for IGCSE & IB Educators
                 </span>
               </motion.div>
               <motion.h1
@@ -475,7 +475,7 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
                 className="text-lg text-gray-500 mb-8 leading-relaxed max-w-lg">
-                Attendance, AI grading, parent updates, and live student analytics — all in one place. Trusted by IGCSE & IB educators across Egypt and the Middle East.
+                Attendance, structured grading, real-time parent updates, and student analytics — all in one place. Trusted by IGCSE & IB educators across Egypt and the Middle East.
               </motion.p>
               <motion.div
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -704,7 +704,7 @@ export default function LandingPage() {
                 delay: 0,
               },
               {
-                quote: "The AI grading assistant cuts my marking time in half. I still review every answer — but the first pass is done before I even open the gradebook. It's like having a TA.",
+                quote: "The structured grading workspace is brilliant. Everything is in one place — submission, rubric, marks, feedback. I can get through 30 papers in half the time it used to take me.",
                 name: "Ahmed Saber",
                 role: "A-Level Mathematics — Alexandria",
                 initials: "AS",

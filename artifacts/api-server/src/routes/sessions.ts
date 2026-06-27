@@ -21,9 +21,11 @@ function ownsSession(teacherId: number | null, session: typeof sessionsTable.$in
 router.get("/sessions", authenticate, async (req: AuthRequest, res): Promise<void> => {
   try {
     const teacherId = getTeacherId(req);
+    const limit = Math.min(parseInt(String(req.query.limit ?? "200"), 10) || 200, 500);
+    const offset = Math.max(parseInt(String(req.query.offset ?? "0"), 10) || 0, 0);
     const rows = teacherId
       ? await db.select().from(sessionsTable).where(eq(sessionsTable.teacherAccountId, teacherId))
-      : await db.select().from(sessionsTable);
+      : await db.select().from(sessionsTable).limit(limit).offset(offset);
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "Failed to load sessions" });

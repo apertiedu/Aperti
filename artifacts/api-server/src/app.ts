@@ -252,8 +252,14 @@ const ALLOWED_ORIGINS: string[] | null = process.env.ALLOWED_ORIGINS
     ? process.env.REPLIT_DOMAINS.split(",").map(d => d.trim()).filter(Boolean).map(d => `https://${d}`)
     : null;
 
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+
 if (!ALLOWED_ORIGINS) {
-  console.warn("[CORS] ALLOWED_ORIGINS and REPLIT_DOMAINS are not set — cross-origin requests are unrestricted. Set ALLOWED_ORIGINS in production.");
+  if (IS_PRODUCTION) {
+    console.error("[CORS] FATAL: ALLOWED_ORIGINS and REPLIT_DOMAINS are not set in production — cross-origin requests will be blocked. Set ALLOWED_ORIGINS or REPLIT_DOMAINS.");
+  } else {
+    console.warn("[CORS] ALLOWED_ORIGINS and REPLIT_DOMAINS are not set — reflecting request origin in development only.");
+  }
 }
 
 app.use(cors({
@@ -262,7 +268,9 @@ app.use(cors({
         if (!origin || ALLOWED_ORIGINS.includes(origin)) cb(null, true);
         else cb(new Error("CORS: origin not allowed"));
       }
-    : true,
+    : IS_PRODUCTION
+      ? false  // Block all cross-origin in production when no whitelist configured
+      : true,  // Reflect origin in development only
   credentials: true,
 }));
 
@@ -708,7 +716,7 @@ app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
 // ── Seed default admin & start scheduler ─────────────────────────────────────
 async function seedDefaultAdmin() {
   try {
-    const existing = await db.select().from(accountsTable);
+    const existing = await db.select().from(accountsTable).limit(1);
     if (existing.length === 0) {
       const { randomBytes } = await import("crypto");
       const tempPassword = randomBytes(12).toString("hex");

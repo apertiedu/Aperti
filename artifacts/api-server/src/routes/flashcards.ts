@@ -298,11 +298,16 @@ Rules:
   res.status(201).json({ generated: inserted.length, cards: inserted });
 });
 
-// GET /flashcards/student/decks — decks available to student
-flashcardsRouter.get("/student/decks", authenticate, requireRole("student"), async (_req: AuthRequest, res: Response) => {
+// GET /flashcards/student/decks — decks available to student (paginated, max 100)
+flashcardsRouter.get("/student/decks", authenticate, requireRole("student"), async (req: AuthRequest, res: Response) => {
   try {
+    const limit = Math.min(parseInt(String(req.query.limit ?? "50"), 10) || 50, 100);
+    const offset = Math.max(parseInt(String(req.query.offset ?? "0"), 10) || 0, 0);
     const decks = await db.query.flashcardDecks.findMany({
+      where: (d, { eq }) => eq(d.isPublic, true),
       orderBy: (d, { desc }) => [desc(d.createdAt)],
+      limit,
+      offset,
     });
     res.json(decks);
   } catch (err: any) {

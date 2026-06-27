@@ -99,6 +99,18 @@ assessmentHubRouter.get("/assessments/:id", ...anyAuth, async (req: AuthRequest,
         return res.status(403).json({ error: "Access denied" });
       }
     }
+    // Scoped admins are restricted to their own tenant's assessments.
+    // Super admins bypass this check.
+    if (requesterRole === "admin") {
+      const { rows: adminRows } = await pool.query(
+        "SELECT teacher_account_id FROM accounts WHERE id = $1 LIMIT 1",
+        [requesterId],
+      );
+      const scopedTenantId = adminRows[0]?.teacher_account_id;
+      if (scopedTenantId && assessment.teacher_id !== scopedTenantId) {
+        return res.status(403).json({ error: "Access denied — cross-tenant" });
+      }
+    }
 
     const [sectionsRes, questionsRes] = await Promise.all([
       pool.query("SELECT * FROM assessment_sections WHERE assessment_id = $1 ORDER BY section_order", [id]),

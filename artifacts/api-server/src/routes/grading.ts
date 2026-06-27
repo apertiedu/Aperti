@@ -99,56 +99,8 @@ gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), asyn
   }
 });
 
-gradingRouter.post("/submission/:submissionId/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
-  try {
-    const submissionId = parseInt(req.params.submissionId);
-    if (isNaN(submissionId)) { res.status(400).json({ error: "Invalid submission ID" }); return; }
-    const mark = await db.query.studentMarks.findFirst({ where: (m, { eq }) => eq(m.id, submissionId) });
-    if (!mark) { res.status(404).json({ error: "Submission not found" }); return; }
-
-    if (req.role !== "admin" && req.role !== "super_admin" && mark.examId) {
-      const { rows: examRows } = await pool.query(
-        "SELECT id FROM exams WHERE id=$1 AND teacher_account_id=$2 LIMIT 1",
-        [mark.examId, req.userId],
-      );
-      if (!examRows.length) { res.status(403).json({ error: "Access denied" }); return; }
-    }
-
-    const scheme = await db.query.markSchemes.findFirst({ where: (s, { eq }) => eq(s.examQuestionId, mark.questionId) });
-    if (!scheme) { res.status(404).json({ error: "No scheme for this question" }); return; }
-
-    const answer = mark.mistakes || "";
-    const criteria = scheme.criteria as Array<{ keyword: string; marks: number }>;
-    let total = 0;
-    for (const c of criteria) {
-      if (answer.toLowerCase().includes(c.keyword.toLowerCase())) total += c.marks;
-    }
-
-    // HUMAN GRADING AUTHORITY: AI result goes into aiSuggestedMarks only.
-    // marksScored stays null until a teacher explicitly approves via /approve.
-    await db.update(studentMarksTable)
-      .set({
-        aiSuggestedMarks: total.toString(),
-        aiConfidence: "0.8",
-        gradingStatus: "pending",
-        mistakes: `[AI-suggested] ${answer}`,
-      })
-      .where(eq(studentMarksTable.id, submissionId));
-
-    res.json({
-      totalAwarded: total,
-      totalMarks: scheme.totalMarks,
-      status: "pending",
-      message: "AI suggestion stored. A teacher must review and approve before the grade is official.",
-    });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to auto-grade submission" });
-  }
-});
-
 // ── Grade approval for student_marks ─────────────────────────────────────────
-// Teacher reviews an AI suggestion, optionally overrides the mark, and sets
-// gradingStatus → 'graded' (saved) or 'approved' (released to student).
+// Teacher enters marks manually, then saves (grade) or releases (approve) to student.
 gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
     const submissionId = parseInt(req.params.submissionId);
@@ -164,7 +116,7 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
     if (!mark) { res.status(404).json({ error: "Submission not found" }); return; }
 
     const officialMarks = marksScored !== undefined ? String(marksScored) : mark.aiSuggestedMarks;
-    if (!officialMarks) { res.status(400).json({ error: "No marks to approve — provide marksScored or run AI grading first" }); return; }
+    if (!officialMarks) { res.status(400).json({ error: "No marks provided — include marksScored in the request body" }); return; }
 
     const newStatus = act === "approve" ? "approved" : "graded";
     const nowVal = new Date();
@@ -190,14 +142,3 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
   }
 });
 
-gradingRouter.post("/accept-suggestion", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
-  try {
-    const { interactionId, accepted } = req.body;
-    if (!interactionId) { res.status(400).json({ error: "interactionId required" }); return; }
-    const { markInteractionOutcome } = await import("../lib/ai-safety");
-    await markInteractionOutcome(interactionId, accepted === true);
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to record suggestion outcome" });
-  }
-});
