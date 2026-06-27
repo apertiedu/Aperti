@@ -44,7 +44,15 @@ export type AuditAction =
   // Payment/billing
   | "PAYMENT_VERIFY" | "PAYMENT_REFUND" | "SUBSCRIPTION_CREATE" | "SUBSCRIPTION_CANCEL"
   // AI
-  | "AI_REQUEST" | "AI_COST_EXCEEDED";
+  | "AI_REQUEST" | "AI_COST_EXCEEDED"
+  // Homework
+  | "HOMEWORK_CREATE" | "HOMEWORK_SUBMIT"
+  // Curriculum
+  | "LESSON_CREATE" | "COURSE_CREATE"
+  // Assessment
+  | "EXAM_CREATE" | "QUESTION_CREATE"
+  // Parent-student linking
+  | "PARENT_LINK_CREATE" | "PARENT_LINK_APPROVE";
 
 export type AuditSeverity = "info" | "warn" | "critical";
 

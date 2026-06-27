@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import { eq, and } from "drizzle-orm";
 import { db, pool, examsTable, examQuestionsTable, studentMarksTable, studentsTable } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+import { auditFromReq } from "../lib/audit";
 
 const router: IRouter = Router();
 
@@ -43,6 +44,7 @@ router.post("/exams", authenticate, async (req: AuthRequest, res): Promise<void>
       totalMarks: totalMarks ? String(totalMarks) : null,
       timeLimitMinutes: timeLimitMinutes ? parseInt(timeLimitMinutes, 10) : null,
     }).returning();
+    auditFromReq(req, "EXAM_CREATE", "exams", { resourceId: created.id, metadata: { name: created.name, subjectId: created.subjectId } });
     res.status(201).json(created);
   } catch {
     res.status(500).json({ error: "Failed to create exam" });
@@ -168,6 +170,7 @@ router.post("/exams/:id/questions", authenticate, async (req: AuthRequest, res):
       options: type === "mcq" && Array.isArray(options) ? options : null,
       correctOption: type === "mcq" && correctOption !== undefined ? parseInt(correctOption, 10) : null,
     }).returning();
+    auditFromReq(req, "QUESTION_CREATE", "exam_questions", { resourceId: created.id, metadata: { examId, topic, maxMarks } });
     res.status(201).json(created);
   } catch {
     res.status(500).json({ error: "Failed to add question" });

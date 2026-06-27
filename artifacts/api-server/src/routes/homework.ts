@@ -4,6 +4,7 @@ import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { homeworkTable, homeworkSubmissionsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { sendPushToRole, sendPushToUser } from "../lib/push";
+import { auditFromReq } from "../lib/audit";
 
 export const homeworkRouter = Router();
 
@@ -43,6 +44,7 @@ homeworkRouter.post("/", authenticate, requireRole("teacher", "admin"), async (r
       body: title ? `"${title}" has been assigned.` : "A new homework assignment has been posted.",
       url: "/my-homework",
     }).catch(() => {});
+    auditFromReq(req, "HOMEWORK_CREATE", "homework", { resourceId: hw.id, metadata: { title: hw.title, subjectId: hw.subjectId } });
     res.status(201).json(hw);
   } catch (err: any) {
     const msg = /duplicate|unique|constraint/i.test(err.message)
@@ -159,6 +161,7 @@ homeworkRouter.post("/:id/submit", authenticate, requireRole("student"), async (
       homeworkId, studentId, content, status: "submitted", submittedAt: new Date(),
     });
   }
+  auditFromReq(req, "HOMEWORK_SUBMIT", "homework_submissions", { resourceId: homeworkId });
   res.json({ success: true });
 });
 

@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { lessonsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { auditFromReq } from "../lib/audit";
 
 export const lessonsRouter = Router();
 
@@ -27,6 +28,7 @@ lessonsRouter.post("/", authenticate, async (req: AuthRequest, res: Response) =>
       capacity: capacity || null,
       onlineLink: onlineLink || null,
     }).returning();
+    auditFromReq(req, "LESSON_CREATE", "lessons", { resourceId: lesson.id, metadata: { lessonNumber: lesson.lessonNumber, subjectId: lesson.subjectId } });
     res.status(201).json(lesson);
   } catch (err: any) {
     const msg = /duplicate|unique|constraint/i.test(err.message)

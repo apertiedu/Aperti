@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { randomBytes } from "crypto";
+import { auditFromReq } from "../lib/audit";
 
 export const parentRouter = Router();
 
@@ -65,6 +66,7 @@ parentRouter.put("/approve-link/:id", authenticate, requireRole("parent"), async
       [status, parseInt(req.params.id), req.userId]
     );
     if (!rowCount) return res.status(404).json({ error: "Link not found" });
+    auditFromReq(req, "PARENT_LINK_APPROVE", "guardian_links", { resourceId: parseInt(req.params.id), metadata: { status } });
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
@@ -163,6 +165,7 @@ parentRouter.post("/link-student", authenticate, requireRole("student"), async (
        VALUES ($1,$2,'pending',$3,NOW()) RETURNING *`,
       [parentId, studentId, pairingCode.trim().toUpperCase()]
     );
+    auditFromReq(req, "PARENT_LINK_CREATE", "guardian_links", { resourceId: rows[0]?.id, metadata: { parentId, studentId } });
     res.status(201).json(rows[0]);
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

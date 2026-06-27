@@ -6,6 +6,7 @@ import { authenticate, requireRole } from "../middleware/auth";
 import bcrypt from "bcryptjs";
 import { validateBody } from "../middleware/validate-body";
 import { z } from "zod";
+import { audit } from "../lib/audit";
 
 const createUserSchema = z.object({
   username:    z.string().min(2).max(80),
@@ -186,6 +187,9 @@ adminUsersRouter.put("/:id", validateBody(updateUserSchema), async (req: Request
       .set({ displayName, email, role, status, phone, country, bio, avatarUrl, firstName, lastName })
       .where(eq(accountsTable.id, targetId))
       .returning();
+    if (role) {
+      audit({ actorId: actorId, actorRole: actorRole, action: "ROLE_CHANGE", resource: "accounts", resourceId: targetId, metadata: { newRole: role } }).catch(() => {});
+    }
     const { passwordHash: _omit, ...safeUser } = user as any;
     res.json(safeUser);
   } catch (err) {

@@ -5,6 +5,7 @@ import { markSchemesTable, studentMarksTable, examsTable, examQuestionsTable, qu
 import { eq } from "drizzle-orm";
 import { enhanceGrading } from "../lib/coremind";
 import { logInteraction } from "../lib/ai-safety";
+import { auditFromReq } from "../lib/audit";
 
 export const gradingRouter = Router();
 
@@ -147,7 +148,7 @@ gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), asyn
       confidence: baseResponse.confidence,
       sources: baseResponse.sources,
     });
-
+    auditFromReq(req, "GRADE_CREATE", "grading", { resourceId: questionId, metadata: { totalAwarded, totalMarks: scheme.totalMarks, type } });
     res.json(baseResponse);
   } catch (err) {
     res.status(500).json({ error: "Failed to grade answer" });
@@ -196,6 +197,7 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
       approvedBy: act === "approve" ? req.userId : null,
     }).where(eq(studentMarksTable.id, submissionId));
 
+    auditFromReq(req, act === "approve" ? "GRADE_APPROVE" : "GRADE_CREATE", "student_marks", { resourceId: submissionId, metadata: { marksScored: officialMarks, gradingStatus: newStatus } });
     res.json({
       id: submissionId,
       marksScored: officialMarks,

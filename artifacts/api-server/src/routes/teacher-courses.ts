@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enforce-limit";
+import { auditFromReq } from "../lib/audit";
 
 export const teacherCoursesRouter = Router();
 
@@ -48,6 +49,7 @@ teacherCoursesRouter.post(
         [tid, subject_id || null, name, description || null, board || "CAIE", level || "A-Level", session || null, duration_weeks || 12, language || "English", visibility || "draft"],
       );
       await incrementUsage(tid, "courses");
+      auditFromReq(req, "COURSE_CREATE", "teacher_courses", { resourceId: rows[0]?.id, metadata: { name, board, level } });
       res.status(201).json(rows[0]);
     } catch (e: any) {
       res.status(500).json({ error: "An unexpected error occurred" });

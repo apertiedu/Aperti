@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { db, pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
+import { auditFromReq } from "../lib/audit";
 import { attendanceTable, studentsTable, attendanceAuditTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 
@@ -91,7 +92,7 @@ attendanceRouter.post("/mark", authenticate, requireRole("teacher", "admin"), as
     if (newStatus === "Absent" || newStatus === "absent") {
       notifyParentOfAbsence(Number(studentId), date);
     }
-
+    auditFromReq(req, "ATTENDANCE_MARK", "attendance", { resourceId: studentId, metadata: { sessionId, date, status: newStatus } });
     res.json({ success: true });
   } catch (err: any) {
     res.status(400).json({ error: "Failed to mark attendance" });
@@ -129,7 +130,7 @@ attendanceRouter.post("/mark-by-code", authenticate, requireRole("teacher", "adm
     if (newStatus === "Absent" || newStatus === "absent") {
       notifyParentOfAbsence(student.id, date);
     }
-
+    auditFromReq(req, "ATTENDANCE_MARK", "attendance", { resourceId: student.id, metadata: { date, status: newStatus, scanMethod: "qr_code" } });
     res.json({
       success: true,
       student: { id: student.id, name: student.studentName, code: student.studentCode },

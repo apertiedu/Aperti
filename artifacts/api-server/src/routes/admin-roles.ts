@@ -13,6 +13,7 @@
  *   POST /api/admin/roles/matrix/reset       — reset a role to default permissions
  */
 import { Router, Request, Response } from "express";
+import { audit } from "../lib/audit";
 import { requireRole } from "../middleware/auth";
 import { DEFAULT_PERMISSIONS, PERMISSION_MODULES, hasPermission, type Role, type Permission } from "../config/permissions";
 import { pool } from "@workspace/db";
@@ -98,6 +99,8 @@ adminRolesRouter.put("/matrix", async (req: Request, res: Response) => {
       [role, permission, granted]
     );
     clearPermissionCache();
+    const actor = (req as any);
+    audit({ actorId: actor.userId ?? 0, actorRole: actor.role ?? "admin", action: "ROLE_CHANGE", resource: "role_permissions", metadata: { role, permission, granted } }).catch(() => {});
     res.json({ ok: true, role, permission, granted });
   } catch (err: any) {
     console.error("matrix update error:", err);
