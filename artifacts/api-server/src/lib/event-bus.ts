@@ -19,7 +19,10 @@ export type DomainEventType =
   | "enrollment.created"
   | "payout.processed"
   | "subscription.created"
-  | "subscription.cancelled";
+  | "subscription.cancelled"
+  | "auth.login"
+  | "auth.logout"
+  | "auth.mfa_success";
 
 export interface DomainEvent<T = Record<string, unknown>> {
   type: DomainEventType;

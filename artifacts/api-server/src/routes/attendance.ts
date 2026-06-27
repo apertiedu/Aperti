@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { db, pool } from "@workspace/db";
-import { authenticate, AuthRequest } from "../middleware/auth";
+import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { attendanceTable, studentsTable, attendanceAuditTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 
@@ -61,7 +61,7 @@ async function notifyParentOfAbsence(studentId: number, date: string) {
   } catch { }
 }
 
-attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Response) => {
+attendanceRouter.post("/mark", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   const { studentId, sessionId, date, status } = req.body;
   if (!studentId || !sessionId || !date) {
     return res.status(400).json({ error: "studentId, sessionId, and date are required" });
@@ -98,7 +98,7 @@ attendanceRouter.post("/mark", authenticate, async (req: AuthRequest, res: Respo
   }
 });
 
-attendanceRouter.post("/mark-by-code", authenticate, async (req: AuthRequest, res: Response) => {
+attendanceRouter.post("/mark-by-code", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   const { studentCode, lessonId, date, status, deviceInfo } = req.body;
   if (!studentCode || !date) {
     return res.status(400).json({ error: "studentCode and date are required" });

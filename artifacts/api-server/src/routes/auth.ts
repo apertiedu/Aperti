@@ -7,6 +7,7 @@ import { randomBytes } from "crypto";
 import { db, pool } from "@workspace/db";
 import { accountsTable, deviceSessionsTable, auditLogsTable } from "@workspace/db";
 import { authenticate, AuthRequest } from "../middleware/auth";
+import { eventBus } from "../lib/event-bus";
 import { sendEmail, buildPasswordResetEmail, SMTP_CONFIGURED } from "../lib/email";
 
 /**
@@ -209,6 +210,22 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
+    // ── MFA mandatory for admin and teacher: block login if not configured ───
+    const MFA_ENFORCED_ROLES = ["admin", "teacher"];
+    if (MFA_ENFORCED_ROLES.includes(account.role) && (!account.mfa_enabled || !account.mfa_secret)) {
+      const setupToken = jwt.sign(
+        { id: account.id, role: account.role, stage: "mfa_setup" },
+        JWT_SECRET,
+        { expiresIn: "15m" },
+      );
+      writeAudit({ accountId: account.id, action: "mfa_setup_required", resource: "auth", details: { role: account.role }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "warning" });
+      return res.status(403).json({
+        mfa_setup_required: true,
+        setup_token: setupToken,
+        message: "Multi-factor authentication is required for your role. Please set up MFA to continue.",
+      });
+    }
+
     // ── MFA gate: if MFA is enabled, do NOT issue a full JWT yet ─────────────
     if (account.mfa_enabled && account.mfa_secret) {
       const preAuthToken = jwt.sign(
@@ -258,6 +275,7 @@ authRouter.post("/login", loginLimiter, async (req: Request, res: Response) => {
       }).onConflictDoNothing();
     }
     writeAudit({ accountId: account.id, action: "login", resource: "auth", details: { role: account.role }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
+    eventBus.emit_event("auth.login", { userId: account.id, role: account.role, ip: req.ip ?? null }, { actorId: account.id, actorRole: account.role }).catch(() => {});
     dbPool.query(
       `INSERT INTO device_login_log (account_id, device, browser, ip, user_agent)
        VALUES ($1, $2, $3, $4, $5)`,
@@ -332,6 +350,7 @@ authRouter.post("/mfa-challenge", async (req: Request, res: Response) => {
 
     await dbPool.query("UPDATE accounts SET last_login_at=NOW() WHERE id=$1", [account.id]).catch(() => {});
     writeAudit({ accountId: account.id, action: "login_mfa_success", resource: "auth", details: { role: account.role }, ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
+    eventBus.emit_event("auth.mfa_success", { userId: account.id, role: account.role, ip: req.ip ?? null }, { actorId: account.id, actorRole: account.role }).catch(() => {});
 
     res.json({ token: fullToken, user: safeUser(account as unknown as Record<string, unknown>) });
   } catch (err) {
@@ -414,6 +433,7 @@ authRouter.post("/logout", async (req: Request, res: Response) => {
       try {
         const payload = jwt.verify(raw, JWT_SECRET) as any;
         writeAudit({ accountId: payload.id, action: "logout", resource: "auth", ipAddress: req.ip, userAgent: req.headers["user-agent"] as string, severity: "info" });
+        eventBus.emit_event("auth.logout", { userId: payload.id, role: payload.role ?? null, ip: req.ip ?? null }, { actorId: payload.id, actorRole: payload.role }).catch(() => {});
       } catch { /* token already expired — still allow logout */ }
     }
   } catch {
