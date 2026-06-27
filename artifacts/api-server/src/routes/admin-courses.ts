@@ -1,10 +1,10 @@
 import { Router, Request, Response } from "express";
 import { pool, db } from "@workspace/db";
-import { requireRole } from "../middleware/auth";
+import { authenticate, requireRole } from "../middleware/auth";
 import { sql } from "drizzle-orm";
 
 export const adminCoursesRouter = Router();
-adminCoursesRouter.use(requireRole("admin", "super_admin"));
+adminCoursesRouter.use(authenticate, requireRole("admin", "super_admin"));
 
 adminCoursesRouter.get("/", async (req: Request, res: Response) => {
   try {

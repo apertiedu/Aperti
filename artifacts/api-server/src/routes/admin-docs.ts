@@ -1,9 +1,9 @@
 import { Router, Request, Response } from "express";
 import { pool } from "@workspace/db";
-import { requireRole } from "../middleware/auth";
+import { authenticate, requireRole } from "../middleware/auth";
 
 export const adminDocsRouter = Router();
-adminDocsRouter.use(requireRole("admin", "super_admin"));
+adminDocsRouter.use(authenticate, requireRole("admin", "super_admin"));
 
 adminDocsRouter.get("/", async (req: Request, res: Response) => {
   try {

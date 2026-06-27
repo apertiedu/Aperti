@@ -2,10 +2,10 @@ import { Router, Request, Response } from "express";
 import { db } from "@workspace/db";
 import { organizationsTable, organizationSettingsTable } from "@workspace/db";
 import { eq, ilike, desc, sql } from "drizzle-orm";
-import { requireRole } from "../middleware/auth";
+import { authenticate, requireRole } from "../middleware/auth";
 
 export const adminOrgsRouter = Router();
-adminOrgsRouter.use(requireRole("admin", "super_admin"));
+adminOrgsRouter.use(authenticate, requireRole("admin", "super_admin"));
 
 adminOrgsRouter.get("/", async (req: Request, res: Response) => {
   try {

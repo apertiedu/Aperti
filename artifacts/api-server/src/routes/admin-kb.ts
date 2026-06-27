@@ -2,10 +2,10 @@ import { Router, Request, Response } from "express";
 import { db } from "@workspace/db";
 import { knowledgeBaseArticlesTable } from "@workspace/db";
 import { eq, desc, ilike } from "drizzle-orm";
-import { requireRole } from "../middleware/auth";
+import { authenticate, requireRole } from "../middleware/auth";
 
 export const adminKbRouter = Router();
-adminKbRouter.use(requireRole("admin", "super_admin"));
+adminKbRouter.use(authenticate, requireRole("admin", "super_admin"));
 
 adminKbRouter.get("/", async (req: Request, res: Response) => {
   try {

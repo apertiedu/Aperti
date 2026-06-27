@@ -234,10 +234,20 @@ assessmentHubRouter.post("/assessments/:id/questions", ...teacherOrAdmin, async 
 // ── REORDER QUESTIONS ─────────────────────────────────────────────────────────
 assessmentHubRouter.put("/assessments/:id/questions/reorder", ...teacherOrAdmin, async (req: AuthRequest, res: Response) => {
   try {
+    const assessmentId = parseInt(req.params.id);
+    if (isNaN(assessmentId)) return res.status(400).json({ error: "Invalid assessment ID" });
     const { ids } = req.body as { ids: number[] };
     if (!Array.isArray(ids)) return res.status(400).json({ error: "ids[] required" });
+    const { rows: own } = await pool.query(
+      "SELECT id FROM assessments WHERE id=$1 AND (teacher_id=$2 OR $3='admin') LIMIT 1",
+      [assessmentId, req.userId!, req.role]
+    );
+    if (!own.length) return res.status(403).json({ error: "Assessment not found or access denied" });
     await Promise.all(ids.map((qId, idx) =>
-      pool.query("UPDATE assessment_questions SET question_order=$1 WHERE id=$2", [idx, qId])
+      pool.query(
+        "UPDATE assessment_questions SET question_order=$1 WHERE id=$2 AND assessment_id=$3",
+        [idx, qId, assessmentId]
+      )
     ));
     res.json({ ok: true });
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }

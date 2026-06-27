@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and } from "drizzle-orm";
-import { db, examsTable, examQuestionsTable, studentMarksTable, studentsTable } from "@workspace/db";
+import { db, pool, examsTable, examQuestionsTable, studentMarksTable, studentsTable } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 
 const router: IRouter = Router();
