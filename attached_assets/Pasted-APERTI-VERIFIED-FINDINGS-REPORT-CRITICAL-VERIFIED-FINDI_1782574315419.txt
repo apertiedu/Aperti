@@ -1,0 +1,280 @@
+APERTI VERIFIED FINDINGS REPORT
+CRITICAL VERIFIED FINDINGS
+CRIT-01: requireRole Without authenticate on 5 Admin Router Groups
+Status: VERIFIED
+
+Exact File Paths:
+
+artifacts/api-server/src/routes/admin-users.ts — line 39
+artifacts/api-server/src/routes/admin-organizations.ts — line 8
+artifacts/api-server/src/routes/admin-kb.ts — line 8
+artifacts/api-server/src/routes/admin-docs.ts — line 6
+artifacts/api-server/src/routes/admin-courses.ts — line 7
+Exact Endpoints:
+
+GET|POST|PUT|DELETE /api/admin/users/*
+GET|POST|PUT|DELETE /api/admin/organizations/*
+GET|POST|PUT|DELETE /api/admin/kb/*
+GET|POST|PUT|DELETE /api/admin/docs/*
+GET|PUT|DELETE /api/admin/courses/*
+Code Evidence:
+
+// admin-users.ts:39 — authenticate is never imported or called
+adminUsersRouter.use(requireRole("admin", "super_admin"));
+// middleware/auth.ts:72-78
+export function requireRole(...roles: string[]) {
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.role || !roles.includes(req.role)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+    next();
+  };
+}
+Reproduction Steps:
+
+Send any request to /api/admin/users/1 with a valid admin JWT cookie
+authenticate never runs → req.role is undefined
+requireRole evaluates !req.role as true → returns 403
+Legitimate admin cannot access the route
+Impact: All 5 admin router groups return 403 to every caller including legitimate admins. The admin user management panel, organization management, knowledge base, documentation, and course admin are completely inaccessible. No JWT is ever verified on these routes.
+
+Likelihood: Certain — reproducible on every request
+
+Severity: Critical
+
+Fix Complexity: Small — add authenticate before requireRole in each router's .use() call
+
+Launch Blocking: Yes
+
+CRIT-02: passwordHash Field Returned in Three Admin User API Responses
+Status: VERIFIED
+
+Exact File Path: artifacts/api-server/src/routes/admin-users.ts
+
+Exact Endpoints:
+
+GET /api/admin/users/:id — line 130
+POST /api/admin/users/ — line 141
+PUT /api/admin/users/:id — line 169
+Code Evidence:
+
+// Line 127-130: full account row spread including passwordHash
+const [user] = await db.select().from(accountsTable).where(eq(accountsTable.id, parseInt(req.params.id)));
+res.json({ ...user, sessions });
+// Line 141: .returning() on insert returns all columns
+const [user] = await db.insert(accountsTable).values({ ... passwordHash, ... }).returning();
+res.status(201).json(user);
+// Line 166-170: .returning() on update returns all columns
+const [user] = await db.update(accountsTable).set({ ... }).where(...).returning();
+res.json(user);
+Reproduction Steps:
+
+Fix CRIT-01 (add authenticate)
+Log in as admin
+GET /api/admin/users/1
+Response body includes "passwordHash": "$2a$10$..." (bcrypt hash)
+Impact: Bcrypt hashes exposed to all admin-role users. Hash can be used in offline dictionary attacks against weak passwords. Full hash of every platform account retrievable by any admin.
+
+Likelihood: Certain once CRIT-01 is fixed
+
+Severity: Critical
+
+Fix Complexity: Small — use explicit column selection (exclude passwordHash) on these three queries
+
+Launch Blocking: Yes
+
+HIGH VERIFIED FINDINGS
+HIGH-01: IDOR — Any Authenticated Student Can Access Any Exam
+Status: VERIFIED
+
+Exact File Path: artifacts/api-server/src/routes/exams.ts
+
+Exact Endpoint: GET /api/exams/:id
+
+Code Evidence:
+
+// Lines 60-66
+const isStudent = req.role === "student";
+const isOwner = req.role === "admin" || exam.teacherAccountId === req.userId;
+if (!isOwner && !isStudent) {          // ← students bypass this check entirely
+  res.status(403).json({ error: "You do not have permission to view this exam" });
+  return;
+}
+// No enrollment check follows for students
+const questions = await db.select().from(examQuestionsTable)
+  .where(eq(examQuestionsTable.examId, id));
+Reproduction Steps:
+
+Log in as any student account
+Enumerate exam IDs starting from 1: GET /api/exams/1, /api/exams/2, etc.
+For every valid ID, full exam questions, mark schemes context, and all approved student marks are returned
+No check that the student is enrolled in the exam's course or lesson
+Impact: Any student accesses exam questions for exams they are not enrolled in. Exam contents are exposed before the sitting date. All approved marks for all students on that exam are returned in the marks array.
+
+Likelihood: High — sequential ID enumeration is trivial
+
+Severity: High
+
+Fix Complexity: Medium — add enrollment check: verify students table has a record with account_id = req.userId and teacher_account_id = exam.teacherAccountId, or check course_enrollments
+
+Launch Blocking: Yes
+
+HIGH-02: IDOR — POST /submission/:submissionId/approve No Teacher-Student Ownership Check
+Status: VERIFIED
+
+Exact File Path: artifacts/api-server/src/routes/grading.ts
+
+Exact Endpoint: POST /api/grading/submission/:submissionId/approve
+
+Code Evidence:
+
+// Lines 118-146 — fetches mark by ID, checks only that it exists, not that the
+// student belongs to the requesting teacher
+const mark = await db.query.studentMarks.findFirst({
+  where: (m, { eq }) => eq(m.id, submissionId)
+});
+if (!mark) { res.status(404).json({ error: "Submission not found" }); return; }
+// No: "WHERE exam.teacher_account_id = req.userId"
+// No: "WHERE student.teacher_account_id = req.userId"
+await db.update(studentMarksTable).set({
+  marksScored: officialMarks,
+  gradingStatus: newStatus,
+  approvedAt: ...,
+  approvedBy: req.userId,
+}).where(eq(studentMarksTable.id, submissionId));
+Reproduction Steps:
+
+Log in as Teacher A
+Obtain a submissionId belonging to Teacher B's student (e.g., via exam ID enumeration from HIGH-01)
+POST /api/grading/submission/<id>/approve with { "marksScored": 100, "action": "approve" }
+Grade is overwritten and marked as approved by Teacher A
+Impact: Any teacher can set the official grade on any student submission platform-wide. Grade integrity is compromised. The approvedBy audit field is populated with the attacker's ID.
+
+Likelihood: Medium — requires knowledge of a valid submissionId
+
+Severity: High
+
+Fix Complexity: Medium — after fetching mark, join to exams and verify teacher_account_id = req.userId (or req.role === 'admin')
+
+Launch Blocking: Yes
+
+HIGH-03: IDOR — POST /schemes Overwrites Any Teacher's Mark Scheme
+Status: VERIFIED
+
+Exact File Path: artifacts/api-server/src/routes/grading.ts
+
+Exact Endpoint: POST /api/grading/schemes
+
+Code Evidence:
+
+// Lines 23-43 — no ownership check on the question before update
+const existing = await db.query.markSchemes.findFirst({
+  where: (s, { eq }) => eq(questionBankId ? s.questionBankId : s.examQuestionId,
+    questionBankId || examQuestionId),
+});
+if (existing) {
+  await db.update(markSchemesTable)
+    .set({ criteria, totalMarks: totalMarks.toString() })
+    .where(eq(markSchemesTable.id, existing.id));
+  // No check: does req.userId own the question this scheme is attached to?
+Reproduction Steps:
+
+Log in as Teacher A
+Obtain an examQuestionId belonging to Teacher B (via HIGH-01 exam enumeration)
+POST /api/grading/schemes with { "examQuestionId": <id>, "criteria": [...], "totalMarks": 0 }
+Teacher B's mark scheme criteria are overwritten with Teacher A's payload
+Impact: Mark scheme corruption. A teacher can zero out or falsify the marking criteria for another teacher's exam questions, causing all subsequent grading for that question to award incorrect marks.
+
+Likelihood: Medium — requires knowledge of an examQuestionId
+
+Severity: High
+
+Fix Complexity: Medium — after resolving the question, verify exam.teacher_account_id = req.userId
+
+Launch Blocking: Yes
+
+MEDIUM VERIFIED FINDINGS
+MED-01: IDOR — PUT /assessments/:id/questions/reorder Updates Arbitrary Question IDs
+Status: VERIFIED
+
+Exact File Path: artifacts/api-server/src/routes/assessment-hub.ts
+
+Exact Endpoint: PUT /api/assessments/:id/questions/reorder
+
+Code Evidence:
+
+// Lines 235-244
+assessmentHubRouter.put("/assessments/:id/questions/reorder", ...teacherOrAdmin,
+  async (req: AuthRequest, res: Response) => {
+    const { ids } = req.body as { ids: number[] };
+    if (!Array.isArray(ids)) return res.status(400).json({ error: "ids[] required" });
+    await Promise.all(ids.map((qId, idx) =>
+      pool.query("UPDATE assessment_questions SET question_order=$1 WHERE id=$2", [idx, qId])
+    ));
+    // No check: do these qIds belong to assessment :id?
+    // No check: does the teacher own assessment :id?
+Reproduction Steps:
+
+Log in as Teacher A
+Obtain assessment_questions IDs from Teacher B's assessment
+PUT /api/assessments/1/questions/reorder with { "ids": [<teacherB_q1>, <teacherB_q2>] }
+Teacher B's question ordering is overwritten; Teacher A's assessment ID in the URL is irrelevant
+Impact: Teacher can corrupt the question ordering of another teacher's assessment. Assessment :id in the URL is not verified against the teacher's ownership, and the supplied ids are not verified to belong to that assessment.
+
+Likelihood: Low — requires knowledge of another teacher's question IDs
+
+Severity: Medium
+
+Fix Complexity: Medium — verify ownership of assessment :id and add WHERE id = $2 AND assessment_id = $1 to the update query
+
+Launch Blocking: No
+
+MED-02: GET /schemes Returns Mark Schemes for Any Question ID
+Status: VERIFIED
+
+Exact File Path: artifacts/api-server/src/routes/grading.ts
+
+Exact Endpoint: GET /api/grading/schemes?questionId=N
+
+Code Evidence:
+
+// Lines 11-21
+gradingRouter.get("/schemes", authenticate, requireRole("teacher", "admin"),
+  async (req: AuthRequest, res: Response) => {
+    const { questionId } = req.query as Record<string, string>;
+    const scheme = await db.query.markSchemes.findFirst({
+      where: (s, { eq }) => eq(s.questionBankId || s.examQuestionId, parseInt(questionId)),
+    });
+    res.json(scheme || null);
+    // No ownership check on the question or scheme
+Reproduction Steps:
+
+Log in as any teacher
+GET /api/grading/schemes?questionId=1, ?questionId=2, etc.
+Mark schemes for all teachers' questions are returned without restriction
+Impact: Any teacher reads the keyword-based mark scheme criteria for any other teacher's questions. Exposes marking logic and answer key keywords.
+
+Likelihood: Medium — sequential enumeration of questionId
+
+Severity: Medium
+
+Fix Complexity: Medium — join to the parent question/exam and verify teacher_account_id = req.userId
+
+Launch Blocking: No
+
+FALSE POSITIVES
+Finding	Reason
+ledger.ts — missing authenticate	authenticate IS at router level: ledgerRouter.use(authenticate, requireRole(...)) line 13
+migration-safety.ts — missing auth on /checkpoint	authenticate IS at router level: migrationSafetyRouter.use(authenticate, requireRole(...)) line 7
+session-slots.ts — missing authenticate	sessionSlotsRouter.use(authenticate) at line 20, requireRole at line 21
+centers.ts SQL injection via tenantCond	teacherId comes from req.tenant (set by requireTenantAccess which calls authenticate); it is a typed integer from JWT payload, never from req.body
+trials.ts SQL injection via tenantCond	Same as centers.ts — teacherId is req.tenant.teacherId, an integer from authenticated session
+admin-courses.ts dynamic SQL	Columns are explicitly hardcoded in destructuring (visibility, teacher_account_id); values use $1, $2 parameterization; no user-controlled column names
+admin-slow-queries.ts VACUUM ANALYZE	table variable comes from CORE_TABLES hardcoded array in the same file; no user input reaches this interpolation
+admin-docs.ts ILIKE injection	User input is pushed to params[] array and referenced via $N; the ILIKE pattern is parameterized
+FINAL COUNT OF REAL ISSUES
+Severity	Count
+Critical	2
+High	3
+Medium	2
+Total	7
