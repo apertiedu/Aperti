@@ -308,7 +308,7 @@ assessmentHubRouter.post("/assessments/:id/submit", ...anyAuth, async (req: Auth
       "SELECT * FROM assessment_submissions WHERE assessment_id=$1 AND student_id=$2", [id, studentId]
     );
     if (!sub.rows.length) return res.status(404).json({ error: "No active submission" });
-    if (sub.rows[0].status === "submitted") return res.status(409).json({ error: "Already submitted" });
+    if (["pending_review", "submitted", "graded"].includes(sub.rows[0].status)) return res.status(409).json({ error: "Already submitted" });
 
     const submissionId = sub.rows[0].id;
     const { answers = [] } = req.body as { answers: Array<{ question_id: number; answer_text?: string; file_url?: string }> };
@@ -323,17 +323,20 @@ assessmentHubRouter.post("/assessments/:id/submit", ...anyAuth, async (req: Auth
       );
     }
 
-    // Auto-grade MCQs
+    // Detect MCQ correctness as a review hint for assistants/teachers.
+    // Marks are stored per-answer (auto_graded=TRUE) so reviewers can see
+    // AI suggestions, but NO final score is committed here — that is the
+    // teacher's responsibility via POST /grading/assessments/:id/manual-grade.
     const questions = await pool.query(
       "SELECT * FROM assessment_questions WHERE assessment_id=$1", [id]
     );
-    let autoScore = 0;
+    let suggestedScore = 0;
     for (const q of questions.rows) {
       if (q.question_type === "mcq" && q.correct_answer) {
         const ans = answers.find(a => a.question_id === q.id);
         const isCorrect = ans?.answer_text?.trim() === q.correct_answer?.trim();
         const marksAwarded = isCorrect ? parseFloat(q.marks) : 0;
-        autoScore += marksAwarded;
+        suggestedScore += marksAwarded;
         await pool.query(
           `UPDATE submission_answers SET is_correct=$1, marks_awarded=$2, auto_graded=TRUE
            WHERE submission_id=$3 AND question_id=$4`,
@@ -342,15 +345,21 @@ assessmentHubRouter.post("/assessments/:id/submit", ...anyAuth, async (req: Auth
       }
     }
 
-    // Mark submitted
+    // Stage 1 → Stage 2: move to pending_review (NOT graded).
+    // Workflow: Student Submission → pending_review → Assistant Review
+    //           → Teacher Review → manual-grade endpoint → status=graded
     const { rows } = await pool.query(
       `UPDATE assessment_submissions
-       SET status='submitted', submitted_at=NOW(), score=$1
-       WHERE id=$2 RETURNING *`,
-      [autoScore || null, submissionId]
+       SET status='pending_review', submitted_at=NOW()
+       WHERE id=$1 RETURNING *`,
+      [submissionId]
     );
 
-    res.json({ submission: rows[0], auto_score: autoScore });
+    res.json({
+      submission: rows[0],
+      suggested_score: suggestedScore,
+      note: "Submission received. Awaiting assistant/teacher review before final grade is assigned.",
+    });
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
 
