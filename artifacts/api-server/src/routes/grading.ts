@@ -1,7 +1,7 @@
 import { Router, Response } from "express";
 import { db, pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
-import { markSchemesTable, studentMarksTable } from "@workspace/db";
+import { markSchemesTable, studentMarksTable, examsTable, examQuestionsTable, questionBankTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { enhanceGrading } from "../lib/coremind";
 import { logInteraction } from "../lib/ai-safety";
@@ -10,11 +10,41 @@ export const gradingRouter = Router();
 
 gradingRouter.get("/schemes", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
-    const { questionId } = req.query as Record<string, string>;
+    const { questionId, type } = req.query as Record<string, string>;
+    const qId = parseInt(questionId);
+    if (isNaN(qId)) { res.status(400).json({ error: "Invalid questionId" }); return; }
+
     const scheme = await db.query.markSchemes.findFirst({
-      where: (s, { eq }) => eq(s.questionBankId || s.examQuestionId, parseInt(questionId)),
+      where: (s, { eq }) => type === "exam" ? eq(s.examQuestionId, qId) : eq(s.questionBankId, qId),
     });
-    res.json(scheme || null);
+
+    if (!scheme) { res.json(null); return; }
+
+    // MED-02: verify the requesting teacher owns the parent question (admin bypasses)
+    if (req.role !== "admin") {
+      if (scheme.examQuestionId) {
+        const [question] = await db
+          .select({ teacherAccountId: examsTable.teacherAccountId })
+          .from(examQuestionsTable)
+          .innerJoin(examsTable, eq(examsTable.id, examQuestionsTable.examId))
+          .where(eq(examQuestionsTable.id, scheme.examQuestionId))
+          .limit(1);
+        if (!question || question.teacherAccountId !== req.userId) {
+          res.status(403).json({ error: "Access denied" }); return;
+        }
+      } else if (scheme.questionBankId) {
+        const [question] = await db
+          .select({ teacherAccountId: questionBankTable.teacherAccountId })
+          .from(questionBankTable)
+          .where(eq(questionBankTable.id, scheme.questionBankId))
+          .limit(1);
+        if (!question || question.teacherAccountId !== req.userId) {
+          res.status(403).json({ error: "Access denied" }); return;
+        }
+      }
+    }
+
+    res.json(scheme);
   } catch (err) {
     res.status(500).json({ error: "Failed to load mark scheme" });
   }
@@ -23,6 +53,31 @@ gradingRouter.get("/schemes", authenticate, requireRole("teacher", "admin"), asy
 gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
     const { questionBankId, examQuestionId, criteria, totalMarks } = req.body;
+
+    // HIGH-03: verify the requesting teacher owns the parent question (admin bypasses)
+    if (req.role !== "admin") {
+      if (examQuestionId) {
+        const [question] = await db
+          .select({ teacherAccountId: examsTable.teacherAccountId })
+          .from(examQuestionsTable)
+          .innerJoin(examsTable, eq(examsTable.id, examQuestionsTable.examId))
+          .where(eq(examQuestionsTable.id, examQuestionId))
+          .limit(1);
+        if (!question || question.teacherAccountId !== req.userId) {
+          res.status(403).json({ error: "Access denied" }); return;
+        }
+      } else if (questionBankId) {
+        const [question] = await db
+          .select({ teacherAccountId: questionBankTable.teacherAccountId })
+          .from(questionBankTable)
+          .where(eq(questionBankTable.id, questionBankId))
+          .limit(1);
+        if (!question || question.teacherAccountId !== req.userId) {
+          res.status(403).json({ error: "Access denied" }); return;
+        }
+      }
+    }
+
     const existing = await db.query.markSchemes.findFirst({
       where: (s, { eq }) => eq(questionBankId ? s.questionBankId : s.examQuestionId, questionBankId || examQuestionId),
     });
@@ -114,6 +169,18 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
 
     const mark = await db.query.studentMarks.findFirst({ where: (m, { eq }) => eq(m.id, submissionId) });
     if (!mark) { res.status(404).json({ error: "Submission not found" }); return; }
+
+    // HIGH-02: verify the requesting teacher owns the exam this submission belongs to (admin bypasses)
+    if (req.role !== "admin") {
+      const [exam] = await db
+        .select({ teacherAccountId: examsTable.teacherAccountId })
+        .from(examsTable)
+        .where(eq(examsTable.id, mark.examId!))
+        .limit(1);
+      if (!exam || exam.teacherAccountId !== req.userId) {
+        res.status(403).json({ error: "Access denied" }); return;
+      }
+    }
 
     const officialMarks = marksScored !== undefined ? String(marksScored) : mark.aiSuggestedMarks;
     if (!officialMarks) { res.status(400).json({ error: "No marks provided — include marksScored in the request body" }); return; }

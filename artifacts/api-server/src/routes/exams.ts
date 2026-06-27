@@ -65,6 +65,24 @@ router.get("/exams/:id", authenticate, async (req: AuthRequest, res): Promise<vo
       return;
     }
 
+    // IDOR guard: students must be enrolled under the exam's teacher
+    if (isStudent) {
+      const [enrolled] = await db
+        .select({ id: studentsTable.id })
+        .from(studentsTable)
+        .where(
+          and(
+            eq(studentsTable.accountId, req.userId!),
+            eq(studentsTable.teacherAccountId, exam.teacherAccountId!)
+          )
+        )
+        .limit(1);
+      if (!enrolled) {
+        res.status(403).json({ error: "You do not have permission to view this exam" });
+        return;
+      }
+    }
+
     const questions = await db.select().from(examQuestionsTable)
       .where(eq(examQuestionsTable.examId, id))
       .orderBy(examQuestionsTable.questionOrder);

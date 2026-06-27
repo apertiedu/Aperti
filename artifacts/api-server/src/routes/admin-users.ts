@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import { db, pool } from "@workspace/db";
 import { accountsTable, deviceSessionsTable } from "@workspace/db";
 import { eq, ilike, or, and, desc, sql } from "drizzle-orm";
-import { requireRole } from "../middleware/auth";
+import { authenticate, requireRole } from "../middleware/auth";
 import bcrypt from "bcryptjs";
 import { validateBody } from "../middleware/validate-body";
 import { z } from "zod";
@@ -36,7 +36,25 @@ const resetPasswordSchema = z.object({
 });
 
 export const adminUsersRouter = Router();
-adminUsersRouter.use(requireRole("admin", "super_admin"));
+adminUsersRouter.use(authenticate, requireRole("admin", "super_admin"));
+
+const safeAccountColumns = {
+  id: accountsTable.id,
+  username: accountsTable.username,
+  displayName: accountsTable.displayName,
+  email: accountsTable.email,
+  role: accountsTable.role,
+  status: accountsTable.status,
+  isVerified: accountsTable.isVerified,
+  lastLoginAt: accountsTable.lastLoginAt,
+  createdAt: accountsTable.createdAt,
+  avatarUrl: accountsTable.avatarUrl,
+  phone: accountsTable.phone,
+  country: accountsTable.country,
+  bio: accountsTable.bio,
+  firstName: accountsTable.firstName,
+  lastName: accountsTable.lastName,
+} as const;
 
 /* ── List Users ──────────────────────────────────────────────────────────── */
 adminUsersRouter.get("/", async (req: Request, res: Response) => {
@@ -124,7 +142,7 @@ adminUsersRouter.get("/stats/overview", async (req: Request, res: Response) => {
 /* ── Get Single User ─────────────────────────────────────────────────────── */
 adminUsersRouter.get("/:id", async (req: Request, res: Response) => {
   try {
-    const [user] = await db.select().from(accountsTable).where(eq(accountsTable.id, parseInt(req.params.id)));
+    const [user] = await db.select(safeAccountColumns).from(accountsTable).where(eq(accountsTable.id, parseInt(req.params.id)));
     if (!user) return res.status(404).json({ error: "User not found" });
     const sessions = await db.select().from(deviceSessionsTable).where(eq(deviceSessionsTable.accountId, user.id)).orderBy(desc(deviceSessionsTable.lastActiveAt)).limit(10);
     res.json({ ...user, sessions });
@@ -139,7 +157,8 @@ adminUsersRouter.post("/", validateBody(createUserSchema), async (req: Request, 
     const { username, password, displayName, email, role, status = "active", phone, country } = req.body;
     const passwordHash = await bcrypt.hash(password, 10);
     const [user] = await db.insert(accountsTable).values({ username, passwordHash, displayName: displayName || username, email, role: role || "teacher", status, phone, country }).returning();
-    res.status(201).json(user);
+    const { passwordHash: _omit, ...safeUser } = user as any;
+    res.status(201).json(safeUser);
   } catch (err: any) {
     if (err.code === "23505") return res.status(409).json({ error: "Username already exists" });
     res.status(500).json({ error: "Failed to create user" });
@@ -167,7 +186,8 @@ adminUsersRouter.put("/:id", validateBody(updateUserSchema), async (req: Request
       .set({ displayName, email, role, status, phone, country, bio, avatarUrl, firstName, lastName })
       .where(eq(accountsTable.id, targetId))
       .returning();
-    res.json(user);
+    const { passwordHash: _omit, ...safeUser } = user as any;
+    res.json(safeUser);
   } catch (err) {
     res.status(500).json({ error: "Failed to update user" });
   }
