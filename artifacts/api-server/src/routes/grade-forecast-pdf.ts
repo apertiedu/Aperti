@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import PDFDocument from "pdfkit";
+import { AI_AVAILABLE } from "../services/ai";
 
 export const gradeForecastPdfRouter = Router();
 
@@ -10,6 +11,12 @@ gradeForecastPdfRouter.get(
   authenticate,
   requireRole("teacher", "admin"),
   async (req: AuthRequest, res: Response) => {
+    if (!AI_AVAILABLE) {
+      return res.status(503).json({
+        error: "AI grade forecasting is not available — OPENAI_API_KEY is not configured.",
+        ai_available: false,
+      });
+    }
     try {
       const teacherId = req.userId!;
       const subjectId = req.query.subjectId ? parseInt(req.query.subjectId as string) : null;

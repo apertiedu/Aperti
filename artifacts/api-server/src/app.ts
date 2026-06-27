@@ -132,6 +132,8 @@ import { RedisStore as ConnectRedisStore } from "connect-redis";
 import { emailVerificationRouter } from "./routes/email-verification";
 import { accountSuspensionRouter } from "./routes/account-suspension";
 import { onboardingRouter } from "./routes/onboarding";
+import { studyPlanRouter } from "./routes/study-plan";
+import { gradePredictionRouter } from "./routes/grade-prediction";
 import { runGraceAndExpiryCheck } from "./lib/subscription-fsm";
 
 const app: Express = express();
@@ -568,6 +570,8 @@ app.use("/api", complianceConsentRouter);
 app.use("/api", emailVerificationRouter);
 app.use("/api/admin/accounts", accountSuspensionRouter);
 app.use("/api/onboarding", onboardingRouter);
+app.use("/api/study-plan", studyPlanRouter);
+app.use("/api/grade-prediction", gradePredictionRouter);
 
 // Phase 32 — Zero-Defect Initiative
 app.use("/api/admin/route-health", adminRouteHealthRouter);

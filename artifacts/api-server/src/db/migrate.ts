@@ -1970,4 +1970,41 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
   `CREATE INDEX IF NOT EXISTS idx_room_messages_room           ON room_messages (room_id)`,
   `CREATE INDEX IF NOT EXISTS idx_homework_due_published       ON homework (due_date) WHERE is_published = true`,
   `CREATE INDEX IF NOT EXISTS idx_mastery_records_student      ON mastery_records (student_id)`,
+
+  /* ── AI Governance tables (Phase 42) ─────────────────────────────────── */
+  `CREATE TABLE IF NOT EXISTS ai_learning_events (
+    id           SERIAL PRIMARY KEY,
+    student_id   INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+    teacher_id   INTEGER REFERENCES accounts(id) ON DELETE SET NULL,
+    event_type   TEXT NOT NULL,
+    subject_id   INTEGER REFERENCES subjects(id) ON DELETE SET NULL,
+    module       TEXT NOT NULL DEFAULT 'general',
+    action       TEXT NOT NULL,
+    outcome      TEXT,
+    confidence   NUMERIC(4,3),
+    tokens_used  INTEGER NOT NULL DEFAULT 0,
+    accepted     BOOLEAN NOT NULL DEFAULT false,
+    latency_ms   INTEGER,
+    metadata     JSONB NOT NULL DEFAULT '{}',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_learning_events_student ON ai_learning_events (student_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_learning_events_teacher ON ai_learning_events (teacher_id, created_at DESC)`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_learning_events_module  ON ai_learning_events (module, created_at DESC)`,
+
+  `CREATE TABLE IF NOT EXISTS teacher_ai_stats (
+    id               SERIAL PRIMARY KEY,
+    teacher_id       INTEGER NOT NULL REFERENCES accounts(id) ON DELETE CASCADE,
+    period_date      DATE NOT NULL,
+    module           TEXT NOT NULL DEFAULT 'all',
+    total_calls      INTEGER NOT NULL DEFAULT 0,
+    accepted_calls   INTEGER NOT NULL DEFAULT 0,
+    rejected_calls   INTEGER NOT NULL DEFAULT 0,
+    total_tokens     INTEGER NOT NULL DEFAULT 0,
+    avg_confidence   NUMERIC(4,3),
+    avg_latency_ms   INTEGER,
+    updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (teacher_id, period_date, module)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_teacher_ai_stats_teacher ON teacher_ai_stats (teacher_id, period_date DESC)`,
 ];
