@@ -29,6 +29,7 @@ export function validateEnv(): void {
   if (isProd) {
     const prodRequired = [
       "ALLOWED_ORIGINS",
+      "PUBLIC_URL",
       "EXAM_VAULT_KEY",
       "VAPID_PUBLIC_KEY",
       "VAPID_PRIVATE_KEY",

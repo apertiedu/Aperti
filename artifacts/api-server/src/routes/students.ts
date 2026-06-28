@@ -5,6 +5,7 @@ import { studentsTable, accountsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { enforceLimit, incrementUsage, decrementUsage } from "../middleware/enforce-limit";
+import { auditFromReq } from "../lib/audit";
 
 export const studentsRouter = Router();
 
@@ -13,7 +14,6 @@ function isAdmin(req: AuthRequest) { return req.role === "admin"; }
 studentsRouter.get("/", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const teacherId = req.userId!;
-    // Cap at 2000 rows to prevent unbounded memory use; admins can paginate
     const students = isAdmin(req)
       ? await db.select().from(studentsTable).limit(2000)
       : await db.select().from(studentsTable).where(eq(studentsTable.teacherAccountId, teacherId)).limit(2000);
@@ -37,6 +37,7 @@ studentsRouter.post("/bulk", authenticate, enforceLimit("students"), async (req:
   try {
     const inserted = await db.insert(studentsTable).values(rows).returning();
     await incrementUsage(teacherId, "students", inserted.length);
+    auditFromReq(req, "STUDENT_CREATE", "student", { metadata: { bulk: true, count: inserted.length } });
     res.json(inserted);
   } catch (err: any) {
     if (err.code === "23505" || err.message?.includes("unique")) {
@@ -60,6 +61,7 @@ studentsRouter.post("/", authenticate, enforceLimit("students"), async (req: Aut
       lesson3SessionId: lesson3SessionId || null,
     }).returning();
     await incrementUsage(teacherId, "students");
+    auditFromReq(req, "STUDENT_CREATE", "student", { resourceId: student.id, metadata: { studentCode: student.studentCode } });
     res.status(201).json(student);
   } catch (err: any) {
     if (err.code === "23505" || err.message?.includes("unique")) {
@@ -103,6 +105,7 @@ studentsRouter.put("/:id/approve", authenticate, async (req: AuthRequest, res: R
     }
     const { rowCount } = await pool.query(query, params);
     if (!rowCount) return res.status(404).json({ error: "Student not found or not authorized" });
+    auditFromReq(req, "STUDENT_UPDATE", "student", { resourceId: id, metadata: { action: "approve" } });
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: "Failed to approve student" });
@@ -123,6 +126,7 @@ studentsRouter.put("/:id/reject", authenticate, async (req: AuthRequest, res: Re
     }
     const { rowCount } = await pool.query(query, params);
     if (!rowCount) return res.status(404).json({ error: "Student not found or not authorized" });
+    auditFromReq(req, "STUDENT_UPDATE", "student", { resourceId: id, metadata: { action: "reject" } });
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: "Failed to reject student" });
@@ -151,6 +155,7 @@ studentsRouter.patch("/:id", authenticate, async (req: AuthRequest, res: Respons
       .returning();
 
     if (!updated) return res.status(404).json({ error: "Student not found or access denied" });
+    auditFromReq(req, "STUDENT_UPDATE", "student", { resourceId: updated.id });
     res.json(updated);
   } catch {
     res.status(500).json({ error: "Failed to update student" });
@@ -172,6 +177,11 @@ studentsRouter.delete("/:id", authenticate, async (req: AuthRequest, res: Respon
     if (!isAdmin(req)) {
       try { await decrementUsage(req.userId!, "students"); } catch { }
     }
+    auditFromReq(req, "STUDENT_DELETE", "student", {
+      resourceId: id,
+      severity: "warn",
+      metadata: { studentCode: deleted.studentCode, studentName: deleted.studentName },
+    });
     res.json({ success: true });
   } catch {
     res.status(500).json({ error: "Failed to delete student" });
@@ -204,6 +214,7 @@ studentsRouter.post("/:id/create-account", authenticate, async (req: AuthRequest
     }).returning();
 
     await db.update(studentsTable).set({ accountId: account.id }).where(eq(studentsTable.id, studentId));
+    auditFromReq(req, "ADMIN_USER_CREATE", "student_account", { resourceId: account.id, metadata: { studentId, username } });
     res.json({ success: true, accountId: account.id, username });
   } catch (err: any) {
     if (err.code === "23505") return res.status(409).json({ error: "An account with this student code already exists" });
