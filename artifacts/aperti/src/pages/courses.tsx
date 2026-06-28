@@ -47,7 +47,12 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
           {/* Thumbnail */}
           <div className="h-44 relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${color}15, ${color}30)` }}>
             {course.thumbnail_url ? (
-              <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
+              <img
+                src={course.thumbnail_url}
+                alt={course.title}
+                className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center">

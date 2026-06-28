@@ -246,6 +246,37 @@ function HeroDashboardMockup() {
   );
 }
 
+/* ─── Live Stats from API ─── */
+function StatsSection() {
+  const { data: stats } = useQuery<{ activeStudents: number; activeTeachers: number; activeCourses: number; attendanceRecords: number }>({
+    queryKey: ["public-stats"],
+    queryFn: async () => {
+      const r = await fetch("/api/auth/stats");
+      if (!r.ok) throw new Error("stats unavailable");
+      return r.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+  const items = [
+    { value: stats?.activeStudents ?? 0, suffix: "+", label: "Active Students" },
+    { value: stats?.activeTeachers ?? 0, suffix: "+", label: "Teachers & Tutors" },
+    { value: stats?.activeCourses ?? 0, suffix: "+", label: "Active Courses" },
+    { value: stats?.attendanceRecords ?? 0, suffix: "+", label: "Attendance Records" },
+  ];
+  return (
+    <section className="py-14 bg-gray-50/80 border-y border-gray-100">
+      <div className="max-w-5xl mx-auto px-5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {items.map((item, i) => (
+            <StatCard key={item.label} value={item.value} suffix={item.suffix} label={item.label} delay={i * 0.08} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Stats ─── */
 function useCountUp(target: number, inView: boolean) {
   const [value, setValue] = useState(0);
@@ -512,16 +543,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Stats ── */}
-      <section className="py-14 bg-gray-50/80 border-y border-gray-100">
-        <div className="max-w-5xl mx-auto px-5">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <StatCard value={2400} suffix="+" label="Active Students" delay={0} />
-            <StatCard value={180} suffix="+" label="Teachers & Tutors" delay={0.08} />
-            <StatCard value={12000} suffix="+" label="Exams Conducted" delay={0.16} />
-            <StatCard value={98} suffix="%" label="Uptime Reliability" delay={0.24} />
-          </div>
-        </div>
-      </section>
+      <StatsSection />
 
       {/* ── Features ── */}
       <section id="features" className="py-24 px-5">

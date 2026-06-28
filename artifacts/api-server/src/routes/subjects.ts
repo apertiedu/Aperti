@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db, subjectsTable } from "@workspace/db";
 import { requireTenantAccess } from "../middleware/tenant";
 import { sql } from "drizzle-orm";
@@ -76,6 +76,9 @@ router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<voi
   const { name, board, code, level, syllabusCodes, papersBreakdown, pdfUrl, codeExplainer } = req.body;
   if (!name?.trim()) { res.status(400).json({ message: "Name required" }); return; }
 
+  const { teacherId, isAdmin, accountId } = req.tenant;
+  const ownershipCond = isAdmin ? sql`WHERE id = ${id}` : sql`WHERE id = ${id} AND teacher_account_id = ${teacherId}`;
+
   const updateResult = await db.execute(sql`
     UPDATE subjects SET
       name = ${name.trim()},
@@ -86,17 +89,17 @@ router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<voi
       papers_breakdown = ${papersBreakdown ? JSON.stringify(papersBreakdown) : null},
       pdf_url = ${pdfUrl || null},
       code_explainer = ${codeExplainer || null}
-    WHERE id = ${id}
+    ${ownershipCond}
     RETURNING *
   `);
-  if (!updateResult.rows.length) { res.status(404).json({ message: "Subject not found" }); return; }
+  if (!updateResult.rows.length) { res.status(403).json({ message: "Subject not found or access denied" }); return; }
   writeSubjectAudit(accountId, "SUBJECT_UPDATE", id, { name: name.trim() });
   res.json(updateResult.rows[0]);
 });
 
 router.delete("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {
   const id = parseInt(req.params.id as string, 10);
-  const { teacherId, isAdmin } = req.tenant;
+  const { teacherId, isAdmin, accountId } = req.tenant;
   const condition = isAdmin
     ? eq(subjectsTable.id, id)
     : and(eq(subjectsTable.id, id), eq(subjectsTable.teacherAccountId, teacherId!));

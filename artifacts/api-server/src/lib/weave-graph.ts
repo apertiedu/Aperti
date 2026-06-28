@@ -95,7 +95,7 @@ export async function findShortestPath(sourceId: number, targetId: number): Prom
     return { nodes: [{ id: n.id, name: n.name, type: n.type }], edges: [], length: 0 };
   }
 
-  const allEdges = await db.select().from(knowledgeEdgesTable);
+  const allEdges = await db.select().from(knowledgeEdgesTable).limit(10000);
   const adj: Map<number, Array<{ to: number; relation: string; weight: number }>> = new Map();
   for (const e of allEdges) {
     if (!adj.has(e.fromNodeId)) adj.set(e.fromNodeId, []);

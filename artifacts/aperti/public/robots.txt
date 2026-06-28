@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Allow: /features
+Allow: /roadmap
+Allow: /status
+Allow: /terms
+Allow: /privacy
+Allow: /courses
+Disallow: /admin
+Disallow: /admin/
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+
+Sitemap: https://aperti.ai/sitemap.xml

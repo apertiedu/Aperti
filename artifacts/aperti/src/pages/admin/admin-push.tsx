@@ -20,7 +20,7 @@ export default function AdminPushPage() {
   const [body, setBody] = useState("");
   const [url, setUrl] = useState("/");
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ["admin-push-stats"],
     queryFn: () => fetchJSON("/admin/push/stats"),
   });
@@ -52,18 +52,30 @@ export default function AdminPushPage() {
 
       {/* Subscription Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-primary/10 rounded-xl p-4 flex flex-col gap-1">
-          <Bell className="w-5 h-5 text-primary" />
-          <p className="text-xl font-bold text-foreground">{totalSubs}</p>
-          <p className="text-[11px] text-muted-foreground">Total subscribers</p>
-        </div>
-        {byRole.map((r: any) => (
-          <div key={r.role} className="bg-card border border-border/40 rounded-xl p-4 flex flex-col gap-1">
-            <Users className="w-5 h-5 text-muted-foreground" />
-            <p className="text-xl font-bold text-foreground">{r.subscribers}</p>
-            <p className="text-[11px] text-muted-foreground capitalize">{r.role}s</p>
-          </div>
-        ))}
+        {statsLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="bg-muted/40 rounded-xl p-4 h-20 animate-pulse" />
+          ))
+        ) : (
+          <>
+            <div className="bg-primary/10 rounded-xl p-4 flex flex-col gap-1">
+              <Bell className="w-5 h-5 text-primary" />
+              <p className="text-xl font-bold text-foreground">{totalSubs}</p>
+              <p className="text-[11px] text-muted-foreground">Total subscribers</p>
+            </div>
+            {byRole.length === 0 ? (
+              <div className="col-span-3 flex items-center justify-center text-sm text-muted-foreground">
+                No subscribers by role yet.
+              </div>
+            ) : byRole.map((r: any) => (
+              <div key={r.role} className="bg-card border border-border/40 rounded-xl p-4 flex flex-col gap-1">
+                <Users className="w-5 h-5 text-muted-foreground" />
+                <p className="text-xl font-bold text-foreground">{r.subscribers}</p>
+                <p className="text-[11px] text-muted-foreground capitalize">{r.role}s</p>
+              </div>
+            ))}
+          </>
+        )}
       </div>
 
       {/* Compose Form */}

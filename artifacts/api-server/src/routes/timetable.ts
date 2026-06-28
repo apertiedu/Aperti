@@ -7,7 +7,9 @@ const router: IRouter = Router();
 
 router.get("/timetable", requireTenantAccess as any, async (req: AuthRequest, res): Promise<void> => {
   const { teacherId, isAdmin } = req.tenant;
-  const teacherCond = isAdmin ? "" : `WHERE s.teacher_account_id = ${teacherId}`;
+  if (!isAdmin && !teacherId) { res.status(403).json({ error: "Forbidden" }); return; }
+  const params: unknown[] = [];
+  const teacherCond = isAdmin ? "" : (() => { params.push(teacherId); return `WHERE s.teacher_account_id = $${params.length}`; })();
   const { rows } = await pool.query(`
     SELECT
       s.id, s.lesson_number AS "lessonNumber", s.day_of_week AS "dayOfWeek",
@@ -30,7 +32,7 @@ router.get("/timetable", requireTenantAccess as any, async (req: AuthRequest, re
         WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6
         ELSE 7 END,
       s.start_time
-  `);
+  `, params);
   res.json(rows);
 });
 

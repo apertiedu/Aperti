@@ -160,7 +160,7 @@ qaRouter.post("/admin/test-runs", async (req: AuthRequest, res: Response) => {
       }
     }
 
-    const allCases = await db.select().from(testCasesTable);
+    const allCases = await db.select().from(testCasesTable).limit(5000);
     const total = allCases.length;
     const passed = allCases.filter(c => c.status === "passed").length;
     const failed = allCases.filter(c => c.status === "failed").length;

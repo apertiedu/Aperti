@@ -100,7 +100,12 @@ export default function CourseDetail() {
                 <div className="h-52 flex items-center justify-center relative"
                   style={{ background: `linear-gradient(135deg, ${"hsl(var(--primary))"}15, ${"hsl(var(--primary))"}30)` }}>
                   {course.thumbnail_url ? (
-                    <img src={course.thumbnail_url} alt={course.title} className="w-full h-full object-cover" />
+                    <img
+                      src={course.thumbnail_url}
+                      alt={course.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                    />
                   ) : (
                     <div className="text-center">
                       <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3" style={{ background: `${"hsl(var(--primary))"}25` }}>

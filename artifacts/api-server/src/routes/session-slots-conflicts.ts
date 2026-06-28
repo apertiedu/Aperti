@@ -23,7 +23,7 @@ function slotsOverlap(a: { startTime: string; endTime?: string | null }, b: { st
 
 sessionSlotsConflictsRouter.get("/", async (_req, res) => {
   try {
-    const slots = await db.select().from(sessionSlotsTable).where(eq(sessionSlotsTable.isActive, true));
+    const slots = await db.select().from(sessionSlotsTable).where(eq(sessionSlotsTable.isActive, true)).limit(500);
 
     const conflicts: Array<{ slot1: any; slot2: any; reason: string }> = [];
 
