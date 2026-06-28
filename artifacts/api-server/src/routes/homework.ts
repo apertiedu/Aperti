@@ -125,8 +125,15 @@ homeworkRouter.post("/:id/submissions/:subId/grade", authenticate, requireRole("
   if (!sub) return res.status(404).json({ error: "Submission not found" });
 
   await db.update(homeworkSubmissionsTable)
-    .set({ marksAwarded: marksAwarded?.toString(), teacherFeedback, status, gradedAt: new Date() })
+    .set({ marksAwarded: marksAwarded?.toString(), teacherFeedback, status, gradingStatus: "approved", gradedAt: new Date() })
     .where(eq(homeworkSubmissionsTable.id, subId));
+
+  auditFromReq(req, "HOMEWORK_GRADE", "homework_submissions", {
+    submissionId: subId,
+    homeworkId,
+    marksAwarded,
+    studentId: sub.studentId,
+  }).catch(() => {});
 
   if (sub.studentId) {
     const gradeMsg = marksAwarded != null
