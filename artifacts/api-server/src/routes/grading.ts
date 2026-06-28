@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { enhanceGrading } from "../lib/coremind";
 import { logInteraction } from "../lib/ai-safety";
 import { auditFromReq } from "../lib/audit";
+import { notifyAndPush } from "../lib/notify";
 
 export const gradingRouter = Router();
 
@@ -198,6 +199,29 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
     }).where(eq(studentMarksTable.id, submissionId));
 
     auditFromReq(req, act === "approve" ? "GRADE_APPROVE" : "GRADE_CREATE", "student_marks", { resourceId: submissionId, metadata: { marksScored: officialMarks, gradingStatus: newStatus } });
+
+    if (act === "approve") {
+      pool.query(
+        `SELECT s.account_id FROM student_marks sm
+         JOIN students s ON s.id = sm.student_id
+         WHERE sm.id = $1 AND s.account_id IS NOT NULL`,
+        [submissionId]
+      ).then(({ rows }) => {
+        const accountId = rows[0]?.account_id;
+        if (accountId) {
+          notifyAndPush(accountId, {
+            title: "Grade released",
+            message: `Your exam result is now available. You scored ${officialMarks} marks.`,
+            type: "grade_approved",
+            link: "/my-results",
+            pushBody: `Result available: ${officialMarks} marks.`,
+            relatedEntityType: "student_mark",
+            relatedEntityId: submissionId,
+          }).catch(() => {});
+        }
+      }).catch(() => {});
+    }
+
     res.json({
       id: submissionId,
       marksScored: officialMarks,

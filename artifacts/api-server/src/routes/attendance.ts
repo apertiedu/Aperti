@@ -2,6 +2,8 @@ import { Router, Response } from "express";
 import { db, pool } from "@workspace/db";
 import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { auditFromReq } from "../lib/audit";
+import { notifyUser } from "../lib/notify";
+import { sendPushToUser } from "../lib/push";
 import { attendanceTable, studentsTable, attendanceAuditTable } from "@workspace/db";
 import { eq, and, sql } from "drizzle-orm";
 
@@ -47,18 +49,31 @@ async function notifyParentOfAbsence(studentId: number, date: string) {
     );
     if (!links.length) return;
     const studentName = links[0].student_name;
-    const inserts = links.map((l: any) =>
-      pool.query(
-        `INSERT INTO parent_notifications (parent_id, type, title, message, is_read, created_at)
-         VALUES ($1, 'attendance', $2, $3, false, NOW())`,
-        [
-          l.parent_account_id,
-          `Absence recorded — ${studentName}`,
-          `${studentName} was marked absent on ${date}. Please contact the teacher if this is incorrect.`,
-        ]
-      )
+    const title = `Absence recorded — ${studentName}`;
+    const message = `${studentName} was marked absent on ${date}. Please contact the teacher if this is incorrect.`;
+    await Promise.allSettled(
+      links.flatMap((l: any) => [
+        pool.query(
+          `INSERT INTO parent_notifications (parent_id, type, title, message, is_read, created_at)
+           VALUES ($1, 'attendance', $2, $3, false, NOW())`,
+          [l.parent_account_id, title, message]
+        ),
+        notifyUser({
+          accountId: l.parent_account_id,
+          title,
+          message,
+          type: "attendance",
+          link: "/parent/attendance",
+          relatedEntityType: "student",
+          relatedEntityId: studentId,
+        }),
+        sendPushToUser(l.parent_account_id, {
+          title: `Absence — ${studentName}`,
+          body: `${studentName} was marked absent on ${date}.`,
+          url: "/parent/attendance",
+        }),
+      ])
     );
-    await Promise.all(inserts);
   } catch { }
 }
 

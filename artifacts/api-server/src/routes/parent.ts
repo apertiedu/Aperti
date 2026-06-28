@@ -3,6 +3,7 @@ import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { randomBytes } from "crypto";
 import { auditFromReq } from "../lib/audit";
+import { notifyAndPush } from "../lib/notify";
 
 export const parentRouter = Router();
 
@@ -67,6 +68,28 @@ parentRouter.put("/approve-link/:id", authenticate, requireRole("parent"), async
     );
     if (!rowCount) return res.status(404).json({ error: "Link not found" });
     auditFromReq(req, "PARENT_LINK_APPROVE", "guardian_links", { resourceId: parseInt(req.params.id), metadata: { status } });
+    const linkId = parseInt(req.params.id);
+    pool.query(
+      `SELECT s.account_id FROM guardian_links gl
+       JOIN students s ON s.id = gl.student_id
+       WHERE gl.id = $1 AND s.account_id IS NOT NULL`,
+      [linkId]
+    ).then(({ rows: linkRows }) => {
+      const accountId = linkRows[0]?.account_id;
+      if (!accountId) return;
+      const approved = status === "active";
+      notifyAndPush(accountId, {
+        title: approved ? "Parent link approved" : "Parent link declined",
+        message: approved
+          ? "Your parent link request was approved. Your parent can now view your progress."
+          : "Your parent link request was declined.",
+        type: "parent_link",
+        link: "/settings",
+        pushBody: approved ? "Your parent link request was approved." : "Your parent link request was declined.",
+        relatedEntityType: "guardian_link",
+        relatedEntityId: linkId,
+      }).catch(() => {});
+    }).catch(() => {});
     res.json({ success: true });
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });
@@ -166,6 +189,15 @@ parentRouter.post("/link-student", authenticate, requireRole("student"), async (
       [parentId, studentId, pairingCode.trim().toUpperCase()]
     );
     auditFromReq(req, "PARENT_LINK_CREATE", "guardian_links", { resourceId: rows[0]?.id, metadata: { parentId, studentId } });
+    notifyAndPush(parentId, {
+      title: "Parent link request received",
+      message: "A student has requested to link with your account. Review it in your pending links.",
+      type: "parent_link",
+      link: "/parent/pending-links",
+      pushBody: "A student requested to link with your account.",
+      relatedEntityType: "guardian_link",
+      relatedEntityId: rows[0]?.id,
+    }).catch(() => {});
     res.status(201).json(rows[0]);
   } catch (err: any) { res.status(500).json({ error: "An unexpected error occurred" }); }
 });

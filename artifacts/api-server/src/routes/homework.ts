@@ -5,6 +5,7 @@ import { homeworkTable, homeworkSubmissionsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { sendPushToRole, sendPushToUser } from "../lib/push";
 import { auditFromReq } from "../lib/audit";
+import { notifyMany, notifyUser } from "../lib/notify";
 
 export const homeworkRouter = Router();
 
@@ -39,10 +40,29 @@ homeworkRouter.post("/", authenticate, requireRole("teacher", "admin"), async (r
       classFilter: classFilter || null,
       isPublished: true,
     }).returning();
-    sendPushToRole("student", {
-      title: "New Assignment Posted",
-      body: title ? `"${title}" has been assigned.` : "A new homework assignment has been posted.",
-      url: "/my-homework",
+    pool.query(
+      `SELECT s.account_id FROM students s WHERE s.teacher_account_id=$1 AND s.account_id IS NOT NULL`,
+      [teacherId]
+    ).then(({ rows }) => {
+      const accountIds = rows.map((r: any) => r.account_id);
+      if (!accountIds.length) return;
+      const notifTitle = "New Assignment Posted";
+      const notifMessage = title ? `"${title}" has been assigned.` : "A new homework assignment has been posted.";
+      return Promise.allSettled([
+        notifyMany(accountIds, {
+          title: notifTitle,
+          message: notifMessage,
+          type: "homework",
+          link: "/my-homework",
+          relatedEntityType: "homework",
+          relatedEntityId: hw.id,
+        }),
+        sendPushToRole("student", {
+          title: notifTitle,
+          body: notifMessage,
+          url: "/my-homework",
+        }),
+      ]);
     }).catch(() => {});
     auditFromReq(req, "HOMEWORK_CREATE", "homework", { resourceId: hw.id, metadata: { title: hw.title, subjectId: hw.subjectId } });
     res.status(201).json(hw);
@@ -109,11 +129,21 @@ homeworkRouter.post("/:id/submissions/:subId/grade", authenticate, requireRole("
     .where(eq(homeworkSubmissionsTable.id, subId));
 
   if (sub.studentId) {
+    const gradeMsg = marksAwarded != null
+      ? `Your work has been graded: ${marksAwarded} marks awarded.`
+      : "Your assignment has been reviewed by your teacher.";
+    notifyUser({
+      accountId: sub.studentId,
+      title: "Assignment Graded",
+      message: gradeMsg,
+      type: "grade_approved",
+      link: "/my-homework",
+      relatedEntityType: "homework",
+      relatedEntityId: homeworkId,
+    }).catch(() => {});
     sendPushToUser(sub.studentId, {
       title: "Assignment Graded",
-      body: marksAwarded != null
-        ? `Your work has been graded: ${marksAwarded} marks awarded.`
-        : "Your assignment has been reviewed by your teacher.",
+      body: gradeMsg,
       url: "/my-homework",
     }).catch(() => {});
   }

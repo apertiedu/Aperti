@@ -1,4 +1,5 @@
 import { pool } from "@workspace/db";
+import { sendPushToUser } from "./push";
 
 interface NotifyOptions {
   accountId: number;
@@ -34,4 +35,25 @@ export async function notifyUser(opts: NotifyOptions): Promise<void> {
 
 export async function notifyMany(accountIds: number[], opts: Omit<NotifyOptions, "accountId">): Promise<void> {
   await Promise.allSettled(accountIds.map(id => notifyUser({ ...opts, accountId: id })));
+}
+
+export async function notifyAndPush(
+  accountId: number,
+  opts: Omit<NotifyOptions, "accountId"> & { pushBody?: string },
+): Promise<void> {
+  await Promise.allSettled([
+    notifyUser({ ...opts, accountId }),
+    sendPushToUser(accountId, {
+      title: opts.title,
+      body: opts.pushBody ?? opts.message ?? opts.title,
+      url: opts.link,
+    }),
+  ]);
+}
+
+export async function notifyManyAndPush(
+  accountIds: number[],
+  opts: Omit<NotifyOptions, "accountId"> & { pushBody?: string },
+): Promise<void> {
+  await Promise.allSettled(accountIds.map(id => notifyAndPush(id, opts)));
 }
