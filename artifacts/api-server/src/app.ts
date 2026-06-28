@@ -99,6 +99,8 @@ import { adminDataQualityRouter } from "./routes/admin-data-quality";
 import { sessionSlotsRouter } from "./routes/session-slots";
 import { attendanceAuditRouter } from "./routes/attendance-audit";
 import { enrollmentTimelineRouter } from "./routes/enrollment-timeline";
+import { enrollmentsRouter } from "./routes/enrollments";
+import { teacherOpsRouter } from "./routes/teacher-ops";
 import { notificationsInboxRouter } from "./routes/notifications-inbox";
 // Phase 33 — Error System & Performance
 import { errorsLogRouter } from "./routes/errors-log";
@@ -610,6 +612,8 @@ app.use("/api/admin/data-quality", adminDataQualityRouter);
 app.use("/api/session-slots", sessionSlotsRouter);
 app.use("/api/attendance-audit", attendanceAuditRouter);
 app.use("/api/enrollment-timeline", enrollmentTimelineRouter);
+app.use("/api/enrollments", enrollmentsRouter);
+app.use("/api/teacher-ops", teacherOpsRouter);
 app.use("/api/notifications/inbox", notificationsInboxRouter);
 // Phase 47 — Repair Panel & Launch Score
 app.use("/api/admin/repair", adminRepairRouter);

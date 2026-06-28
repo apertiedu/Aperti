@@ -17,6 +17,9 @@
  *   INSTAPAY_PHONE     — payment instructions show placeholder if absent
  *   PUBLIC_URL         — certificate verification links use fallback URL if absent
  *   EXAM_VAULT_KEY     — exam vault encryption disabled if absent
+ *   GOOGLE_CLIENT_ID   — required for Google OAuth login
+ *   GOOGLE_CLIENT_SECRET — required for Google OAuth login
+ *   GOOGLE_REDIRECT_URI  — defaults to PUBLIC_URL + /auth/google/callback
  */
 export function validateEnv(): void {
   const errors: string[] = [];
@@ -115,8 +118,13 @@ export function validateEnv(): void {
   if (isProd && !process.env["ALLOWED_ORIGINS"] && !process.env["REPLIT_DOMAINS"]) {
     errors.push(
       "  ALLOWED_ORIGINS must be set in production. Provide a comma-separated list of allowed frontend origins.\n" +
-      "  Example: ALLOWED_ORIGINS=https://your-app.replit.app,https://yourdomain.com"
+      "  Example: ALLOWED_ORIGINS=https://aperti.ai"
     );
+  }
+
+  // Google OAuth — optional; login falls back gracefully when absent
+  if (!process.env["GOOGLE_CLIENT_ID"] || !process.env["GOOGLE_CLIENT_SECRET"]) {
+    warnings.push("  GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET not set — Google OAuth login will show a configuration error to users.");
   }
 
   // ── Report ──────────────────────────────────────────────────────────────────
