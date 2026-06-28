@@ -18,6 +18,7 @@ VAPID_PUBLIC_KEY = "BCJyiOIWiw0M5rPsnS1UK2CUlzcLlAMYd33o6hyOyXxZfVRYDrVxiVOdV1S2
 VAPID_SUBJECT = "mailto:admin@aperti.app"
 OPENAI_BASE_URL = "https://integrate.api.nvidia.com/v1"
 OPENAI_MODEL = "openai/gpt-oss-20b"
+PUBLIC_URL = "https://aperti.ai"
 
 [userenv.development]
 

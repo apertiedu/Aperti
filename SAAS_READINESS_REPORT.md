@@ -32,7 +32,7 @@
 - **🆕 GDPR execution:** `POST /api/admin/compliance/requests/:id/execute` — requires `super_admin`; irreversibly anonymises:
   - `username` → `deleted_user_<id>`
   - `display_name` → `"Deleted User"`
-  - `email` → `deleted_<id>@deleted.aperti.app`
+  - `email` → `deleted_<id>@deleted.aperti.ai`
   - `password_hash` → bcrypt of random 32-byte secret (account cannot be logged into)
   - `bio`, `avatar_url`, `google_id`, `phone` → `NULL`
   - `status` → `'deleted'`
@@ -264,7 +264,7 @@ SMTP_HOST=smtp.example.com
 SMTP_PORT=587
 SMTP_USER=user@example.com
 SMTP_PASS=<secret>
-SMTP_FROM=noreply@aperti.app   # optional, defaults to SMTP_USER
+SMTP_FROM=noreply@aperti.ai   # optional, defaults to SMTP_USER
 ```
 
 ---

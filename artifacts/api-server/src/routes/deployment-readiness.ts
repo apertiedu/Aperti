@@ -194,7 +194,7 @@ deploymentReadinessRouter.get("/environments", async (_req: AuthRequest, res: Re
       },
       {
         name: "staging",
-        url: "staging.aperti.app (not yet provisioned)",
+        url: "staging.aperti.ai (not yet provisioned)",
         features: ["production-like", "full AI simulation", "fake payment codes"],
         data: "anonymized copy",
         payments: "simulation mode",
@@ -202,7 +202,7 @@ deploymentReadinessRouter.get("/environments", async (_req: AuthRequest, res: Re
       },
       {
         name: "production",
-        url: "app.aperti.app (not yet deployed)",
+        url: "https://aperti.ai",
         features: ["real users", "strict validation", "full monitoring"],
         data: "live",
         payments: "real Instapay",

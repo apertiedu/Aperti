@@ -345,7 +345,7 @@ export default function LandingSettingsEditorPage() {
             </div>
             <div>
               <label className={LABEL}>Contact Email</label>
-              <input className={INPUT} value={form.footer_email || ""} onChange={(e) => set("footer_email", e.target.value)} placeholder="support@aperti.app" />
+              <input className={INPUT} value={form.footer_email || ""} onChange={(e) => set("footer_email", e.target.value)} placeholder="support@aperti.ai" />
             </div>
             <div>
               <label className={LABEL}>Social Link — X/Twitter</label>

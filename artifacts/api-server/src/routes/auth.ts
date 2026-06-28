@@ -685,7 +685,7 @@ authRouter.post("/forgot-password", forgotPasswordLimiter, async (req: Request, 
           );
         });
 
-        const publicUrl = process.env.PUBLIC_URL ?? "https://aperti.app";
+        const publicUrl = process.env.PUBLIC_URL ?? "https://aperti.ai";
         const resetUrl = `${publicUrl}/reset-password?token=${resetToken}`;
         const { html, text } = buildPasswordResetEmail({
           displayName: account.display_name ?? account.username,

@@ -154,10 +154,10 @@ Request → authenticate → extract {userId, userRole}
 ```
 Internet
    │
-   ├── aperti.app (Frontend)
+   ├── aperti.ai (Frontend)
    │     Vercel static / Express static serve in production
    │
-   └── api.aperti.app (API, Port 3001)
+   └── api.aperti.ai (API, Port 3001)
          Railway (primary) / Replit (dev+staging)
                │
                ├── PostgreSQL

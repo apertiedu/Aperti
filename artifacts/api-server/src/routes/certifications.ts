@@ -51,7 +51,7 @@ certificationsRouter.post("/certificates/issue", ...teacherOrAdmin, async (req: 
     }
 
     const uniqueCode = `APT-${crypto.randomBytes(4).toString("hex").toUpperCase()}-${Date.now().toString(36).toUpperCase()}`;
-    const verificationUrl = `${process.env.PUBLIC_URL ?? "https://aperti.app"}/verify/${uniqueCode}`;
+    const verificationUrl = `${process.env.PUBLIC_URL ?? "https://aperti.ai"}/verify/${uniqueCode}`;
 
     const { rows } = await pool.query(
       `INSERT INTO certificates

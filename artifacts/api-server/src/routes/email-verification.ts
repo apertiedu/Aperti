@@ -95,7 +95,7 @@ emailVerificationRouter.post(
       const baseUrl =
         process.env.PUBLIC_URL ??
         (process.env.NODE_ENV === "production"
-          ? "https://aperti.app"
+          ? "https://aperti.ai"
           : `https://${process.env.REPLIT_DEV_DOMAIN ?? "localhost:5000"}`);
       const verifyUrl = `${baseUrl}/verify-email?token=${token}`;
 
@@ -140,7 +140,7 @@ emailVerificationRouter.get(
     const frontendBase =
       process.env.PUBLIC_URL ??
       (process.env.NODE_ENV === "production"
-        ? "https://aperti.app"
+        ? "https://aperti.ai"
         : `https://${process.env.REPLIT_DEV_DOMAIN ?? "localhost:5000"}`);
 
     if (!token || typeof token !== "string" || token.length < 16) {

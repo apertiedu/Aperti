@@ -39,7 +39,7 @@ export const SMTP_CONFIGURED = !!(
 );
 
 export async function sendEmail(opts: EmailOpts): Promise<void> {
-  const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "noreply@aperti.app";
+  const from = process.env.SMTP_FROM ?? process.env.SMTP_USER ?? "noreply@aperti.ai";
 
   const transport = buildTransport();
   if (!transport) {

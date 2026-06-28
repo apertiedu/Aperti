@@ -99,7 +99,7 @@ adminComplianceRouter.put("/platform-settings", async (req: Request, res: Respon
  * Anonymises all PII for the user linked to the compliance request:
  *   - username        → deleted_user_<id>
  *   - display_name    → Deleted User
- *   - email           → deleted_<id>@deleted.aperti.app
+ *   - email           → deleted_<id>@deleted.aperti.ai
  *   - password_hash   → irreversible random hash
  *   - bio, avatar_url → nulled
  *   - account status  → 'deleted'
@@ -172,7 +172,7 @@ adminComplianceRouter.post("/requests/:id/execute", async (req: Request, res: Re
        WHERE id = $4`,
       [
         `deleted_user_${userId}`,
-        `deleted_${userId}@deleted.aperti.app`,
+        `deleted_${userId}@deleted.aperti.ai`,
         unusableHash,
         userId,
       ],

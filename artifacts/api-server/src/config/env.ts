@@ -95,7 +95,7 @@ export function validateEnv(): void {
   }
 
   if (!process.env["PUBLIC_URL"]) {
-    warnings.push("  PUBLIC_URL not set — certificate verification links will use the default aperti.app URL.");
+    warnings.push("  PUBLIC_URL not set — certificate verification links will use the default aperti.ai URL.");
   }
 
   if (!process.env["EXAM_VAULT_KEY"]) {
