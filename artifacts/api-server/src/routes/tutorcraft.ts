@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { authenticate, AuthRequest } from "../middleware/auth";
 import { db, pool, studentsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { logInteraction, logFallback, emitAIOutage } from "../lib/ai-safety";
 
 export const tutorcraftRouter = Router();
 
@@ -45,18 +46,15 @@ async function openaiChat(messages: any[], maxTokens = 1200): Promise<string> {
 }
 
 async function ruleBasedChatWithQuestions(message: string, teacherAccountId: number): Promise<string> {
-  // Extract topic keywords from the message to search the question bank
   const lower = message.toLowerCase();
   const topicWords = message.split(/\s+/).filter(w => w.length > 3).slice(0, 5);
 
-  // Fetch up to 3 related questions from this teacher's question bank
   let relatedQuestions: Array<{ questionText: string; modelAnswer: string | null; topic: string | null }> = [];
   try {
     const allTeacherQs = await db.query.questionBank.findMany({
       where: (q, { eq }) => eq(q.teacherAccountId, teacherAccountId),
       limit: 100,
     });
-    // Score by keyword overlap
     const scored = allTeacherQs.map(q => {
       const combined = `${q.questionText} ${q.topic ?? ""}`.toLowerCase();
       const overlap = topicWords.filter(w => combined.includes(w.toLowerCase())).length;
@@ -67,9 +65,7 @@ async function ruleBasedChatWithQuestions(message: string, teacherAccountId: num
       modelAnswer: s.q.modelAnswer,
       topic: s.q.topic,
     }));
-  } catch {
-    // Question bank query failed silently — continue with structured response
-  }
+  } catch { /* continue */ }
 
   if (relatedQuestions.length > 0) {
     return `**TutorCraft (Rule-based Mode)**\n\nYou asked about: *${message}*\n\nHere are ${relatedQuestions.length} related question(s) from your question bank:\n\n${relatedQuestions.map((q, i) =>
@@ -77,7 +73,6 @@ async function ruleBasedChatWithQuestions(message: string, teacherAccountId: num
     ).join("\n\n---\n\n")}\n\n*Configure an OpenAI API key for fully AI-generated, contextual responses.*`;
   }
 
-  // Fallback templates when no question bank results
   if (lower.includes("lesson plan") || lower.includes("lesson planning")) {
     return `**Rule-based Lesson Plan Outline**\n\nFor topic: *${message}*\n\n1. **Starter (5 min):** Activate prior knowledge — quick question or quiz.\n2. **Main Teaching (20 min):** Explain core concepts with worked examples.\n3. **Student Activity (15 min):** Structured practice — individual or paired.\n4. **Assessment Checkpoint (5 min):** Exit ticket or mini-quiz.\n5. **Homework:** Assign 3–5 questions from the question bank.\n\n*Configure an OpenAI API key for fully personalized plans.*`;
   }
@@ -90,7 +85,6 @@ async function ruleBasedChatWithQuestions(message: string, teacherAccountId: num
   return `**TutorCraft (Rule-based Mode)**\n\nYou asked: *${message}*\n\nFull AI generation requires an OpenAI API key. In the meantime:\n- Use the Question Bank to build assessments.\n- Review the Gradebook for student performance insights.\n- Use the Resources section to share learning materials.`;
 }
 
-/* ── Streaming Chat ─────────────────────────────────────────────────────── */
 tutorcraftRouter.post("/tutorcraft/stream", authenticate, async (req: AuthRequest, res: Response) => {
   const { message, history = [] } = req.body;
   if (!message) { res.status(400).json({ error: "message required" }); return; }
@@ -103,6 +97,7 @@ tutorcraftRouter.post("/tutorcraft/stream", authenticate, async (req: AuthReques
     res.write(`data: ${JSON.stringify({ content: fallback })}\n\n`);
     res.write("data: [DONE]\n\n");
     res.end();
+    logFallback({ userId: req.userId, module: "tutorcraft", action: "stream_chat", inputSummary: message.slice(0, 200), reason: "No AI key configured" }).catch(() => {});
     return;
   }
 
@@ -135,6 +130,8 @@ tutorcraftRouter.post("/tutorcraft/stream", authenticate, async (req: AuthReques
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
+
+  const t0 = Date.now();
 
   try {
     const upstreamRes = await fetch(`${AI_BASE}/chat/completions`, {
@@ -183,15 +180,25 @@ tutorcraftRouter.post("/tutorcraft/stream", authenticate, async (req: AuthReques
       }
     }
 
-    pool.query(
-      `INSERT INTO ai_interactions (user_id, module, action, input_summary, output_summary, tokens_used, confidence, accepted, created_at)
-       VALUES ($1,'tutorcraft','stream_chat',$2,$3,0,0.9,true,NOW())`,
-      [req.userId, message.slice(0, 300), fullReply.slice(0, 300)]
-    ).catch(() => {});
+    logInteraction({
+      userId: req.userId,
+      module: "tutorcraft",
+      action: "stream_chat",
+      inputSummary: message.slice(0, 300),
+      outputSummary: fullReply.slice(0, 300),
+      confidence: 0.9,
+      latencyMs: Date.now() - t0,
+      sources: [AI_BASE.includes("nvidia") ? "nvidia_nim" : "openai"],
+    }).catch(() => {});
 
     res.end();
   } catch (err: any) {
+    const errMsg = err?.message ?? "Unknown error";
     console.error("[tutorcraft] stream error:", err);
+
+    emitAIOutage("tutorcraft", errMsg, req.userId).catch(() => {});
+    logFallback({ userId: req.userId, module: "tutorcraft", action: "stream_chat", inputSummary: message.slice(0, 200), reason: `Stream error: ${errMsg.slice(0, 200)}` }).catch(() => {});
+
     const fallback = await ruleBasedChatWithQuestions(message, req.userId!).catch(() => "TutorCraft is temporarily unavailable.");
     res.write(`data: ${JSON.stringify({ content: fallback })}\n\n`);
     res.write("data: [DONE]\n\n");
@@ -199,7 +206,6 @@ tutorcraftRouter.post("/tutorcraft/stream", authenticate, async (req: AuthReques
   }
 });
 
-/* ── Chat (legacy non-streaming) ────────────────────────────────────────── */
 tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { message, history = [] } = req.body;
@@ -207,11 +213,11 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
 
     if (!process.env.OPENAI_API_KEY && !process.env.NVIDIA_API_KEY) {
       const reply = await ruleBasedChatWithQuestions(message, req.userId!);
+      logFallback({ userId: req.userId, module: "tutorcraft", action: "chat", inputSummary: message.slice(0, 200), reason: "No AI key configured" }).catch(() => {});
       res.json({ reply, fallback: true });
       return;
     }
 
-    // CoreMind enrichment: inject class-level intelligence for at-risk / lesson-improvement queries
     let coremindContext = "";
     const lowerMsg = message.toLowerCase();
     const needsCoreMind = lowerMsg.includes("at-risk") || lowerMsg.includes("struggling") ||
@@ -246,7 +252,7 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
       { role: "user", content: message },
     ];
 
-    const startTime = Date.now();
+    const t0 = Date.now();
     let reply = "";
     let success = false;
     let failureReason: string | undefined;
@@ -259,21 +265,25 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
       reply = await ruleBasedChatWithQuestions(message, req.userId!).catch(() =>
         "TutorCraft is temporarily unavailable. Please try again shortly."
       );
+      emitAIOutage("tutorcraft", failureReason, req.userId).catch(() => {});
     }
 
-    const latencyMs = Date.now() - startTime;
+    const latencyMs = Date.now() - t0;
 
-    pool.query(
-      `INSERT INTO ai_interactions (user_id, module, action, input_summary, output_summary, tokens_used, confidence, accepted, created_at)
-       VALUES ($1,'tutorcraft','chat',$2,$3,0,0.9,true,NOW())`,
-      [req.userId, message.slice(0, 300), reply.slice(0, 300)]
-    ).catch(() => {});
-
-    pool.query(
-      `INSERT INTO ai_logs (account_id, type, input_summary, response_summary, latency_ms, success, failure_reason, created_at)
-       VALUES ($1,'tutorcraft_chat',$2,$3,$4,$5,$6,NOW()) ON CONFLICT DO NOTHING`,
-      [req.userId, message.slice(0, 300), reply.slice(0, 300), latencyMs, success, failureReason ?? null]
-    ).catch(() => {});
+    if (success) {
+      logInteraction({
+        userId: req.userId,
+        module: "tutorcraft",
+        action: "chat",
+        inputSummary: message.slice(0, 300),
+        outputSummary: reply.slice(0, 300),
+        confidence: 0.9,
+        latencyMs,
+        sources: ["openai"],
+      }).catch(() => {});
+    } else {
+      logFallback({ userId: req.userId, module: "tutorcraft", action: "chat", inputSummary: message.slice(0, 200), reason: failureReason ?? "AI error" }).catch(() => {});
+    }
 
     res.json({ reply, fallback: !success });
   } catch (e: any) {
@@ -281,6 +291,7 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
       const reply = await ruleBasedChatWithQuestions(req.body.message ?? "", req.userId!).catch(() =>
         "TutorCraft is in rule-based mode. Configure an OpenAI API key for full AI features."
       );
+      logFallback({ userId: req.userId, module: "tutorcraft", action: "chat", inputSummary: (req.body.message ?? "").slice(0, 200), reason: "No AI key — outer catch" }).catch(() => {});
       res.json({ reply, fallback: true });
     } else {
       res.status(500).json({ error: "An unexpected error occurred" });
@@ -288,17 +299,18 @@ tutorcraftRouter.post("/tutorcraft/chat", authenticate, async (req: AuthRequest,
   }
 });
 
-/* ── AI lesson plan generator ──────────────────────────────────────────── */
 tutorcraftRouter.post("/tutorcraft/lesson-plan", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { subject, topic, level, duration_min, objectives } = req.body;
 
     if (!process.env.OPENAI_API_KEY) {
       const plan = `# Lesson Plan: ${topic ?? "Topic"}\n\n**Subject:** ${subject ?? "General"} | **Level:** ${level ?? "A-Level"} | **Duration:** ${duration_min ?? 60} min\n\n## Objectives\n${objectives ?? "Students will understand the core concepts of this topic."}\n\n## Starter (5 min)\nQuick recall question on prior knowledge.\n\n## Main Teaching (${Math.round((duration_min ?? 60) * 0.35)} min)\nExplain key concepts with worked examples.\n\n## Student Activity (${Math.round((duration_min ?? 60) * 0.4)} min)\nStructured practice problems from the question bank.\n\n## Assessment Checkpoint (5 min)\nExit ticket: 2 quick questions.\n\n## Homework\n3-5 questions at medium difficulty.\n\n*Configure an OpenAI API key for a fully personalized AI-generated plan.*`;
+      logFallback({ userId: req.userId, module: "tutorcraft", action: "lesson_plan", inputSummary: `${subject}/${topic}`, reason: "No AI key configured" }).catch(() => {});
       res.json({ plan, fallback: true });
       return;
     }
 
+    const t0 = Date.now();
     const prompt = `Generate a detailed lesson plan for:
 Subject: ${subject}
 Topic: ${topic}
@@ -314,13 +326,14 @@ Format as structured markdown.`;
       { role: "user", content: prompt },
     ], 1500);
 
+    logInteraction({ userId: req.userId, module: "tutorcraft", action: "lesson_plan", inputSummary: `${subject}/${topic}`, outputSummary: plan.slice(0, 200), confidence: 0.9, latencyMs: Date.now() - t0, sources: ["openai"] }).catch(() => {});
     res.json({ plan });
   } catch (e: any) {
+    emitAIOutage("tutorcraft", e?.message ?? "lesson-plan error", req.userId).catch(() => {});
     res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
-/* ── AI feedback generator ─────────────────────────────────────────────── */
 tutorcraftRouter.post("/tutorcraft/generate-feedback", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { student_answer, model_answer, marks_awarded, max_marks, question_text } = req.body;
@@ -329,10 +342,12 @@ tutorcraftRouter.post("/tutorcraft/generate-feedback", authenticate, async (req:
       const pct = max_marks > 0 ? Math.round((marks_awarded / max_marks) * 100) : 0;
       const tone = pct >= 70 ? "Good work" : pct >= 50 ? "Reasonable attempt" : "Needs improvement";
       const feedback = `${tone}. You scored ${marks_awarded}/${max_marks}. ${pct < 70 ? `Review the model answer and focus on: ${model_answer?.slice(0, 100) ?? "key concepts"}.` : "Keep building on this foundation."} Configure AI for more personalised feedback.`;
+      logFallback({ userId: req.userId, module: "tutorcraft", action: "generate_feedback", inputSummary: question_text?.slice(0, 100), reason: "No AI key configured" }).catch(() => {});
       res.json({ feedback, fallback: true });
       return;
     }
 
+    const t0 = Date.now();
     const prompt = `You are marking a student's answer. Write constructive teacher feedback (2-3 sentences).
 
 Question: ${question_text}
@@ -343,22 +358,25 @@ Marks Awarded: ${marks_awarded} / ${max_marks}
 Write specific, encouraging feedback that identifies what was good and what to improve. Be brief and direct.`;
 
     const feedback = await openaiChat([{ role: "user", content: prompt }], 200);
+    logInteraction({ userId: req.userId, module: "tutorcraft", action: "generate_feedback", inputSummary: question_text?.slice(0, 100), outputSummary: feedback.slice(0, 200), confidence: 0.9, latencyMs: Date.now() - t0, sources: ["openai"] }).catch(() => {});
     res.json({ feedback });
   } catch (e: any) {
+    emitAIOutage("tutorcraft", e?.message ?? "feedback error", req.userId).catch(() => {});
     res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
-/* ── AI question variant generator ────────────────────────────────────── */
 tutorcraftRouter.post("/tutorcraft/generate-variants", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { question_text, difficulty, count = 3 } = req.body;
 
     if (!process.env.OPENAI_API_KEY) {
+      logFallback({ userId: req.userId, module: "tutorcraft", action: "generate_variants", inputSummary: question_text?.slice(0, 100), reason: "No AI key configured" }).catch(() => {});
       res.json({ variants: [], fallback: true, message: "Configure an OpenAI API key to auto-generate question variants." });
       return;
     }
 
+    const t0 = Date.now();
     const prompt = `Generate ${count} variant questions based on this original question, at ${difficulty || "same"} difficulty:
 
 Original: ${question_text}
@@ -366,6 +384,7 @@ Original: ${question_text}
 Return as a JSON array with fields: question_text, model_answer, marks. No markdown wrapper, just raw JSON array.`;
 
     const raw = await openaiChat([{ role: "user", content: prompt }], 800);
+    logInteraction({ userId: req.userId, module: "tutorcraft", action: "generate_variants", inputSummary: question_text?.slice(0, 100), outputSummary: `count=${count}`, confidence: 0.85, latencyMs: Date.now() - t0, sources: ["openai"] }).catch(() => {});
     try {
       const variants = JSON.parse(raw);
       res.json({ variants });
@@ -373,20 +392,22 @@ Return as a JSON array with fields: question_text, model_answer, marks. No markd
       res.json({ variants: [], raw });
     }
   } catch (e: any) {
+    emitAIOutage("tutorcraft", e?.message ?? "variants error", req.userId).catch(() => {});
     res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 
-/* ── AI syllabus generator ─────────────────────────────────────────────── */
 tutorcraftRouter.post("/tutorcraft/generate-syllabus", authenticate, async (req: AuthRequest, res: Response) => {
   try {
     const { subject, level, board, duration_weeks } = req.body;
 
     if (!process.env.OPENAI_API_KEY) {
+      logFallback({ userId: req.userId, module: "tutorcraft", action: "generate_syllabus", inputSummary: `${subject}/${level}`, reason: "No AI key configured" }).catch(() => {});
       res.json({ units: [], fallback: true, message: "Configure an OpenAI API key to auto-generate a syllabus." });
       return;
     }
 
+    const t0 = Date.now();
     const prompt = `Create a structured course syllabus for:
 Subject: ${subject}, Level: ${level || "A-Level"}, Board: ${board || "CAIE"}, Duration: ${duration_weeks || 12} weeks.
 
@@ -395,9 +416,12 @@ No markdown, just raw JSON.`;
 
     const raw = await openaiChat([{ role: "user", content: prompt }], 1500);
     let parsed: { units: any[] } | null = null;
-    try { parsed = JSON.parse(raw); } catch { res.json({ units: [], raw }); return; }
+    try { parsed = JSON.parse(raw); } catch {
+      logInteraction({ userId: req.userId, module: "tutorcraft", action: "generate_syllabus", inputSummary: `${subject}/${level}`, outputSummary: "JSON parse failed", confidence: 0, latencyMs: Date.now() - t0, sources: ["openai"] }).catch(() => {});
+      res.json({ units: [], raw });
+      return;
+    }
 
-    // Weave integration: enrich each unit with prerequisites + register nodes
     let weaveEnriched = false;
     try {
       const { getOrCreateNode, ensureEdge, getRelatedNodes } = await import("../lib/weave-graph");
@@ -420,8 +444,10 @@ No markdown, just raw JSON.`;
       weaveEnriched = true;
     } catch { /* Weave best-effort */ }
 
+    logInteraction({ userId: req.userId, module: "tutorcraft", action: "generate_syllabus", inputSummary: `${subject}/${level}`, outputSummary: `units=${parsed!.units?.length ?? 0}`, confidence: 0.9, latencyMs: Date.now() - t0, sources: ["openai"] }).catch(() => {});
     res.json({ ...parsed, weaveEnriched });
   } catch (e: any) {
+    emitAIOutage("tutorcraft", e?.message ?? "syllabus error", req.userId).catch(() => {});
     res.status(500).json({ error: "An unexpected error occurred" });
   }
 });

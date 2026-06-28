@@ -22,7 +22,9 @@ export type DomainEventType =
   | "subscription.cancelled"
   | "auth.login"
   | "auth.logout"
-  | "auth.mfa_success";
+  | "auth.mfa_success"
+  | "ai.outage"
+  | "ai.fallback";
 
 export interface DomainEvent<T = Record<string, unknown>> {
   type: DomainEventType;

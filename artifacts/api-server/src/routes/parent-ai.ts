@@ -3,6 +3,7 @@ import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
 import { pool } from "@workspace/db";
 import { withLanguage } from "../lib/ai-config";
 import { generateAIResponse, AI_AVAILABLE } from "../services/ai";
+import { logInteraction, logFallback, emitAIOutage } from "../lib/ai-safety";
 
 export const parentAiRouter = Router();
 
@@ -90,6 +91,7 @@ parentAiRouter.post(
           }
         }
         reply += "\n\n*AI assistant unavailable. Configure an AI API key for conversational responses.*";
+        logFallback({ userId: req.userId, module: "parent-ai", action: "assistant", inputSummary: question.slice(0, 200), reason: "AI not configured" }).catch(() => {});
         return res.json({ reply, studentName, dataCtx, fallback: true });
       }
 
@@ -112,6 +114,7 @@ Answer the parent's question using the data above. Be warm, specific, and give 1
         {
           systemPrompt,
           maxTokens: 600,
+          userId: req.userId,
           module: "parent-ai",
         }
       );
@@ -128,11 +131,25 @@ Answer the parent's question using the data above. Be warm, specific, and give 1
           }
         }
         reply += "\n\n*AI review unavailable. Teacher review mode activated.*";
+        logFallback({ userId: req.userId, module: "parent-ai", action: "assistant", inputSummary: question.slice(0, 200), reason: result.error ?? "AI response failed" }).catch(() => {});
+        emitAIOutage("parent-ai", result.error ?? "AI response failed", req.userId).catch(() => {});
         return res.json({ reply, studentName, dataCtx, fallback: true, error: result.error });
       }
 
+      logInteraction({
+        userId: req.userId,
+        module: "parent-ai",
+        action: "assistant",
+        inputSummary: question.slice(0, 200),
+        outputSummary: result.text.slice(0, 300),
+        confidence: 0.85,
+        latencyMs: result.latencyMs,
+        sources: ["openai", "coremind"],
+      }).catch(() => {});
+
       res.json({ reply: result.text, studentName, coremindBacked: analysis !== null, latencyMs: result.latencyMs });
     } catch (err: any) {
+      emitAIOutage("parent-ai", err?.message ?? "Unexpected error", req.userId).catch(() => {});
       res.status(500).json({ error: "An unexpected error occurred" });
     }
   }

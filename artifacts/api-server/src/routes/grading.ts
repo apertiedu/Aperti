@@ -4,7 +4,7 @@ import { authenticate, requireRole, AuthRequest } from "../middleware/auth";
 import { markSchemesTable, studentMarksTable, examsTable, examQuestionsTable, questionBankTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { enhanceGrading } from "../lib/coremind";
-import { logInteraction } from "../lib/ai-safety";
+import { logInteraction, emitAIOutage } from "../lib/ai-safety";
 import { auditFromReq } from "../lib/audit";
 import { notifyAndPush } from "../lib/notify";
 
@@ -22,7 +22,6 @@ gradingRouter.get("/schemes", authenticate, requireRole("teacher", "admin"), asy
 
     if (!scheme) { res.json(null); return; }
 
-    // MED-02: verify the requesting teacher owns the parent question (admin bypasses)
     if (req.role !== "admin") {
       if (scheme.examQuestionId) {
         const [question] = await db
@@ -56,7 +55,6 @@ gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), as
   try {
     const { questionBankId, examQuestionId, criteria, totalMarks } = req.body;
 
-    // HIGH-03: verify the requesting teacher owns the parent question (admin bypasses)
     if (req.role !== "admin") {
       if (examQuestionId) {
         const [question] = await db
@@ -101,7 +99,7 @@ gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), as
 
 gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
-    const { answer, questionId, type, topic } = req.body;
+    const { answer, questionId, type, topic, studentId } = req.body;
     const scheme = await db.query.markSchemes.findFirst({
       where: (s, { eq }) => eq(type === "exam" ? s.examQuestionId : s.questionBankId, questionId),
     });
@@ -138,9 +136,11 @@ gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), asyn
         baseResponse.confidence = enhancement.confidence;
         baseResponse.sources = [...baseResponse.sources, ...enhancement.sources];
       }
-    } catch { /* enhancement best-effort */ }
+    } catch (enhErr: any) {
+      emitAIOutage("grading-enhancement", enhErr?.message ?? "Enhancement failed", req.userId).catch(() => {});
+    }
 
-    await logInteraction({
+    const interactionId = await logInteraction({
       userId: req.userId,
       module: "grading",
       action: "grade",
@@ -149,15 +149,27 @@ gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), asyn
       confidence: baseResponse.confidence,
       sources: baseResponse.sources,
     });
+
+    pool.query(
+      `INSERT INTO ai_grading_accuracy (interaction_id, question_id, student_id, suggested_mark, confidence, teacher_id, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+      [
+        interactionId > 0 ? interactionId : null,
+        questionId ?? null,
+        studentId ?? null,
+        totalAwarded,
+        baseResponse.confidence,
+        req.userId,
+      ]
+    ).catch(() => {});
+
     auditFromReq(req, "GRADE_CREATE", "grading", { resourceId: questionId, metadata: { totalAwarded, totalMarks: scheme.totalMarks, type } });
-    res.json(baseResponse);
+    res.json({ ...baseResponse, gradingAccuracyId: interactionId > 0 ? interactionId : null });
   } catch (err) {
     res.status(500).json({ error: "Failed to grade answer" });
   }
 });
 
-// ── Grade approval for student_marks ─────────────────────────────────────────
-// Teacher enters marks manually, then saves (grade) or releases (approve) to student.
 gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
   try {
     const submissionId = parseInt(req.params.submissionId);
@@ -165,14 +177,13 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
 
     const { marksScored, action } = req.body as {
       marksScored?: number;
-      action?: "grade" | "approve";  // grade=save without releasing, approve=release to student
+      action?: "grade" | "approve";
     };
     const act = action === "grade" ? "grade" : "approve";
 
     const mark = await db.query.studentMarks.findFirst({ where: (m, { eq }) => eq(m.id, submissionId) });
     if (!mark) { res.status(404).json({ error: "Submission not found" }); return; }
 
-    // HIGH-02: verify the requesting teacher owns the exam this submission belongs to (admin bypasses)
     if (req.role !== "admin") {
       const [exam] = await db
         .select({ teacherAccountId: examsTable.teacherAccountId })
@@ -197,6 +208,22 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
       approvedAt: act === "approve" ? nowVal : null,
       approvedBy: act === "approve" ? req.userId : null,
     }).where(eq(studentMarksTable.id, submissionId));
+
+    if (act === "approve" && mark.questionId) {
+      const approvedVal = parseFloat(officialMarks);
+      pool.query(
+        `UPDATE ai_grading_accuracy
+         SET approved_mark = $1,
+             delta = $1 - suggested_mark,
+             approved_at = NOW()
+         WHERE question_id = $2
+           AND student_id = $3
+           AND approved_at IS NULL
+         ORDER BY created_at DESC
+         LIMIT 1`,
+        [approvedVal, mark.questionId, mark.studentId]
+      ).catch(() => {});
+    }
 
     auditFromReq(req, act === "approve" ? "GRADE_APPROVE" : "GRADE_CREATE", "student_marks", { resourceId: submissionId, metadata: { marksScored: officialMarks, gradingStatus: newStatus } });
 
@@ -234,4 +261,3 @@ gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRol
     res.status(500).json({ error: "Failed to approve grade" });
   }
 });
-

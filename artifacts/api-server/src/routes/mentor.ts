@@ -1,13 +1,12 @@
 import { Router, Response } from "express";
 import { authenticate, AuthRequest } from "../middleware/auth";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { enhanceMentor } from "../lib/coremind";
-import { logInteraction, moderateContent } from "../lib/ai-safety";
+import { logInteraction, logFallback, emitAIOutage, moderateContent } from "../lib/ai-safety";
 import { withLanguage, getFallbackPhrase } from "../lib/ai-config";
 
 export const mentorRouter = Router();
 
-// POST /mentor/chat — streamed conversation
 mentorRouter.post("/chat", authenticate, async (req: AuthRequest, res: Response) => {
   const studentId = req.userId!;
   const { message, sessionId, language } = req.body;
@@ -18,7 +17,6 @@ mentorRouter.post("/chat", authenticate, async (req: AuthRequest, res: Response)
     return;
   }
 
-  // 1. Fetch student memory (Echo)
   const memory = await db.query.echoMemory.findFirst({
     where: (m, { eq }) => eq(m.studentId, studentId),
   });
@@ -27,7 +25,6 @@ mentorRouter.post("/chat", authenticate, async (req: AuthRequest, res: Response)
   const preferredStyle = memory?.preferredStyle ?? "conceptual";
   const recentMistakes = (memory?.mistakeHistory as Record<string, number>) ?? {};
 
-  // 2. CoreMind enhancement — enriches with knowledge graph context
   let mentorContext = {
     contextualNodes: [] as Array<{ id: number; name: string; type: string }>,
     preferredStyle,
@@ -41,7 +38,6 @@ mentorRouter.post("/chat", authenticate, async (req: AuthRequest, res: Response)
     mentorContext = await enhanceMentor(studentId, message ?? "");
   } catch { /* enhancement is best-effort */ }
 
-  // 3. Fetch relevant questions from QueryVault (top 3 weak topics)
   const relatedQuestions = weakTopics.length > 0
     ? await db.query.questionBank.findMany({
         where: (q, { inArray }) => inArray(q.topic, weakTopics.slice(0, 3)),
@@ -49,7 +45,6 @@ mentorRouter.post("/chat", authenticate, async (req: AuthRequest, res: Response)
       })
     : [];
 
-  // 4. Build the enriched system prompt
   const miscNote = mentorContext.misconceptions.length > 0
     ? `\nCommon misconceptions for this topic: ${mentorContext.misconceptions.join("; ")}.`
     : "";
@@ -82,14 +77,12 @@ Your task:
         ).join("\n\n---\n\n")}\n\n*Tip: Focus on your weak areas: ${weakTopics.slice(0, 3).join(", ") || "general revision"}.*`
       : `I understand you're asking about **${message}**. While full AI is not available right now, here's a structured approach:\n\n1. Review your notes on this topic.\n2. Look at past exam questions.\n3. Practice with flashcards for key terms.\n\nYour preferred learning style is *${mentorContext.preferredStyle}* — try to apply that as you study.${miscNote}`;
 
-    await logInteraction({
+    await logFallback({
       userId: studentId,
       module: "mentor",
       action: "chat",
       inputSummary: message?.slice(0, 200),
-      outputSummary: "Rule-based fallback",
-      confidence: 0.5,
-      sources: ["question_bank", "echo_memory"],
+      reason: "No AI key configured",
     });
 
     res.json({ content: fallbackContent, fallback: true });
@@ -102,20 +95,11 @@ Your task:
   const AI_MODEL = process.env.OPENAI_MODEL ||
     (process.env.NVIDIA_API_KEY ? "meta/llama-3.1-8b-instruct" : "gpt-4o-mini");
 
-  // Set up SSE streaming
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
-  await logInteraction({
-    userId: studentId,
-    module: "mentor",
-    action: "chat",
-    inputSummary: message?.slice(0, 200),
-    outputSummary: "AI streaming response",
-    confidence: mentorContext.confidence,
-    sources: [AI_BASE.includes("nvidia") ? "nvidia_nim" : "openai", ...mentorContext.sources],
-  });
+  const t0 = Date.now();
 
   try {
     const upstreamRes = await fetch(`${AI_BASE}/chat/completions`, {
@@ -145,6 +129,7 @@ Your task:
     const reader = upstreamRes.body.getReader();
     const decoder = new TextDecoder();
     let buf = "";
+    let fullReply = "";
 
     while (true) {
       const { done, value } = await reader.read();
@@ -160,18 +145,47 @@ Your task:
         try {
           const parsed = JSON.parse(msg);
           const content = parsed.choices?.[0]?.delta?.content;
-          if (content) res.write(`data: ${JSON.stringify({ content })}\n\n`);
+          if (content) { fullReply += content; res.write(`data: ${JSON.stringify({ content })}\n\n`); }
         } catch { /* skip non-JSON lines */ }
       }
     }
+
+    const latencyMs = Date.now() - t0;
+
+    logInteraction({
+      userId: studentId,
+      module: "mentor",
+      action: "chat",
+      inputSummary: message?.slice(0, 200),
+      outputSummary: fullReply.slice(0, 300),
+      confidence: mentorContext.confidence,
+      latencyMs,
+      sources: [AI_BASE.includes("nvidia") ? "nvidia_nim" : "openai", ...mentorContext.sources],
+    }).catch(() => {});
+
+    pool.query(
+      `UPDATE echo_memory SET updated_at = NOW() WHERE student_id = $1`,
+      [studentId]
+    ).catch(() => {});
+
     res.end();
-  } catch (err) {
+  } catch (err: any) {
+    const errMsg = err?.message ?? "Unknown error";
     console.error("[mentor] stream error:", err);
+
+    await emitAIOutage("mentor", errMsg, studentId);
+    await logFallback({
+      userId: studentId,
+      module: "mentor",
+      action: "chat",
+      inputSummary: message?.slice(0, 200),
+      reason: `Stream error: ${errMsg.slice(0, 200)}`,
+    });
+
     res.end();
   }
 });
 
-// GET /mentor/sessions — list past sessions (for history)
 mentorRouter.get("/sessions", authenticate, async (req: AuthRequest, res: Response) => {
   res.json([]);
 });

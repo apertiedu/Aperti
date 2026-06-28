@@ -64,6 +64,8 @@ export async function logInteraction(params: {
   confidence?: number;
   tokensUsed?: number;
   sources?: string[];
+  fallback?: boolean;
+  latencyMs?: number;
 }): Promise<number> {
   try {
     const [row] = await db.insert(aiInteractionsTable).values({
@@ -75,11 +77,42 @@ export async function logInteraction(params: {
       confidence: params.confidence != null ? String(params.confidence) : null,
       tokensUsed: params.tokensUsed ?? null,
       sources: params.sources ?? [],
+      accepted: params.fallback === true ? false : null,
+      latencyMs: params.latencyMs ?? 0,
     }).returning();
     return row.id;
   } catch {
     return -1;
   }
+}
+
+export async function logFallback(params: {
+  userId?: number;
+  module: string;
+  action: string;
+  inputSummary?: string;
+  reason: string;
+}): Promise<void> {
+  await logInteraction({
+    userId: params.userId,
+    module: params.module,
+    action: params.action,
+    inputSummary: params.inputSummary,
+    outputSummary: `FALLBACK: ${params.reason}`,
+    confidence: 0,
+    fallback: true,
+    sources: ["rule_based_fallback"],
+  });
+}
+
+export async function emitAIOutage(module: string, error: string, userId?: number): Promise<void> {
+  const { eventBus } = await import("./event-bus");
+  eventBus.emit_event("ai.outage", {
+    module,
+    error: error.slice(0, 500),
+    userId: userId ?? null,
+    timestamp: new Date().toISOString(),
+  }, { actorId: userId }).catch(() => {});
 }
 
 export async function markInteractionOutcome(interactionId: number, accepted: boolean): Promise<void> {

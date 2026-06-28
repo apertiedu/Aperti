@@ -2007,4 +2007,20 @@ const PHASE_FIXES_MIGRATIONS: string[] = [
     UNIQUE (teacher_id, period_date, module)
   )`,
   `CREATE INDEX IF NOT EXISTS idx_teacher_ai_stats_teacher ON teacher_ai_stats (teacher_id, period_date DESC)`,
+  `CREATE TABLE IF NOT EXISTS ai_grading_accuracy (
+    id               SERIAL PRIMARY KEY,
+    interaction_id   INTEGER REFERENCES ai_interactions(id) ON DELETE SET NULL,
+    question_id      INTEGER,
+    student_id       INTEGER REFERENCES students(id) ON DELETE CASCADE,
+    suggested_mark   NUMERIC(8,2),
+    approved_mark    NUMERIC(8,2),
+    delta            NUMERIC(8,2),
+    confidence       NUMERIC(4,3),
+    teacher_id       INTEGER REFERENCES accounts(id) ON DELETE SET NULL,
+    approved_at      TIMESTAMPTZ,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_grading_accuracy_question ON ai_grading_accuracy (question_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_grading_accuracy_student  ON ai_grading_accuracy (student_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_ai_grading_accuracy_created  ON ai_grading_accuracy (created_at DESC)`,
 ];
