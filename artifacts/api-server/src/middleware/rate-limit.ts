@@ -167,3 +167,12 @@ export const adminActionLimiter = rateLimit({
   keyGenerator: perUserKeyGenerator,
   message: { error: "Admin action rate limit exceeded." },
 });
+
+// ── Notifications — prevent notification spam / mass-mark flooding ────────────
+export const notificationsLimiter = rateLimit({
+  ...BASE_OPTS,
+  windowMs: 60 * 1000,
+  max: 60,
+  keyGenerator: perUserKeyGenerator,
+  message: { error: "Notification rate limit exceeded. Please slow down." },
+});

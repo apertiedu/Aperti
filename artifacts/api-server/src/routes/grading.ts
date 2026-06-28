@@ -7,6 +7,7 @@ import { enhanceGrading } from "../lib/coremind";
 import { logInteraction, emitAIOutage } from "../lib/ai-safety";
 import { auditFromReq } from "../lib/audit";
 import { notifyAndPush } from "../lib/notify";
+import { gradingLimiter } from "../middleware/rate-limit";
 
 export const gradingRouter = Router();
 
@@ -51,7 +52,7 @@ gradingRouter.get("/schemes", authenticate, requireRole("teacher", "admin"), asy
   }
 });
 
-gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), gradingLimiter, async (req: AuthRequest, res: Response) => {
   try {
     const { questionBankId, examQuestionId, criteria, totalMarks } = req.body;
 
@@ -97,7 +98,7 @@ gradingRouter.post("/schemes", authenticate, requireRole("teacher", "admin"), as
   }
 });
 
-gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), gradingLimiter, async (req: AuthRequest, res: Response) => {
   try {
     const { answer, questionId, type, topic, studentId } = req.body;
     const scheme = await db.query.markSchemes.findFirst({
@@ -170,7 +171,7 @@ gradingRouter.post("/grade", authenticate, requireRole("teacher", "admin"), asyn
   }
 });
 
-gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRole("teacher", "admin"), async (req: AuthRequest, res: Response) => {
+gradingRouter.post("/submission/:submissionId/approve", authenticate, requireRole("teacher", "admin"), gradingLimiter, async (req: AuthRequest, res: Response) => {
   try {
     const submissionId = parseInt(req.params.submissionId);
     if (isNaN(submissionId)) { res.status(400).json({ error: "Invalid submission ID" }); return; }

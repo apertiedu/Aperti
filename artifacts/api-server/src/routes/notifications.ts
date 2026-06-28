@@ -4,6 +4,7 @@ import { db, notificationsTable } from "@workspace/db";
 import { requireTenantAccess } from "../middleware/tenant";
 import { authenticate, type AuthRequest } from "../middleware/auth";
 import { pool } from "@workspace/db";
+import { notificationsLimiter } from "../middleware/rate-limit";
 
 const router: IRouter = Router();
 
@@ -32,7 +33,7 @@ router.get("/notifications/unread-count", requireTenantAccess, async (req, res):
   }
 });
 
-router.post("/notifications/read-all", requireTenantAccess, async (req, res): Promise<void> => {
+router.post("/notifications/read-all", requireTenantAccess, notificationsLimiter, async (req, res): Promise<void> => {
   try {
     const { accountId } = req.tenant;
     await db.update(notificationsTable)
@@ -44,7 +45,7 @@ router.post("/notifications/read-all", requireTenantAccess, async (req, res): Pr
   }
 });
 
-router.patch("/notifications/:id/read", requireTenantAccess, async (req, res): Promise<void> => {
+router.patch("/notifications/:id/read", requireTenantAccess, notificationsLimiter, async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id as string, 10);
     const { accountId } = req.tenant;
@@ -57,7 +58,7 @@ router.patch("/notifications/:id/read", requireTenantAccess, async (req, res): P
   }
 });
 
-router.delete("/notifications/:id", requireTenantAccess, async (req, res): Promise<void> => {
+router.delete("/notifications/:id", requireTenantAccess, notificationsLimiter, async (req, res): Promise<void> => {
   try {
     const id = parseInt(req.params.id as string, 10);
     const { accountId } = req.tenant;

@@ -52,13 +52,22 @@ export async function runBackup(): Promise<void> {
 
     await execFileAsync("pg_dump", [dbUrl, "-f", filePath]);
 
-    const { statSync: stat } = await import("fs");
+    const { statSync: stat, readFileSync } = await import("fs");
     const sizeBytes = stat(filePath).size;
+
+    if (sizeBytes < 512) {
+      logger.error({ fileName, sizeBytes }, "Backup file is suspiciously small — treating as failed");
+      await logBackup("auto", "failed", `/backups/${fileName}`, sizeBytes);
+      return;
+    }
+
+    const { createHash } = await import("crypto");
+    const sha256 = createHash("sha256").update(readFileSync(filePath)).digest("hex");
 
     await logBackup("auto", "success", `/backups/${fileName}`, sizeBytes);
     await pruneOldBackups();
 
-    logger.info({ fileName, sizeBytes }, "Database backup completed");
+    logger.info({ fileName, sizeBytes, sha256 }, "Database backup completed and verified");
   } catch (err: any) {
     logger.error({ err }, "Database backup failed");
     await logBackup("auto", "failed");

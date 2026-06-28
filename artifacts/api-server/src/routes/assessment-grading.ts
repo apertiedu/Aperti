@@ -1,9 +1,10 @@
 import { Router, Response } from "express";
 import { pool } from "@workspace/db";
 import { authenticate, AuthRequest, requireRole } from "../middleware/auth";
+import { gradingLimiter } from "../middleware/rate-limit";
 export const assessmentGradingRouter = Router();
 
-const teacherOrAdmin = [authenticate, requireRole("teacher", "admin")];
+const teacherOrAdmin = [authenticate, requireRole("teacher", "admin"), gradingLimiter];
 const anyAuth = [authenticate];
 
 // POST /grading/assessments/:submissionId/manual-grade

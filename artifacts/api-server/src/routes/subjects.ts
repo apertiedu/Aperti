@@ -3,6 +3,20 @@ import { eq } from "drizzle-orm";
 import { db, subjectsTable } from "@workspace/db";
 import { requireTenantAccess } from "../middleware/tenant";
 import { sql } from "drizzle-orm";
+import { pool } from "@workspace/db";
+
+async function writeSubjectAudit(
+  accountId: number,
+  action: string,
+  resourceId: number | null,
+  metadata?: Record<string, unknown>,
+) {
+  pool.query(
+    `INSERT INTO audit_logs (account_id, action, resource, resource_id, details, severity, created_at)
+     VALUES ($1,$2,'subject',$3,$4,'info',NOW())`,
+    [accountId, action, resourceId ?? null, JSON.stringify(metadata ?? {})],
+  ).catch(() => {});
+}
 
 const router: IRouter = Router();
 
@@ -52,7 +66,9 @@ router.post("/subjects", requireTenantAccess, async (req, res): Promise<void> =>
     )
     RETURNING *
   `);
-  res.status(201).json(insertResult.rows[0]);
+  const inserted = insertResult.rows[0] as any;
+  writeSubjectAudit(accountId, "SUBJECT_CREATE", inserted?.id ?? null, { name: name.trim(), board, code, level });
+  res.status(201).json(inserted);
 });
 
 router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<void> => {
@@ -74,6 +90,7 @@ router.patch("/subjects/:id", requireTenantAccess, async (req, res): Promise<voi
     RETURNING *
   `);
   if (!updateResult.rows.length) { res.status(404).json({ message: "Subject not found" }); return; }
+  writeSubjectAudit(accountId, "SUBJECT_UPDATE", id, { name: name.trim() });
   res.json(updateResult.rows[0]);
 });
 
@@ -85,6 +102,7 @@ router.delete("/subjects/:id", requireTenantAccess, async (req, res): Promise<vo
     : and(eq(subjectsTable.id, id), eq(subjectsTable.teacherAccountId, teacherId!));
   const result = await db.delete(subjectsTable).where(condition!).returning();
   if (!result.length) { res.status(403).json({ error: "Not found or access denied" }); return; }
+  writeSubjectAudit(accountId, "SUBJECT_DELETE", id, { severity: "warn" });
   res.json({ message: "Subject deleted" });
 });
 

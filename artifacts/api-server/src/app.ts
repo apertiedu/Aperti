@@ -492,6 +492,40 @@ app.get("/api/health", async (_req, res) => {
   });
 });
 
+// ── Config diagnostics — shows presence of secrets, never their values ────────
+app.get("/api/health/diagnostics", async (_req, res) => {
+  const has = (key: string) => !!process.env[key];
+  const hasAi = has("OPENAI_API_KEY") || has("NVIDIA_API_KEY") || has("AI_INTEGRATIONS_OPENAI_API_KEY") || has("REPLIT_AI_AVAILABLE");
+  const hasSmtp = has("SMTP_HOST") && has("SMTP_USER") && has("SMTP_PASS");
+
+  let dbLatencyMs: number | null = null;
+  try {
+    const t0 = Date.now();
+    await pool.query("SELECT 1");
+    dbLatencyMs = Date.now() - t0;
+  } catch {}
+
+  res.json({
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || "development",
+    database: { configured: has("DATABASE_URL"), latencyMs: dbLatencyMs },
+    auth: {
+      jwtSecret: { configured: has("JWT_SECRET"), lengthOk: (process.env.JWT_SECRET?.length ?? 0) >= 32 },
+      sessionSecret: { configured: has("SESSION_SECRET") },
+    },
+    cors: {
+      allowedOrigins: { configured: has("ALLOWED_ORIGINS") || has("REPLIT_DOMAINS") },
+    },
+    ai: { configured: hasAi },
+    smtp: { configured: hasSmtp },
+    publicUrl: { configured: has("PUBLIC_URL") },
+    examVault: { configured: has("EXAM_VAULT_KEY") },
+    vapid: { configured: has("VAPID_PUBLIC_KEY") && has("VAPID_PRIVATE_KEY") },
+    google: { oauthConfigured: has("GOOGLE_CLIENT_ID") && has("GOOGLE_CLIENT_SECRET") },
+    redis: { configured: has("REDIS_URL") },
+  });
+});
+
 // Phase 14 — Public stats & testimonials (no auth, must be BEFORE main router)
 app.use("/api", phase14PublicRouter);
 

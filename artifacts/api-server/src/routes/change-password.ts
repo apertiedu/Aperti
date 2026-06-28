@@ -46,8 +46,8 @@ router.post("/auth/change-password", authenticate, async (req: AuthRequest, res)
     if (!currentPassword || !newPassword) {
       res.status(400).json({ message: "Both current and new password are required" }); return;
     }
-    if (newPassword.length < 8) {
-      res.status(400).json({ message: "New password must be at least 8 characters" }); return;
+    if (newPassword.length < 12) {
+      res.status(400).json({ message: "New password must be at least 12 characters" }); return;
     }
     if (currentPassword === newPassword) {
       res.status(400).json({ message: "New password must be different from current password" }); return;
@@ -84,8 +84,8 @@ router.post("/accounts/:id/reset-password", authenticate, requireRole("admin"), 
   try {
     const id = parseInt(req.params.id, 10);
     const { newPassword } = req.body;
-    if (!newPassword || newPassword.length < 8) {
-      res.status(400).json({ message: "Password must be at least 8 characters" }); return;
+    if (!newPassword || newPassword.length < 12) {
+      res.status(400).json({ message: "Password must be at least 12 characters" }); return;
     }
 
     const hash = await bcrypt.hash(newPassword, 12);
