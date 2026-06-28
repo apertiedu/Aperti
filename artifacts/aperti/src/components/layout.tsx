@@ -193,7 +193,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       items: [
         { name: "Pricing Plans",          href: "/pricing",               icon: CreditCard, roles: ["admin","teacher","assistant"] },
         { name: "My Subscription",        href: "/account/subscription",  icon: CreditCard, roles: ["admin","teacher","assistant"] },
-        { name: "Coming Soon",            href: "/coming-soon",           icon: Sparkles,   roles: ["admin","teacher","assistant"] },
         { name: "Revision Notes",         href: "/revision-notes",        icon: FileText,   roles: ["admin","teacher","assistant"] },
       ],
     },

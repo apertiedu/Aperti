@@ -295,7 +295,7 @@ export default function PaperVaultAdmin() {
           <Input
             value={fileUrl}
             onChange={e => { setFileUrl(e.target.value); if (e.target.value) setFile(null); }}
-            placeholder="https://papers.example.com/paper.pdf"
+            placeholder="https://drive.aperti.ai/paper.pdf"
             className="h-9"
           />
 

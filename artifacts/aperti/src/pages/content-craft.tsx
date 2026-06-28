@@ -224,7 +224,7 @@ function RichTextEditor({
             type="url"
             value={linkUrl}
             onChange={(e) => setLinkUrl(e.target.value)}
-            placeholder="https://example.com"
+            placeholder="https://aperti.ai"
             className="flex-1 text-xs border border-blue-200 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-blue-400 min-w-0"
           />
           <button type="submit" className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors shrink-0">Insert</button>

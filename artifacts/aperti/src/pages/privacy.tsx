@@ -137,7 +137,7 @@ export default function Privacy() {
               law and acting as the primary contact for data subjects and supervisory authorities.
             </p>
             <div className="mt-3 bg-muted/40 border border-border rounded-lg px-4 py-3 text-sm space-y-1">
-              <p><strong className="text-foreground">DPO Contact:</strong> <a href="mailto:dpo@aperti.ai" className="text-primary underline hover:opacity-80">dpo@aperti.ai</a></p>
+              <p><strong className="text-foreground">DPO Contact:</strong> <a href="mailto:privacy@aperti.ai" className="text-primary underline hover:opacity-80">privacy@aperti.ai</a></p>
               <p><strong className="text-foreground">Privacy team:</strong> <a href="mailto:privacy@aperti.ai" className="text-primary underline hover:opacity-80">privacy@aperti.ai</a></p>
               <p><strong className="text-foreground">Legal matters:</strong> <a href="mailto:legal@aperti.ai" className="text-primary underline hover:opacity-80">legal@aperti.ai</a></p>
               <p><strong className="text-foreground">Response SLA:</strong> 30 days for data subject requests; 72 hours for breach notifications</p>
