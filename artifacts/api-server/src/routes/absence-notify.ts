@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authenticate } from "../middleware/auth";
+import { authenticate, requireRole } from "../middleware/auth";
 import { db } from "@workspace/db";
 import { sql } from "drizzle-orm";
 
@@ -37,7 +37,7 @@ async function ensureTables() {
 ensureTables().catch(console.error);
 
 // GET /absence-notify/settings
-router.get("/settings", authenticate, async (req: any, res) => {
+router.get("/settings", authenticate, requireRole("teacher", "admin", "assistant"), async (req: any, res) => {
   try {
     const rows = await db.execute(
       sql`SELECT * FROM absence_notify_settings WHERE account_id = ${req.userId}`
@@ -62,7 +62,7 @@ router.get("/settings", authenticate, async (req: any, res) => {
 });
 
 // PUT /absence-notify/settings
-router.put("/settings", authenticate, async (req: any, res) => {
+router.put("/settings", authenticate, requireRole("teacher", "admin", "assistant"), async (req: any, res) => {
   try {
     const { senderName, messageTemplate, whatsappEnabled } = req.body;
     await db.execute(sql`
@@ -82,7 +82,7 @@ router.put("/settings", authenticate, async (req: any, res) => {
 });
 
 // POST /absence-notify/send — looks up parent phone by studentId, logs + returns WhatsApp URL
-router.post("/send", authenticate, async (req: any, res) => {
+router.post("/send", authenticate, requireRole("teacher", "admin", "assistant"), async (req: any, res) => {
   try {
     const { studentId, studentName, status, lessonName, date } = req.body;
 
@@ -131,7 +131,7 @@ router.post("/send", authenticate, async (req: any, res) => {
 });
 
 // POST /absence-notify/update-phone — update parent phone on student record
-router.post("/update-phone", authenticate, async (req: any, res) => {
+router.post("/update-phone", authenticate, requireRole("teacher", "admin"), async (req: any, res) => {
   try {
     const { studentId, parentPhone } = req.body;
     await db.execute(sql`
@@ -145,7 +145,7 @@ router.post("/update-phone", authenticate, async (req: any, res) => {
 });
 
 // GET /absence-notify/log
-router.get("/log", authenticate, async (req: any, res) => {
+router.get("/log", authenticate, requireRole("teacher", "admin", "assistant"), async (req: any, res) => {
   try {
     const rows = await db.execute(sql`
       SELECT * FROM absence_notify_log
@@ -160,8 +160,8 @@ router.get("/log", authenticate, async (req: any, res) => {
   }
 });
 
-// GET /absence-notify/students-phones — get all students with parent phone info
-router.get("/students-phones", authenticate, async (req: any, res) => {
+// GET /absence-notify/students-phones — get all students with parent phone info (teacher-scoped)
+router.get("/students-phones", authenticate, requireRole("teacher", "admin", "assistant"), async (req: any, res) => {
   try {
     const rows = await db.execute(sql`
       SELECT id, student_name, student_code, parent_phone FROM students ORDER BY student_name

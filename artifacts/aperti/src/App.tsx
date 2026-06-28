@@ -39,6 +39,7 @@ const DataRetention = lazy(() => import("@/pages/data-retention"));
 const LegalContact = lazy(() => import("@/pages/legal"));
 const Sitemap = lazy(() => import("@/pages/sitemap"));
 const PaperVaultPublic = lazy(() => import("@/pages/paper-vault-public"));
+const CertificateVerify = lazy(() => import("@/pages/certificate-verify"));
 
 // Teacher / Admin / Assistant
 const CoreHub = lazy(() => import("@/pages/core-hub"));
@@ -813,6 +814,7 @@ function PublicRouter() {
       <Route path="/roadmap" component={RoadmapPublic} />
       <Route path="/release-notes" component={ReleaseNotesPublic} />
       <Route path="/status" component={StatusPublic} />
+      <Route path="/verify/:code" component={CertificateVerify} />
       <Route path="/500" component={ServerError} />
       <Route component={Landing} />
     </Switch>

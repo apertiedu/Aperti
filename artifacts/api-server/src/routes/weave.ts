@@ -39,6 +39,17 @@ weaveRouter.get("/recommend", authenticate, async (req: AuthRequest, res: any) =
   const studentId = parseInt(req.query.studentId as string);
   const type = (req.query.type as "topic" | "question" | "resource") || "topic";
   if (isNaN(studentId)) return res.status(400).json({ error: "studentId required" });
+  const role = req.role;
+  if (role === "student") {
+    const studentRows = await db.select({ id: studentsTable.id })
+      .from(studentsTable)
+      .where(eq(studentsTable.accountId, req.userId!))
+      .limit(1);
+    const ownStudentId = studentRows[0]?.id;
+    if (!ownStudentId || ownStudentId !== studentId) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+  }
   const recommendations = await getRecommendations(studentId, type);
   res.json({ recommendations, type, studentId });
 });

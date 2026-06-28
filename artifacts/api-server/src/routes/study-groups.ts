@@ -346,6 +346,26 @@ const peerReviewSubmitHandler = async (req: AuthRequest, res: Response): Promise
 router.post("/peer-review/submit", ...studentGuard, peerReviewSubmitHandler);
 router.post("/peer-reviews", ...studentGuard, peerReviewSubmitHandler);
 
+router.get("/peer-reviews/received", ...studentGuard, async (req: AuthRequest, res: Response): Promise<void> => {
+  const ctx = await requireStudent(req, res);
+  if (!ctx) return;
+  const { studentId } = ctx;
+
+  const mySubmissions = await db.select({ id: snapgradeSubmissionsTable.id })
+    .from(snapgradeSubmissionsTable)
+    .where(eq(snapgradeSubmissionsTable.studentId, studentId));
+
+  if (mySubmissions.length === 0) { res.json([]); return; }
+
+  const subIds = mySubmissions.map(s => s.id);
+  const reviews = await db.select().from(peerReviewsTable)
+    .where(inArray(peerReviewsTable.submissionId, subIds))
+    .orderBy(desc(peerReviewsTable.createdAt))
+    .limit(50);
+
+  res.json(reviews);
+});
+
 // ─── STANDALONE GROUP-CHALLENGES ROUTES (spec contract paths) ───
 
 // GET /group-challenges/:groupId — list challenges for a group (spec path)

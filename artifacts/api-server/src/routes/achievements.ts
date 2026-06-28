@@ -203,4 +203,40 @@ router.get("/portal/leaderboard", requireStudentAccess, async (req, res): Promis
   res.json({ leaderboard: rows, myStudentId: studentId });
 });
 
+router.get("/achievements/badges", requireStudentAccess, async (req, res): Promise<void> => {
+  const studentId: number = (req as any).studentId;
+
+  const { rows: earned } = await pool.query(
+    `SELECT achievement_key FROM student_achievements WHERE student_id=$1`,
+    [studentId],
+  );
+  const earnedKeys = new Set(earned.map((a: any) => a.achievement_key));
+
+  const ICON_TYPE_MAP: Record<string, string> = {
+    flash_master: "flashcard",
+    streak_7: "streak",
+    streak_30: "streak",
+    top_scorer: "trophy",
+    full_marks: "trophy",
+    rising_star: "target",
+    exam_ready: "exam",
+    goal_achieved: "target",
+    attendance_90: "attendance",
+    consistent: "attendance",
+    perfect_week: "attendance",
+    first_login: "circuit",
+  };
+
+  const badges = ACHIEVEMENT_DEFS.map((def) => ({
+    id: def.key,
+    name: def.name,
+    description: def.desc,
+    xp: def.xp,
+    icon_type: ICON_TYPE_MAP[def.key] ?? "trophy",
+    earned: earnedKeys.has(def.key),
+  }));
+
+  res.json(badges);
+});
+
 export default router;
