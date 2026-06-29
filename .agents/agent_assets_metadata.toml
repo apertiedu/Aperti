@@ -41,3 +41,9 @@ id = "0OS2eRFeR_QKd4Leghk3I"
 uri = "file://docs/QA_REPORT.md"
 type = "text"
 title = "Aperti — Comprehensive QA Report"
+
+[[outputs]]
+id = "xqzdCb_YaYCN92SZqajTt"
+uri = "file://docs/PENTEST_REPORT.md"
+type = "text"
+title = "Aperti — Penetration Test Report"
