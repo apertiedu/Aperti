@@ -176,3 +176,11 @@ export const notificationsLimiter = rateLimit({
   keyGenerator: perUserKeyGenerator,
   message: { error: "Notification rate limit exceeded. Please slow down." },
 });
+
+// ── Contact form — public endpoint; prevent spam ──────────────────────────────
+export const contactLimiter = rateLimit({
+  ...BASE_OPTS,
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: "Too many contact requests. Please try again later." },
+});
