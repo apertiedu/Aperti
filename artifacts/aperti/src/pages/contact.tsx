@@ -18,17 +18,15 @@ export default function Contact() {
     e.preventDefault();
     setLoading(true);
     try {
-      await fetch("/api/errors/log", {
+      const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: `[contact-form] ${form.subject}: ${form.message}`,
-          route: "/contact",
-          source: "ContactForm",
-          browserInfo: `Name: ${form.name} | Email: ${form.email} | Topic: ${form.subject}`,
-          timestamp: new Date().toISOString(),
-        }),
+        body: JSON.stringify(form),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to send message.");
+      }
     } catch {}
     setLoading(false);
     setSubmitted(true);
@@ -66,9 +64,9 @@ export default function Contact() {
               <div>
                 <p className="font-medium text-sm">In-App HelpDesk</p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Already a user? Use the{" "}
-                  <a href="/helpdesk" className="text-primary underline hover:opacity-80">HelpDesk</a>{" "}
-                  inside the platform for faster support.
+                  Existing users can access the HelpDesk after{" "}
+                  <a href="/login" className="text-primary underline hover:opacity-80">logging in</a>{" "}
+                  for faster, tracked support.
                 </p>
               </div>
             </CardContent>

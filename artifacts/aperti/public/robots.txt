@@ -1,6 +1,11 @@
 User-agent: *
 Allow: /
 Allow: /features
+Allow: /pricing
+Allow: /trust
+Allow: /contact
+Allow: /legal
+Allow: /data-retention
 Allow: /roadmap
 Allow: /status
 Allow: /terms

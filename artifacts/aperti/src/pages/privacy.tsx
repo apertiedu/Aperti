@@ -116,7 +116,7 @@ export default function Privacy() {
                     ["Analytics (usage patterns)", "Consent (Art. 6(1)(a))", "Opt-in via privacy preferences"],
                     ["Marketing communications", "Consent (Art. 6(1)(a))", "Explicit opt-in required"],
                     ["AI model improvement", "Consent (Art. 6(1)(a))", "Optional — anonymised only"],
-                    ["Financial record retention (5 years)", "Legal obligation (Art. 6(1)(c))", "Egyptian financial regulations"],
+                    ["Financial record retention (7 years)", "Legal obligation (Art. 6(1)(c))", "Egyptian financial regulations (Tax Law No. 91/2005)"],
                     ["Audit log retention (12 months)", "Legal obligation (Art. 6(1)(c))", "Security & compliance requirements"],
                   ].map(([activity, basis, details]) => (
                     <tr key={activity} className="hover:bg-muted/20 transition-colors">
@@ -242,7 +242,7 @@ export default function Privacy() {
             <ul className="list-disc pl-6 text-muted-foreground space-y-1 mt-2">
               <li><strong className="text-foreground">Active accounts:</strong> Data retained for the lifetime of the account.</li>
               <li><strong className="text-foreground">Closed accounts:</strong> Data retained for 30 days to allow export requests, then permanently deleted.</li>
-              <li><strong className="text-foreground">Payment records:</strong> Retained for 5 years as required by Egyptian financial regulations.</li>
+              <li><strong className="text-foreground">Payment records:</strong> Retained for 7 years as required by Egyptian financial regulations (Tax Law No. 91/2005).</li>
               <li><strong className="text-foreground">Audit logs:</strong> Retained for 12 months for security purposes.</li>
               <li><strong className="text-foreground">AI interaction logs:</strong> Retained for 90 days, then purged.</li>
             </ul>

@@ -29,6 +29,8 @@ const CSRF_EXEMPT_PREFIXES = [
   // Error telemetry — no privileged state-change
   "/api/errors/",
   "/api/founder/frontend-errors",
+  // Public contact form — no auth; rate-limited separately
+  "/api/contact",
   // Webhooks — use their own signature verification
   "/api/webhooks/",
   // Health / metrics

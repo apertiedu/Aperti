@@ -104,6 +104,7 @@ import { teacherOpsRouter } from "./routes/teacher-ops";
 import { notificationsInboxRouter } from "./routes/notifications-inbox";
 // Phase 33 — Error System & Performance
 import { errorsLogRouter } from "./routes/errors-log";
+import { contactRouter } from "./routes/contact";
 // Phase 47 — AI Teaching Assistant, V2 Permissions, Repair System
 import { adminRepairRouter } from "./routes/admin-repair";
 import { classforgeRouter } from "./routes/classforge";
@@ -547,6 +548,7 @@ app.use("/api", launchCmsRouter);
 
 // Phase 33 — Error capture (public, rate-limited) — MUST be before main router
 app.use("/api/errors", errorsLogRouter);
+app.use("/api/contact", contactRouter);
 
 app.use("/api/ai/chat", aiChatLimiter);
 app.use("/auth/login", loginLimiter);

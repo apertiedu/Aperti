@@ -188,7 +188,7 @@ function HeroDashboardMockup() {
               <p className="text-xs text-gray-400">CoreHub</p>
               <p className="text-sm font-bold text-gray-900">Your class at a glance</p>
             </div>
-            <span className="text-xs text-gray-400">26 Jun</span>
+            <span className="text-xs text-gray-400">Today</span>
           </div>
           <div className="grid grid-cols-3 gap-3 mb-4">
             {[
@@ -611,7 +611,7 @@ export default function LandingPage() {
                   {[
                     "Homework assigned, submitted, and graded in one place",
                     "Gradebook visible to teachers, students, and parents — separately",
-                    "QR attendance in seconds, instant SMS to absent parents",
+                    "QR attendance in seconds, automated parent notifications",
                     "InstaPay verified payments with full audit log",
                     "Risk alerts tell you who needs help — before they fail",
                     "One platform. Every role. Every workflow.",

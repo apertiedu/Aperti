@@ -1,7 +1,7 @@
 {
-  "name": "Aperti — Educational OS",
+  "name": "Aperti — Intelligent Educational Operating System",
   "short_name": "Aperti",
-  "description": "The intelligent operating system that unifies teaching, learning, and assessment",
+  "description": "The all-in-one educational platform for teachers, students, parents, and administrators.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

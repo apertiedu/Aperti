@@ -142,7 +142,7 @@ export default function Terms() {
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-1">
               <li><strong className="text-foreground">Billing:</strong> Fees are charged monthly at the rate displayed on your active plan at time of subscription.</li>
-              <li><strong className="text-foreground">Payment:</strong> Currently processed via InstaPay. You must submit a valid payment reference within 48 hours of subscribing. Access is granted upon manual verification by an administrator.</li>
+              <li><strong className="text-foreground">Payment:</strong> Currently processed via InstaPay. You must submit a valid payment reference within 24 hours of subscribing. Access is granted upon manual verification by an administrator.</li>
               <li><strong className="text-foreground">Price changes:</strong> We will give at least 30 days' notice of any price increases. Continued use after the notice period constitutes acceptance of the new price.</li>
               <li><strong className="text-foreground">Cancellation:</strong> You may cancel your subscription at any time. Your access continues until the end of the current billing period. No pro-rata refunds are issued for unused days.</li>
               <li><strong className="text-foreground">Refunds:</strong> Refunds are not provided for subscription fees already paid, except where required by applicable Egyptian consumer protection law.</li>
